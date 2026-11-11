@@ -15,24 +15,11 @@
 .odm-sheet * {
   box-sizing: border-box;
 }
-.odm-sheet header {
-  padding: 28px;
-  background: radial-gradient(ellipse at top right, #24404b, #14232e 75%);
-}
-.odm-sheet h1 {
-  font-size: clamp(22px, 3vw, 32px);
-  font-weight: 500;
-  letter-spacing: -1px;
-  margin: 8px 0;
-}
-.odm-sheet p {
-  margin: 4px 0;
+.odm-sheet .sheet-caption {
+  padding: 10px 16px;
+  margin: 0;
+  font-size: 11px;
   color: var(--sheet-muted);
-}
-.odm-sheet .sheet-eyebrow {
-  font-size: 10px;
-  letter-spacing: 2px;
-  color: #a3efd5;
 }
 .sheet-scroll {
   max-width: 100%;
@@ -84,7 +71,8 @@
 .odm-sheet tbody tr:nth-child(even) td {
   background: #192a343b;
 }
-.odm-sheet tbody th strong {
+.odm-sheet tbody th strong,
+.odm-sheet tbody th em {
   display: block;
   font-size: 16px;
   font-weight: 500;
@@ -193,7 +181,7 @@
 }
 .sheet-sections {
   display: flex;
-  min-width: 700px;
+  min-width: 1050px;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -228,9 +216,6 @@
   .odm-sheet {
     border-radius: 0;
   }
-  .odm-sheet header {
-    padding: 20px 16px;
-  }
   .odm-sheet th:first-child {
     min-width: 155px;
     max-width: 155px;
@@ -242,4 +227,15 @@
   .sheet-song {
     padding: 14px 12px;
   }
+}
+
+.sheet-use-note {
+  max-width: 250px;
+  overflow-wrap: anywhere;
+}
+
+.sheet-sections summary {
+  cursor: pointer;
+  color: var(--sheet-muted);
+  font-size: 11px;
 }

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { checkDoc } from '../document';
+import { checkDoc, instruments } from '../document';
 import { fixtures, trio, arrange, missing, broken, dense, irregular } from './fixtures';
+import { importStrudel } from '../import';
 import { DRAW_CAP, sheetModel } from './model';
 
 const cell = (name: string, row = 0, input = trio) =>
@@ -193,10 +194,46 @@ describe('score sheet model', () => {
     expect(cell('custom', 0, input).label).toBe('[opaque value]');
     expect(() => sheetModel({ ...trio, toCycle: 0 })).toThrow('finite and increasing');
   });
-  it('does not infer unqueried sections, but honors explicitly muted arrange parts', () => {
+  it('knows section membership without querying that section', () => {
     const input = { ...arrange, toCycle: 1 };
     expect(sheetModel(input).sections[2].instruments[1].state).toBe('absent');
-    expect(sheetModel(input).sections[2].instruments[0].state).toBe('unknown');
+    expect(sheetModel(input).sections[2].instruments[0].state).toBe('present');
+  });
+  it('uses instrument definitions and keeps use-site settings and rewrites separate', () => {
+    const doc = importStrudel(
+      'const chords=note(60).s("piano").lpf(900).slow(2); const intro=stack(chords.lpf(600).pan(.3).fast(2),s("hh").pan(.5)); arrange([4,intro],[4,chords])',
+    ).doc;
+    const rows = instruments(doc);
+    const input = {
+      ...trio,
+      doc,
+      events: {
+        [rows[0].id]: {
+          ...trio.events.lead,
+          events: [
+            {
+              whole: [0, 1] as [number, number],
+              part: [0, 1] as [number, number],
+              hasOnset: true,
+              value: { note: 60, s: 'piano', cutoff: 600, pan: 0.3 },
+            },
+          ],
+        },
+      },
+    };
+    const model = sheetModel(input);
+    expect(model.rows).toHaveLength(2);
+    expect(model.rows[0].rewrites.map((r) => r.name)).toEqual(['slow']);
+    expect(model.rows[0].useNotes).toContain('in intro: lpf 600; pan 0.3; fast 2');
+    expect(model.rows[0].cells.find((c) => c.name === 'lpf')?.values).toEqual([900]);
+    expect(model.rows[0].status).toBe('1 event');
+    expect(model.rows[0].cells.find((c) => c.name === 'pan')).toMatchObject({
+      kind: 'unused',
+      values: [],
+      marks: [],
+    });
+    expect(model.rows[0].cells.find((c) => c.name === 's')?.kind).toBe('constant');
+    expect(model.rows[0].cells.find((c) => c.name === 'rhythm')?.values).toEqual([60]);
   });
   it('distinguishes quiet, unqueried and broken from unused, and hides stopped/outside playheads', () => {
     const input = structuredClone(trio);

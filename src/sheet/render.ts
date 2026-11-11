@@ -12,7 +12,7 @@ const svgElement = (tag: string, attributes: Record<string, string | number>) =>
   Object.entries(attributes).forEach(([key, value]) => node.setAttribute(key, String(value)));
   return node;
 };
-function drawing(cell: Cell, playheadX: number | null) {
+function drawing(cell: Cell) {
   const svg = svgElement('svg', {
     viewBox: '0 0 100 36',
     'aria-hidden': 'true',
@@ -25,8 +25,7 @@ function drawing(cell: Cell, playheadX: number | null) {
     .forEach((m) =>
       svg.append(svgElement('rect', { x: m.x, y: m.y, width: m.width, height: 3, rx: 0.5 })),
     );
-  if (playheadX !== null)
-    svg.append(svgElement('path', { d: `M${playheadX},0 V36`, class: 'sheet-playhead' }));
+  svg.append(svgElement('path', { d: 'M0,0 V36', class: 'sheet-playhead' }));
   return svg;
 }
 
@@ -34,17 +33,7 @@ function drawing(cell: Cell, playheadX: number | null) {
 export function mountSheet(host: HTMLElement, model: SheetModel): void {
   const sheet = element('section', '', 'odm-sheet');
   sheet.setAttribute('aria-label', 'Score sheet');
-  const heading = element('header');
-  heading.append(
-    element('p', 'ORDER DOESN’T MATTER', 'sheet-eyebrow'),
-    element('h1', 'One piece. All its settings.'),
-    element('p', model.caption),
-    element(
-      'p',
-      'Settings are an unordered set. Rewrites run in numbered order. Scroll the table for more settings.',
-    ),
-  );
-  sheet.append(heading);
+  sheet.append(element('p', model.caption, 'sheet-caption'));
   if (model.sections.length) {
     const strip = element('section', '', 'sheet-song');
     strip.setAttribute('aria-label', 'Song sections');
@@ -63,12 +52,20 @@ export function mountSheet(host: HTMLElement, model: SheetModel): void {
         element('strong', section.name),
         element(
           'span',
-          `${section.cycles} cycles · ${section.start}–${section.start + section.cycles}`,
+          `${section.cycles} cycle${section.cycles === 1 ? '' : 's'} · ${section.start}–${section.start + section.cycles}`,
         ),
       );
-      section.instruments.forEach((instrument) =>
-        item.append(element('small', instrument.text, `sheet-${instrument.state}`)),
+      const membership = element('details');
+      const present = section.instruments.filter(
+        (instrument) => instrument.state === 'present',
+      ).length;
+      membership.append(
+        element('summary', `${present} in · ${section.instruments.length - present} out`),
       );
+      section.instruments.forEach((instrument) =>
+        membership.append(element('small', instrument.text, `sheet-${instrument.state}`)),
+      );
+      item.append(membership);
       list.append(item);
     });
     scroll.append(list);
@@ -99,14 +96,10 @@ export function mountSheet(host: HTMLElement, model: SheetModel): void {
     const name = element('th');
     name.scope = 'row';
     name.dataset.nodeId = row.id;
-    name.append(
-      element('strong', row.name),
-      element(
-        'small',
-        `${row.nameSource === 'generated' ? 'Generated name' : 'Author name'}${row.muted ? ' · Muted' : ''}`,
-      ),
-      element('span', row.status, row.broken !== null ? 'sheet-error' : 'sheet-status'),
-    );
+    name.append(element(row.nameSource === 'generated' ? 'em' : 'strong', row.name));
+    if (row.nameSource === 'generated') name.append(element('small', 'Generated name'));
+    if (row.muted) name.append(element('small', 'Muted'));
+    name.append(element('span', row.status, row.broken !== null ? 'sheet-error' : 'sheet-status'));
     if (!row.sounds.length) name.append(element('small', 'Sound not queried'));
     row.sounds.forEach((sound) =>
       name.append(
@@ -117,6 +110,7 @@ export function mountSheet(host: HTMLElement, model: SheetModel): void {
         ),
       ),
     );
+    row.useNotes.forEach((note) => name.append(element('small', note, 'sheet-use-note')));
     tr.append(name);
     row.cells.forEach((cell) => {
       const td = element('td', '', `sheet-cell sheet-${cell.kind}`);
@@ -124,7 +118,7 @@ export function mountSheet(host: HTMLElement, model: SheetModel): void {
       td.setAttribute('aria-label', cell.summary);
       td.title = cell.summary;
       td.append(element('span', cell.label));
-      if (cell.marks.length) td.append(drawing(cell, model.playheadX));
+      if (cell.marks.length && cell.kind !== 'constant') td.append(drawing(cell));
       tr.append(td);
     });
     const rewrites = element('td');
@@ -148,4 +142,15 @@ export function mountSheet(host: HTMLElement, model: SheetModel): void {
   scroll.append(table);
   sheet.append(scroll);
   host.replaceChildren(sheet);
+  setPlayhead(host, model.playheadX);
+}
+
+/** x is a percentage of the displayed cycle window, or null when outside/stopped.
+ * Touch only the preallocated playhead paths; preserve table, focus and scroll. */
+export function setPlayhead(host: HTMLElement, x: number | null): void {
+  const visible = x !== null && Number.isFinite(x) && x >= 0 && x <= 100;
+  host.querySelectorAll<SVGPathElement>('.sheet-playhead').forEach((mark) => {
+    mark.style.display = visible ? '' : 'none';
+    if (visible) mark.setAttribute('d', `M${x},0 V36`);
+  });
 }
