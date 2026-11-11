@@ -5,7 +5,7 @@ import { generate } from '../src/generate';
 import { parseSteps, printSteps } from '../src/import/mini';
 import { queryEvents, queryEventsWithBudget } from '../src/strudel/evaluate';
 import { queryEventsNode } from '../src/strudel/evaluate-node';
-import { checkDoc, voices } from '../src/document';
+import { checkDoc, voices, instruments } from '../src/document';
 import type { Doc } from '../src/document';
 import baseline from './corpus/tier3-baseline.json';
 import { tierTotals } from './corpus/metrics';
@@ -80,16 +80,20 @@ describe('corpus proof', () => {
         expect(original.error).toBeNull();
         expect(original.opaqueValues).toBe(entry.id === 'micro-bare-strings');
       }
-      const rows = voices(doc);
+      const rows = instruments(doc);
+      expect(new Set(rows.map((row) => row.id)).size).toBe(rows.length);
+      if (original.events.length) expect(rows.length).toBeGreaterThan(0);
       const isolated = [];
       for (const row of rows) {
-        const result = await queryEvents(generate(doc, { only: row.id }), 0, end);
+        const code = generate(doc, { only: row.id });
+        // Reuse the independently evaluated whole program only for identical source.
+        const result = code === fresh ? regenerated : await queryEventsNode(code, 0, end);
         expect(result.error).toEqual(original.error);
         isolated.push(...result.events);
       }
       // all() is applied to each isolated score, too. The corpus's slow transform
       // distributes over stack, so its event multiset must also partition exactly.
-      if (rows.length) expect(events(isolated)).toEqual(events(original.events));
+      if (rows.length) expect(events(isolated), entry.id).toEqual(events(original.events));
     });
 });
 
@@ -108,6 +112,15 @@ it.skipIf(!existsSync(local))(
       b = await queryEvents(fresh, 0, 17);
     expect(a.error === null && b.error === null).toBe(true);
     expect(stable(a) === stable(b)).toBe(true);
+    const rows = instruments(first);
+    expect(rows.length > 0 && new Set(rows.map((row) => row.id)).size === rows.length).toBe(true);
+    const isolated = [];
+    for (const row of rows) {
+      const result = await queryEventsNode(generate(first, { only: row.id }), 0, 17);
+      expect(result.error === null && !result.opaqueValues).toBe(true);
+      isolated.push(...result.events);
+    }
+    expect(stable(events(isolated)) === stable(events(a.events))).toBe(true);
   },
 );
 

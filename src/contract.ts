@@ -20,9 +20,10 @@ export type ImportStrudel = (source: string) => ImportResult;
 
 export interface GenerateOptions {
   /**
-   * Generate a program that plays only this instrument (a `voice` id), keeping
-   * setup, tempo, shared patterns and global transforms. This is how a row of
-   * the sheet gets its own events.
+   * Generate the whole piece with other instruments silenced in place. Accepts
+   * an id from instruments(doc), preserving arrangement timing, use-site layers,
+   * setup, tempo and global transforms. A voice id still isolates that voice.
+   * This is how a row of the sheet gets its own events.
    */
   only?: string;
 }
@@ -97,7 +98,7 @@ export interface SheetInput {
   /** The window of cycles the cells are drawn from. */
   fromCycle: number;
   toCycle: number;
-  /** Events per instrument, keyed by `voice` id, from `generate({ only })`. */
+  /** Events per instrument, keyed by `instruments(doc)` id, from `generate({ only })`. */
   events: Record<string, EventResult>;
   sounds: SoundState[];
   playhead: number | null;
