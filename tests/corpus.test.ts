@@ -46,7 +46,9 @@ async function equivalent(source: string, horizon = 2) {
   return { doc, fresh, result: a };
 }
 
-describe('corpus proof', () => {
+// Vitest bounds concurrent tests to five. Every evaluation still has its own worker
+// and all original/round-trip/isolation assertions remain independent.
+describe('corpus proof', { concurrent: true }, () => {
   it('baseline covers exactly the indexed corpus', () =>
     expect(Object.keys(baseline).sort()).toEqual(index.map((p) => p.id).sort()));
   for (const entry of index)

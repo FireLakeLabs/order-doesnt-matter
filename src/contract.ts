@@ -93,6 +93,11 @@ export type CreateEngine = () => Promise<Engine>;
 
 /* ---- Score sheet: src/sheet/ ---- */
 
+/** A sheet can exist before the gesture that creates the audio engine. */
+export type SheetSoundState = Omit<SoundState, 'state'> & {
+  state: SoundState['state'] | 'not-loaded';
+};
+
 export interface SheetInput {
   doc: Doc;
   /** The window of cycles the cells are drawn from. */
@@ -100,6 +105,6 @@ export interface SheetInput {
   toCycle: number;
   /** Events per instrument, keyed by `instruments(doc)` id, from `generate({ only })`. */
   events: Record<string, EventResult>;
-  sounds: SoundState[];
+  sounds: SheetSoundState[];
   playhead: number | null;
 }

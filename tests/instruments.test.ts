@@ -216,3 +216,24 @@ it('shared identity takes precedence across standalone voices, with per-use mute
     instruments(doc(shared('kick', leaf('kick')), voice(ref('single', 'kick'), 'one')))[0].id,
   ).toBe('one');
 });
+
+it('bare silence has timing but no row; decorated silence and unknown leaves remain rows', () => {
+  const d = importStrudel('arrange([2,silence],[3,s("bd")],[1,silence.gain(.2)],[1,custom()])').doc;
+  expect(instruments(d)).toHaveLength(3);
+  expect(sections(d).map((s) => [s.start, s.cycles, s.instrumentIds.length])).toEqual([
+    [0, 2, 0],
+    [2, 3, 1],
+    [5, 1, 1],
+    [6, 1, 1],
+  ]);
+  const real = instruments(corpusDoc('real-dubstep-arranged'));
+  expect(
+    real.some(
+      (r) =>
+        r.pattern.core.kind === 'generator' &&
+        r.pattern.core.name === 'silence' &&
+        !r.pattern.layers.length,
+    ),
+  ).toBe(false);
+  expect(real.some((r) => /^Instrument \d+$/.test(r.name))).toBe(false);
+});

@@ -86,6 +86,14 @@ export function instruments(doc: Doc): Instrument[] {
         );
       return;
     }
+    // A bare spacer retains its arrangement duration without becoming a row.
+    if (
+      p.core.kind === 'generator' &&
+      p.core.name === 'silence' &&
+      !p.core.args.length &&
+      !p.layers.length
+    )
+      return;
     const id = p.id;
     let row = rows.get(id);
     if (!row) {

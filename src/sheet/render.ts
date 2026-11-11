@@ -30,7 +30,19 @@ function drawing(cell: Cell) {
 }
 
 /** Rendering only: the model owns values, ordering, descriptions and geometry. */
-export function mountSheet(host: HTMLElement, model: SheetModel): void {
+export function mountSheet(
+  host: HTMLElement,
+  model: SheetModel,
+  options: { selected?: string | null; onSelect?(id: string): void } = {},
+): void {
+  const scrollers = Array.from(host.querySelectorAll<HTMLElement>('.sheet-scroll')).map((el) => ({
+    left: el.scrollLeft,
+    top: el.scrollTop,
+  }));
+  const focus = document.activeElement;
+  const sectionFocus =
+    focus instanceof HTMLButtonElement && host.contains(focus) ? focus.dataset.section : undefined;
+  const scrollFocus = Array.from(host.querySelectorAll('.sheet-scroll')).indexOf(focus as Element);
   const sheet = element('section', '', 'odm-sheet');
   sheet.setAttribute('aria-label', 'Score sheet');
   sheet.append(element('p', model.caption, 'sheet-caption'));
@@ -47,14 +59,31 @@ export function mountSheet(host: HTMLElement, model: SheetModel): void {
       const item = element('li', '', section.current ? 'sheet-current' : '');
       item.dataset.nodeId = section.nodeId;
       item.style.flexBasis = `${section.width}%`;
-      if (section.current) item.setAttribute('aria-current', 'true');
-      item.append(
+      const button = element('button');
+      button.type = 'button';
+      button.dataset.section = section.nodeId;
+      button.dataset.start = String(section.start);
+      button.dataset.end = String(section.start + section.cycles);
+      button.setAttribute('aria-pressed', String(options.selected === section.nodeId));
+      button.setAttribute('aria-label', section.name);
+      button.onclick = () => options.onSelect?.(section.nodeId);
+      if (section.current) button.setAttribute('aria-current', 'true');
+      button.append(
         element('strong', section.name),
         element(
           'span',
           `${section.cycles} cycle${section.cycles === 1 ? '' : 's'} · ${section.start}–${section.start + section.cycles}`,
         ),
       );
+      button.append(
+        element(
+          'small',
+          options.selected === section.nodeId ? 'Selected' : 'Select section',
+          'sheet-selection',
+        ),
+      );
+      button.append(element('small', section.current ? 'Playing now' : '', 'sheet-playing'));
+      item.append(button);
       const membership = element('details');
       const present = section.instruments.filter(
         (instrument) => instrument.state === 'present',
@@ -97,7 +126,10 @@ export function mountSheet(host: HTMLElement, model: SheetModel): void {
     name.scope = 'row';
     name.dataset.nodeId = row.id;
     name.append(element(row.nameSource === 'generated' ? 'em' : 'strong', row.name));
-    if (row.nameSource === 'generated') name.append(element('small', 'Generated name'));
+    if (row.nameSource === 'generated') {
+      const alternative = element('span', 'Generated instrument name', 'sheet-sr-only');
+      name.append(alternative);
+    }
     if (row.muted) name.append(element('small', 'Muted'));
     name.append(element('span', row.status, row.broken !== null ? 'sheet-error' : 'sheet-status'));
     if (!row.sounds.length) name.append(element('small', 'Sound not queried'));
@@ -105,7 +137,7 @@ export function mountSheet(host: HTMLElement, model: SheetModel): void {
       name.append(
         element(
           'span',
-          `${sound.name}: ${sound.state}${sound.detail ? ` — ${sound.detail}` : ''}`,
+          `${sound.name}: ${sound.state === 'not-loaded' ? 'not loaded yet' : sound.state}${sound.detail ? ` — ${sound.detail}` : ''}`,
           `sheet-sound sheet-${sound.state}`,
         ),
       ),
@@ -143,6 +175,15 @@ export function mountSheet(host: HTMLElement, model: SheetModel): void {
   sheet.append(scroll);
   host.replaceChildren(sheet);
   setPlayhead(host, model.playheadX);
+  host.querySelectorAll<HTMLElement>('.sheet-scroll').forEach((el, i) => {
+    el.scrollLeft = scrollers[i]?.left ?? 0;
+    el.scrollTop = scrollers[i]?.top ?? 0;
+    if (i === scrollFocus) el.focus({ preventScroll: true });
+  });
+  if (sectionFocus)
+    Array.from(host.querySelectorAll<HTMLButtonElement>('[data-section]'))
+      .find((button) => button.dataset.section === sectionFocus)
+      ?.focus({ preventScroll: true });
 }
 
 /** x is a percentage of the displayed cycle window, or null when outside/stopped.
@@ -152,5 +193,19 @@ export function setPlayhead(host: HTMLElement, x: number | null): void {
   host.querySelectorAll<SVGPathElement>('.sheet-playhead').forEach((mark) => {
     mark.style.display = visible ? '' : 'none';
     if (visible) mark.setAttribute('d', `M${x},0 V36`);
+  });
+}
+
+/** Current transport section is separate from the pinned cell selection. */
+export function setCurrentSection(host: HTMLElement, cycle: number | null, total: number): void {
+  const now = cycle === null || !total ? null : ((cycle % total) + total) % total;
+  host.querySelectorAll<HTMLButtonElement>('[data-section]').forEach((button) => {
+    const current =
+      now !== null && now >= Number(button.dataset.start) && now < Number(button.dataset.end);
+    if (current === button.hasAttribute('aria-current')) return;
+    button.toggleAttribute('aria-current', current);
+    if (current) button.setAttribute('aria-current', 'true');
+    button.closest('li')!.classList.toggle('sheet-current', current);
+    button.querySelector('.sheet-playing')!.textContent = current ? 'Playing now' : '';
   });
 }

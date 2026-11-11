@@ -1,4 +1,4 @@
-import type { SheetInput, SoundState } from '../contract';
+import type { SheetInput, SheetSoundState } from '../contract';
 import {
   shared,
   instruments,
@@ -44,7 +44,7 @@ export interface Row {
   muted: boolean;
   broken: string | null;
   status: string;
-  sounds: SoundState[];
+  sounds: SheetSoundState[];
   cells: Cell[];
   rewrites: Chip[];
   useNotes: string[];
@@ -220,8 +220,26 @@ function makeCell(
     numeric.length === values.length && values.length > 1
       ? `${Number(lo.toPrecision(4))} to ${Number(hi.toPrecision(4))}`
       : values.map(text).join(', ');
-  const label = kind === 'unused' ? 'Not used' : kind === 'empty' ? status : short(range);
-  const summary = `${name}: ${kind === 'unused' ? 'not used' : kind === 'empty' ? status : `${range}; ${changes} changes; ${kind}`}${totalCount > DRAW_CAP ? `; showing ${DRAW_CAP} of ${totalCount} events` : ''}`;
+  const unpitched =
+    name === 'rhythm' &&
+    samples.every(({ event }) => {
+      const value = bag(event.value);
+      return (
+        value.note === undefined &&
+        value.n === undefined &&
+        value.freq === undefined &&
+        value.value === undefined
+      );
+    });
+  const label =
+    kind === 'unused'
+      ? 'Not used'
+      : kind === 'empty'
+        ? status
+        : unpitched
+          ? `${totalCount} hit${totalCount === 1 ? '' : 's'}`
+          : short(range);
+  const summary = `${name}: ${kind === 'unused' ? 'not used' : kind === 'empty' ? status : `${unpitched ? `${totalCount} hits` : range}; ${changes} changes; ${kind}`}${totalCount > DRAW_CAP ? `; showing ${DRAW_CAP} of ${totalCount} events` : ''}`;
   return { nodeId, name, kind, summary, label, values, changes, totalCount, marks, path };
 }
 
@@ -384,18 +402,17 @@ export function sheetModel(input: SheetInput): SheetModel {
               : `${events.length} event${events.length === 1 ? '' : 's'}`;
     const names = [
       ...new Set(
-        events.flatMap((e) =>
+        (result?.error ? [] : (result?.events ?? [])).flatMap((e) =>
           [bag(e.value).s].flat().filter((v): v is string => typeof v === 'string'),
         ),
       ),
     ];
     const sounds = names.map(
-      (name): SoundState =>
+      (name): SheetSoundState =>
         input.sounds.find((s) => s.name === name) ??
         input.sounds.find((s) => s.name === name.split(':')[0]) ?? {
           name,
-          state: 'loading',
-          detail: 'Awaiting sound status',
+          state: 'not-loaded',
         },
     );
     return {

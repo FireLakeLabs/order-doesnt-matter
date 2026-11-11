@@ -66,7 +66,7 @@ test('moving the playhead preserves table nodes, focus and scroll; constants dra
   await page.goto('/harness/sheet.html?fixture=trio');
   await expect(page.locator('h1')).toHaveCount(0);
   await expect(page.getByText('Author name', { exact: true })).toHaveCount(0);
-  await expect(page.getByText('Generated name', { exact: true })).toHaveCount(1);
+  await expect(page.getByText('Generated name', { exact: true })).toHaveCount(0);
   await expect(page.locator('tbody tr').first().locator('.sheet-constant svg')).toHaveCount(0);
   await page.getByRole('region', { name: 'Score table, scroll for more settings' }).focus();
   const result = await page.evaluate(() => {
