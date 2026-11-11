@@ -1,0 +1,3 @@
+// G3: function source introspection is changed by AST body instrumentation
+function choose() { return 60; }
+note(choose.toString().includes('__capture') ? 72 : choose())

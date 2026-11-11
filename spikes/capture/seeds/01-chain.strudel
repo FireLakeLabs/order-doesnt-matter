@@ -1,0 +1,2 @@
+// G4 E5: ordinary chains and bare values
+mini('0 2 4').add(12).scale('C:minor').note().s('sawtooth').lpf(800).gain(0.5)

@@ -1,0 +1,3 @@
+// Q1: silence must differ from a thrown query
+const broken = note('c3').withValue(v => { throw new Error('query boom'); });
+stack(silence, broken)

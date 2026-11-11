@@ -1,0 +1,3 @@
+// G3 G4: register uses function.length, patterned args delay its body
+register('captureShift', (amount, pat) => pat.add(amount).fast(2));
+mini('0 2').captureShift("<7 12>").note()

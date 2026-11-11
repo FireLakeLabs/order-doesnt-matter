@@ -1,0 +1,2 @@
+// G1: branching constructors and selection
+stack(cat(note('c3'), note('d3')), seq(note('e3'), note('g3')), arrange([2,note('a3')],[1,note('b3')]), "0 1".pick([note('c4'),note('e4')])).fast(2)

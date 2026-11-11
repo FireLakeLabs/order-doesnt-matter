@@ -1,0 +1,3 @@
+// Q1 G3: an opaque body can itself swallow a query failure
+// Its outer low-level query succeeds with [] despite the inner error.
+eval('new Pattern(()=>new Pattern(()=>{throw Error(1)}).queryArc(0,1))')

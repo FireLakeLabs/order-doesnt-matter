@@ -1,0 +1,15 @@
+{
+  "name": "strudel-capture-spike",
+  "private": true,
+  "type": "module",
+  "scripts": { "capture": "node capture.mjs", "test": "node --test verify.test.mjs" },
+  "dependencies": {
+    "@strudel/core": "1.2.6",
+    "@strudel/mini": "1.2.6",
+    "@strudel/tonal": "1.2.6",
+    "@strudel/transpiler": "1.2.6",
+    "acorn": "8.15.0",
+    "escodegen": "2.1.0",
+    "estree-walker": "3.0.3"
+  }
+}

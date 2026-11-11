@@ -1,0 +1,6 @@
+// G5 G2: $ roots, named root, muted root, global all
+all(p => p.gain(0.25));
+$: note("c3 e3");
+bass: note('c2').slow(2);
+_$: note('muted');
+$: note('g3').off(1/8,p=>p.add(12));

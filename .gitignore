@@ -3,3 +3,9 @@ dist/
 test-results/
 playwright-report/
 .DS_Store
+
+# Per-program capture dumps are large and regenerable (see spikes/capture/README.md)
+spikes/capture/results/programs--*.json
+spikes/capture/results/seeds--*.json
+spikes/capture/results/probes--*.json
+spikes/capture/results/profile/

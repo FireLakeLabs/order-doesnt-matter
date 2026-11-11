@@ -1,0 +1,12 @@
+// G3 S1 Q1: order, getter, this, lexical eval, optional call and caught errors
+const order = [];
+const obj = { value: 12, get f() { order.push('get'); return function(x) { order.push('call'); return this.value+x; }; } };
+const amount = obj.f((order.push('arg'), 1));
+if (order.join(',') !== 'get,arg,call') throw Error('evaluation order');
+let lexical = 2;
+const fromEval = eval('lexical + 1');
+const absent = null;
+absent?.f();
+try { note('c3').unknownCaptureMethod(); } catch(e) {}
+const control = slider(0.5,0,1);
+pure(48).add(amount+fromEval).note().gain(control)

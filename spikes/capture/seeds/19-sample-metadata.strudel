@@ -1,0 +1,3 @@
+// Q3 S1: no decoded samples in this host
+samples({breaks:'not-decoded.wav'});
+stack(s('breaks').loopAt(2),s('breaks').fit(),s('breaks').splice(8,"0 1 2 3"))

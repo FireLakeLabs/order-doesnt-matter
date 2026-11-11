@@ -1,0 +1,3 @@
+// Q2: observing intermediate stations changes subsequent score
+let counter = 0;
+note('c3').withValue(v => ({...v, note: ++counter}))

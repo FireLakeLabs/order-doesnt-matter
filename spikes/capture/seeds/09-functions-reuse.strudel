@@ -1,0 +1,5 @@
+// G3: two call instances of one function; one dead body
+function transpose(p, amount) { return p.add(amount).fast(2); }
+function unused() { return note('never'); }
+const a = mini('0 2');
+stack(transpose(a, 7), transpose(a, 12), a.slow(2)).note()

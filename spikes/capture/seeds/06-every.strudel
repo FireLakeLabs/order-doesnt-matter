@@ -1,0 +1,2 @@
+// G2 G4 T1: constant and patternified every/firstOf
+mini('0 1').every(3, x => x.add(12)).firstOf("<2 4>", x => x.rev()).note()

@@ -1,0 +1,2 @@
+// G4 E1 E2: continuous modulation, patterned speed, long notes
+note("c3/2").lpf("<400 2000>").gain(sine.range(0.2,0.8)).fast("<1 2>")

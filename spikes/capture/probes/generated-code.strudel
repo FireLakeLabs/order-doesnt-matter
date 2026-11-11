@@ -1,0 +1,3 @@
+// G3: AST sees eval boundary; prototype sees methods inside generated source
+const p = eval('note(60).fast(2)');
+p

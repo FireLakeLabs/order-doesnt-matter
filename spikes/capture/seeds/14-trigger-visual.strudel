@@ -1,0 +1,2 @@
+// S2: querying does not trigger scheduler callbacks; visual/output stubs
+note("c3 e3").onTrigger(h => h.value).log().pianoroll().scope().midi()

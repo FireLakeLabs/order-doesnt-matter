@@ -1,0 +1,4 @@
+// G3: object identity gives candidate producers, not exact variable provenance
+const a = note(60);
+const b = (p => p)(a);
+stack(a,b)

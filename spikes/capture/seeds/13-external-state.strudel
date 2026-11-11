@@ -1,0 +1,7 @@
+// S1 G5: samples auto-await, explicit await, tempo and hush
+samples('github:fake/no-network');
+await samples({bd:'fake.wav'});
+setcpm(120);
+$: note('c3');
+hush();
+$: note('d3');

@@ -1,0 +1,2 @@
+// G2 G4: late nested callback, argument varies by cycle
+mini('0 2').off("<0 .125>", y => y.add(12).superimpose(z => z.add(7))).note()

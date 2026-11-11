@@ -1,0 +1,5236 @@
+{
+  "generatedAt": "2026-11-11T01:17:13.527Z",
+  "node": "v24.22.2",
+  "cycles": [
+    0,
+    8
+  ],
+  "limits": {
+    "queryMs": 80,
+    "stationsMs": 1200,
+    "eventCount": 50000,
+    "instanceRetentionPerSite": 8
+  },
+  "inputs": [
+    {
+      "directory": "/home/aaron/projects/order-doesnt-matter/spikes/capture/seeds",
+      "files": 20
+    },
+    {
+      "directory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "files": 72
+    },
+    {
+      "directory": "/home/aaron/projects/order-doesnt-matter/spikes/capture/probes",
+      "files": 5
+    }
+  ],
+  "programs": [
+    {
+      "file": "01-chain.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "G4",
+        "E5"
+      ],
+      "resultFile": "seeds--01-chain.json",
+      "counts": {
+        "sites": 7,
+        "pattern": 7,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 7,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 26.49199900000002,
+      "runtimeStationMs": 119.76731699999999,
+      "runtimeCalls": 198,
+      "runtimeMethods": 27,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.6233310000000074,
+        "ast": 0.7496779999999887,
+        "runtime": 1.3106800000000192
+      },
+      "compileMs": {
+        "baseline": 6.156429000000003,
+        "ast": 1.2148109999999974
+      }
+    },
+    {
+      "file": "02-trees.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "G1"
+      ],
+      "resultFile": "seeds--02-trees.json",
+      "counts": {
+        "sites": 14,
+        "pattern": 14,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 14,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 3
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 34.45476999999994,
+      "runtimeStationMs": 93.95638599999995,
+      "runtimeCalls": 593,
+      "runtimeMethods": 24,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.9564560000000029,
+        "ast": 1.1405620000000454,
+        "runtime": 1.5416040000000066
+      },
+      "compileMs": {
+        "baseline": 10.056150000000002,
+        "ast": 1.5246230000000196
+      }
+    },
+    {
+      "file": "03-off-constant.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "G2"
+      ],
+      "resultFile": "seeds--03-off-constant.json",
+      "counts": {
+        "sites": 4,
+        "pattern": 4,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 4,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 3
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 12.130445000000009,
+      "runtimeStationMs": 56.54105800000002,
+      "runtimeCalls": 54,
+      "runtimeMethods": 21,
+      "callbackCounts": [
+        {
+          "callee": "mini('0 2').off",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "c1ecd3dbbb2d:0",
+          "totalInstances": 1
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.46894099999985883,
+        "ast": 0.5133740000001126,
+        "runtime": 0.7605779999998958
+      },
+      "compileMs": {
+        "baseline": 6.663000000000011,
+        "ast": 1.7263309999999592
+      }
+    },
+    {
+      "file": "04-off-pattern-nested.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "G2",
+        "G4"
+      ],
+      "resultFile": "seeds--04-off-pattern-nested.json",
+      "counts": {
+        "sites": 6,
+        "pattern": 6,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 6,
+        "queryError": 0,
+        "budgetExceeded": 3,
+        "continuous": 0,
+        "fragments": 5
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 55.97683800000004,
+      "runtimeStationMs": 87.01144700000009,
+      "runtimeCalls": 1796,
+      "runtimeMethods": 29,
+      "callbackCounts": [
+        {
+          "callee": "mini('0 2').off",
+          "construction": 0,
+          "query": 36,
+          "other": 0,
+          "queryOwners": {
+            "final-before-stations": 9,
+            "c18358401683:0#0": 9,
+            "72e592b9d01f:0#0": 9,
+            "final-after-stations": 9
+          },
+          "id": "bff25fe0bbab:0",
+          "totalInstances": 36
+        },
+        {
+          "callee": "y.add(12).superimpose",
+          "construction": 0,
+          "query": 36,
+          "other": 0,
+          "queryOwners": {
+            "final-before-stations": 9,
+            "c18358401683:0#0": 9,
+            "72e592b9d01f:0#0": 9,
+            "final-after-stations": 9
+          },
+          "id": "29033faddd3a:0",
+          "totalInstances": 36
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.41627100000005157,
+        "ast": 0.349074999999857,
+        "runtime": 0.6385589999999866
+      },
+      "compileMs": {
+        "baseline": 6.746848,
+        "ast": 1.5067190000002029
+      }
+    },
+    {
+      "file": "05-branching.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "G2"
+      ],
+      "resultFile": "seeds--05-branching.json",
+      "counts": {
+        "sites": 9,
+        "pattern": 9,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 9,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 3
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 31.851523000000043,
+      "runtimeStationMs": 84.42926899999998,
+      "runtimeCalls": 77,
+      "runtimeMethods": 27,
+      "callbackCounts": [
+        {
+          "callee": "note(\"c3 e3\").jux",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "df8a63db8ac9:0",
+          "totalInstances": 1
+        },
+        {
+          "callee": "note(\"c3 e3\").jux(x => x.rev()).superimpose",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "d9e7ec367d53:0",
+          "totalInstances": 1
+        },
+        {
+          "callee": "note(\"c3 e3\").jux(x => x.rev()).superimpose(x => x.add(12)).layer",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "4652dd663bbc:0",
+          "totalInstances": 1
+        },
+        {
+          "callee": "note(\"c3 e3\").jux(x => x.rev()).superimpose(x => x.add(12)).layer",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "b5d956adb896:0",
+          "totalInstances": 1
+        },
+        {
+          "callee": "x.off",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "1b155d0e1ecc:0",
+          "totalInstances": 1
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.3055540000000292,
+        "ast": 0.3842010000000755,
+        "runtime": 0.5241540000001805
+      },
+      "compileMs": {
+        "baseline": 7.042443000000048,
+        "ast": 1.6883090000001175
+      }
+    },
+    {
+      "file": "06-every.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "G2",
+        "G4",
+        "T1"
+      ],
+      "resultFile": "seeds--06-every.json",
+      "counts": {
+        "sites": 6,
+        "pattern": 6,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 6,
+        "queryError": 0,
+        "budgetExceeded": 1,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 23.806516999999985,
+      "runtimeStationMs": 64.01410900000019,
+      "runtimeCalls": 311,
+      "runtimeMethods": 28,
+      "callbackCounts": [
+        {
+          "callee": "mini('0 1').every",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "d9e7ec367d53:0",
+          "totalInstances": 1
+        },
+        {
+          "callee": "mini('0 1').every(3, x => x.add(12)).firstOf",
+          "construction": 0,
+          "query": 36,
+          "other": 0,
+          "queryOwners": {
+            "final-before-stations": 9,
+            "379d809c15a7:0#0": 9,
+            "44ded51c38c0:0#0": 9,
+            "final-after-stations": 9
+          },
+          "id": "df8a63db8ac9:0",
+          "totalInstances": 36
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.37346099999990656,
+        "ast": 0.4364090000001397,
+        "runtime": 0.6277990000000955
+      },
+      "compileMs": {
+        "baseline": 6.64310300000011,
+        "ast": 1.4983130000000529
+      }
+    },
+    {
+      "file": "07-conditional.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "G2",
+        "T2"
+      ],
+      "resultFile": "seeds--07-conditional.json",
+      "counts": {
+        "sites": 8,
+        "pattern": 8,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 8,
+        "queryError": 0,
+        "budgetExceeded": 2,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 67.95622999999978,
+      "runtimeStationMs": 120.58860000000004,
+      "runtimeCalls": 6470,
+      "runtimeMethods": 34,
+      "callbackCounts": [
+        {
+          "callee": "mini('0 1 2 3').sometimes",
+          "construction": 0,
+          "query": 261,
+          "other": 0,
+          "queryOwners": {
+            "final-before-stations": 18,
+            "f219d3cdaf98:0#0": 9,
+            "b8badc2fe9e0:0#0": 18,
+            "c144f2e3f452:0#0": 18,
+            "7434eb585668:0#0": 18,
+            "a584363d7d4a:0#0": 18,
+            "a85cd815bbea:0#0": 18,
+            "a85cd815bbea:0#1": 18,
+            "a85cd815bbea:0#2": 18,
+            "a85cd815bbea:0#3": 18,
+            "a85cd815bbea:0#4": 18,
+            "a85cd815bbea:0#5": 18,
+            "a85cd815bbea:0#6": 18,
+            "a85cd815bbea:0#7": 18,
+            "final-after-stations": 18
+          },
+          "id": "d9e7ec367d53:0",
+          "totalInstances": 261
+        },
+        {
+          "callee": "mini('0 1 2 3').sometimes(x => x.add(12)).when",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "4652dd663bbc:0",
+          "totalInstances": 1
+        },
+        {
+          "callee": "mini('0 1 2 3').sometimes(x => x.add(12)).when(true, x => x.fast(2)).when",
+          "construction": 0,
+          "query": 16,
+          "other": 0,
+          "queryOwners": {
+            "final-before-stations": 4,
+            "7434eb585668:0#0": 4,
+            "a584363d7d4a:0#0": 4,
+            "final-after-stations": 4
+          },
+          "id": "df8a63db8ac9:0",
+          "totalInstances": 16
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.380804999999782,
+        "ast": 0.45283999999992375,
+        "runtime": 0.7498279999999795
+      },
+      "compileMs": {
+        "baseline": 6.941882999999962,
+        "ast": 1.538328999999976
+      }
+    },
+    {
+      "file": "08-within.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "G2",
+        "G4",
+        "E2"
+      ],
+      "resultFile": "seeds--08-within.json",
+      "counts": {
+        "sites": 6,
+        "pattern": 6,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 6,
+        "queryError": 0,
+        "budgetExceeded": 1,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 32.47833899999978,
+      "runtimeStationMs": 91.10971199999994,
+      "runtimeCalls": 2125,
+      "runtimeMethods": 29,
+      "callbackCounts": [
+        {
+          "callee": "mini('0 1 2 3').within",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "742333f583e7:0",
+          "totalInstances": 1
+        },
+        {
+          "callee": "mini('0 1 2 3').within(0,0.5,x=>x.rev()).within",
+          "construction": 0,
+          "query": 36,
+          "other": 0,
+          "queryOwners": {
+            "final-before-stations": 9,
+            "4540a635e3d0:0#0": 9,
+            "8328861d410a:0#0": 9,
+            "final-after-stations": 9
+          },
+          "id": "e0e85b08a0a2:0",
+          "totalInstances": 36
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.4100499999999556,
+        "ast": 0.5073529999999664,
+        "runtime": 0.7816870000001472
+      },
+      "compileMs": {
+        "baseline": 6.8341810000001715,
+        "ast": 1.588322000000062
+      }
+    },
+    {
+      "file": "09-functions-reuse.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "G3"
+      ],
+      "resultFile": "seeds--09-functions-reuse.json",
+      "counts": {
+        "sites": 9,
+        "pattern": 8,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 1,
+        "queryable": 8,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 21.84320200000002,
+      "runtimeStationMs": 55.02165500000001,
+      "runtimeCalls": 71,
+      "runtimeMethods": 22,
+      "callbackCounts": [
+        {
+          "callee": "transpose",
+          "construction": 2,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "5ceffe2c1b5a:0",
+          "totalInstances": 2
+        },
+        {
+          "callee": "unused",
+          "construction": 0,
+          "query": 0,
+          "other": 0,
+          "id": "94b8cf75be5a:0",
+          "totalInstances": 0
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.3325950000003104,
+        "ast": 0.6246119999996154,
+        "runtime": 0.5146159999999327
+      },
+      "compileMs": {
+        "baseline": 6.177768999999898,
+        "ast": 1.4225010000000111
+      }
+    },
+    {
+      "file": "10-register.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "G3",
+        "G4"
+      ],
+      "resultFile": "seeds--10-register.json",
+      "counts": {
+        "sites": 6,
+        "pattern": 5,
+        "value": 0,
+        "function": 1,
+        "error": 0,
+        "never": 0,
+        "queryable": 5,
+        "queryError": 0,
+        "budgetExceeded": 2,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 35.25231699999995,
+      "runtimeStationMs": 69.16804499999989,
+      "runtimeCalls": 1273,
+      "runtimeMethods": 27,
+      "callbackCounts": [
+        {
+          "callee": "register",
+          "construction": 0,
+          "query": 36,
+          "other": 0,
+          "queryOwners": {
+            "final-before-stations": 9,
+            "dba3281601c8:0#0": 9,
+            "9ebace667fd5:0#0": 9,
+            "final-after-stations": 9
+          },
+          "id": "c56d9817aaec:0",
+          "totalInstances": 36
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.3923859999999877,
+        "ast": 0.40817599999991216,
+        "runtime": 0.867149000000154
+      },
+      "compileMs": {
+        "baseline": 7.080844999999954,
+        "ast": 1.4185429999997723
+      }
+    },
+    {
+      "file": "11-pattern-arguments.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "G4",
+        "E1",
+        "E2"
+      ],
+      "resultFile": "seeds--11-pattern-arguments.json",
+      "counts": {
+        "sites": 5,
+        "pattern": 5,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 5,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 1,
+        "fragments": 4
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 9.647042000000056,
+      "runtimeStationMs": 70.99748,
+      "runtimeCalls": 350,
+      "runtimeMethods": 29,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.45549499999970067,
+        "ast": 0.4756729999999152,
+        "runtime": 0.7679520000001503
+      },
+      "compileMs": {
+        "baseline": 6.659744000000046,
+        "ast": 1.135421999999835
+      }
+    },
+    {
+      "file": "12-roots.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "G5",
+        "G2"
+      ],
+      "resultFile": "seeds--12-roots.json",
+      "counts": {
+        "sites": 9,
+        "pattern": 9,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 9,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 4
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 19.278565999999955,
+      "runtimeStationMs": 65.78999299999987,
+      "runtimeCalls": 90,
+      "runtimeMethods": 25,
+      "callbackCounts": [
+        {
+          "callee": "all",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "5e254f04b116:0",
+          "totalInstances": 1
+        },
+        {
+          "callee": "note('g3').off",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "0b85410c2e9a:0",
+          "totalInstances": 1
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.40594300000020667,
+        "ast": 0.510939000000235,
+        "runtime": 0.6897650000000795
+      },
+      "compileMs": {
+        "baseline": 7.412146000000121,
+        "ast": 1.540012000000388
+      }
+    },
+    {
+      "file": "13-external-state.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "S1",
+        "G5"
+      ],
+      "resultFile": "seeds--13-external-state.json",
+      "counts": {
+        "sites": 6,
+        "pattern": 4,
+        "value": 2,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 4,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 8.766149000000041,
+      "runtimeStationMs": 19.768796000000293,
+      "runtimeCalls": 14,
+      "runtimeMethods": 7,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.27463600000010047,
+        "ast": 0.340509000000111,
+        "runtime": 0.38035500000023603
+      },
+      "compileMs": {
+        "baseline": 4.722596999999951,
+        "ast": 0.8944900000001326
+      }
+    },
+    {
+      "file": "14-trigger-visual.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "S2"
+      ],
+      "resultFile": "seeds--14-trigger-visual.json",
+      "counts": {
+        "sites": 6,
+        "pattern": 6,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 6,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": true
+      },
+      "stationMs": 10.708165000000008,
+      "runtimeStationMs": 47.51440999999977,
+      "runtimeCalls": 45,
+      "runtimeMethods": 20,
+      "callbackCounts": [
+        {
+          "callee": "note(\"c3 e3\").onTrigger",
+          "construction": 0,
+          "query": 0,
+          "other": 0,
+          "id": "504fdb1ba565:0",
+          "totalInstances": 0
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.24894799999992756,
+        "ast": 0.2838929999998072,
+        "runtime": 0.4454160000000229
+      },
+      "compileMs": {
+        "baseline": 6.512997999999698,
+        "ast": 1.306332999999995
+      }
+    },
+    {
+      "file": "15-query-error.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "Q1"
+      ],
+      "resultFile": "seeds--15-query-error.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 1,
+        "queryError": 2,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": false,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 2.409733999999844,
+      "runtimeStationMs": 8.103894999999284,
+      "runtimeCalls": 7,
+      "runtimeMethods": 6,
+      "callbackCounts": [
+        {
+          "callee": "note('c3').withValue",
+          "construction": 0,
+          "query": 4,
+          "other": 0,
+          "queryOwners": {
+            "final-before-stations": 1,
+            "acb05f29b8d4:0#0": 1,
+            "73d469a0d2e3:0#0": 1,
+            "final-after-stations": 1
+          },
+          "id": "6e12b9f88a11:0",
+          "totalInstances": 4
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.2740139999996245,
+        "ast": 0.27522700000008626,
+        "runtime": 0.28450399999928777
+      },
+      "compileMs": {
+        "baseline": 4.732355000000098,
+        "ast": 0.9695009999995818
+      }
+    },
+    {
+      "file": "16-expensive.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "Q2",
+        "E4"
+      ],
+      "resultFile": "seeds--16-expensive.json",
+      "counts": {
+        "sites": 2,
+        "pattern": 2,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 1,
+        "queryError": 1,
+        "budgetExceeded": 1,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": false,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 83.31884400000035,
+      "runtimeStationMs": 123.70628300000044,
+      "runtimeCalls": 77,
+      "runtimeMethods": 16,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.4639710000001287,
+        "ast": 0.4315710000000763,
+        "runtime": 0.6475360000004002
+      },
+      "compileMs": {
+        "baseline": 6.696652999999969,
+        "ast": 0.9668350000001737
+      }
+    },
+    {
+      "file": "17-impure.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "Q2"
+      ],
+      "resultFile": "seeds--17-impure.json",
+      "counts": {
+        "sites": 2,
+        "pattern": 2,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 2,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": false,
+        "runtimeUnaffectedByStationQueries": false,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 3.2147860000004584,
+      "runtimeStationMs": 10.487932,
+      "runtimeCalls": 7,
+      "runtimeMethods": 6,
+      "callbackCounts": [
+        {
+          "callee": "note('c3').withValue",
+          "construction": 0,
+          "query": 27,
+          "other": 0,
+          "queryOwners": {
+            "final-before-stations": 9,
+            "30c3714425b4:0#0": 9,
+            "final-after-stations": 9
+          },
+          "id": "d8c852f5df7a:0",
+          "totalInstances": 27
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.28537599999981467,
+        "ast": 0.2649679999994987,
+        "runtime": 0.2943730000006326
+      },
+      "compileMs": {
+        "baseline": 5.698569000000134,
+        "ast": 1.1858470000006491
+      }
+    },
+    {
+      "file": "18-nontermination.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "Q2"
+      ],
+      "resultFile": "seeds--18-nontermination.json",
+      "counts": {
+        "sites": 1,
+        "pattern": 1,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 0,
+        "queryError": 1,
+        "budgetExceeded": 1,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": false,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 80.58027200000015,
+      "runtimeStationMs": 0.0062010000001464505,
+      "runtimeCalls": 0,
+      "runtimeMethods": 0,
+      "callbackCounts": [
+        {
+          "callee": "user function",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "12ea154f9b1a:0",
+          "totalInstances": 1
+        },
+        {
+          "callee": "user function",
+          "construction": 0,
+          "query": 3,
+          "other": 0,
+          "queryOwners": {
+            "final-before-stations": 1,
+            "5673b62e3713:0#0": 1,
+            "final-after-stations": 1
+          },
+          "id": "c7dba043a410:0",
+          "totalInstances": 3
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.14577300000019022,
+        "ast": 0.19016699999974662,
+        "runtime": 0.15229599999929633
+      },
+      "compileMs": {
+        "baseline": 4.65527099999963,
+        "ast": 1.1686239999999088
+      }
+    },
+    {
+      "file": "19-sample-metadata.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "Q3",
+        "S1"
+      ],
+      "resultFile": "seeds--19-sample-metadata.json",
+      "counts": {
+        "sites": 8,
+        "pattern": 7,
+        "value": 1,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 7,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 2
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 24.000040999999328,
+      "runtimeStationMs": 89.05546500000037,
+      "runtimeCalls": 2446,
+      "runtimeMethods": 29,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.8472599999995509,
+        "ast": 0.9801499999994121,
+        "runtime": 1.3935460000002422
+      },
+      "compileMs": {
+        "baseline": 10.396709999999985,
+        "ast": 1.6011469999994006
+      }
+    },
+    {
+      "file": "20-javascript-semantics.strudel",
+      "inputDirectory": "seeds",
+      "tags": [
+        "G3",
+        "S1",
+        "Q1"
+      ],
+      "resultFile": "seeds--20-javascript-semantics.json",
+      "counts": {
+        "sites": 15,
+        "pattern": 5,
+        "value": 7,
+        "function": 0,
+        "error": 1,
+        "never": 2,
+        "queryable": 5,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 7.373564000000442,
+      "runtimeStationMs": 19.116872000000512,
+      "runtimeCalls": 19,
+      "runtimeMethods": 11,
+      "callbackCounts": [
+        {
+          "callee": "user function",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "5ba79c5fc906:0",
+          "totalInstances": 1
+        },
+        {
+          "callee": "user function",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "72c700429b1e:0",
+          "totalInstances": 1
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.32821700000022247,
+        "ast": 0.4010630000002493,
+        "runtime": 0.4472189999996772
+      },
+      "compileMs": {
+        "baseline": 7.309432999999444,
+        "ast": 1.576259000000391
+      }
+    },
+    {
+      "file": "micro-arrange-300.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "T3",
+        "T1"
+      ],
+      "resultFile": "programs--micro-arrange-300.json",
+      "counts": {
+        "sites": 6,
+        "pattern": 6,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 6,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 11.173077999999805,
+      "runtimeStationMs": 58.60391100000015,
+      "runtimeCalls": 194,
+      "runtimeMethods": 23,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.5478190000003451,
+        "ast": 0.5431600000001708,
+        "runtime": 0.9297759999999471
+      },
+      "compileMs": {
+        "baseline": 6.737540000000081,
+        "ast": 1.294369999999617
+      }
+    },
+    {
+      "file": "micro-arrange-301.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "T3",
+        "E2"
+      ],
+      "resultFile": "programs--micro-arrange-301.json",
+      "counts": {
+        "sites": 6,
+        "pattern": 6,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 6,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 2
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 9.98692100000062,
+      "runtimeStationMs": 136.558223,
+      "runtimeCalls": 124,
+      "runtimeMethods": 23,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.4441340000003038,
+        "ast": 0.47711600000002363,
+        "runtime": 0.7722599999997328
+      },
+      "compileMs": {
+        "baseline": 6.408852999999908,
+        "ast": 1.0558119999996052
+      }
+    },
+    {
+      "file": "micro-bare-numbers.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "E5",
+        "G4"
+      ],
+      "resultFile": "programs--micro-bare-numbers.json",
+      "counts": {
+        "sites": 2,
+        "pattern": 2,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 2,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 2.717302000000018,
+      "runtimeStationMs": 11.93277499999931,
+      "runtimeCalls": 8,
+      "runtimeMethods": 8,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.14253699999972014,
+        "ast": 0.1584979999997813,
+        "runtime": 0.2000159999997777
+      },
+      "compileMs": {
+        "baseline": 3.5239760000004026,
+        "ast": 0.6053359999996246
+      }
+    },
+    {
+      "file": "micro-bare-strings.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "E5",
+        "G1"
+      ],
+      "resultFile": "programs--micro-bare-strings.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": true
+      },
+      "stationMs": 3.9077269999997952,
+      "runtimeStationMs": 22.30202199999985,
+      "runtimeCalls": 84,
+      "runtimeMethods": 9,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.2452400000001944,
+        "ast": 0.2652379999999539,
+        "runtime": 0.3207119999997303
+      },
+      "compileMs": {
+        "baseline": 5.537177000000156,
+        "ast": 0.7835310000000391
+      }
+    },
+    {
+      "file": "micro-callback-deep.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G2",
+        "G3"
+      ],
+      "resultFile": "programs--micro-callback-deep.json",
+      "counts": {
+        "sites": 9,
+        "pattern": 9,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 9,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 7
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 39.063914000000295,
+      "runtimeStationMs": 97.14860000000044,
+      "runtimeCalls": 125,
+      "runtimeMethods": 28,
+      "callbackCounts": [
+        {
+          "callee": "note(\"c3 e3 g3 b3\").s(\"sine\").layer",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "06697592b738:0",
+          "totalInstances": 1
+        },
+        {
+          "callee": "note(\"c3 e3 g3 b3\").s(\"sine\").layer",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "6ccd8666b469:0",
+          "totalInstances": 1
+        },
+        {
+          "callee": "p.off",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "9b97ab334cf9:0",
+          "totalInstances": 1
+        },
+        {
+          "callee": "q.superimpose",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "2160da86cea0:0",
+          "totalInstances": 1
+        },
+        {
+          "callee": "r.rev().off",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "4c531f4a81d7:0",
+          "totalInstances": 1
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.3596850000003542,
+        "ast": 0.4584709999999177,
+        "runtime": 0.7162350000007791
+      },
+      "compileMs": {
+        "baseline": 7.187966000000415,
+        "ast": 2.0131400000000212
+      }
+    },
+    {
+      "file": "micro-callback-off.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G2",
+        "E3"
+      ],
+      "resultFile": "programs--micro-callback-off.json",
+      "counts": {
+        "sites": 6,
+        "pattern": 6,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 6,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 3
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 14.67395099999976,
+      "runtimeStationMs": 63.006578000000445,
+      "runtimeCalls": 87,
+      "runtimeMethods": 23,
+      "callbackCounts": [
+        {
+          "callee": "note(\"c3 e3 g3\").s(\"triangle\").off",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "ff2c7aacb72a:0",
+          "totalInstances": 1
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.35031700000035926,
+        "ast": 0.42569900000034977,
+        "runtime": 0.6053969999993569
+      },
+      "compileMs": {
+        "baseline": 6.670853999999963,
+        "ast": 1.421448999999484
+      }
+    },
+    {
+      "file": "micro-clip-length.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "A4",
+        "C1"
+      ],
+      "resultFile": "programs--micro-clip-length.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 5.701904999999897,
+      "runtimeStationMs": 37.42725100000007,
+      "runtimeCalls": 30,
+      "runtimeMethods": 16,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.2820899999996982,
+        "ast": 0.2827510000006441,
+        "runtime": 0.39548199999990175
+      },
+      "compileMs": {
+        "baseline": 5.635199999999713,
+        "ast": 0.7148219999999128
+      }
+    },
+    {
+      "file": "micro-control-aliases.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "C1",
+        "G4"
+      ],
+      "resultFile": "programs--micro-control-aliases.json",
+      "counts": {
+        "sites": 7,
+        "pattern": 7,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 7,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 13.811362000000372,
+      "runtimeStationMs": 65.07052199999998,
+      "runtimeCalls": 76,
+      "runtimeMethods": 25,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.31729600000016944,
+        "ast": 0.4148589999995238,
+        "runtime": 0.5379299999995055
+      },
+      "compileMs": {
+        "baseline": 6.2014540000000125,
+        "ast": 1.02654800000073
+      }
+    },
+    {
+      "file": "micro-control-array.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "C2",
+        "C1"
+      ],
+      "resultFile": "programs--micro-control-array.json",
+      "counts": {
+        "sites": 4,
+        "pattern": 4,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 4,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 8.245171000000482,
+      "runtimeStationMs": 59.959837000000334,
+      "runtimeCalls": 68,
+      "runtimeMethods": 24,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.36616700000013225,
+        "ast": 0.3752750000003289,
+        "runtime": 0.5137739999991027
+      },
+      "compileMs": {
+        "baseline": 6.21711299999879,
+        "ast": 0.9418389999991632
+      }
+    },
+    {
+      "file": "micro-control-multivalue.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "C2",
+        "C1"
+      ],
+      "resultFile": "programs--micro-control-multivalue.json",
+      "counts": {
+        "sites": 4,
+        "pattern": 4,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 4,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 9.070230000001175,
+      "runtimeStationMs": 64.73002300000007,
+      "runtimeCalls": 89,
+      "runtimeMethods": 22,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.38137599999936356,
+        "ast": 0.43467600000076345,
+        "runtime": 0.6516440000013972
+      },
+      "compileMs": {
+        "baseline": 6.1749630000012985,
+        "ast": 1.017721000000165
+      }
+    },
+    {
+      "file": "micro-cut-group.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "A3",
+        "E3"
+      ],
+      "resultFile": "programs--micro-cut-group.json",
+      "counts": {
+        "sites": 5,
+        "pattern": 5,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 5,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 11.716027000000395,
+      "runtimeStationMs": 45.94483300000138,
+      "runtimeCalls": 48,
+      "runtimeMethods": 15,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.32774499999868567,
+        "ast": 0.3815360000007786,
+        "runtime": 0.512602999999217
+      },
+      "compileMs": {
+        "baseline": 6.094864000000598,
+        "ast": 0.9016729999984818
+      }
+    },
+    {
+      "file": "micro-dense-64.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "E4",
+        "Q2"
+      ],
+      "resultFile": "programs--micro-dense-64.json",
+      "counts": {
+        "sites": 2,
+        "pattern": 2,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 2,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 23.30101900000045,
+      "runtimeStationMs": 114.75255199999992,
+      "runtimeCalls": 26,
+      "runtimeMethods": 11,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.24103199999990466,
+        "ast": 0.2811679999995249,
+        "runtime": 0.3516600000002654
+      },
+      "compileMs": {
+        "baseline": 5.580286999998862,
+        "ast": 0.692019000000073
+      }
+    },
+    {
+      "file": "micro-dense-stack.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "E4",
+        "Q2"
+      ],
+      "resultFile": "programs--micro-dense-stack.json",
+      "counts": {
+        "sites": 5,
+        "pattern": 5,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 5,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 93.15430000000015,
+      "runtimeStationMs": 330.5547580000002,
+      "runtimeCalls": 8571,
+      "runtimeMethods": 23,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.3705759999993461,
+        "ast": 0.4529499999989639,
+        "runtime": 0.6422459999994317
+      },
+      "compileMs": {
+        "baseline": 6.23232199999984,
+        "ast": 1.0334700000003068
+      }
+    },
+    {
+      "file": "micro-duck-room.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "A3",
+        "A2"
+      ],
+      "resultFile": "programs--micro-duck-room.json",
+      "counts": {
+        "sites": 9,
+        "pattern": 9,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 9,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 1
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 18.14812399999937,
+      "runtimeStationMs": 58.45306800000071,
+      "runtimeCalls": 88,
+      "runtimeMethods": 22,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.41866599999957543,
+        "ast": 0.4883669999999256,
+        "runtime": 0.6504910000003292
+      },
+      "compileMs": {
+        "baseline": 6.752448000001095,
+        "ast": 1.1511909999990166
+      }
+    },
+    {
+      "file": "micro-external-state.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "S1",
+        "Q3"
+      ],
+      "resultFile": "programs--micro-external-state.json",
+      "counts": {
+        "sites": 4,
+        "pattern": 3,
+        "value": 1,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 4.459732999999687,
+      "runtimeStationMs": 22.07705000000169,
+      "runtimeCalls": 18,
+      "runtimeMethods": 11,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.25677299999915704,
+        "ast": 0.27559800000017276,
+        "runtime": 0.3300600000002305
+      },
+      "compileMs": {
+        "baseline": 5.915506999999707,
+        "ast": 0.8038199999991775
+      }
+    },
+    {
+      "file": "micro-external-tempo.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "S1",
+        "G3"
+      ],
+      "resultFile": "programs--micro-external-tempo.json",
+      "counts": {
+        "sites": 4,
+        "pattern": 3,
+        "value": 1,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 4.566463999999542,
+      "runtimeStationMs": 49.832462000000305,
+      "runtimeCalls": 46,
+      "runtimeMethods": 20,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.3721690000002127,
+        "ast": 0.36773100000027625,
+        "runtime": 0.4827159999986179
+      },
+      "compileMs": {
+        "baseline": 6.160546999999497,
+        "ast": 0.8820959999993647
+      }
+    },
+    {
+      "file": "micro-fragments-chop.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "E2",
+        "E3"
+      ],
+      "resultFile": "programs--micro-fragments-chop.json",
+      "counts": {
+        "sites": 4,
+        "pattern": 4,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 4,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 2
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 6.878904999999577,
+      "runtimeStationMs": 41.725892000000385,
+      "runtimeCalls": 45,
+      "runtimeMethods": 17,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.34970699999939825,
+        "ast": 0.3852129999995668,
+        "runtime": 0.4928350000009232
+      },
+      "compileMs": {
+        "baseline": 6.064255999999659,
+        "ast": 0.9232630000005884
+      }
+    },
+    {
+      "file": "micro-fragments-slow.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "E2",
+        "A4"
+      ],
+      "resultFile": "programs--micro-fragments-slow.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 1
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 5.212407000000894,
+      "runtimeStationMs": 55.355562000000646,
+      "runtimeCalls": 56,
+      "runtimeMethods": 22,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.3449579999996786,
+        "ast": 0.3264930000004824,
+        "runtime": 0.49649200000021665
+      },
+      "compileMs": {
+        "baseline": 5.95372899999893,
+        "ast": 0.8505270000005112
+      }
+    },
+    {
+      "file": "micro-fx-drive-filter.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "A1",
+        "C2"
+      ],
+      "resultFile": "programs--micro-fx-drive-filter.json",
+      "counts": {
+        "sites": 7,
+        "pattern": 7,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 7,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 14.771343000000343,
+      "runtimeStationMs": 70.04561300000023,
+      "runtimeCalls": 64,
+      "runtimeMethods": 24,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.31815699999970093,
+        "ast": 0.37240899999960675,
+        "runtime": 0.5568960000000516
+      },
+      "compileMs": {
+        "baseline": 6.239423999999417,
+        "ast": 0.9972420000012789
+      }
+    },
+    {
+      "file": "micro-fx-filter-drive.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "A1",
+        "C2"
+      ],
+      "resultFile": "programs--micro-fx-filter-drive.json",
+      "counts": {
+        "sites": 6,
+        "pattern": 6,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 6,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 10.35137500000019,
+      "runtimeStationMs": 63.401568999999654,
+      "runtimeCalls": 61,
+      "runtimeMethods": 24,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.3091100000001461,
+        "ast": 0.36671900000146707,
+        "runtime": 0.5587990000003629
+      },
+      "compileMs": {
+        "baseline": 6.142692999999781,
+        "ast": 0.9368590000012773
+      }
+    },
+    {
+      "file": "micro-labels.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G5",
+        "G1"
+      ],
+      "resultFile": "programs--micro-labels.json",
+      "counts": {
+        "sites": 6,
+        "pattern": 6,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 6,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 16.368482999998378,
+      "runtimeStationMs": 48.51788400000078,
+      "runtimeCalls": 73,
+      "runtimeMethods": 18,
+      "callbackCounts": [
+        {
+          "callee": "all",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "a720aebfa6aa:0",
+          "totalInstances": 1
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.36903200000051584,
+        "ast": 0.3902830000006361,
+        "runtime": 0.5570059999990917
+      },
+      "compileMs": {
+        "baseline": 7.007987999999386,
+        "ast": 1.5149639999999636
+      }
+    },
+    {
+      "file": "micro-long-alternation.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "T1",
+        "G2"
+      ],
+      "resultFile": "programs--micro-long-alternation.json",
+      "counts": {
+        "sites": 4,
+        "pattern": 4,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 4,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 9.920695999999225,
+      "runtimeStationMs": 78.1708579999995,
+      "runtimeCalls": 1009,
+      "runtimeMethods": 29,
+      "callbackCounts": [
+        {
+          "callee": "note(\"<c3 d3 e3 f3 g3 a3 b3>\").s(\"sine\").firstOf",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "44d7cb2713cc:0",
+          "totalInstances": 1
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.44821199999933015,
+        "ast": 0.45784999999887077,
+        "runtime": 0.7619709999999031
+      },
+      "compileMs": {
+        "baseline": 6.981196999999156,
+        "ast": 1.5609410000015487
+      }
+    },
+    {
+      "file": "micro-orbit-conflict.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G5",
+        "A2"
+      ],
+      "resultFile": "programs--micro-orbit-conflict.json",
+      "counts": {
+        "sites": 9,
+        "pattern": 9,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 9,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 19.80117799999971,
+      "runtimeStationMs": 70.24863399999958,
+      "runtimeCalls": 102,
+      "runtimeMethods": 25,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.400061000000278,
+        "ast": 0.44301199999972596,
+        "runtime": 0.6926600000006147
+      },
+      "compileMs": {
+        "baseline": 6.882322000001295,
+        "ast": 1.221984000001612
+      }
+    },
+    {
+      "file": "micro-orbit-delay.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "A2",
+        "G5"
+      ],
+      "resultFile": "programs--micro-orbit-delay.json",
+      "counts": {
+        "sites": 8,
+        "pattern": 8,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 8,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 19.32015400000091,
+      "runtimeStationMs": 53.501962000000276,
+      "runtimeCalls": 74,
+      "runtimeMethods": 18,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.3332960000007006,
+        "ast": 0.42046899999877496,
+        "runtime": 0.5450739999996586
+      },
+      "compileMs": {
+        "baseline": 6.613728000000265,
+        "ast": 1.1020189999999275
+      }
+    },
+    {
+      "file": "micro-pattern-fast.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G4",
+        "T1"
+      ],
+      "resultFile": "programs--micro-pattern-fast.json",
+      "counts": {
+        "sites": 4,
+        "pattern": 4,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 4,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 11.028286000000662,
+      "runtimeStationMs": 84.37130100000104,
+      "runtimeCalls": 553,
+      "runtimeMethods": 27,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.511940999998842,
+        "ast": 0.533410999998523,
+        "runtime": 0.9480899999998655
+      },
+      "compileMs": {
+        "baseline": 6.561719999999696,
+        "ast": 1.1487770000003366
+      }
+    },
+    {
+      "file": "micro-pattern-slow.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G4",
+        "T1"
+      ],
+      "resultFile": "programs--micro-pattern-slow.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 2
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 8.327344999999696,
+      "runtimeStationMs": 72.89093499999944,
+      "runtimeCalls": 1848,
+      "runtimeMethods": 24,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.4437930000003689,
+        "ast": 0.4812030000011873,
+        "runtime": 0.8080470000004425
+      },
+      "compileMs": {
+        "baseline": 6.72491699999955,
+        "ast": 1.0140739999988
+      }
+    },
+    {
+      "file": "micro-polymeter.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "T1",
+        "G1"
+      ],
+      "resultFile": "programs--micro-polymeter.json",
+      "counts": {
+        "sites": 2,
+        "pattern": 2,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 2,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 1
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 4.1839749999999185,
+      "runtimeStationMs": 55.83181599999989,
+      "runtimeCalls": 401,
+      "runtimeMethods": 23,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.2981400000007852,
+        "ast": 0.36076799999864306,
+        "runtime": 0.5567950000004203
+      },
+      "compileMs": {
+        "baseline": 5.996087999999872,
+        "ast": 0.8470409999990807
+      }
+    },
+    {
+      "file": "micro-query-late-throws.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "Q1",
+        "T1"
+      ],
+      "resultFile": "programs--micro-query-late-throws.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 1,
+        "value": 2,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 1,
+        "queryError": 0,
+        "budgetExceeded": 1,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": false,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 4.59128999999848,
+      "runtimeStationMs": 2.9009360000000015,
+      "runtimeCalls": 6,
+      "runtimeMethods": 1,
+      "callbackCounts": [
+        {
+          "callee": "user function",
+          "construction": 0,
+          "query": 8,
+          "other": 0,
+          "queryOwners": {
+            "final-before-stations": 4,
+            "final-after-stations": 4
+          },
+          "id": "de2f8de07439:0",
+          "totalInstances": 8
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.14103499999873748,
+        "ast": 0.14883000000008906,
+        "runtime": 0.14119499999833351
+      },
+      "compileMs": {
+        "baseline": 5.013613999999507,
+        "ast": 1.0399020000004384
+      }
+    },
+    {
+      "file": "micro-query-throws.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "Q1",
+        "Q2"
+      ],
+      "resultFile": "programs--micro-query-throws.json",
+      "counts": {
+        "sites": 0,
+        "pattern": 0,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 0,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": false,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 0.0017229999994015088,
+      "runtimeStationMs": 0.0014730000002600718,
+      "runtimeCalls": 0,
+      "runtimeMethods": 0,
+      "callbackCounts": [
+        {
+          "callee": "user function",
+          "construction": 0,
+          "query": 2,
+          "other": 0,
+          "queryOwners": {
+            "final-before-stations": 1,
+            "final-after-stations": 1
+          },
+          "id": "04dd76a3cb21:0",
+          "totalInstances": 2
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.13315999999940686,
+        "ast": 0.143249000000651,
+        "runtime": 0.13557399999990594
+      },
+      "compileMs": {
+        "baseline": 3.9501560000007885,
+        "ast": 0.7856950000004872
+      }
+    },
+    {
+      "file": "micro-random-pitch.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "T2",
+        "T4"
+      ],
+      "resultFile": "programs--micro-random-pitch.json",
+      "counts": {
+        "sites": 7,
+        "pattern": 7,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 7,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 2,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 17.861886000000595,
+      "runtimeStationMs": 61.62732800000049,
+      "runtimeCalls": 2326,
+      "runtimeMethods": 26,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.3021169999992708,
+        "ast": 0.3460289999984525,
+        "runtime": 0.5409259999996721
+      },
+      "compileMs": {
+        "baseline": 5.86719500000072,
+        "ast": 0.858511999998882
+      }
+    },
+    {
+      "file": "micro-register.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G3",
+        "G2"
+      ],
+      "resultFile": "programs--micro-register.json",
+      "counts": {
+        "sites": 6,
+        "pattern": 5,
+        "value": 0,
+        "function": 1,
+        "error": 0,
+        "never": 0,
+        "queryable": 5,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 3
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 14.059726999999839,
+      "runtimeStationMs": 60.87091700000019,
+      "runtimeCalls": 69,
+      "runtimeMethods": 24,
+      "callbackCounts": [
+        {
+          "callee": "register",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "a550b2ab9bd9:0",
+          "totalInstances": 1
+        },
+        {
+          "callee": "pat.off",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "3dd470f78f54:0",
+          "totalInstances": 1
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.38566399999945133,
+        "ast": 0.5005700000001525,
+        "runtime": 0.7501090000005206
+      },
+      "compileMs": {
+        "baseline": 7.097335000000385,
+        "ast": 1.4620350000004692
+      }
+    },
+    {
+      "file": "micro-reuse.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G3",
+        "G1"
+      ],
+      "resultFile": "programs--micro-reuse.json",
+      "counts": {
+        "sites": 7,
+        "pattern": 7,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 7,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 14.764671999999337,
+      "runtimeStationMs": 62.177130000000034,
+      "runtimeCalls": 106,
+      "runtimeMethods": 22,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.4208099999996193,
+        "ast": 0.45232900000155496,
+        "runtime": 0.7565400000003137
+      },
+      "compileMs": {
+        "baseline": 6.7445129999996425,
+        "ast": 1.098823000000266
+      }
+    },
+    {
+      "file": "micro-sample-loop.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "Q3",
+        "A4"
+      ],
+      "resultFile": "programs--micro-sample-loop.json",
+      "counts": {
+        "sites": 2,
+        "pattern": 2,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 2,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 1
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 3.5638010000002396,
+      "runtimeStationMs": 57.24763399999938,
+      "runtimeCalls": 1468,
+      "runtimeMethods": 18,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.22429100000044855,
+        "ast": 0.26620999999977357,
+        "runtime": 0.27140999999937776
+      },
+      "compileMs": {
+        "baseline": 5.337211000000025,
+        "ast": 0.6818499999990308
+      }
+    },
+    {
+      "file": "micro-sample-splice.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "Q3",
+        "E4"
+      ],
+      "resultFile": "programs--micro-sample-splice.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 7.100821999998516,
+      "runtimeStationMs": 62.93858900000123,
+      "runtimeCalls": 1353,
+      "runtimeMethods": 21,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.3516199999994569,
+        "ast": 0.39386999999987893,
+        "runtime": 0.6412839999993594
+      },
+      "compileMs": {
+        "baseline": 6.0905949999996665,
+        "ast": 0.9768840000015189
+      }
+    },
+    {
+      "file": "micro-seeded-drop.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "T2",
+        "T4"
+      ],
+      "resultFile": "programs--micro-seeded-drop.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 9.150170000000799,
+      "runtimeStationMs": 45.9497420000007,
+      "runtimeCalls": 33,
+      "runtimeMethods": 17,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.24210499999935564,
+        "ast": 0.31495100000029197,
+        "runtime": 0.4196279999996477
+      },
+      "compileMs": {
+        "baseline": 5.701393999999709,
+        "ast": 0.7207230000003619
+      }
+    },
+    {
+      "file": "micro-signal-bare.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "E1",
+        "E5"
+      ],
+      "resultFile": "programs--micro-signal-bare.json",
+      "counts": {
+        "sites": 0,
+        "pattern": 0,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 0,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 0.004138000000239117,
+      "runtimeStationMs": 0.0018329999984416645,
+      "runtimeCalls": 0,
+      "runtimeMethods": 0,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.14107499999954598,
+        "ast": 0.13430200000038894,
+        "runtime": 0.14253800000005867
+      },
+      "compileMs": {
+        "baseline": 2.453786999998556,
+        "ast": 0.2673319999994419
+      }
+    },
+    {
+      "file": "micro-signal-lanes.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "E1",
+        "G4"
+      ],
+      "resultFile": "programs--micro-signal-lanes.json",
+      "counts": {
+        "sites": 8,
+        "pattern": 8,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 8,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 3,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 14.943708000000697,
+      "runtimeStationMs": 45.071632999999565,
+      "runtimeCalls": 83,
+      "runtimeMethods": 19,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.33034000000043306,
+        "ast": 0.4185560000005353,
+        "runtime": 0.5872229999986303
+      },
+      "compileMs": {
+        "baseline": 6.151429000001372,
+        "ast": 0.9478200000012293
+      }
+    },
+    {
+      "file": "micro-tails.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "A4",
+        "E3"
+      ],
+      "resultFile": "programs--micro-tails.json",
+      "counts": {
+        "sites": 4,
+        "pattern": 4,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 4,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 12.516880999999557,
+      "runtimeStationMs": 46.54352699999981,
+      "runtimeCalls": 41,
+      "runtimeMethods": 17,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.2956950000007055,
+        "ast": 0.34090000000105647,
+        "runtime": 0.46305000000029395
+      },
+      "compileMs": {
+        "baseline": 5.84586599999966,
+        "ast": 0.8492239999995945
+      }
+    },
+    {
+      "file": "micro-tree-arrange.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "T1"
+      ],
+      "resultFile": "programs--micro-tree-arrange.json",
+      "counts": {
+        "sites": 6,
+        "pattern": 6,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 6,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 10.65557600000102,
+      "runtimeStationMs": 76.22875199999908,
+      "runtimeCalls": 133,
+      "runtimeMethods": 19,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.47883900000124413,
+        "ast": 0.47090399999979127,
+        "runtime": 0.7716190000010101
+      },
+      "compileMs": {
+        "baseline": 6.383314999999129,
+        "ast": 1.1365440000008675
+      }
+    },
+    {
+      "file": "micro-tree-stack.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "E3"
+      ],
+      "resultFile": "programs--micro-tree-stack.json",
+      "counts": {
+        "sites": 7,
+        "pattern": 7,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 7,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 3
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 11.51222499999858,
+      "runtimeStationMs": 56.248679000000266,
+      "runtimeCalls": 189,
+      "runtimeMethods": 22,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.4693910000005417,
+        "ast": 0.4823359999991226,
+        "runtime": 0.6907259999989037
+      },
+      "compileMs": {
+        "baseline": 6.695642000000589,
+        "ast": 1.27947199999835
+      }
+    },
+    {
+      "file": "micro-trigger.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "S2",
+        "G2"
+      ],
+      "resultFile": "programs--micro-trigger.json",
+      "counts": {
+        "sites": 4,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 1,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": true
+      },
+      "stationMs": 6.32579700000133,
+      "runtimeStationMs": 34.10176699999647,
+      "runtimeCalls": 32,
+      "runtimeMethods": 16,
+      "callbackCounts": [
+        {
+          "callee": "note(\"c4*4\").s(\"sine\").onTrigger",
+          "construction": 0,
+          "query": 0,
+          "other": 0,
+          "id": "cfe65ad6e19c:0",
+          "totalInstances": 0
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.30709699999715667,
+        "ast": 0.36861299999873154,
+        "runtime": 0.44437400000242633
+      },
+      "compileMs": {
+        "baseline": 6.3145149999982095,
+        "ast": 1.3222330000025977
+      }
+    },
+    {
+      "file": "micro-visuals.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "S2",
+        "G2"
+      ],
+      "resultFile": "programs--micro-visuals.json",
+      "counts": {
+        "sites": 4,
+        "pattern": 4,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 4,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": true
+      },
+      "stationMs": 9.261628999996901,
+      "runtimeStationMs": 46.13874699999724,
+      "runtimeCalls": 75,
+      "runtimeMethods": 19,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.2810879999997269,
+        "ast": 0.3460290000002715,
+        "runtime": 0.471624999998312
+      },
+      "compileMs": {
+        "baseline": 5.827891999997519,
+        "ast": 0.7955030000011902
+      }
+    },
+    {
+      "file": "mms-chunk.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G2",
+        "E4"
+      ],
+      "resultFile": "programs--mms-chunk.json",
+      "counts": {
+        "sites": 5,
+        "pattern": 5,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 5,
+        "queryError": 0,
+        "budgetExceeded": 2,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 59.971519000002445,
+      "runtimeStationMs": 123.54194400000051,
+      "runtimeCalls": 10168,
+      "runtimeMethods": 35,
+      "callbackCounts": [
+        {
+          "callee": "note(\"c3 e3 g3 b3\").s(\"sine\").chunk",
+          "construction": 0,
+          "query": 27,
+          "other": 0,
+          "queryOwners": {
+            "final-before-stations": 9,
+            "3cc1c5789f3c:0#0": 9,
+            "final-after-stations": 9
+          },
+          "id": "fb18cc146de0:0",
+          "totalInstances": 27
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.39257699999870965,
+        "ast": 0.4052510000001348,
+        "runtime": 0.7233379999997851
+      },
+      "compileMs": {
+        "baseline": 6.748160000002827,
+        "ast": 1.4061000000001513
+      }
+    },
+    {
+      "file": "mms-clock.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "T1",
+        "E2"
+      ],
+      "resultFile": "programs--mms-clock.json",
+      "counts": {
+        "sites": 5,
+        "pattern": 5,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 5,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 2
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 16.87236799999664,
+      "runtimeStationMs": 83.57573599999887,
+      "runtimeCalls": 3193,
+      "runtimeMethods": 29,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.3779690000010305,
+        "ast": 0.40860699999757344,
+        "runtime": 0.7044629999982135
+      },
+      "compileMs": {
+        "baseline": 6.251628000001801,
+        "ast": 0.9940070000011474
+      }
+    },
+    {
+      "file": "mms-echo.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "E3",
+        "G2"
+      ],
+      "resultFile": "programs--mms-echo.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 1
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 9.018342999999732,
+      "runtimeStationMs": 69.37122699999964,
+      "runtimeCalls": 130,
+      "runtimeMethods": 24,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.3798830000014277,
+        "ast": 0.4120839999995951,
+        "runtime": 0.7130790000010165
+      },
+      "compileMs": {
+        "baseline": 6.343711000001349,
+        "ast": 0.9530500000000757
+      }
+    },
+    {
+      "file": "mms-euclid-legato.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "E2",
+        "A4"
+      ],
+      "resultFile": "programs--mms-euclid-legato.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 1
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 6.598217999999179,
+      "runtimeStationMs": 67.30486799999926,
+      "runtimeCalls": 140,
+      "runtimeMethods": 27,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.381706000000122,
+        "ast": 0.44176900000093156,
+        "runtime": 0.7543970000006084
+      },
+      "compileMs": {
+        "baseline": 6.1300090000004275,
+        "ast": 0.8879669999987527
+      }
+    },
+    {
+      "file": "mms-euclid.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G4",
+        "T1"
+      ],
+      "resultFile": "programs--mms-euclid.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 8.56819700000051,
+      "runtimeStationMs": 75.4987910000018,
+      "runtimeCalls": 1396,
+      "runtimeMethods": 27,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.3894609999988461,
+        "ast": 0.4285249999993539,
+        "runtime": 0.6677440000021306
+      },
+      "compileMs": {
+        "baseline": 6.043517000001884,
+        "ast": 0.9036159999996016
+      }
+    },
+    {
+      "file": "mms-jux.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G2",
+        "E3"
+      ],
+      "resultFile": "programs--mms-jux.json",
+      "counts": {
+        "sites": 5,
+        "pattern": 5,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 5,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 13.982080999998288,
+      "runtimeStationMs": 113.74639200000092,
+      "runtimeCalls": 11729,
+      "runtimeMethods": 33,
+      "callbackCounts": [
+        {
+          "callee": "note(\"c3 e3 g3 b3\").s(\"sine\").jux",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "d2a287c93b12:0",
+          "totalInstances": 1
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.40454899999895133,
+        "ast": 0.4538719999982277,
+        "runtime": 0.7140299999991839
+      },
+      "compileMs": {
+        "baseline": 6.617734999999811,
+        "ast": 1.443570000003092
+      }
+    },
+    {
+      "file": "mms-nested.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G2",
+        "G3"
+      ],
+      "resultFile": "programs--mms-nested.json",
+      "counts": {
+        "sites": 7,
+        "pattern": 7,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 7,
+        "queryError": 0,
+        "budgetExceeded": 4,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 142.32368799999676,
+      "runtimeStationMs": 166.46140699999887,
+      "runtimeCalls": 21166,
+      "runtimeMethods": 36,
+      "callbackCounts": [
+        {
+          "callee": "note(\"c3 e3 g3 b3\").s(\"sine\").chunk",
+          "construction": 0,
+          "query": 27,
+          "other": 0,
+          "queryOwners": {
+            "final-before-stations": 9,
+            "2f311b0ef0d8:0#0": 9,
+            "final-after-stations": 9
+          },
+          "id": "3391306c2e88:0",
+          "totalInstances": 27
+        },
+        {
+          "callee": "x.off",
+          "construction": 0,
+          "query": 27,
+          "other": 0,
+          "queryOwners": {
+            "final-before-stations": 9,
+            "2f311b0ef0d8:0#0": 9,
+            "final-after-stations": 9
+          },
+          "id": "2d7d6b338a84:0",
+          "totalInstances": 27
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.4472399999976915,
+        "ast": 0.42911600000297767,
+        "runtime": 0.7229179999994813
+      },
+      "compileMs": {
+        "baseline": 7.089921000002505,
+        "ast": 1.7986170000003767
+      }
+    },
+    {
+      "file": "mms-off.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G2",
+        "E3"
+      ],
+      "resultFile": "programs--mms-off.json",
+      "counts": {
+        "sites": 5,
+        "pattern": 5,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 5,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 3
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 12.975232000000688,
+      "runtimeStationMs": 69.76589800000147,
+      "runtimeCalls": 101,
+      "runtimeMethods": 24,
+      "callbackCounts": [
+        {
+          "callee": "note(\"c3 e3 g3 b3\").s(\"sine\").off",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "756ef5c4b7c0:0",
+          "totalInstances": 1
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.36594699999841396,
+        "ast": 0.40364799999952083,
+        "runtime": 0.6883730000008654
+      },
+      "compileMs": {
+        "baseline": 7.191812999997637,
+        "ast": 1.5342899999996007
+      }
+    },
+    {
+      "file": "mms-palindrome.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "T1",
+        "G1"
+      ],
+      "resultFile": "programs--mms-palindrome.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 6.801178999998228,
+      "runtimeStationMs": 53.83966599999985,
+      "runtimeCalls": 87,
+      "runtimeMethods": 22,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.3645139999971434,
+        "ast": 0.36896299999716575,
+        "runtime": 0.5924329999979818
+      },
+      "compileMs": {
+        "baseline": 5.984556999999768,
+        "ast": 0.8520900000003166
+      }
+    },
+    {
+      "file": "mms-ratchet.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "E4",
+        "G4"
+      ],
+      "resultFile": "programs--mms-ratchet.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 7.330552999999782,
+      "runtimeStationMs": 102.28787900000316,
+      "runtimeCalls": 8830,
+      "runtimeMethods": 31,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.44386300000041956,
+        "ast": 0.4853110000003653,
+        "runtime": 0.8588120000022172
+      },
+      "compileMs": {
+        "baseline": 6.564805999998498,
+        "ast": 1.110915000001114
+      }
+    },
+    {
+      "file": "mms-ribbon.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "T1",
+        "G4"
+      ],
+      "resultFile": "programs--mms-ribbon.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 8.227697999998782,
+      "runtimeStationMs": 86.66102899999896,
+      "runtimeCalls": 1253,
+      "runtimeMethods": 33,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.40827700000227196,
+        "ast": 0.3953719999990426,
+        "runtime": 0.6607100000001083
+      },
+      "compileMs": {
+        "baseline": 6.132033000001684,
+        "ast": 0.8995890000005602
+      }
+    },
+    {
+      "file": "mms-seed.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "T2",
+        "T4"
+      ],
+      "resultFile": "programs--mms-seed.json",
+      "counts": {
+        "sites": 4,
+        "pattern": 4,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 4,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 9.187449000000925,
+      "runtimeStationMs": 64.42791500000021,
+      "runtimeCalls": 95,
+      "runtimeMethods": 24,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.34523799999806215,
+        "ast": 0.42267400000127964,
+        "runtime": 0.713038999998389
+      },
+      "compileMs": {
+        "baseline": 6.23814300000231,
+        "ast": 0.9506750000000466
+      }
+    },
+    {
+      "file": "mms-shuffle.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "T2",
+        "T4"
+      ],
+      "resultFile": "programs--mms-shuffle.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 1
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 10.479927000000316,
+      "runtimeStationMs": 104.26002199999857,
+      "runtimeCalls": 4921,
+      "runtimeMethods": 34,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.412705000002461,
+        "ast": 0.42299500000081025,
+        "runtime": 0.7862170000007609
+      },
+      "compileMs": {
+        "baseline": 6.2257490000010876,
+        "ast": 0.9499739999992016
+      }
+    },
+    {
+      "file": "mms-within.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G2",
+        "E2"
+      ],
+      "resultFile": "programs--mms-within.json",
+      "counts": {
+        "sites": 5,
+        "pattern": 5,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 5,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 15.90838900000017,
+      "runtimeStationMs": 115.85673400000087,
+      "runtimeCalls": 8206,
+      "runtimeMethods": 34,
+      "callbackCounts": [
+        {
+          "callee": "note(\"c3 e3 g3 b3\").s(\"sine\").within",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "d2a287c93b12:0",
+          "totalInstances": 1
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.41847600000255625,
+        "ast": 0.4881870000026538,
+        "runtime": 0.8456980000009935
+      },
+      "compileMs": {
+        "baseline": 7.196751999999833,
+        "ast": 1.642943999999261
+      }
+    },
+    {
+      "file": "mms-zoom.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "E2",
+        "G4"
+      ],
+      "resultFile": "programs--mms-zoom.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 8.126378000000841,
+      "runtimeStationMs": 53.624761999999464,
+      "runtimeCalls": 88,
+      "runtimeMethods": 22,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.345288000000437,
+        "ast": 0.3595050000003539,
+        "runtime": 0.5827340000032564
+      },
+      "compileMs": {
+        "baseline": 6.371683000001212,
+        "ast": 0.9220209999984945
+      }
+    },
+    {
+      "file": "piece-blue-hour.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "G3",
+        "T3",
+        "E3",
+        "A4",
+        "A2"
+      ],
+      "resultFile": "programs--piece-blue-hour.json",
+      "counts": {
+        "sites": 30,
+        "pattern": 30,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 30,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 6
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 76.61362499999814,
+      "runtimeStationMs": 136.7367779999986,
+      "runtimeCalls": 2710,
+      "runtimeMethods": 39,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 1.0608810000012454,
+        "ast": 1.2011050000000978,
+        "runtime": 1.9471359999988636
+      },
+      "compileMs": {
+        "baseline": 9.815629000000627,
+        "ast": 2.4339599999984785
+      }
+    },
+    {
+      "file": "piece-copper.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "G3",
+        "T3",
+        "E3",
+        "A4",
+        "A1"
+      ],
+      "resultFile": "programs--piece-copper.json",
+      "counts": {
+        "sites": 31,
+        "pattern": 31,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 31,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 5
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 73.48372799999925,
+      "runtimeStationMs": 122.38732600000003,
+      "runtimeCalls": 2668,
+      "runtimeMethods": 41,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 1.0624749999988126,
+        "ast": 1.1118170000008831,
+        "runtime": 1.955711999999039
+      },
+      "compileMs": {
+        "baseline": 9.472044000001915,
+        "ast": 2.227472000002308
+      }
+    },
+    {
+      "file": "piece-foundry.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "G3",
+        "T3",
+        "E3",
+        "A4",
+        "A1"
+      ],
+      "resultFile": "programs--piece-foundry.json",
+      "counts": {
+        "sites": 32,
+        "pattern": 32,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 32,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 77.9913919999999,
+      "runtimeStationMs": 128.66195799999696,
+      "runtimeCalls": 2761,
+      "runtimeMethods": 41,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 1.0828230000006442,
+        "ast": 1.2851929999997083,
+        "runtime": 2.314737000000605
+      },
+      "compileMs": {
+        "baseline": 9.605855000001611,
+        "ast": 2.355131000000256
+      }
+    },
+    {
+      "file": "piece-glass-garden.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "G3",
+        "T3",
+        "E3",
+        "A4",
+        "A1"
+      ],
+      "resultFile": "programs--piece-glass-garden.json",
+      "counts": {
+        "sites": 32,
+        "pattern": 32,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 32,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 6
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 78.64311499999894,
+      "runtimeStationMs": 133.2213269999993,
+      "runtimeCalls": 2717,
+      "runtimeMethods": 42,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 1.1401000000005297,
+        "ast": 1.1843640000006417,
+        "runtime": 2.0233990000015183
+      },
+      "compileMs": {
+        "baseline": 9.577582000001712,
+        "ast": 2.2708029999994324
+      }
+    },
+    {
+      "file": "piece-harbour.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "G3",
+        "T3",
+        "E3",
+        "A4",
+        "A2"
+      ],
+      "resultFile": "programs--piece-harbour.json",
+      "counts": {
+        "sites": 30,
+        "pattern": 30,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 30,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 6
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 69.21938199999931,
+      "runtimeStationMs": 127.66723999999886,
+      "runtimeCalls": 2710,
+      "runtimeMethods": 39,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 1.1216260000001057,
+        "ast": 1.7581610000015644,
+        "runtime": 2.14201200000025
+      },
+      "compileMs": {
+        "baseline": 9.477263999997376,
+        "ast": 3.835491000001639
+      }
+    },
+    {
+      "file": "piece-kiln.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "G3",
+        "T3",
+        "E3",
+        "A4",
+        "A2"
+      ],
+      "resultFile": "programs--piece-kiln.json",
+      "counts": {
+        "sites": 30,
+        "pattern": 30,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 30,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 6
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 72.73112500000207,
+      "runtimeStationMs": 136.3552120000022,
+      "runtimeCalls": 2671,
+      "runtimeMethods": 39,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 1.0278199999993376,
+        "ast": 1.1171480000011798,
+        "runtime": 1.8114610000011453
+      },
+      "compileMs": {
+        "baseline": 10.370842000000266,
+        "ast": 2.2077749999989464
+      }
+    },
+    {
+      "file": "piece-lichen.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "G3",
+        "T3",
+        "E3",
+        "A4",
+        "A2"
+      ],
+      "resultFile": "programs--piece-lichen.json",
+      "counts": {
+        "sites": 30,
+        "pattern": 30,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 30,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 6
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 65.36840099999972,
+      "runtimeStationMs": 116.3362249999991,
+      "runtimeCalls": 1874,
+      "runtimeMethods": 39,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 1.0961779999997816,
+        "ast": 1.3419900000008056,
+        "runtime": 2.164635000000999
+      },
+      "compileMs": {
+        "baseline": 9.839594000000943,
+        "ast": 2.3299950000000536
+      }
+    },
+    {
+      "file": "piece-moss-radio.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "G3",
+        "T3",
+        "E3",
+        "A4",
+        "A2"
+      ],
+      "resultFile": "programs--piece-moss-radio.json",
+      "counts": {
+        "sites": 31,
+        "pattern": 31,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 31,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 1,
+        "fragments": 6
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 76.07852099999945,
+      "runtimeStationMs": 134.44718900000225,
+      "runtimeCalls": 2786,
+      "runtimeMethods": 39,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 1.0993240000025253,
+        "ast": 1.1959449999994831,
+        "runtime": 2.1318319999991218
+      },
+      "compileMs": {
+        "baseline": 9.543888999996852,
+        "ast": 2.3449130000008154
+      }
+    },
+    {
+      "file": "piece-night-bus.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "G3",
+        "T3",
+        "E3",
+        "A4",
+        "A2"
+      ],
+      "resultFile": "programs--piece-night-bus.json",
+      "counts": {
+        "sites": 29,
+        "pattern": 29,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 29,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 5
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 73.69840100000147,
+      "runtimeStationMs": 134.34306300000026,
+      "runtimeCalls": 2738,
+      "runtimeMethods": 38,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 1.1074189999999362,
+        "ast": 1.2972850000005565,
+        "runtime": 2.3048369999996794
+      },
+      "compileMs": {
+        "baseline": 9.507840999998734,
+        "ast": 2.313373999997566
+      }
+    },
+    {
+      "file": "piece-paper-lantern.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "G3",
+        "T3",
+        "E3",
+        "A4",
+        "A2"
+      ],
+      "resultFile": "programs--piece-paper-lantern.json",
+      "counts": {
+        "sites": 31,
+        "pattern": 31,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 31,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 1,
+        "fragments": 6
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 81.19255200000043,
+      "runtimeStationMs": 129.81415999999808,
+      "runtimeCalls": 2718,
+      "runtimeMethods": 40,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 1.271867999999813,
+        "ast": 1.2887200000004668,
+        "runtime": 2.230317000001378
+      },
+      "compileMs": {
+        "baseline": 9.754705000003014,
+        "ast": 2.8918999999987136
+      }
+    },
+    {
+      "file": "piece-relay.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "G3",
+        "T3",
+        "E3",
+        "A4",
+        "A2"
+      ],
+      "resultFile": "programs--piece-relay.json",
+      "counts": {
+        "sites": 29,
+        "pattern": 29,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 29,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 75.14199199999712,
+      "runtimeStationMs": 132.7201359999999,
+      "runtimeCalls": 2767,
+      "runtimeMethods": 38,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 1.087601999999606,
+        "ast": 1.3322919999991427,
+        "runtime": 2.1846310000000813
+      },
+      "compileMs": {
+        "baseline": 9.858059000001958,
+        "ast": 2.4337699999996403
+      }
+    },
+    {
+      "file": "piece-slow-orbit.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "G3",
+        "T3",
+        "E3",
+        "A4",
+        "A2"
+      ],
+      "resultFile": "programs--piece-slow-orbit.json",
+      "counts": {
+        "sites": 30,
+        "pattern": 30,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 30,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 6
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 66.30768499999976,
+      "runtimeStationMs": 117.67314500000066,
+      "runtimeCalls": 1870,
+      "runtimeMethods": 39,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 1.0441200000022945,
+        "ast": 1.1186300000008487,
+        "runtime": 1.942627000000357
+      },
+      "compileMs": {
+        "baseline": 9.576751000000513,
+        "ast": 2.519962000002124
+      }
+    },
+    {
+      "file": "piece-sundial.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "G3",
+        "T3",
+        "E3",
+        "A4",
+        "A1"
+      ],
+      "resultFile": "programs--piece-sundial.json",
+      "counts": {
+        "sites": 31,
+        "pattern": 31,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 31,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 5
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 70.34317200000078,
+      "runtimeStationMs": 128.0830300000016,
+      "runtimeCalls": 2715,
+      "runtimeMethods": 41,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 1.0497209999994084,
+        "ast": 1.253151999997499,
+        "runtime": 2.108469000002515
+      },
+      "compileMs": {
+        "baseline": 9.867045999999391,
+        "ast": 2.2788589999981923
+      }
+    },
+    {
+      "file": "piece-switchyard.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "G3",
+        "T3",
+        "E3",
+        "A4",
+        "A1"
+      ],
+      "resultFile": "programs--piece-switchyard.json",
+      "counts": {
+        "sites": 32,
+        "pattern": 32,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 32,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 5
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 79.9338179999977,
+      "runtimeStationMs": 135.8297249999996,
+      "runtimeCalls": 2671,
+      "runtimeMethods": 41,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 1.078936000001704,
+        "ast": 1.1964670000015758,
+        "runtime": 2.163301999997202
+      },
+      "compileMs": {
+        "baseline": 9.323516000000382,
+        "ast": 3.886757000000216
+      }
+    },
+    {
+      "file": "piece-tidal-stairs.strudel",
+      "inputDirectory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "tags": [
+        "G1",
+        "G3",
+        "T3",
+        "E3",
+        "A4",
+        "A2"
+      ],
+      "resultFile": "programs--piece-tidal-stairs.json",
+      "counts": {
+        "sites": 30,
+        "pattern": 30,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 30,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 6
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 76.09121400000004,
+      "runtimeStationMs": 135.40647999999783,
+      "runtimeCalls": 2744,
+      "runtimeMethods": 39,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 1.0175600000002305,
+        "ast": 1.2183680000016466,
+        "runtime": 1.922539000002871
+      },
+      "compileMs": {
+        "baseline": 10.144626000001153,
+        "ast": 2.4925599999987753
+      }
+    },
+    {
+      "file": "alias-provenance.strudel",
+      "inputDirectory": "probes",
+      "tags": [
+        "G3"
+      ],
+      "resultFile": "probes--alias-provenance.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 3,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 3,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 3.755690999998478,
+      "runtimeStationMs": 1.8283719999999448,
+      "runtimeCalls": 1,
+      "runtimeMethods": 1,
+      "callbackCounts": [
+        {
+          "callee": "p => p",
+          "construction": 1,
+          "query": 0,
+          "other": 0,
+          "queryOwners": {},
+          "id": "06697592b738:0",
+          "totalInstances": 1
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.14970099999845843,
+        "ast": 0.1790469999978086,
+        "runtime": 0.18316399999821442
+      },
+      "compileMs": {
+        "baseline": 4.501462000000174,
+        "ast": 1.1595870000019204
+      }
+    },
+    {
+      "file": "function-source.strudel",
+      "inputDirectory": "probes",
+      "tags": [
+        "G3"
+      ],
+      "resultFile": "probes--function-source.json",
+      "counts": {
+        "sites": 4,
+        "pattern": 1,
+        "value": 2,
+        "function": 0,
+        "error": 0,
+        "never": 1,
+        "queryable": 1,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": false,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 2.052173000000039,
+      "runtimeStationMs": 1.262710999999399,
+      "runtimeCalls": 1,
+      "runtimeMethods": 1,
+      "callbackCounts": [
+        {
+          "callee": "choose",
+          "construction": 0,
+          "query": 0,
+          "other": 0,
+          "id": "fcbc3c06f3da:0",
+          "totalInstances": 0
+        }
+      ],
+      "evalMedianMs": {
+        "baseline": 0.1347330000025977,
+        "ast": 0.16045200000007753,
+        "runtime": 0.1636480000015581
+      },
+      "compileMs": {
+        "baseline": 4.688672999996925,
+        "ast": 0.9738579999975627
+      }
+    },
+    {
+      "file": "generated-code.strudel",
+      "inputDirectory": "probes",
+      "tags": [
+        "G3"
+      ],
+      "resultFile": "probes--generated-code.json",
+      "counts": {
+        "sites": 1,
+        "pattern": 1,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 1,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 1.9709699999984878,
+      "runtimeStationMs": 13.2326350000003,
+      "runtimeCalls": 9,
+      "runtimeMethods": 9,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.15447000000131084,
+        "ast": 0.1629450000000361,
+        "runtime": 0.20468400000027032
+      },
+      "compileMs": {
+        "baseline": 3.673226999999315,
+        "ast": 0.5857900000009977
+      }
+    },
+    {
+      "file": "prototype-source.strudel",
+      "inputDirectory": "probes",
+      "tags": [
+        "G3"
+      ],
+      "resultFile": "probes--prototype-source.json",
+      "counts": {
+        "sites": 3,
+        "pattern": 1,
+        "value": 2,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 1,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": false,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 1.2289779999991879,
+      "runtimeStationMs": 1.2224150000001828,
+      "runtimeCalls": 1,
+      "runtimeMethods": 1,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.1485290000018722,
+        "ast": 0.16678300000057789,
+        "runtime": 0.18069000000105007
+      },
+      "compileMs": {
+        "baseline": 4.271048999999039,
+        "ast": 0.6420059999982186
+      }
+    },
+    {
+      "file": "swallowed-query.strudel",
+      "inputDirectory": "probes",
+      "tags": [
+        "Q1",
+        "G3"
+      ],
+      "resultFile": "probes--swallowed-query.json",
+      "counts": {
+        "sites": 1,
+        "pattern": 1,
+        "value": 0,
+        "function": 0,
+        "error": 0,
+        "never": 0,
+        "queryable": 1,
+        "queryError": 0,
+        "budgetExceeded": 0,
+        "continuous": 0,
+        "fragments": 0
+      },
+      "comparison": {
+        "astEqualsBaseline": true,
+        "runtimeEqualsBaseline": true,
+        "astUnaffectedByStationQueries": true,
+        "runtimeUnaffectedByStationQueries": true,
+        "fullyChecked": true,
+        "functionBehaviorUnchecked": false
+      },
+      "stationMs": 1.5101350000004459,
+      "runtimeStationMs": 0.0015120000025490299,
+      "runtimeCalls": 18,
+      "runtimeMethods": 1,
+      "callbackCounts": [],
+      "evalMedianMs": {
+        "baseline": 0.14234700000088196,
+        "ast": 0.1559930000003078,
+        "runtime": 0.1491810000006808
+      },
+      "compileMs": {
+        "baseline": 3.2600710000006075,
+        "ast": 0.5332809999999881
+      }
+    }
+  ],
+  "byTag": {
+    "G4": {
+      "programs": 15,
+      "sites": 72,
+      "pattern": 71,
+      "value": 0,
+      "function": 1,
+      "error": 0,
+      "never": 0,
+      "queryable": 71,
+      "queryError": 0,
+      "budgetExceeded": 7,
+      "continuous": 4,
+      "fragments": 11
+    },
+    "E5": {
+      "programs": 4,
+      "sites": 12,
+      "pattern": 12,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 12,
+      "queryError": 0,
+      "budgetExceeded": 0,
+      "continuous": 0,
+      "fragments": 0
+    },
+    "G1": {
+      "programs": 23,
+      "sites": 506,
+      "pattern": 506,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 506,
+      "queryError": 0,
+      "budgetExceeded": 0,
+      "continuous": 2,
+      "fragments": 81
+    },
+    "G2": {
+      "programs": 19,
+      "sites": 111,
+      "pattern": 109,
+      "value": 0,
+      "function": 1,
+      "error": 0,
+      "never": 1,
+      "queryable": 109,
+      "queryError": 0,
+      "budgetExceeded": 13,
+      "continuous": 0,
+      "fragments": 32
+    },
+    "T1": {
+      "programs": 12,
+      "sites": 48,
+      "pattern": 46,
+      "value": 2,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 46,
+      "queryError": 0,
+      "budgetExceeded": 2,
+      "continuous": 0,
+      "fragments": 5
+    },
+    "T2": {
+      "programs": 5,
+      "sites": 25,
+      "pattern": 25,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 25,
+      "queryError": 0,
+      "budgetExceeded": 2,
+      "continuous": 2,
+      "fragments": 1
+    },
+    "E2": {
+      "programs": 9,
+      "sites": 40,
+      "pattern": 40,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 40,
+      "queryError": 0,
+      "budgetExceeded": 1,
+      "continuous": 1,
+      "fragments": 12
+    },
+    "G3": {
+      "programs": 28,
+      "sites": 533,
+      "pattern": 514,
+      "value": 12,
+      "function": 2,
+      "error": 1,
+      "never": 4,
+      "queryable": 514,
+      "queryError": 0,
+      "budgetExceeded": 6,
+      "continuous": 2,
+      "fragments": 84
+    },
+    "E1": {
+      "programs": 3,
+      "sites": 13,
+      "pattern": 13,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 13,
+      "queryError": 0,
+      "budgetExceeded": 0,
+      "continuous": 4,
+      "fragments": 4
+    },
+    "G5": {
+      "programs": 5,
+      "sites": 38,
+      "pattern": 36,
+      "value": 2,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 36,
+      "queryError": 0,
+      "budgetExceeded": 0,
+      "continuous": 0,
+      "fragments": 4
+    },
+    "S1": {
+      "programs": 5,
+      "sites": 37,
+      "pattern": 22,
+      "value": 12,
+      "function": 0,
+      "error": 1,
+      "never": 2,
+      "queryable": 22,
+      "queryError": 0,
+      "budgetExceeded": 0,
+      "continuous": 0,
+      "fragments": 2
+    },
+    "S2": {
+      "programs": 3,
+      "sites": 14,
+      "pattern": 13,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 1,
+      "queryable": 13,
+      "queryError": 0,
+      "budgetExceeded": 0,
+      "continuous": 0,
+      "fragments": 0
+    },
+    "Q1": {
+      "programs": 5,
+      "sites": 22,
+      "pattern": 10,
+      "value": 9,
+      "function": 0,
+      "error": 1,
+      "never": 2,
+      "queryable": 8,
+      "queryError": 2,
+      "budgetExceeded": 1,
+      "continuous": 0,
+      "fragments": 0
+    },
+    "Q2": {
+      "programs": 6,
+      "sites": 12,
+      "pattern": 12,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 10,
+      "queryError": 2,
+      "budgetExceeded": 2,
+      "continuous": 0,
+      "fragments": 0
+    },
+    "E4": {
+      "programs": 6,
+      "sites": 20,
+      "pattern": 20,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 19,
+      "queryError": 1,
+      "budgetExceeded": 3,
+      "continuous": 0,
+      "fragments": 0
+    },
+    "Q3": {
+      "programs": 4,
+      "sites": 17,
+      "pattern": 15,
+      "value": 2,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 15,
+      "queryError": 0,
+      "budgetExceeded": 0,
+      "continuous": 0,
+      "fragments": 3
+    },
+    "T3": {
+      "programs": 17,
+      "sites": 470,
+      "pattern": 470,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 470,
+      "queryError": 0,
+      "budgetExceeded": 0,
+      "continuous": 2,
+      "fragments": 76
+    },
+    "E3": {
+      "programs": 23,
+      "sites": 497,
+      "pattern": 497,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 497,
+      "queryError": 0,
+      "budgetExceeded": 0,
+      "continuous": 2,
+      "fragments": 86
+    },
+    "A4": {
+      "programs": 20,
+      "sites": 473,
+      "pattern": 473,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 473,
+      "queryError": 0,
+      "budgetExceeded": 0,
+      "continuous": 2,
+      "fragments": 77
+    },
+    "C1": {
+      "programs": 4,
+      "sites": 18,
+      "pattern": 18,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 18,
+      "queryError": 0,
+      "budgetExceeded": 0,
+      "continuous": 0,
+      "fragments": 0
+    },
+    "C2": {
+      "programs": 4,
+      "sites": 21,
+      "pattern": 21,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 21,
+      "queryError": 0,
+      "budgetExceeded": 0,
+      "continuous": 0,
+      "fragments": 0
+    },
+    "A3": {
+      "programs": 2,
+      "sites": 14,
+      "pattern": 14,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 14,
+      "queryError": 0,
+      "budgetExceeded": 0,
+      "continuous": 0,
+      "fragments": 1
+    },
+    "A2": {
+      "programs": 13,
+      "sites": 326,
+      "pattern": 326,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 326,
+      "queryError": 0,
+      "budgetExceeded": 0,
+      "continuous": 2,
+      "fragments": 54
+    },
+    "A1": {
+      "programs": 7,
+      "sites": 171,
+      "pattern": 171,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 171,
+      "queryError": 0,
+      "budgetExceeded": 0,
+      "continuous": 0,
+      "fragments": 21
+    },
+    "T4": {
+      "programs": 4,
+      "sites": 17,
+      "pattern": 17,
+      "value": 0,
+      "function": 0,
+      "error": 0,
+      "never": 0,
+      "queryable": 17,
+      "queryError": 0,
+      "budgetExceeded": 0,
+      "continuous": 2,
+      "fragments": 1
+    }
+  }
+}

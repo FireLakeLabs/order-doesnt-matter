@@ -1,0 +1,2 @@
+// G2 G4 E2: within has constant and patternified time bounds
+mini('0 1 2 3').within(0,0.5,x=>x.rev()).within("<0 .25>",0.75,x=>x.add(7)).note()

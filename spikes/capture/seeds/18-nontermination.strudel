@@ -1,0 +1,3 @@
+// Q2: query timeout must stop synchronous nontermination
+const identity = x => x;
+identity(new Pattern(state => { while (true) {} }))

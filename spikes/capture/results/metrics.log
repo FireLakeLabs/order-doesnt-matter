@@ -1,0 +1,90 @@
+{
+  "programs": 97,
+  "inputs": [
+    {
+      "directory": "/home/aaron/projects/order-doesnt-matter/spikes/capture/seeds",
+      "files": 20
+    },
+    {
+      "directory": "/home/aaron/projects/order-doesnt-matter/corpus/programs",
+      "files": 72
+    },
+    {
+      "directory": "/home/aaron/projects/order-doesnt-matter/spikes/capture/probes",
+      "files": 5
+    }
+  ],
+  "totals": {
+    "sites": 861,
+    "pattern": 835,
+    "value": 18,
+    "function": 2,
+    "error": 1,
+    "never": 5,
+    "queryable": 831,
+    "queryError": 4,
+    "budgetExceeded": 18,
+    "continuous": 8,
+    "fragments": 132
+  },
+  "completeComparisons": 92,
+  "opaqueFunctionPrograms": [
+    "14-trigger-visual.strudel",
+    "micro-bare-strings.strudel",
+    "micro-trigger.strudel",
+    "micro-visuals.strudel"
+  ],
+  "astMismatches": [
+    "function-source.strudel"
+  ],
+  "runtimeMismatches": [
+    "prototype-source.strudel"
+  ],
+  "afterStationChanges": [
+    "17-impure.strudel"
+  ],
+  "evalMedianMs": {
+    "baseline": 0.3779690000010305,
+    "ast": 0.42267400000127964,
+    "runtime": 0.6516440000013972
+  },
+  "evalMedianDeltaMs": {
+    "ast": 0.04391199999918172,
+    "runtime": 0.27026800000203366
+  },
+  "stationMedianMs": 12.516880999999557,
+  "stationMaxMs": 142.32368799999676,
+  "runtimeStationMedianMs": 65.07052199999998,
+  "chart": [
+    {
+      "sites": 4,
+      "ms": 10.203978000000006,
+      "min": 8.513855000000035,
+      "max": 15.831624000000033
+    },
+    {
+      "sites": 8,
+      "ms": 19.652538000000277,
+      "min": 18.156929999999875,
+      "max": 20.48584299999993
+    },
+    {
+      "sites": 16,
+      "ms": 42.95442800000001,
+      "min": 39.05769199999986,
+      "max": 46.15896500000008
+    },
+    {
+      "sites": 32,
+      "ms": 106.86344999999983,
+      "min": 102.80699400000049,
+      "max": 109.56326899999976
+    },
+    {
+      "sites": 64,
+      "ms": 280.0466669999996,
+      "min": 277.61526200000026,
+      "max": 289.1483559999997
+    }
+  ]
+}
