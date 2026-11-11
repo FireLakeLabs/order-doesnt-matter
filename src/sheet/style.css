@@ -1,0 +1,245 @@
+.odm-sheet {
+  --sheet-line: #2b3d48;
+  --sheet-muted: #a6bdc5;
+  color: #dfedec;
+  background: #101b24;
+  font:
+    13px/1.5 system-ui,
+    sans-serif;
+  min-width: 0;
+  max-width: 100%;
+  border: 1px solid var(--sheet-line);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.odm-sheet * {
+  box-sizing: border-box;
+}
+.odm-sheet header {
+  padding: 28px;
+  background: radial-gradient(ellipse at top right, #24404b, #14232e 75%);
+}
+.odm-sheet h1 {
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 500;
+  letter-spacing: -1px;
+  margin: 8px 0;
+}
+.odm-sheet p {
+  margin: 4px 0;
+  color: var(--sheet-muted);
+}
+.odm-sheet .sheet-eyebrow {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #a3efd5;
+}
+.sheet-scroll {
+  max-width: 100%;
+  overflow: auto;
+}
+.sheet-scroll:focus-visible {
+  outline: 2px solid #a3efd5;
+  outline-offset: -3px;
+}
+.odm-sheet table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+}
+.odm-sheet caption {
+  text-align: left;
+  padding: 12px 20px;
+  color: var(--sheet-muted);
+  font-size: 11px;
+}
+.odm-sheet th,
+.odm-sheet td {
+  border-top: 1px solid var(--sheet-line);
+  border-right: 1px solid #263640;
+  padding: 16px;
+  text-align: left;
+  vertical-align: middle;
+}
+.odm-sheet thead th {
+  background: #1b2e39;
+  color: #b9cdd3;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.odm-sheet th:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  min-width: 190px;
+  max-width: 220px;
+  background: #152731;
+}
+.odm-sheet tbody th {
+  border-left: 3px solid #85c9b4;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+.odm-sheet tbody tr:nth-child(even) td {
+  background: #192a343b;
+}
+.odm-sheet tbody th strong {
+  display: block;
+  font-size: 16px;
+  font-weight: 500;
+}
+.odm-sheet small {
+  display: block;
+  font-size: 10px;
+  color: var(--sheet-muted);
+  margin: 4px 0;
+}
+.sheet-status {
+  font-size: 11px;
+  color: var(--sheet-muted);
+}
+.sheet-sound {
+  display: block;
+  font-size: 11px;
+  margin-top: 7px;
+}
+.sheet-ready {
+  color: #a3efd5;
+}
+.sheet-loading {
+  color: #f0cb86;
+}
+.sheet-missing,
+.sheet-error {
+  color: #ffb3a8;
+  font-weight: 600;
+}
+.sheet-cell {
+  min-width: 172px;
+  max-width: 210px;
+  height: 132px;
+}
+.sheet-cell > span {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.sheet-unused {
+  color: #91a7b2;
+  font-size: 11px;
+}
+.sheet-empty {
+  color: #bdc4c8;
+  font-size: 11px;
+}
+.sheet-cell svg {
+  display: block;
+  width: 150px;
+  height: 48px;
+  margin-top: 12px;
+  fill: #a3efd5;
+}
+.sheet-steps svg {
+  fill: #c3b0f1;
+}
+.sheet-axis {
+  stroke: #69818c;
+  fill: none;
+  stroke-width: 0.3;
+}
+.sheet-curve {
+  fill: none;
+  stroke: #c3b0f1;
+  stroke-width: 0.8;
+}
+.sheet-playhead {
+  fill: none;
+  stroke: #fff7d0;
+  stroke-width: 0.6;
+}
+.sheet-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 185px;
+  max-width: 250px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.sheet-chips li {
+  color: #efc58b;
+  background: #efbd7509;
+  border: 1px solid #796344;
+  border-radius: 5px;
+  padding: 5px 8px;
+  font-size: 11px;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.sheet-chips .sheet-source {
+  border-style: dashed;
+}
+.sheet-song {
+  padding: 16px 20px;
+  border-top: 1px solid var(--sheet-line);
+  background: #182a35;
+}
+.sheet-song h2 {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  margin: 0 0 10px;
+}
+.sheet-sections {
+  display: flex;
+  min-width: 700px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.sheet-sections li {
+  flex-grow: 0;
+  flex-shrink: 0;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #37505b;
+  background: #20343e;
+  overflow-wrap: anywhere;
+}
+.sheet-sections strong,
+.sheet-sections span {
+  display: block;
+}
+.sheet-sections span {
+  color: var(--sheet-muted);
+  font-size: 10px;
+  margin: 5px 0;
+}
+.sheet-sections .sheet-current {
+  background: #28454b;
+  border-top: 3px solid #a3efd5;
+  padding-top: 10px;
+}
+.sheet-sections .sheet-absent {
+  color: #f0cb86;
+}
+@media (max-width: 600px) {
+  .odm-sheet {
+    border-radius: 0;
+  }
+  .odm-sheet header {
+    padding: 20px 16px;
+  }
+  .odm-sheet th:first-child {
+    min-width: 155px;
+    max-width: 155px;
+  }
+  .odm-sheet th,
+  .odm-sheet td {
+    padding: 12px;
+  }
+  .sheet-song {
+    padding: 14px 12px;
+  }
+}
