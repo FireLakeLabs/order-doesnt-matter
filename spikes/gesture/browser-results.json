@@ -1,0 +1,1665 @@
+{
+  "audioInfo": {
+    "state": "running",
+    "sampleRate": 48000,
+    "baseLatency": 0.010666666666666666,
+    "outputLatency": 0.04
+  },
+  "phaseError": 4.440892098500626e-16,
+  "durationMs": 16668.263657,
+  "measurement": "one warm built-app run; actual trusted input timestamp to completed REPL swap, not heard audio",
+  "tests": [
+    {
+      "name": "shift-snapped",
+      "durationMs": 760.77963
+    },
+    {
+      "name": "shift-free",
+      "durationMs": 421.61043799999993
+    },
+    {
+      "name": "pitch",
+      "durationMs": 469.95322399999986
+    },
+    {
+      "name": "tap-rest-and-back",
+      "durationMs": 530.3571030000003
+    },
+    {
+      "name": "split",
+      "durationMs": 447.27970300000015
+    },
+    {
+      "name": "merge",
+      "durationMs": 456.2121239999997
+    },
+    {
+      "name": "paint-steps",
+      "durationMs": 832.0057990000005
+    },
+    {
+      "name": "paint-curve",
+      "durationMs": 894.0081109999992
+    },
+    {
+      "name": "wheel-speed",
+      "durationMs": 504.94642399999975
+    },
+    {
+      "name": "wheel-half",
+      "durationMs": 461.5190680000005
+    },
+    {
+      "name": "pinch-speed",
+      "durationMs": 613.8123030000006
+    },
+    {
+      "name": "echo",
+      "durationMs": 636.2928009999996
+    },
+    {
+      "name": "touch-turn",
+      "durationMs": 556.8179650000002
+    },
+    {
+      "name": "touch-pitch",
+      "durationMs": 513.0113360000014
+    },
+    {
+      "name": "touch-tap",
+      "durationMs": 499.21652600000016
+    },
+    {
+      "name": "touch-split",
+      "durationMs": 599.5015550000007
+    },
+    {
+      "name": "touch-merge",
+      "durationMs": 596.1499110000004
+    },
+    {
+      "name": "touch-paint-steps",
+      "durationMs": 560.4310290000012
+    },
+    {
+      "name": "touch-paint-curve",
+      "durationMs": 600.506582
+    },
+    {
+      "name": "touch-echo",
+      "durationMs": 548.6682240000009
+    },
+    {
+      "name": "undo-redo"
+    },
+    {
+      "name": "identical-swap-continuity",
+      "moves": 98,
+      "durationMs": 2400
+    },
+    {
+      "name": "gain-swap-audio-estimate"
+    },
+    {
+      "name": "audio-clock-playhead",
+      "phaseError": 4.440892098500626e-16
+    }
+  ],
+  "timings": {
+    "shift-snapped": [
+      4.900000035762787,
+      14.200000047683716,
+      7.5,
+      8.099999964237213,
+      6.399999976158142,
+      3.900000035762787,
+      12.699999988079071,
+      14.100000023841858
+    ],
+    "shift-free": [
+      5.099999964237213
+    ],
+    "pitch": [
+      2.399999976158142
+    ],
+    "tap-rest-and-back": [
+      2.899999976158142,
+      1.5999999642372131,
+      1.699999988079071
+    ],
+    "split": [
+      4.599999964237213
+    ],
+    "merge": [
+      3.400000035762787
+    ],
+    "paint-steps": [
+      9.400000035762787,
+      7.600000023841858,
+      3.399999976158142,
+      2.5,
+      15.5,
+      14.399999976158142,
+      13.900000035762787,
+      2.800000011920929,
+      7.600000023841858,
+      9,
+      7,
+      7.100000023841858,
+      8,
+      4.699999988079071,
+      4.599999964237213,
+      13.099999964237213,
+      1.5,
+      6.5
+    ],
+    "paint-curve": [
+      7,
+      8.199999988079071,
+      3,
+      3.100000023841858,
+      16.599999964237213,
+      15.899999976158142,
+      15.699999988079071,
+      15.199999988079071,
+      8,
+      9.300000011920929,
+      7.600000023841858,
+      7.5,
+      8.600000023841858,
+      4.400000035762787,
+      8.600000023841858,
+      2.400000035762787,
+      2.800000011920929,
+      3.800000011920929
+    ],
+    "wheel-speed": [
+      32.69999998807907
+    ],
+    "wheel-half": [
+      32.5
+    ],
+    "pinch-speed": [
+      29.80000001192093
+    ],
+    "echo": [
+      3.199999988079071,
+      14.800000011920929,
+      16.69999998807907,
+      14.700000047683716,
+      8,
+      8.900000035762787,
+      7.899999976158142,
+      6.300000011920929
+    ],
+    "touch-turn": [
+      23.5,
+      25.400000035762787
+    ],
+    "touch-pitch": [
+      25.30000001192093
+    ],
+    "touch-tap": [
+      22.69999998807907
+    ],
+    "touch-split": [
+      26
+    ],
+    "touch-merge": [
+      25.80000001192093
+    ],
+    "touch-paint-steps": [
+      22.900000035762787,
+      19
+    ],
+    "touch-paint-curve": [
+      22,
+      24.900000035762787
+    ],
+    "touch-echo": [
+      19.900000035762787,
+      21.799999952316284
+    ]
+  },
+  "shots": [
+    "shots/01-shift-mid.png",
+    "shots/02-free-mid.png",
+    "shots/03-pitch-mid.png",
+    "shots/04-tap-held.png",
+    "shots/05-split-mid.png",
+    "shots/06-merge-mid.png",
+    "shots/07-paint-steps-mid.png",
+    "shots/07-paint-curve-mid.png",
+    "shots/08-wheel.png",
+    "shots/08-wheel-half.png",
+    "shots/09-pinch-mid.png",
+    "shots/10-echo-mid.png",
+    "shots/12-touch-turn-mid.png",
+    "shots/13-touch-pitch-mid.png",
+    "shots/14-touch-tap-held.png",
+    "shots/15-touch-split-mid.png",
+    "shots/16-touch-merge-mid.png",
+    "shots/17-touch-paint-steps-mid.png",
+    "shots/17-touch-paint-curve-mid.png",
+    "shots/18-touch-echo-mid.png",
+    "shots/11-code-drawer.png"
+  ],
+  "continuity": {
+    "triggers": [
+      {
+        "revision": 123,
+        "loggedAt": 12190.800000011921,
+        "audioNow": 12.010666666666667,
+        "target": 12.2533,
+        "begin": 0.125,
+        "note": 64,
+        "voice": "melody",
+        "gain": 0.22,
+        "ghost": false
+      },
+      {
+        "revision": 137,
+        "loggedAt": 12481.300000011921,
+        "audioNow": 12.298666666666668,
+        "target": 12.5033,
+        "begin": 0.25,
+        "note": 67,
+        "voice": "melody",
+        "gain": 0.22,
+        "ghost": false
+      },
+      {
+        "revision": 137,
+        "loggedAt": 12481.300000011921,
+        "audioNow": 12.298666666666668,
+        "target": 12.5033,
+        "begin": 0.25,
+        "note": 43,
+        "voice": "drum",
+        "gain": 0.45,
+        "ghost": false
+      },
+      {
+        "revision": 140,
+        "loggedAt": 12582.900000035763,
+        "audioNow": 12.405333333333333,
+        "target": 12.6283,
+        "begin": 0.3125,
+        "note": 72,
+        "voice": "melody",
+        "gain": 0.22,
+        "ghost": false
+      },
+      {
+        "revision": 144,
+        "loggedAt": 12689.700000047684,
+        "audioNow": 12.512,
+        "target": 12.7533,
+        "begin": 0.375,
+        "note": 69,
+        "voice": "melody",
+        "gain": 0.22,
+        "ghost": false
+      },
+      {
+        "revision": 156,
+        "loggedAt": 12979.5,
+        "audioNow": 12.8,
+        "target": 13.0033,
+        "begin": 0.5,
+        "note": 67,
+        "voice": "melody",
+        "gain": 0.22,
+        "ghost": false
+      },
+      {
+        "revision": 156,
+        "loggedAt": 12979.5,
+        "audioNow": 12.8,
+        "target": 13.0033,
+        "begin": 0.5,
+        "note": 36,
+        "voice": "drum",
+        "gain": 0.45,
+        "ghost": false
+      },
+      {
+        "revision": 165,
+        "loggedAt": 13181.200000047684,
+        "audioNow": 13.002666666666666,
+        "target": 13.2533,
+        "begin": 0.625,
+        "note": 64,
+        "voice": "melody",
+        "gain": 0.22,
+        "ghost": false
+      },
+      {
+        "revision": 181,
+        "loggedAt": 13481.700000047684,
+        "audioNow": 13.301333333333334,
+        "target": 13.5033,
+        "begin": 0.75,
+        "note": 62,
+        "voice": "melody",
+        "gain": 0.22,
+        "ghost": false
+      },
+      {
+        "revision": 181,
+        "loggedAt": 13481.700000047684,
+        "audioNow": 13.301333333333334,
+        "target": 13.5033,
+        "begin": 0.75,
+        "note": 43,
+        "voice": "drum",
+        "gain": 0.45,
+        "ghost": false
+      },
+      {
+        "revision": 198,
+        "loggedAt": 13982.600000023842,
+        "audioNow": 13.802666666666667,
+        "target": 14.0033,
+        "begin": 1,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.22,
+        "ghost": false
+      },
+      {
+        "revision": 198,
+        "loggedAt": 13982.600000023842,
+        "audioNow": 13.802666666666667,
+        "target": 14.0033,
+        "begin": 1,
+        "note": 36,
+        "voice": "drum",
+        "gain": 0.45,
+        "ghost": false
+      },
+      {
+        "revision": 207,
+        "loggedAt": 14190.300000011921,
+        "audioNow": 14.005333333333333,
+        "target": 14.2533,
+        "begin": 1.125,
+        "note": 64,
+        "voice": "melody",
+        "gain": 0.22,
+        "ghost": false
+      },
+      {
+        "revision": 216,
+        "loggedAt": 14483.400000035763,
+        "audioNow": 14.304,
+        "target": 14.5033,
+        "begin": 1.25,
+        "note": 67,
+        "voice": "melody",
+        "gain": 0.22,
+        "ghost": false
+      },
+      {
+        "revision": 216,
+        "loggedAt": 14483.400000035763,
+        "audioNow": 14.304,
+        "target": 14.5033,
+        "begin": 1.25,
+        "note": 43,
+        "voice": "drum",
+        "gain": 0.45,
+        "ghost": false
+      },
+      {
+        "revision": 216,
+        "loggedAt": 14483.400000035763,
+        "audioNow": 14.304,
+        "target": 14.6283,
+        "begin": 1.3125,
+        "note": 72,
+        "voice": "melody",
+        "gain": 0.22,
+        "ghost": false
+      }
+    ],
+    "expected": [
+      {
+        "begin": 0.125,
+        "voice": "melody",
+        "ghost": false
+      },
+      {
+        "begin": 0.25,
+        "voice": "melody",
+        "ghost": false
+      },
+      {
+        "begin": 0.3125,
+        "voice": "melody",
+        "ghost": false
+      },
+      {
+        "begin": 0.375,
+        "voice": "melody",
+        "ghost": false
+      },
+      {
+        "begin": 0.5,
+        "voice": "melody",
+        "ghost": false
+      },
+      {
+        "begin": 0.625,
+        "voice": "melody",
+        "ghost": false
+      },
+      {
+        "begin": 0.75,
+        "voice": "melody",
+        "ghost": false
+      },
+      {
+        "begin": 1,
+        "voice": "melody",
+        "ghost": false
+      },
+      {
+        "begin": 1.125,
+        "voice": "melody",
+        "ghost": false
+      },
+      {
+        "begin": 1.25,
+        "voice": "melody",
+        "ghost": false
+      },
+      {
+        "begin": 1.3125,
+        "voice": "melody",
+        "ghost": false
+      },
+      {
+        "begin": 0.25,
+        "voice": "drum",
+        "ghost": false
+      },
+      {
+        "begin": 0.5,
+        "voice": "drum",
+        "ghost": false
+      },
+      {
+        "begin": 0.75,
+        "voice": "drum",
+        "ghost": false
+      },
+      {
+        "begin": 1,
+        "voice": "drum",
+        "ghost": false
+      },
+      {
+        "begin": 1.25,
+        "voice": "drum",
+        "ghost": false
+      }
+    ],
+    "duplicates": [],
+    "missing": [],
+    "late": [],
+    "lookaheadMs": [
+      242.63333333333213,
+      204.6333333333319,
+      204.6333333333319,
+      222.9666666666663,
+      241.29999999999896,
+      203.2999999999987,
+      203.2999999999987,
+      250.63333333333304,
+      201.9666666666655,
+      201.9666666666655,
+      200.63333333333233,
+      200.63333333333233,
+      247.96666666666667,
+      199.29999999999916,
+      199.29999999999916,
+      324.29999999999916
+    ],
+    "samples": [
+      {
+        "revision": 120,
+        "gesture": "turn",
+        "eventAt": 12123.700000047684,
+        "swappedAt": 12124.900000035763,
+        "latency": 1.199999988079071,
+        "audioAtSwap": 11.946666666666667,
+        "queriedThrough": 0.1
+      },
+      {
+        "revision": 121,
+        "gesture": "turn",
+        "eventAt": 12139.100000023842,
+        "swappedAt": 12141.5,
+        "latency": 2.399999976158142,
+        "audioAtSwap": 11.957333333333333,
+        "queriedThrough": 0.1
+      },
+      {
+        "revision": 122,
+        "gesture": "turn",
+        "eventAt": 12155.900000035763,
+        "swappedAt": 12158,
+        "latency": 2.099999964237213,
+        "audioAtSwap": 11.978666666666667,
+        "queriedThrough": 0.1
+      },
+      {
+        "revision": 123,
+        "gesture": "turn",
+        "eventAt": 12173.200000047684,
+        "swappedAt": 12174.5,
+        "latency": 1.2999999523162842,
+        "audioAtSwap": 11.989333333333333,
+        "queriedThrough": 0.1
+      },
+      {
+        "revision": 124,
+        "gesture": "turn",
+        "eventAt": 12198.400000035763,
+        "swappedAt": 12208.200000047684,
+        "latency": 9.800000011920929,
+        "audioAtSwap": 12.021333333333333,
+        "queriedThrough": 0.15000000000000002
+      },
+      {
+        "revision": 125,
+        "gesture": "turn",
+        "eventAt": 12224.900000035763,
+        "swappedAt": 12241.5,
+        "latency": 16.599999964237213,
+        "audioAtSwap": 12.064,
+        "queriedThrough": 0.15000000000000002
+      },
+      {
+        "revision": 126,
+        "gesture": "turn",
+        "eventAt": 12255.400000035763,
+        "swappedAt": 12258.200000047684,
+        "latency": 2.800000011920929,
+        "audioAtSwap": 12.074666666666667,
+        "queriedThrough": 0.15000000000000002
+      },
+      {
+        "revision": 127,
+        "gesture": "turn",
+        "eventAt": 12281.600000023842,
+        "swappedAt": 12291.800000011921,
+        "latency": 10.199999988079071,
+        "audioAtSwap": 12.106666666666667,
+        "queriedThrough": 0.2
+      },
+      {
+        "revision": 128,
+        "gesture": "turn",
+        "eventAt": 12305.100000023842,
+        "swappedAt": 12308,
+        "latency": 2.899999976158142,
+        "audioAtSwap": 12.128,
+        "queriedThrough": 0.2
+      },
+      {
+        "revision": 129,
+        "gesture": "turn",
+        "eventAt": 12321.200000047684,
+        "swappedAt": 12324.600000023842,
+        "latency": 3.399999976158142,
+        "audioAtSwap": 12.138666666666667,
+        "queriedThrough": 0.2
+      },
+      {
+        "revision": 130,
+        "gesture": "turn",
+        "eventAt": 12332.300000011921,
+        "swappedAt": 12341.5,
+        "latency": 9.199999988079071,
+        "audioAtSwap": 12.16,
+        "queriedThrough": 0.2
+      },
+      {
+        "revision": 131,
+        "gesture": "turn",
+        "eventAt": 12349.100000023842,
+        "swappedAt": 12357.900000035763,
+        "latency": 8.800000011920929,
+        "audioAtSwap": 12.170666666666667,
+        "queriedThrough": 0.2
+      },
+      {
+        "revision": 132,
+        "gesture": "turn",
+        "eventAt": 12365.800000011921,
+        "swappedAt": 12374.700000047684,
+        "latency": 8.900000035762787,
+        "audioAtSwap": 12.192,
+        "queriedThrough": 0.2
+      },
+      {
+        "revision": 133,
+        "gesture": "turn",
+        "eventAt": 12383.100000023842,
+        "swappedAt": 12392,
+        "latency": 8.899999976158142,
+        "audioAtSwap": 12.213333333333333,
+        "queriedThrough": 0.25
+      },
+      {
+        "revision": 134,
+        "gesture": "turn",
+        "eventAt": 12399.700000047684,
+        "swappedAt": 12408.5,
+        "latency": 8.799999952316284,
+        "audioAtSwap": 12.224,
+        "queriedThrough": 0.25
+      },
+      {
+        "revision": 135,
+        "gesture": "turn",
+        "eventAt": 12420.600000023842,
+        "swappedAt": 12424.600000023842,
+        "latency": 4,
+        "audioAtSwap": 12.245333333333333,
+        "queriedThrough": 0.25
+      },
+      {
+        "revision": 136,
+        "gesture": "turn",
+        "eventAt": 12433.200000047684,
+        "swappedAt": 12441.200000047684,
+        "latency": 8,
+        "audioAtSwap": 12.256,
+        "queriedThrough": 0.25
+      },
+      {
+        "revision": 137,
+        "gesture": "turn",
+        "eventAt": 12455.200000047684,
+        "swappedAt": 12457.900000035763,
+        "latency": 2.699999988079071,
+        "audioAtSwap": 12.277333333333333,
+        "queriedThrough": 0.25
+      },
+      {
+        "revision": 138,
+        "gesture": "turn",
+        "eventAt": 12476.400000035763,
+        "swappedAt": 12491.5,
+        "latency": 15.099999964237213,
+        "audioAtSwap": 12.309333333333333,
+        "queriedThrough": 0.30000000000000004
+      },
+      {
+        "revision": 139,
+        "gesture": "turn",
+        "eventAt": 12507.900000035763,
+        "swappedAt": 12524.900000035763,
+        "latency": 17,
+        "audioAtSwap": 12.341333333333333,
+        "queriedThrough": 0.30000000000000004
+      },
+      {
+        "revision": 140,
+        "gesture": "turn",
+        "eventAt": 12540.600000023842,
+        "swappedAt": 12558,
+        "latency": 17.399999976158142,
+        "audioAtSwap": 12.373333333333333,
+        "queriedThrough": 0.30000000000000004
+      },
+      {
+        "revision": 141,
+        "gesture": "turn",
+        "eventAt": 12576.200000047684,
+        "swappedAt": 12591.400000035763,
+        "latency": 15.199999988079071,
+        "audioAtSwap": 12.405333333333333,
+        "queriedThrough": 0.35000000000000003
+      },
+      {
+        "revision": 142,
+        "gesture": "turn",
+        "eventAt": 12617.700000047684,
+        "swappedAt": 12625.100000023842,
+        "latency": 7.399999976158142,
+        "audioAtSwap": 12.442666666666666,
+        "queriedThrough": 0.35000000000000003
+      },
+      {
+        "revision": 143,
+        "gesture": "turn",
+        "eventAt": 12647.200000047684,
+        "swappedAt": 12658.200000047684,
+        "latency": 11,
+        "audioAtSwap": 12.48,
+        "queriedThrough": 0.35000000000000003
+      },
+      {
+        "revision": 144,
+        "gesture": "turn",
+        "eventAt": 12673.5,
+        "swappedAt": 12677.300000011921,
+        "latency": 3.800000011920929,
+        "audioAtSwap": 12.490666666666666,
+        "queriedThrough": 0.35000000000000003
+      },
+      {
+        "revision": 145,
+        "gesture": "turn",
+        "eventAt": 12699.100000023842,
+        "swappedAt": 12708.100000023842,
+        "latency": 9,
+        "audioAtSwap": 12.522666666666666,
+        "queriedThrough": 0.4
+      },
+      {
+        "revision": 146,
+        "gesture": "turn",
+        "eventAt": 12727.100000023842,
+        "swappedAt": 12741.5,
+        "latency": 14.399999976158142,
+        "audioAtSwap": 12.554666666666666,
+        "queriedThrough": 0.4
+      },
+      {
+        "revision": 147,
+        "gesture": "turn",
+        "eventAt": 12760.700000047684,
+        "swappedAt": 12774.800000011921,
+        "latency": 14.099999964237213,
+        "audioAtSwap": 12.597333333333333,
+        "queriedThrough": 0.4
+      },
+      {
+        "revision": 148,
+        "gesture": "turn",
+        "eventAt": 12791.900000035763,
+        "swappedAt": 12808,
+        "latency": 16.099999964237213,
+        "audioAtSwap": 12.629333333333333,
+        "queriedThrough": 0.45
+      },
+      {
+        "revision": 149,
+        "gesture": "turn",
+        "eventAt": 12823.700000047684,
+        "swappedAt": 12824.900000035763,
+        "latency": 1.199999988079071,
+        "audioAtSwap": 12.64,
+        "queriedThrough": 0.45
+      },
+      {
+        "revision": 150,
+        "gesture": "turn",
+        "eventAt": 12840,
+        "swappedAt": 12841.300000011921,
+        "latency": 1.300000011920929,
+        "audioAtSwap": 12.661333333333333,
+        "queriedThrough": 0.45
+      },
+      {
+        "revision": 151,
+        "gesture": "turn",
+        "eventAt": 12856.800000011921,
+        "swappedAt": 12858.200000047684,
+        "latency": 1.4000000357627869,
+        "audioAtSwap": 12.672,
+        "queriedThrough": 0.45
+      },
+      {
+        "revision": 152,
+        "gesture": "turn",
+        "eventAt": 12883.200000047684,
+        "swappedAt": 12891.300000011921,
+        "latency": 8.099999964237213,
+        "audioAtSwap": 12.706666666666667,
+        "queriedThrough": 0.5
+      },
+      {
+        "revision": 153,
+        "gesture": "turn",
+        "eventAt": 12906.200000047684,
+        "swappedAt": 12907.900000035763,
+        "latency": 1.699999988079071,
+        "audioAtSwap": 12.725333333333333,
+        "queriedThrough": 0.5
+      },
+      {
+        "revision": 154,
+        "gesture": "turn",
+        "eventAt": 12924,
+        "swappedAt": 12941.300000011921,
+        "latency": 17.30000001192093,
+        "audioAtSwap": 12.757333333333333,
+        "queriedThrough": 0.5
+      },
+      {
+        "revision": 155,
+        "gesture": "turn",
+        "eventAt": 12949.700000047684,
+        "swappedAt": 12958.100000023842,
+        "latency": 8.399999976158142,
+        "audioAtSwap": 12.778666666666666,
+        "queriedThrough": 0.5
+      },
+      {
+        "revision": 156,
+        "gesture": "turn",
+        "eventAt": 12967.100000023842,
+        "swappedAt": 12974.600000023842,
+        "latency": 7.5,
+        "audioAtSwap": 12.789333333333333,
+        "queriedThrough": 0.5
+      },
+      {
+        "revision": 157,
+        "gesture": "turn",
+        "eventAt": 12983.100000023842,
+        "swappedAt": 12991,
+        "latency": 7.899999976158142,
+        "audioAtSwap": 12.810666666666666,
+        "queriedThrough": 0.55
+      },
+      {
+        "revision": 158,
+        "gesture": "turn",
+        "eventAt": 12999,
+        "swappedAt": 13008.200000047684,
+        "latency": 9.200000047683716,
+        "audioAtSwap": 12.821333333333333,
+        "queriedThrough": 0.55
+      },
+      {
+        "revision": 159,
+        "gesture": "turn",
+        "eventAt": 13018,
+        "swappedAt": 13024.400000035763,
+        "latency": 6.400000035762787,
+        "audioAtSwap": 12.842666666666666,
+        "queriedThrough": 0.55
+      },
+      {
+        "revision": 160,
+        "gesture": "turn",
+        "eventAt": 13033.700000047684,
+        "swappedAt": 13041.200000047684,
+        "latency": 7.5,
+        "audioAtSwap": 12.864,
+        "queriedThrough": 0.55
+      },
+      {
+        "revision": 161,
+        "gesture": "turn",
+        "eventAt": 13054.900000035763,
+        "swappedAt": 13057.900000035763,
+        "latency": 3,
+        "audioAtSwap": 12.874666666666666,
+        "queriedThrough": 0.55
+      },
+      {
+        "revision": 162,
+        "gesture": "turn",
+        "eventAt": 13071.400000035763,
+        "swappedAt": 13075.5,
+        "latency": 4.099999964237213,
+        "audioAtSwap": 12.896,
+        "queriedThrough": 0.55
+      },
+      {
+        "revision": 163,
+        "gesture": "turn",
+        "eventAt": 13100.400000035763,
+        "swappedAt": 13108,
+        "latency": 7.599999964237213,
+        "audioAtSwap": 12.928,
+        "queriedThrough": 0.6000000000000001
+      },
+      {
+        "revision": 164,
+        "gesture": "turn",
+        "eventAt": 13119.200000047684,
+        "swappedAt": 13124.700000047684,
+        "latency": 5.5,
+        "audioAtSwap": 12.938666666666666,
+        "queriedThrough": 0.6000000000000001
+      },
+      {
+        "revision": 165,
+        "gesture": "turn",
+        "eventAt": 13141.900000035763,
+        "swappedAt": 13158.200000047684,
+        "latency": 16.30000001192093,
+        "audioAtSwap": 12.981333333333334,
+        "queriedThrough": 0.6000000000000001
+      },
+      {
+        "revision": 166,
+        "gesture": "turn",
+        "eventAt": 13176.800000011921,
+        "swappedAt": 13191.300000011921,
+        "latency": 14.5,
+        "audioAtSwap": 13.013333333333334,
+        "queriedThrough": 0.65
+      },
+      {
+        "revision": 167,
+        "gesture": "turn",
+        "eventAt": 13205.800000011921,
+        "swappedAt": 13207.700000047684,
+        "latency": 1.9000000357627869,
+        "audioAtSwap": 13.024,
+        "queriedThrough": 0.65
+      },
+      {
+        "revision": 168,
+        "gesture": "turn",
+        "eventAt": 13221.5,
+        "swappedAt": 13225.300000011921,
+        "latency": 3.800000011920929,
+        "audioAtSwap": 13.045333333333334,
+        "queriedThrough": 0.65
+      },
+      {
+        "revision": 169,
+        "gesture": "turn",
+        "eventAt": 13239.100000023842,
+        "swappedAt": 13241.400000035763,
+        "latency": 2.300000011920929,
+        "audioAtSwap": 13.056,
+        "queriedThrough": 0.65
+      },
+      {
+        "revision": 170,
+        "gesture": "turn",
+        "eventAt": 13255.800000011921,
+        "swappedAt": 13258.100000023842,
+        "latency": 2.300000011920929,
+        "audioAtSwap": 13.077333333333334,
+        "queriedThrough": 0.65
+      },
+      {
+        "revision": 171,
+        "gesture": "turn",
+        "eventAt": 13272.5,
+        "swappedAt": 13274.600000023842,
+        "latency": 2.100000023841858,
+        "audioAtSwap": 13.088,
+        "queriedThrough": 0.65
+      },
+      {
+        "revision": 172,
+        "gesture": "turn",
+        "eventAt": 13290.5,
+        "swappedAt": 13308.700000047684,
+        "latency": 18.200000047683716,
+        "audioAtSwap": 13.130666666666666,
+        "queriedThrough": 0.7000000000000001
+      },
+      {
+        "revision": 173,
+        "gesture": "turn",
+        "eventAt": 13332.700000047684,
+        "swappedAt": 13341.100000023842,
+        "latency": 8.399999976158142,
+        "audioAtSwap": 13.162666666666667,
+        "queriedThrough": 0.7000000000000001
+      },
+      {
+        "revision": 174,
+        "gesture": "turn",
+        "eventAt": 13351.5,
+        "swappedAt": 13357.900000035763,
+        "latency": 6.400000035762787,
+        "audioAtSwap": 13.173333333333334,
+        "queriedThrough": 0.7000000000000001
+      },
+      {
+        "revision": 175,
+        "gesture": "turn",
+        "eventAt": 13366,
+        "swappedAt": 13374.600000023842,
+        "latency": 8.600000023841858,
+        "audioAtSwap": 13.194666666666667,
+        "queriedThrough": 0.7000000000000001
+      },
+      {
+        "revision": 176,
+        "gesture": "turn",
+        "eventAt": 13385.100000023842,
+        "swappedAt": 13391.200000047684,
+        "latency": 6.100000023841858,
+        "audioAtSwap": 13.205333333333334,
+        "queriedThrough": 0.75
+      },
+      {
+        "revision": 177,
+        "gesture": "turn",
+        "eventAt": 13399.5,
+        "swappedAt": 13408,
+        "latency": 8.5,
+        "audioAtSwap": 13.226666666666667,
+        "queriedThrough": 0.75
+      },
+      {
+        "revision": 178,
+        "gesture": "turn",
+        "eventAt": 13416.100000023842,
+        "swappedAt": 13424.600000023842,
+        "latency": 8.5,
+        "audioAtSwap": 13.24,
+        "queriedThrough": 0.75
+      },
+      {
+        "revision": 179,
+        "gesture": "turn",
+        "eventAt": 13432.600000023842,
+        "swappedAt": 13441.600000023842,
+        "latency": 9,
+        "audioAtSwap": 13.258666666666667,
+        "queriedThrough": 0.75
+      },
+      {
+        "revision": 180,
+        "gesture": "turn",
+        "eventAt": 13452.400000035763,
+        "swappedAt": 13457.900000035763,
+        "latency": 5.5,
+        "audioAtSwap": 13.28,
+        "queriedThrough": 0.75
+      },
+      {
+        "revision": 181,
+        "gesture": "turn",
+        "eventAt": 13471.100000023842,
+        "swappedAt": 13474.600000023842,
+        "latency": 3.5,
+        "audioAtSwap": 13.290666666666667,
+        "queriedThrough": 0.75
+      },
+      {
+        "revision": 182,
+        "gesture": "turn",
+        "eventAt": 13494.5,
+        "swappedAt": 13508,
+        "latency": 13.5,
+        "audioAtSwap": 13.322666666666667,
+        "queriedThrough": 0.8
+      },
+      {
+        "revision": 183,
+        "gesture": "turn",
+        "eventAt": 13522.900000035763,
+        "swappedAt": 13524.700000047684,
+        "latency": 1.800000011920929,
+        "audioAtSwap": 13.344,
+        "queriedThrough": 0.8
+      },
+      {
+        "revision": 184,
+        "gesture": "turn",
+        "eventAt": 13543.300000011921,
+        "swappedAt": 13558.100000023842,
+        "latency": 14.800000011920929,
+        "audioAtSwap": 13.376,
+        "queriedThrough": 0.8
+      },
+      {
+        "revision": 185,
+        "gesture": "turn",
+        "eventAt": 13571.700000047684,
+        "swappedAt": 13574.700000047684,
+        "latency": 3,
+        "audioAtSwap": 13.397333333333334,
+        "queriedThrough": 0.8
+      },
+      {
+        "revision": 186,
+        "gesture": "turn",
+        "eventAt": 13594.600000023842,
+        "swappedAt": 13608.300000011921,
+        "latency": 13.699999988079071,
+        "audioAtSwap": 13.429333333333334,
+        "queriedThrough": 0.8500000000000001
+      },
+      {
+        "revision": 187,
+        "gesture": "turn",
+        "eventAt": 13624.200000047684,
+        "swappedAt": 13641.5,
+        "latency": 17.299999952316284,
+        "audioAtSwap": 13.461333333333334,
+        "queriedThrough": 0.8500000000000001
+      },
+      {
+        "revision": 188,
+        "gesture": "turn",
+        "eventAt": 13660.700000047684,
+        "swappedAt": 13674.600000023842,
+        "latency": 13.899999976158142,
+        "audioAtSwap": 13.493333333333334,
+        "queriedThrough": 0.8500000000000001
+      },
+      {
+        "revision": 189,
+        "gesture": "turn",
+        "eventAt": 13690.400000035763,
+        "swappedAt": 13708.300000011921,
+        "latency": 17.899999976158142,
+        "audioAtSwap": 13.525333333333334,
+        "queriedThrough": 0.925
+      },
+      {
+        "revision": 190,
+        "gesture": "turn",
+        "eventAt": 13730.600000023842,
+        "swappedAt": 13741.400000035763,
+        "latency": 10.800000011920929,
+        "audioAtSwap": 13.557333333333334,
+        "queriedThrough": 0.925
+      },
+      {
+        "revision": 191,
+        "gesture": "turn",
+        "eventAt": 13756.700000047684,
+        "swappedAt": 13757.800000011921,
+        "latency": 1.0999999642372131,
+        "audioAtSwap": 13.578666666666667,
+        "queriedThrough": 0.925
+      },
+      {
+        "revision": 192,
+        "gesture": "turn",
+        "eventAt": 13779.700000047684,
+        "swappedAt": 13791.200000047684,
+        "latency": 11.5,
+        "audioAtSwap": 13.610666666666667,
+        "queriedThrough": 0.9500000000000001
+      },
+      {
+        "revision": 193,
+        "gesture": "turn",
+        "eventAt": 13805.900000035763,
+        "swappedAt": 13808,
+        "latency": 2.099999964237213,
+        "audioAtSwap": 13.621333333333334,
+        "queriedThrough": 0.9500000000000001
+      },
+      {
+        "revision": 194,
+        "gesture": "turn",
+        "eventAt": 13823.900000035763,
+        "swappedAt": 13842.300000011921,
+        "latency": 18.399999976158142,
+        "audioAtSwap": 13.653333333333334,
+        "queriedThrough": 0.9500000000000001
+      },
+      {
+        "revision": 195,
+        "gesture": "turn",
+        "eventAt": 13855.900000035763,
+        "swappedAt": 13858,
+        "latency": 2.099999964237213,
+        "audioAtSwap": 13.674666666666667,
+        "queriedThrough": 0.9500000000000001
+      },
+      {
+        "revision": 196,
+        "gesture": "turn",
+        "eventAt": 13877,
+        "swappedAt": 13891.5,
+        "latency": 14.5,
+        "audioAtSwap": 13.706666666666667,
+        "queriedThrough": 1
+      },
+      {
+        "revision": 197,
+        "gesture": "turn",
+        "eventAt": 13918.100000023842,
+        "swappedAt": 13924.900000035763,
+        "latency": 6.800000011920929,
+        "audioAtSwap": 13.738666666666667,
+        "queriedThrough": 1
+      },
+      {
+        "revision": 198,
+        "gesture": "turn",
+        "eventAt": 13948.400000035763,
+        "swappedAt": 13957.900000035763,
+        "latency": 9.5,
+        "audioAtSwap": 13.776,
+        "queriedThrough": 1
+      },
+      {
+        "revision": 199,
+        "gesture": "turn",
+        "eventAt": 13985.5,
+        "swappedAt": 13990.900000035763,
+        "latency": 5.400000035762787,
+        "audioAtSwap": 13.813333333333333,
+        "queriedThrough": 1.05
+      },
+      {
+        "revision": 200,
+        "gesture": "turn",
+        "eventAt": 14000.200000047684,
+        "swappedAt": 14007.900000035763,
+        "latency": 7.699999988079071,
+        "audioAtSwap": 13.824,
+        "queriedThrough": 1.05
+      },
+      {
+        "revision": 201,
+        "gesture": "turn",
+        "eventAt": 14017.800000011921,
+        "swappedAt": 14024.5,
+        "latency": 6.699999988079071,
+        "audioAtSwap": 13.845333333333333,
+        "queriedThrough": 1.05
+      },
+      {
+        "revision": 202,
+        "gesture": "turn",
+        "eventAt": 14033.200000047684,
+        "swappedAt": 14041.200000047684,
+        "latency": 8,
+        "audioAtSwap": 13.856,
+        "queriedThrough": 1.05
+      },
+      {
+        "revision": 203,
+        "gesture": "turn",
+        "eventAt": 14050.900000035763,
+        "swappedAt": 14057.900000035763,
+        "latency": 7,
+        "audioAtSwap": 13.877333333333333,
+        "queriedThrough": 1.05
+      },
+      {
+        "revision": 204,
+        "gesture": "turn",
+        "eventAt": 14067.600000023842,
+        "swappedAt": 14074.600000023842,
+        "latency": 7,
+        "audioAtSwap": 13.888,
+        "queriedThrough": 1.05
+      },
+      {
+        "revision": 205,
+        "gesture": "turn",
+        "eventAt": 14083.700000047684,
+        "swappedAt": 14091.400000035763,
+        "latency": 7.699999988079071,
+        "audioAtSwap": 13.909333333333333,
+        "queriedThrough": 1.1
+      },
+      {
+        "revision": 206,
+        "gesture": "turn",
+        "eventAt": 14101.100000023842,
+        "swappedAt": 14107.900000035763,
+        "latency": 6.800000011920929,
+        "audioAtSwap": 13.930666666666667,
+        "queriedThrough": 1.1
+      },
+      {
+        "revision": 207,
+        "gesture": "turn",
+        "eventAt": 14166.5,
+        "swappedAt": 14177.800000011921,
+        "latency": 11.300000011920929,
+        "audioAtSwap": 13.994666666666667,
+        "queriedThrough": 1.1
+      },
+      {
+        "revision": 208,
+        "gesture": "turn",
+        "eventAt": 14198.600000023842,
+        "swappedAt": 14208.900000035763,
+        "latency": 10.300000011920929,
+        "audioAtSwap": 14.026666666666667,
+        "queriedThrough": 1.175
+      },
+      {
+        "revision": 209,
+        "gesture": "turn",
+        "eventAt": 14230.100000023842,
+        "swappedAt": 14241.900000035763,
+        "latency": 11.800000011920929,
+        "audioAtSwap": 14.058666666666667,
+        "queriedThrough": 1.175
+      },
+      {
+        "revision": 210,
+        "gesture": "turn",
+        "eventAt": 14259.600000023842,
+        "swappedAt": 14275.800000011921,
+        "latency": 16.19999998807907,
+        "audioAtSwap": 14.090666666666667,
+        "queriedThrough": 1.175
+      },
+      {
+        "revision": 211,
+        "gesture": "turn",
+        "eventAt": 14291,
+        "swappedAt": 14308.700000047684,
+        "latency": 17.700000047683716,
+        "audioAtSwap": 14.122666666666667,
+        "queriedThrough": 1.2000000000000002
+      },
+      {
+        "revision": 212,
+        "gesture": "turn",
+        "eventAt": 14328,
+        "swappedAt": 14341.5,
+        "latency": 13.5,
+        "audioAtSwap": 14.154666666666667,
+        "queriedThrough": 1.2000000000000002
+      },
+      {
+        "revision": 213,
+        "gesture": "turn",
+        "eventAt": 14364.200000047684,
+        "swappedAt": 14375,
+        "latency": 10.799999952316284,
+        "audioAtSwap": 14.197333333333333,
+        "queriedThrough": 1.2000000000000002
+      },
+      {
+        "revision": 214,
+        "gesture": "turn",
+        "eventAt": 14393.300000011921,
+        "swappedAt": 14408.100000023842,
+        "latency": 14.800000011920929,
+        "audioAtSwap": 14.229333333333333,
+        "queriedThrough": 1.25
+      },
+      {
+        "revision": 215,
+        "gesture": "turn",
+        "eventAt": 14423.700000047684,
+        "swappedAt": 14441.300000011921,
+        "latency": 17.599999964237213,
+        "audioAtSwap": 14.261333333333333,
+        "queriedThrough": 1.25
+      },
+      {
+        "revision": 216,
+        "gesture": "turn",
+        "eventAt": 14463.700000047684,
+        "swappedAt": 14474.700000047684,
+        "latency": 11,
+        "audioAtSwap": 14.293333333333333,
+        "queriedThrough": 1.25
+      },
+      {
+        "revision": 217,
+        "gesture": "turn",
+        "eventAt": 14492.100000023842,
+        "swappedAt": 14508.400000035763,
+        "latency": 16.30000001192093,
+        "audioAtSwap": 14.325333333333333,
+        "queriedThrough": 1.3250000000000002
+      },
+      {
+        "revision": 218,
+        "gesture": "turn",
+        "eventAt": 14527.400000035763,
+        "swappedAt": 14541.400000035763,
+        "latency": 14,
+        "audioAtSwap": 14.357333333333333,
+        "queriedThrough": 1.3250000000000002
+      }
+    ]
+  },
+  "gainTrace": {
+    "samples": [
+      {
+        "revision": 222,
+        "gesture": "paint",
+        "eventAt": 15207,
+        "swappedAt": 15225.100000023842,
+        "latency": 18.100000023841858,
+        "audioAtSwap": 15.04,
+        "queriedThrough": 0.375,
+        "code": "// mini-off\nstack(\n  sequence(pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"0\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"1\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"2\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"3\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"4\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"5\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"6\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"7\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"8\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"9\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"10\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"11\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"12\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"13\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"14\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"15\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"16\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"17\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"18\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"19\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"20\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"21\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"22\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"23\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"24\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"25\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"26\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"27\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"28\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"29\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"30\",\"ghost\":false}), pure({\"note\":60,\"s\":\"triangle\",\"voice\":\"melody\",\"step\":\"31\",\"ghost\":false}))\n    .lpf(2200)\n    .gain(sequence(0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.9230765801571786, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05))\n    .attack(0.005).decay(0.12).sustain(0.15).release(0.08)\n)"
+      }
+    ],
+    "triggers": [
+      {
+        "revision": 221,
+        "loggedAt": 14779.5,
+        "audioNow": 14.602666666666666,
+        "target": 14.856,
+        "begin": 0.125,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      },
+      {
+        "revision": 221,
+        "loggedAt": 14881.700000047684,
+        "audioNow": 14.698666666666666,
+        "target": 14.9185,
+        "begin": 0.15625,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      },
+      {
+        "revision": 221,
+        "loggedAt": 14881.700000047684,
+        "audioNow": 14.698666666666666,
+        "target": 14.981,
+        "begin": 0.1875,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      },
+      {
+        "revision": 221,
+        "loggedAt": 14978.200000047684,
+        "audioNow": 14.794666666666666,
+        "target": 15.0435,
+        "begin": 0.21875,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      },
+      {
+        "revision": 221,
+        "loggedAt": 15080.400000035763,
+        "audioNow": 14.901333333333334,
+        "target": 15.106,
+        "begin": 0.25,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      },
+      {
+        "revision": 221,
+        "loggedAt": 15080.400000035763,
+        "audioNow": 14.901333333333334,
+        "target": 15.1685,
+        "begin": 0.28125,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      },
+      {
+        "revision": 221,
+        "loggedAt": 15198.300000011921,
+        "audioNow": 15.018666666666666,
+        "target": 15.231,
+        "begin": 0.3125,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      },
+      {
+        "revision": 221,
+        "loggedAt": 15198.300000011921,
+        "audioNow": 15.018666666666666,
+        "target": 15.2935,
+        "begin": 0.34375,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      },
+      {
+        "revision": 222,
+        "loggedAt": 15278,
+        "audioNow": 15.093333333333334,
+        "target": 15.356,
+        "begin": 0.375,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.9230765801571786,
+        "ghost": false
+      },
+      {
+        "revision": 222,
+        "loggedAt": 15379.900000035763,
+        "audioNow": 15.2,
+        "target": 15.4185,
+        "begin": 0.40625,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.9230765801571786,
+        "ghost": false
+      },
+      {
+        "revision": 222,
+        "loggedAt": 15379.900000035763,
+        "audioNow": 15.2,
+        "target": 15.481,
+        "begin": 0.4375,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      },
+      {
+        "revision": 222,
+        "loggedAt": 15480,
+        "audioNow": 15.296,
+        "target": 15.5435,
+        "begin": 0.46875,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      },
+      {
+        "revision": 222,
+        "loggedAt": 15578.700000047684,
+        "audioNow": 15.392,
+        "target": 15.606,
+        "begin": 0.5,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      },
+      {
+        "revision": 222,
+        "loggedAt": 15578.700000047684,
+        "audioNow": 15.392,
+        "target": 15.6685,
+        "begin": 0.53125,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      },
+      {
+        "revision": 222,
+        "loggedAt": 15682.800000011921,
+        "audioNow": 15.498666666666667,
+        "target": 15.731,
+        "begin": 0.5625,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      },
+      {
+        "revision": 222,
+        "loggedAt": 15682.800000011921,
+        "audioNow": 15.498666666666667,
+        "target": 15.7935,
+        "begin": 0.59375,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      },
+      {
+        "revision": 222,
+        "loggedAt": 15781.200000047684,
+        "audioNow": 15.594666666666667,
+        "target": 15.856,
+        "begin": 0.625,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      },
+      {
+        "revision": 222,
+        "loggedAt": 15882.5,
+        "audioNow": 15.701333333333332,
+        "target": 15.9185,
+        "begin": 0.65625,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      },
+      {
+        "revision": 222,
+        "loggedAt": 15882.5,
+        "audioNow": 15.701333333333332,
+        "target": 15.981,
+        "begin": 0.6875,
+        "note": 60,
+        "voice": "melody",
+        "gain": 0.05,
+        "ghost": false
+      }
+    ],
+    "firstChanged": {
+      "revision": 222,
+      "loggedAt": 15278,
+      "audioNow": 15.093333333333334,
+      "target": 15.356,
+      "begin": 0.375,
+      "note": 60,
+      "voice": "melody",
+      "gain": 0.9230765801571786,
+      "ghost": false
+    },
+    "eventToFirstDispatchMs": 71,
+    "estimatedEventToAudioMs": 334.1000000238426
+  },
+  "consoleErrors": [],
+  "networkErrors": [],
+  "chromiumVersion": "158.0.8127.18",
+  "port": 43369
+}
