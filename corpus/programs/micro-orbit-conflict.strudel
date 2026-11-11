@@ -1,0 +1,2 @@
+$: s("bd*4").orbit(0).room(.8).roomsize(2)
+$: note("c4 e4").s("sine").orbit(0).room(.2).roomsize(8)

@@ -1,0 +1,1 @@
+{"private":true,"type":"module","scripts":{"check":"node check.mjs"},"dependencies":{"@strudel/core":"1.2.6","@strudel/mini":"1.2.6","@strudel/tonal":"1.2.6","@strudel/transpiler":"1.2.6"}}

@@ -1,0 +1,1 @@
+note("c3 e3").s("sine").lpf(900).lpq(2).vib(4).vibmod(.2).velocity(.7)

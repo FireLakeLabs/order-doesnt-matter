@@ -1,0 +1,4 @@
+await samples('github:tidalcycles/dirt-samples');
+setcpm(100);
+hush();
+s("bd*4")

@@ -1,0 +1,1 @@
+note("c3*4").s("sawtooth").lpf(sine.range(300,3000)).pan(cosine.range(0,1)).gain(perlin.range(.1,.8))

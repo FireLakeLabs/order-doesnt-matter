@@ -1,0 +1,1 @@
+new Pattern(() => { throw new Error('corpus intentional query failure'); })

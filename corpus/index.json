@@ -1,0 +1,998 @@
+[
+  {
+    "id": "micro-tree-stack",
+    "file": "programs/micro-tree-stack.strudel",
+    "title": "Nested score trees",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "E3"
+    ],
+    "cycles": 6,
+    "notes": ""
+  },
+  {
+    "id": "micro-tree-arrange",
+    "file": "programs/micro-tree-arrange.strudel",
+    "title": "Alternating branches",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "T1"
+    ],
+    "cycles": 6,
+    "notes": ""
+  },
+  {
+    "id": "micro-callback-off",
+    "file": "programs/micro-callback-off.strudel",
+    "title": "Offset shadow",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G2",
+      "E3"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-callback-deep",
+    "file": "programs/micro-callback-deep.strudel",
+    "title": "Callbacks inside callbacks",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G2",
+      "G3"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-reuse",
+    "file": "programs/micro-reuse.strudel",
+    "title": "One motif in two registers",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G3",
+      "G1"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-register",
+    "file": "programs/micro-register.strudel",
+    "title": "Registered custom transform",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G3",
+      "G2"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-pattern-fast",
+    "file": "programs/micro-pattern-fast.strudel",
+    "title": "Time is a pattern",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G4",
+      "T1"
+    ],
+    "cycles": 4,
+    "notes": ""
+  },
+  {
+    "id": "micro-pattern-slow",
+    "file": "programs/micro-pattern-slow.strudel",
+    "title": "Nested rate modulation",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G4",
+      "T1"
+    ],
+    "cycles": 6,
+    "notes": ""
+  },
+  {
+    "id": "micro-labels",
+    "file": "programs/micro-labels.strudel",
+    "title": "Labels and muted voice",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G5",
+      "G1"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-orbit-conflict",
+    "file": "programs/micro-orbit-conflict.strudel",
+    "title": "Two voices fight over room zero",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G5",
+      "A2"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-long-alternation",
+    "file": "programs/micro-long-alternation.strudel",
+    "title": "Seven and eleven",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "T1",
+      "G2"
+    ],
+    "cycles": 77,
+    "notes": ""
+  },
+  {
+    "id": "micro-polymeter",
+    "file": "programs/micro-polymeter.strudel",
+    "title": "Three across four",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "T1",
+      "G1"
+    ],
+    "cycles": 15,
+    "notes": ""
+  },
+  {
+    "id": "micro-seeded-drop",
+    "file": "programs/micro-seeded-drop.strudel",
+    "title": "Time addressed dropout",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "T2",
+      "T4"
+    ],
+    "cycles": 300,
+    "notes": ""
+  },
+  {
+    "id": "micro-random-pitch",
+    "file": "programs/micro-random-pitch.strudel",
+    "title": "Sampled random pitch",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "T2",
+      "T4"
+    ],
+    "cycles": 300,
+    "notes": ""
+  },
+  {
+    "id": "micro-arrange-300",
+    "file": "programs/micro-arrange-300.strudel",
+    "title": "A three hundred cycle score",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "T3",
+      "T1"
+    ],
+    "cycles": 300,
+    "notes": "The checker queries only cycles 0..8; inspect the full cycles horizon to see the distant transition."
+  },
+  {
+    "id": "micro-arrange-301",
+    "file": "programs/micro-arrange-301.strudel",
+    "title": "Distant single ending",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "T3",
+      "E2"
+    ],
+    "cycles": 301,
+    "notes": "The checker queries only cycles 0..8; inspect the full cycles horizon to see the distant transition."
+  },
+  {
+    "id": "micro-signal-bare",
+    "file": "programs/micro-signal-bare.strudel",
+    "title": "Continuous values are not notes",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "E1",
+      "E5"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-signal-lanes",
+    "file": "programs/micro-signal-lanes.strudel",
+    "title": "Several continuous settings",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "E1",
+      "G4"
+    ],
+    "cycles": 8,
+    "notes": ""
+  },
+  {
+    "id": "micro-fragments-slow",
+    "file": "programs/micro-fragments-slow.strudel",
+    "title": "Whole spans multiple windows",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "E2",
+      "A4"
+    ],
+    "cycles": 7,
+    "notes": ""
+  },
+  {
+    "id": "micro-fragments-chop",
+    "file": "programs/micro-fragments-chop.strudel",
+    "title": "Chopped overlapping whole spans",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "E2",
+      "E3"
+    ],
+    "cycles": 3,
+    "notes": ""
+  },
+  {
+    "id": "micro-dense-64",
+    "file": "programs/micro-dense-64.strudel",
+    "title": "Sixty four times four",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "E4",
+      "Q2"
+    ],
+    "cycles": 1,
+    "notes": ""
+  },
+  {
+    "id": "micro-dense-stack",
+    "file": "programs/micro-dense-stack.strudel",
+    "title": "Polyphonic dense lattice",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "E4",
+      "Q2"
+    ],
+    "cycles": 1,
+    "notes": ""
+  },
+  {
+    "id": "micro-bare-numbers",
+    "file": "programs/micro-bare-numbers.strudel",
+    "title": "Numeric score before controls",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "E5",
+      "G4"
+    ],
+    "cycles": 1,
+    "notes": ""
+  },
+  {
+    "id": "micro-bare-strings",
+    "file": "programs/micro-bare-strings.strudel",
+    "title": "Strings before controls",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "E5",
+      "G1"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-control-aliases",
+    "file": "programs/micro-control-aliases.strudel",
+    "title": "Aliases and uncommon controls",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "C1",
+      "G4"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-control-multivalue",
+    "file": "programs/micro-control-multivalue.strudel",
+    "title": "Colon settings",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "C2",
+      "C1"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-control-array",
+    "file": "programs/micro-control-array.strudel",
+    "title": "Array valued partials",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "C2",
+      "C1"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-fx-filter-drive",
+    "file": "programs/micro-fx-filter-drive.strudel",
+    "title": "Filter then distortion",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "A1",
+      "C2"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-fx-drive-filter",
+    "file": "programs/micro-fx-drive-filter.strudel",
+    "title": "Distortion then filter",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "A1",
+      "C2"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-orbit-delay",
+    "file": "programs/micro-orbit-delay.strudel",
+    "title": "Separate rooms with delay",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "A2",
+      "G5"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-cut-group",
+    "file": "programs/micro-cut-group.strudel",
+    "title": "Shared cut group",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "A3",
+      "E3"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-duck-room",
+    "file": "programs/micro-duck-room.strudel",
+    "title": "Cross voice duck routing",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "A3",
+      "A2"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-tails",
+    "file": "programs/micro-tails.strudel",
+    "title": "Release outlasts score",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "A4",
+      "E3"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-clip-length",
+    "file": "programs/micro-clip-length.strudel",
+    "title": "Legato and clip",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "A4",
+      "C1"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-external-state",
+    "file": "programs/micro-external-state.strudel",
+    "title": "Tempo samples await and hush",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "S1",
+      "Q3"
+    ],
+    "cycles": 2,
+    "notes": "Sample loading is stubbed. No decoded audio is required for score inspection."
+  },
+  {
+    "id": "micro-external-tempo",
+    "file": "programs/micro-external-tempo.strudel",
+    "title": "Tempo outside score",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "S1",
+      "G3"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-trigger",
+    "file": "programs/micro-trigger.strudel",
+    "title": "Trigger time callback",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "S2",
+      "G2"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-visuals",
+    "file": "programs/micro-visuals.strudel",
+    "title": "Visual and log hooks",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "S2",
+      "G2"
+    ],
+    "cycles": 2,
+    "notes": ""
+  },
+  {
+    "id": "micro-query-throws",
+    "file": "programs/micro-query-throws.strudel",
+    "title": "Broken is not quiet",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "Q1",
+      "Q2"
+    ],
+    "cycles": 1,
+    "notes": "INTENDED FAILURE: valid construction; underlying query throws. queryArc would swallow this error."
+  },
+  {
+    "id": "micro-query-late-throws",
+    "file": "programs/micro-query-late-throws.strudel",
+    "title": "A later window fails",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "Q1",
+      "T1"
+    ],
+    "cycles": 4,
+    "notes": "INTENDED FAILURE: valid construction; underlying query throws. queryArc would swallow this error."
+  },
+  {
+    "id": "micro-sample-loop",
+    "file": "programs/micro-sample-loop.strudel",
+    "title": "Loop length metadata",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "Q3",
+      "A4"
+    ],
+    "cycles": 3,
+    "notes": "Score only: actual duration, slicing and playback require decoded sample metadata and are unverified."
+  },
+  {
+    "id": "micro-sample-splice",
+    "file": "programs/micro-sample-splice.strudel",
+    "title": "Slices need decoded duration",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "Q3",
+      "E4"
+    ],
+    "cycles": 2,
+    "notes": "Score only: actual duration, slicing and playback require decoded sample metadata and are unverified."
+  },
+  {
+    "id": "mms-clock",
+    "file": "programs/mms-clock.strudel",
+    "title": "MMS clock",
+    "origin": "mms",
+    "licence": "MIT; Copyright (c) 2026 Aaron Hoyt; see MMS-LICENSE.txt",
+    "tags": [
+      "T1",
+      "E2"
+    ],
+    "cycles": 8,
+    "notes": "Adapted exact call from src/modules/pattern-time.fixtures.ts; supplied neutral note source."
+  },
+  {
+    "id": "mms-euclid",
+    "file": "programs/mms-euclid.strudel",
+    "title": "MMS euclid",
+    "origin": "mms",
+    "licence": "MIT; Copyright (c) 2026 Aaron Hoyt; see MMS-LICENSE.txt",
+    "tags": [
+      "G4",
+      "T1"
+    ],
+    "cycles": 8,
+    "notes": "Adapted exact call from src/modules/pattern-time.fixtures.ts; supplied neutral note source."
+  },
+  {
+    "id": "mms-euclid-legato",
+    "file": "programs/mms-euclid-legato.strudel",
+    "title": "MMS euclid-legato",
+    "origin": "mms",
+    "licence": "MIT; Copyright (c) 2026 Aaron Hoyt; see MMS-LICENSE.txt",
+    "tags": [
+      "E2",
+      "A4"
+    ],
+    "cycles": 8,
+    "notes": "Adapted exact call from src/modules/pattern-time.fixtures.ts; supplied neutral note source."
+  },
+  {
+    "id": "mms-ratchet",
+    "file": "programs/mms-ratchet.strudel",
+    "title": "MMS ratchet",
+    "origin": "mms",
+    "licence": "MIT; Copyright (c) 2026 Aaron Hoyt; see MMS-LICENSE.txt",
+    "tags": [
+      "E4",
+      "G4"
+    ],
+    "cycles": 8,
+    "notes": "Adapted exact call from src/modules/pattern-time.fixtures.ts; supplied neutral note source."
+  },
+  {
+    "id": "mms-seed",
+    "file": "programs/mms-seed.strudel",
+    "title": "MMS seed",
+    "origin": "mms",
+    "licence": "MIT; Copyright (c) 2026 Aaron Hoyt; see MMS-LICENSE.txt",
+    "tags": [
+      "T2",
+      "T4"
+    ],
+    "cycles": 8,
+    "notes": "Adapted exact call from src/modules/pattern-time.fixtures.ts; supplied neutral note source."
+  },
+  {
+    "id": "mms-palindrome",
+    "file": "programs/mms-palindrome.strudel",
+    "title": "MMS palindrome",
+    "origin": "mms",
+    "licence": "MIT; Copyright (c) 2026 Aaron Hoyt; see MMS-LICENSE.txt",
+    "tags": [
+      "T1",
+      "G1"
+    ],
+    "cycles": 8,
+    "notes": "Adapted exact call from src/modules/pattern-time.fixtures.ts; supplied neutral note source."
+  },
+  {
+    "id": "mms-shuffle",
+    "file": "programs/mms-shuffle.strudel",
+    "title": "MMS shuffle",
+    "origin": "mms",
+    "licence": "MIT; Copyright (c) 2026 Aaron Hoyt; see MMS-LICENSE.txt",
+    "tags": [
+      "T2",
+      "T4"
+    ],
+    "cycles": 8,
+    "notes": "Adapted exact call from src/modules/pattern-time.fixtures.ts; supplied neutral note source."
+  },
+  {
+    "id": "mms-ribbon",
+    "file": "programs/mms-ribbon.strudel",
+    "title": "MMS ribbon",
+    "origin": "mms",
+    "licence": "MIT; Copyright (c) 2026 Aaron Hoyt; see MMS-LICENSE.txt",
+    "tags": [
+      "T1",
+      "G4"
+    ],
+    "cycles": 8,
+    "notes": "Adapted exact call from src/modules/pattern-time.fixtures.ts; supplied neutral note source."
+  },
+  {
+    "id": "mms-zoom",
+    "file": "programs/mms-zoom.strudel",
+    "title": "MMS zoom",
+    "origin": "mms",
+    "licence": "MIT; Copyright (c) 2026 Aaron Hoyt; see MMS-LICENSE.txt",
+    "tags": [
+      "E2",
+      "G4"
+    ],
+    "cycles": 8,
+    "notes": "Adapted exact call from src/modules/pattern-time.fixtures.ts; supplied neutral note source."
+  },
+  {
+    "id": "mms-echo",
+    "file": "programs/mms-echo.strudel",
+    "title": "MMS echo",
+    "origin": "mms",
+    "licence": "MIT; Copyright (c) 2026 Aaron Hoyt; see MMS-LICENSE.txt",
+    "tags": [
+      "E3",
+      "G2"
+    ],
+    "cycles": 8,
+    "notes": "Adapted exact call from src/modules/pattern-time.fixtures.ts; supplied neutral note source."
+  },
+  {
+    "id": "mms-chunk",
+    "file": "programs/mms-chunk.strudel",
+    "title": "MMS chunk",
+    "origin": "mms",
+    "licence": "MIT; Copyright (c) 2026 Aaron Hoyt; see MMS-LICENSE.txt",
+    "tags": [
+      "G2",
+      "E4"
+    ],
+    "cycles": 4,
+    "notes": "Adapted exact call from src/modules/function-loops.fixtures.ts; supplied neutral note source."
+  },
+  {
+    "id": "mms-off",
+    "file": "programs/mms-off.strudel",
+    "title": "MMS off",
+    "origin": "mms",
+    "licence": "MIT; Copyright (c) 2026 Aaron Hoyt; see MMS-LICENSE.txt",
+    "tags": [
+      "G2",
+      "E3"
+    ],
+    "cycles": 4,
+    "notes": "Adapted exact call from src/modules/function-loops.fixtures.ts; supplied neutral note source."
+  },
+  {
+    "id": "mms-within",
+    "file": "programs/mms-within.strudel",
+    "title": "MMS within",
+    "origin": "mms",
+    "licence": "MIT; Copyright (c) 2026 Aaron Hoyt; see MMS-LICENSE.txt",
+    "tags": [
+      "G2",
+      "E2"
+    ],
+    "cycles": 4,
+    "notes": "Adapted exact call from src/modules/function-loops.fixtures.ts; supplied neutral note source."
+  },
+  {
+    "id": "mms-jux",
+    "file": "programs/mms-jux.strudel",
+    "title": "MMS jux",
+    "origin": "mms",
+    "licence": "MIT; Copyright (c) 2026 Aaron Hoyt; see MMS-LICENSE.txt",
+    "tags": [
+      "G2",
+      "E3"
+    ],
+    "cycles": 4,
+    "notes": "Adapted exact call from src/modules/function-loops.fixtures.ts; supplied neutral note source."
+  },
+  {
+    "id": "mms-nested",
+    "file": "programs/mms-nested.strudel",
+    "title": "MMS nested",
+    "origin": "mms",
+    "licence": "MIT; Copyright (c) 2026 Aaron Hoyt; see MMS-LICENSE.txt",
+    "tags": [
+      "G2",
+      "G3"
+    ],
+    "cycles": 4,
+    "notes": "Adapted exact call from src/modules/function-loops.fixtures.ts; supplied neutral note source."
+  },
+  {
+    "id": "piece-harbour",
+    "file": "programs/piece-harbour.strudel",
+    "title": "Harbour",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "G3",
+      "T3",
+      "E3",
+      "A4",
+      "A2"
+    ],
+    "cycles": 32,
+    "notes": "Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window."
+  },
+  {
+    "id": "piece-foundry",
+    "file": "programs/piece-foundry.strudel",
+    "title": "Foundry",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "G3",
+      "T3",
+      "E3",
+      "A4",
+      "A1"
+    ],
+    "cycles": 32,
+    "notes": "Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window."
+  },
+  {
+    "id": "piece-lichen",
+    "file": "programs/piece-lichen.strudel",
+    "title": "Lichen",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "G3",
+      "T3",
+      "E3",
+      "A4",
+      "A2"
+    ],
+    "cycles": 32,
+    "notes": "Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window."
+  },
+  {
+    "id": "piece-night-bus",
+    "file": "programs/piece-night-bus.strudel",
+    "title": "Night Bus",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "G3",
+      "T3",
+      "E3",
+      "A4",
+      "A2"
+    ],
+    "cycles": 32,
+    "notes": "Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window."
+  },
+  {
+    "id": "piece-copper",
+    "file": "programs/piece-copper.strudel",
+    "title": "Copper",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "G3",
+      "T3",
+      "E3",
+      "A4",
+      "A1"
+    ],
+    "cycles": 32,
+    "notes": "Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window."
+  },
+  {
+    "id": "piece-paper-lantern",
+    "file": "programs/piece-paper-lantern.strudel",
+    "title": "Paper Lantern",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "G3",
+      "T3",
+      "E3",
+      "A4",
+      "A2"
+    ],
+    "cycles": 32,
+    "notes": "Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window."
+  },
+  {
+    "id": "piece-tidal-stairs",
+    "file": "programs/piece-tidal-stairs.strudel",
+    "title": "Tidal Stairs",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "G3",
+      "T3",
+      "E3",
+      "A4",
+      "A2"
+    ],
+    "cycles": 32,
+    "notes": "Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window."
+  },
+  {
+    "id": "piece-glass-garden",
+    "file": "programs/piece-glass-garden.strudel",
+    "title": "Glass Garden",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "G3",
+      "T3",
+      "E3",
+      "A4",
+      "A1"
+    ],
+    "cycles": 32,
+    "notes": "Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window."
+  },
+  {
+    "id": "piece-relay",
+    "file": "programs/piece-relay.strudel",
+    "title": "Relay",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "G3",
+      "T3",
+      "E3",
+      "A4",
+      "A2"
+    ],
+    "cycles": 32,
+    "notes": "Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window."
+  },
+  {
+    "id": "piece-slow-orbit",
+    "file": "programs/piece-slow-orbit.strudel",
+    "title": "Slow Orbit",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "G3",
+      "T3",
+      "E3",
+      "A4",
+      "A2"
+    ],
+    "cycles": 32,
+    "notes": "Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window."
+  },
+  {
+    "id": "piece-moss-radio",
+    "file": "programs/piece-moss-radio.strudel",
+    "title": "Moss Radio",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "G3",
+      "T3",
+      "E3",
+      "A4",
+      "A2"
+    ],
+    "cycles": 32,
+    "notes": "Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window."
+  },
+  {
+    "id": "piece-sundial",
+    "file": "programs/piece-sundial.strudel",
+    "title": "Sundial",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "G3",
+      "T3",
+      "E3",
+      "A4",
+      "A1"
+    ],
+    "cycles": 32,
+    "notes": "Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window."
+  },
+  {
+    "id": "piece-kiln",
+    "file": "programs/piece-kiln.strudel",
+    "title": "Kiln",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "G3",
+      "T3",
+      "E3",
+      "A4",
+      "A2"
+    ],
+    "cycles": 32,
+    "notes": "Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window."
+  },
+  {
+    "id": "piece-blue-hour",
+    "file": "programs/piece-blue-hour.strudel",
+    "title": "Blue Hour",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "G3",
+      "T3",
+      "E3",
+      "A4",
+      "A2"
+    ],
+    "cycles": 32,
+    "notes": "Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window."
+  },
+  {
+    "id": "piece-switchyard",
+    "file": "programs/piece-switchyard.strudel",
+    "title": "Switchyard",
+    "origin": "original",
+    "licence": "CC0-1.0",
+    "tags": [
+      "G1",
+      "G3",
+      "T3",
+      "E3",
+      "A4",
+      "A1"
+    ],
+    "cycles": 32,
+    "notes": "Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window."
+  }
+]

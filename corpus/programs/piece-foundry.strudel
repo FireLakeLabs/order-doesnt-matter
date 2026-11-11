@@ -1,0 +1,7 @@
+// Original: foundry
+setcpm(138/4);
+const drums = stack(s("bd*4"), s("[hh hh oh hh]*2").gain(.22).pan(.65), s("~ cp ~ cp").gain(.5));
+const bass = note("c2 c2 eb2 gb2").s("sawtooth").lpf(700).gain(.45).release(.12);
+const pad = note("[c4,eb4,gb4] ~ [bb3,db4,f4] ~").s("triangle").slow(4).gain(.23).FX(coarse(4),lpf(1200),distort(.5));
+const lead = note("<c2 gb2>").add(note(24)).s("sine").ply("<1 2 3 2>").gain(.18).delay(.3);
+arrange([4, drums], [8, stack(drums,bass)], [16, stack(drums,bass,pad,lead)], [4, stack(pad,lead)])

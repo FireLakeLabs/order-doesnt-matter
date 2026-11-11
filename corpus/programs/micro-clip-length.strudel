@@ -1,0 +1,1 @@
+s("oh*4").clip(.2).legato(2)

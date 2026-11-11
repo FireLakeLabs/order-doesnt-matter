@@ -1,0 +1,7 @@
+// Original: copper
+setcpm(124/4);
+const drums = stack(s("bd*4"), s("hh*8").gain(.22).pan(.65), s("~ cp ~ cp").gain(.5));
+const bass = note("e2 e2 g2 b2").s("sawtooth").lpf(700).gain(.45).release(.12);
+const pad = note("[e4,g4,b4] [d4,fs4,a4]").s("triangle").slow(4).gain(.23).FX(lpf(1800),distort(.3));
+const lead = note("<e2 b2>").add(note(24)).s("sine").ply("<1 2 3 2>").gain(.18).delay(.3);
+arrange([4, drums], [8, stack(drums,bass)], [16, stack(drums,bass,pad,lead)], [4, stack(pad,lead)])

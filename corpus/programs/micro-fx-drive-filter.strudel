@@ -1,0 +1,1 @@
+note("c3 e3").s("sawtooth").FX(distort(1)).FX(lpf(500)).delay(.3)

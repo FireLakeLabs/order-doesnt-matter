@@ -1,0 +1,7 @@
+// Original: tidal stairs
+setcpm(105/4);
+const drums = stack(s("bd ~ [bd bd] ~"), s("hh*12").gain(.22).pan(.65), s("~ cp ~ cp").gain(.5));
+const bass = note("g2 bb2 d3 f3").s("triangle").lpf(700).gain(.45).release(.12);
+const pad = note("[g3,bb3,d4] [f3,a3,c4]").s("triangle").slow(4).gain(.23).delay(.25).delaytime(.333);
+const lead = note("<g2 f3>").add(note(24)).s("sine").ply("<1 2 3 2>").gain(.18).delay(.3);
+arrange([4, drums], [8, stack(drums,bass)], [16, stack(drums,bass,pad,lead)], [4, stack(pad,lead)])

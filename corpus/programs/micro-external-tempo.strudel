@@ -1,0 +1,3 @@
+setcpm(73);
+await Promise.resolve();
+note("c3 g3").s("sine")

@@ -1,0 +1,1 @@
+stack(s("oh*2").cut(1),s("hh*8").cut(1))

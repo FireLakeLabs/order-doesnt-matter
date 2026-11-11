@@ -1,0 +1,83 @@
+
+> check
+> node check.mjs
+
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+{
+  "total": 72,
+  "ok": 70,
+  "intendedFailures": 2,
+  "unexpectedFailures": [],
+  "missingIntendedFailures": []
+}

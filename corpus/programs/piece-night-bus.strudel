@@ -1,0 +1,7 @@
+// Original: night bus
+setcpm(112/4);
+const drums = stack(s("bd ~ bd [~ bd]"), s("hh*16").gain(.22).pan(.65), s("~ cp ~ cp").gain(.5));
+const bass = note("f2 ab2 c3 eb3").s("triangle").lpf(700).gain(.45).release(.12);
+const pad = note("[f3,ab3,c4] [eb3,g3,bb3]").s("triangle").slow(4).gain(.23).delay(.4);
+const lead = note("<f2 eb3>").add(note(24)).s("sine").ply("<1 2 3 2>").gain(.18).delay(.3);
+arrange([4, drums], [8, stack(drums,bass)], [16, stack(drums,bass,pad,lead)], [4, stack(pad,lead)])

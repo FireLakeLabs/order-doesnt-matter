@@ -1,0 +1,7 @@
+// Original: sundial
+setcpm(118/4);
+const drums = stack(s("bd ~ bd bd"), s("hh*8").gain(.22).pan(.65), s("~ cp ~ cp").gain(.5));
+const bass = note("a1 e2 g2 b2").s("sawtooth").lpf(700).gain(.45).release(.12);
+const pad = note("[a3,c4,e4] [f3,a3,c4]").s("triangle").slow(4).gain(.23).FX(distort(.25),lpf(1600));
+const lead = note("<a1 b2>").add(note(24)).s("sine").ply("<1 2 3 2>").gain(.18).delay(.3);
+arrange([4, drums], [8, stack(drums,bass)], [16, stack(drums,bass,pad,lead)], [4, stack(pad,lead)])

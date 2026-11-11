@@ -1,0 +1,1 @@
+note("c3 g3").s("user").partials([1,.5,0,.25]).phases([0,.25,0,.5])

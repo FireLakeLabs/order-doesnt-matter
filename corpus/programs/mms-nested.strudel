@@ -1,0 +1,1 @@
+note("c3 e3 g3 b3").s("sine").chunk(4, x => x.off(1/8, y => y.ply("2").rev()).rev())

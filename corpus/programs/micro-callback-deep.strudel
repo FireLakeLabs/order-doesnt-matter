@@ -1,0 +1,1 @@
+note("c3 e3 g3 b3").s("sine").layer(p => p, p => p.off(1/8, q => q.superimpose(r => r.rev().off(1/16, t => t.fast(2).gain(.2)))))

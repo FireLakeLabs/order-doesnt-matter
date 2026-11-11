@@ -1,0 +1,4 @@
+$: s("bd*4")
+hats: s("hh*8").gain(.3)
+_$: s("cp*8")
+all(p => p.slow(2))

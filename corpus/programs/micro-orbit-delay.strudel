@@ -1,0 +1,2 @@
+$: s("bd*4").orbit(1).delay(.3).delaytime(.25)
+$: s("cp*2").orbit(2).delay(.8).delaytime(.375)

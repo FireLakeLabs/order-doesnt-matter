@@ -1,0 +1,1 @@
+note("c4*8").s("sine").release(3).legato(.2)

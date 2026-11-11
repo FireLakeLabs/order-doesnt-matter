@@ -1,0 +1,1 @@
+arrange([299,note("c3").s("sine").slow(7)],[1,s("cp*4")],[1,s("bd")])

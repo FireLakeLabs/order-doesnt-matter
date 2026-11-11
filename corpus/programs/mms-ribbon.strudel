@@ -1,0 +1,1 @@
+note("c3 e3 g3 b3").s("sine").rib(45, 2)

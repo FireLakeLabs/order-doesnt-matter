@@ -1,0 +1,7 @@
+// Original: paper lantern
+setcpm(78/4);
+const drums = stack(s("bd ~ ~ bd"), s("hh*8").gain(.22).pan(.65), s("~ cp ~ ~").gain(.5));
+const bass = note("a2 ~ e3 g2").s("sine").lpf(700).gain(.45).release(.12);
+const pad = note("[a3,c4,e4] [g3,b3,d4]").s("triangle").slow(4).gain(.23).room(.6).pan(sine.range(.2,.8));
+const lead = note("<a2 g2>").add(note(24)).s("sine").ply("<1 2 3 2>").gain(.18).delay(.3);
+arrange([4, drums], [8, stack(drums,bass)], [16, stack(drums,bass,pad,lead)], [4, stack(pad,lead)])
