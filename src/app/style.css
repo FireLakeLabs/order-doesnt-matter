@@ -1,0 +1,172 @@
+:root {
+  color-scheme: dark;
+  font:
+    15px/1.5 system-ui,
+    sans-serif;
+  color: #dfedec;
+  background: #0b141b;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  min-width: 0;
+}
+button,
+textarea {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+  color: #dfedec;
+  background: #213740;
+  border: 1px solid #52717b;
+  border-radius: 6px;
+  padding: 8px 14px;
+}
+button:hover {
+  background: #2d4a51;
+}
+button:disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+:focus-visible {
+  outline: 3px solid #a3efd5;
+  outline-offset: 3px;
+}
+.topbar {
+  padding: 22px clamp(14px, 3vw, 42px) 10px;
+  border-bottom: 1px solid #2b3d48;
+}
+h1 {
+  font-size: clamp(22px, 3vw, 30px);
+  letter-spacing: -0.7px;
+  margin: 0 0 16px;
+  font-weight: 600;
+}
+.transport,
+.load-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+#tempo {
+  color: #b4c8cb;
+  font-size: 13px;
+  margin-right: auto;
+}
+#play,
+#load {
+  color: #102323;
+  background: #a3efd5;
+  border-color: #a3efd5;
+}
+#message,
+#load-error {
+  margin: 10px 0;
+  overflow-wrap: anywhere;
+}
+#message {
+  color: #f0cb86;
+  min-height: 22px;
+}
+#load-error {
+  color: #ffb3a8;
+}
+#load-error:empty {
+  display: none;
+}
+main {
+  padding: 20px clamp(10px, 3vw, 42px);
+  min-width: 0;
+}
+#paste-panel {
+  background: #15232c;
+  border: 1px solid #2b3d48;
+  border-radius: 10px;
+  padding: 16px;
+}
+#paste-panel label {
+  display: block;
+  margin-bottom: 8px;
+  color: #bed2d4;
+}
+textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-height: 130px;
+  resize: vertical;
+  padding: 12px;
+  color: #e0eeeb;
+  background: #0d1820;
+  border: 1px solid #52717b;
+  border-radius: 5px;
+  font:
+    13px/1.6 ui-monospace,
+    monospace;
+}
+.load-actions {
+  margin-top: 12px;
+  font-size: 13px;
+}
+#examples {
+  display: flex;
+  gap: 8px;
+}
+#notes {
+  margin-top: 14px;
+  color: #bed2d4;
+}
+#notes summary {
+  cursor: pointer;
+}
+.score-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0 12px;
+}
+h2 {
+  font-size: 16px;
+  margin: 0 auto 0 0;
+  font-weight: 500;
+}
+#follow {
+  font-size: 12px;
+  padding: 5px 12px;
+}
+#follow[aria-pressed='true'] {
+  border-color: #a3efd5;
+  color: #a3efd5;
+}
+#window {
+  font-size: 12px;
+  color: #bed2d4;
+}
+.welcome {
+  padding: 30px;
+  border: 1px dashed #52717b;
+  border-radius: 10px;
+  color: #bed2d4;
+}
+footer {
+  padding: 8px 24px 24px;
+  color: #8ca7af;
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .topbar {
+    padding-top: 16px;
+  }
+  #paste {
+    margin-left: 0;
+  }
+  main {
+    padding-top: 12px;
+  }
+}
