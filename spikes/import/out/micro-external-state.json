@@ -1,0 +1,93 @@
+{
+  "setup": [
+    {
+      "id": "n1",
+      "tier": 3,
+      "span": {
+        "start": 0,
+        "end": 49
+      },
+      "code": "await samples('github:tidalcycles/dirt-samples');"
+    },
+    {
+      "id": "n2",
+      "tier": 3,
+      "span": {
+        "start": 63,
+        "end": 70
+      },
+      "code": "hush();"
+    }
+  ],
+  "voices": [
+    {
+      "id": "n3",
+      "tier": 1,
+      "span": {
+        "start": 71,
+        "end": 80
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n4",
+        "tier": 1,
+        "span": {
+          "start": 71,
+          "end": 80
+        },
+        "core": {
+          "kind": "generator",
+          "name": "s",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n5",
+                "tier": 1,
+                "span": {
+                  "start": 73,
+                  "end": 79
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "other",
+                      "notation": "bd*4"
+                    }
+                  ],
+                  "notation": "bd*4"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": []
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "setup",
+      "index": 0
+    },
+    {
+      "kind": "tempo"
+    },
+    {
+      "kind": "setup",
+      "index": 1
+    },
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": [],
+  "tempo": {
+    "cpm": 100
+  }
+}

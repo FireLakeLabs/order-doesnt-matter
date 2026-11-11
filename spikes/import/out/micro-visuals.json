@@ -1,0 +1,103 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 42
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 16
+        },
+        "core": {
+          "kind": "generator",
+          "name": "s",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n3",
+                "tier": 1,
+                "span": {
+                  "start": 2,
+                  "end": 15
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "bd"
+                    },
+                    {
+                      "kind": "value",
+                      "value": "hh"
+                    },
+                    {
+                      "kind": "value",
+                      "value": "cp"
+                    },
+                    {
+                      "kind": "value",
+                      "value": "hh"
+                    }
+                  ],
+                  "notation": "bd hh cp hh"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n4",
+            "tier": 3,
+            "span": {
+              "start": 0,
+              "end": 22
+            },
+            "kind": "opaque",
+            "code": ".log()"
+          },
+          {
+            "id": "n5",
+            "tier": 3,
+            "span": {
+              "start": 0,
+              "end": 34
+            },
+            "kind": "opaque",
+            "code": ".pianoroll()"
+          },
+          {
+            "id": "n6",
+            "tier": 3,
+            "span": {
+              "start": 0,
+              "end": 42
+            },
+            "kind": "opaque",
+            "code": ".scope()"
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

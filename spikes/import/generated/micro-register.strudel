@@ -1,0 +1,2 @@
+register('ghosts', (amount, pat) => pat.off(1/8, p => p.gain(amount)));
+$: /*@odm-voice {"name":"$","muted":false}*/ note("c3 e3").s("sine").ghosts(0.3);

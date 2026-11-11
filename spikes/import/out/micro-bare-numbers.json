@@ -1,0 +1,59 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 15
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 7
+        },
+        "core": {
+          "kind": "generator",
+          "name": "pure",
+          "args": [
+            {
+              "kind": "literal",
+              "value": 7
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n3",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 15
+            },
+            "kind": "rewrite",
+            "name": "fast",
+            "args": [
+              {
+                "kind": "literal",
+                "value": 3
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

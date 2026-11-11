@@ -1,0 +1,2 @@
+const motif = note("c3 eb3 g3 bb3");
+$: /*@odm-voice {"name":"$","muted":false}*/ stack(motif.s("sine"), motif.add(note(12)).s("triangle").slow(2));

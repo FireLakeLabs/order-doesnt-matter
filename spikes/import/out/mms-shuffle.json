@@ -1,0 +1,128 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 40
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 19
+        },
+        "core": {
+          "kind": "generator",
+          "name": "note",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n3",
+                "tier": 1,
+                "span": {
+                  "start": 5,
+                  "end": 18
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "c3"
+                    },
+                    {
+                      "kind": "value",
+                      "value": "e3"
+                    },
+                    {
+                      "kind": "value",
+                      "value": "g3"
+                    },
+                    {
+                      "kind": "value",
+                      "value": "b3"
+                    }
+                  ],
+                  "notation": "c3 e3 g3 b3"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n6",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 29
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n4",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 29
+                },
+                "name": "s",
+                "value": {
+                  "id": "n5",
+                  "tier": 1,
+                  "span": {
+                    "start": 22,
+                    "end": 28
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "sine"
+                      }
+                    ],
+                    "notation": "sine"
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          },
+          {
+            "id": "n7",
+            "tier": 2,
+            "span": {
+              "start": 0,
+              "end": 40
+            },
+            "kind": "rewrite",
+            "name": "shuffle",
+            "args": [
+              {
+                "kind": "literal",
+                "value": 8
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

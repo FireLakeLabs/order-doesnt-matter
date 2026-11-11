@@ -1,0 +1,1 @@
+$: /*@odm-voice {"name":"$","muted":false}*/ note("c4*8").s("sine").release(3).clip(0.2);

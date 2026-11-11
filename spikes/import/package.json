@@ -1,0 +1,30 @@
+{
+  "name": "strudel-import-spike",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "check": "tsc --noEmit && vitest run",
+    "corpus": "node --import tsx study.ts",
+    "build": "node build.mjs",
+    "format": "prettier --write src *.ts *.mjs *.md package.json tsconfig.json",
+    "format:check": "prettier --check src *.ts *.mjs *.md package.json tsconfig.json"
+  },
+  "dependencies": {
+    "@strudel/core": "1.2.6",
+    "@strudel/mini": "1.2.6",
+    "@strudel/tonal": "1.2.6",
+    "@strudel/transpiler": "1.2.6",
+    "acorn": "8.15.0"
+  },
+  "devDependencies": {
+    "@types/estree": "1.0.8",
+    "@types/node": "24.10.0",
+    "esbuild": "0.25.12",
+    "estree-walker": "3.0.3",
+    "prettier": "3.6.2",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vitest": "3.2.4"
+  }
+}

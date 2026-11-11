@@ -1,0 +1,116 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 32
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n6",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 32
+        },
+        "core": {
+          "kind": "group",
+          "how": "cat",
+          "parts": [
+            {
+              "pattern": {
+                "id": "n2",
+                "tier": 1,
+                "span": {
+                  "start": 4,
+                  "end": 17
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "pure",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n3",
+                        "tier": 1,
+                        "span": {
+                          "start": 9,
+                          "end": 16
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "north"
+                            }
+                          ],
+                          "notation": "north"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": []
+              }
+            },
+            {
+              "pattern": {
+                "id": "n4",
+                "tier": 1,
+                "span": {
+                  "start": 18,
+                  "end": 31
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "pure",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n5",
+                        "tier": 1,
+                        "span": {
+                          "start": 23,
+                          "end": 30
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "south"
+                            }
+                          ],
+                          "notation": "south"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": []
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

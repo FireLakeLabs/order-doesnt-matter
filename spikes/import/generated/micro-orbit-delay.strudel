@@ -1,0 +1,2 @@
+$: /*@odm-voice {"name":"$","muted":false}*/ s("bd*4").orbit(1).delay(0.3).delaytime(0.25);
+$: /*@odm-voice {"name":"$","muted":false}*/ s("cp*2").orbit(2).delay(0.8).delaytime(0.375);

@@ -1,0 +1,124 @@
+{
+  "setup": [
+    {
+      "id": "n1",
+      "tier": 3,
+      "span": {
+        "start": 12,
+        "end": 36
+      },
+      "code": "await Promise.resolve();"
+    }
+  ],
+  "voices": [
+    {
+      "id": "n2",
+      "tier": 1,
+      "span": {
+        "start": 37,
+        "end": 60
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n3",
+        "tier": 1,
+        "span": {
+          "start": 37,
+          "end": 50
+        },
+        "core": {
+          "kind": "generator",
+          "name": "note",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n4",
+                "tier": 1,
+                "span": {
+                  "start": 42,
+                  "end": 49
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "c3"
+                    },
+                    {
+                      "kind": "value",
+                      "value": "g3"
+                    }
+                  ],
+                  "notation": "c3 g3"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n7",
+            "tier": 1,
+            "span": {
+              "start": 37,
+              "end": 60
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n5",
+                "tier": 1,
+                "span": {
+                  "start": 37,
+                  "end": 60
+                },
+                "name": "s",
+                "value": {
+                  "id": "n6",
+                  "tier": 1,
+                  "span": {
+                    "start": 53,
+                    "end": 59
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "sine"
+                      }
+                    ],
+                    "notation": "sine"
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "tempo"
+    },
+    {
+      "kind": "setup",
+      "index": 0
+    },
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": [],
+  "tempo": {
+    "cpm": 73
+  }
+}

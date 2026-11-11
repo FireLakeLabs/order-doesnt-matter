@@ -1,0 +1,1 @@
+$: /*@odm-voice {"name":"$","muted":false}*/ note("c3*4").s("sawtooth").cutoff(sine.range(300, 3000)).pan(cosine.range(0, 1)).gain(perlin.range(0.1, 0.8));

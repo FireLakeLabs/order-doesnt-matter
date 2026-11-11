@@ -1,0 +1,1 @@
+$: /*@odm-voice {"name":"$","muted":false}*/ note("c4*4").s("sine").onTrigger(() => console.log('a note was triggered'));

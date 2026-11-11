@@ -1,0 +1,1 @@
+$: /*@odm-voice {"name":"$","muted":false}*/ note(irand(24).segment(7).add(48)).s("sine").gain(perlin.range(0.1, 0.7));

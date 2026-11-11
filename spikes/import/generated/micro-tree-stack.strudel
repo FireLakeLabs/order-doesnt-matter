@@ -1,0 +1,1 @@
+$: /*@odm-voice {"name":"$","muted":false}*/ stack(cat(note("c3 e3"), note("g3")), note("[c4,e4,g4]").slow(3)).s("sine");

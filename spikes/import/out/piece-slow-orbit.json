@@ -1,0 +1,1069 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n54",
+      "tier": 1,
+      "span": {
+        "start": 394,
+        "end": 493
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n67",
+        "tier": 1,
+        "span": {
+          "start": 394,
+          "end": 493
+        },
+        "core": {
+          "kind": "group",
+          "how": "arrange",
+          "parts": [
+            {
+              "cycles": 4,
+              "pattern": {
+                "id": "n55",
+                "tier": 1,
+                "span": {
+                  "start": 406,
+                  "end": 411
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "drums"
+                },
+                "layers": []
+              }
+            },
+            {
+              "cycles": 8,
+              "pattern": {
+                "id": "n58",
+                "tier": 1,
+                "span": {
+                  "start": 418,
+                  "end": 435
+                },
+                "core": {
+                  "kind": "group",
+                  "how": "stack",
+                  "parts": [
+                    {
+                      "pattern": {
+                        "id": "n56",
+                        "tier": 1,
+                        "span": {
+                          "start": 424,
+                          "end": 429
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "drums"
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "pattern": {
+                        "id": "n57",
+                        "tier": 1,
+                        "span": {
+                          "start": 430,
+                          "end": 434
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "bass"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": []
+              }
+            },
+            {
+              "cycles": 16,
+              "pattern": {
+                "id": "n63",
+                "tier": 1,
+                "span": {
+                  "start": 443,
+                  "end": 469
+                },
+                "core": {
+                  "kind": "group",
+                  "how": "stack",
+                  "parts": [
+                    {
+                      "pattern": {
+                        "id": "n59",
+                        "tier": 1,
+                        "span": {
+                          "start": 449,
+                          "end": 454
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "drums"
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "pattern": {
+                        "id": "n60",
+                        "tier": 1,
+                        "span": {
+                          "start": 455,
+                          "end": 459
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "bass"
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "pattern": {
+                        "id": "n61",
+                        "tier": 1,
+                        "span": {
+                          "start": 460,
+                          "end": 463
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "pad"
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "pattern": {
+                        "id": "n62",
+                        "tier": 1,
+                        "span": {
+                          "start": 464,
+                          "end": 468
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "lead"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": []
+              }
+            },
+            {
+              "cycles": 4,
+              "pattern": {
+                "id": "n66",
+                "tier": 1,
+                "span": {
+                  "start": 476,
+                  "end": 491
+                },
+                "core": {
+                  "kind": "group",
+                  "how": "stack",
+                  "parts": [
+                    {
+                      "pattern": {
+                        "id": "n64",
+                        "tier": 1,
+                        "span": {
+                          "start": 482,
+                          "end": 485
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "pad"
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "pattern": {
+                        "id": "n65",
+                        "tier": 1,
+                        "span": {
+                          "start": 486,
+                          "end": 490
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "lead"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": []
+      }
+    }
+  ],
+  "shared": {
+    "drums": {
+      "id": "n15",
+      "tier": 1,
+      "span": {
+        "start": 52,
+        "end": 126
+      },
+      "core": {
+        "kind": "group",
+        "how": "stack",
+        "parts": [
+          {
+            "pattern": {
+              "id": "n1",
+              "tier": 1,
+              "span": {
+                "start": 58,
+                "end": 71
+              },
+              "core": {
+                "kind": "generator",
+                "name": "s",
+                "args": [
+                  {
+                    "kind": "pattern",
+                    "pattern": {
+                      "id": "n2",
+                      "tier": 1,
+                      "span": {
+                        "start": 60,
+                        "end": 70
+                      },
+                      "core": {
+                        "kind": "sequence",
+                        "steps": [
+                          {
+                            "kind": "value",
+                            "value": "bd"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "rest"
+                          }
+                        ],
+                        "notation": "bd ~ ~ ~"
+                      },
+                      "layers": []
+                    }
+                  }
+                ]
+              },
+              "layers": []
+            }
+          },
+          {
+            "pattern": {
+              "id": "n3",
+              "tier": 1,
+              "span": {
+                "start": 73,
+                "end": 82
+              },
+              "core": {
+                "kind": "generator",
+                "name": "s",
+                "args": [
+                  {
+                    "kind": "pattern",
+                    "pattern": {
+                      "id": "n4",
+                      "tier": 1,
+                      "span": {
+                        "start": 75,
+                        "end": 81
+                      },
+                      "core": {
+                        "kind": "sequence",
+                        "steps": [
+                          {
+                            "kind": "other",
+                            "notation": "hh*4"
+                          }
+                        ],
+                        "notation": "hh*4"
+                      },
+                      "layers": []
+                    }
+                  }
+                ]
+              },
+              "layers": [
+                {
+                  "id": "n7",
+                  "tier": 1,
+                  "span": {
+                    "start": 73,
+                    "end": 92
+                  },
+                  "kind": "settings",
+                  "settings": [
+                    {
+                      "id": "n5",
+                      "tier": 1,
+                      "span": {
+                        "start": 73,
+                        "end": 92
+                      },
+                      "name": "gain",
+                      "value": {
+                        "id": "n6",
+                        "tier": 1,
+                        "span": {
+                          "start": 88,
+                          "end": 91
+                        },
+                        "core": {
+                          "kind": "constant",
+                          "value": 0.22
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "id": "n8",
+                      "tier": 1,
+                      "span": {
+                        "start": 73,
+                        "end": 101
+                      },
+                      "name": "pan",
+                      "value": {
+                        "id": "n9",
+                        "tier": 1,
+                        "span": {
+                          "start": 97,
+                          "end": 100
+                        },
+                        "core": {
+                          "kind": "constant",
+                          "value": 0.65
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "pattern": {
+              "id": "n10",
+              "tier": 1,
+              "span": {
+                "start": 103,
+                "end": 116
+              },
+              "core": {
+                "kind": "generator",
+                "name": "s",
+                "args": [
+                  {
+                    "kind": "pattern",
+                    "pattern": {
+                      "id": "n11",
+                      "tier": 1,
+                      "span": {
+                        "start": 105,
+                        "end": 115
+                      },
+                      "core": {
+                        "kind": "sequence",
+                        "steps": [
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "cp"
+                          },
+                          {
+                            "kind": "rest"
+                          }
+                        ],
+                        "notation": "~ ~ cp ~"
+                      },
+                      "layers": []
+                    }
+                  }
+                ]
+              },
+              "layers": [
+                {
+                  "id": "n14",
+                  "tier": 1,
+                  "span": {
+                    "start": 103,
+                    "end": 125
+                  },
+                  "kind": "settings",
+                  "settings": [
+                    {
+                      "id": "n12",
+                      "tier": 1,
+                      "span": {
+                        "start": 103,
+                        "end": 125
+                      },
+                      "name": "gain",
+                      "value": {
+                        "id": "n13",
+                        "tier": 1,
+                        "span": {
+                          "start": 122,
+                          "end": 124
+                        },
+                        "core": {
+                          "kind": "constant",
+                          "value": 0.5
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "layers": []
+    },
+    "bass": {
+      "id": "n16",
+      "tier": 1,
+      "span": {
+        "start": 141,
+        "end": 160
+      },
+      "core": {
+        "kind": "generator",
+        "name": "note",
+        "args": [
+          {
+            "kind": "pattern",
+            "pattern": {
+              "id": "n17",
+              "tier": 1,
+              "span": {
+                "start": 146,
+                "end": 159
+              },
+              "core": {
+                "kind": "sequence",
+                "steps": [
+                  {
+                    "kind": "value",
+                    "value": "eb2"
+                  },
+                  {
+                    "kind": "rest"
+                  },
+                  {
+                    "kind": "value",
+                    "value": "bb2"
+                  },
+                  {
+                    "kind": "rest"
+                  }
+                ],
+                "notation": "eb2 ~ bb2 ~"
+              },
+              "layers": []
+            }
+          }
+        ]
+      },
+      "layers": [
+        {
+          "id": "n20",
+          "tier": 1,
+          "span": {
+            "start": 141,
+            "end": 170
+          },
+          "kind": "settings",
+          "settings": [
+            {
+              "id": "n18",
+              "tier": 1,
+              "span": {
+                "start": 141,
+                "end": 170
+              },
+              "name": "s",
+              "value": {
+                "id": "n19",
+                "tier": 1,
+                "span": {
+                  "start": 163,
+                  "end": 169
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "sine"
+                    }
+                  ],
+                  "notation": "sine"
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n21",
+              "tier": 1,
+              "span": {
+                "start": 141,
+                "end": 179
+              },
+              "name": "cutoff",
+              "value": {
+                "id": "n22",
+                "tier": 1,
+                "span": {
+                  "start": 175,
+                  "end": 178
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 700
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n23",
+              "tier": 1,
+              "span": {
+                "start": 141,
+                "end": 189
+              },
+              "name": "gain",
+              "value": {
+                "id": "n24",
+                "tier": 1,
+                "span": {
+                  "start": 185,
+                  "end": 188
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.45
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n25",
+              "tier": 1,
+              "span": {
+                "start": 141,
+                "end": 202
+              },
+              "name": "release",
+              "value": {
+                "id": "n26",
+                "tier": 1,
+                "span": {
+                  "start": 198,
+                  "end": 201
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.12
+                },
+                "layers": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "pad": {
+      "id": "n27",
+      "tier": 1,
+      "span": {
+        "start": 216,
+        "end": 249
+      },
+      "core": {
+        "kind": "generator",
+        "name": "note",
+        "args": [
+          {
+            "kind": "pattern",
+            "pattern": {
+              "id": "n28",
+              "tier": 1,
+              "span": {
+                "start": 221,
+                "end": 248
+              },
+              "core": {
+                "kind": "sequence",
+                "steps": [
+                  {
+                    "kind": "together",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "eb4"
+                      },
+                      {
+                        "kind": "value",
+                        "value": "g4"
+                      },
+                      {
+                        "kind": "value",
+                        "value": "bb4"
+                      }
+                    ]
+                  },
+                  {
+                    "kind": "together",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "db4"
+                      },
+                      {
+                        "kind": "value",
+                        "value": "f4"
+                      },
+                      {
+                        "kind": "value",
+                        "value": "ab4"
+                      }
+                    ]
+                  }
+                ],
+                "notation": "[eb4,g4,bb4] [db4,f4,ab4]"
+              },
+              "layers": []
+            }
+          }
+        ]
+      },
+      "layers": [
+        {
+          "id": "n31",
+          "tier": 1,
+          "span": {
+            "start": 216,
+            "end": 263
+          },
+          "kind": "settings",
+          "settings": [
+            {
+              "id": "n29",
+              "tier": 1,
+              "span": {
+                "start": 216,
+                "end": 263
+              },
+              "name": "s",
+              "value": {
+                "id": "n30",
+                "tier": 1,
+                "span": {
+                  "start": 252,
+                  "end": 262
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "triangle"
+                    }
+                  ],
+                  "notation": "triangle"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "n32",
+          "tier": 1,
+          "span": {
+            "start": 216,
+            "end": 271
+          },
+          "kind": "rewrite",
+          "name": "slow",
+          "args": [
+            {
+              "kind": "literal",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "id": "n35",
+          "tier": 1,
+          "span": {
+            "start": 216,
+            "end": 281
+          },
+          "kind": "settings",
+          "settings": [
+            {
+              "id": "n33",
+              "tier": 1,
+              "span": {
+                "start": 216,
+                "end": 281
+              },
+              "name": "gain",
+              "value": {
+                "id": "n34",
+                "tier": 1,
+                "span": {
+                  "start": 277,
+                  "end": 280
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.23
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n36",
+              "tier": 1,
+              "span": {
+                "start": 216,
+                "end": 290
+              },
+              "name": "room",
+              "value": {
+                "id": "n37",
+                "tier": 1,
+                "span": {
+                  "start": 287,
+                  "end": 289
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.8
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n38",
+              "tier": 1,
+              "span": {
+                "start": 216,
+                "end": 301
+              },
+              "name": "release",
+              "value": {
+                "id": "n39",
+                "tier": 1,
+                "span": {
+                  "start": 299,
+                  "end": 300
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 2
+                },
+                "layers": []
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "lead": {
+      "id": "n40",
+      "tier": 1,
+      "span": {
+        "start": 316,
+        "end": 331
+      },
+      "core": {
+        "kind": "generator",
+        "name": "note",
+        "args": [
+          {
+            "kind": "pattern",
+            "pattern": {
+              "id": "n41",
+              "tier": 1,
+              "span": {
+                "start": 321,
+                "end": 330
+              },
+              "core": {
+                "kind": "sequence",
+                "steps": [
+                  {
+                    "kind": "alternate",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "eb2"
+                      },
+                      {
+                        "kind": "rest"
+                      }
+                    ]
+                  }
+                ],
+                "notation": "<eb2 ~>"
+              },
+              "layers": []
+            }
+          }
+        ]
+      },
+      "layers": [
+        {
+          "id": "n42",
+          "tier": 1,
+          "span": {
+            "start": 316,
+            "end": 345
+          },
+          "kind": "rewrite",
+          "name": "add",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n43",
+                "tier": 1,
+                "span": {
+                  "start": 336,
+                  "end": 344
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "note",
+                  "args": [
+                    {
+                      "kind": "literal",
+                      "value": 24
+                    }
+                  ]
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "n46",
+          "tier": 1,
+          "span": {
+            "start": 316,
+            "end": 355
+          },
+          "kind": "settings",
+          "settings": [
+            {
+              "id": "n44",
+              "tier": 1,
+              "span": {
+                "start": 316,
+                "end": 355
+              },
+              "name": "s",
+              "value": {
+                "id": "n45",
+                "tier": 1,
+                "span": {
+                  "start": 348,
+                  "end": 354
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "sine"
+                    }
+                  ],
+                  "notation": "sine"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "n47",
+          "tier": 1,
+          "span": {
+            "start": 316,
+            "end": 372
+          },
+          "kind": "rewrite",
+          "name": "ply",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n48",
+                "tier": 1,
+                "span": {
+                  "start": 360,
+                  "end": 371
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "alternate",
+                      "steps": [
+                        {
+                          "kind": "value",
+                          "value": "1"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "2"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "3"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "2"
+                        }
+                      ]
+                    }
+                  ],
+                  "notation": "<1 2 3 2>"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "n51",
+          "tier": 1,
+          "span": {
+            "start": 316,
+            "end": 382
+          },
+          "kind": "settings",
+          "settings": [
+            {
+              "id": "n49",
+              "tier": 1,
+              "span": {
+                "start": 316,
+                "end": 382
+              },
+              "name": "gain",
+              "value": {
+                "id": "n50",
+                "tier": 1,
+                "span": {
+                  "start": 378,
+                  "end": 381
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.18
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n52",
+              "tier": 1,
+              "span": {
+                "start": 316,
+                "end": 392
+              },
+              "name": "delay",
+              "value": {
+                "id": "n53",
+                "tier": 1,
+                "span": {
+                  "start": 389,
+                  "end": 391
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.3
+                },
+                "layers": []
+              }
+            }
+          ]
+        }
+      ]
+    }
+  },
+  "order": [
+    {
+      "kind": "tempo"
+    },
+    {
+      "kind": "shared",
+      "name": "drums"
+    },
+    {
+      "kind": "shared",
+      "name": "bass"
+    },
+    {
+      "kind": "shared",
+      "name": "pad"
+    },
+    {
+      "kind": "shared",
+      "name": "lead"
+    },
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": [],
+  "tempo": {
+    "cpm": 15
+  }
+}

@@ -1,0 +1,176 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 70
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 34
+        },
+        "core": {
+          "kind": "generator",
+          "name": "note",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n3",
+                "tier": 1,
+                "span": {
+                  "start": 5,
+                  "end": 14
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "irand",
+                  "args": [
+                    {
+                      "kind": "literal",
+                      "value": 24
+                    }
+                  ]
+                },
+                "layers": [
+                  {
+                    "id": "n4",
+                    "tier": 1,
+                    "span": {
+                      "start": 5,
+                      "end": 25
+                    },
+                    "kind": "rewrite",
+                    "name": "segment",
+                    "args": [
+                      {
+                        "kind": "literal",
+                        "value": 7
+                      }
+                    ]
+                  },
+                  {
+                    "id": "n5",
+                    "tier": 2,
+                    "span": {
+                      "start": 5,
+                      "end": 33
+                    },
+                    "kind": "rewrite",
+                    "name": "add",
+                    "args": [
+                      {
+                        "kind": "literal",
+                        "value": 48
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n8",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 44
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n6",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 44
+                },
+                "name": "s",
+                "value": {
+                  "id": "n7",
+                  "tier": 1,
+                  "span": {
+                    "start": 37,
+                    "end": 43
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "sine"
+                      }
+                    ],
+                    "notation": "sine"
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n9",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 70
+                },
+                "name": "gain",
+                "value": {
+                  "id": "n10",
+                  "tier": 1,
+                  "span": {
+                    "start": 50,
+                    "end": 56
+                  },
+                  "core": {
+                    "kind": "signal",
+                    "shape": "perlin"
+                  },
+                  "layers": [
+                    {
+                      "id": "n11",
+                      "tier": 1,
+                      "span": {
+                        "start": 50,
+                        "end": 69
+                      },
+                      "kind": "rewrite",
+                      "name": "range",
+                      "args": [
+                        {
+                          "kind": "literal",
+                          "value": 0.1
+                        },
+                        {
+                          "kind": "literal",
+                          "value": 0.7
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

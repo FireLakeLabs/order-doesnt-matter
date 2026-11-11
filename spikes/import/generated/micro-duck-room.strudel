@@ -1,0 +1,2 @@
+$: /*@odm-voice {"name":"$","muted":false}*/ s("bd*4").orbit(0).duckorbit(1).duckdepth(0.8).duckattack(0.01);
+$: /*@odm-voice {"name":"$","muted":false}*/ note("[c3,eb3,g3]").s("sawtooth").orbit(1).slow(2);

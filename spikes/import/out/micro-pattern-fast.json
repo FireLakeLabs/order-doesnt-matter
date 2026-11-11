@@ -1,0 +1,207 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 62
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 16
+        },
+        "core": {
+          "kind": "generator",
+          "name": "note",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n3",
+                "tier": 1,
+                "span": {
+                  "start": 5,
+                  "end": 15
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "c3"
+                    },
+                    {
+                      "kind": "value",
+                      "value": "e3"
+                    },
+                    {
+                      "kind": "value",
+                      "value": "g3"
+                    }
+                  ],
+                  "notation": "c3 e3 g3"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n6",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 26
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n4",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 26
+                },
+                "name": "s",
+                "value": {
+                  "id": "n5",
+                  "tier": 1,
+                  "span": {
+                    "start": 19,
+                    "end": 25
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "sine"
+                      }
+                    ],
+                    "notation": "sine"
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          },
+          {
+            "id": "n7",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 44
+            },
+            "kind": "rewrite",
+            "name": "fast",
+            "args": [
+              {
+                "kind": "pattern",
+                "pattern": {
+                  "id": "n8",
+                  "tier": 1,
+                  "span": {
+                    "start": 32,
+                    "end": 43
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "alternate",
+                        "steps": [
+                          {
+                            "kind": "value",
+                            "value": "1"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "2"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "3"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "5"
+                          }
+                        ]
+                      }
+                    ],
+                    "notation": "<1 2 3 5>"
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          },
+          {
+            "id": "n11",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 62
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n9",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 62
+                },
+                "name": "cutoff",
+                "value": {
+                  "id": "n10",
+                  "tier": 1,
+                  "span": {
+                    "start": 49,
+                    "end": 61
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "alternate",
+                        "steps": [
+                          {
+                            "kind": "value",
+                            "value": "400"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "2000"
+                          }
+                        ]
+                      }
+                    ],
+                    "notation": "<400 2000>"
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

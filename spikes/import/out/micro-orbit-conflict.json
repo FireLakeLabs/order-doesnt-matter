@@ -1,0 +1,299 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 42
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 3,
+          "end": 12
+        },
+        "core": {
+          "kind": "generator",
+          "name": "s",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n3",
+                "tier": 1,
+                "span": {
+                  "start": 5,
+                  "end": 11
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "other",
+                      "notation": "bd*4"
+                    }
+                  ],
+                  "notation": "bd*4"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n6",
+            "tier": 1,
+            "span": {
+              "start": 3,
+              "end": 21
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n4",
+                "tier": 1,
+                "span": {
+                  "start": 3,
+                  "end": 21
+                },
+                "name": "orbit",
+                "value": {
+                  "id": "n5",
+                  "tier": 1,
+                  "span": {
+                    "start": 19,
+                    "end": 20
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n7",
+                "tier": 1,
+                "span": {
+                  "start": 3,
+                  "end": 30
+                },
+                "name": "room",
+                "value": {
+                  "id": "n8",
+                  "tier": 1,
+                  "span": {
+                    "start": 27,
+                    "end": 29
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.8
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n9",
+                "tier": 1,
+                "span": {
+                  "start": 3,
+                  "end": 42
+                },
+                "name": "roomsize",
+                "value": {
+                  "id": "n10",
+                  "tier": 1,
+                  "span": {
+                    "start": 40,
+                    "end": 41
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 2
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "n11",
+      "tier": 1,
+      "span": {
+        "start": 43,
+        "end": 99
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n12",
+        "tier": 1,
+        "span": {
+          "start": 46,
+          "end": 59
+        },
+        "core": {
+          "kind": "generator",
+          "name": "note",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n13",
+                "tier": 1,
+                "span": {
+                  "start": 51,
+                  "end": 58
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "c4"
+                    },
+                    {
+                      "kind": "value",
+                      "value": "e4"
+                    }
+                  ],
+                  "notation": "c4 e4"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n16",
+            "tier": 1,
+            "span": {
+              "start": 46,
+              "end": 69
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n14",
+                "tier": 1,
+                "span": {
+                  "start": 46,
+                  "end": 69
+                },
+                "name": "s",
+                "value": {
+                  "id": "n15",
+                  "tier": 1,
+                  "span": {
+                    "start": 62,
+                    "end": 68
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "sine"
+                      }
+                    ],
+                    "notation": "sine"
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n17",
+                "tier": 1,
+                "span": {
+                  "start": 46,
+                  "end": 78
+                },
+                "name": "orbit",
+                "value": {
+                  "id": "n18",
+                  "tier": 1,
+                  "span": {
+                    "start": 76,
+                    "end": 77
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n19",
+                "tier": 1,
+                "span": {
+                  "start": 46,
+                  "end": 87
+                },
+                "name": "room",
+                "value": {
+                  "id": "n20",
+                  "tier": 1,
+                  "span": {
+                    "start": 84,
+                    "end": 86
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.2
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n21",
+                "tier": 1,
+                "span": {
+                  "start": 46,
+                  "end": 99
+                },
+                "name": "roomsize",
+                "value": {
+                  "id": "n22",
+                  "tier": 1,
+                  "span": {
+                    "start": 97,
+                    "end": 98
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 8
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    },
+    {
+      "kind": "voice",
+      "index": 1
+    }
+  ],
+  "transforms": []
+}

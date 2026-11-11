@@ -1,0 +1,1 @@
+$: /*@odm-voice {"name":"$","muted":false}*/ (new Pattern(state => { if (Number(state.span.begin) >= 3) throw new Error('corpus intentional late failure'); return note(60).query(state); }));

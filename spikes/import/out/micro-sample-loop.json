@@ -1,0 +1,77 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 24
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 14
+        },
+        "core": {
+          "kind": "generator",
+          "name": "s",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n3",
+                "tier": 1,
+                "span": {
+                  "start": 2,
+                  "end": 13
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "breaks165"
+                    }
+                  ],
+                  "notation": "breaks165"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n4",
+            "tier": 2,
+            "span": {
+              "start": 0,
+              "end": 24
+            },
+            "kind": "rewrite",
+            "name": "loopAt",
+            "args": [
+              {
+                "kind": "literal",
+                "value": 3
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

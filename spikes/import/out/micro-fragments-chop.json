@@ -1,0 +1,145 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 51
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 18
+        },
+        "core": {
+          "kind": "generator",
+          "name": "note",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n3",
+                "tier": 1,
+                "span": {
+                  "start": 5,
+                  "end": 17
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "together",
+                      "steps": [
+                        {
+                          "kind": "value",
+                          "value": "c3"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "e3"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "g3"
+                        }
+                      ]
+                    }
+                  ],
+                  "notation": "[c3,e3,g3]"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n6",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 32
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n4",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 32
+                },
+                "name": "s",
+                "value": {
+                  "id": "n5",
+                  "tier": 1,
+                  "span": {
+                    "start": 21,
+                    "end": 31
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "sawtooth"
+                      }
+                    ],
+                    "notation": "sawtooth"
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          },
+          {
+            "id": "n7",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 40
+            },
+            "kind": "rewrite",
+            "name": "slow",
+            "args": [
+              {
+                "kind": "literal",
+                "value": 3
+              }
+            ]
+          },
+          {
+            "id": "n8",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 51
+            },
+            "kind": "rewrite",
+            "name": "early",
+            "args": [
+              {
+                "kind": "literal",
+                "value": 0.3333333333333333
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

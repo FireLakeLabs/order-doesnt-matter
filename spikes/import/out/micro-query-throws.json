@@ -1,0 +1,36 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 75
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 3,
+        "span": {
+          "start": 0,
+          "end": 75
+        },
+        "core": {
+          "kind": "opaque",
+          "code": "new Pattern(() => { throw new Error('corpus intentional query failure'); })"
+        },
+        "layers": []
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

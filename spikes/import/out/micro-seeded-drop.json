@@ -1,0 +1,93 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 34
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 10
+        },
+        "core": {
+          "kind": "generator",
+          "name": "s",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n3",
+                "tier": 1,
+                "span": {
+                  "start": 2,
+                  "end": 9
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "other",
+                      "notation": "hh*16"
+                    }
+                  ],
+                  "notation": "hh*16"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n4",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 25
+            },
+            "kind": "rewrite",
+            "name": "degradeBy",
+            "args": [
+              {
+                "kind": "literal",
+                "value": 0.37
+              }
+            ]
+          },
+          {
+            "id": "n5",
+            "tier": 2,
+            "span": {
+              "start": 0,
+              "end": 34
+            },
+            "kind": "rewrite",
+            "name": "seed",
+            "args": [
+              {
+                "kind": "literal",
+                "value": 42
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

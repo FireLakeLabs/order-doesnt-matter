@@ -1,0 +1,2913 @@
+{
+  "node": "v24.22.2",
+  "window": [
+    0,
+    16
+  ],
+  "date": "2026-11-11T18:59:27.224Z",
+  "reports": [
+    {
+      "id": "micro-tree-stack",
+      "tiers": {
+        "1": 12,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 72,
+      "freshEvents": 72,
+      "importMs": 0.7683330000000126,
+      "generateMs": 0.030366999999984046,
+      "importTimes": [
+        1.2299289999999985,
+        1.1331069999999954,
+        0.818696999999986,
+        0.7683330000000126,
+        0.7366529999999898,
+        0.745018000000016,
+        0.7356709999999964
+      ],
+      "generateTimes": [
+        0.0579490000000078,
+        0.02665999999999258,
+        0.030366999999984046,
+        0.053099000000003116,
+        0.03333200000000147,
+        0.017402000000004136,
+        0.02458599999999933
+      ]
+    },
+    {
+      "id": "micro-tree-arrange",
+      "tiers": {
+        "1": 10,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 94,
+      "freshEvents": 94,
+      "importMs": 0.28932399999996505,
+      "generateMs": 0.013746000000082859,
+      "importTimes": [
+        0.28932399999996505,
+        0.308620000000019,
+        0.26992599999994127,
+        0.24704299999996238,
+        0.30499300000008134,
+        0.34689099999991413,
+        0.27228100000002087
+      ],
+      "generateTimes": [
+        0.014578000000028624,
+        0.010890999999901396,
+        0.014888000000041757,
+        0.00973799999997027,
+        0.013746000000082859,
+        0.009817999999995664,
+        0.013956000000007407
+      ]
+    },
+    {
+      "id": "micro-callback-off",
+      "tiers": {
+        "1": 12,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 112,
+      "freshEvents": 112,
+      "importMs": 0.3646649999999454,
+      "generateMs": 0.01846499999999196,
+      "importTimes": [
+        0.3698549999999159,
+        0.3646649999999454,
+        0.33988799999997354,
+        0.2995029999999588,
+        0.5228220000000192,
+        0.3894510000000082,
+        0.29710799999998017
+      ],
+      "generateTimes": [
+        0.023112999999966632,
+        0.014397000000030857,
+        0.01846499999999196,
+        0.013464999999996508,
+        0.04350099999999202,
+        0.029065000000059626,
+        0.0173219999999219
+      ]
+    },
+    {
+      "id": "micro-callback-deep",
+      "tiers": {
+        "1": 20,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 464,
+      "freshEvents": 464,
+      "importMs": 0.24450900000010733,
+      "generateMs": 0.015638999999964653,
+      "importTimes": [
+        0.2570619999999053,
+        0.29823000000010325,
+        0.24450900000010733,
+        0.23323800000002848,
+        0.20359199999984412,
+        0.2871189999998478,
+        0.22272900000007212
+      ],
+      "generateTimes": [
+        0.030676999999968757,
+        0.014265999999906853,
+        0.016530999999986307,
+        0.011842999999998938,
+        0.015429000000040105,
+        0.019536999999900218,
+        0.015638999999964653
+      ]
+    },
+    {
+      "id": "micro-reuse",
+      "tiers": {
+        "1": 14,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 96,
+      "freshEvents": 96,
+      "importMs": 0.2543470000000525,
+      "generateMs": 0.016800999999986743,
+      "importTimes": [
+        0.3092910000000302,
+        0.24328600000012557,
+        0.2563910000001215,
+        0.2543470000000525,
+        0.23590200000012373,
+        0.25744299999996656,
+        0.20292099999983293
+      ],
+      "generateTimes": [
+        0.020518999999922016,
+        0.020007999999961612,
+        0.016800999999986743,
+        0.012493000000176835,
+        0.01897600000006605,
+        0.011901999999963664,
+        0.015508999999838124
+      ]
+    },
+    {
+      "id": "micro-register",
+      "tiers": {
+        "1": 5,
+        "2": 1,
+        "3": 1
+      },
+      "tier2": {
+        "ghosts": 1
+      },
+      "reasons": {
+        "register body": 1
+      },
+      "warnings": [
+        "register body: register('ghosts', (amount, pat) => pat.off(1/8, p => p.gain(amount)));"
+      ],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 80,
+      "freshEvents": 80,
+      "importMs": 0.21097600000007333,
+      "generateMs": 0.01238299999999981,
+      "importTimes": [
+        0.2937610000001314,
+        0.21679699999981494,
+        0.21097600000007333,
+        0.2500800000000254,
+        0.20920299999988856,
+        0.17742299999986244,
+        0.19119900000009693
+      ],
+      "generateTimes": [
+        0.016530999999986307,
+        0.011211000000002969,
+        0.013384999999971114,
+        0.008074999999962529,
+        0.015108000000054744,
+        0.007564000000002125,
+        0.01238299999999981
+      ]
+    },
+    {
+      "id": "micro-pattern-fast",
+      "tiers": {
+        "1": 8,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 132,
+      "freshEvents": 132,
+      "importMs": 0.3579420000000937,
+      "generateMs": 0.017272000000048138,
+      "importTimes": [
+        0.23890899999992143,
+        0.22176699999999983,
+        0.2184500000000753,
+        0.3722580000001017,
+        0.7900529999999435,
+        0.40025100000002567,
+        0.3579420000000937
+      ],
+      "generateTimes": [
+        0.017272000000048138,
+        0.01071999999999207,
+        0.014376999999967666,
+        0.00994900000000598,
+        0.04592600000000857,
+        0.0309180000001561,
+        0.01932600000009188
+      ]
+    },
+    {
+      "id": "micro-pattern-slow",
+      "tiers": {
+        "1": 6,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 60,
+      "freshEvents": 60,
+      "importMs": 0.1772529999998369,
+      "generateMs": 0.012392999999974563,
+      "importTimes": [
+        0.3773489999998674,
+        0.20247999999992317,
+        0.2405319999998028,
+        0.17521899999974266,
+        0.1772529999998369,
+        0.15892799999983254,
+        0.15753499999982523
+      ],
+      "generateTimes": [
+        0.029825999999957276,
+        0.009337999999843305,
+        0.014758000000256288,
+        0.008827000000110274,
+        0.013725999999678606,
+        0.008354999999937718,
+        0.012392999999974563
+      ]
+    },
+    {
+      "id": "micro-labels",
+      "tiers": {
+        "1": 11,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "all": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 96,
+      "freshEvents": 96,
+      "importMs": 0.29749800000035975,
+      "generateMs": 0.019906999999875552,
+      "importTimes": [
+        0.29749800000035975,
+        0.3263230000002295,
+        0.23039199999993798,
+        0.2436979999997675,
+        0.2382670000001781,
+        0.34208200000011857,
+        0.35979600000018763
+      ],
+      "generateTimes": [
+        0.026779999999689608,
+        0.013715999999931228,
+        0.019906999999875552,
+        0.011903000000074826,
+        0.03117900000006557,
+        0.015097999999852618,
+        0.030095999999957712
+      ]
+    },
+    {
+      "id": "micro-orbit-conflict",
+      "tiers": {
+        "1": 18,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 96,
+      "freshEvents": 96,
+      "importMs": 0.2134609999998247,
+      "generateMs": 0.01298399999996036,
+      "importTimes": [
+        0.38631500000019514,
+        0.20162799999980052,
+        0.23410899999998946,
+        0.22357899999997244,
+        0.2134609999998247,
+        0.1805480000002717,
+        0.16784499999994296
+      ],
+      "generateTimes": [
+        0.0190149999998539,
+        0.01044899999988047,
+        0.01544899999998961,
+        0.009367000000111148,
+        0.01428699999996752,
+        0.008576000000175554,
+        0.01298399999996036
+      ]
+    },
+    {
+      "id": "micro-long-alternation",
+      "tiers": {
+        "1": 9,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 20,
+      "freshEvents": 20,
+      "importMs": 0.16216399999984787,
+      "generateMs": 0.01153199999998833,
+      "importTimes": [
+        0.1960079999998925,
+        0.2396400000002359,
+        0.17547899999999572,
+        0.16216399999984787,
+        0.13976299999967523,
+        0.14380000000028303,
+        0.1321589999997741
+      ],
+      "generateTimes": [
+        0.018264999999701104,
+        0.01153199999998833,
+        0.012604000000010274,
+        0.007714000000305532,
+        0.01128100000005361,
+        0.007433999999648222,
+        0.011541999999735708
+      ]
+    },
+    {
+      "id": "micro-polymeter",
+      "tiers": {
+        "1": 4,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 25,
+      "freshEvents": 25,
+      "importMs": 0.09161200000016834,
+      "generateMs": 0.00855600000022605,
+      "importTimes": [
+        0.13241799999968862,
+        0.11597800000026837,
+        0.09161200000016834,
+        0.10634900000013658,
+        0.08232399999997142,
+        0.08307599999989179,
+        0.07868800000005649
+      ],
+      "generateTimes": [
+        0.012203000000226893,
+        0.006401999999980035,
+        0.008916999999655673,
+        0.005659999999807042,
+        0.008655999999973574,
+        0.006250999999792839,
+        0.00855600000022605
+      ]
+    },
+    {
+      "id": "micro-seeded-drop",
+      "tiers": {
+        "1": 5,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "seed": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 165,
+      "freshEvents": 165,
+      "importMs": 0.09432700000024852,
+      "generateMs": 0.009647999999742751,
+      "importTimes": [
+        0.13025399999969522,
+        0.10796200000004319,
+        0.09432700000024852,
+        0.13692700000001423,
+        0.09308499999997366,
+        0.0890479999998206,
+        0.08079099999986283
+      ],
+      "generateTimes": [
+        0.014206999999714753,
+        0.006872999999814056,
+        0.009647999999742751,
+        0.006793000000016036,
+        0.01721300000008341,
+        0.005951000000095519,
+        0.009809000000132073
+      ]
+    },
+    {
+      "id": "micro-random-pitch",
+      "tiers": {
+        "1": 13,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "add": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 112,
+      "freshEvents": 112,
+      "importMs": 0.12144800000032774,
+      "generateMs": 0.01298399999996036,
+      "importTimes": [
+        0.12881199999992532,
+        0.10600900000008551,
+        0.11990500000001703,
+        0.1821220000001631,
+        0.12268099999982951,
+        0.11997500000006767,
+        0.12144800000032774
+      ],
+      "generateTimes": [
+        0.01298399999996036,
+        0.009077000000161206,
+        0.013454999999794381,
+        0.020177999999759777,
+        0.021220000000084838,
+        0.00802499999963402,
+        0.012453999999706866
+      ]
+    },
+    {
+      "id": "micro-arrange-300",
+      "tiers": {
+        "1": 11,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 64,
+      "freshEvents": 64,
+      "importMs": 0.2537670000001526,
+      "generateMs": 0.014917999999852327,
+      "importTimes": [
+        0.2690950000005614,
+        0.36661800000001676,
+        0.2537670000001526,
+        0.27113900000040303,
+        0.2474739999997837,
+        0.23006200000054378,
+        0.23074300000007497
+      ],
+      "generateTimes": [
+        0.017762999999831663,
+        0.011320999999952619,
+        0.015207999999802269,
+        0.010269000000334927,
+        0.017391999999745167,
+        0.010239000000183296,
+        0.014917999999852327
+      ]
+    },
+    {
+      "id": "micro-arrange-301",
+      "tiers": {
+        "1": 11,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 16,
+      "freshEvents": 16,
+      "importMs": 0.2318760000007387,
+      "generateMs": 0.015018000000054599,
+      "importTimes": [
+        0.30807800000002317,
+        0.2402010000005248,
+        0.2318760000007387,
+        0.21356099999957223,
+        0.2574530000001687,
+        0.21019499999965774,
+        0.2008770000002187
+      ],
+      "generateTimes": [
+        0.020168000000012398,
+        0.010420000000522123,
+        0.01530800000000454,
+        0.009958999999980733,
+        0.015018000000054599,
+        0.010118999999576772,
+        0.015209000000140804
+      ]
+    },
+    {
+      "id": "micro-signal-bare",
+      "tiers": {
+        "1": 1,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 16,
+      "freshEvents": 16,
+      "importMs": 0.021431000000120548,
+      "generateMs": 0.005450000000564614,
+      "importTimes": [
+        0.0308180000001812,
+        0.022762999999940803,
+        0.017243000000235043,
+        0.016490999999405176,
+        0.014457000000220432,
+        0.028473000000303728,
+        0.021431000000120548
+      ],
+      "generateTimes": [
+        0.009248000000297907,
+        0.004358999999567459,
+        0.005450000000564614,
+        0.0042480000001887674,
+        0.005371000000195636,
+        0.007193000000370375,
+        0.005850999999893247
+      ]
+    },
+    {
+      "id": "micro-signal-lanes",
+      "tiers": {
+        "1": 19,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 64,
+      "freshEvents": 64,
+      "importMs": 0.19388399999934336,
+      "generateMs": 0.014065999999729684,
+      "importTimes": [
+        0.20332200000029843,
+        0.23147400000016205,
+        0.19388399999934336,
+        0.17445800000041345,
+        0.14310899999964022,
+        0.1808389999996507,
+        0.3196400000006179
+      ],
+      "generateTimes": [
+        0.021220000000539585,
+        0.026109000000360538,
+        0.01454699999976583,
+        0.009157000000413973,
+        0.014065999999729684,
+        0.010279000000082306,
+        0.013536000000385684
+      ]
+    },
+    {
+      "id": "micro-fragments-slow",
+      "tiers": {
+        "1": 6,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 18,
+      "freshEvents": 18,
+      "importMs": 0.15682399999968766,
+      "generateMs": 0.011452000000645057,
+      "importTimes": [
+        0.24864700000034645,
+        0.23581199999989622,
+        0.1571749999993699,
+        0.15607299999919633,
+        0.15682399999968766,
+        0.14858900000035646,
+        0.14586399999916466
+      ],
+      "generateTimes": [
+        0.022431999999753316,
+        0.007223999999951047,
+        0.014868000000205939,
+        0.007483999999749358,
+        0.011551999999937834,
+        0.007845000000088476,
+        0.011452000000645057
+      ]
+    },
+    {
+      "id": "micro-fragments-chop",
+      "tiers": {
+        "1": 8,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 63,
+      "freshEvents": 63,
+      "importMs": 0.15659400000004098,
+      "generateMs": 0.011150999999699707,
+      "importTimes": [
+        0.3473919999996724,
+        0.16981900000064343,
+        0.15659400000004098,
+        0.14754700000048615,
+        0.15802700000040204,
+        0.1493399999999383,
+        0.14027299999997922
+      ],
+      "generateTimes": [
+        0.01915599999938422,
+        0.007954000000609085,
+        0.011712000000443368,
+        0.007273000000168395,
+        0.011150999999699707,
+        0.007174000000304659,
+        0.011150999999699707
+      ]
+    },
+    {
+      "id": "micro-dense-64",
+      "tiers": {
+        "1": 4,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 4096,
+      "freshEvents": 4096,
+      "importMs": 0.08942800000022544,
+      "generateMs": 0.008364999999685097,
+      "importTimes": [
+        0.12226000000009662,
+        0.10208099999999831,
+        0.08942800000022544,
+        0.08323699999982637,
+        0.07685399999991205,
+        0.10116999999991094,
+        0.08584100000007311
+      ],
+      "generateTimes": [
+        0.012022000000797561,
+        0.005639999999402789,
+        0.00898700000016106,
+        0.005581000000347558,
+        0.008364999999685097,
+        0.007714999999734573,
+        0.00899699999990844
+      ]
+    },
+    {
+      "id": "micro-dense-stack",
+      "tiers": {
+        "1": 9,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 14336,
+      "freshEvents": 14336,
+      "importMs": 0.4348469999995359,
+      "generateMs": 0.017853999999715597,
+      "importTimes": [
+        0.43536800000038056,
+        0.44411399999989953,
+        0.44932300000073155,
+        0.4194079999997484,
+        0.4348469999995359,
+        0.40444899999965855,
+        0.3796629999997094
+      ],
+      "generateTimes": [
+        0.025067000000490225,
+        0.017211999999744876,
+        0.019767000000683765,
+        0.026930999999422056,
+        0.017853999999715597,
+        0.011862000000292028,
+        0.014417000000321423
+      ]
+    },
+    {
+      "id": "micro-bare-numbers",
+      "tiers": {
+        "1": 4,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 48,
+      "freshEvents": 48,
+      "importMs": 0.030146000000058848,
+      "generateMs": 0.005861000000550121,
+      "importTimes": [
+        0.030617000000347616,
+        0.030146000000058848,
+        0.025778999999602092,
+        0.03834199999982957,
+        0.024586000000454078,
+        0.032050999999228225,
+        0.02400500000021566
+      ],
+      "generateTimes": [
+        0.007264000000759552,
+        0.005129000000124506,
+        0.006041999999979453,
+        0.004769000000123924,
+        0.01592900000014197,
+        0.004689000000325905,
+        0.005861000000550121
+      ]
+    },
+    {
+      "id": "micro-bare-strings",
+      "tiers": {
+        "1": 5,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": false,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": true,
+      "originalEvents": 16,
+      "freshEvents": 16,
+      "importMs": 0.10720099999980448,
+      "generateMs": 0.009056999999302207,
+      "importTimes": [
+        0.14782800000011775,
+        0.12737899999956426,
+        0.10919499999999971,
+        0.10404500000004191,
+        0.10720099999980448,
+        0.1055080000005546,
+        0.09666199999992386
+      ],
+      "generateTimes": [
+        0.014447000000473054,
+        0.007212999999865133,
+        0.01123100000040722,
+        0.006452999999964959,
+        0.014577000000826956,
+        0.006262000000788248,
+        0.009056999999302207
+      ]
+    },
+    {
+      "id": "micro-control-aliases",
+      "tiers": {
+        "1": 12,
+        "2": 2,
+        "3": 0
+      },
+      "tier2": {
+        "vib": 1,
+        "vibmod": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 32,
+      "freshEvents": 32,
+      "importMs": 0.14845900000000256,
+      "generateMs": 0.011621999999988475,
+      "importTimes": [
+        0.17881599999964237,
+        0.2856069999997999,
+        0.18373400000018592,
+        0.14692600000034872,
+        0.14845900000000256,
+        0.13551399999960267,
+        0.13819899999998597
+      ],
+      "generateTimes": [
+        0.013434999999844877,
+        0.017172999999274907,
+        0.013195000000450818,
+        0.008064999999987776,
+        0.011621999999988475,
+        0.00834599999961938,
+        0.011300999999548367
+      ]
+    },
+    {
+      "id": "micro-control-multivalue",
+      "tiers": {
+        "1": 8,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 32,
+      "freshEvents": 32,
+      "importMs": 0.21860000000015134,
+      "generateMs": 0.015328999999837833,
+      "importTimes": [
+        0.24703300000055606,
+        0.2020990000000893,
+        0.18283299999984592,
+        0.1843459999990955,
+        0.23087300000042887,
+        0.31537200000002485,
+        0.21860000000015134
+      ],
+      "generateTimes": [
+        0.015257999999448657,
+        0.009727999999995518,
+        0.01127100000030623,
+        0.02033800000026531,
+        0.01828399999976682,
+        0.015328999999837833,
+        0.015379000000393717
+      ]
+    },
+    {
+      "id": "micro-control-array",
+      "tiers": {
+        "1": 6,
+        "2": 2,
+        "3": 0
+      },
+      "tier2": {
+        "partials": 1,
+        "phases": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 32,
+      "freshEvents": 32,
+      "importMs": 0.12602700000024925,
+      "generateMs": 0.011771999999837135,
+      "importTimes": [
+        0.1496709999992163,
+        0.15494000000035157,
+        0.13391199999932724,
+        0.12602700000024925,
+        0.12183899999945424,
+        0.12381300000015472,
+        0.11881299999913608
+      ],
+      "generateTimes": [
+        0.016030000000682776,
+        0.010209000000031665,
+        0.014307000001281267,
+        0.00846599999931641,
+        0.011792000001150882,
+        0.008074999999735155,
+        0.011771999999837135
+      ]
+    },
+    {
+      "id": "micro-fx-filter-drive",
+      "tiers": {
+        "1": 10,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "FX": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 32,
+      "freshEvents": 32,
+      "importMs": 0.44325199999912,
+      "generateMs": 0.031037999999171006,
+      "importTimes": [
+        0.34850399999959336,
+        0.475973000000522,
+        0.327263999999559,
+        1.8092959999994491,
+        0.44325199999912,
+        0.5107789999983652,
+        0.3839399999997113
+      ],
+      "generateTimes": [
+        0.03476599999885366,
+        0.030948999999964144,
+        0.028282999999646563,
+        0.031037999999171006,
+        0.03840200000013283,
+        0.025988999999754014,
+        0.03378300000076706
+      ]
+    },
+    {
+      "id": "micro-fx-drive-filter",
+      "tiers": {
+        "1": 10,
+        "2": 2,
+        "3": 0
+      },
+      "tier2": {
+        "FX": 2
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 32,
+      "freshEvents": 32,
+      "importMs": 0.13047499999993306,
+      "generateMs": 0.01128199999948265,
+      "importTimes": [
+        0.15060300000004645,
+        0.13047499999993306,
+        0.13476300000002084,
+        0.11768099999972037,
+        0.11666900000091118,
+        0.11931400000139547,
+        0.13426199999958044
+      ],
+      "generateTimes": [
+        0.016480999998748302,
+        0.008036000001084176,
+        0.012323000000833417,
+        0.008636000000478816,
+        0.01128199999948265,
+        0.008976999999504187,
+        0.013464999999996508
+      ]
+    },
+    {
+      "id": "micro-orbit-delay",
+      "tiers": {
+        "1": 16,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 96,
+      "freshEvents": 96,
+      "importMs": 0.15931900000032329,
+      "generateMs": 0.013284999999086722,
+      "importTimes": [
+        0.17749300000104995,
+        0.17921700000079,
+        0.15931900000032329,
+        0.1445819999989908,
+        0.14247700000123587,
+        0.18670000000020082,
+        0.15042199999879813
+      ],
+      "generateTimes": [
+        0.02082900000095833,
+        0.011771999999837135,
+        0.01692200000070443,
+        0.011261000001468346,
+        0.013284999999086722,
+        0.009937999999237945,
+        0.015398999999888474
+      ]
+    },
+    {
+      "id": "micro-cut-group",
+      "tiers": {
+        "1": 9,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 160,
+      "freshEvents": 160,
+      "importMs": 0.1115799999988667,
+      "generateMs": 0.010650000000168802,
+      "importTimes": [
+        0.2033820000015112,
+        0.1317479999997886,
+        0.1115799999988667,
+        0.1109680000008666,
+        0.11555699999917124,
+        0.10514800000055402,
+        0.10477600000012899
+      ],
+      "generateTimes": [
+        0.016260000000329455,
+        0.010650000000168802,
+        0.010800000000017462,
+        0.007574000001113745,
+        0.011571999999432592,
+        0.007203999999546795,
+        0.010569999998551793
+      ]
+    },
+    {
+      "id": "micro-duck-room",
+      "tiers": {
+        "1": 15,
+        "2": 3,
+        "3": 0
+      },
+      "tier2": {
+        "duckorbit": 1,
+        "duckdepth": 1,
+        "duckattack": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 112,
+      "freshEvents": 112,
+      "importMs": 0.19141900000067835,
+      "generateMs": 0.015338000001065666,
+      "importTimes": [
+        0.24354700000003504,
+        0.19991600000139442,
+        0.19141900000067835,
+        0.20240999999987253,
+        0.1766010000010283,
+        0.1732850000007602,
+        0.1888150000013411
+      ],
+      "generateTimes": [
+        0.024435999999695923,
+        0.012864000000263331,
+        0.01763299999947776,
+        0.011351000001013745,
+        0.015338999999585212,
+        0.00993900000139547,
+        0.015338000001065666
+      ]
+    },
+    {
+      "id": "micro-tails",
+      "tiers": {
+        "1": 8,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 128,
+      "freshEvents": 128,
+      "importMs": 0.12193900000056601,
+      "generateMs": 0.010088999999425141,
+      "importTimes": [
+        0.1548399999992398,
+        0.13056600000163598,
+        0.12193900000056601,
+        0.1136530000003404,
+        0.12214900000071793,
+        0.10593899999912537,
+        0.10338400000000547
+      ],
+      "generateTimes": [
+        0.017021999999997206,
+        0.00846599999931641,
+        0.011180999999851338,
+        0.006612999999560998,
+        0.010449999999764259,
+        0.006451999999626423,
+        0.010088999999425141
+      ]
+    },
+    {
+      "id": "micro-clip-length",
+      "tiers": {
+        "1": 6,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 64,
+      "freshEvents": 64,
+      "importMs": 0.07978000000002794,
+      "generateMs": 0.008465000000796863,
+      "importTimes": [
+        0.07978000000002794,
+        0.08181399999921268,
+        0.08904699999948207,
+        0.07950900000105321,
+        0.08435800000006566,
+        0.07873800000015763,
+        0.0796600000012404
+      ],
+      "generateTimes": [
+        0.009207999999489402,
+        0.006461999999373802,
+        0.00891599999886239,
+        0.005960999998933403,
+        0.01295399999980873,
+        0.0064419999998790445,
+        0.008465000000796863
+      ]
+    },
+    {
+      "id": "micro-external-state",
+      "tiers": {
+        "1": 2,
+        "2": 0,
+        "3": 2
+      },
+      "tier2": {},
+      "reasons": {
+        "awaited setup": 1,
+        "setup effect": 1
+      },
+      "warnings": [
+        "awaited setup: await samples('github:tidalcycles/dirt-samples');",
+        "setup effect: hush();"
+      ],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 64,
+      "freshEvents": 64,
+      "importMs": 0.10007799999948475,
+      "generateMs": 0.010349000000132946,
+      "importTimes": [
+        0.3274040000014793,
+        0.10007799999948475,
+        0.11525700000129291,
+        0.08875699999953213,
+        0.08494000000064261,
+        0.08674299999984214,
+        0.12048600000161969
+      ],
+      "generateTimes": [
+        0.03647899999850779,
+        0.006341999998767278,
+        0.01108100000055856,
+        0.00590100000044913,
+        0.01082000000133121,
+        0.005720999999539345,
+        0.010349000000132946
+      ]
+    },
+    {
+      "id": "micro-external-tempo",
+      "tiers": {
+        "1": 4,
+        "2": 0,
+        "3": 1
+      },
+      "tier2": {},
+      "reasons": {
+        "awaited setup": 1
+      },
+      "warnings": [
+        "awaited setup: await Promise.resolve();"
+      ],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 32,
+      "freshEvents": 32,
+      "importMs": 0.13777899999877263,
+      "generateMs": 0.011222000000998378,
+      "importTimes": [
+        0.16855600000053528,
+        0.14716599999883329,
+        0.15664400000059686,
+        0.13039500000013504,
+        0.13777899999877263,
+        0.12335100000018429,
+        0.13334100000065519
+      ],
+      "generateTimes": [
+        0.01634100000046601,
+        0.009477999999944586,
+        0.012693999999100924,
+        0.006962999999814201,
+        0.011222000000998378,
+        0.007034000000203378,
+        0.011452000000645057
+      ]
+    },
+    {
+      "id": "micro-trigger",
+      "tiers": {
+        "1": 4,
+        "2": 0,
+        "3": 1
+      },
+      "tier2": {},
+      "reasons": {
+        "side-effect output": 1
+      },
+      "warnings": [
+        "side-effect output: .onTrigger(() => console.log('a note was triggered'))"
+      ],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 64,
+      "freshEvents": 64,
+      "importMs": 0.15192600000045786,
+      "generateMs": 0.00966800000060175,
+      "importTimes": [
+        0.18641000000025088,
+        0.15633399999933317,
+        0.16143299999930605,
+        0.13385200000084296,
+        0.12281099999927392,
+        0.11808099999871047,
+        0.15192600000045786
+      ],
+      "generateTimes": [
+        0.02102999999988242,
+        0.00810500000079628,
+        0.012131999999837717,
+        0.00754400000005262,
+        0.00966800000060175,
+        0.0062010000001464505,
+        0.010699999998905696
+      ]
+    },
+    {
+      "id": "micro-visuals",
+      "tiers": {
+        "1": 2,
+        "2": 0,
+        "3": 3
+      },
+      "tier2": {},
+      "reasons": {
+        "side-effect output": 3
+      },
+      "warnings": [
+        "side-effect output: .log()",
+        "side-effect output: .pianoroll()",
+        "side-effect output: .scope()"
+      ],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 64,
+      "freshEvents": 64,
+      "importMs": 0.09410600000046543,
+      "generateMs": 0.007875000001149601,
+      "importTimes": [
+        0.14251700000022538,
+        0.11538699999982782,
+        0.09410600000046543,
+        0.08560100000067905,
+        0.0820240000011836,
+        0.09980800000084855,
+        0.08138199999848439
+      ],
+      "generateTimes": [
+        0.013655000000653672,
+        0.006943000000319444,
+        0.008346000000528875,
+        0.00560100000075181,
+        0.007883999998739455,
+        0.0061409999998431886,
+        0.007875000001149601
+      ]
+    },
+    {
+      "id": "micro-query-throws",
+      "tiers": {
+        "1": 0,
+        "2": 0,
+        "3": 1
+      },
+      "tier2": {},
+      "reasons": {
+        "hand-built object/pattern": 1
+      },
+      "warnings": [
+        "hand-built object/pattern: new Pattern(() => { throw new Error('corpus intentional query failure'); })"
+      ],
+      "idempotent": true,
+      "equivalent": false,
+      "matchingProjection": true,
+      "originalError": "corpus intentional query failure",
+      "freshError": "corpus intentional query failure",
+      "opaqueValues": false,
+      "originalEvents": 0,
+      "freshEvents": 0,
+      "importMs": 0.04809000000022934,
+      "generateMs": 0.006070999999792548,
+      "importTimes": [
+        0.06108500000118511,
+        0.05320899999969697,
+        0.04253900000003341,
+        0.04809000000022934,
+        0.05341999999836844,
+        0.04130799999984447,
+        0.04542500000025029
+      ],
+      "generateTimes": [
+        0.010088999999425141,
+        0.004848999999012449,
+        0.006451999999626423,
+        0.003987000000051921,
+        0.006761999999071122,
+        0.003946999999243417,
+        0.006070999999792548
+      ]
+    },
+    {
+      "id": "micro-query-late-throws",
+      "tiers": {
+        "1": 0,
+        "2": 0,
+        "3": 1
+      },
+      "tier2": {},
+      "reasons": {
+        "hand-built object/pattern": 1
+      },
+      "warnings": [
+        "hand-built object/pattern: new Pattern(state => { if (Number(state.span.begin) >= 3) throw new Error('corpus intentional late failure'); return note(60).query(state); })"
+      ],
+      "idempotent": true,
+      "equivalent": false,
+      "matchingProjection": true,
+      "originalError": "corpus intentional late failure",
+      "freshError": "corpus intentional late failure",
+      "opaqueValues": false,
+      "originalEvents": 3,
+      "freshEvents": 3,
+      "importMs": 0.07491099999970174,
+      "generateMs": 0.006783000000723405,
+      "importTimes": [
+        0.16160300000046846,
+        0.11082799999894632,
+        0.08194400000138558,
+        0.07491099999970174,
+        0.07182499999908032,
+        0.07076299999971525,
+        0.0678779999998369
+      ],
+      "generateTimes": [
+        0.015669000000343658,
+        0.004689000001235399,
+        0.008225000001402805,
+        0.007143999999243533,
+        0.006783000000723405,
+        0.003988000000390457,
+        0.006661999999778345
+      ]
+    },
+    {
+      "id": "micro-sample-loop",
+      "tiers": {
+        "1": 3,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "loopAt": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 16,
+      "freshEvents": 16,
+      "importMs": 0.1037849999993341,
+      "generateMs": 0.008947000000262051,
+      "importTimes": [
+        0.22133600000051956,
+        0.19641799999953946,
+        0.1037849999993341,
+        0.08275499999945168,
+        0.0792989999990823,
+        0.11038800000096671,
+        0.07945900000049733
+      ],
+      "generateTimes": [
+        0.026719999999841093,
+        0.01750299999912386,
+        0.009466999999858672,
+        0.005320000000210712,
+        0.008947000000262051,
+        0.00662200000078883,
+        0.008576000000175554
+      ]
+    },
+    {
+      "id": "micro-sample-splice",
+      "tiers": {
+        "1": 4,
+        "2": 2,
+        "3": 0
+      },
+      "tier2": {
+        "splice": 1,
+        "fit": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 80,
+      "freshEvents": 80,
+      "importMs": 0.13929100000132166,
+      "generateMs": 0.011522000000695698,
+      "importTimes": [
+        0.3833489999997255,
+        0.3195899999991525,
+        0.13929100000132166,
+        0.13257900000098743,
+        0.12761999999929685,
+        0.1364659999999276,
+        0.1455630000000383
+      ],
+      "generateTimes": [
+        0.03520600000047125,
+        0.016962000001512934,
+        0.011651999999230611,
+        0.0073040000006585615,
+        0.010830999999598134,
+        0.0075140000008104835,
+        0.011522000000695698
+      ]
+    },
+    {
+      "id": "mms-clock",
+      "tiers": {
+        "1": 10,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "swingBy": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 128,
+      "freshEvents": 128,
+      "importMs": 0.16438799999923503,
+      "generateMs": 0.012844000000768574,
+      "importTimes": [
+        0.19813200000135112,
+        0.16502000000036787,
+        0.1469149999993533,
+        0.16438799999923503,
+        0.1481579999999667,
+        0.1425970000000234,
+        0.1705500000007305
+      ],
+      "generateTimes": [
+        0.018876000000091153,
+        0.007875000001149601,
+        0.012844000000768574,
+        0.010378999999375083,
+        0.01315499999873282,
+        0.007734000000709784,
+        0.013015000000450527
+      ]
+    },
+    {
+      "id": "mms-euclid",
+      "tiers": {
+        "1": 8,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 48,
+      "freshEvents": 48,
+      "importMs": 0.14260699999977078,
+      "generateMs": 0.013815999998769257,
+      "importTimes": [
+        0.14260699999977078,
+        0.15720499999952153,
+        0.14346000000114145,
+        0.16264500000033877,
+        0.13887099999919883,
+        0.14154600000074424,
+        0.13118600000052538
+      ],
+      "generateTimes": [
+        0.014217000001735869,
+        0.0073040000006585615,
+        0.013846000001649372,
+        0.014908000001014443,
+        0.013815999998769257,
+        0.00853600000118604,
+        0.01031900000089081
+      ]
+    },
+    {
+      "id": "mms-euclid-legato",
+      "tiers": {
+        "1": 6,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "euclidLegato": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 80,
+      "freshEvents": 80,
+      "importMs": 0.14368999999896914,
+      "generateMs": 0.01086100000065926,
+      "importTimes": [
+        0.16667299999971874,
+        0.14368999999896914,
+        0.1309560000008787,
+        0.12161799999921641,
+        0.136026000000129,
+        0.17448700000022654,
+        0.14625400000113586
+      ],
+      "generateTimes": [
+        0.021150000000488944,
+        0.00922800000080315,
+        0.011320999999952619,
+        0.007123000001229229,
+        0.01086100000065926,
+        0.007413999999698717,
+        0.0112410000001546
+      ]
+    },
+    {
+      "id": "mms-ratchet",
+      "tiers": {
+        "1": 6,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 144,
+      "freshEvents": 144,
+      "importMs": 0.20680800000081945,
+      "generateMs": 0.012442999999620952,
+      "importTimes": [
+        0.2028810000010708,
+        0.2001060000002326,
+        0.20680800000081945,
+        0.21383099999911792,
+        0.1900470000000496,
+        0.20731900000100723,
+        0.21414200000072015
+      ],
+      "generateTimes": [
+        0.015610000000378932,
+        0.010219000001598033,
+        0.013665999998920597,
+        0.010138999999981024,
+        0.012442999999620952,
+        0.010930999998890911,
+        0.012463999999454245
+      ]
+    },
+    {
+      "id": "mms-seed",
+      "tiers": {
+        "1": 7,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "seed": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 46,
+      "freshEvents": 46,
+      "importMs": 0.15332800000032876,
+      "generateMs": 0.012512999999671592,
+      "importTimes": [
+        0.18253200000071956,
+        0.16148299999986193,
+        0.15332800000032876,
+        0.1363759999985632,
+        0.12610599999970873,
+        0.12463300000126765,
+        0.17090100000132225
+      ],
+      "generateTimes": [
+        0.016841000000567874,
+        0.008206000000427593,
+        0.012512999999671592,
+        0.009417999999641324,
+        0.01287400000001071,
+        0.00697299999956158,
+        0.014918000000761822
+      ]
+    },
+    {
+      "id": "mms-palindrome",
+      "tiers": {
+        "1": 4,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "palindrome": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 64,
+      "freshEvents": 64,
+      "importMs": 0.12729899999976624,
+      "generateMs": 0.01001900000119349,
+      "importTimes": [
+        0.15940899999986868,
+        0.14195699999982025,
+        0.12729899999976624,
+        0.12916299999960756,
+        0.11375299999963318,
+        0.11315300000023853,
+        0.11216000000058557
+      ],
+      "generateTimes": [
+        0.013686000000234344,
+        0.007374000000709202,
+        0.010640000000421423,
+        0.006282000000283006,
+        0.01001900000119349,
+        0.006572000000232947,
+        0.010388999999122461
+      ]
+    },
+    {
+      "id": "mms-shuffle",
+      "tiers": {
+        "1": 5,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "shuffle": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 128,
+      "freshEvents": 128,
+      "importMs": 0.13389199999983248,
+      "generateMs": 0.010670000001482549,
+      "importTimes": [
+        0.13389199999983248,
+        0.13858000000072934,
+        0.14104500000030384,
+        0.13558499999999185,
+        0.12321099999826401,
+        0.12187900000026275,
+        0.12514499999997497
+      ],
+      "generateTimes": [
+        0.012343000000328175,
+        0.007424000001265085,
+        0.01306500000100641,
+        0.0081850000005943,
+        0.012624000000869273,
+        0.006583000000318862,
+        0.010670000001482549
+      ]
+    },
+    {
+      "id": "mms-ribbon",
+      "tiers": {
+        "1": 6,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "rib": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 64,
+      "freshEvents": 64,
+      "importMs": 0.1303250000000844,
+      "generateMs": 0.01017899999897054,
+      "importTimes": [
+        0.1472859999994398,
+        0.13460200000008626,
+        0.12253000000055181,
+        0.22701599999891187,
+        0.1303250000000844,
+        0.12087599999904342,
+        0.11730999999963387
+      ],
+      "generateTimes": [
+        0.013766000000032363,
+        0.008235000001150183,
+        0.011402000000089174,
+        0.007153000000471366,
+        0.010960999999952037,
+        0.006621999998969841,
+        0.01017899999897054
+      ]
+    },
+    {
+      "id": "mms-zoom",
+      "tiers": {
+        "1": 6,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "zoom": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 32,
+      "freshEvents": 32,
+      "importMs": 0.15100300000085554,
+      "generateMs": 0.010498999999981606,
+      "importTimes": [
+        0.17470800000046438,
+        0.15100300000085554,
+        0.16074200000002747,
+        0.16336699999919801,
+        0.12344099999972968,
+        0.11638800000037008,
+        0.13121699999828706
+      ],
+      "generateTimes": [
+        0.01592999999957101,
+        0.009146999998847605,
+        0.012151999999332475,
+        0.0072440000003552996,
+        0.010498999999981606,
+        0.007163000000218744,
+        0.011060999999244814
+      ]
+    },
+    {
+      "id": "mms-echo",
+      "tiers": {
+        "1": 7,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "echo": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 208,
+      "freshEvents": 208,
+      "importMs": 0.12996399999974528,
+      "generateMs": 0.011631999999735854,
+      "importTimes": [
+        0.17600099999981467,
+        0.15484099999957834,
+        0.12996399999974528,
+        0.1237120000005234,
+        0.12449299999934738,
+        0.11907400000018242,
+        0.13084499999968102
+      ],
+      "generateTimes": [
+        0.016691000000719214,
+        0.008325000000695582,
+        0.011672000000544358,
+        0.007374000000709202,
+        0.011781999999584514,
+        0.007184000000052038,
+        0.011631999999735854
+      ]
+    },
+    {
+      "id": "mms-chunk",
+      "tiers": {
+        "1": 9,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "chunk": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 80,
+      "freshEvents": 80,
+      "importMs": 0.1579359999996086,
+      "generateMs": 0.011481999999887194,
+      "importTimes": [
+        0.17672199999833538,
+        0.1579359999996086,
+        0.13776900000084424,
+        0.13516300000082992,
+        0.12879199999952107,
+        0.21906099999978323,
+        0.3091100000001461
+      ],
+      "generateTimes": [
+        0.015448999998625368,
+        0.0077039999996486586,
+        0.011481999999887194,
+        0.0073439999996480765,
+        0.011911999999938416,
+        0.009248000000297907,
+        0.026799999999639113
+      ]
+    },
+    {
+      "id": "mms-off",
+      "tiers": {
+        "1": 10,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 144,
+      "freshEvents": 144,
+      "importMs": 0.15008099999977276,
+      "generateMs": 0.01235400000041409,
+      "importTimes": [
+        0.19837200000074517,
+        0.15008099999977276,
+        0.1621950000007928,
+        0.16435900000033143,
+        0.13533400000051188,
+        0.144600999999966,
+        0.14501199999904202
+      ],
+      "generateTimes": [
+        0.016250999999101623,
+        0.008205000000089058,
+        0.013404999999693246,
+        0.007845000000088476,
+        0.01235400000041409,
+        0.007484000001568347,
+        0.012854000000515953
+      ]
+    },
+    {
+      "id": "mms-within",
+      "tiers": {
+        "1": 10,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "within": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 112,
+      "freshEvents": 112,
+      "importMs": 0.17595000000073924,
+      "generateMs": 0.012963999999556108,
+      "importTimes": [
+        0.17084100000101898,
+        0.1767519999993965,
+        0.17595000000073924,
+        0.16277499999887368,
+        0.15906799999902432,
+        0.20184900000094785,
+        0.18285300000025018
+      ],
+      "generateTimes": [
+        0.016270000000076834,
+        0.008977000001323177,
+        0.013184999999793945,
+        0.009207000000969856,
+        0.013585999999122578,
+        0.012514000000010128,
+        0.012963999999556108
+      ]
+    },
+    {
+      "id": "mms-jux",
+      "tiers": {
+        "1": 9,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 192,
+      "freshEvents": 192,
+      "importMs": 0.1576260000001639,
+      "generateMs": 0.012203000002045883,
+      "importTimes": [
+        0.35569699999905424,
+        0.34413599999970756,
+        0.1576260000001639,
+        0.15800600000147824,
+        0.1504930000010063,
+        0.1539389999998093,
+        0.14891999999963446
+      ],
+      "generateTimes": [
+        0.033092000001488486,
+        0.03251100000125007,
+        0.012113000000681495,
+        0.007774000001518289,
+        0.013494999999238644,
+        0.00777399999788031,
+        0.012203000002045883
+      ]
+    },
+    {
+      "id": "mms-nested",
+      "tiers": {
+        "1": 13,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "chunk": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 96,
+      "freshEvents": 96,
+      "importMs": 0.19695000000137952,
+      "generateMs": 0.014847999998892192,
+      "importTimes": [
+        0.19695000000137952,
+        0.2187210000010964,
+        0.18169099999795435,
+        0.18279299999994691,
+        0.21997300000293762,
+        0.4267010000003211,
+        0.1855180000020482
+      ],
+      "generateTimes": [
+        0.01843399999779649,
+        0.009578000001056353,
+        0.014817999999650056,
+        0.029184999999415595,
+        0.014847999998892192,
+        0.009037000003445428,
+        0.024055000001681037
+      ]
+    },
+    {
+      "id": "piece-harbour",
+      "tiers": {
+        "1": 61,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 248,
+      "freshEvents": 248,
+      "importMs": 0.6012279999995371,
+      "generateMs": 0.04178899999897112,
+      "importTimes": [
+        1.0574039999992237,
+        0.7476129999995464,
+        0.6321669999997539,
+        0.6012279999995371,
+        0.5730750000002445,
+        0.5678359999983513,
+        0.5733360000012908
+      ],
+      "generateTimes": [
+        0.04743900000175927,
+        0.0314589999979944,
+        0.04142800000045099,
+        0.030387000002519926,
+        0.04178899999897112,
+        0.07742599999983213,
+        0.04946300000301562
+      ]
+    },
+    {
+      "id": "piece-foundry",
+      "tiers": {
+        "1": 62,
+        "2": 2,
+        "3": 0
+      },
+      "tier2": {
+        "FX": 1,
+        "coarse": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 286,
+      "freshEvents": 286,
+      "importMs": 0.6630640000003041,
+      "generateMs": 0.03889300000082585,
+      "importTimes": [
+        0.6754779999973834,
+        0.667914000001474,
+        0.6630640000003041,
+        0.7059650000010151,
+        0.6410629999991215,
+        0.6366349999989325,
+        0.6117789999989327
+      ],
+      "generateTimes": [
+        0.043191000000661006,
+        0.030726999997568782,
+        0.03889300000082585,
+        0.049293000000034226,
+        0.03761099999974249,
+        0.03187899999829824,
+        0.039583999998285435
+      ]
+    },
+    {
+      "id": "piece-lichen",
+      "tiers": {
+        "1": 61,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 152,
+      "freshEvents": 152,
+      "importMs": 0.6559110000016517,
+      "generateMs": 0.03905300000042189,
+      "importTimes": [
+        0.7009649999999965,
+        0.6559110000016517,
+        0.6199530000012601,
+        0.6037130000004254,
+        0.609414000002289,
+        0.6649679999973159,
+        0.660079000001133
+      ],
+      "generateTimes": [
+        0.040806000000884524,
+        0.03036699999938719,
+        0.039354000000457745,
+        0.029316000000108033,
+        0.03988499999832129,
+        0.031810000000405125,
+        0.03905300000042189
+      ]
+    },
+    {
+      "id": "piece-night-bus",
+      "tiers": {
+        "1": 59,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 404,
+      "freshEvents": 404,
+      "importMs": 0.6058669999983977,
+      "generateMs": 0.033412000000680564,
+      "importTimes": [
+        0.6058669999983977,
+        0.930235999996512,
+        0.6245820000003732,
+        0.5970610000003944,
+        0.5903380000017933,
+        0.6635649999989255,
+        0.592623000000458
+      ],
+      "generateTimes": [
+        0.03465499999947497,
+        0.02717099999790662,
+        0.0421089999981632,
+        0.02804199999809498,
+        0.035016000001633074,
+        0.026849999998376006,
+        0.033412000000680564
+      ]
+    },
+    {
+      "id": "piece-copper",
+      "tiers": {
+        "1": 61,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "FX": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 292,
+      "freshEvents": 292,
+      "importMs": 0.5533480000012787,
+      "generateMs": 0.03331299999990733,
+      "importTimes": [
+        0.5558830000009038,
+        0.5716729999985546,
+        0.5828140000012354,
+        0.5303749999984575,
+        0.5533480000012787,
+        0.5101280000017141,
+        0.5009200000022247
+      ],
+      "generateTimes": [
+        0.03410400000211666,
+        0.0273109999980079,
+        0.03396400000201538,
+        0.026418999997986248,
+        0.03504600000087521,
+        0.027791999997134553,
+        0.03331299999990733
+      ]
+    },
+    {
+      "id": "piece-paper-lantern",
+      "tiers": {
+        "1": 64,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 232,
+      "freshEvents": 232,
+      "importMs": 0.5428790000005392,
+      "generateMs": 0.04375200000140467,
+      "importTimes": [
+        0.7241100000028382,
+        0.7405200000030163,
+        0.7307719999989786,
+        0.5428790000005392,
+        0.5217499999998836,
+        0.51892399999997,
+        0.5174110000007204
+      ],
+      "generateTimes": [
+        0.08559099999911268,
+        0.06560299999910058,
+        0.08788500000082422,
+        0.03021699999953853,
+        0.04375200000140467,
+        0.03108799999972689,
+        0.03719999999884749
+      ]
+    },
+    {
+      "id": "piece-tidal-stairs",
+      "tiers": {
+        "1": 61,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 340,
+      "freshEvents": 340,
+      "importMs": 0.5633779999989201,
+      "generateMs": 0.03983399999924586,
+      "importTimes": [
+        0.5773640000006708,
+        0.5445419999996375,
+        0.5633779999989201,
+        0.5319589999999152,
+        0.5291629999992438,
+        0.5732459999999264,
+        0.5726849999991828
+      ],
+      "generateTimes": [
+        0.042399999998451676,
+        0.030407000002014684,
+        0.04036599999744794,
+        0.030847999998513842,
+        0.07286699999895063,
+        0.02873399999953108,
+        0.03983399999924586
+      ]
+    },
+    {
+      "id": "piece-glass-garden",
+      "tiers": {
+        "1": 62,
+        "2": 2,
+        "3": 0
+      },
+      "tier2": {
+        "FX": 1,
+        "phaserrate": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 260,
+      "freshEvents": 260,
+      "importMs": 0.5357859999967332,
+      "generateMs": 0.037940999998681946,
+      "importTimes": [
+        0.5597610000004352,
+        0.5404649999982212,
+        0.5357859999967332,
+        0.5343630000024859,
+        0.5255169999982172,
+        0.5213690000018687,
+        0.9072629999973287
+      ],
+      "generateTimes": [
+        0.04371200000241515,
+        0.03113899999880232,
+        0.039915000001201406,
+        0.033612999999604654,
+        0.037940999998681946,
+        0.028642999997828156,
+        0.06158499999946798
+      ]
+    },
+    {
+      "id": "piece-relay",
+      "tiers": {
+        "1": 59,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 414,
+      "freshEvents": 414,
+      "importMs": 0.5817720000013651,
+      "generateMs": 0.034544000001915265,
+      "importTimes": [
+        0.6416739999986021,
+        0.5826429999979155,
+        0.5737470000021858,
+        0.5738369999999122,
+        0.5738070000006701,
+        0.5944859999981418,
+        0.5817720000013651
+      ],
+      "generateTimes": [
+        0.045986000000993954,
+        0.029475000003003515,
+        0.054732000000512926,
+        0.03766099999847938,
+        0.034544000001915265,
+        0.026148999997531064,
+        0.032662000001437264
+      ]
+    },
+    {
+      "id": "piece-slow-orbit",
+      "tiers": {
+        "1": 61,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 136,
+      "freshEvents": 136,
+      "importMs": 0.6059470000000147,
+      "generateMs": 0.036888999999064254,
+      "importTimes": [
+        0.6036829999975453,
+        0.6445899999998801,
+        0.6274180000000342,
+        0.6060170000018843,
+        0.5410759999977017,
+        0.5932630000024801,
+        0.6059470000000147
+      ],
+      "generateTimes": [
+        0.04301099999793223,
+        0.028773999998520594,
+        0.03713000000061584,
+        0.02888399999937974,
+        0.036888999999064254,
+        0.028213000001414912,
+        0.037791000002471264
+      ]
+    },
+    {
+      "id": "piece-moss-radio",
+      "tiers": {
+        "1": 64,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 228,
+      "freshEvents": 228,
+      "importMs": 0.5833450000027369,
+      "generateMs": 0.037079999998240964,
+      "importTimes": [
+        0.9220910000003641,
+        1.227904999999737,
+        0.690495999999257,
+        0.5773329999974521,
+        0.5833450000027369,
+        0.5605819999982486,
+        0.5812110000006214
+      ],
+      "generateTimes": [
+        0.04662800000005518,
+        0.030827999999019084,
+        0.04086699999970733,
+        0.02837300000101095,
+        0.03926399999909336,
+        0.028783999998267973,
+        0.037079999998240964
+      ]
+    },
+    {
+      "id": "piece-sundial",
+      "tiers": {
+        "1": 61,
+        "2": 1,
+        "3": 0
+      },
+      "tier2": {
+        "FX": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 276,
+      "freshEvents": 276,
+      "importMs": 0.5228920000008657,
+      "generateMs": 0.03575699999782955,
+      "importTimes": [
+        0.604856000001746,
+        0.5400139999983367,
+        0.5277199999982258,
+        0.5224200000011479,
+        0.5196949999990466,
+        0.5182930000009947,
+        0.5228920000008657
+      ],
+      "generateTimes": [
+        0.04237999999895692,
+        0.029966000001877546,
+        0.036728999999468215,
+        0.028502999997726874,
+        0.03575699999782955,
+        0.0287239999997837,
+        0.03865300000325078
+      ]
+    },
+    {
+      "id": "piece-kiln",
+      "tiers": {
+        "1": 61,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 420,
+      "freshEvents": 420,
+      "importMs": 0.519414999998844,
+      "generateMs": 0.034585000001243316,
+      "importTimes": [
+        0.6034730000028503,
+        0.5366979999998875,
+        0.5242450000005192,
+        0.519414999998844,
+        0.5098969999999099,
+        0.5134940000025381,
+        0.5087050000001909
+      ],
+      "generateTimes": [
+        0.03974499999822001,
+        0.028844000000390224,
+        0.03641799999968498,
+        0.025978999998187646,
+        0.034585000001243316,
+        0.0258590000012191,
+        0.036078000000998145
+      ]
+    },
+    {
+      "id": "piece-blue-hour",
+      "tiers": {
+        "1": 61,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 244,
+      "freshEvents": 244,
+      "importMs": 0.5539099999987229,
+      "generateMs": 0.034314000000449596,
+      "importTimes": [
+        0.7341180000003078,
+        0.5338119999978517,
+        0.5489010000019334,
+        1.0437290000008943,
+        0.6166279999997641,
+        0.5539099999987229,
+        0.5089359999983571
+      ],
+      "generateTimes": [
+        0.0487520000024233,
+        0.027711999999155523,
+        0.040385000000242144,
+        0.027781999997387175,
+        0.04062600000179373,
+        0.029356000002735527,
+        0.034314000000449596
+      ]
+    },
+    {
+      "id": "piece-switchyard",
+      "tiers": {
+        "1": 61,
+        "2": 3,
+        "3": 0
+      },
+      "tier2": {
+        "FX": 1,
+        "coarse": 1,
+        "bandf": 1
+      },
+      "reasons": {},
+      "warnings": [],
+      "idempotent": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "originalError": null,
+      "freshError": null,
+      "opaqueValues": false,
+      "originalEvents": 420,
+      "freshEvents": 420,
+      "importMs": 0.5236220000006142,
+      "generateMs": 0.036368000000948086,
+      "importTimes": [
+        0.5312569999987318,
+        0.5236220000006142,
+        0.5587090000008175,
+        0.572094000002835,
+        0.5074519999980112,
+        0.5060900000025867,
+        0.510216999999102
+      ],
+      "generateTimes": [
+        0.0412270000015269,
+        0.029625999999552732,
+        0.036939000001439126,
+        0.02824299999701907,
+        0.03731999999945401,
+        0.028141999999206746,
+        0.036368000000948086
+      ]
+    }
+  ]
+}

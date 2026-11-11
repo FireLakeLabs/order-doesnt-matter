@@ -1,0 +1,4 @@
+$: /*@odm-voice {"name":"$","muted":false}*/ s("bd*4");
+$: /*@odm-voice {"name":"hats","muted":false}*/ s("hh*8").gain(0.3);
+_$: /*@odm-voice {"name":"_$","muted":true}*/ s("cp*8");
+all(p => p.slow(2));

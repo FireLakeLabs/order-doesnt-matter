@@ -1,0 +1,131 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 44
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 14
+        },
+        "core": {
+          "kind": "generator",
+          "name": "s",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n3",
+                "tier": 1,
+                "span": {
+                  "start": 2,
+                  "end": 13
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "breaks165"
+                    }
+                  ],
+                  "notation": "breaks165"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n4",
+            "tier": 2,
+            "span": {
+              "start": 0,
+              "end": 38
+            },
+            "kind": "rewrite",
+            "name": "splice",
+            "args": [
+              {
+                "kind": "literal",
+                "value": 8
+              },
+              {
+                "kind": "pattern",
+                "pattern": {
+                  "id": "n5",
+                  "tier": 1,
+                  "span": {
+                    "start": 24,
+                    "end": 37
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "0"
+                      },
+                      {
+                        "kind": "value",
+                        "value": "1"
+                      },
+                      {
+                        "kind": "sub",
+                        "steps": [
+                          {
+                            "kind": "value",
+                            "value": "2"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "3"
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "value",
+                        "value": "7"
+                      }
+                    ],
+                    "notation": "0 1 [2 3] 7"
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          },
+          {
+            "id": "n6",
+            "tier": 2,
+            "span": {
+              "start": 0,
+              "end": 44
+            },
+            "kind": "rewrite",
+            "name": "fit",
+            "args": []
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

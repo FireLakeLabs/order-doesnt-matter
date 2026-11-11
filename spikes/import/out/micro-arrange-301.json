@@ -1,0 +1,214 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 69
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n12",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 69
+        },
+        "core": {
+          "kind": "group",
+          "how": "arrange",
+          "parts": [
+            {
+              "cycles": 299,
+              "pattern": {
+                "id": "n2",
+                "tier": 1,
+                "span": {
+                  "start": 13,
+                  "end": 23
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "note",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n3",
+                        "tier": 1,
+                        "span": {
+                          "start": 18,
+                          "end": 22
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "c3"
+                            }
+                          ],
+                          "notation": "c3"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": [
+                  {
+                    "id": "n6",
+                    "tier": 1,
+                    "span": {
+                      "start": 13,
+                      "end": 33
+                    },
+                    "kind": "settings",
+                    "settings": [
+                      {
+                        "id": "n4",
+                        "tier": 1,
+                        "span": {
+                          "start": 13,
+                          "end": 33
+                        },
+                        "name": "s",
+                        "value": {
+                          "id": "n5",
+                          "tier": 1,
+                          "span": {
+                            "start": 26,
+                            "end": 32
+                          },
+                          "core": {
+                            "kind": "sequence",
+                            "steps": [
+                              {
+                                "kind": "value",
+                                "value": "sine"
+                              }
+                            ],
+                            "notation": "sine"
+                          },
+                          "layers": []
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    "id": "n7",
+                    "tier": 1,
+                    "span": {
+                      "start": 13,
+                      "end": 41
+                    },
+                    "kind": "rewrite",
+                    "name": "slow",
+                    "args": [
+                      {
+                        "kind": "literal",
+                        "value": 7
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "cycles": 1,
+              "pattern": {
+                "id": "n8",
+                "tier": 1,
+                "span": {
+                  "start": 46,
+                  "end": 55
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "s",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n9",
+                        "tier": 1,
+                        "span": {
+                          "start": 48,
+                          "end": 54
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "other",
+                              "notation": "cp*4"
+                            }
+                          ],
+                          "notation": "cp*4"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": []
+              }
+            },
+            {
+              "cycles": 1,
+              "pattern": {
+                "id": "n10",
+                "tier": 1,
+                "span": {
+                  "start": 60,
+                  "end": 67
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "s",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n11",
+                        "tier": 1,
+                        "span": {
+                          "start": 62,
+                          "end": 66
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "bd"
+                            }
+                          ],
+                          "notation": "bd"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": []
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

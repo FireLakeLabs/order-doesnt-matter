@@ -1,0 +1,21 @@
+{
+  "file": "CPU.20261111.130005.2015974.0.001.cpuprofile",
+  "samples": 1458,
+  "hot": {
+    "(garbage collector) @ ": 375,
+    "peg$parse @ file:///home/aaron/projects/order-doesnt-matter/spikes/import/node_modules/@strudel/mini/krill-parser.js": 239,
+    "makeSyncRequest @ node:internal/modules/esm/hooks": 66,
+    "parseSteps @ file:///home/aaron/projects/order-doesnt-matter/spikes/import/src/mini.ts": 43,
+    "set TextDecoder @ ": 41,
+    "waitForWorker @ node:internal/modules/esm/hooks": 38,
+    "ElementStub @ file:///home/aaron/projects/order-doesnt-matter/spikes/import/node_modules/@strudel/mini/krill-parser.js": 34,
+    "pattern @ file:///home/aaron/projects/order-doesnt-matter/spikes/import/src/import.ts": 32,
+    "AtomStub @ file:///home/aaron/projects/order-doesnt-matter/spikes/import/node_modules/@strudel/mini/krill-parser.js": 30,
+    "references @ file:///home/aaron/projects/order-doesnt-matter/spikes/import/src/import.ts": 29,
+    "pattern @ file:///home/aaron/projects/order-doesnt-matter/spikes/import/src/generate.ts": 28,
+    "PatternStub @ file:///home/aaron/projects/order-doesnt-matter/spikes/import/node_modules/@strudel/mini/krill-parser.js": 26,
+    "step @ file:///home/aaron/projects/order-doesnt-matter/spikes/import/src/mini.ts": 26,
+    "peg$f3 @ file:///home/aaron/projects/order-doesnt-matter/spikes/import/node_modules/@strudel/mini/krill-parser.js": 21,
+    "compileSourceTextModule @ node:internal/modules/esm/utils": 19
+  }
+}

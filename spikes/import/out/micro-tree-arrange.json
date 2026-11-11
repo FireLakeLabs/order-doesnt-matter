@@ -1,0 +1,214 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 71
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n11",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 71
+        },
+        "core": {
+          "kind": "group",
+          "how": "arrange",
+          "parts": [
+            {
+              "cycles": 2,
+              "pattern": {
+                "id": "n2",
+                "tier": 1,
+                "span": {
+                  "start": 12,
+                  "end": 21
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "s",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n3",
+                        "tier": 1,
+                        "span": {
+                          "start": 14,
+                          "end": 20
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "other",
+                              "notation": "bd*4"
+                            }
+                          ],
+                          "notation": "bd*4"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": []
+              }
+            },
+            {
+              "cycles": 3,
+              "pattern": {
+                "id": "n4",
+                "tier": 1,
+                "span": {
+                  "start": 28,
+                  "end": 37
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "s",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n5",
+                        "tier": 1,
+                        "span": {
+                          "start": 30,
+                          "end": 36
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "other",
+                              "notation": "hh*8"
+                            }
+                          ],
+                          "notation": "hh*8"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": []
+              }
+            },
+            {
+              "cycles": 1,
+              "pattern": {
+                "id": "n10",
+                "tier": 1,
+                "span": {
+                  "start": 44,
+                  "end": 69
+                },
+                "core": {
+                  "kind": "group",
+                  "how": "stack",
+                  "parts": [
+                    {
+                      "pattern": {
+                        "id": "n6",
+                        "tier": 1,
+                        "span": {
+                          "start": 50,
+                          "end": 57
+                        },
+                        "core": {
+                          "kind": "generator",
+                          "name": "s",
+                          "args": [
+                            {
+                              "kind": "pattern",
+                              "pattern": {
+                                "id": "n7",
+                                "tier": 1,
+                                "span": {
+                                  "start": 52,
+                                  "end": 56
+                                },
+                                "core": {
+                                  "kind": "sequence",
+                                  "steps": [
+                                    {
+                                      "kind": "value",
+                                      "value": "cp"
+                                    }
+                                  ],
+                                  "notation": "cp"
+                                },
+                                "layers": []
+                              }
+                            }
+                          ]
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "pattern": {
+                        "id": "n8",
+                        "tier": 1,
+                        "span": {
+                          "start": 59,
+                          "end": 68
+                        },
+                        "core": {
+                          "kind": "generator",
+                          "name": "s",
+                          "args": [
+                            {
+                              "kind": "pattern",
+                              "pattern": {
+                                "id": "n9",
+                                "tier": 1,
+                                "span": {
+                                  "start": 61,
+                                  "end": 67
+                                },
+                                "core": {
+                                  "kind": "sequence",
+                                  "steps": [
+                                    {
+                                      "kind": "other",
+                                      "notation": "bd*2"
+                                    }
+                                  ],
+                                  "notation": "bd*2"
+                                },
+                                "layers": []
+                              }
+                            }
+                          ]
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": []
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

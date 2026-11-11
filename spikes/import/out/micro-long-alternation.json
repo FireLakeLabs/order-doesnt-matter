@@ -1,0 +1,178 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 64
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 30
+        },
+        "core": {
+          "kind": "generator",
+          "name": "note",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n3",
+                "tier": 1,
+                "span": {
+                  "start": 5,
+                  "end": 29
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "alternate",
+                      "steps": [
+                        {
+                          "kind": "value",
+                          "value": "c3"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "d3"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "e3"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "f3"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "g3"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "a3"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "b3"
+                        }
+                      ]
+                    }
+                  ],
+                  "notation": "<c3 d3 e3 f3 g3 a3 b3>"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n6",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 40
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n4",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 40
+                },
+                "name": "s",
+                "value": {
+                  "id": "n5",
+                  "tier": 1,
+                  "span": {
+                    "start": 33,
+                    "end": 39
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "sine"
+                      }
+                    ],
+                    "notation": "sine"
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          },
+          {
+            "id": "n7",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 64
+            },
+            "kind": "rewrite",
+            "name": "firstOf",
+            "args": [
+              {
+                "kind": "literal",
+                "value": 11
+              },
+              {
+                "kind": "callback",
+                "parameter": "p",
+                "body": {
+                  "id": "n8",
+                  "tier": 1,
+                  "span": {
+                    "start": 55,
+                    "end": 56
+                  },
+                  "core": {
+                    "kind": "hole"
+                  },
+                  "layers": [
+                    {
+                      "id": "n9",
+                      "tier": 1,
+                      "span": {
+                        "start": 55,
+                        "end": 63
+                      },
+                      "kind": "rewrite",
+                      "name": "ply",
+                      "args": [
+                        {
+                          "kind": "literal",
+                          "value": 3
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

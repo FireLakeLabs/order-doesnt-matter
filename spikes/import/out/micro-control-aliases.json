@@ -1,0 +1,214 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 70
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 13
+        },
+        "core": {
+          "kind": "generator",
+          "name": "note",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n3",
+                "tier": 1,
+                "span": {
+                  "start": 5,
+                  "end": 12
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "c3"
+                    },
+                    {
+                      "kind": "value",
+                      "value": "e3"
+                    }
+                  ],
+                  "notation": "c3 e3"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n6",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 23
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n4",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 23
+                },
+                "name": "s",
+                "value": {
+                  "id": "n5",
+                  "tier": 1,
+                  "span": {
+                    "start": 16,
+                    "end": 22
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "sine"
+                      }
+                    ],
+                    "notation": "sine"
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n7",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 32
+                },
+                "name": "cutoff",
+                "value": {
+                  "id": "n8",
+                  "tier": 1,
+                  "span": {
+                    "start": 28,
+                    "end": 31
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 900
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n9",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 39
+                },
+                "name": "resonance",
+                "value": {
+                  "id": "n10",
+                  "tier": 1,
+                  "span": {
+                    "start": 37,
+                    "end": 38
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 2
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n11",
+                "tier": 2,
+                "span": {
+                  "start": 0,
+                  "end": 46
+                },
+                "name": "vib",
+                "value": {
+                  "id": "n12",
+                  "tier": 1,
+                  "span": {
+                    "start": 44,
+                    "end": 45
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 4
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n13",
+                "tier": 2,
+                "span": {
+                  "start": 0,
+                  "end": 57
+                },
+                "name": "vibmod",
+                "value": {
+                  "id": "n14",
+                  "tier": 1,
+                  "span": {
+                    "start": 54,
+                    "end": 56
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.2
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n15",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 70
+                },
+                "name": "velocity",
+                "value": {
+                  "id": "n16",
+                  "tier": 1,
+                  "span": {
+                    "start": 67,
+                    "end": 69
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.7
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

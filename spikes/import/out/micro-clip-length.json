@@ -1,0 +1,127 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 28
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 9
+        },
+        "core": {
+          "kind": "generator",
+          "name": "s",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n3",
+                "tier": 1,
+                "span": {
+                  "start": 2,
+                  "end": 8
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "other",
+                      "notation": "oh*4"
+                    }
+                  ],
+                  "notation": "oh*4"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n6",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 18
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n4",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 18
+                },
+                "name": "clip",
+                "value": {
+                  "id": "n5",
+                  "tier": 1,
+                  "span": {
+                    "start": 15,
+                    "end": 17
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.2
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          },
+          {
+            "id": "n9",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 28
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n7",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 28
+                },
+                "name": "clip",
+                "value": {
+                  "id": "n8",
+                  "tier": 1,
+                  "span": {
+                    "start": 26,
+                    "end": 27
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 2
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

@@ -1,0 +1,6 @@
+setcpm(22.5);
+const drums = stack(s("bd ~ bd ~"), s("hh*8").gain(0.22).pan(0.65), s("cp ~ cp ~").gain(0.5));
+const bass = note("c2 ~ g2 bb2").s("triangle").cutoff(700).gain(0.45).release(0.12);
+const pad = note("[c4,eb4,g4] [bb3,d4,f4]").s("triangle").slow(4).gain(0.23).delay(0.3).delaytime(0.375);
+const lead = note("<c2 bb2>").add(note(24)).s("sine").ply("<1 2 3 2>").gain(0.18).delay(0.3);
+$: /*@odm-voice {"name":"$","muted":false}*/ arrange([4, drums], [8, stack(drums, bass)], [16, stack(drums, bass, pad, lead)], [4, stack(pad, lead)]);

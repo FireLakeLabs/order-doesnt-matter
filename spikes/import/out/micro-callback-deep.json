@@ -1,0 +1,312 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 129
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 19
+        },
+        "core": {
+          "kind": "generator",
+          "name": "note",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n3",
+                "tier": 1,
+                "span": {
+                  "start": 5,
+                  "end": 18
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "c3"
+                    },
+                    {
+                      "kind": "value",
+                      "value": "e3"
+                    },
+                    {
+                      "kind": "value",
+                      "value": "g3"
+                    },
+                    {
+                      "kind": "value",
+                      "value": "b3"
+                    }
+                  ],
+                  "notation": "c3 e3 g3 b3"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n6",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 29
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n4",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 29
+                },
+                "name": "s",
+                "value": {
+                  "id": "n5",
+                  "tier": 1,
+                  "span": {
+                    "start": 22,
+                    "end": 28
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "sine"
+                      }
+                    ],
+                    "notation": "sine"
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          },
+          {
+            "id": "n7",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 129
+            },
+            "kind": "rewrite",
+            "name": "layer",
+            "args": [
+              {
+                "kind": "callback",
+                "parameter": "p",
+                "body": {
+                  "id": "n8",
+                  "tier": 1,
+                  "span": {
+                    "start": 41,
+                    "end": 42
+                  },
+                  "core": {
+                    "kind": "hole"
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "kind": "callback",
+                "parameter": "p",
+                "body": {
+                  "id": "n9",
+                  "tier": 1,
+                  "span": {
+                    "start": 49,
+                    "end": 50
+                  },
+                  "core": {
+                    "kind": "hole"
+                  },
+                  "layers": [
+                    {
+                      "id": "n10",
+                      "tier": 1,
+                      "span": {
+                        "start": 49,
+                        "end": 128
+                      },
+                      "kind": "rewrite",
+                      "name": "off",
+                      "args": [
+                        {
+                          "kind": "literal",
+                          "value": 0.125
+                        },
+                        {
+                          "kind": "callback",
+                          "parameter": "q",
+                          "body": {
+                            "id": "n11",
+                            "tier": 1,
+                            "span": {
+                              "start": 65,
+                              "end": 66
+                            },
+                            "core": {
+                              "kind": "hole"
+                            },
+                            "layers": [
+                              {
+                                "id": "n12",
+                                "tier": 1,
+                                "span": {
+                                  "start": 65,
+                                  "end": 127
+                                },
+                                "kind": "rewrite",
+                                "name": "superimpose",
+                                "args": [
+                                  {
+                                    "kind": "callback",
+                                    "parameter": "r",
+                                    "body": {
+                                      "id": "n13",
+                                      "tier": 1,
+                                      "span": {
+                                        "start": 84,
+                                        "end": 85
+                                      },
+                                      "core": {
+                                        "kind": "hole"
+                                      },
+                                      "layers": [
+                                        {
+                                          "id": "n14",
+                                          "tier": 1,
+                                          "span": {
+                                            "start": 84,
+                                            "end": 91
+                                          },
+                                          "kind": "rewrite",
+                                          "name": "rev",
+                                          "args": []
+                                        },
+                                        {
+                                          "id": "n15",
+                                          "tier": 1,
+                                          "span": {
+                                            "start": 84,
+                                            "end": 126
+                                          },
+                                          "kind": "rewrite",
+                                          "name": "off",
+                                          "args": [
+                                            {
+                                              "kind": "literal",
+                                              "value": 0.0625
+                                            },
+                                            {
+                                              "kind": "callback",
+                                              "parameter": "t",
+                                              "body": {
+                                                "id": "n16",
+                                                "tier": 1,
+                                                "span": {
+                                                  "start": 107,
+                                                  "end": 108
+                                                },
+                                                "core": {
+                                                  "kind": "hole"
+                                                },
+                                                "layers": [
+                                                  {
+                                                    "id": "n17",
+                                                    "tier": 1,
+                                                    "span": {
+                                                      "start": 107,
+                                                      "end": 116
+                                                    },
+                                                    "kind": "rewrite",
+                                                    "name": "fast",
+                                                    "args": [
+                                                      {
+                                                        "kind": "literal",
+                                                        "value": 2
+                                                      }
+                                                    ]
+                                                  },
+                                                  {
+                                                    "id": "n20",
+                                                    "tier": 1,
+                                                    "span": {
+                                                      "start": 107,
+                                                      "end": 125
+                                                    },
+                                                    "kind": "settings",
+                                                    "settings": [
+                                                      {
+                                                        "id": "n18",
+                                                        "tier": 1,
+                                                        "span": {
+                                                          "start": 107,
+                                                          "end": 125
+                                                        },
+                                                        "name": "gain",
+                                                        "value": {
+                                                          "id": "n19",
+                                                          "tier": 1,
+                                                          "span": {
+                                                            "start": 122,
+                                                            "end": 124
+                                                          },
+                                                          "core": {
+                                                            "kind": "constant",
+                                                            "value": 0.2
+                                                          },
+                                                          "layers": []
+                                                        }
+                                                      }
+                                                    ]
+                                                  }
+                                                ]
+                                              }
+                                            }
+                                          ]
+                                        }
+                                      ]
+                                    }
+                                  }
+                                ]
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

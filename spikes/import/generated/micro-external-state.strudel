@@ -1,0 +1,4 @@
+await samples('github:tidalcycles/dirt-samples');
+setcpm(100);
+hush();
+$: /*@odm-voice {"name":"$","muted":false}*/ s("bd*4");

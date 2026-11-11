@@ -1,0 +1,144 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 44
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 12
+        },
+        "core": {
+          "kind": "generator",
+          "name": "note",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n3",
+                "tier": 1,
+                "span": {
+                  "start": 5,
+                  "end": 11
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "other",
+                      "notation": "c4*8"
+                    }
+                  ],
+                  "notation": "c4*8"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n6",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 22
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n4",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 22
+                },
+                "name": "s",
+                "value": {
+                  "id": "n5",
+                  "tier": 1,
+                  "span": {
+                    "start": 15,
+                    "end": 21
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "sine"
+                      }
+                    ],
+                    "notation": "sine"
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n7",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 33
+                },
+                "name": "release",
+                "value": {
+                  "id": "n8",
+                  "tier": 1,
+                  "span": {
+                    "start": 31,
+                    "end": 32
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 3
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n9",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 44
+                },
+                "name": "clip",
+                "value": {
+                  "id": "n10",
+                  "tier": 1,
+                  "span": {
+                    "start": 41,
+                    "end": 43
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.2
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

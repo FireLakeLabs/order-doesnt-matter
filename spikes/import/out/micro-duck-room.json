@@ -1,0 +1,302 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 59
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 3,
+          "end": 12
+        },
+        "core": {
+          "kind": "generator",
+          "name": "s",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n3",
+                "tier": 1,
+                "span": {
+                  "start": 5,
+                  "end": 11
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "other",
+                      "notation": "bd*4"
+                    }
+                  ],
+                  "notation": "bd*4"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n6",
+            "tier": 1,
+            "span": {
+              "start": 3,
+              "end": 21
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n4",
+                "tier": 1,
+                "span": {
+                  "start": 3,
+                  "end": 21
+                },
+                "name": "orbit",
+                "value": {
+                  "id": "n5",
+                  "tier": 1,
+                  "span": {
+                    "start": 19,
+                    "end": 20
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n7",
+                "tier": 2,
+                "span": {
+                  "start": 3,
+                  "end": 29
+                },
+                "name": "duckorbit",
+                "value": {
+                  "id": "n8",
+                  "tier": 1,
+                  "span": {
+                    "start": 27,
+                    "end": 28
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 1
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n9",
+                "tier": 2,
+                "span": {
+                  "start": 3,
+                  "end": 43
+                },
+                "name": "duckdepth",
+                "value": {
+                  "id": "n10",
+                  "tier": 1,
+                  "span": {
+                    "start": 40,
+                    "end": 42
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.8
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n11",
+                "tier": 2,
+                "span": {
+                  "start": 3,
+                  "end": 59
+                },
+                "name": "duckattack",
+                "value": {
+                  "id": "n12",
+                  "tier": 1,
+                  "span": {
+                    "start": 55,
+                    "end": 58
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.01
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id": "n13",
+      "tier": 1,
+      "span": {
+        "start": 60,
+        "end": 113
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n14",
+        "tier": 1,
+        "span": {
+          "start": 63,
+          "end": 82
+        },
+        "core": {
+          "kind": "generator",
+          "name": "note",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n15",
+                "tier": 1,
+                "span": {
+                  "start": 68,
+                  "end": 81
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "together",
+                      "steps": [
+                        {
+                          "kind": "value",
+                          "value": "c3"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "eb3"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "g3"
+                        }
+                      ]
+                    }
+                  ],
+                  "notation": "[c3,eb3,g3]"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n18",
+            "tier": 1,
+            "span": {
+              "start": 63,
+              "end": 96
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n16",
+                "tier": 1,
+                "span": {
+                  "start": 63,
+                  "end": 96
+                },
+                "name": "s",
+                "value": {
+                  "id": "n17",
+                  "tier": 1,
+                  "span": {
+                    "start": 85,
+                    "end": 95
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "sawtooth"
+                      }
+                    ],
+                    "notation": "sawtooth"
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n19",
+                "tier": 1,
+                "span": {
+                  "start": 63,
+                  "end": 105
+                },
+                "name": "orbit",
+                "value": {
+                  "id": "n20",
+                  "tier": 1,
+                  "span": {
+                    "start": 103,
+                    "end": 104
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 1
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          },
+          {
+            "id": "n21",
+            "tier": 1,
+            "span": {
+              "start": 63,
+              "end": 113
+            },
+            "kind": "rewrite",
+            "name": "slow",
+            "args": [
+              {
+                "kind": "literal",
+                "value": 2
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    },
+    {
+      "kind": "voice",
+      "index": 1
+    }
+  ],
+  "transforms": []
+}

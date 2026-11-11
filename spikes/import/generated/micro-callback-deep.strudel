@@ -1,0 +1,1 @@
+$: /*@odm-voice {"name":"$","muted":false}*/ note("c3 e3 g3 b3").s("sine").layer(p => p, p => p.off(0.125, q => q.superimpose(r => r.rev().off(0.0625, t => t.fast(2).gain(0.2)))));

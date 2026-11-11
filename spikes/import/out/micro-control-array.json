@@ -1,0 +1,146 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 0,
+        "end": 67
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n2",
+        "tier": 1,
+        "span": {
+          "start": 0,
+          "end": 13
+        },
+        "core": {
+          "kind": "generator",
+          "name": "note",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n3",
+                "tier": 1,
+                "span": {
+                  "start": 5,
+                  "end": 12
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "c3"
+                    },
+                    {
+                      "kind": "value",
+                      "value": "g3"
+                    }
+                  ],
+                  "notation": "c3 g3"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n6",
+            "tier": 1,
+            "span": {
+              "start": 0,
+              "end": 23
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n4",
+                "tier": 1,
+                "span": {
+                  "start": 0,
+                  "end": 23
+                },
+                "name": "s",
+                "value": {
+                  "id": "n5",
+                  "tier": 1,
+                  "span": {
+                    "start": 16,
+                    "end": 22
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "user"
+                      }
+                    ],
+                    "notation": "user"
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          },
+          {
+            "id": "n7",
+            "tier": 2,
+            "span": {
+              "start": 0,
+              "end": 46
+            },
+            "kind": "rewrite",
+            "name": "partials",
+            "args": [
+              {
+                "kind": "literal",
+                "value": [
+                  1,
+                  0.5,
+                  0,
+                  0.25
+                ]
+              }
+            ]
+          },
+          {
+            "id": "n8",
+            "tier": 2,
+            "span": {
+              "start": 0,
+              "end": 67
+            },
+            "kind": "rewrite",
+            "name": "phases",
+            "args": [
+              {
+                "kind": "literal",
+                "value": [
+                  0,
+                  0.25,
+                  0,
+                  0.5
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": []
+}

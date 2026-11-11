@@ -1,0 +1,2 @@
+$: /*@odm-voice {"name":"$","muted":false}*/ s("bd*4").orbit(0).room(0.8).roomsize(2);
+$: /*@odm-voice {"name":"$","muted":false}*/ note("c4 e4").s("sine").orbit(0).room(0.2).roomsize(8);
