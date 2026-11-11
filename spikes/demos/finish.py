@@ -30,6 +30,7 @@ def click_time(a,sr,expect,threshold):
     return (start+int(idx[0]))/sr
 reports=[]
 for path in sorted(Path('raw').glob('*.json')):
+    if os.environ.get('TAKE') and not path.stem.startswith(os.environ['TAKE']):continue
     if path.stem.endswith('failure') or not Path(f'raw/{path.stem}.webm').exists():continue
     meta=json.loads(path.read_text());id=meta['id'];src=Path(f'raw/{id}.webm');out=Path(f'out/{id}.mp4')
     sr=meta['sr'];a=np.fromfile(f'raw/{id}.f32',dtype='<f4').reshape(-1,2)
@@ -171,6 +172,6 @@ if first:
     assert 20<=r['lengthSeconds']<=60 and r['sizeBytes']<15_000_000 and lvl['peak']<1
     if max(map(abs,sync))>=40:raise RuntimeError('02: sync exceeds 40 ms; must fix or caption')
     reports.append(r);Path('out/02-gesture-delay-slowed.metrics.json').write_text(json.dumps(r,indent=2));print(r['id'],r['syncMs'],lvl,flush=True)
-Path('out/measurements.json').write_text(json.dumps(sorted(reports,key=lambda r:r['id']),indent=2))
+if not os.environ.get('TAKE'):Path('out/measurements.json').write_text(json.dumps(sorted(reports,key=lambda r:r['id']),indent=2))
 
-exec(Path('write_index.py').read_text())
+if not os.environ.get('TAKE'):exec(Path('write_index.py').read_text())

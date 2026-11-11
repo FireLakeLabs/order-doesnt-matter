@@ -1,0 +1,18 @@
+{
+  "totalSeconds": 7.0511169019999995,
+  "checks": [
+    "Gate and secondary clock agree while travelling",
+    "Active note remains named for its duration; next voice replaces it after the scored boundary",
+    "A real rest clears the sounding-voice readout",
+    "A cross-cycle continuation stays active without a duplicate onset",
+    "Four future turns by default; look-ahead control reveals eight",
+    "Voice focus preserves the other voices as ghosts",
+    "User-gesture audio starts the playhead, and Pause audio holds it",
+    "Continuous lane query and current-value beads rendered (screenshot judged separately)"
+  ],
+  "errors": [],
+  "failures": [],
+  "browser": "158.0.8127.18",
+  "server": "built Vite preview, OS-selected port",
+  "heard": "No listening judgment"
+}

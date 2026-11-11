@@ -12,3 +12,12 @@ declare module '@strudel/core' {
 declare module '@strudel/mini';
 declare module '@strudel/tonal';
 declare module '@strudel/transpiler';
+declare module '@strudel/web' {
+  export const initStrudel:import('./strudel-web').StrudelWeb['initStrudel'];
+  export const initAudio:import('./strudel-web').StrudelWeb['initAudio'];
+  export const getAudioContext:import('./strudel-web').StrudelWeb['getAudioContext'];
+  export const samples:import('./strudel-web').StrudelWeb['samples'];
+  export const loadBuffer:import('./strudel-web').StrudelWeb['loadBuffer'];
+  export const resetGlobalEffects:import('./strudel-web').StrudelWeb['resetGlobalEffects'];
+  export const getSuperdoughAudioController:import('./strudel-web').StrudelWeb['getSuperdoughAudioController'];
+}

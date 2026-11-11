@@ -73,3 +73,30 @@ not label every short gap as an erroneous duplicate or claim zero dropped notes.
 For one take while iterating: `TAKE=05 node spikes/demos/record.mjs --no-build`
 (from the project root, after a full build). Re-mux with
 `spikes/demos/.venv/bin/python spikes/demos/finish.py`.
+
+## 08 — Spiral: finding now
+
+From this directory:
+
+```sh
+node record-now.mjs
+TAKE=08 .venv/bin/python finish.py
+```
+
+This take uses the prototype's own Play audio button and scheduler clock.
+`build-now.mjs` adds a recording-only switch to the frozen Study 01 scene in
+`study01-scene.ts`; both scenes draw the same playing score. The old renderer
+runs only in the before segment. Query windows extend to 32 turns for the tour.
+The controls and captions use the same presentation rig as the previous demos.
+
+The now bridge schedules each sync click six milliseconds after the animation
+frame that displays its flash, avoiding a flash drawn late relative to a distant
+click deadline. The mux still independently detects both flashes and clicks in
+the decoded final output. Every captured frame carries the audio-clock stripe;
+frames are selected by that stamp, and the audio is not retimed. A/V residuals
+measure the output tap, excluding speakers and device output latency.
+
+`TAKE=08` limits `finish.py` to this take and leaves earlier videos and their
+index intact. The adjacent `08-spiral-now.metrics.json` reports decoded levels,
+marker residuals, frame gaps, and exact segment timestamps. Capture gaps over
+80 ms receive a visible caption. No sound was heard by the agent.

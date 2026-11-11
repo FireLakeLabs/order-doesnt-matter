@@ -1,7 +1,8 @@
 # Time, in orbit
 
-A throwaway 3D design study for Order Doesn't Matter. No audio: the travel clock
-and all geometry work without an audio context or sample downloads.
+A throwaway 3D design study for Order Doesn't Matter. The travel clock and all
+geometry work without audio; Play audio optionally starts Strudel behind a
+user gesture.
 
 Use Node **24.22.2** from the project root's `.node-version`:
 
@@ -67,3 +68,32 @@ appearance and the two visual iterations. Final program screenshots have no pass
 prefix. Frame intervals include browser scheduling and software rendering;
 `draw*Ms` measures CPU submission, not completed GPU work. Read [FINDINGS.md](FINDINGS.md)
 for the visual verdicts and limits. Fonts are bundled for offline use after install.
+
+## Study 02: watching now
+
+Use **Play audio** to initialise pinned `@strudel/web` behind a user gesture.
+The visible playhead follows the scheduler's audio clock, including its scheduling
+latency. **Travel** remains a silent camera tour. Pause audio holds the position;
+visiting another turn stops audio. Play audio starts the scheduler at that score
+address; a sustained note already in progress is re-attacked for its remaining
+scored duration. Oscillator phase and effect history cannot be reconstructed.
+The display deliberately shows scored activity, not measured effect tails.
+The master output is halved for mix headroom. Local deterministic percussion WAVs
+supply `bd`, `sd`, and `hh`; other sample names need their own sample registration.
+
+Fly-through shows the current turn plus four future turns by default. **Look
+ahead** offers 3, 4, 5, 8, or 14 future turns. Past turns disappear. Bright spans
+and beads mark scored activity; clicking a sound key focuses it visually while
+the full ensemble continues playing. Camera gestures do not edit the score.
+
+```sh
+npm run build
+npm test            # original 15-program / 3-view browser coverage
+npm run test:now     # built bundle: duration, rest, continuation, focus, audio
+npm run test:built   # built bundle / worker / fonts smoke check
+npm run test:audio   # real Strudel: start inside a long note
+```
+
+Evidence: `shots/v2/`, `measurements-study02.json`, `study02-checks.json`, and
+`FINDINGS.md`. Run the new recording from `spikes/demos/` with
+`node record-now.mjs`, then `TAKE=08 .venv/bin/python finish.py`.

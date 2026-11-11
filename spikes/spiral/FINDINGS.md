@@ -74,3 +74,37 @@ lanes beside the ring; give signal lanes scales and per-control inspection.
 | C1 | shown degraded | Selected controls encoded; full bag inspectable, no 411-control schema. |
 | C2 | shown degraded | Colon normalization and arrays retained; functions shown opaque, not visualized. |
 | A4 | shown degraded | Clip/release whisker estimates; actual heard tails out of scope. |
+
+## Study 02: finding now
+
+Fly-through is now for watching. Four screenshot rounds covered the six-voice
+piece, three-cycle alternation, every(4), polymeter, and 512-onset program. I tried
+strong depth falloff, a luminous present plane/rim, thicker full-colour current
+spans, disappearing past turns, and a short horizon. I kept them together, with
+four turns ahead by default and a control reaching fourteen: dimming alone did
+not locate now clearly enough by eye.
+
+The white gate names active sounds in their colours. Actual scored spans light
+for their duration, swell at onset, and carry bright playhead beads independently
+of occupancy aggregation. Continuous lanes get current-value beads. Upcoming
+spans are calmer; completed spans fade. Fly-through separates sound names into
+radial bands; focus ghosts the rest visually. Ring and coil share the present
+cues. Camera gestures remain navigation, with no draggable score handles.
+
+The first central readout covered drums; moving names beside the gate helped.
+A fourth pass moved left-side labels outside the rim. Audio starts behind Play
+using pinned @strudel/web and its scheduler clock. A mid-span restart re-attacks
+the remaining duration. Local bd/sd/hh percussion substitutes are disclosed.
+
+Still limited: dense occupancy loses exact onsets; branches sharing a sound
+share a band/focus target; effect tails and prior oscillator phase are not
+reconstructed. Readability and one-second recognition were judged by eye, not
+measured with viewers. No sound was heard.
+
+Measured: clean-install build passed; full browser coverage took 133.8 s and
+focused built-bundle checks 7.1 s, with no page/request failures. Mid-note restart
+and synchronized readouts had failing-before/passing-after regressions. The
+1280×720 H.264/AAC recording is 46.56 s, 9.95 MB; independently decoded start/end
+A/V residuals are +20.0/−6.6 ms, with zero clipped decoded samples. Fourteen capture
+gaps exceeded 80 ms (maximum 266 ms), visibly captioned. Evidence: `shots/v2/`,
+`measurements-study02.json`, `study02-checks.json`, and the recording’s metrics.

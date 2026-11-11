@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {note,lpf} from '@strudel/core/controls.mjs';
+import {sine} from '@strudel/core/signal.mjs';
+import {startAt} from '../src/audio-start.ts';
+const long=note('c3').slow(4);
+const shifted=startAt(long,1.5);
+const first=shifted.queryArc(0,.125);
+assert.equal(first.filter(h=>h.hasOnset()).length,1,'Starting inside a long note must trigger its remaining span');
+assert.deepEqual(first.map(h=>[Number(h.whole.begin),Number(h.whole.end)]),[[0,2.5]]);
+assert.equal(shifted.queryArc(.125,.25).filter(h=>h.hasOnset()).length,0,'Later scheduler queries must not re-trigger the continuation');
+assert.equal(shifted.queryArc(2.5,2.625).filter(h=>h.hasOnset()).length,1,'The next original onset must retain its time address');
+assert.equal(startAt(lpf(sine),1.5).queryArc(0,.125).filter(h=>h.hasOnset()).length,0,'A continuous signal must never gain an onset');
+console.log('PASS: mid-note audio start triggers once for the remaining duration; future onsets and continuous signals preserved.');

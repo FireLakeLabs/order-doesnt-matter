@@ -20,3 +20,7 @@ spikes/spiral/shots/*
 !spikes/spiral/shots/touch-mobile.png
 .npm-cache/
 spikes/demos/out/
+!spikes/spiral/shots/v2/
+!spikes/spiral/shots/v2/*-before.jpg
+!spikes/spiral/shots/v2/*-after.jpg
+!spikes/spiral/shots/v2/README.md
