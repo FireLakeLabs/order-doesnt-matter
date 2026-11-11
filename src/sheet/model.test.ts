@@ -112,8 +112,7 @@ describe('score sheet model', () => {
     input.events.lead.events[0].value = { s: ['triangle', 'unknown'] };
     expect(sheetModel(input).rows[0].sounds).toContainEqual({
       name: 'unknown',
-      state: 'loading',
-      detail: 'Awaiting sound status',
+      state: 'not-loaded',
     });
   });
   it('lets the last setting replace a signal driver', () => {
@@ -245,4 +244,14 @@ describe('score sheet model', () => {
     expect(sheetModel({ ...trio, playhead: null }).playheadX).toBeNull();
     expect(sheetModel({ ...trio, playhead: 1 }).playheadX).toBeNull();
   });
+});
+
+it('unpitched rhythm names the hit count instead of a generic event', () => {
+  const input = structuredClone(trio);
+  input.events.lead.events.forEach((e) => {
+    e.value = { s: 'bd' };
+  });
+  const model = sheetModel(input);
+  const rhythm = model.rows[0].cells.find((c) => c.name === 'rhythm')!;
+  expect(rhythm.label).toBe(`${rhythm.totalCount} hits`);
 });
