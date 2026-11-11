@@ -31,7 +31,8 @@ server; `serve` uses Vite's built-file preview on an OS-selected free port.
 - Changes during playback stay **PENDING** until the first dispatched onset of
   that voice at the new revision reaches the audio clock. The aligned option
   uses the next _uncommitted_ cycle, because queued audio cannot be recalled.
-  A silent selection may remain pending until it next produces an onset.
+  Muted selections clear pending when the scheduling boundary is reached;
+  other silent selections may remain pending until they next produce an onset.
 - Undo/Redo and Ctrl/Cmd-Z work across document edits. Refresh resets the study;
   it deliberately has no persistence/export workflow.
 
@@ -45,7 +46,9 @@ npm run shots:v2
 
 Browser checks need Chromium installed for Playwright (or the existing cache).
 They build **nothing**: run `npm run build` first. The combined gate runs real-input edits/jumps, existing editor behavior, pointer
-checks and all 85 corpus maps, with a **90-second aggregate budget**. Every
+checks, all 85 corpus maps, the owner mute regressions, sample decoding/output
+checks, a default-sound audit and an explicit offline case, with a
+**90-second aggregate budget**. Every
 script starts and closes a built-copy server on a free port. Durations are in
 `browser-suite-study02.json`; real-input assertions are in `real-browser-results.json`;
 coverage of every corpus program is in `corpus-coverage.json` and `CORPUS.md`.
@@ -53,7 +56,8 @@ Study 02 screenshots and four round critiques are in `shots/v2/`, under 6 MB.
 `npm run shots:v2` refreshes the final screenshots from the built app.
 
 `src/document.ts`, `src/query-document.ts` and `src/scene.ts` are pure and tested
-in Node. `src/engine.ts` alone owns audio/REPL wiring. `src/adapter.ts` consumes
+in Node. `src/engine.ts` owns audio/REPL wiring; `src/sounds.ts` owns sample registration
+and decoder readiness. `src/adapter.ts` consumes
 `spikes/import` after its 43 acceptance tests passed. `prepare-import.mjs` builds
 that source into this study's `vendor/`, without writing into the import spike;
 Vite packages its bounded query worker for the browser. The local declaration
@@ -61,8 +65,11 @@ uses the import agent's extended draft types (`data`, ordered setup, globals).
 `src/fallback.ts` retains the original minimal three-function fixture adapter as
 study evidence; it is no longer the active adapter.
 
-No audio was heard. Dispatch timestamps and real queried events prove the
-specified score changes, not speaker output, sample availability or continuity.
+No audio was heard. The owner regression suite also measures output PCM for
+isolated kick, hat and clap onsets; it reports “not checked: offline” when sample
+access cannot be established. This proves rendered energy, not speaker output or
+continuity. See [Fixes after owner testing](FINDINGS.md#fixes-after-owner-testing)
+and the [per-program sound audit](SOUND-AUDIT.md).
 
 The default piece is the real House sketch. The section strip shows authored
 sections, lengths and current position. Click a section to query it or restart

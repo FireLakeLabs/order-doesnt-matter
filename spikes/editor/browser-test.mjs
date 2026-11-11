@@ -106,7 +106,10 @@ try {
   await pick("source · not modelled", 2);
   await shot("editor-source");
   await page.locator("#opaque-code").fill("not valid code }");
-  await page.waitForTimeout(600);
+  await page
+    .locator(".error-box")
+    .first()
+    .waitFor({ state: "visible", timeout: 3000 });
   assert(await page.locator(".error-box").count());
   await shot("editor-source-broken");
   await page.getByRole("button", { name: "Undo", exact: true }).click();

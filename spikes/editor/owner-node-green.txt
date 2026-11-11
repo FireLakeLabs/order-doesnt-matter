@@ -1,0 +1,20 @@
+
+> odm-editor-study@0.0.0 test
+> node prepare-import.mjs && vitest run --reporter=dot
+
+
+ RUN  v3.2.4 /home/aaron/projects/order-doesnt-matter/spikes/editor
+
+stdout | src/sounds.test.ts
+🌀 @strudel/core loaded 🌀
+
+stderr | src/sounds.test.ts
+cannot use window: not in browser?
+
+······························
+
+ Test Files  4 passed (4)
+      Tests  30 passed (30)
+   Start at  15:13:03
+   Duration  3.80s (transform 479ms, setup 0ms, collect 1.41s, tests 6.44s, environment 1ms, prepare 331ms)
+

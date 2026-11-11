@@ -48,6 +48,8 @@ export interface Voice extends Meta {
 }
 
 export interface Pattern extends Meta {
+  /** Instrument mute is document state; shared definitions affect every use. */
+  muted?: boolean;
   /** Author vocabulary; kept even when a single-use const is inlined. */
   label?: string;
   /** Adjacent author comment, independent of the executable pattern. */

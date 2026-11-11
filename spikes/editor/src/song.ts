@@ -14,6 +14,7 @@ export interface Instrument {
   name: string;
   pattern: Pattern;
   voice: Voice;
+  muted: boolean;
   uses: { pattern: Pattern; section: number }[];
   sections: number[];
 }
@@ -27,7 +28,11 @@ export function resolve(
   if (!shared) return p;
   seen.add(p.core.name);
   const base = resolve(doc, shared, seen);
-  return { ...base, layers: [...base.layers, ...p.layers] };
+  return {
+    ...base,
+    muted: base.muted || p.muted,
+    layers: [...base.layers, ...p.layers],
+  };
 }
 function notation(p: Pattern): string {
   return p.core.kind === "sequence"
@@ -133,6 +138,7 @@ export function song(doc: Doc): {
         name: proposed + (n > 1 ? ` ${n}` : ""),
         pattern: base,
         voice: v,
+        muted: v.muted || !!base.muted,
         uses: [],
         sections: [],
       };

@@ -108,3 +108,63 @@ explicit than these top-level songs. No novice usability session was performed.
 existing editor behavior 24.53 s, pointer checks 2.60 s, corpus audit 13.54 s
 (including child startup). Dispatched onsets/phase were observed; sample access,
 physical output, acoustic continuity and tails were not established.
+
+## Fixes after owner testing
+
+**Silent samples.** The browser's original sound registry contained synths but no
+`bd`, `hh` or `cp`; the pinned `@strudel/web` README explicitly says external
+samples are not loaded automatically. The engine now prebakes the documented
+[default collections](https://github.com/felixroos/dough-samples#usage) plus the
+complete Dirt set (deterministic registration order), executes `Doc.setup` sample
+setup through Strudel's transpiler, and checks both registration and decoded
+files. Loading / Ready / Missing, including the sound name and failure detail,
+are visible on every instrument in both maps, the sidebar and its editor. Actual
+trigger values are checked too, for sound/index changes beyond the preview window.
+
+**Wrong mute.** A pending query left old rows clickable after the current document
+changed: House's clap row ID `n4` addressed Techno's kick **shape driver**, and the
+old general-purpose toggle injected a silence layer into that driver. Mute also
+lived in opaque source layers and had inconsistent visual readback. New rows now
+replace old rows immediately, stale handlers are rejected, and mute accepts only
+canonical instruments; typed node mute state is generated and re-imported without
+turning it into opaque document source. Shared instruments mute everywhere; IDs
+remain stable within a document, and history, edits, sections and map switches
+retain the state. [Before](owner-regressions-before.json) /
+[after](owner-regressions.json) capture the same real-pointer regression with
+query delivery delayed by 250 ms; the before run lost kick events without showing
+any muted row. The new Node tests also failed on the original representation.
+
+**Neighbours.** Solo stays temporary and clears when another piece is loaded;
+reorder and collapse leave generated source unchanged. A next-cycle mute no longer
+waits forever for its own nonexistent onset: its pending badge clears at the
+scheduling boundary. Both pieces passed real-click mute-two / unmute-first,
+section/cycle jump, map switch, undo/redo, solo, reorder, collapse, and Apply now /
+next-cycle dispatch checks. Pending starts are invalidated when transport stops
+or another document is loaded. Scroll and unfinished field input survive status
+refreshes.
+
+**Measured, not heard.** A 48 kHz AudioWorklet tap at Superdough's output captured
+two onsets of each isolated Techno drum with the bass and other drums muted. In
+100 ms windows starting 5 ms after the scheduled onset, stereo RMS ranges were
+`bd` 0.44308–0.44340, `hh` 0.01454–0.01637,
+and `cp` 0.13118–0.13185; the first onset of each also exceeded
+its pre-onset background RMS by more than 3×. This proves non-silent rendered PCM,
+not physical speaker output, acoustic quality, smooth edits or audible tails.
+The forced-offline run reported **not checked: offline**, verified Missing names
+in the UI, and made no audio-energy claim.
+
+[Every program's sound list](SOUND-AUDIT.md) / [raw sound checks](sound-audit.json):
+85 programs, 15 available names; only `myvocal` in `real-custom-samples` fails
+default resolution (the source has a placeholder URL). No corpus piece uses
+`.bank(...)`; the standard drum-machine collections are nevertheless registered.
+`micro-query-throws` and `micro-query-late-throws` deliberately fail queries and
+remain explicitly marked; no successful full-window query is claimed for them.
+
+**Final verification:** 30 editor Node tests (**3.80 s**), 43 importer acceptance
+tests (**5.89 s**), TypeScript/build, real screenshots inspected, and the complete
+browser gate **77.65 s** including the owner checks (**23.15 s**)
+and forced-offline check (**0.69 s**). Pure Node audit queries run alongside
+the browser checks and finish before registry resolution.
+[Browser evidence](owner-browser-results.json), [offline evidence](owner-browser-offline.json),
+and [gate timings](browser-suite-study02.json) record the assertions and durations.
+`dist/` was rebuilt. No audio was heard; nothing was committed or pushed.

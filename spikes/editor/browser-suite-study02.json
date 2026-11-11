@@ -1,21 +1,37 @@
 {
-  "durationMs": 45112.953062,
+  "durationMs": 77652.07252799999,
   "runs": [
     {
       "script": "verify-real.mjs",
-      "durationMs": 4442.962081000001
+      "durationMs": 4666.149571999999
+    },
+    {
+      "script": "sound-audit.mjs",
+      "durationMs": 11259.937461
     },
     {
       "script": "browser-test.mjs",
-      "durationMs": 24531.591121999998
+      "durationMs": 26562.644765
     },
     {
       "script": "pointer-check.mjs",
-      "durationMs": 2598.652625999999
+      "durationMs": 2840.2579299999998
     },
     {
       "script": "corpus-audit.mjs",
-      "durationMs": 13539.710594
+      "durationMs": 17320.768015999995
+    },
+    {
+      "script": "owner-browser.mjs",
+      "durationMs": 23523.607527
+    },
+    {
+      "script": "owner-regressions.mjs",
+      "durationMs": 1674.886578000005
+    },
+    {
+      "script": "owner-browser.mjs (offline)",
+      "durationMs": 1061.405442000003
     }
   ]
 }

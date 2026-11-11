@@ -1750,3 +1750,77 @@ header {
 .inactive-value {
   opacity: 0.7;
 }
+
+/* Readiness and audition state stay legible even when the score is muted. */
+.sound-status {
+  display: block;
+  font-size: 9px;
+  line-height: 1.35;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.sound-status.loading {
+  color: #efd08b;
+}
+.sound-status.ready {
+  color: #98d5ba;
+}
+.sound-status.missing {
+  color: #ff9f98;
+  font-weight: 600;
+}
+.planet-sound {
+  fill: #dfc99c;
+  font-size: 10px;
+}
+.planet-sound[data-sound-state="missing"] {
+  fill: #ff9f98;
+}
+.planet-sound[data-sound-state="ready"] {
+  fill: #98d5ba;
+}
+.instrument-state,
+.play-state {
+  display: block;
+  color: #a9bfc5;
+  font-size: 9px;
+}
+.instrument-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+}
+.planet-actions button {
+  padding: 2px 7px;
+  margin-right: 4px;
+  font-size: 10px;
+}
+.voice-nav button:first-child {
+  display: block;
+  text-align: left;
+}
+.voice-nav .instrument-state,
+.voice-nav .sound-status {
+  margin-left: 16px;
+}
+.voice-nav {
+  align-items: stretch;
+}
+.muted {
+  opacity: 1;
+}
+.muted .name,
+.planet.muted .planet-face {
+  opacity: 0.5;
+}
+[data-muted="true"] .instrument-state,
+[data-muted="true"] .play-state {
+  color: #efd08b;
+}
+button[aria-pressed="true"][data-action="mute"],
+button[aria-pressed="true"][data-action="solo"] {
+  border-color: #efd08b;
+  color: #efd08b;
+}

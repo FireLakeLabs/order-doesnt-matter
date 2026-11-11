@@ -43,6 +43,7 @@ import { controlInfo } from "./controls";
 import { eventLanes, shortValue, staticValue } from "./miniature";
 import { song, currentSection, instrumentEvents } from "./song";
 import { Engine } from "./engine";
+import type { Instrument } from "./song";
 import { tagVoices, atBoundary, driverDocument } from "./query-document";
 const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) throw Error("No app root");
@@ -96,6 +97,7 @@ let map: "constellation" | "sheet" = "sheet",
   revision = 0,
   queued: Doc | undefined;
 let rowOrder: string[] = [];
+let renderedDocument: Doc | undefined;
 let moreColumns = false;
 let sampledDrivers: EventMap = {};
 let driverErrors: Record<string, string> = {};
@@ -216,6 +218,40 @@ function sectionUses(i: ReturnType<typeof song>["instruments"][number]) {
     ? `<span class="shared-mark" title="${esc(sections.map((n) => (s.sections[n]?.name ?? "") + " @ " + s.sections[n]?.start).join(" · "))} · editing the shared instrument changes every occurrence">${sections.length > 1 ? "↳ Shared · " + sections.length + " sections" : "In " + esc(s.sections[sections[0] ?? 0]?.name)}</span>`
     : "";
 }
+function instrumentState(i: Instrument) {
+  return i.muted
+    ? "Muted"
+    : solo && solo !== i.id
+      ? "Quiet · another instrument is solo"
+      : solo === i.id
+        ? "Solo"
+        : "Active";
+}
+function soundText(id: string) {
+  const report = engine.sounds?.reports[id];
+  if (!report || report.state === "loading")
+    return "Loading · checking sounds…";
+  const missing = [
+    ...new Set(
+      report.sounds.filter((s) => s.state === "missing").map((s) => s.name),
+    ),
+  ];
+  const names = [...new Set(report.sounds.map((s) => s.name))];
+  return report.state === "missing"
+    ? "Missing sound · " + (missing.join(", ") || report.error || "not checked")
+    : "Ready · " + names.join(", ");
+}
+function soundHtml(id: string) {
+  const state = engine.sounds?.reports[id]?.state ?? "loading";
+  const report = engine.sounds?.reports[id];
+  const details = report?.sounds
+    .flatMap((s) => (s.state === "missing" ? [s.name + ": " + s.reason] : []))
+    .join("; ");
+  return `<span class="sound-status ${state}" data-sound-state="${state}" title="${esc(details || report?.error || soundText(id))}">${esc(soundText(id))}</span>`;
+}
+function instrumentButtons(i: Instrument) {
+  return `${button(i.muted ? "Unmute" : "M", "mute", `data-id="${i.id}" title="Mute ${esc(i.name)}" aria-label="${i.muted ? "Unmute" : "Mute"} ${esc(i.name)}" aria-pressed="${i.muted}"`)}${button(solo === i.id ? "Unsolo" : "S", "solo", `data-id="${i.id}" title="Solo ${esc(i.name)}" aria-label="${solo === i.id ? "Unsolo" : "Solo"} ${esc(i.name)}" aria-pressed="${solo === i.id}"`)}`;
+}
 function mapHtml() {
   if (map === "sheet") return sourceNodes() + sheetHtml();
   const scene = constellation(
@@ -230,10 +266,12 @@ function mapHtml() {
     `<div class="space" id="space"><svg id="universe" viewBox="0 0 ${scene.width} ${scene.height}" style="width:${scene.width * zoom}px;height:${scene.height * zoom}px;transform:translate(${pan.x}px,${pan.y}px)" aria-label="Constellation: rhythms at the centre, settings on orbits, rewrites on rings">${scene.planets
       .map((p) => {
         const broken = errors[p.voice];
-        return `<g class="planet ${p.active ? "" : "inactive"} ${pending && target(pending.id)?.voice.id === p.voice ? "pending" : ""}"><rect x="${p.x - 200}" y="${p.y - 238}" width="400" height="464" rx="14" class="planet-card"/><text x="${p.x - 177}" y="${p.y - 208}" class="planet-title">${esc(p.name.length > 29 ? p.name.slice(0, 28) + "…" : p.name)}<title>${esc(p.name)} · ${esc(p.pattern.comment ?? "Click its rhythm, settings or rings to edit")}</title></text><text x="${p.x - 177}" y="${p.y - 188}" class="planet-state">${broken ? "⚠ BROKEN" : !p.active ? "○ Not in this section" : p.events.length ? "● Playing this section" : "◌ Rest this cycle"}${p.instrument.sections.length > 1 ? " · ↳ shared in " + p.instrument.sections.length + " sections" : ""}${scene.rooms
+        return `<g data-instrument="${p.id}" data-muted="${p.muted}" class="planet ${p.muted ? "muted" : ""} ${p.active ? "" : "inactive"} ${pending && target(pending.id)?.voice.id === p.voice ? "pending" : ""}"><rect x="${p.x - 200}" y="${p.y - 238}" width="400" height="464" rx="14" class="planet-card"/><text x="${p.x - 177}" y="${p.y - 208}" class="planet-title">${esc(p.name.length > 29 ? p.name.slice(0, 28) + "…" : p.name)}<title>${esc(p.name)} · ${esc(p.pattern.comment ?? "Click its rhythm, settings or rings to edit")}</title></text><text x="${p.x - 177}" y="${p.y - 188}" class="planet-state">${p.muted ? "Muted" : solo && solo !== p.id ? "Quiet · solo elsewhere" : broken ? "⚠ BROKEN" : engine.sounds?.reports[p.id]?.state !== "ready" ? "⚠ Sound unavailable / loading" : !p.active ? "○ Not in this section" : p.events.length ? "● Playing this section" : "◌ Rest this cycle"}${p.instrument.sections.length > 1 ? " · ↳ shared in " + p.instrument.sections.length + " sections" : ""}${scene.rooms
           .filter((r) => r.voices.includes(p.id))
           .map((r) => " · room " + r.id + (r.conflict ? " ⚠" : ""))
-          .join("")}</text>
+          .join(
+            "",
+          )}</text><text x="${p.x - 177}" y="${p.y - 170}" class="planet-sound" data-sound-state="${engine.sounds?.reports[p.id]?.state ?? "loading"}">${esc(soundText(p.id))}<title>${esc(soundText(p.id))}</title></text><foreignObject x="${p.x - 177}" y="${p.y + 195}" width="180" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="planet-actions">${instrumentButtons(p.instrument)}</div></foreignObject>
   <circle cx="${p.x}" cy="${p.y}" r="${p.orbit}" class="orbit"/>
   ${p.shells.map((sh, j) => `<g data-select="${sh.id}" tabindex="0" role="button" aria-label="${esc(p.name)} rewrite ${esc(sh.name)}"><title>${esc(sh.name)} rewrites the score · click to edit. Settings inside this ring are rewritten with the rhythm.</title><circle cx="${p.x}" cy="${p.y}" r="${sh.r}" class="shell${chosen(sh.id)}"/><rect x="${sh.labelX - 32}" y="${sh.labelY - 8}" width="64" height="17" rx="6" class="shell-label-bg"/><text x="${sh.labelX}" y="${sh.labelY + 4}" text-anchor="middle" class="shell-label">${esc(sh.name)}</text></g>`).join("")}
   <g data-select="${p.id}" tabindex="0" role="button" aria-label="${esc(p.name)} rhythm" class="planet-face${chosen(p.id)} ${p.tier === 3 ? "opaque" : ""}"><title>${esc(p.name)} · rhythm. Click to edit the source pattern${p.instrument.sections.length > 1 ? " shared by every marked section" : ""}.</title><circle cx="${p.x}" cy="${p.y}" r="${p.radius}"/><svg x="${p.x - 27}" y="${p.y - 27}" width="54" height="54" viewBox="0 0 100 100">${ring(
@@ -312,7 +350,7 @@ function sheetHtml() {
   return `<div class="sheet-summary"><span>${data.rows.filter((r) => r.active).length} in this section · ${data.rows.length} instruments in the piece</span>${data.columns.length > 5 ? button(moreColumns ? "Fewer settings" : `+ ${extra} more settings`, "more-columns") : ""}</div><div class="sheet-scroll"><table><thead><tr><th class="voice-col">INSTRUMENT · click to edit</th><th>RHYTHM · cycle ${cycle}</th>${columns.map((c) => `<th title="${esc(c)} · ordered by use in this piece">${esc(settingName(c))}<small>${esc(c)}</small></th>`).join("")}<th>REWRITES</th><th>ROOM</th></tr></thead><tbody>${data.rows
     .map(({ voice: v, events: es, settings: ss, active, instrument: i }) => {
       const broken = errors[i.voice.id];
-      return `<tr class="${v.muted ? "muted" : ""} ${active ? "" : "inactive"} ${pending && target(pending.id)?.voice.id === i.voice.id ? "pending" : ""}" data-instrument="${v.id}"><th class="voice-col"><div class="voice-name">${button(esc(v.name), "select", `data-id="${v.id}" class="name${chosen(v.id)}" title="${esc(v.pattern.comment ?? v.name)} · edit this instrument everywhere it is used"`)}</div><div class="membership">${sectionUses(i)}</div><div class="row-actions">${button(v.muted ? "Unmute" : "M", "mute", `data-id="${v.id}" title="Mute ${esc(v.name)}"`)}${button(solo === v.id ? "Unsolo" : "S", "solo", `data-id="${v.id}" title="Solo ${esc(v.name)}"`)}${button("↑", "row-up", `data-id="${v.id}" aria-label="Move ${esc(v.name)} up"`)}${button("↓", "row-down", `data-id="${v.id}" aria-label="Move ${esc(v.name)} down"`)}${button(collapsed.has(v.id) ? "+" : "−", "collapse", `data-id="${v.id}" aria-label="Collapse ${esc(v.name)}"`)}</div></th><td>${broken ? `<span class="error-box">⚠ BROKEN</span>` : !active ? `<span class="rest-state">○ Not in this section</span>` : !es.length ? `<span class="rest-state">◌ Rest this cycle</span>` : button(`${collapsed.has(v.id) ? "Show rhythm" : lane(es, "", 34)}`, "select", `data-id="${v.pattern.id}" class="cell" title="${es.length} real queried event parts · click to edit rhythm"`)}</td>${columns
+      return `<tr class="${v.muted ? "muted" : ""} ${active ? "" : "inactive"} ${pending && target(pending.id)?.voice.id === i.voice.id ? "pending" : ""}" data-instrument="${v.id}" data-muted="${v.muted}"><th class="voice-col"><div class="voice-name">${button(esc(v.name), "select", `data-id="${v.id}" class="name${chosen(v.id)}" title="${esc(v.pattern.comment ?? v.name)} · edit this instrument everywhere it is used"`)}</div><div class="membership">${sectionUses(i)}</div>${soundHtml(i.id)}<div class="row-actions">${instrumentButtons(i)}${button("↑", "row-up", `data-id="${v.id}" aria-label="Move ${esc(v.name)} up"`)}${button("↓", "row-down", `data-id="${v.id}" aria-label="Move ${esc(v.name)} down"`)}${button(collapsed.has(v.id) ? "+" : "−", "collapse", `data-id="${v.id}" aria-label="Collapse ${esc(v.name)}"`)}</div></th><td><span class="play-state">${esc(instrumentState(i))}</span>${broken ? `<span class="error-box">⚠ BROKEN</span>` : !active ? `<span class="rest-state">○ Not in this section</span>` : !es.length ? `<span class="rest-state">◌ Rest this cycle</span>` : button(`${collapsed.has(v.id) ? "Show rhythm" : lane(es, "", 34)}`, "select", `data-id="${v.pattern.id}" class="cell" title="${es.length} real queried event parts · click to edit rhythm"`)}</td>${columns
         .map((c) => {
           const matches = ss.filter((s) => s.name === c),
             s = matches.at(-1);
@@ -335,7 +373,27 @@ function sheetHtml() {
 function render() {
   // A cycle/query refresh must not replace a captured drag target.
   if (gestureActive) return;
+  const active = document.activeElement;
+  const focus =
+    active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement
+      ? {
+          id: active.id,
+          value: active.value,
+          start: active.selectionStart,
+          end: active.selectionEnd,
+        }
+      : undefined;
+  const scrolls = [
+    ".navigator",
+    ".map-container",
+    ".sheet-scroll",
+    ".editor-scroll",
+  ].map((selector) => {
+    const el = document.querySelector(selector);
+    return { selector, top: el?.scrollTop ?? 0, left: el?.scrollLeft ?? 0 };
+  });
   const t = selectedTarget();
+  renderedDocument = doc();
   app!.innerHTML = `<header><a class="brand" href="#">◎ <span>Order Doesn’t Matter</span></a><span class="study">TWO MAPS / ONE SCORE</span><div class="transport">${button(engine.playing ? "■ Stop" : "▶ Play", "play", 'id="play" class="primary"')}<span id="clock">${String(cycle).padStart(2, "0")} / ${(phase % 1).toFixed(2)}</span>${button("Undo", "undo", history.past.length ? "" : "disabled")}${button("Redo", "redo", history.future.length ? "" : "disabled")}</div></header><div class="workspace"><aside class="navigator" ${open ? "inert" : ""}><p class="eyebrow">AN INSTRUMENT FOR FINDING</p><h1>The score,<br>at a glance.</h1><label class="label" for="piece">PIECE</label><select id="piece">${piece === "paste" || piece === "local-switch" ? `<option selected value="${piece}">${piece === "local-switch" ? "Switch Angel · local only" : "Imported score"}</option>` : ""}<optgroup label="Design fixtures (secondary)">${fixtures.map((f) => `<option value="${f.id}" ${f.id === piece ? "selected" : ""}>${esc(f.name)}</option>`).join("")}</optgroup><optgroup label="Real input + corpus programs">${corpusDocs.map((f) => `<option value="${f.id}" ${f.id === piece ? "selected" : ""}>${esc(f.title ?? f.id)}</option>`).join("")}</optgroup></select>${button("Switch Angel · local file", "local-switch", 'class="text-button" title="Reads the earlier project at runtime; source is not redistributed"')}${button("Paste Strudel…", "paste", 'class="text-button"')}<div class="nav-divider"></div><label class="label" for="find">FIND A VOICE OR SETTING</label><input id="find" type="search" placeholder="Try “shore lpf”" value="${esc(query)}" autocomplete="off"><div class="results">${
     query
       ? searchTargets(doc(), query)
@@ -351,11 +409,32 @@ function render() {
       : song(doc())
           .instruments.map(
             (i, n) =>
-              `<div class="voice-nav"><button data-action="select" data-id="${i.id}" title="Edit ${esc(i.name)}${i.sections.length > 1 ? " everywhere it is used" : ""}"><i style="background:${colors[n % 4]}"></i>${esc(i.name)}</button><button data-action="focus" data-id="${i.id}" aria-label="Find ${esc(i.name)} in map">⌖</button></div>`,
+              `<div class="voice-nav" data-instrument="${i.id}" data-muted="${i.muted}"><button data-action="select" data-id="${i.id}" title="Edit ${esc(i.name)}${i.sections.length > 1 ? " everywhere it is used" : ""}"><i style="background:${colors[n % 4]}"></i>${esc(i.name)}<small class="instrument-state">${esc(instrumentState(i))}</small>${soundHtml(i.id)}</button><button data-action="focus" data-id="${i.id}" aria-label="Find ${esc(i.name)} in map">⌖</button></div>`,
           )
           .join("")
   }</div>${button("+ Add voice", "add-voice", 'class="add-voice"')}<div class="legend"><p><i class="mint"></i> Planet = rhythm / real events</p><p><i class="violet"></i> Moon = setting; satellite = driver</p><p><i class="amber"></i> Shell = ordered rewrite</p><p>Orbits mean “belongs to”.<br>There is no sound-flow path.</p><p>◇ Dashed = not modelled</p><small>Corpus importer · real Strudel queries</small></div></aside><main><div class="toolbar"><div class="tabs">${button("◎ Constellation", "map-a", `aria-pressed="${map === "constellation"}"`)}${button("▤ Score sheet", "map-b", `aria-pressed="${map === "sheet"}"`)}</div><div class="map-tools" ${open ? "inert" : ""}>${map === "constellation" ? `${button("−", "zoom-out", 'aria-label="Zoom out"')}${button("Fit", "fit")}${button("+", "zoom-in", 'aria-label="Zoom in"')}` : ""}<span>${song(doc()).instruments.length} instruments · cycle ${cycle}</span></div></div><div class="map-intro"><div><p class="eyebrow">${map === "constellation" ? "BELONGING, WITHOUT WIRES" : "COMPARE ACROSS VOICES"}</p><h2>${map === "constellation" ? "A small universe of settings." : "One piece. All its settings."}</h2><p>${map === "constellation" ? "Click a planet, moon or labelled shell to edit. Drag empty space to pan. Scroll to explore; + / − to zoom." : "Click a cell to edit. ↳ opens nested drivers. Horizontal scroll reveals every setting; names stay pinned."}</p></div><div class="map-key">${map === "constellation" ? "Inner → outer: rewrite order<br>Moons inside rings are rewritten<br>Outer orbit: freely placed constants" : "Bars are actual event spans<br>No equal-step grid is assumed"}</div></div>${arrangementHtml()}<div class="map-container" ${open ? "inert" : ""}>${mapHtml()}</div><footer><span id="status" class="${Object.keys(errors).length ? "error" : ""}">${warning ? esc(warning) : Object.keys(errors).length ? `⚠ BROKEN · ${esc(Object.values(errors).join(" · "))}` : busy ? "Querying real events…" : `${Object.values(events).flat().length} queried event parts · scored length, not audible tails`}</span><span id="pending">${pending ? "◌ PENDING · waiting for first changed onset" : "● document and preview agree"}</span></footer></main></div>${open && t ? `<div class="scrim"></div>${editorHtml(t)}` : ""}${paste ? `<div class="modal-scrim"><section class="paste-panel"><h2>Bring in a score</h2><p>Executable Strudel, for this local study. Structured import; unsupported source stays selectable.</p><textarea id="paste-source" aria-label="Strudel to import">note("60 [64 67] 72").s("triangle")</textarea>${button("Import expression", "import", 'class="primary"')}${button("Cancel", "cancel-paste")}</section></div>` : ""}`;
   bind();
+  for (const { selector, top, left } of scrolls) {
+    const el = document.querySelector(selector);
+    if (el) {
+      el.scrollTop = top;
+      el.scrollLeft = left;
+    }
+  }
+  if (focus?.id) {
+    const el = document.getElementById(focus.id);
+    if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+      el.value = focus.value;
+      el.focus({ preventScroll: true });
+      if (
+        (el instanceof HTMLTextAreaElement ||
+          ["text", "search"].includes(el.type)) &&
+        focus.start !== null &&
+        focus.end !== null
+      )
+        el.setSelectionRange(focus.start, focus.end);
+    }
+  }
 }
 function argLabels(name: string) {
   return (
@@ -515,7 +594,7 @@ function editorHtml(t: Target) {
   const children = targets({ ...doc(), voices: [t.voice] }).filter(
     (x) => x.parent?.id === p.id && x.id !== t.id && "core" in x.node,
   );
-  return `<section class="editor" role="dialog" aria-modal="true" aria-label="Edit ${esc(t.path.join(" › "))}"><div class="editor-head"><div><p class="eyebrow">ONE THING AT A TIME · ${kind}</p><h2 id="breadcrumb">${esc(t.path.join(" › "))}</h2></div>${button("Done ×", "done", 'class="done"')}</div><div class="editor-scroll"><div class="voice-preview"><div><span class="label">REAL RESULT · CYCLE ${cycle} · ${esc(context?.instrument.name ?? t.pattern.label ?? t.voice.name)}</span>${errors[t.voice.id] ? `<div class="error-box">⚠ BROKEN · ${esc(errors[t.voice.id])}</div>` : lane(events[t.voice.id] ?? [], "", 60)}<div class="axis-labels"><span>start</span><span>½ cycle</span><span>end</span></div></div><figure>${ring(resultEvents)}<figcaption>read-only</figcaption></figure></div><div id="editor-error" role="alert">${warning ? `<p class="error-box">${esc(warning)}</p>` : ""}</div>${editingScopeHtml(t)}${body}${t.setting ? `<div class="driver-tree"><span class="label">WHAT DRIVES ${esc(t.setting.name)}?</span>${button(`${esc(t.setting.value.core.kind)} › open driver`, "select", `data-id="${t.setting.value.id}"`)}${["constant", "sequence", "signal"].map((x) => button(`Use ${x}`, "driver", `data-kind="${x}"`)).join("")}</div>` : ""}${children.length ? `<div class="driver-tree"><span class="label">NESTED DRIVERS · CLICK TO OPEN</span>${children.map((x) => button(esc(x.path.slice(t.path.length).join(" › ") || x.label), "select", `data-id="${x.id}"`)).join("")}</div>` : ""}<div class="context"><span class="label">OTHER SETTINGS · SELECT TO EDIT</span>${settings(
+  return `<section class="editor" role="dialog" aria-modal="true" aria-label="Edit ${esc(t.path.join(" › "))}"><div class="editor-head"><div><p class="eyebrow">ONE THING AT A TIME · ${kind}</p><h2 id="breadcrumb">${esc(t.path.join(" › "))}</h2></div>${button("Done ×", "done", 'class="done"')}</div><div class="editor-scroll"><div class="voice-preview"><div><span class="label">REAL RESULT · CYCLE ${cycle} · ${esc(context?.instrument.name ?? t.pattern.label ?? t.voice.name)}</span>${errors[t.voice.id] ? `<div class="error-box">⚠ BROKEN · ${esc(errors[t.voice.id])}</div>` : lane(events[t.voice.id] ?? [], "", 60)}<div class="axis-labels"><span>start</span><span>½ cycle</span><span>end</span></div></div><figure>${ring(resultEvents)}<figcaption>read-only</figcaption></figure></div><div id="editor-error" role="alert">${warning ? `<p class="error-box">${esc(warning)}</p>` : ""}</div>${context ? `<div class="instrument-status" data-instrument="${context.instrument.id}" data-muted="${context.instrument.muted}"><strong>${esc(instrumentState(context.instrument))}</strong>${soundHtml(context.instrument.id)}${instrumentButtons(context.instrument)}</div>` : ""}${editingScopeHtml(t)}${body}${t.setting ? `<div class="driver-tree"><span class="label">WHAT DRIVES ${esc(t.setting.name)}?</span>${button(`${esc(t.setting.value.core.kind)} › open driver`, "select", `data-id="${t.setting.value.id}"`)}${["constant", "sequence", "signal"].map((x) => button(`Use ${x}`, "driver", `data-kind="${x}"`)).join("")}</div>` : ""}${children.length ? `<div class="driver-tree"><span class="label">NESTED DRIVERS · CLICK TO OPEN</span>${children.map((x) => button(esc(x.path.slice(t.path.length).join(" › ") || x.label), "select", `data-id="${x.id}"`)).join("")}</div>` : ""}<div class="context"><span class="label">OTHER SETTINGS · SELECT TO EDIT</span>${settings(
     t.voice,
   )
     .filter((s) => s.id !== t.setting?.id)
@@ -577,6 +656,14 @@ async function refresh() {
   busy = true;
   const d = doc(),
     c = cycle;
+  // A new document must replace its old clickable rows immediately. Import IDs
+  // are local to each document; a delayed query must never leave old actions live.
+  if (renderedDocument !== d) {
+    events = {};
+    errors = {};
+    render();
+  }
+  engine.inspect(d).catch(fail);
   const tagged = tagVoices(d, true);
   const r = await queryEvents(generate(tagged), c, c + 1);
   if (token !== serial) return;
@@ -719,6 +806,7 @@ async function changed(next: Doc, id = selected) {
         queued: mode === "next",
       }
     : undefined;
+  render();
   if (engine.playing) {
     try {
       if (mode === "next") {
@@ -796,9 +884,14 @@ async function edit(fn: (t: Target) => void) {
   await changed(update(doc(), selected, fn));
 }
 function bind() {
+  const boundDocument = doc();
   document.querySelectorAll<HTMLElement>("[data-action]").forEach(
     (el) =>
       (el.onclick = () => {
+        if (boundDocument !== doc()) {
+          render();
+          return;
+        }
         const action = el.dataset.action,
           id = el.dataset.id;
         handle(action ?? "", id, el).catch((e) => {
@@ -850,6 +943,8 @@ function bind() {
       piece = f.id;
       selected = "";
       rowOrder = [];
+      solo = "";
+      collapsed.clear();
       open = false;
       cycle = 0;
       phase = 0;
@@ -1129,6 +1224,9 @@ async function handle(action: string, id?: string, el?: HTMLElement) {
       const imported = importStrudel(await response.text());
       engine.stop();
       history.set(imported.doc);
+      solo = "";
+      rowOrder = [];
+      collapsed.clear();
       piece = "local-switch";
       selected = "";
       open = false;
@@ -1366,7 +1464,12 @@ function bindPan() {
   if (!el || !svg) return;
   let drag: { x: number; y: number; px: number; py: number } | undefined;
   el.onpointerdown = (e) => {
-    if ((e.target as Element).closest("[data-select],[data-collapse]")) return;
+    if (
+      (e.target as Element).closest(
+        "[data-select],[data-collapse],[data-action]",
+      )
+    )
+      return;
     drag = { x: e.clientX, y: e.clientY, px: pan.x, py: pan.y };
     el.setPointerCapture(e.pointerId);
   };
@@ -1465,7 +1568,12 @@ function tick() {
                 : "",
             ) === target(p.id)?.voice.id),
       );
-      if (onset) {
+      const silentChange = song(doc()).instruments.find(
+        (i) => i.id === p.id,
+      )?.muted;
+      const appliedSilence =
+        silentChange && engine.revision >= p.revision && phase >= p.first;
+      if (onset || appliedSilence) {
         pending = undefined;
         changeLog.push({ revision, state: "landed", cycle: phase });
         document
@@ -1473,7 +1581,10 @@ function tick() {
           .forEach((el) => el.classList.remove("pending"));
         for (const id of ["#pending", "#editor-pending"]) {
           const el = document.querySelector(id);
-          if (el) el.textContent = "● Change landed · first dispatched onset";
+          if (el)
+            el.textContent = onset
+              ? "● Change landed · first dispatched onset"
+              : "● Mute applied · scheduling boundary reached";
         }
       }
     }
@@ -1526,6 +1637,9 @@ Object.assign(window, {
       d.voices[0]!.pattern.layers.push({ ...shell("slow", [1]), tier: 2 });
       engine.stop();
       history.set(d);
+      solo = "";
+      rowOrder = [];
+      collapsed.clear();
       selected = "";
       open = false;
       query = "";
@@ -1542,6 +1656,8 @@ Object.assign(window, {
       piece = id;
       selected = "";
       rowOrder = [];
+      solo = "";
+      collapsed.clear();
       open = false;
       cycle = 0;
       phase = 0;
@@ -1557,6 +1673,9 @@ Object.assign(window, {
       if (!f) throw Error("No fixture");
       engine.stop();
       history.set(structuredClone(f.doc));
+      solo = "";
+      rowOrder = [];
+      collapsed.clear();
       piece = id;
       cycle = 0;
       phase = 0;
@@ -1574,6 +1693,7 @@ Object.assign(window, {
     },
   },
 });
+engine.onSoundsChanged = () => render();
 render();
 refresh().catch(fail);
 tick();

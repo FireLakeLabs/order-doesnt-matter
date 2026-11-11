@@ -181,6 +181,7 @@ export interface Planet {
   tier: number;
   group?: string;
   collapsed: boolean;
+  muted: boolean;
   pattern: Pattern;
   instrument: Instrument;
   active: boolean;
@@ -318,6 +319,7 @@ export function constellation(
       tier: p.tier,
       group: p.core.kind === "group" ? p.core.how : undefined,
       collapsed: collapsed.has(i.id),
+      muted: i.muted,
       pattern: p,
       instrument: i,
       active:
@@ -351,9 +353,7 @@ export function sheet(doc: Doc, events: EventMap, cycle = 0) {
       id: p.id,
       name: p.name,
       pattern: p.pattern,
-      muted:
-        p.instrument.voice.muted ||
-        p.pattern.layers.some((l) => l.id === "mute-" + p.id),
+      muted: p.muted,
     };
     // Query only this instrument's actual settings; never descend through the whole arrangement.
     const active = currentSection(song(doc).sections, cycle, song(doc).total);

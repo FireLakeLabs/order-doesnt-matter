@@ -16,7 +16,7 @@ export type {
   Voice,
   Step,
 } from "../../import/src/document";
-import { humanName } from "./song";
+import { humanName, song } from "./song";
 import { fixtures } from "./fixtures";
 export type Target = {
   id: string;
@@ -482,22 +482,14 @@ export function makeDriver(
 }
 
 export function toggleMute(doc: Doc, id: string): Doc {
-  return update(doc, id, (t) => {
-    if (t.id === t.voice.id) {
-      t.voice.muted = !t.voice.muted;
-      return;
-    }
-    const key = "mute-" + t.pattern.id;
-    const index = t.pattern.layers.findIndex((l) => l.id === key);
-    if (index >= 0) t.pattern.layers.splice(index, 1);
-    else
-      t.pattern.layers.push({
-        id: key,
-        tier: 3,
-        kind: "opaque",
-        code: ".filterWhen(()=>false)",
-      });
-  });
+  const next = structuredClone(doc);
+  const instrument = song(next).instruments.find((i) => i.id === id);
+  if (!instrument) throw Error("Instrument no longer exists");
+  // Set the canonical definition, never a section's reference or a driver.
+  if (instrument.id === instrument.voice.id)
+    instrument.voice.muted = !instrument.voice.muted;
+  else instrument.pattern.muted = !instrument.pattern.muted;
+  return next;
 }
 
 /** Find the voice leaf that owns a setting/driver, without lifting an edit to the

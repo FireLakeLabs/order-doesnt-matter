@@ -24,9 +24,10 @@ export function tagVoices(d: Doc, unmute = false): Doc {
     const id = uses.get(p.id);
     return {
       ...p,
+      muted: unmute ? false : p.muted,
       core,
       layers: [
-        ...p.layers.filter((l) => !unmute || !l.id.startsWith("mute-")),
+        ...p.layers,
         ...(id
           ? [
               {

@@ -1,5 +1,5 @@
 {
-  "durationMs": 24134.749784000003,
+  "durationMs": 26174.441992,
   "checks": [
     "sheet 3 voices",
     "sheet 8 voices",
@@ -19,7 +19,7 @@
   "dispatches": [
     {
       "revision": 1,
-      "target": 0.2484875,
+      "target": 9.4431875,
       "begin": 0.0625,
       "value": {
         "note": 48,
@@ -37,7 +37,7 @@
     },
     {
       "revision": 1,
-      "target": 0.2484875,
+      "target": 9.4431875,
       "begin": 0.0625,
       "value": {
         "note": 49,
@@ -55,7 +55,7 @@
     },
     {
       "revision": 1,
-      "target": 0.2484875,
+      "target": 9.4431875,
       "begin": 0.0625,
       "value": {
         "note": 50,
@@ -73,7 +73,7 @@
     },
     {
       "revision": 2,
-      "target": 1.1859875000000002,
+      "target": 10.3806875,
       "begin": 0.5625,
       "value": {
         "note": 55,
@@ -91,7 +91,7 @@
     },
     {
       "revision": 2,
-      "target": 1.1859875000000002,
+      "target": 10.3806875,
       "begin": 0.5625,
       "value": {
         "note": 56,
@@ -109,7 +109,7 @@
     },
     {
       "revision": 2,
-      "target": 1.1859875000000002,
+      "target": 10.3806875,
       "begin": 0.5625,
       "value": {
         "note": 57,

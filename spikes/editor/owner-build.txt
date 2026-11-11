@@ -1,0 +1,20 @@
+
+> odm-editor-study@0.0.0 build
+> node prepare-import.mjs && tsc --noEmit && vite build
+
+vite v7.2.2 building client environment for production...
+transforming...
+✓ 119 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                           0.43 kB │ gzip:   0.29 kB
+dist/assets/browser-worker-BHmQ_qbK.js  519.65 kB
+dist/assets/index-C4wAKWup.css           22.91 kB │ gzip:   6.14 kB
+dist/assets/index-Bx4csjNJ.js           446.02 kB │ gzip: 137.50 kB
+dist/assets/dist-By0dj7Ne.js            656.70 kB │ gzip: 217.13 kB
+
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+✓ built in 2.34s

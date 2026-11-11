@@ -354,6 +354,8 @@ function importStrudel(source) {
       try {
         const data = JSON.parse(c.value.slice("@odm-pattern ".length));
         if (data && typeof data === "object") {
+          if ("muted" in data && typeof data.muted === "boolean")
+            p.muted = data.muted;
           if ("label" in data && typeof data.label === "string")
             p.label = data.label;
           if ("comment" in data && typeof data.comment === "string")
@@ -424,6 +426,17 @@ function importStrudel(source) {
     if (node.type !== "CallExpression" || node.optional) return opaque(node);
     if (node.callee.type === "MemberExpression" && !node.callee.computed && !node.callee.optional && node.callee.property.type === "Identifier") {
       const receiver = node.callee.object;
+      const metadata = leadingComment(node);
+      if (node.callee.property.name === "filterWhen" && node.arguments.length === 1 && text(node.arguments[0]).replace(/\s/g, "") === "()=>false" && metadata?.value.startsWith("@odm-pattern ")) {
+        try {
+          const data = JSON.parse(
+            metadata.value.slice("@odm-pattern ".length)
+          );
+          if (data && typeof data === "object" && "muted" in data && data.muted === true)
+            return { ...pattern(receiver, hole), muted: true };
+        } catch {
+        }
+      }
       const name2 = canonicalName(node.callee.property.name);
       const root = chainRoot(receiver);
       const primitive = root.type === "Identifier" ? definitions.get(root.name)?.init : root;
@@ -742,8 +755,10 @@ function generatePattern(p, hole) {
       text += `.${layer.name}(${layer.args.map((a) => argument(a, hole)).join(", ")})`;
     else text += layer.code;
   }
-  if (p.label !== void 0 || p.comment !== void 0) {
+  if (p.muted) text += ".filterWhen(()=>false)";
+  if (p.label !== void 0 || p.comment !== void 0 || p.muted) {
     const metadata = JSON.stringify({
+      muted: p.muted || void 0,
       label: p.label,
       comment: p.comment
     }).replaceAll("*/", "*\\/");

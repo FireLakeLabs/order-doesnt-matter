@@ -1,0 +1,210 @@
+{
+  "checks": [
+    {
+      "piece": "real-techno",
+      "initialDispatches": {
+        "rev": 1,
+        "ids": [
+          "n14",
+          "n2",
+          "n7",
+          "n9"
+        ]
+      }
+    },
+    {
+      "piece": "real-techno",
+      "planets": [
+        {
+          "id": "n2",
+          "muted": "false",
+          "text": "● Playing this section"
+        },
+        {
+          "id": "n7",
+          "muted": "true",
+          "text": "Muted"
+        },
+        {
+          "id": "n9",
+          "muted": "false",
+          "text": "● Playing this section · room 1"
+        },
+        {
+          "id": "n14",
+          "muted": "false",
+          "text": "● Playing this section"
+        }
+      ]
+    },
+    "real-techno: mute two, unmute first, section/cycle, map, undo/redo, solo, reorder, collapse; real pointer clicks and scheduler tags",
+    {
+      "piece": "real-house-vocals",
+      "initialDispatches": {
+        "rev": 9,
+        "ids": [
+          "n29",
+          "n49",
+          "n28"
+        ]
+      }
+    },
+    {
+      "piece": "real-house-vocals",
+      "planets": [
+        {
+          "id": "n28",
+          "muted": "false",
+          "text": "● Playing this section · ↳ shared in 3 sections"
+        },
+        {
+          "id": "n38",
+          "muted": "true",
+          "text": "Muted · ↳ shared in 5 sections · room 1 ⚠"
+        },
+        {
+          "id": "n1",
+          "muted": "false",
+          "text": "○ Not in this section · ↳ shared in 2 sections · room 1 ⚠"
+        },
+        {
+          "id": "n85",
+          "muted": "false",
+          "text": "○ Not in this section"
+        },
+        {
+          "id": "n29",
+          "muted": "false",
+          "text": "● Playing this section · ↳ shared in 3 sections"
+        },
+        {
+          "id": "n49",
+          "muted": "false",
+          "text": "● Playing this section · ↳ shared in 2 sections"
+        },
+        {
+          "id": "n54",
+          "muted": "false",
+          "text": "● Playing this section · ↳ shared in 2 sections · room 1 ⚠"
+        },
+        {
+          "id": "n109",
+          "muted": "false",
+          "text": "○ Not in this section · room 1 ⚠"
+        }
+      ]
+    },
+    "real-house-vocals: mute two, unmute first, section/cycle, map, undo/redo, solo, reorder, collapse; real pointer clicks and scheduler tags",
+    "non-silent drum onsets measured",
+    "program-level unawaited samples setup downloads and decodes a WAV; a separate missing name is visible in both maps and editor",
+    "real-techno: next-cycle mute retains old events before boundary, removes instrument after boundary, clears pending without requiring a nonexistent onset; Apply now restores its dispatches",
+    "real-house-vocals: next-cycle mute retains old events before boundary, removes instrument after boundary, clears pending without requiring a nonexistent onset; Apply now restores its dispatches"
+  ],
+  "errors": [],
+  "audio": {
+    "status": "non-silent drum onsets measured",
+    "rate": 48000,
+    "readiness": [
+      {
+        "state": "ready",
+        "name": "bd",
+        "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+      },
+      {
+        "state": "ready",
+        "name": "hh",
+        "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+      },
+      {
+        "state": "ready",
+        "name": "cp",
+        "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+      }
+    ],
+    "measured": [
+      {
+        "sound": "bd",
+        "begin": 0,
+        "target": 8.526,
+        "rms": 0.4434025218496755,
+        "peak": 0.8979718685150146,
+        "samples": 9600,
+        "beforeRms": 0.025273062622733485,
+        "beforeSamples": 9600
+      },
+      {
+        "sound": "bd",
+        "begin": 0.25,
+        "target": 8.970444444444444,
+        "rms": 0.4430796757369775,
+        "peak": 0.9025224447250366,
+        "samples": 9600,
+        "beforeRms": 0.008768695464049101,
+        "beforeSamples": 9600
+      },
+      {
+        "sound": "hh",
+        "begin": 0.125,
+        "target": 10.572222222222221,
+        "rms": 0.01453883708387111,
+        "peak": 0.11830631643533707,
+        "samples": 9600,
+        "beforeRms": 0.004064466816848675,
+        "beforeSamples": 9600
+      },
+      {
+        "sound": "hh",
+        "begin": 0.375,
+        "target": 11.016666666666666,
+        "rms": 0.016368346933713532,
+        "peak": 0.12038637697696686,
+        "samples": 9600,
+        "beforeRms": 0.004713679065221322,
+        "beforeSamples": 9600
+      },
+      {
+        "sound": "cp",
+        "begin": 0.25,
+        "target": 13.055744444444445,
+        "rms": 0.13184619414757584,
+        "peak": 0.730713963508606,
+        "samples": 9600,
+        "beforeRms": 0.0025890213620907384,
+        "beforeSamples": 9600
+      },
+      {
+        "sound": "cp",
+        "begin": 0.75,
+        "target": 13.944633333333334,
+        "rms": 0.13117545524618401,
+        "peak": 0.7332459092140198,
+        "samples": 9600,
+        "beforeRms": 0.003435270427419034,
+        "beforeSamples": 9600
+      }
+    ],
+    "bassMuted": true
+  },
+  "audit": {
+    "pieces": 85,
+    "missing": [
+      {
+        "id": "real-custom-samples",
+        "sounds": [
+          "myvocal"
+        ]
+      }
+    ],
+    "queryErrors": [
+      {
+        "id": "micro-query-throws",
+        "error": "corpus intentional query failure"
+      },
+      {
+        "id": "micro-query-late-throws",
+        "error": "corpus intentional late failure"
+      }
+    ]
+  },
+  "durationMs": 23150.575032
+}

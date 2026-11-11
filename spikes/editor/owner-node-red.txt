@@ -1,0 +1,56 @@
+
+> odm-editor-study@0.0.0 test
+> node prepare-import.mjs && vitest run --reporter=dot
+
+
+ RUN  v3.2.4 /home/aaron/projects/order-doesnt-matter/spikes/editor
+
+·xxx······················
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 3 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/owner-fixes.test.ts > real-techno: mute is instrument state, survives editing/history, and removes exactly its events in every section
+ FAIL  src/owner-fixes.test.ts > real-house-vocals: mute is instrument state, survives editing/history, and removes exactly its events in every section
+AssertionError: expected undefined to be true // Object.is equality
+
+- Expected: 
+true
+
++ Received: 
+undefined
+
+ ❯ src/owner-fixes.test.ts:30:61
+     28|     };
+     29|     history.set(toggleMute(history.doc, a.id));
+     30|     expect(song(history.doc).instruments[0]!.pattern.muted).toBe(true);
+       |                                                             ^
+     31|     expect(song(history.doc).instruments[0]!.pattern.layers).toEqual(a…
+     32|     await check([a.id]);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  src/owner-fixes.test.ts > generated instrument mute survives import and can then be removed
+AssertionError: expected undefined to be true // Object.is equality
+
+- Expected: 
+true
+
++ Received: 
+undefined
+
+ ❯ src/owner-fixes.test.ts:55:57
+     53|   d = toggleMute(d, song(d).instruments[0]!.id);
+     54|   const roundtrip = importStrudel(generate(d)).doc;
+     55|   expect(song(roundtrip).instruments[0]!.pattern.muted).toBe(true);
+       |                                                         ^
+     56|   const unmuted = toggleMute(roundtrip, song(roundtrip).instruments[0]…
+     57|   const q = await queryEvents(generate(unmuted), 0, 4);
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+
+ Test Files  1 failed | 2 passed (3)
+      Tests  3 failed | 23 passed (26)
+   Start at  14:45:46
+   Duration  3.20s (transform 237ms, setup 0ms, collect 706ms, tests 3.44s, environment 0ms, prepare 193ms)
+

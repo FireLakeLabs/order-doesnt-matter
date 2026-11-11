@@ -1,0 +1,68 @@
+{
+  "durationMs": 1309.795962,
+  "registry": {
+    "bd": true,
+    "hh": true,
+    "cp": true
+  },
+  "displayed": "hi-hat",
+  "state": {
+    "rows": [
+      {
+        "id": "n2",
+        "name": "kick",
+        "muted": false
+      },
+      {
+        "id": "n7",
+        "name": "hi-hat",
+        "muted": true
+      },
+      {
+        "id": "n9",
+        "name": "clap",
+        "muted": false
+      },
+      {
+        "id": "n14",
+        "name": "saw bass",
+        "muted": false
+      }
+    ],
+    "source": "setcpm(33.75);\n$: /*@odm-voice {\"name\":\"$\",\"muted\":false}*/ stack((/*@odm-pattern {\"comment\":\"Hard driving kick\"}*/ s(\"bd*4\").shape(0.4)), (/*@odm-pattern {\"muted\":true,\"comment\":\"Crisp metallic hi-hats and claps\"}*/ s(\"~ hh ~ hh ~ hh ~ hh\").filterWhen(()=>false)), s(\"~ cp ~ cp\").room(0.5), (/*@odm-pattern {\"comment\":\"Hypnotic rolling bass/synth sequence\"}*/ note(\"c2 c2 eb2 c2 f2 c2 g2 bb1\").s(\"sawtooth\").cutoff(sine.range(200, 1800).slow(4)).resonance(12).shape(0.3)));\n",
+    "preview": [
+      "bd",
+      "bd",
+      "bd",
+      "bd",
+      "hh",
+      "hh",
+      "hh",
+      "hh",
+      "cp",
+      "cp",
+      "sawtooth",
+      "sawtooth",
+      "sawtooth",
+      "sawtooth",
+      "sawtooth",
+      "sawtooth",
+      "sawtooth",
+      "sawtooth"
+    ]
+  },
+  "planets": [
+    "● Playing this section",
+    "Muted",
+    "● Playing this section · room 1",
+    "● Playing this section"
+  ],
+  "checks": [
+    "documented default drums are registered after initialization",
+    "new document replaces old clickable rows before a slow query returns",
+    "real pointer mute affects the displayed hi-hat and no other row",
+    "mute never destroys another instrument's scored events",
+    "Constellation agrees with the muted hi-hat row"
+  ],
+  "failures": []
+}

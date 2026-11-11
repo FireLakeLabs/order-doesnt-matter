@@ -347,6 +347,8 @@ export function importStrudel(source: string): {
       try {
         const data: unknown = JSON.parse(c.value.slice("@odm-pattern ".length));
         if (data && typeof data === "object") {
+          if ("muted" in data && typeof data.muted === "boolean")
+            p.muted = data.muted;
           if ("label" in data && typeof data.label === "string")
             p.label = data.label;
           if ("comment" in data && typeof data.comment === "string")
@@ -426,6 +428,28 @@ export function importStrudel(source: string): {
       node.callee.property.type === "Identifier"
     ) {
       const receiver = node.callee.object;
+      // Our generated mute suffix has explicit metadata. Keep the original
+      // score editable, rather than importing the suffix as opaque user code.
+      const metadata = leadingComment(node);
+      if (
+        node.callee.property.name === "filterWhen" &&
+        node.arguments.length === 1 &&
+        text(node.arguments[0]).replace(/\s/g, "") === "()=>false" &&
+        metadata?.value.startsWith("@odm-pattern ")
+      ) {
+        try {
+          const data: unknown = JSON.parse(
+            metadata.value.slice("@odm-pattern ".length),
+          );
+          if (
+            data &&
+            typeof data === "object" &&
+            "muted" in data &&
+            data.muted === true
+          )
+            return { ...pattern(receiver, hole), muted: true };
+        } catch {}
+      }
       const name = canonicalName(node.callee.property.name);
       const root = chainRoot(receiver);
       const primitive =

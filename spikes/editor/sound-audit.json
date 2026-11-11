@@ -1,0 +1,8775 @@
+{
+  "durationMs": 11171.084482,
+  "rows": [
+    {
+      "id": "micro-tree-stack",
+      "title": "Nested score trees",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "c4",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "e4",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g4",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "micro-tree-arrange",
+      "title": "Alternating branches",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "s": "cp"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        }
+      ]
+    },
+    {
+      "id": "micro-callback-off",
+      "title": "Offset shadow",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "triangle",
+          "value": {
+            "note": "c3",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "note": "e3",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "note": "g3",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.3,
+            "note": 60,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.3,
+            "note": 64,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.3,
+            "note": 67,
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "micro-callback-deep",
+      "title": "Callbacks inside callbacks",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.2,
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.2,
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.2,
+            "note": "g3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.2,
+            "note": "b3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "micro-reuse",
+      "title": "One motif in two registers",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "eb3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "bb3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "note": 60,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "note": 63,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "note": 67,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "note": 70,
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "micro-register",
+      "title": "Registered custom transform",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.3,
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.3,
+            "note": "e3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "micro-pattern-fast",
+      "title": "Time is a pattern",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 2000,
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 2000,
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 2000,
+            "note": "g3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "micro-pattern-slow",
+      "title": "Nested rate modulation",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "s": "cp"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        }
+      ]
+    },
+    {
+      "id": "micro-labels",
+      "title": "Labels and muted voice",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.3,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "s": "cp"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        }
+      ]
+    },
+    {
+      "id": "micro-orbit-conflict",
+      "title": "Two voices fight over room zero",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "orbit": 0,
+            "room": 0.8,
+            "roomsize": 2,
+            "s": "bd"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "c4",
+            "orbit": 0,
+            "room": 0.2,
+            "roomsize": 8,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "e4",
+            "orbit": 0,
+            "room": 0.2,
+            "roomsize": 8,
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "micro-long-alternation",
+      "title": "Seven and eleven",
+      "window": [
+        0,
+        77
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "d3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "f3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "a3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "b3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "micro-polymeter",
+      "title": "Three across four",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "s": "cp"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "s": "hh"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        }
+      ]
+    },
+    {
+      "id": "micro-seeded-drop",
+      "title": "Time addressed dropout",
+      "window": [
+        0,
+        300
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "hh",
+          "value": {
+            "s": "hh"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        }
+      ]
+    },
+    {
+      "id": "micro-random-pitch",
+      "title": "Sampled random pitch",
+      "window": [
+        0,
+        300
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.124141838029027,
+            "note": 48,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.5591151662200318,
+            "note": 67,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.6513445957296672,
+            "note": 62,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.6505395047228975,
+            "note": 53,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.6496734336353246,
+            "note": 64,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.3671886176396182,
+            "note": 61,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.6081068669914023,
+            "note": 60,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.6515451805373842,
+            "note": 54,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.1623417513328737,
+            "note": 50,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.2212594630116419,
+            "note": 69,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.5813566406893415,
+            "note": 71,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.34201444219019894,
+            "note": 49,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.1067031541906544,
+            "note": 52,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.6509759560365038,
+            "note": 51,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.3464394923033599,
+            "note": 55,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.3499328551930242,
+            "note": 65,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.14169327619351121,
+            "note": 57,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.6213774621863003,
+            "note": 68,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.20599898301994973,
+            "note": 66,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.4027138507456762,
+            "note": 63,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.38813276849687095,
+            "note": 59,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.650170865029734,
+            "note": 56,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.28797225275887756,
+            "note": 70,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.3814296143062166,
+            "note": 58,
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "micro-arrange-300",
+      "title": "A three hundred cycle score",
+      "window": [
+        0,
+        300
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "eb3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "s": "cp"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        }
+      ]
+    },
+    {
+      "id": "micro-arrange-301",
+      "title": "Distant single ending",
+      "window": [
+        0,
+        301
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "s": "cp"
+          }
+        },
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        }
+      ]
+    },
+    {
+      "id": "micro-signal-bare",
+      "title": "Continuous values are not notes",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [],
+      "sounds": []
+    },
+    {
+      "id": "micro-signal-lanes",
+      "title": "Several continuous settings",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 300,
+            "gain": 0.31915511809202146,
+            "note": "c3",
+            "pan": 0.49999999999999806,
+            "s": "sawtooth"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        }
+      ]
+    },
+    {
+      "id": "micro-fragments-slow",
+      "title": "Whole spans multiple windows",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "micro-fragments-chop",
+      "title": "Chopped overlapping whole spans",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sawtooth",
+          "value": {
+            "note": "c3",
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "note": "e3",
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "note": "g3",
+            "s": "sawtooth"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        }
+      ]
+    },
+    {
+      "id": "micro-dense-64",
+      "title": "Sixty four times four",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "hh",
+          "value": {
+            "s": "hh"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        }
+      ]
+    },
+    {
+      "id": "micro-dense-stack",
+      "title": "Polyphonic dense lattice",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "b3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "d4",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "f4",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "a4",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "micro-bare-numbers",
+      "title": "Numeric score before controls",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [],
+      "sounds": []
+    },
+    {
+      "id": "micro-bare-strings",
+      "title": "Strings before controls",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "triangle",
+          "value": {
+            "_Pattern": true,
+            "__steps": {
+              "d": "1",
+              "n": "1",
+              "s": "1"
+            },
+            "__weight": {
+              "d": "1",
+              "n": "1",
+              "s": "1"
+            },
+            "polyJoin": "[function:unchecked]",
+            "query": "[function:unchecked]"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "micro-control-aliases",
+      "title": "Aliases and uncommon controls",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 900,
+            "note": "c3",
+            "resonance": 2,
+            "s": "sine",
+            "velocity": 0.7,
+            "vib": 4,
+            "vibmod": 0.2
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 900,
+            "note": "e3",
+            "resonance": 2,
+            "s": "sine",
+            "velocity": 0.7,
+            "vib": 4,
+            "vibmod": 0.2
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "micro-control-multivalue",
+      "title": "Colon settings",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 800,
+            "delay": 0.3,
+            "delayfeedback": 0.6,
+            "delaytime": 0.125,
+            "note": "c3",
+            "resonance": 2,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 800,
+            "delay": 0.3,
+            "delayfeedback": 0.6,
+            "delaytime": 0.125,
+            "note": "e3",
+            "resonance": 2,
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "micro-control-array",
+      "title": "Array valued partials",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "user",
+          "value": {
+            "note": "c3",
+            "partials": [
+              1,
+              0.5,
+              0,
+              0.25
+            ],
+            "phases": [
+              0,
+              0.25,
+              0,
+              0.5
+            ],
+            "s": "user"
+          }
+        },
+        {
+          "name": "user",
+          "value": {
+            "note": "g3",
+            "partials": [
+              1,
+              0.5,
+              0,
+              0.25
+            ],
+            "phases": [
+              0,
+              0.25,
+              0,
+              0.5
+            ],
+            "s": "user"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "user"
+        },
+        {
+          "state": "ready",
+          "name": "user"
+        }
+      ]
+    },
+    {
+      "id": "micro-fx-filter-drive",
+      "title": "Filter then distortion",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sawtooth",
+          "value": {
+            "FX": [
+              {
+                "cutoff": 500
+              },
+              {
+                "distort": 1
+              }
+            ],
+            "delay": 0.3,
+            "note": "c3",
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "FX": [
+              {
+                "cutoff": 500
+              },
+              {
+                "distort": 1
+              }
+            ],
+            "delay": 0.3,
+            "note": "e3",
+            "s": "sawtooth"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        }
+      ]
+    },
+    {
+      "id": "micro-fx-drive-filter",
+      "title": "Distortion then filter",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sawtooth",
+          "value": {
+            "FX": [
+              {
+                "distort": 1
+              },
+              {
+                "cutoff": 500
+              }
+            ],
+            "delay": 0.3,
+            "note": "c3",
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "FX": [
+              {
+                "distort": 1
+              },
+              {
+                "cutoff": 500
+              }
+            ],
+            "delay": 0.3,
+            "note": "e3",
+            "s": "sawtooth"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        }
+      ]
+    },
+    {
+      "id": "micro-orbit-delay",
+      "title": "Separate rooms with delay",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "delay": 0.3,
+            "delaytime": 0.25,
+            "orbit": 1,
+            "s": "bd"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "delay": 0.8,
+            "delaytime": 0.375,
+            "orbit": 2,
+            "s": "cp"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        }
+      ]
+    },
+    {
+      "id": "micro-cut-group",
+      "title": "Shared cut group",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "oh",
+          "value": {
+            "cut": 1,
+            "s": "oh"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "cut": 1,
+            "s": "hh"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "oh",
+          "url": "https://raw.githubusercontent.com/ritchse/tidal-drum-machines/main/machines/EmuSP12/emusp12-oh/Hhopen1.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        }
+      ]
+    },
+    {
+      "id": "micro-duck-room",
+      "title": "Cross voice duck routing",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "duckattack": 0.01,
+            "duckdepth": 0.8,
+            "duckorbit": 1,
+            "orbit": 0,
+            "s": "bd"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "note": "c3",
+            "orbit": 1,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "note": "eb3",
+            "orbit": 1,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "note": "g3",
+            "orbit": 1,
+            "s": "sawtooth"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        }
+      ]
+    },
+    {
+      "id": "micro-tails",
+      "title": "Release outlasts score",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "clip": 0.2,
+            "note": "c4",
+            "release": 3,
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "micro-clip-length",
+      "title": "Legato and clip",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "oh",
+          "value": {
+            "clip": 2,
+            "s": "oh"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "oh",
+          "url": "https://raw.githubusercontent.com/ritchse/tidal-drum-machines/main/machines/EmuSP12/emusp12-oh/Hhopen1.wav"
+        }
+      ]
+    },
+    {
+      "id": "micro-external-state",
+      "title": "Tempo samples await and hush",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        }
+      ]
+    },
+    {
+      "id": "micro-external-tempo",
+      "title": "Tempo outside score",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "micro-trigger",
+      "title": "Trigger time callback",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "c4",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "micro-visuals",
+      "title": "Visual and log hooks",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "s": "cp"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        }
+      ]
+    },
+    {
+      "id": "micro-query-throws",
+      "title": "Broken is not quiet",
+      "window": [
+        0,
+        16
+      ],
+      "error": "corpus intentional query failure",
+      "uses": [],
+      "sounds": []
+    },
+    {
+      "id": "micro-query-late-throws",
+      "title": "A later window fails",
+      "window": [
+        0,
+        16
+      ],
+      "error": "corpus intentional late failure",
+      "uses": [
+        {
+          "name": "triangle",
+          "value": {
+            "note": 60
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "micro-sample-loop",
+      "title": "Loop length metadata",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "breaks165",
+          "value": {
+            "s": "breaks165",
+            "speed": 0.16666666666666666,
+            "unit": "c"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "breaks165",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/breaks165/000_RAWCLN.WAV"
+        }
+      ]
+    },
+    {
+      "id": "micro-sample-splice",
+      "title": "Slices need decoded duration",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "breaks165",
+          "value": {
+            "_slices": 8,
+            "begin": 0.875,
+            "end": 1,
+            "s": "breaks165",
+            "speed": 0.25,
+            "unit": "c"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "breaks165",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/breaks165/000_RAWCLN.WAV"
+        }
+      ]
+    },
+    {
+      "id": "mms-clock",
+      "title": "MMS clock",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "b3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "mms-euclid",
+      "title": "MMS euclid",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "mms-euclid-legato",
+      "title": "MMS euclid-legato",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "b3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "mms-ratchet",
+      "title": "MMS ratchet",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "b3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "mms-seed",
+      "title": "MMS seed",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "b3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "mms-palindrome",
+      "title": "MMS palindrome",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "b3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "mms-shuffle",
+      "title": "MMS shuffle",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "b3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "mms-ribbon",
+      "title": "MMS ribbon",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "b3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "mms-zoom",
+      "title": "MMS zoom",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "mms-echo",
+      "title": "MMS echo",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.25,
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.25,
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.25,
+            "note": "g3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.25,
+            "note": "b3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "mms-chunk",
+      "title": "MMS chunk",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "b3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "mms-off",
+      "title": "MMS off",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.5,
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.5,
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.5,
+            "note": "g3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.5,
+            "note": "b3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "mms-within",
+      "title": "MMS within",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "b3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "mms-jux",
+      "title": "MMS jux",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "pan": 1,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "pan": 1,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "pan": 1,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "b3",
+            "pan": 1,
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "mms-nested",
+      "title": "MMS nested",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "note": "b3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "c3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "e3",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "note": "g3",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "piece-harbour",
+      "title": "Harbour",
+      "window": [
+        0,
+        32
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.22,
+            "pan": 0.65,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "gain": 0.5,
+            "s": "cp"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "c2",
+            "release": 0.12,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "g2",
+            "release": 0.12,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "bb2",
+            "release": 0.12,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.3,
+            "delaytime": 0.375,
+            "gain": 0.23,
+            "note": "c4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.3,
+            "delaytime": 0.375,
+            "gain": 0.23,
+            "note": "eb4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.3,
+            "delaytime": 0.375,
+            "gain": 0.23,
+            "note": "g4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 60,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 70,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.3,
+            "delaytime": 0.375,
+            "gain": 0.23,
+            "note": "bb3",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.3,
+            "delaytime": 0.375,
+            "gain": 0.23,
+            "note": "d4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.3,
+            "delaytime": 0.375,
+            "gain": 0.23,
+            "note": "f4",
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "piece-foundry",
+      "title": "Foundry",
+      "window": [
+        0,
+        32
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.22,
+            "pan": 0.65,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "oh",
+          "value": {
+            "gain": 0.22,
+            "pan": 0.65,
+            "s": "oh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "gain": 0.5,
+            "s": "cp"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "c2",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "eb2",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "gb2",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "coarse": 4
+              },
+              {
+                "cutoff": 1200
+              },
+              {
+                "distort": 0.5
+              }
+            ],
+            "gain": 0.23,
+            "note": "c4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "coarse": 4
+              },
+              {
+                "cutoff": 1200
+              },
+              {
+                "distort": 0.5
+              }
+            ],
+            "gain": 0.23,
+            "note": "eb4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "coarse": 4
+              },
+              {
+                "cutoff": 1200
+              },
+              {
+                "distort": 0.5
+              }
+            ],
+            "gain": 0.23,
+            "note": "gb4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 60,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 66,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "coarse": 4
+              },
+              {
+                "cutoff": 1200
+              },
+              {
+                "distort": 0.5
+              }
+            ],
+            "gain": 0.23,
+            "note": "bb3",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "coarse": 4
+              },
+              {
+                "cutoff": 1200
+              },
+              {
+                "distort": 0.5
+              }
+            ],
+            "gain": 0.23,
+            "note": "db4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "coarse": 4
+              },
+              {
+                "cutoff": 1200
+              },
+              {
+                "distort": 0.5
+              }
+            ],
+            "gain": 0.23,
+            "note": "f4",
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "oh",
+          "url": "https://raw.githubusercontent.com/ritchse/tidal-drum-machines/main/machines/EmuSP12/emusp12-oh/Hhopen1.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "piece-lichen",
+      "title": "Lichen",
+      "window": [
+        0,
+        32
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.22,
+            "pan": 0.65,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "gain": 0.5,
+            "s": "cp"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "d2",
+            "release": 0.12,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "a2",
+            "release": 0.12,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "d4",
+            "release": 1.5,
+            "room": 0.7,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "f4",
+            "release": 1.5,
+            "room": 0.7,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "a4",
+            "release": 1.5,
+            "room": 0.7,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 62,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "c4",
+            "release": 1.5,
+            "room": 0.7,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "e4",
+            "release": 1.5,
+            "room": 0.7,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "g4",
+            "release": 1.5,
+            "room": 0.7,
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "piece-night-bus",
+      "title": "Night Bus",
+      "window": [
+        0,
+        32
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.22,
+            "pan": 0.65,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "gain": 0.5,
+            "s": "cp"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "f2",
+            "release": 0.12,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "ab2",
+            "release": 0.12,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "c3",
+            "release": 0.12,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.4,
+            "gain": 0.23,
+            "note": "eb3",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.4,
+            "gain": 0.23,
+            "note": "f3",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.4,
+            "gain": 0.23,
+            "note": "ab3",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.4,
+            "gain": 0.23,
+            "note": "c4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 65,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 75,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.4,
+            "gain": 0.23,
+            "note": "g3",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.4,
+            "gain": 0.23,
+            "note": "bb3",
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "piece-copper",
+      "title": "Copper",
+      "window": [
+        0,
+        32
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.22,
+            "pan": 0.65,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "gain": 0.5,
+            "s": "cp"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "e2",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "g2",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "b2",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "cutoff": 1800
+              },
+              {
+                "distort": 0.3
+              }
+            ],
+            "gain": 0.23,
+            "note": "e4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "cutoff": 1800
+              },
+              {
+                "distort": 0.3
+              }
+            ],
+            "gain": 0.23,
+            "note": "g4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "cutoff": 1800
+              },
+              {
+                "distort": 0.3
+              }
+            ],
+            "gain": 0.23,
+            "note": "b4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 64,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 71,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "cutoff": 1800
+              },
+              {
+                "distort": 0.3
+              }
+            ],
+            "gain": 0.23,
+            "note": "d4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "cutoff": 1800
+              },
+              {
+                "distort": 0.3
+              }
+            ],
+            "gain": 0.23,
+            "note": "fs4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "cutoff": 1800
+              },
+              {
+                "distort": 0.3
+              }
+            ],
+            "gain": 0.23,
+            "note": "a4",
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "piece-paper-lantern",
+      "title": "Paper Lantern",
+      "window": [
+        0,
+        32
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.22,
+            "pan": 0.65,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "gain": 0.5,
+            "s": "cp"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "a2",
+            "release": 0.12,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "e3",
+            "release": 0.12,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "g2",
+            "release": 0.12,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "a3",
+            "pan": 0.5,
+            "room": 0.6,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "c4",
+            "pan": 0.5,
+            "room": 0.6,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "e4",
+            "pan": 0.5,
+            "room": 0.6,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 69,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 67,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "g3",
+            "pan": 0.49999999999999994,
+            "room": 0.6,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "b3",
+            "pan": 0.49999999999999994,
+            "room": 0.6,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "d4",
+            "pan": 0.49999999999999994,
+            "room": 0.6,
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "piece-tidal-stairs",
+      "title": "Tidal Stairs",
+      "window": [
+        0,
+        32
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.22,
+            "pan": 0.65,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "gain": 0.5,
+            "s": "cp"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "g2",
+            "release": 0.12,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "bb2",
+            "release": 0.12,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "d3",
+            "release": 0.12,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.25,
+            "delaytime": 0.333,
+            "gain": 0.23,
+            "note": "f3",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.25,
+            "delaytime": 0.333,
+            "gain": 0.23,
+            "note": "g3",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.25,
+            "delaytime": 0.333,
+            "gain": 0.23,
+            "note": "bb3",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.25,
+            "delaytime": 0.333,
+            "gain": 0.23,
+            "note": "d4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 67,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 77,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.25,
+            "delaytime": 0.333,
+            "gain": 0.23,
+            "note": "a3",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.25,
+            "delaytime": 0.333,
+            "gain": 0.23,
+            "note": "c4",
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "piece-glass-garden",
+      "title": "Glass Garden",
+      "window": [
+        0,
+        32
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.22,
+            "pan": 0.65,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "gain": 0.5,
+            "s": "cp"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "b1",
+            "release": 0.12,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "fs2",
+            "release": 0.12,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "a2",
+            "release": 0.12,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "d2",
+            "release": 0.12,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "phaserrate": 0.3
+              },
+              {
+                "delay": 0.2
+              }
+            ],
+            "gain": 0.23,
+            "note": "b3",
+            "room": 0.5,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "phaserrate": 0.3
+              },
+              {
+                "delay": 0.2
+              }
+            ],
+            "gain": 0.23,
+            "note": "d4",
+            "room": 0.5,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "phaserrate": 0.3
+              },
+              {
+                "delay": 0.2
+              }
+            ],
+            "gain": 0.23,
+            "note": "fs4",
+            "room": 0.5,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 59,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 62,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "phaserrate": 0.3
+              },
+              {
+                "delay": 0.2
+              }
+            ],
+            "gain": 0.23,
+            "note": "a3",
+            "room": 0.5,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "phaserrate": 0.3
+              },
+              {
+                "delay": 0.2
+              }
+            ],
+            "gain": 0.23,
+            "note": "cs4",
+            "room": 0.5,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "phaserrate": 0.3
+              },
+              {
+                "delay": 0.2
+              }
+            ],
+            "gain": 0.23,
+            "note": "e4",
+            "room": 0.5,
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "piece-relay",
+      "title": "Relay",
+      "window": [
+        0,
+        32
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.22,
+            "pan": 0.65,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "gain": 0.5,
+            "s": "cp"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "d2",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "f2",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "a2",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 500,
+            "gain": 0.23,
+            "note": "d4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 500,
+            "gain": 0.23,
+            "note": "f4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 500,
+            "gain": 0.23,
+            "note": "a4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 62,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 69,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 900,
+            "gain": 0.23,
+            "note": "c4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 900,
+            "gain": 0.23,
+            "note": "e4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 900,
+            "gain": 0.23,
+            "note": "g4",
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "piece-slow-orbit",
+      "title": "Slow Orbit",
+      "window": [
+        0,
+        32
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.22,
+            "pan": 0.65,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "gain": 0.5,
+            "s": "cp"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "eb2",
+            "release": 0.12,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "bb2",
+            "release": 0.12,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "eb4",
+            "release": 2,
+            "room": 0.8,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "g4",
+            "release": 2,
+            "room": 0.8,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "bb4",
+            "release": 2,
+            "room": 0.8,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 63,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "db4",
+            "release": 2,
+            "room": 0.8,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "f4",
+            "release": 2,
+            "room": 0.8,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "ab4",
+            "release": 2,
+            "room": 0.8,
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "piece-moss-radio",
+      "title": "Moss Radio",
+      "window": [
+        0,
+        32
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.22,
+            "pan": 0.65,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "gain": 0.5,
+            "s": "cp"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "c2",
+            "release": 0.12,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "g2",
+            "release": 0.12,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "bb2",
+            "release": 0.12,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "eb3",
+            "release": 0.12,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 2323.1015279889107,
+            "delay": 0.4,
+            "gain": 0.23,
+            "note": "c4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 2323.1015279889107,
+            "delay": 0.4,
+            "gain": 0.23,
+            "note": "eb4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 500,
+            "delay": 0.4,
+            "gain": 0.23,
+            "note": "g4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 60,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 75,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 2323.1015279889107,
+            "delay": 0.4,
+            "gain": 0.23,
+            "note": "ab3",
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "piece-sundial",
+      "title": "Sundial",
+      "window": [
+        0,
+        32
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.22,
+            "pan": 0.65,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "gain": 0.5,
+            "s": "cp"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "a1",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "e2",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "g2",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "b2",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "distort": 0.25
+              },
+              {
+                "cutoff": 1600
+              }
+            ],
+            "gain": 0.23,
+            "note": "a3",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "distort": 0.25
+              },
+              {
+                "cutoff": 1600
+              }
+            ],
+            "gain": 0.23,
+            "note": "c4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "distort": 0.25
+              },
+              {
+                "cutoff": 1600
+              }
+            ],
+            "gain": 0.23,
+            "note": "e4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 57,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 71,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "distort": 0.25
+              },
+              {
+                "cutoff": 1600
+              }
+            ],
+            "gain": 0.23,
+            "note": "f3",
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "piece-kiln",
+      "title": "Kiln",
+      "window": [
+        0,
+        32
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.22,
+            "pan": 0.65,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "gain": 0.5,
+            "s": "cp"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "fs2",
+            "release": 0.12,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "a2",
+            "release": 0.12,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "cs3",
+            "release": 0.12,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.2,
+            "gain": 0.23,
+            "note": "fs3",
+            "room": 0.3,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.2,
+            "gain": 0.23,
+            "note": "a3",
+            "room": 0.3,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.2,
+            "gain": 0.23,
+            "note": "cs4",
+            "room": 0.3,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 66,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 73,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.2,
+            "gain": 0.23,
+            "note": "e3",
+            "room": 0.3,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.2,
+            "gain": 0.23,
+            "note": "g3",
+            "room": 0.3,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.2,
+            "gain": 0.23,
+            "note": "b3",
+            "room": 0.3,
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "piece-blue-hour",
+      "title": "Blue Hour",
+      "window": [
+        0,
+        32
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.22,
+            "pan": 0.65,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "gain": 0.5,
+            "s": "cp"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "bb1",
+            "release": 0.12,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "f2",
+            "release": 0.12,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "ab2",
+            "release": 0.12,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "c3",
+            "release": 0.12,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "bb3",
+            "release": 0.8,
+            "room": 0.6,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "db4",
+            "release": 0.8,
+            "room": 0.6,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "f4",
+            "release": 0.8,
+            "room": 0.6,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 58,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 72,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "ab3",
+            "release": 0.8,
+            "room": 0.6,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "c4",
+            "release": 0.8,
+            "room": 0.6,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "gain": 0.23,
+            "note": "eb4",
+            "release": 0.8,
+            "room": 0.6,
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "piece-switchyard",
+      "title": "Switchyard",
+      "window": [
+        0,
+        32
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.22,
+            "pan": 0.65,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "gain": 0.5,
+            "s": "cp"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "g1",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "g2",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "bb1",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 700,
+            "gain": 0.45,
+            "note": "d2",
+            "release": 0.12,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "coarse": 3
+              },
+              {
+                "bandf": 1200
+              },
+              {
+                "distort": 0.4
+              }
+            ],
+            "gain": 0.23,
+            "note": "g3",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "coarse": 3
+              },
+              {
+                "bandf": 1200
+              },
+              {
+                "distort": 0.4
+              }
+            ],
+            "gain": 0.23,
+            "note": "bb3",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "coarse": 3
+              },
+              {
+                "bandf": 1200
+              },
+              {
+                "distort": 0.4
+              }
+            ],
+            "gain": 0.23,
+            "note": "d4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 55,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "delay": 0.3,
+            "gain": 0.18,
+            "note": 62,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "FX": [
+              {
+                "coarse": 3
+              },
+              {
+                "bandf": 1200
+              },
+              {
+                "distort": 0.4
+              }
+            ],
+            "gain": 0.23,
+            "note": "eb3",
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "real-house",
+      "title": "House sketch",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "s": "cp"
+          }
+        },
+        {
+          "name": "oh",
+          "value": {
+            "gain": 0.7,
+            "s": "oh"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 400,
+            "note": "c2",
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 400,
+            "note": "g1",
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 400,
+            "note": "a1",
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "c4",
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "eb4",
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "g4",
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "bb4",
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "f4",
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "ab4",
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "c5",
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "eb5",
+            "s": "piano"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "oh",
+          "url": "https://raw.githubusercontent.com/ritchse/tidal-drum-machines/main/machines/EmuSP12/emusp12-oh/Hhopen1.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/C4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/Ds4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/Fs4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/A4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/Fs4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/A4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/C5v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/C5v8.mp3"
+        }
+      ]
+    },
+    {
+      "id": "real-techno",
+      "title": "Techno sketch",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd",
+            "shape": 0.4
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "s": "hh"
+          }
+        },
+        {
+          "name": "cp",
+          "value": {
+            "room": 0.5,
+            "s": "cp"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 555.5438135843166,
+            "note": "c2",
+            "resonance": 12,
+            "s": "sawtooth",
+            "shape": 0.3
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 260.89637399097046,
+            "note": "eb2",
+            "resonance": 12,
+            "s": "sawtooth",
+            "shape": 0.3
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 434.31457505076094,
+            "note": "f2",
+            "resonance": 12,
+            "s": "sawtooth",
+            "shape": 0.3
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 693.8532541079285,
+            "note": "g2",
+            "resonance": 12,
+            "s": "sawtooth",
+            "shape": 0.3
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 843.927742387097,
+            "note": "bb1",
+            "resonance": 12,
+            "s": "sawtooth",
+            "shape": 0.3
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        }
+      ]
+    },
+    {
+      "id": "real-trance",
+      "title": "Trance sketch",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "oh",
+          "value": {
+            "s": "oh"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 600,
+            "note": "c2",
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 600,
+            "note": "c3",
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 600,
+            "note": "ab1",
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 600,
+            "note": "ab2",
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 600,
+            "note": "bb1",
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 600,
+            "note": "bb2",
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.6,
+            "note": "c4",
+            "room": 0.7,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.6,
+            "note": "eb4",
+            "room": 0.7,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.6,
+            "note": "g4",
+            "room": 0.7,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.6,
+            "note": "c5",
+            "room": 0.7,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.6,
+            "note": "d5",
+            "room": 0.7,
+            "s": "supersaw"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "oh",
+          "url": "https://raw.githubusercontent.com/ritchse/tidal-drum-machines/main/machines/EmuSP12/emusp12-oh/Hhopen1.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        }
+      ]
+    },
+    {
+      "id": "real-dnb",
+      "title": "Drum and Bass sketch",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "sd",
+          "value": {
+            "room": 0.3,
+            "s": "sd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.6,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 350,
+            "note": "c1",
+            "s": "sawtooth",
+            "shape": 0.5
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 350,
+            "note": "eb1",
+            "s": "sawtooth",
+            "shape": 0.5
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 350,
+            "note": "d1",
+            "s": "sawtooth",
+            "shape": 0.5
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 350,
+            "note": "f1",
+            "s": "sawtooth",
+            "shape": 0.5
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 350,
+            "note": "g1",
+            "s": "sawtooth",
+            "shape": 0.5
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/sd/rytm-00-hard.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        }
+      ]
+    },
+    {
+      "id": "real-dubstep",
+      "title": "Dubstep sketch",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd",
+            "shape": 0.4
+          }
+        },
+        {
+          "name": "sd",
+          "value": {
+            "s": "sd",
+            "shape": 0.4
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.5,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 1150.0000000000166,
+            "note": "c1",
+            "resonance": 10,
+            "s": "sawtooth",
+            "shape": 0.6
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 1149.9999999999854,
+            "note": "eb1",
+            "resonance": 10,
+            "s": "sawtooth",
+            "shape": 0.6
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 1149.9999999999548,
+            "note": "f1",
+            "resonance": 10,
+            "s": "sawtooth",
+            "shape": 0.6
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/sd/rytm-00-hard.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        }
+      ]
+    },
+    {
+      "id": "real-ambient",
+      "title": "Ambient sketch",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "sine",
+          "value": {
+            "attack": 2,
+            "gain": 0.5,
+            "note": "c3",
+            "release": 3,
+            "room": 0.95,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "attack": 2,
+            "gain": 0.5,
+            "note": "g3",
+            "release": 3,
+            "room": 0.95,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "attack": 2,
+            "gain": 0.5,
+            "note": "d4",
+            "release": 3,
+            "room": 0.95,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "attack": 2,
+            "gain": 0.5,
+            "note": "eb4",
+            "release": 3,
+            "room": 0.95,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.5,
+            "gain": 0.3,
+            "note": "g5",
+            "room": 0.9,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.5,
+            "gain": 0.3,
+            "note": "bb5",
+            "room": 0.9,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.5,
+            "gain": 0.3,
+            "note": "d6",
+            "room": 0.9,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.5,
+            "gain": 0.3,
+            "note": "c6",
+            "room": 0.9,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "attack": 2,
+            "gain": 0.5,
+            "note": "ab2",
+            "release": 3,
+            "room": 0.95,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "attack": 2,
+            "gain": 0.5,
+            "note": "eb3",
+            "release": 3,
+            "room": 0.95,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "attack": 2,
+            "gain": 0.5,
+            "note": "bb3",
+            "release": 3,
+            "room": 0.95,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "attack": 2,
+            "gain": 0.5,
+            "note": "c4",
+            "release": 3,
+            "room": 0.95,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "attack": 2,
+            "gain": 0.5,
+            "note": "f2",
+            "release": 3,
+            "room": 0.95,
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "attack": 2,
+            "gain": 0.5,
+            "note": "ab3",
+            "release": 3,
+            "room": 0.95,
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "real-future-bass",
+      "title": "Future Bass sketch",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "sd",
+          "value": {
+            "s": "sd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.6,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "cutoff": 3000,
+            "gain": 0.39999999999998703,
+            "note": "f3",
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "cutoff": 3000,
+            "gain": 0.39999999999998703,
+            "note": "ab3",
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "cutoff": 3000,
+            "gain": 0.39999999999998703,
+            "note": "c4",
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "cutoff": 3000,
+            "gain": 0.39999999999998703,
+            "note": "eb4",
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "cutoff": 3000,
+            "gain": 0.3999999999999959,
+            "note": "g4",
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.9,
+            "note": "f1",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "cutoff": 3000,
+            "gain": 0.39999999999998703,
+            "note": "db3",
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.9,
+            "note": "db1",
+            "s": "sine"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/sd/rytm-00-hard.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        }
+      ]
+    },
+    {
+      "id": "real-synthwave",
+      "title": "Synthwave sketch",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "sd",
+          "value": {
+            "room": 0.8,
+            "roomsize": 0.9,
+            "s": "sd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.5,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 800,
+            "note": "a1",
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "square",
+          "value": {
+            "cutoff": 2000,
+            "delay": 0.25,
+            "gain": 0.5,
+            "note": "e4",
+            "s": "square"
+          }
+        },
+        {
+          "name": "square",
+          "value": {
+            "cutoff": 2000,
+            "delay": 0.25,
+            "gain": 0.5,
+            "note": "g4",
+            "s": "square"
+          }
+        },
+        {
+          "name": "square",
+          "value": {
+            "cutoff": 2000,
+            "delay": 0.25,
+            "gain": 0.5,
+            "note": "a4",
+            "s": "square"
+          }
+        },
+        {
+          "name": "square",
+          "value": {
+            "cutoff": 2000,
+            "delay": 0.25,
+            "gain": 0.5,
+            "note": "d4",
+            "s": "square"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 800,
+            "note": "f1",
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 800,
+            "note": "c2",
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 800,
+            "note": "g1",
+            "s": "sawtooth"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/sd/rytm-00-hard.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "square"
+        },
+        {
+          "state": "ready",
+          "name": "square"
+        },
+        {
+          "state": "ready",
+          "name": "square"
+        },
+        {
+          "state": "ready",
+          "name": "square"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        }
+      ]
+    },
+    {
+      "id": "real-house-arranged",
+      "title": "House arrangement",
+      "window": [
+        0,
+        28
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "cp",
+          "value": {
+            "s": "cp"
+          }
+        },
+        {
+          "name": "oh",
+          "value": {
+            "gain": 0.7,
+            "s": "oh"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.3094251076211755,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "c4",
+            "room": 0.4,
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "eb4",
+            "room": 0.4,
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "g4",
+            "room": 0.4,
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "bb4",
+            "room": 0.4,
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "f4",
+            "room": 0.4,
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "ab4",
+            "room": 0.4,
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "c5",
+            "room": 0.4,
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "eb5",
+            "room": 0.4,
+            "s": "piano"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 450,
+            "note": "c2",
+            "resonance": 4,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 450,
+            "note": "g1",
+            "resonance": 4,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 450,
+            "note": "a1",
+            "resonance": 4,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.4,
+            "note": "g4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.4,
+            "note": "eb4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.4,
+            "note": "c4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.4,
+            "note": "d4",
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "oh",
+          "url": "https://raw.githubusercontent.com/ritchse/tidal-drum-machines/main/machines/EmuSP12/emusp12-oh/Hhopen1.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/C4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/Ds4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/Fs4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/A4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/Fs4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/A4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/C5v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/C5v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "real-house-vocals",
+      "title": "House with vocals",
+      "window": [
+        0,
+        28
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "cp",
+          "value": {
+            "s": "cp"
+          }
+        },
+        {
+          "name": "oh",
+          "value": {
+            "gain": 0.7,
+            "s": "oh"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.3094251076211755,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "c4",
+            "room": 0.4,
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "eb4",
+            "room": 0.4,
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "g4",
+            "room": 0.4,
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "bb4",
+            "room": 0.4,
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "f4",
+            "room": 0.4,
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "ab4",
+            "room": 0.4,
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "c5",
+            "room": 0.4,
+            "s": "piano"
+          }
+        },
+        {
+          "name": "piano",
+          "value": {
+            "delay": 0.25,
+            "note": "eb5",
+            "room": 0.4,
+            "s": "piano"
+          }
+        },
+        {
+          "name": "ade",
+          "value": {
+            "delay": 0.5,
+            "gain": 0.8,
+            "n": 2,
+            "room": 0.85,
+            "roomsize": 0.9,
+            "s": "ade",
+            "speed": 0.95
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 450,
+            "note": "c2",
+            "resonance": 4,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 450,
+            "note": "g1",
+            "resonance": 4,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 450,
+            "note": "a1",
+            "resonance": 4,
+            "s": "sawtooth"
+          }
+        },
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd"
+          }
+        },
+        {
+          "name": "speech",
+          "value": {
+            "cut": 1,
+            "cutoff": 2800,
+            "delay": 0.375,
+            "delayfeedback": 0.4,
+            "gain": 0.85,
+            "n": 0,
+            "room": 0.5,
+            "s": "speech",
+            "speed": 1.25
+          }
+        },
+        {
+          "name": "speech",
+          "value": {
+            "cut": 1,
+            "cutoff": 2800,
+            "delay": 0.375,
+            "delayfeedback": 0.4,
+            "gain": 0.85,
+            "n": 2,
+            "room": 0.5,
+            "s": "speech",
+            "speed": 1.25
+          }
+        },
+        {
+          "name": "speech",
+          "value": {
+            "cut": 1,
+            "cutoff": 2800,
+            "delay": 0.375,
+            "delayfeedback": 0.4,
+            "gain": 0.85,
+            "n": 4,
+            "room": 0.5,
+            "s": "speech",
+            "speed": 1.25
+          }
+        },
+        {
+          "name": "speech",
+          "value": {
+            "cut": 1,
+            "cutoff": 2800,
+            "delay": 0.375,
+            "delayfeedback": 0.4,
+            "gain": 0.85,
+            "n": 1,
+            "room": 0.5,
+            "s": "speech",
+            "speed": 1.25
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.4,
+            "note": "g4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.4,
+            "note": "eb4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.4,
+            "note": "c4",
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.4,
+            "note": "d4",
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "cp",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+        },
+        {
+          "state": "ready",
+          "name": "oh",
+          "url": "https://raw.githubusercontent.com/ritchse/tidal-drum-machines/main/machines/EmuSP12/emusp12-oh/Hhopen1.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/C4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/Ds4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/Fs4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/A4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/Fs4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/A4v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/C5v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "piano",
+          "url": "https://raw.githubusercontent.com/felixroos/dough-samples/main/piano/C5v8.mp3"
+        },
+        {
+          "state": "ready",
+          "name": "ade",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/ade/002_20020506-01.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "speech",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/speech/000_Sound10.wav"
+        },
+        {
+          "state": "ready",
+          "name": "speech",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/speech/002_Sound5.wav"
+        },
+        {
+          "state": "ready",
+          "name": "speech",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/speech/004_Sound7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "speech",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/speech/001_Sound4.wav"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "real-custom-samples",
+      "title": "Custom sample usage snippet",
+      "window": [
+        0,
+        16
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "myvocal",
+          "value": {
+            "_slices": 8,
+            "begin": 0.875,
+            "end": 1,
+            "s": "myvocal",
+            "speed": 1.1
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "missing",
+          "name": "myvocal",
+          "reason": "not registered"
+        }
+      ]
+    },
+    {
+      "id": "real-dnb-arranged",
+      "title": "Drum and Bass arrangement",
+      "window": [
+        0,
+        28
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.5,
+            "cutoff": 600,
+            "gain": 0.45,
+            "note": "c3",
+            "release": 1.5,
+            "room": 0.8,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.5,
+            "cutoff": 600,
+            "gain": 0.45,
+            "note": "eb3",
+            "release": 1.5,
+            "room": 0.8,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.5,
+            "cutoff": 600,
+            "gain": 0.45,
+            "note": "g3",
+            "release": 1.5,
+            "room": 0.8,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.5,
+            "cutoff": 600,
+            "gain": 0.45,
+            "note": "d4",
+            "release": 1.5,
+            "room": 0.8,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "ade",
+          "value": {
+            "cutoff": 2200,
+            "delay": 0.375,
+            "gain": 0.8,
+            "n": 1,
+            "room": 0.9,
+            "roomsize": 0.95,
+            "s": "ade",
+            "speed": 0.85
+          }
+        },
+        {
+          "name": "bd",
+          "value": {
+            "s": "bd",
+            "shape": 0.35
+          }
+        },
+        {
+          "name": "sd",
+          "value": {
+            "gain": 0.95,
+            "room": 0.25,
+            "s": "sd"
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.6900063434752838,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "oh",
+          "value": {
+            "gain": 0.4,
+            "s": "oh"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.5,
+            "cutoff": 600,
+            "gain": 0.45,
+            "note": "ab2",
+            "release": 1.5,
+            "room": 0.8,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.5,
+            "cutoff": 600,
+            "gain": 0.45,
+            "note": "c4",
+            "release": 1.5,
+            "room": 0.8,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 415,
+            "gain": 0.95,
+            "note": "c1",
+            "resonance": 6,
+            "s": "sawtooth",
+            "shape": 0.55
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 414.99999999999994,
+            "gain": 0.95,
+            "note": "eb1",
+            "resonance": 6,
+            "s": "sawtooth",
+            "shape": 0.55
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 650,
+            "gain": 0.95,
+            "note": "d1",
+            "resonance": 6,
+            "s": "sawtooth",
+            "shape": 0.55
+          }
+        },
+        {
+          "name": "speech",
+          "value": {
+            "cut": 1,
+            "delay": 0.25,
+            "delayfeedback": 0.55,
+            "gain": 0.75,
+            "n": 1,
+            "room": 0.4,
+            "s": "speech",
+            "speed": 1.15
+          }
+        },
+        {
+          "name": "speech",
+          "value": {
+            "cut": 1,
+            "delay": 0.25,
+            "delayfeedback": 0.55,
+            "gain": 0.75,
+            "n": 5,
+            "room": 0.4,
+            "s": "speech",
+            "speed": 1.15
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 414.9999999999999,
+            "gain": 0.95,
+            "note": "f1",
+            "resonance": 6,
+            "s": "sawtooth",
+            "shape": 0.55
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 414.99999999999983,
+            "gain": 0.95,
+            "note": "g1",
+            "resonance": 6,
+            "s": "sawtooth",
+            "shape": 0.55
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 650,
+            "gain": 0.95,
+            "note": "bb1",
+            "resonance": 6,
+            "s": "sawtooth",
+            "shape": 0.55
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.5,
+            "gain": 0.35,
+            "note": "g4",
+            "room": 0.9,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.5,
+            "gain": 0.35,
+            "note": "eb4",
+            "room": 0.9,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.5,
+            "gain": 0.35,
+            "note": "d4",
+            "room": 0.9,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.5,
+            "gain": 0.35,
+            "note": "c4",
+            "room": 0.9,
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "ade",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/ade/001_011112-melody.wav"
+        },
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/sd/rytm-00-hard.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "oh",
+          "url": "https://raw.githubusercontent.com/ritchse/tidal-drum-machines/main/machines/EmuSP12/emusp12-oh/Hhopen1.wav"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "speech",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/speech/001_Sound4.wav"
+        },
+        {
+          "state": "ready",
+          "name": "speech",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/speech/005_Sound8.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    },
+    {
+      "id": "real-dubstep-arranged",
+      "title": "Dubstep arrangement",
+      "window": [
+        0,
+        28
+      ],
+      "error": null,
+      "uses": [
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.4,
+            "cutoff": 1200,
+            "gain": 0.45,
+            "note": "c3",
+            "release": 1.2,
+            "room": 0.85,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.4,
+            "cutoff": 1200,
+            "gain": 0.45,
+            "note": "g3",
+            "release": 1.2,
+            "room": 0.85,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.4,
+            "cutoff": 1200,
+            "gain": 0.45,
+            "note": "eb4",
+            "release": 1.2,
+            "room": 0.85,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "ade",
+          "value": {
+            "cutoff": 1800,
+            "delay": 0.375,
+            "gain": 0.75,
+            "n": 0,
+            "room": 0.9,
+            "roomsize": 0.95,
+            "s": "ade",
+            "speed": 0.8
+          }
+        },
+        {
+          "name": "hh",
+          "value": {
+            "gain": 0.5985768658359575,
+            "s": "hh"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.4,
+            "cutoff": 1200,
+            "gain": 0.45,
+            "note": "ab2",
+            "release": 1.2,
+            "room": 0.85,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.4,
+            "cutoff": 1200,
+            "gain": 0.45,
+            "note": "eb3",
+            "release": 1.2,
+            "room": 0.85,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.4,
+            "cutoff": 1200,
+            "gain": 0.45,
+            "note": "c4",
+            "release": 1.2,
+            "room": 0.85,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.4,
+            "cutoff": 1200,
+            "gain": 0.45,
+            "note": "f2",
+            "release": 1.2,
+            "room": 0.85,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.4,
+            "cutoff": 1200,
+            "gain": 0.45,
+            "note": "ab3",
+            "release": 1.2,
+            "room": 0.85,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.4,
+            "cutoff": 1200,
+            "gain": 0.45,
+            "note": "g2",
+            "release": 1.2,
+            "room": 0.85,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.4,
+            "cutoff": 1200,
+            "gain": 0.45,
+            "note": "d3",
+            "release": 1.2,
+            "room": 0.85,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "supersaw",
+          "value": {
+            "attack": 0.4,
+            "cutoff": 1200,
+            "gain": 0.45,
+            "note": "b3",
+            "release": 1.2,
+            "room": 0.85,
+            "s": "supersaw"
+          }
+        },
+        {
+          "name": "sd",
+          "value": {
+            "gain": 1,
+            "room": 0.45,
+            "roomsize": 0.7,
+            "s": "sd",
+            "shape": 0.35
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 1500,
+            "gain": 0.35,
+            "note": "c3",
+            "s": "sawtooth",
+            "speed": 1.75
+          }
+        },
+        {
+          "name": "speech",
+          "value": {
+            "delay": 0.25,
+            "delayfeedback": 0.5,
+            "gain": 0.95,
+            "n": 2,
+            "room": 0.6,
+            "s": "speech",
+            "shape": 0.3,
+            "speed": 0.9
+          }
+        },
+        {
+          "name": "bd",
+          "value": {
+            "gain": 1,
+            "s": "bd",
+            "shape": 0.45
+          }
+        },
+        {
+          "name": "oh",
+          "value": {
+            "gain": 0.4,
+            "s": "oh"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.95,
+            "note": "c1",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 1369.999999999994,
+            "gain": 0.75,
+            "hcutoff": 110,
+            "note": "c2",
+            "resonance": 11,
+            "room": 0.25,
+            "s": "sawtooth",
+            "shape": 0.65
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.95,
+            "note": "eb1",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 1369.9999999999945,
+            "gain": 0.75,
+            "hcutoff": 110,
+            "note": "eb2",
+            "resonance": 11,
+            "room": 0.25,
+            "s": "sawtooth",
+            "shape": 0.65
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.95,
+            "note": "f1",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sine",
+          "value": {
+            "gain": 0.95,
+            "note": "g1",
+            "s": "sine"
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 1369.9999999999832,
+            "gain": 0.75,
+            "hcutoff": 110,
+            "note": "f2",
+            "resonance": 11,
+            "room": 0.25,
+            "s": "sawtooth",
+            "shape": 0.65
+          }
+        },
+        {
+          "name": "sawtooth",
+          "value": {
+            "cutoff": 1369.999999999947,
+            "gain": 0.75,
+            "hcutoff": 110,
+            "note": "g2",
+            "resonance": 11,
+            "room": 0.25,
+            "s": "sawtooth",
+            "shape": 0.65
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.4,
+            "note": "g4",
+            "room": 0.9,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.4,
+            "note": "eb4",
+            "room": 0.9,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.4,
+            "note": "d4",
+            "room": 0.9,
+            "s": "triangle"
+          }
+        },
+        {
+          "name": "triangle",
+          "value": {
+            "delay": 0.375,
+            "gain": 0.4,
+            "note": "c4",
+            "room": 0.9,
+            "s": "triangle"
+          }
+        }
+      ],
+      "sounds": [
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "ade",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/ade/000_011112-bassline.wav"
+        },
+        {
+          "state": "ready",
+          "name": "hh",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "supersaw"
+        },
+        {
+          "state": "ready",
+          "name": "sd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/sd/rytm-00-hard.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "speech",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/speech/002_Sound5.wav"
+        },
+        {
+          "state": "ready",
+          "name": "bd",
+          "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+        },
+        {
+          "state": "ready",
+          "name": "oh",
+          "url": "https://raw.githubusercontent.com/ritchse/tidal-drum-machines/main/machines/EmuSP12/emusp12-oh/Hhopen1.wav"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sine"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "sawtooth"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        },
+        {
+          "state": "ready",
+          "name": "triangle"
+        }
+      ]
+    }
+  ]
+}

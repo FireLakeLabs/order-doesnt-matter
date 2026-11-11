@@ -72,8 +72,10 @@ export function generatePattern(p: Pattern, hole?: string): string {
       text += `.${layer.name}(${layer.args.map((a) => argument(a, hole)).join(", ")})`;
     else text += layer.code;
   }
-  if (p.label !== undefined || p.comment !== undefined) {
+  if (p.muted) text += ".filterWhen(()=>false)";
+  if (p.label !== undefined || p.comment !== undefined || p.muted) {
     const metadata = JSON.stringify({
+      muted: p.muted || undefined,
       label: p.label,
       comment: p.comment,
     }).replaceAll("*/", "*\\/");
