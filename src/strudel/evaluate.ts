@@ -49,6 +49,8 @@ async function evaluate(
   const prototype = Object.getOwnPropertyDescriptors(core.Pattern.prototype);
   const registered = Object.getOwnPropertyDescriptors(core.strudelScope);
   const saved = installStandIns(labels);
+  // Depends on pinned Pattern.__pure for pattern-valued tempo controls; canary
+  // coverage exercises setCpm(pure(120)) without asking a signal for a value.
   const scalar = (value: unknown) =>
     Number(core.isPattern(value) ? (value as core.Pattern & { __pure: unknown }).__pure : value);
   const scope: Record<string, unknown> = {

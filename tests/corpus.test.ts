@@ -244,7 +244,7 @@ describe('no-audio evaluator', () => {
   });
   it('uses tempo, slider, register, fill and numeric plain spans', async () => {
     const result = await queryEvents(
-      'setCpm(120); register(\'customGain\',(x,p)=>p.gain(x)); s("bd").customGain(slider(.4)).fill(.8).slow(2)',
+      'setCpm(pure(120)); register(\'customGain\',(x,p)=>p.gain(x)); s("bd").customGain(slider(.4)).fill(.8).slow(2)',
       0.5,
       1.5,
     );
