@@ -108,3 +108,11 @@ and synchronized readouts had failing-before/passing-after regressions. The
 A/V residuals are +20.0/−6.6 ms, with zero clipped decoded samples. Fourteen capture
 gaps exceeded 80 ms (maximum 266 ms), visibly captioned. Evidence: `shots/v2/`,
 `measurements-study02.json`, `study02-checks.json`, and the recording’s metrics.
+
+## Owner notes after trying Study 02 (2026-11-11)
+
+Better. Two things to tune during implementation, not now:
+
+- The turn just played blinks out; it should fade. The right duration is
+  unknown, only that the current one is abrupt.
+- In fly-through the upcoming turns are so faint they almost do not register.
