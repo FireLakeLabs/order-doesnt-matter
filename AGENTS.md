@@ -7,14 +7,17 @@ you play with the score directly, without making Strudel's syntax the subject.
 
 - [The model](docs/model.md): how Strudel works and how we draw it. One page.
 - [Decisions](docs/decisions.md): what is settled.
+- [Standards](docs/standards.md): test rules, boundaries, and ownership.
 - [Dark corners](research/dark-corners.md): what is not. Evidence, not authority.
 
 ## Current phase
 
-Phase 0, design study. No production code. Work lives in `spikes/<name>/`, each
-with its own `package.json`, and in `corpus/`. A spike ends with a
-`FINDINGS.md` that states what was measured, what was only observed, and what
-could not be checked.
+Phase 1, the walking skeleton: paste Strudel, hear it, see the score sheet and
+song strip, edit a constant setting. Production code lives in `src/`.
+`spikes/` is frozen reference and must not be imported; `corpus/` is evidence.
+
+Run `npm run check` for the Node checks and build, and `npm run test:browser`
+for the built-page browser suite.
 
 ## Working rules
 
@@ -24,4 +27,5 @@ could not be checked.
   `@strudel/webaudio`, `superdough` at 1.3.0.
 - Never bind a fixed port. Dev servers and browser tests take a free one.
 - Stay inside the directory your task names. Do not commit unless asked.
-- Report what you heard or saw separately from what only passed a check.
+- Report what was measured separately from what was seen. No agent can hear;
+  never describe how something sounds.

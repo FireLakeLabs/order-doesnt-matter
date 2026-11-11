@@ -42,3 +42,13 @@ Keep each entry to a few lines.
   like silence.
 - **D13 (2026-11-11) Other people's music stays out of the repository** unless
   permission to redistribute is recorded. It may be tested from a local path.
+- **D14 (2026-11-11) One Strudel seam.** Only `src/strudel/` imports Strudel.
+  Every reach below its documented surface lives there with a test that fails
+  if Strudel changes. Enforced by `check:boundaries`.
+- **D15 (2026-11-11) The document is one ordered list.** `Doc.body` holds
+  setup, tempo, shared patterns, instruments and global transforms in evaluation
+  order; it is plain JSON. Derived state (rooms, sound loading, pending) is never
+  stored. Replaces the parallel lists in the Phase 0 draft.
+- **D16 (2026-11-11) Budgets are checked, not promised.** The browser suite
+  fails over three minutes; the four living documents fail over their word
+  budgets; fixed ports fail the boundary check.
