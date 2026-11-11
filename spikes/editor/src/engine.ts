@@ -1,0 +1,99 @@
+import type { Doc } from "../../import/src/document";
+import { generate } from "./adapter";
+export interface Dispatch {
+  revision: number;
+  target: number;
+  begin: number;
+  value: unknown;
+}
+type Repl = {
+  evaluate(code: string, autoplay: boolean): Promise<unknown>;
+  stop(): void;
+  state: { error?: Error };
+  scheduler: {
+    started: boolean;
+    seconds_at_cps_change: number;
+    num_cycles_at_cps_change: number;
+    cps: number;
+    latency: number;
+    lastEnd: number;
+  };
+};
+export class Engine {
+  repl?: Repl;
+  playing = false;
+  revision = 0;
+  dispatches: Dispatch[] = [];
+  private web?: typeof import("@strudel/web");
+  private queue = Promise.resolve();
+  async init() {
+    if (this.repl) return;
+    this.web = await import("@strudel/web");
+    this.repl = await this.web.initStrudel({
+      sync: false,
+      miniAllStrings: false,
+      editPattern: (p: {
+        onTrigger(
+          fn: (
+            h: { whole: { begin: unknown }; value: unknown },
+            t: number,
+            cps: number,
+            target: number,
+          ) => void,
+          dominant: boolean,
+        ): unknown;
+      }) => {
+        const revision = this.revision;
+        return p.onTrigger((h, _t, _cps, target) => {
+          this.dispatches.push({
+            revision,
+            target,
+            begin: Number(h.whole.begin),
+            value: h.value,
+          });
+          if (this.dispatches.length > 2000) this.dispatches.shift();
+        }, false);
+      },
+    });
+  }
+  async play(doc: Doc) {
+    await this.init();
+    await this.web?.getAudioContext().resume();
+    await this.web?.initAudio();
+    this.playing = true;
+    await this.swap(doc);
+  }
+  async swap(doc: Doc) {
+    const source = generate(doc);
+    const work = this.queue.then(async () => {
+      if (!this.repl || !this.playing) return;
+      this.revision++;
+      await this.repl.evaluate(source, true);
+      if (this.repl.state.error) throw this.repl.state.error;
+    });
+    this.queue = work.catch(() => undefined);
+    return work;
+  }
+  stop() {
+    this.playing = false;
+    this.repl?.stop();
+  }
+  phase() {
+    const s = this.repl?.scheduler;
+    if (!s?.started || !this.web) return 0;
+    return Math.max(
+      0,
+      s.num_cycles_at_cps_change +
+        (this.web.getAudioContext().currentTime -
+          s.seconds_at_cps_change -
+          s.latency) *
+          s.cps,
+    );
+  }
+  audioTime() {
+    return this.web ? this.web.getAudioContext().currentTime : 0;
+  }
+  horizon() {
+    return this.repl?.scheduler.lastEnd ?? 0;
+  }
+}

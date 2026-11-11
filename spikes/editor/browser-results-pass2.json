@@ -1,0 +1,165 @@
+{
+  "durationMs": 13402.985416,
+  "checks": [
+    "sheet 3 voices",
+    "sheet 8 voices",
+    "sheet 20 voices",
+    "broken source + undo",
+    "20-voice lookup: focus + type + click = 3 actions; selection survives map switch",
+    "split document/generation + undo",
+    "constant edit changes real events",
+    "live swap + pending lands on dispatched changed revision"
+  ],
+  "errors": [],
+  "shots": [
+    "shots/pass2-constellation-3.jpg",
+    "shots/pass2-sheet-3.jpg",
+    "shots/pass2-editor-typed-3.jpg",
+    "shots/pass2-editor-constant-3.jpg",
+    "shots/pass2-editor-signal-3.jpg",
+    "shots/pass2-editor-rewrite-3.jpg",
+    "shots/pass2-constellation-8.jpg",
+    "shots/pass2-sheet-8.jpg",
+    "shots/pass2-editor-typed-8.jpg",
+    "shots/pass2-editor-constant-8.jpg",
+    "shots/pass2-editor-signal-8.jpg",
+    "shots/pass2-editor-rewrite-8.jpg",
+    "shots/pass2-constellation-20.jpg",
+    "shots/pass2-sheet-20.jpg",
+    "shots/pass2-editor-typed-20.jpg",
+    "shots/pass2-editor-constant-20.jpg",
+    "shots/pass2-editor-signal-20.jpg",
+    "shots/pass2-editor-rewrite-20.jpg",
+    "shots/pass2-editor-rule.jpg",
+    "shots/pass2-editor-source.jpg",
+    "shots/pass2-editor-source-broken.jpg",
+    "shots/pass2-editor-tier2.jpg",
+    "shots/pass2-nested-constellation.jpg",
+    "shots/pass2-pending-live-edit.jpg",
+    "shots/pass2-phone-constellation-3.jpg",
+    "shots/pass2-phone-sheet-3.jpg",
+    "shots/pass2-phone-editor-typed-3.jpg",
+    "shots/pass2-phone-editor-constant-3.jpg",
+    "shots/pass2-phone-editor-signal-3.jpg",
+    "shots/pass2-phone-editor-rewrite-3.jpg",
+    "shots/pass2-phone-constellation-8.jpg",
+    "shots/pass2-phone-sheet-8.jpg",
+    "shots/pass2-phone-editor-typed-8.jpg",
+    "shots/pass2-phone-editor-constant-8.jpg",
+    "shots/pass2-phone-editor-signal-8.jpg",
+    "shots/pass2-phone-editor-rewrite-8.jpg",
+    "shots/pass2-phone-constellation-20.jpg",
+    "shots/pass2-phone-sheet-20.jpg",
+    "shots/pass2-phone-editor-typed-20.jpg",
+    "shots/pass2-phone-editor-constant-20.jpg",
+    "shots/pass2-phone-editor-signal-20.jpg",
+    "shots/pass2-phone-editor-rewrite-20.jpg",
+    "shots/pass2-phone-editor-rule.jpg",
+    "shots/pass2-phone-editor-source.jpg",
+    "shots/pass2-phone-editor-tier2.jpg"
+  ],
+  "dispatches": [
+    {
+      "revision": 1,
+      "target": 0.2378875,
+      "begin": 0.0625,
+      "value": {
+        "note": 48,
+        "s": "triangle",
+        "gain": 0.6,
+        "cutoff": 1450,
+        "pan": 0.2,
+        "room": 0.25,
+        "roomsize": 0.4,
+        "orbit": 1,
+        "__voice": "e207",
+        "duration": 0.9375
+      }
+    },
+    {
+      "revision": 1,
+      "target": 0.2378875,
+      "begin": 0.0625,
+      "value": {
+        "note": 49,
+        "s": "sine",
+        "gain": 0.3,
+        "cutoff": 600,
+        "pan": 0.4,
+        "room": 0.25,
+        "roomsize": 1.2,
+        "orbit": 1,
+        "__voice": "e230",
+        "duration": 0.9375
+      }
+    },
+    {
+      "revision": 1,
+      "target": 0.2378875,
+      "begin": 0.0625,
+      "value": {
+        "note": 50,
+        "s": "sawtooth",
+        "gain": 0.3,
+        "cutoff": 1400,
+        "pan": 0.6000000000000001,
+        "room": 0.25,
+        "roomsize": 0.4,
+        "orbit": 1,
+        "__voice": "e251",
+        "duration": 0.9375
+      }
+    },
+    {
+      "revision": 2,
+      "target": 1.1753875,
+      "begin": 0.5625,
+      "value": {
+        "note": 55,
+        "s": "triangle",
+        "gain": 0.4,
+        "cutoff": 2600,
+        "pan": 0.2,
+        "room": 0.25,
+        "roomsize": 0.4,
+        "orbit": 1,
+        "__voice": "e207",
+        "duration": 0.234375
+      }
+    },
+    {
+      "revision": 2,
+      "target": 1.1753875,
+      "begin": 0.5625,
+      "value": {
+        "note": 56,
+        "s": "sine",
+        "gain": 0.3,
+        "cutoff": 600,
+        "pan": 0.4,
+        "room": 0.25,
+        "roomsize": 1.2,
+        "orbit": 1,
+        "__voice": "e230",
+        "duration": 0.234375
+      }
+    },
+    {
+      "revision": 2,
+      "target": 1.1753875,
+      "begin": 0.5625,
+      "value": {
+        "note": 57,
+        "s": "sawtooth",
+        "gain": 0.3,
+        "cutoff": 1400,
+        "pan": 0.6000000000000001,
+        "room": 0.25,
+        "roomsize": 0.4,
+        "orbit": 1,
+        "__voice": "e251",
+        "duration": 0.234375
+      }
+    }
+  ]
+}
