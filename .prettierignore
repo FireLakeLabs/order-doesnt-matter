@@ -1,0 +1,8 @@
+spikes/
+corpus/
+research/
+node_modules/
+dist/
+package-lock.json
+test-results/
+playwright-report/

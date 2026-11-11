@@ -7,4 +7,7 @@ The name is the lesson that started it: in Strudel, `.lpf(800).gain(0.5)` and
 written, not sound passing through boxes. (Sometimes order does matter. The app
 shows you when.)
 
-Status: Phase 0, design study. Start with [the model](docs/model.md).
+Status: Phase 1, the walking skeleton (paste Strudel, hear it, see the score sheet
+and song strip, edit a constant setting). Wave 0 provides the foundations; those
+flows follow in Wave 1. Production code lives in `src/`; `spikes/` is frozen
+reference and must not be imported. Start with [the model](docs/model.md).

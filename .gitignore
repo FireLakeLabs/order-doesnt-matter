@@ -27,3 +27,5 @@ spikes/demos/out/
 
 # Third-party piece tested locally only; no redistribution permission recorded
 *switch-angel*
+
+.browser-build-*/
