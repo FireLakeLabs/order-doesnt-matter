@@ -1,5 +1,5 @@
 import type { Generate } from '../contract';
-import type { Arg, JsonValue, Pattern } from '../document';
+import { instruments, shared, type Arg, type Doc, type JsonValue, type Pattern } from '../document';
 import { printSteps } from '../import/mini';
 
 function literal(value: JsonValue): string {
@@ -29,7 +29,14 @@ function argument(arg: Arg, hole?: string): string {
     }
   }
 }
-export function generatePattern(pattern: Pattern, hole?: string): string {
+interface Isolation {
+  doc: Doc;
+  selected: string;
+  leaves: Set<string>;
+  seen: Set<string>;
+}
+export function generatePattern(pattern: Pattern, hole?: string, isolation?: Isolation): string {
+  if (isolation) isolation = { ...isolation, seen: new Set(isolation.seen).add(pattern.id) };
   const c = pattern.core;
   let code: string;
   switch (c.kind) {
@@ -46,9 +53,14 @@ export function generatePattern(pattern: Pattern, hole?: string): string {
     case 'signal':
       code = c.args ? `${c.shape}(${c.args.map((a) => argument(a, hole)).join(', ')})` : c.shape;
       break;
-    case 'ref':
-      code = c.name;
+    case 'ref': {
+      const target = isolation && shared(isolation.doc, c.name);
+      code =
+        target && !isolation!.seen.has(target.id)
+          ? `(${generatePattern(target, hole, isolation)})`
+          : c.name;
       break;
+    }
     case 'hole':
       code = hole ?? 'p';
       break;
@@ -61,7 +73,7 @@ export function generatePattern(pattern: Pattern, hole?: string): string {
     case 'group':
       code = `${c.how}(${c.parts
         .map((part) => {
-          let p = generatePattern(part.pattern, hole);
+          let p = generatePattern(part.pattern, hole, isolation);
           if (part.muted) p = `(${p}).filterWhen(()=>false)`;
           if (part.label !== undefined || part.muted !== undefined)
             p = `(${annotation('part', { label: part.label, muted: part.muted })} ${p})`;
@@ -79,14 +91,26 @@ export function generatePattern(pattern: Pattern, hole?: string): string {
       code += `.${layer.name}(${layer.args.map((a) => argument(a, hole)).join(', ')})`;
     else code += layer.code;
   }
+  if (isolation?.leaves.has(pattern.id) && pattern.id !== isolation.selected)
+    code = `(${code}).filterWhen(()=>false)`;
   if (pattern.muted) code += '.filterWhen(()=>false)';
   if (pattern.label !== undefined || pattern.comment !== undefined || pattern.muted !== undefined)
     code = `(${annotation('pattern', { label: pattern.label, comment: pattern.comment, muted: pattern.muted })} ${code})`;
   return code;
 }
 export const generate: Generate = (doc, options = {}) => {
-  if (options.only && !doc.body.some((n) => n.kind === 'voice' && n.id === options.only))
-    throw Error(`Unknown instrument: ${options.only}`);
+  const voiceOnly = doc.body.some((n) => n.kind === 'voice' && n.id === options.only);
+  const rows = options.only && !voiceOnly ? instruments(doc) : [];
+  const selected = rows.find((row) => row.id === options.only);
+  if (options.only && !voiceOnly && !selected) throw Error(`Unknown instrument: ${options.only}`);
+  const isolation = selected
+    ? {
+        doc,
+        selected: selected.pattern.id,
+        leaves: new Set(rows.map((row) => row.pattern.id)),
+        seen: new Set<string>(),
+      }
+    : undefined;
   return doc.body
     .flatMap((node) => {
       switch (node.kind) {
@@ -99,9 +123,9 @@ export const generate: Generate = (doc, options = {}) => {
         case 'transform':
           return [`all(${node.args.map((a) => argument(a)).join(', ')});`];
         case 'voice':
-          if (options.only && options.only !== node.id) return [];
+          if (voiceOnly && options.only !== node.id) return [];
           return [
-            `${node.muted ? '_$' : '$'}: ${annotation('voice', { name: node.name, nameSource: node.nameSource, muted: node.muted })} ${generatePattern(node.pattern)};`,
+            `${node.muted ? '_$' : '$'}: ${annotation('voice', { name: node.name, nameSource: node.nameSource, muted: node.muted })} ${generatePattern(node.pattern, undefined, isolation)};`,
           ];
       }
     })

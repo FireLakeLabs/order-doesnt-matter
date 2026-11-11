@@ -1,5 +1,5 @@
 import type { EventResult, SheetInput } from '../contract';
-import type { Core, Pattern, Voice } from '../document';
+import type { Core, Pattern, Voice, TopLevel } from '../document';
 
 const pattern = (id: string, core: Core): Pattern => ({ id, tier: 1, core, layers: [] });
 const voice = (id: string, name: string, core: Core): Voice => ({
@@ -42,7 +42,7 @@ const result = (events: EventResult['events']): EventResult => ({
   error: null,
   opaqueValues: false,
 });
-const input = (body: Voice[], events: SheetInput['events'], toCycle = 1): SheetInput => ({
+const input = (body: TopLevel[], events: SheetInput['events'], toCycle = 1): SheetInput => ({
   doc: { version: 1, body },
   events,
   fromCycle: 0,
@@ -128,19 +128,34 @@ export const trio = input([lead, bass, bell], {
   bell: result([event(0, 0.2, { note: 'c5', s: 'triangle', room: 0.3 })]),
 });
 
-const arranged = (id: string, name: string, sitsOut = false): Voice =>
-  voice(id, name, {
-    kind: 'group',
-    how: 'arrange',
-    parts: ['Opening', 'Build', 'Space', 'Return'].map((label, index) => ({
-      label,
-      cycles: [2, 1, 3, 2][index],
-      muted: sitsOut && index === 2,
-      pattern: pattern(`${id}-section-${index}`, sequence()),
-    })),
-  });
+const pulse = voice('pulse', 'Pulse', sequence());
+const spark = voice('spark', 'Spark', sequence());
 export const arrange = input(
-  [arranged('pulse', 'Pulse'), arranged('spark', 'Spark', true)],
+  [
+    ...[pulse, spark].map((v) => ({
+      id: `shared-${v.id}`,
+      tier: 1 as const,
+      kind: 'shared' as const,
+      name: v.name,
+      pattern: { ...v.pattern, id: v.id },
+    })),
+    voice('song', 'Song', {
+      kind: 'group',
+      how: 'arrange',
+      parts: ['Opening', 'Build', 'Space', 'Return'].map((label, index) => ({
+        label,
+        cycles: [2, 1, 3, 2][index],
+        pattern: pattern(`section-${index}`, {
+          kind: 'group',
+          how: 'stack',
+          parts: [pulse, spark].map((v) => ({
+            muted: v.id === 'spark' && index === 2,
+            pattern: pattern(`${v.id}-use-${index}`, { kind: 'ref', name: v.name }),
+          })),
+        }),
+      })),
+    }),
+  ],
   {
     pulse: result([
       event(0, 2, { s: 'triangle' }),

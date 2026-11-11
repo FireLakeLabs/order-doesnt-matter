@@ -146,3 +146,5 @@ export function checkDoc(doc: Doc): string[] {
   });
   return problems;
 }
+export { instruments, sections } from './instruments';
+export type { Instrument, InstrumentUse, SongSection } from './instruments';

@@ -1,5 +1,13 @@
 import type { SheetInput, SoundState } from '../contract';
-import { shared, voices, walk, type Arg, type Pattern } from '../document';
+import {
+  shared,
+  instruments,
+  sections,
+  walk,
+  type Arg,
+  type Layer,
+  type Pattern,
+} from '../document';
 
 export const DRAW_CAP = 200;
 export interface Mark {
@@ -14,7 +22,7 @@ export interface Mark {
 export interface Cell {
   nodeId: string;
   name: string;
-  kind: 'unused' | 'empty' | 'constant' | 'steps' | 'curve' | 'rhythm';
+  kind: 'unused' | 'empty' | 'constant' | 'steps' | 'curve' | 'rhythm' | 'definition';
   summary: string;
   label: string;
   values: unknown[];
@@ -39,6 +47,7 @@ export interface Row {
   sounds: SoundState[];
   cells: Cell[];
   rewrites: Chip[];
+  useNotes: string[];
 }
 export interface Section {
   nodeId: string;
@@ -121,8 +130,23 @@ function makeCell(
   driven: boolean,
   status: string,
   input: SheetInput,
+  definitionValue?: unknown,
+  definitionLabel?: string,
 ): Cell {
-  const samples = events
+  if (definitionLabel !== undefined)
+    return {
+      nodeId,
+      name,
+      kind: 'definition',
+      label: definitionLabel,
+      summary: `${name}: definition ${definitionLabel}; use-site variations listed separately`,
+      values: [],
+      changes: 0,
+      totalCount: 0,
+      marks: [],
+      path: '',
+    };
+  const samples = (used ? events : [])
     .flatMap((event) => {
       const values = bag(event.value);
       return name === 'rhythm' || Object.hasOwn(values, name)
@@ -131,8 +155,8 @@ function makeCell(
               event,
               value:
                 name === 'rhythm'
-                  ? (values.note ?? values.n ?? values.s ?? values.value)
-                  : values[name],
+                  ? (values.note ?? values.n ?? values.value ?? 'event')
+                  : (definitionValue ?? values[name]),
             },
           ]
         : [];
@@ -194,114 +218,43 @@ function makeCell(
     (curve.length ? ` L${curve.at(-1)!.x + curve.at(-1)!.width},${curve.at(-1)!.y}` : '');
   const range =
     numeric.length === values.length && values.length > 1
-      ? `${lo} to ${hi}`
+      ? `${Number(lo.toPrecision(4))} to ${Number(hi.toPrecision(4))}`
       : values.map(text).join(', ');
   const label = kind === 'unused' ? 'Not used' : kind === 'empty' ? status : short(range);
   const summary = `${name}: ${kind === 'unused' ? 'not used' : kind === 'empty' ? status : `${range}; ${changes} changes; ${kind}`}${totalCount > DRAW_CAP ? `; showing ${DRAW_CAP} of ${totalCount} events` : ''}`;
   return { nodeId, name, kind, summary, label, values, changes, totalCount, marks, path };
 }
 
-/** Explicit mutes/rests are known even outside the event window. No source-text inference. */
-function silent(
-  doc: SheetInput['doc'],
-  p: Pattern,
-  start: number,
-  end: number,
-  seen = new Set<string>(),
-): boolean {
-  if (p.muted) return true;
-  if (seen.has(p.id)) return false;
-  seen = new Set(seen).add(p.id);
-  const c = p.core;
-  if (c.kind === 'ref') {
-    const target = shared(doc, c.name);
-    return !!target && silent(doc, target, start, end, seen);
-  }
-  if (p.layers.some((layer) => layer.kind !== 'settings')) return false;
-  if (c.kind === 'sequence') return c.steps.every((s) => s.kind === 'rest');
-  if (c.kind !== 'group') return false;
-  if (c.how === 'stack')
-    return c.parts.every((part) => part.muted || silent(doc, part.pattern, start, end, seen));
-  if (c.how !== 'arrange') return false;
-  let at = 0;
-  return c.parts.every((part) => {
-    const from = at;
-    at += part.cycles ?? 1;
-    return (
-      at <= start ||
-      from >= end ||
-      part.muted ||
-      silent(doc, part.pattern, start - from, end - from, seen)
-    );
-  });
-}
-
-/** No arrange means no strip; unqueried participation stays unknown. */
+/** Membership is structural, independent of a query window or a failed query. */
 function song(input: SheetInput, rows: Row[]): Section[] {
-  const parts: { nodeId: string; name: string; start: number; cycles: number }[] = [];
-  function scan(p: Pattern, start = 0, seen = new Set<string>()) {
-    if (seen.has(p.id)) return;
-    seen = new Set(seen).add(p.id);
-    const c = p.core;
-    if (c.kind === 'ref') {
-      const target = shared(input.doc, c.name);
-      if (target) scan(target, start, seen);
-    }
-    if (c.kind !== 'group') return;
-    let at = start;
-    for (const [i, part] of c.parts.entries()) {
-      const cycles = part.cycles ?? 1;
-      if (!(cycles > 0 && Number.isFinite(cycles))) continue;
-      if (c.how === 'arrange') {
-        parts.push({
-          nodeId: part.pattern.id,
-          name: part.label ?? `Section ${i + 1}`,
-          start: at,
-          cycles,
-        });
-        scan(part.pattern, at, seen);
-        at += cycles;
-      } else scan(part.pattern, start, seen);
-    }
-  }
-  voices(input.doc).forEach((v) => scan(v.pattern));
-  if (!parts.length) return [];
-  const total = Math.max(...parts.map((p) => p.start + p.cycles));
-  const boundaries = [...new Set(parts.flatMap((p) => [p.start, p.start + p.cycles]))].sort(
-    (a, b) => a - b,
-  );
+  const parts = sections(input.doc);
+  const total = parts.at(-1) ? parts.at(-1)!.start + parts.at(-1)!.cycles : 0;
   const now = input.playhead === null ? null : ((input.playhead % total) + total) % total;
-  return boundaries.slice(0, -1).map((start, index) => {
-    const end = boundaries[index + 1],
-      active = parts.filter((p) => p.start <= start && p.start + p.cycles >= end);
-    return {
-      nodeId: active[0].nodeId,
-      name: [...new Set(active.map((p) => p.name))].join(' / '),
-      start,
-      cycles: end - start,
-      width: ((end - start) / total) * 100,
-      current: now !== null && now >= start && now < end,
-      instruments: rows.map((row) => {
-        const result = input.events[row.id];
-        const covered = start >= input.fromCycle && end <= input.toCycle;
-        const voice = voices(input.doc).find((v) => v.id === row.id)!;
-        const state =
-          row.muted || silent(input.doc, voice.pattern, start, end)
-            ? 'absent'
-            : !covered || !result || result.error
-              ? 'unknown'
-              : result.events.some((e) => e.part[0] < end && e.part[1] > start)
-                ? 'present'
-                : 'absent';
-        return {
-          id: row.id,
-          name: row.name,
-          state,
-          text: `${row.name}: ${state === 'absent' ? 'not in this section' : state === 'present' ? 'in this section' : 'participation not queried'}`,
-        };
-      }),
-    };
-  });
+  return parts.map((part) => ({
+    nodeId: part.id,
+    name: part.name,
+    start: part.start,
+    cycles: part.cycles,
+    width: (part.cycles / total) * 100,
+    current: now !== null && now >= part.start && now < part.start + part.cycles,
+    instruments: rows.map((row) => {
+      const present = part.instrumentIds.includes(row.id);
+      return {
+        id: row.id,
+        name: row.name,
+        state: present ? 'present' : 'absent',
+        text: `${row.name}: ${present ? 'in this section' : 'not in this section'}`,
+      };
+    }),
+  }));
+}
+function layerNote(layer: Layer): string {
+  if (layer.kind === 'opaque') return layer.code;
+  if (layer.kind === 'rewrite')
+    return `${layer.name} ${layer.args.map(argument).join(', ')}`.trim();
+  return layer.settings
+    .map((s) => `${canonical(s.name)} ${argument({ kind: 'pattern', pattern: s.value })}`)
+    .join('; ');
 }
 
 export function sheetModel(input: SheetInput): SheetModel {
@@ -314,10 +267,32 @@ export function sheetModel(input: SheetInput): SheetModel {
   )
     throw Error('Sheet window must be finite and increasing');
   const columns = new Set<string>();
-  const sources = voices(input.doc).map((voice) => {
+  const songSections = sections(input.doc);
+  const sources = instruments(input.doc).map((voice) => {
+    const contextual = new Set(
+      voice.uses.flatMap((use) =>
+        use.layers.flatMap((layer) =>
+          layer.kind === 'settings' ? layer.settings.map((s) => canonical(s.name)) : [],
+        ),
+      ),
+    );
+    const useNotes = [
+      ...new Set(
+        voice.uses.flatMap((use) => {
+          if (!use.layers.length) return [];
+          const section = songSections.find((section) =>
+            use.path.some((node) => node.id === section.id),
+          );
+          return [`in ${section?.name ?? 'piece'}: ${use.layers.map(layerNote).join('; ')}`];
+        }),
+      ),
+    ];
     const rewrites: Chip[] = [];
     function gather(p: Pattern, seen = new Set<string>()) {
-      const settings = new Map<string, { nodeId: string; driven: boolean }>();
+      const settings = new Map<
+        string,
+        { nodeId: string; driven: boolean; definitionValue?: unknown; definitionLabel?: string }
+      >();
       if (seen.has(p.id)) return settings;
       seen = new Set(seen).add(p.id);
       const c = p.core;
@@ -335,6 +310,7 @@ export function sheetModel(input: SheetInput): SheetModel {
         settings.set(c.name, {
           nodeId: p.id,
           driven: c.args.some((a) => a.kind === 'pattern' && signal(input.doc, a.pattern)),
+          definitionLabel: contextual.has(c.name) ? c.args.map(argument).join(', ') : undefined,
         });
       if (c.kind === 'opaque')
         rewrites.push({ nodeId: p.id, name: 'Source text', summary: short(c.code), source: true });
@@ -345,6 +321,17 @@ export function sheetModel(input: SheetInput): SheetModel {
             settings.set(name, {
               nodeId: s.id,
               driven: signal(input.doc, s.value),
+              definitionValue:
+                contextual.has(name) && s.value.core.kind === 'constant'
+                  ? s.value.core.value
+                  : undefined,
+              definitionLabel:
+                contextual.has(name) && s.value.core.kind !== 'constant'
+                  ? [
+                      argument({ kind: 'pattern', pattern: s.value }),
+                      ...s.value.layers.map(layerNote),
+                    ].join(' · ')
+                  : undefined,
             });
           }
         else
@@ -371,18 +358,19 @@ export function sheetModel(input: SheetInput): SheetModel {
     settings.forEach((_, name) => columns.add(name));
     events.forEach((e) =>
       Object.keys(bag(e.value)).forEach((name) => {
+        if (contextual.has(name) && !settings.has(name)) return;
         columns.add(name);
         if (!settings.has(name)) settings.set(name, { nodeId: voice.pattern.id, driven: false });
       }),
     );
-    return { voice, result, events, settings, rewrites };
+    return { voice, result, events, settings, rewrites, useNotes };
   });
   const ordered = [
     'rhythm',
     ...['note', 'n', 'freq', 's'].filter((name) => columns.has(name)),
     ...[...columns].filter((name) => !['note', 'n', 'freq', 's'].includes(name)),
   ];
-  const rows: Row[] = sources.map(({ voice, result, events, settings, rewrites }) => {
+  const rows: Row[] = sources.map(({ voice, result, events, settings, rewrites, useNotes }) => {
     const broken = result?.error?.message ?? null;
     const status =
       broken !== null
@@ -393,7 +381,7 @@ export function sheetModel(input: SheetInput): SheetModel {
             ? 'Muted'
             : !events.length
               ? 'No events in this window'
-              : `${events.length} events`;
+              : `${events.length} event${events.length === 1 ? '' : 's'}`;
     const names = [
       ...new Set(
         events.flatMap((e) =>
@@ -419,6 +407,7 @@ export function sheetModel(input: SheetInput): SheetModel {
       status,
       sounds,
       rewrites,
+      useNotes,
       cells: ordered.map((name) =>
         makeCell(
           name,
@@ -428,6 +417,8 @@ export function sheetModel(input: SheetInput): SheetModel {
           settings.get(name)?.driven ?? false,
           status,
           input,
+          settings.get(name)?.definitionValue,
+          settings.get(name)?.definitionLabel,
         ),
       ),
     };
