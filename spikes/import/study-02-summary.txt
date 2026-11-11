@@ -1,0 +1,156 @@
+[
+  {
+    "id": "real-house",
+    "evaluates": true,
+    "equivalent": true,
+    "originalError": null,
+    "tiers": {
+      "1": 23,
+      "2": 0,
+      "3": 0
+    }
+  },
+  {
+    "id": "real-techno",
+    "evaluates": true,
+    "equivalent": true,
+    "originalError": null,
+    "tiers": {
+      "1": 26,
+      "2": 0,
+      "3": 0
+    }
+  },
+  {
+    "id": "real-trance",
+    "evaluates": true,
+    "equivalent": true,
+    "originalError": null,
+    "tiers": {
+      "1": 21,
+      "2": 0,
+      "3": 0
+    }
+  },
+  {
+    "id": "real-dnb",
+    "evaluates": true,
+    "equivalent": true,
+    "originalError": null,
+    "tiers": {
+      "1": 19,
+      "2": 0,
+      "3": 0
+    }
+  },
+  {
+    "id": "real-dubstep",
+    "evaluates": true,
+    "equivalent": true,
+    "originalError": null,
+    "tiers": {
+      "1": 24,
+      "2": 0,
+      "3": 0
+    }
+  },
+  {
+    "id": "real-ambient",
+    "evaluates": true,
+    "equivalent": true,
+    "originalError": null,
+    "tiers": {
+      "1": 27,
+      "2": 0,
+      "3": 0
+    }
+  },
+  {
+    "id": "real-future-bass",
+    "evaluates": true,
+    "equivalent": true,
+    "originalError": null,
+    "tiers": {
+      "1": 28,
+      "2": 0,
+      "3": 0
+    }
+  },
+  {
+    "id": "real-synthwave",
+    "evaluates": true,
+    "equivalent": true,
+    "originalError": null,
+    "tiers": {
+      "1": 29,
+      "2": 0,
+      "3": 0
+    }
+  },
+  {
+    "id": "real-house-arranged",
+    "evaluates": true,
+    "equivalent": true,
+    "originalError": null,
+    "tiers": {
+      "1": 82,
+      "2": 0,
+      "3": 0
+    }
+  },
+  {
+    "id": "real-house-vocals",
+    "evaluates": true,
+    "equivalent": true,
+    "originalError": null,
+    "tiers": {
+      "1": 115,
+      "2": 0,
+      "3": 0
+    }
+  },
+  {
+    "id": "real-custom-samples",
+    "evaluates": true,
+    "equivalent": true,
+    "originalError": null,
+    "tiers": {
+      "1": 6,
+      "2": 1,
+      "3": 1
+    }
+  },
+  {
+    "id": "real-dnb-arranged",
+    "evaluates": true,
+    "equivalent": true,
+    "originalError": null,
+    "tiers": {
+      "1": 148,
+      "2": 0,
+      "3": 0
+    }
+  },
+  {
+    "id": "real-dubstep-arranged",
+    "evaluates": true,
+    "equivalent": true,
+    "originalError": null,
+    "tiers": {
+      "1": 164,
+      "2": 0,
+      "3": 0
+    }
+  },
+  {
+    "id": "local-switch-angel",
+    "evaluates": true,
+    "equivalent": true,
+    "originalError": null,
+    "tiers": {
+      "1": 43,
+      "2": 15,
+      "3": 4
+    }
+  }
+]

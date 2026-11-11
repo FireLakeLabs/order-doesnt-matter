@@ -1,0 +1,21 @@
+{
+  "durationMs": 45112.953062,
+  "runs": [
+    {
+      "script": "verify-real.mjs",
+      "durationMs": 4442.962081000001
+    },
+    {
+      "script": "browser-test.mjs",
+      "durationMs": 24531.591121999998
+    },
+    {
+      "script": "pointer-check.mjs",
+      "durationMs": 2598.652625999999
+    },
+    {
+      "script": "corpus-audit.mjs",
+      "durationMs": 13539.710594
+    }
+  ]
+}

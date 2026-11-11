@@ -1,0 +1,54 @@
+spikes/import/src/browser-worker.mjs 37ms (unchanged)
+spikes/import/src/compare.ts 53ms (unchanged)
+spikes/import/src/document.ts 25ms (unchanged)
+spikes/import/src/generate.ts 50ms
+spikes/import/src/import.ts 92ms
+spikes/import/src/index.ts 2ms (unchanged)
+spikes/import/src/mini.ts 12ms (unchanged)
+spikes/import/src/node-worker.mjs 7ms (unchanged)
+spikes/import/src/query.ts 11ms (unchanged)
+spikes/import/src/registry.ts 6ms (unchanged)
+spikes/import/src/runtime.mjs 16ms
+spikes/import/src/vendor.d.ts 4ms (unchanged)
+spikes/import/browser-binding.test.ts 3ms
+spikes/import/import.test.ts 34ms
+spikes/import/profile.ts 4ms (unchanged)
+spikes/import/study-02.ts 13ms
+spikes/import/study.ts 21ms (unchanged)
+spikes/import/timings.ts 3ms (unchanged)
+spikes/import/build.mjs 2ms (unchanged)
+spikes/import/BENCHMARK.md 27ms (unchanged)
+spikes/import/FINDINGS.md 40ms
+spikes/import/README.md 11ms (unchanged)
+spikes/import/TIMINGS.md 28ms (unchanged)
+spikes/editor/src/adapter.ts 1ms
+spikes/editor/src/controls.ts 5ms
+spikes/editor/src/document.ts 32ms
+spikes/editor/src/engine.ts 9ms
+spikes/editor/src/fallback.ts 14ms
+spikes/editor/src/fixtures.ts 8ms (unchanged)
+spikes/editor/src/main.ts 111ms
+spikes/editor/src/miniature.ts 4ms
+spikes/editor/src/query-document.ts 7ms
+spikes/editor/src/scene.ts 21ms
+spikes/editor/src/song.test.ts 7ms
+spikes/editor/src/song.ts 8ms
+spikes/editor/src/strudel.d.ts 1ms (unchanged)
+spikes/editor/src/study.test.ts 20ms (unchanged)
+spikes/editor/src/style.css 89ms
+spikes/editor/browser-test.mjs 17ms
+spikes/editor/check-browser.mjs 2ms
+spikes/editor/corpus-audit.mjs 8ms
+spikes/editor/local-source.mjs 2ms
+spikes/editor/pointer-check.mjs 9ms
+spikes/editor/prepare-import.mjs 2ms (unchanged)
+spikes/editor/serve.mjs 2ms (unchanged)
+spikes/editor/study-02-browser.mjs 7ms
+spikes/editor/verify-real.mjs 12ms
+spikes/editor/CORPUS.md 35ms
+spikes/editor/FINDINGS.md 11ms
+spikes/editor/README.md 9ms
+spikes/editor/verification-notes.md 4ms
+spikes/editor/package.json 1ms (unchanged)
+spikes/editor/shots/v2/README.md 5ms (unchanged)
+corpus/README.md 4ms

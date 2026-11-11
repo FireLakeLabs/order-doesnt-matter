@@ -18,7 +18,7 @@
     "lacksWhole": false,
     "fragments": true,
     "maxSimultaneousEvents": 4,
-    "elapsedMs": 165
+    "elapsedMs": 111
   },
   {
     "id": "micro-tree-arrange",
@@ -39,7 +39,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 2,
-    "elapsedMs": 150
+    "elapsedMs": 99
   },
   {
     "id": "micro-callback-off",
@@ -60,7 +60,7 @@
     "lacksWhole": false,
     "fragments": true,
     "maxSimultaneousEvents": 2,
-    "elapsedMs": 132
+    "elapsedMs": 102
   },
   {
     "id": "micro-callback-deep",
@@ -102,7 +102,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 2,
-    "elapsedMs": 95
+    "elapsedMs": 97
   },
   {
     "id": "micro-register",
@@ -123,7 +123,7 @@
     "lacksWhole": false,
     "fragments": true,
     "maxSimultaneousEvents": 2,
-    "elapsedMs": 94
+    "elapsedMs": 97
   },
   {
     "id": "micro-pattern-fast",
@@ -144,7 +144,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 98
+    "elapsedMs": 101
   },
   {
     "id": "micro-pattern-slow",
@@ -165,7 +165,7 @@
     "lacksWhole": false,
     "fragments": true,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 97
+    "elapsedMs": 101
   },
   {
     "id": "micro-labels",
@@ -186,7 +186,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 2,
-    "elapsedMs": 96
+    "elapsedMs": 101
   },
   {
     "id": "micro-orbit-conflict",
@@ -207,7 +207,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 2,
-    "elapsedMs": 95
+    "elapsedMs": 100
   },
   {
     "id": "micro-long-alternation",
@@ -228,7 +228,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 97
+    "elapsedMs": 95
   },
   {
     "id": "micro-polymeter",
@@ -249,7 +249,7 @@
     "lacksWhole": false,
     "fragments": true,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 87
+    "elapsedMs": 95
   },
   {
     "id": "micro-seeded-drop",
@@ -270,7 +270,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 89
+    "elapsedMs": 97
   },
   {
     "id": "micro-random-pitch",
@@ -291,7 +291,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 96
+    "elapsedMs": 99
   },
   {
     "id": "micro-arrange-300",
@@ -312,7 +312,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 93
+    "elapsedMs": 97
   },
   {
     "id": "micro-arrange-301",
@@ -333,7 +333,7 @@
     "lacksWhole": false,
     "fragments": true,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 94
+    "elapsedMs": 103
   },
   {
     "id": "micro-signal-bare",
@@ -354,7 +354,7 @@
     "lacksWhole": true,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 86
+    "elapsedMs": 90
   },
   {
     "id": "micro-signal-lanes",
@@ -375,7 +375,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 102
+    "elapsedMs": 99
   },
   {
     "id": "micro-fragments-slow",
@@ -396,7 +396,7 @@
     "lacksWhole": false,
     "fragments": true,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 94
+    "elapsedMs": 99
   },
   {
     "id": "micro-fragments-chop",
@@ -417,7 +417,7 @@
     "lacksWhole": false,
     "fragments": true,
     "maxSimultaneousEvents": 3,
-    "elapsedMs": 97
+    "elapsedMs": 96
   },
   {
     "id": "micro-dense-64",
@@ -438,7 +438,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 109
+    "elapsedMs": 112
   },
   {
     "id": "micro-dense-stack",
@@ -459,7 +459,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 7,
-    "elapsedMs": 157
+    "elapsedMs": 175
   },
   {
     "id": "micro-bare-numbers",
@@ -480,7 +480,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 86
+    "elapsedMs": 91
   },
   {
     "id": "micro-bare-strings",
@@ -501,7 +501,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 87
+    "elapsedMs": 99
   },
   {
     "id": "micro-control-aliases",
@@ -522,7 +522,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 88
+    "elapsedMs": 99
   },
   {
     "id": "micro-control-multivalue",
@@ -543,7 +543,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 91
+    "elapsedMs": 98
   },
   {
     "id": "micro-control-array",
@@ -564,7 +564,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 89
+    "elapsedMs": 94
   },
   {
     "id": "micro-fx-filter-drive",
@@ -585,7 +585,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 92
+    "elapsedMs": 95
   },
   {
     "id": "micro-fx-drive-filter",
@@ -606,7 +606,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 89
+    "elapsedMs": 93
   },
   {
     "id": "micro-orbit-delay",
@@ -627,7 +627,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 2,
-    "elapsedMs": 89
+    "elapsedMs": 95
   },
   {
     "id": "micro-cut-group",
@@ -648,7 +648,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 2,
-    "elapsedMs": 94
+    "elapsedMs": 106
   },
   {
     "id": "micro-duck-room",
@@ -669,7 +669,7 @@
     "lacksWhole": false,
     "fragments": true,
     "maxSimultaneousEvents": 4,
-    "elapsedMs": 92
+    "elapsedMs": 113
   },
   {
     "id": "micro-tails",
@@ -690,7 +690,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 91
+    "elapsedMs": 101
   },
   {
     "id": "micro-clip-length",
@@ -711,7 +711,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 93
+    "elapsedMs": 103
   },
   {
     "id": "micro-external-state",
@@ -732,7 +732,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 88
+    "elapsedMs": 93
   },
   {
     "id": "micro-external-tempo",
@@ -753,7 +753,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 88
+    "elapsedMs": 96
   },
   {
     "id": "micro-trigger",
@@ -774,7 +774,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 88
+    "elapsedMs": 96
   },
   {
     "id": "micro-visuals",
@@ -795,7 +795,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 88
+    "elapsedMs": 92
   },
   {
     "id": "micro-query-throws",
@@ -807,7 +807,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 0,
-    "elapsedMs": 86
+    "elapsedMs": 91
   },
   {
     "id": "micro-query-late-throws",
@@ -823,7 +823,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 85
+    "elapsedMs": 92
   },
   {
     "id": "micro-sample-loop",
@@ -865,7 +865,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 90
+    "elapsedMs": 96
   },
   {
     "id": "mms-clock",
@@ -886,7 +886,7 @@
     "lacksWhole": false,
     "fragments": true,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 94
+    "elapsedMs": 98
   },
   {
     "id": "mms-euclid",
@@ -907,7 +907,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 91
+    "elapsedMs": 100
   },
   {
     "id": "mms-euclid-legato",
@@ -928,7 +928,7 @@
     "lacksWhole": false,
     "fragments": true,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 91
+    "elapsedMs": 98
   },
   {
     "id": "mms-ratchet",
@@ -949,7 +949,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 90
+    "elapsedMs": 99
   },
   {
     "id": "mms-seed",
@@ -970,7 +970,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 90
+    "elapsedMs": 94
   },
   {
     "id": "mms-palindrome",
@@ -991,7 +991,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 89
+    "elapsedMs": 102
   },
   {
     "id": "mms-shuffle",
@@ -1012,7 +1012,7 @@
     "lacksWhole": false,
     "fragments": true,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 94
+    "elapsedMs": 101
   },
   {
     "id": "mms-ribbon",
@@ -1033,7 +1033,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 89
+    "elapsedMs": 94
   },
   {
     "id": "mms-zoom",
@@ -1054,7 +1054,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 89
+    "elapsedMs": 92
   },
   {
     "id": "mms-echo",
@@ -1075,7 +1075,7 @@
     "lacksWhole": false,
     "fragments": true,
     "maxSimultaneousEvents": 3,
-    "elapsedMs": 92
+    "elapsedMs": 97
   },
   {
     "id": "mms-chunk",
@@ -1096,7 +1096,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 1,
-    "elapsedMs": 93
+    "elapsedMs": 106
   },
   {
     "id": "mms-off",
@@ -1117,7 +1117,7 @@
     "lacksWhole": false,
     "fragments": true,
     "maxSimultaneousEvents": 2,
-    "elapsedMs": 90
+    "elapsedMs": 97
   },
   {
     "id": "mms-within",
@@ -1138,7 +1138,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 2,
-    "elapsedMs": 94
+    "elapsedMs": 98
   },
   {
     "id": "mms-jux",
@@ -1159,7 +1159,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 2,
-    "elapsedMs": 95
+    "elapsedMs": 104
   },
   {
     "id": "mms-nested",
@@ -1180,7 +1180,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 2,
-    "elapsedMs": 96
+    "elapsedMs": 101
   },
   {
     "id": "piece-harbour",
@@ -1201,7 +1201,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 4,
-    "elapsedMs": 100
+    "elapsedMs": 104
   },
   {
     "id": "piece-foundry",
@@ -1222,7 +1222,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 4,
-    "elapsedMs": 100
+    "elapsedMs": 105
   },
   {
     "id": "piece-lichen",
@@ -1243,7 +1243,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 3,
-    "elapsedMs": 94
+    "elapsedMs": 104
   },
   {
     "id": "piece-night-bus",
@@ -1264,7 +1264,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 4,
-    "elapsedMs": 99
+    "elapsedMs": 104
   },
   {
     "id": "piece-copper",
@@ -1285,7 +1285,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 4,
-    "elapsedMs": 97
+    "elapsedMs": 103
   },
   {
     "id": "piece-paper-lantern",
@@ -1306,7 +1306,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 3,
-    "elapsedMs": 95
+    "elapsedMs": 101
   },
   {
     "id": "piece-tidal-stairs",
@@ -1327,7 +1327,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 3,
-    "elapsedMs": 97
+    "elapsedMs": 103
   },
   {
     "id": "piece-glass-garden",
@@ -1348,7 +1348,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 3,
-    "elapsedMs": 96
+    "elapsedMs": 110
   },
   {
     "id": "piece-relay",
@@ -1369,7 +1369,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 4,
-    "elapsedMs": 98
+    "elapsedMs": 112
   },
   {
     "id": "piece-slow-orbit",
@@ -1390,7 +1390,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 3,
-    "elapsedMs": 95
+    "elapsedMs": 107
   },
   {
     "id": "piece-moss-radio",
@@ -1411,7 +1411,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 3,
-    "elapsedMs": 98
+    "elapsedMs": 105
   },
   {
     "id": "piece-sundial",
@@ -1432,7 +1432,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 4,
-    "elapsedMs": 97
+    "elapsedMs": 105
   },
   {
     "id": "piece-kiln",
@@ -1453,7 +1453,7 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 4,
-    "elapsedMs": 99
+    "elapsedMs": 109
   },
   {
     "id": "piece-blue-hour",
@@ -1495,6 +1495,279 @@
     "lacksWhole": false,
     "fragments": false,
     "maxSimultaneousEvents": 4,
-    "elapsedMs": 100
+    "elapsedMs": 102
+  },
+  {
+    "id": "real-house",
+    "evaluated": true,
+    "error": null,
+    "numberOfPatterns": 1,
+    "eventsPerCycle": [
+      23,
+      23,
+      23,
+      23,
+      23,
+      23,
+      23,
+      23,
+      23
+    ],
+    "lacksWhole": false,
+    "fragments": false,
+    "maxSimultaneousEvents": 8,
+    "elapsedMs": 104
+  },
+  {
+    "id": "real-techno",
+    "evaluated": true,
+    "error": null,
+    "numberOfPatterns": 1,
+    "eventsPerCycle": [
+      18,
+      18,
+      18,
+      18,
+      18,
+      18,
+      18,
+      18,
+      18
+    ],
+    "lacksWhole": false,
+    "fragments": false,
+    "maxSimultaneousEvents": 4,
+    "elapsedMs": 107
+  },
+  {
+    "id": "real-trance",
+    "evaluated": true,
+    "error": null,
+    "numberOfPatterns": 1,
+    "eventsPerCycle": [
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28,
+      28
+    ],
+    "lacksWhole": false,
+    "fragments": false,
+    "maxSimultaneousEvents": 4,
+    "elapsedMs": 108
+  },
+  {
+    "id": "real-dnb",
+    "evaluated": true,
+    "error": null,
+    "numberOfPatterns": 1,
+    "eventsPerCycle": [
+      13,
+      12,
+      14,
+      12,
+      13,
+      12,
+      13,
+      12,
+      13
+    ],
+    "lacksWhole": false,
+    "fragments": false,
+    "maxSimultaneousEvents": 3,
+    "elapsedMs": 97
+  },
+  {
+    "id": "real-dubstep",
+    "evaluated": true,
+    "error": null,
+    "numberOfPatterns": 1,
+    "eventsPerCycle": [
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14,
+      14
+    ],
+    "lacksWhole": false,
+    "fragments": true,
+    "maxSimultaneousEvents": 3,
+    "elapsedMs": 97
+  },
+  {
+    "id": "real-ambient",
+    "evaluated": true,
+    "error": null,
+    "numberOfPatterns": 1,
+    "eventsPerCycle": [
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6,
+      6
+    ],
+    "lacksWhole": false,
+    "fragments": true,
+    "maxSimultaneousEvents": 5,
+    "elapsedMs": 97
+  },
+  {
+    "id": "real-future-bass",
+    "evaluated": true,
+    "error": null,
+    "numberOfPatterns": 1,
+    "eventsPerCycle": [
+      47,
+      47,
+      47,
+      47,
+      47,
+      47,
+      47,
+      47,
+      47
+    ],
+    "lacksWhole": false,
+    "fragments": true,
+    "maxSimultaneousEvents": 8,
+    "elapsedMs": 104
+  },
+  {
+    "id": "real-synthwave",
+    "evaluated": true,
+    "error": null,
+    "numberOfPatterns": 1,
+    "eventsPerCycle": [
+      26,
+      26,
+      26,
+      26,
+      26,
+      26,
+      26,
+      26,
+      26
+    ],
+    "lacksWhole": false,
+    "fragments": false,
+    "maxSimultaneousEvents": 4,
+    "elapsedMs": 97
+  },
+  {
+    "id": "real-house-arranged",
+    "evaluated": true,
+    "error": null,
+    "numberOfPatterns": 1,
+    "eventsPerCycle": [
+      30,
+      30,
+      30,
+      30,
+      21,
+      21,
+      21,
+      21,
+      39
+    ],
+    "lacksWhole": false,
+    "fragments": false,
+    "maxSimultaneousEvents": 9,
+    "elapsedMs": 105
+  },
+  {
+    "id": "real-house-vocals",
+    "evaluated": true,
+    "error": null,
+    "numberOfPatterns": 1,
+    "eventsPerCycle": [
+      30,
+      30,
+      30,
+      30,
+      22,
+      22,
+      22,
+      22,
+      44
+    ],
+    "lacksWhole": false,
+    "fragments": true,
+    "maxSimultaneousEvents": 10,
+    "elapsedMs": 109
+  },
+  {
+    "id": "real-custom-samples",
+    "evaluated": true,
+    "error": null,
+    "numberOfPatterns": 1,
+    "eventsPerCycle": [
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8,
+      8
+    ],
+    "lacksWhole": false,
+    "fragments": false,
+    "maxSimultaneousEvents": 1,
+    "elapsedMs": 92
+  },
+  {
+    "id": "real-dnb-arranged",
+    "evaluated": true,
+    "error": null,
+    "numberOfPatterns": 1,
+    "eventsPerCycle": [
+      19,
+      19,
+      19,
+      19,
+      14,
+      13,
+      15,
+      13,
+      24
+    ],
+    "lacksWhole": false,
+    "fragments": true,
+    "maxSimultaneousEvents": 8,
+    "elapsedMs": 109
+  },
+  {
+    "id": "real-dubstep-arranged",
+    "evaluated": true,
+    "error": null,
+    "numberOfPatterns": 1,
+    "eventsPerCycle": [
+      8,
+      8,
+      8,
+      8,
+      12,
+      12,
+      12,
+      13,
+      15
+    ],
+    "lacksWhole": false,
+    "fragments": true,
+    "maxSimultaneousEvents": 6,
+    "elapsedMs": 103
   }
 ]

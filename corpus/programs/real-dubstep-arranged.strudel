@@ -1,0 +1,103 @@
+setcpm(140 / 4)
+
+// --- VOCAL SAMPLES & EFFECTS ---
+
+// 1. Eerie, pitched-down vocal atmosphere for the intro & breakdown
+const vocalAtmos = s("ade:0")
+  .slow(4)
+  .speed(0.8)                     // Deep, pitched-down vocal timbre
+  .lpf(1800)
+  .room(0.9)
+  .size(0.95)
+  .delay(0.375)
+  .gain(0.75)
+
+// 2. Classic Dubstep pre-drop vocal chant right before the bass hits
+const preDropVocal = s("~ ~ ~ speech:2")
+  .speed(0.9)
+  .shape(0.3)
+  .delay(0.25)
+  .delayfeedback(0.5)
+  .room(0.6)
+  .gain(0.95)
+
+// --- DRUMS & PERCUSSION ---
+
+// Heavy half-time Dubstep beat (Kick on 1, Snare on 3)
+const dubstepDrums = stack(
+  s("bd ~ ~ ~ ~ ~ ~ ~").shape(0.45).gain(1.0),
+  s("~ ~ ~ ~ sd ~ ~ ~").shape(0.35).room(0.45).size(0.7).gain(1.0),
+  s("hh*8").gain(perlin.range(0.35, 0.65)),
+  s("~ ~ oh ~ ~ ~ oh ~").gain(0.4)
+)
+
+// --- BASSLINES (SUB + MID-RANGE WOBBLE) ---
+
+// 1. Pure, chest-rattling sine wave sub-bass (stays clean below 100 Hz)
+const subBass = note("<c1 c1 eb1 [f1 g1]>")
+  .s("sine")
+  .gain(0.95)
+
+// 2. Aggressive mid-range wobble bass with changing LFO speeds per bar
+const wobbleBass = note("<c2 c2 eb2 [f2 g2]>")
+  .s("sawtooth")
+  .lpf(sine.range(140, 2600).fast("<2 4 3 8>")) // Wobble rate shifts every bar
+  .resonance(11)
+  .shape(0.65)
+  .hpf(110)                                      // Leaves room for the clean sub-bass
+  .room(0.25)
+  .gain(0.75)
+
+// --- ATMOSPHERE & MELODY ---
+
+const darkPad = note("<[c3,g3,eb4] [ab2,eb3,c4] [f2,c3,ab3] [g2,d3,b3]>")
+  .s("supersaw")
+  .lpf(850)
+  .attack(0.4)
+  .release(1.2)
+  .room(0.85)
+  .gain(0.45)
+
+// --- SONG SECTIONS ---
+
+// 1. Intro: Moody dark pads, deep vocal atmosphere, and sparse hi-hats (4 bars)
+const intro = stack(
+  darkPad,
+  vocalAtmos,
+  s("hh*4").gain(0.35).room(0.6)
+)
+
+// 2. Build-up: Accelerating snare roll, rising pitch synth, and pre-drop vocal (4 bars)
+const buildSection = stack(
+  darkPad.lpf(saw.range(600, 2200).slow(4)),
+  s("sd*8").gain(saw.range(0.2, 0.95).slow(4)),
+  note("c3").s("sawtooth").speed(saw.range(1, 2).slow(4)).lpf(1500).gain(0.35),
+  cat(silence, silence, silence, preDropVocal) // Triggers vocal on bar 4 right before drop
+)
+
+// 3. Drop: Half-time drums, pure sub-bass, and dynamic wobble bass (8 bars)
+const drop = stack(
+  dubstepDrums,
+  subBass,
+  wobbleBass
+)
+
+// 4. Breakdown: Bass cuts out; eerie pads and high haunting synth notes return (4 bars)
+const breakdown = stack(
+  darkPad.lpf(1200),
+  vocalAtmos,
+  note("g4 ~ eb4 ~ d4 ~ c4 ~")
+    .s("triangle")
+    .delay(0.375)
+    .room(0.9)
+    .gain(0.4)
+)
+
+// --- FULL ARRANGEMENT (28 Bars Total) ---
+arrange(
+  [4, intro],
+  [4, buildSection],
+  [8, drop],
+  [4, breakdown],
+  [8, drop]
+)

@@ -11,7 +11,8 @@
     "serve": "node serve.mjs --built",
     "build": "node prepare-import.mjs && tsc --noEmit && vite build",
     "test": "node prepare-import.mjs && vitest run",
-    "test:browser": "node browser-test.mjs"
+    "test:browser": "node check-browser.mjs",
+    "shots:v2": "ROUND=after node study-02-browser.mjs"
   },
   "dependencies": {
     "@strudel/core": "1.2.6",

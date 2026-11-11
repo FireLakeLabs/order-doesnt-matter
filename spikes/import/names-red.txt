@@ -1,0 +1,49 @@
+
+> test
+> vitest run --reporter=dot
+
+
+ RUN  v3.2.4 /home/aaron/projects/order-doesnt-matter/spikes/import
+
+·····································xx
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  import.test.ts > author vocabulary > retains single-use const names and section comments through generation
+AssertionError: expected '{"setup":[],"voices":[{"id":"n1","tie…' to contain '"label":"intro"'
+
+Expected: ""label":"intro""
+Received: "{"setup":[],"voices":[{"id":"n1","tier":1,"span":{"start":71,"end":108},"name":"$","muted":false,"pattern":{"id":"n8","tier":1,"span":{"start":71,"end":108},"core":{"kind":"group","how":"arrange","parts":[{"cycles":4,"pattern":{"id":"n4","tier":1,"span":{"start":58,"end":69},"core":{"kind":"group","how":"stack","parts":[{"pattern":{"id":"n2","tier":1,"span":{"start":11,"end":20},"core":{"kind":"generator","name":"s","args":[{"kind":"pattern","pattern":{"id":"n3","tier":1,"span":{"start":13,"end":19},"core":{"kind":"sequence","steps":[{"kind":"other","notation":"bd*4"}],"notation":"bd*4"},"layers":[]}}]},"layers":[]}}]},"layers":[]}},{"cycles":4,"pattern":{"id":"n7","tier":1,"span":{"start":92,"end":106},"core":{"kind":"group","how":"stack","parts":[{"pattern":{"id":"n5","tier":1,"span":{"start":98,"end":105},"core":{"kind":"generator","name":"s","args":[{"kind":"pattern","pattern":{"id":"n6","tier":1,"span":{"start":100,"end":104},"core":{"kind":"sequence","steps":[{"kind":"value","value":"hh"}],"notation":"hh"},"layers":[]}}]},"layers":[]}}]},"layers":[]}}]},"layers":[]}}],"shared":{},"order":[{"kind":"voice","index":0}],"transforms":[]}"
+
+ ❯ import.test.ts:278:33
+    276| arrange([4,intro],[4,stack(s("hh"))])`;
+    277|     const {doc, fresh} = await equivalent(source, 9);
+    278|     expect(JSON.stringify(doc)).toContain('"label":"intro"');
+       |                                 ^
+    279|     expect(JSON.stringify(doc)).toContain('Intro: only the kick');
+    280|     expect(JSON.stringify(doc)).toContain('"label":"kick"');
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯
+
+ FAIL  import.test.ts > author vocabulary > retains comments naming anonymous stack parts
+AssertionError: expected '{"setup":[],"voices":[{"id":"n1","tie…' to contain 'Four-on-the-floor kick'
+
+Expected: "Four-on-the-floor kick"
+Received: "{"setup":[],"voices":[{"id":"n1","tier":1,"span":{"start":0,"end":90},"name":"$","muted":false,"pattern":{"id":"n9","tier":1,"span":{"start":0,"end":90},"core":{"kind":"group","how":"stack","parts":[{"pattern":{"id":"n2","tier":1,"span":{"start":33,"end":42},"core":{"kind":"generator","name":"s","args":[{"kind":"pattern","pattern":{"id":"n3","tier":1,"span":{"start":35,"end":41},"core":{"kind":"sequence","steps":[{"kind":"other","notation":"bd*4"}],"notation":"bd*4"},"layers":[]}}]},"layers":[]}},{"pattern":{"id":"n4","tier":1,"span":{"start":60,"end":78},"core":{"kind":"generator","name":"note","args":[{"kind":"pattern","pattern":{"id":"n5","tier":1,"span":{"start":65,"end":77},"core":{"kind":"sequence","steps":[{"kind":"together","steps":[{"kind":"value","value":"c4"},{"kind":"value","value":"e4"},{"kind":"value","value":"g4"}]}],"notation":"[c4,e4,g4]"},"layers":[]}}]},"layers":[{"id":"n8","tier":1,"span":{"start":60,"end":89},"kind":"settings","settings":[{"id":"n6","tier":1,"span":{"start":60,"end":89},"name":"s","value":{"id":"n7","tier":1,"span":{"start":81,"end":88},"core":{"kind":"sequence","steps":[{"kind":"value","value":"piano"}],"notation":"piano"},"layers":[]}}]}]}}]},"layers":[]}}],"shared":{},"order":[{"kind":"voice","index":0}],"transforms":[]}"
+
+ ❯ import.test.ts:289:33
+    287| // Piano chords
+    288| note("[c4,e4,g4]").s("piano"))`);
+    289|     expect(JSON.stringify(doc)).toContain('Four-on-the-floor kick');
+       |                                 ^
+    290|     expect(JSON.stringify(doc)).toContain('Piano chords');
+    291|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯
+
+
+ Test Files  1 failed (1)
+      Tests  2 failed | 37 passed (39)
+   Start at  13:32:28
+   Duration  5.46s (transform 111ms, setup 0ms, collect 189ms, tests 4.96s, environment 0ms, prepare 86ms)
+

@@ -70,7 +70,10 @@ export function patternSource(
       s = p.core.shape;
       break;
     case "generator":
-      s = `${p.core.name}(${p.core.args.map(arg).join(",")})`;
+      s =
+        p.core.name === "silence" && !p.core.args.length
+          ? "silence"
+          : `${p.core.name}(${p.core.args.map(arg).join(",")})`;
       break;
     case "group":
       s = `${p.core.how}(${p.core.parts.map((x) => (p.core.kind === "group" && p.core.how === "arrange" ? `[${x.cycles ?? 1},${patternSource(x.pattern, doc, true, limit + 1)}]` : patternSource(x.pattern, doc, true, limit + 1))).join(",")})`;

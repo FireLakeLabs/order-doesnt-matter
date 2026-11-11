@@ -96,7 +96,7 @@ try {
       );
     if (record.voices === 1 && record.planets > 1)
       record.wrong.push(
-        "both: group leaves expanded; cat/arrange timing differs across cycles",
+        "both: instrument rows include section rests; timing differs across cycles",
       );
     if (record.events > 128)
       record.wrong.push(
@@ -106,6 +106,7 @@ try {
       record.wrong.push("both: BROKEN result shown for query failure");
     rows.push({ id, ...record });
     if (
+      process.env.CAPTURE_AUDIT &&
       [
         "micro-callback-deep",
         "micro-dense-stack",

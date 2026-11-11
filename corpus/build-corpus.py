@@ -92,5 +92,9 @@ const lead = note("<{bass.split()[0]} {bass.split()[-1]}>").add(note(24)).s("sin
 arrange([4, drums], [8, stack(drums,bass)], [16, stack(drums,bass,pad,lead)], [4, stack(pad,lead)])
 '''
  add('piece-'+slug,slug.replace('-',' ').title(),source,'G1 G3 T3 E3 A4'+(' A1' if '.FX' in fx else ' A2'),32,'Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window.')
-(root/'index.json').write_text(json.dumps(entries,indent=2)+'\n')
+# Generated fixtures must not replace owner-collected entries.
+index_path=root/'index.json'
+collected=json.loads(index_path.read_text()) if index_path.exists() else []
+entries.extend(e for e in collected if e.get('origin')=='owner-collected')
+index_path.write_text(json.dumps(entries,indent=2)+'\n')
 print(len(entries))

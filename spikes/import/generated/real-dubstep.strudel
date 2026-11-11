@@ -1,0 +1,2 @@
+setcpm(35);
+$: /*@odm-voice {"name":"$","muted":false}*/ stack((/*@odm-pattern {"comment":"Half-time drum groove (Kick on 1, Snare on 3)"}*/ s("bd ~ ~ ~ sd ~ ~ ~").shape(0.4)), s("hh*8").gain(0.5), (/*@odm-pattern {"comment":"Wobble bassline (LFO modulating the low-pass filter)"}*/ note("<c1 c1 eb1 f1>").s("sawtooth").cutoff(sine.range(100, 2200).fast(4)).resonance(10).shape(0.6)));

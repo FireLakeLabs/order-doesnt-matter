@@ -1,0 +1,478 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 18,
+        "end": 371
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n28",
+        "tier": 1,
+        "span": {
+          "start": 18,
+          "end": 371
+        },
+        "core": {
+          "kind": "group",
+          "how": "stack",
+          "parts": [
+            {
+              "pattern": {
+                "id": "n2",
+                "tier": 1,
+                "span": {
+                  "start": 64,
+                  "end": 120
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "note",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n3",
+                        "tier": 1,
+                        "span": {
+                          "start": 69,
+                          "end": 119
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "alternate",
+                              "steps": [
+                                {
+                                  "kind": "together",
+                                  "steps": [
+                                    {
+                                      "kind": "value",
+                                      "value": "c3"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "g3"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "d4"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "eb4"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "kind": "together",
+                                  "steps": [
+                                    {
+                                      "kind": "value",
+                                      "value": "ab2"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "eb3"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "bb3"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "c4"
+                                    }
+                                  ]
+                                },
+                                {
+                                  "kind": "together",
+                                  "steps": [
+                                    {
+                                      "kind": "value",
+                                      "value": "f2"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "c3"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "g3"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "ab3"
+                                    }
+                                  ]
+                                }
+                              ]
+                            }
+                          ],
+                          "notation": "<[c3,g3,d4,eb4] [ab2,eb3,bb3,c4] [f2,c3,g3,ab3]>"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": [
+                  {
+                    "id": "n4",
+                    "tier": 1,
+                    "span": {
+                      "start": 64,
+                      "end": 134
+                    },
+                    "kind": "rewrite",
+                    "name": "slow",
+                    "args": [
+                      {
+                        "kind": "literal",
+                        "value": 4
+                      }
+                    ]
+                  },
+                  {
+                    "id": "n7",
+                    "tier": 1,
+                    "span": {
+                      "start": 64,
+                      "end": 150
+                    },
+                    "kind": "settings",
+                    "settings": [
+                      {
+                        "id": "n5",
+                        "tier": 1,
+                        "span": {
+                          "start": 64,
+                          "end": 150
+                        },
+                        "name": "s",
+                        "value": {
+                          "id": "n6",
+                          "tier": 1,
+                          "span": {
+                            "start": 143,
+                            "end": 149
+                          },
+                          "core": {
+                            "kind": "sequence",
+                            "steps": [
+                              {
+                                "kind": "value",
+                                "value": "sine"
+                              }
+                            ],
+                            "notation": "sine"
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n8",
+                        "tier": 1,
+                        "span": {
+                          "start": 64,
+                          "end": 166
+                        },
+                        "name": "attack",
+                        "value": {
+                          "id": "n9",
+                          "tier": 1,
+                          "span": {
+                            "start": 164,
+                            "end": 165
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 2
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n10",
+                        "tier": 1,
+                        "span": {
+                          "start": 64,
+                          "end": 183
+                        },
+                        "name": "release",
+                        "value": {
+                          "id": "n11",
+                          "tier": 1,
+                          "span": {
+                            "start": 181,
+                            "end": 182
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 3
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n12",
+                        "tier": 1,
+                        "span": {
+                          "start": 64,
+                          "end": 200
+                        },
+                        "name": "room",
+                        "value": {
+                          "id": "n13",
+                          "tier": 1,
+                          "span": {
+                            "start": 195,
+                            "end": 199
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.95
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n14",
+                        "tier": 1,
+                        "span": {
+                          "start": 64,
+                          "end": 216
+                        },
+                        "name": "gain",
+                        "value": {
+                          "id": "n15",
+                          "tier": 1,
+                          "span": {
+                            "start": 212,
+                            "end": 215
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.5
+                          },
+                          "layers": []
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "comment": "Slow evolving harmonic drones"
+              }
+            },
+            {
+              "pattern": {
+                "id": "n16",
+                "tier": 1,
+                "span": {
+                  "start": 257,
+                  "end": 285
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "note",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n17",
+                        "tier": 1,
+                        "span": {
+                          "start": 262,
+                          "end": 284
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "g5"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "bb5"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "d6"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "c6"
+                            },
+                            {
+                              "kind": "rest"
+                            }
+                          ],
+                          "notation": "g5 ~ bb5 ~ d6 ~ c6 ~"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": [
+                  {
+                    "id": "n18",
+                    "tier": 1,
+                    "span": {
+                      "start": 257,
+                      "end": 299
+                    },
+                    "kind": "rewrite",
+                    "name": "slow",
+                    "args": [
+                      {
+                        "kind": "literal",
+                        "value": 2
+                      }
+                    ]
+                  },
+                  {
+                    "id": "n21",
+                    "tier": 1,
+                    "span": {
+                      "start": 257,
+                      "end": 319
+                    },
+                    "kind": "settings",
+                    "settings": [
+                      {
+                        "id": "n19",
+                        "tier": 1,
+                        "span": {
+                          "start": 257,
+                          "end": 319
+                        },
+                        "name": "s",
+                        "value": {
+                          "id": "n20",
+                          "tier": 1,
+                          "span": {
+                            "start": 308,
+                            "end": 318
+                          },
+                          "core": {
+                            "kind": "sequence",
+                            "steps": [
+                              {
+                                "kind": "value",
+                                "value": "triangle"
+                              }
+                            ],
+                            "notation": "triangle"
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n22",
+                        "tier": 1,
+                        "span": {
+                          "start": 257,
+                          "end": 336
+                        },
+                        "name": "delay",
+                        "value": {
+                          "id": "n23",
+                          "tier": 1,
+                          "span": {
+                            "start": 332,
+                            "end": 335
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.5
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n24",
+                        "tier": 1,
+                        "span": {
+                          "start": 257,
+                          "end": 352
+                        },
+                        "name": "room",
+                        "value": {
+                          "id": "n25",
+                          "tier": 1,
+                          "span": {
+                            "start": 348,
+                            "end": 351
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.9
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n26",
+                        "tier": 1,
+                        "span": {
+                          "start": 257,
+                          "end": 368
+                        },
+                        "name": "gain",
+                        "value": {
+                          "id": "n27",
+                          "tier": 1,
+                          "span": {
+                            "start": 364,
+                            "end": 367
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.3
+                          },
+                          "layers": []
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "comment": "Sparse crystalline high notes"
+              }
+            }
+          ]
+        },
+        "layers": []
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "tempo"
+    },
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": [],
+  "tempo": {
+    "cpm": 15
+  }
+}

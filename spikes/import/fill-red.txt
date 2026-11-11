@@ -1,0 +1,37 @@
+
+> test
+> vitest run --reporter=dot
+
+
+ RUN  v3.2.4 /home/aaron/projects/order-doesnt-matter/spikes/import
+
+·········································x
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  import.test.ts > queries the draw fill parameter used by registered gates without initializing a canvas
+AssertionError: s("bd").fill(.8).clip(.8): expected 's(...).fill is not a function' to be null
+
+- Expected: 
+null
+
++ Received: 
+"s(...).fill is not a function"
+
+ ❯ equivalent import.test.ts:15:34
+     13|     queryEvents(fresh, 0, cycles),
+     14|   ]);
+     15|   expect(original.error, source).toBeNull();
+       |                                  ^
+     16|   expect(result.error, fresh).toBeNull();
+     17|   expect(eventIdentity(result), fresh).toBe(eventIdentity(original));
+ ❯ import.test.ts:299:17
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 41 passed (42)
+   Start at  13:43:59
+   Duration  6.05s (transform 125ms, setup 0ms, collect 224ms, tests 5.71s, environment 0ms, prepare 163ms)
+

@@ -23,7 +23,7 @@ var tierOneControls = new Set(
   `s note n gain velocity lpf hpf lpq hpq pan delay delaytime delayfeedback room roomsize orbit attack decay sustain release speed begin end cut clip legato vowel crush distort shape scale`.split(" ").map(canonicalName)
 );
 var signals = new Set(
-  "sine cosine saw isaw tri square perlin rand irand".split(" ")
+  "sine cosine saw isaw tri square perlin rand irand time".split(" ")
 );
 var rewrites = new Set(
   "fast slow early late rev ply euclid euclidRot degradeBy sometimes sometimesBy often rarely every firstOf off jux superimpose layer struct mask".split(
@@ -129,7 +129,7 @@ var outputs = new Set(
   )
 );
 var setupCalls = new Set(
-  "samples hush register setcpm setcps setbpm".split(" ")
+  "samples hush register setcpm setCpm setcps setbpm".split(" ")
 );
 function position(node) {
   if ("start" in node && "end" in node && typeof node.start === "number" && typeof node.end === "number")
@@ -342,7 +342,34 @@ function importStrudel(source) {
       };
     return pattern(node, hole);
   }
+  function leadingComment(node) {
+    return comments.filter(
+      (c) => c.end <= position(node).start && /^\s*$/.test(source.slice(c.end, position(node).start))
+    ).at(-1);
+  }
+  function vocabulary(p, node) {
+    const c = leadingComment(node);
+    if (!c) return p;
+    if (c.value.startsWith("@odm-pattern ")) {
+      try {
+        const data = JSON.parse(c.value.slice("@odm-pattern ".length));
+        if (data && typeof data === "object") {
+          if ("label" in data && typeof data.label === "string")
+            p.label = data.label;
+          if ("comment" in data && typeof data.comment === "string")
+            p.comment = data.comment;
+        }
+      } catch {
+      }
+    } else if (!c.value.startsWith("@odm-voice ")) {
+      p.comment = c.value.trim();
+    }
+    return p;
+  }
   function pattern(node, hole) {
+    return vocabulary(parsePattern(node, hole), node);
+  }
+  function parsePattern(node, hole) {
     const p = plain(node);
     if (p && typeof p.value === "string") {
       try {
@@ -363,6 +390,12 @@ function importStrudel(source) {
         layers: []
       };
     if (node.type === "Identifier") {
+      if (node.name === "silence" && !definitions.has(node.name))
+        return {
+          ...meta(node, 1),
+          core: { kind: "generator", name: "silence", args: [] },
+          layers: []
+        };
       if (node.name === hole)
         return { ...meta(node, 1), core: { kind: "hole" }, layers: [] };
       if (signals.has(node.name) && node.name !== "irand")
@@ -382,6 +415,8 @@ function importStrudel(source) {
         active.add(node.name);
         const result = definitionPattern(def.init, hole);
         active.delete(node.name);
+        vocabulary(result, def.statement);
+        result.label = node.name;
         return result;
       }
       return opaque(node);
@@ -523,7 +558,11 @@ function importStrudel(source) {
       if (def) {
         if (def.count > 1) {
           active.add(name);
-          doc.shared[name] = definitionPattern(def.init);
+          doc.shared[name] = vocabulary(
+            definitionPattern(def.init),
+            def.statement
+          );
+          doc.shared[name].label = name;
           active.delete(name);
           order.push({ kind: "shared", name });
         } else if (def.count === 0) setup(statement, "unused declaration");
@@ -533,7 +572,7 @@ function importStrudel(source) {
     const expr = statement.type === "ExpressionStatement" ? statement.expression : void 0;
     if (expr?.type === "CallExpression" && expr.callee.type === "Identifier") {
       const name = expr.callee.name;
-      if (["setcpm", "setcps"].includes(name) && expr.arguments.length === 1 && !doc.tempo) {
+      if (["setcpm", "setCpm", "setcps"].includes(name) && expr.arguments.length === 1 && !doc.tempo) {
         const tempo = plain(expr.arguments[0])?.value;
         if (typeof tempo === "number") {
           doc.tempo = { cpm: name === "setcps" ? tempo * 60 : tempo };
@@ -616,7 +655,7 @@ function importStrudel(source) {
         return transforms[entry.index]?.span?.start ?? Infinity;
       case "tempo": {
         const statement = program.body.find(
-          (s) => s.type === "ExpressionStatement" && s.expression.type === "CallExpression" && s.expression.callee.type === "Identifier" && ["setcpm", "setcps"].includes(s.expression.callee.name)
+          (s) => s.type === "ExpressionStatement" && s.expression.type === "CallExpression" && s.expression.callee.type === "Identifier" && ["setcpm", "setCpm", "setcps"].includes(s.expression.callee.name)
         );
         return statement ? position(statement).start : Infinity;
       }
@@ -627,7 +666,8 @@ function importStrudel(source) {
     const def = definitions.get(name);
     if (!def) continue;
     active.add(name);
-    doc.shared[name] = definitionPattern(def.init);
+    doc.shared[name] = vocabulary(definitionPattern(def.init), def.statement);
+    doc.shared[name].label = name;
     active.delete(name);
     const at = order.findIndex(
       (entry) => entryOffset(entry) > position(def.statement).start
@@ -638,75 +678,82 @@ function importStrudel(source) {
 }
 
 // ../import/src/generate.ts
+function literal(value) {
+  if (typeof value === "string")
+    return `'${value.replaceAll("\\", "\\\\").replaceAll("'", "\\'").replaceAll("\n", "\\n").replaceAll("\r", "\\r")}'`;
+  if (Array.isArray(value)) return `[${value.map(literal).join(", ")}]`;
+  if (value && typeof value === "object")
+    return `{${Object.entries(value).map(([k, v]) => `${literal(k)}: ${literal(v)}`).join(", ")}}`;
+  return JSON.stringify(value);
+}
+function argument(arg, hole) {
+  switch (arg.kind) {
+    case "literal":
+      return literal(arg.value);
+    case "pattern":
+      return generatePattern(arg.pattern, hole);
+    case "opaque":
+      return arg.code;
+    case "callback": {
+      const parameter = arg.parameter ?? "p";
+      return `${parameter} => ${generatePattern(arg.body, parameter)}`;
+    }
+  }
+}
+function generatePattern(p, hole) {
+  let text;
+  const core = p.core;
+  switch (core.kind) {
+    case "sequence":
+      text = JSON.stringify(printSteps(core.steps));
+      break;
+    case "constant":
+      text = literal(core.value);
+      break;
+    case "data":
+      text = literal(core.value);
+      break;
+    case "signal":
+      text = core.shape;
+      break;
+    case "ref":
+      text = core.name;
+      break;
+    case "hole":
+      text = hole ?? "p";
+      break;
+    case "opaque":
+      text = `(${core.code})`;
+      break;
+    case "generator":
+      text = core.name === "silence" && !core.args.length ? "silence" : `${core.name}(${core.args.map((a) => argument(a, hole)).join(", ")})`;
+      break;
+    case "group":
+      text = `${core.how}(${core.parts.map((part) => core.how === "arrange" ? `[${part.cycles ?? 1}, ${generatePattern(part.pattern, hole)}]` : generatePattern(part.pattern, hole)).join(", ")})`;
+      break;
+  }
+  if (p.layers.length && ["constant", "data"].includes(core.kind))
+    text = `pure(${text})`;
+  for (const layer of p.layers) {
+    if (layer.kind === "settings")
+      for (const setting of layer.settings)
+        text += `.${setting.name}(${generatePattern(setting.value, hole)})`;
+    else if (layer.kind === "rewrite")
+      text += `.${layer.name}(${layer.args.map((a) => argument(a, hole)).join(", ")})`;
+    else text += layer.code;
+  }
+  if (p.label !== void 0 || p.comment !== void 0) {
+    const metadata = JSON.stringify({
+      label: p.label,
+      comment: p.comment
+    }).replaceAll("*/", "*\\/");
+    text = `(/*@odm-pattern ${metadata}*/ ${text})`;
+  }
+  return text;
+}
 function generate(doc) {
-  function literal(value) {
-    if (typeof value === "string")
-      return `'${value.replaceAll("\\", "\\\\").replaceAll("'", "\\'").replaceAll("\n", "\\n").replaceAll("\r", "\\r")}'`;
-    if (Array.isArray(value)) return `[${value.map(literal).join(", ")}]`;
-    if (value && typeof value === "object")
-      return `{${Object.entries(value).map(([k, v]) => `${literal(k)}: ${literal(v)}`).join(", ")}}`;
-    return JSON.stringify(value);
-  }
-  function argument(arg, hole) {
-    switch (arg.kind) {
-      case "literal":
-        return literal(arg.value);
-      case "pattern":
-        return pattern(arg.pattern, hole);
-      case "opaque":
-        return arg.code;
-      case "callback": {
-        const parameter = arg.parameter ?? "p";
-        return `${parameter} => ${pattern(arg.body, parameter)}`;
-      }
-    }
-  }
-  function pattern(p, hole) {
-    let text;
-    const core = p.core;
-    switch (core.kind) {
-      case "sequence":
-        text = JSON.stringify(printSteps(core.steps));
-        break;
-      case "constant":
-        text = literal(core.value);
-        break;
-      case "data":
-        text = literal(core.value);
-        break;
-      case "signal":
-        text = core.shape;
-        break;
-      case "ref":
-        text = core.name;
-        break;
-      case "hole":
-        text = hole ?? "p";
-        break;
-      case "opaque":
-        text = `(${core.code})`;
-        break;
-      case "generator":
-        text = `${core.name}(${core.args.map((a) => argument(a, hole)).join(", ")})`;
-        break;
-      case "group":
-        text = `${core.how}(${core.parts.map((part) => core.how === "arrange" ? `[${part.cycles ?? 1}, ${pattern(part.pattern, hole)}]` : pattern(part.pattern, hole)).join(", ")})`;
-        break;
-    }
-    if (p.layers.length && ["constant", "data"].includes(core.kind))
-      text = `pure(${text})`;
-    for (const layer of p.layers) {
-      if (layer.kind === "settings")
-        for (const setting of layer.settings)
-          text += `.${setting.name}(${pattern(setting.value, hole)})`;
-      else if (layer.kind === "rewrite")
-        text += `.${layer.name}(${layer.args.map((a) => argument(a, hole)).join(", ")})`;
-      else text += layer.code;
-    }
-    return text;
-  }
   const setup = (i) => doc.setup[i]?.code ?? "";
-  const shared = (name) => doc.shared[name] ? `const ${name} = ${pattern(doc.shared[name])};` : "";
+  const shared = (name) => doc.shared[name] ? `const ${name} = ${generatePattern(doc.shared[name])};` : "";
   const voice = (i) => {
     const v = doc.voices[i];
     if (!v) return "";
@@ -714,7 +761,7 @@ function generate(doc) {
       name: v.name,
       muted: v.muted
     }).replaceAll("*/", "*\\/");
-    return `${v.muted ? "_$" : "$"}: /*@odm-voice ${metadata}*/ ${pattern(v.pattern)};`;
+    return `${v.muted ? "_$" : "$"}: /*@odm-voice ${metadata}*/ ${generatePattern(v.pattern)};`;
   };
   const tempo = () => doc.tempo ? `setcpm(${doc.tempo.cpm});` : "";
   const transform = (i) => {
@@ -860,6 +907,7 @@ async function queryEvents(source, fromCycle, toCycle) {
 }
 export {
   generate,
+  generatePattern,
   importStrudel,
   queryEvents
 };

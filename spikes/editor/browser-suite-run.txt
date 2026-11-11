@@ -1,0 +1,9 @@
+
+> odm-editor-study@0.0.0 test:browser
+> node check-browser.mjs
+
+{"durationMs":3907.5026299999995,"checks":["one chords definition edited across all five sections; undo restores it","rare settings unfold; rows retain a consistent height","author names and human setting names work in search and breadcrumbs","Play starts at the selected section; jumping while playing restarts at the selected cycle (dispatch and phase observed only)","local-only Switch Angel file loads through the runtime endpoint without redistribution"],"errors":[]}
+{"pass":"study02","durationMs":24134.958526000002,"checks":12,"shots":0,"errors":[]}
+{"durationMs":2233.699685,"checks":["pointer painting changes weighted stepped setting","direct wave handle drag changes signal range","map and navigator locked while editor open","pan and Fit recover camera"],"errors":[],"painted":["5612.996","3216.002"]}
+{"durationMs":13172.98856,"total":85,"mapFailures":[],"unselectable":[],"errors":[]}
+{"durationMs":45112.953062,"runs":[{"script":"verify-real.mjs","durationMs":4442.962081000001},{"script":"browser-test.mjs","durationMs":24531.591121999998},{"script":"pointer-check.mjs","durationMs":2598.652625999999},{"script":"corpus-audit.mjs","durationMs":13539.710594}]}

@@ -1,0 +1,36 @@
+
+> odm-editor-study@0.0.0 test
+> node prepare-import.mjs && vitest run
+
+
+ RUN  v3.2.4 /home/aaron/projects/order-doesnt-matter/spikes/editor
+
+ ❯ src/song.test.ts (3 tests | 1 failed) 253ms
+   ✓ shows one named instrument reused in sections and edits every occurrence 140ms
+   ✓ keeps simultaneous pitches in separate miniature lanes 106ms
+   × keeps moon circles and shell labels apart in a dense constellation 6ms
+     → expected 293.40945546220985 to be less than 200
+ ✓ src/study.test.ts (17 tests) 2870ms
+   ✓ document to real Strudel events > queries all six fixtures including unequal weights, alternation, rules, opaque code and nested signals  675ms
+   ✓ document to real Strudel events > rewrite order changes events and keeps settings at their own layer  301ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/song.test.ts > keeps moon circles and shell labels apart in a dense constellation
+AssertionError: expected 293.40945546220985 to be less than 200
+ ❯ src/song.test.ts:38:34
+     36|   for(let j=0;j<moons.length;j++){
+     37|    const a=moons[j]!;expect(Math.hypot(a.x-p.x,a.y-p.y)).toBeGreaterTh…
+     38|    expect(Math.abs(a.x-p.x)+a.r).toBeLessThan(200);
+       |                                  ^
+     39|    for(const b of moons.slice(j+1))expect(Math.hypot(a.x-b.x,a.y-b.y))…
+     40|   }
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 19 passed (20)
+   Start at  13:44:33
+   Duration  3.48s (transform 269ms, setup 0ms, collect 612ms, tests 3.12s, environment 0ms, prepare 160ms)
+

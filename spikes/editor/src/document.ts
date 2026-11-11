@@ -16,6 +16,7 @@ export type {
   Voice,
   Step,
 } from "../../import/src/document";
+import { humanName } from "./song";
 import { fixtures } from "./fixtures";
 export type Target = {
   id: string;
@@ -31,12 +32,13 @@ export type Target = {
 export function targets(doc: Doc): Target[] {
   const out: Target[] = [];
   for (const v of doc.voices) {
+    const voiceName = /^[\$_]+$/.test(v.name) ? humanName(v.pattern) : v.name;
     out.push({
       id: v.id,
       voice: v,
       node: v,
-      label: v.name,
-      path: [v.name],
+      label: voiceName,
+      path: [voiceName],
       pattern: v.pattern,
     });
     const seen = new Set<string>();
@@ -49,7 +51,9 @@ export function targets(doc: Doc): Target[] {
       if (seen.has(p.id)) return;
       seen.add(p.id);
       const label =
-        p.core.kind === "signal"
+        p.label ??
+        (p.core.kind === "ref" ? p.core.name : undefined) ??
+        (p.core.kind === "signal"
           ? `${p.core.shape} wave`
           : p.core.kind === "sequence"
             ? "typed sequence"
@@ -57,13 +61,17 @@ export function targets(doc: Doc): Target[] {
               ? "source · not modelled"
               : p.core.kind === "generator"
                 ? p.core.name
-                : p.core.kind;
+                : p.core.kind);
+      const author =
+        p.label ?? (p.core.kind === "ref" ? p.core.name : undefined);
+      const contextPath =
+        author && path.at(-1) !== author ? [...path, author] : path;
       out.push({
         id: p.id,
         voice: v,
         node: p,
         label,
-        path: [...path, label],
+        path: [...contextPath, label],
         pattern: p,
         parent,
         setting: context,
@@ -80,12 +88,12 @@ export function targets(doc: Doc): Target[] {
                 ? "source layer"
                 : "settings bag",
           path: [
-            ...path,
+            ...contextPath,
             l.kind === "rewrite"
               ? l.name
               : l.kind === "opaque"
                 ? "source layer"
-                : `settings · level ${i + 1}`,
+                : `settings ${i === 0 ? "before rewrites" : "between rewrites"}`,
           ],
           pattern: p,
           layerIndex: i,
@@ -98,17 +106,22 @@ export function targets(doc: Doc): Target[] {
               voice: v,
               node: s,
               label: s.name,
-              path: [...path, s.name],
+              path: [...contextPath, s.name],
               pattern: s.value,
               parent: p,
               layerIndex: i,
               setting: s,
             });
-            walk(s.value, [...path, s.name], p, s);
+            walk(s.value, [...contextPath, s.name], p, s);
           }
         if (l.kind === "rewrite")
           l.args.forEach((a, j) =>
-            arg(a, [...path, `${l.name} › argument ${j + 1}`], p, context),
+            arg(
+              a,
+              [...contextPath, `${l.name} › argument ${j + 1}`],
+              p,
+              context,
+            ),
           );
       });
       if (p.core.kind === "group")
@@ -116,8 +129,11 @@ export function targets(doc: Doc): Target[] {
           walk(
             x.pattern,
             [
-              ...path,
-              `${p.core.kind === "group" ? p.core.how : "group"} ${i + 1}`,
+              ...contextPath,
+              x.pattern.label ??
+                (x.pattern.core.kind === "ref"
+                  ? x.pattern.core.name
+                  : humanName(x.pattern)),
             ],
             p,
           ),
@@ -127,7 +143,7 @@ export function targets(doc: Doc): Target[] {
           arg(
             a,
             [
-              ...path,
+              ...contextPath,
               `${p.core.kind === "generator" ? p.core.name : "call"} › argument ${j + 1}`,
             ],
             p,
@@ -135,13 +151,13 @@ export function targets(doc: Doc): Target[] {
           ),
         );
       if (p.core.kind === "ref" && doc.shared[p.core.name])
-        walk(doc.shared[p.core.name]!, [...path, p.core.name], p);
+        walk(doc.shared[p.core.name]!, [...contextPath, p.core.name], p);
     }
     function arg(a: Arg, path: string[], p: Pattern, s?: Setting) {
       if (a.kind === "pattern") walk(a.pattern, path, p, s);
       if (a.kind === "callback") walk(a.body, path, p, s);
     }
-    walk(v.pattern, [v.name]);
+    walk(v.pattern, [voiceName]);
   }
   const base = doc.voices[0] ?? {
     id: "setup-voice",

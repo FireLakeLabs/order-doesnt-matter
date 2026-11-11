@@ -1,0 +1,157 @@
+{
+  "durationMs": 2489.310661,
+  "errors": [],
+  "observations": [
+    {
+      "id": "real-house",
+      "map": "sheet",
+      "rows": 5,
+      "names": [
+        "kick",
+        "clap",
+        "open hat",
+        "saw bass",
+        "piano chords"
+      ],
+      "broken": {}
+    },
+    {
+      "id": "real-house",
+      "map": "constellation",
+      "rows": 0,
+      "names": [],
+      "broken": {}
+    },
+    {
+      "id": "real-techno",
+      "map": "sheet",
+      "rows": 4,
+      "names": [
+        "kick",
+        "hi-hat",
+        "clap",
+        "saw bass"
+      ],
+      "broken": {}
+    },
+    {
+      "id": "real-techno",
+      "map": "constellation",
+      "rows": 0,
+      "names": [],
+      "broken": {}
+    },
+    {
+      "id": "real-house-vocals",
+      "map": "sheet",
+      "rows": 8,
+      "names": [
+        "percussion",
+        "chords",
+        "vocalPhrase",
+        "clap",
+        "bass",
+        "kick",
+        "vocalChop",
+        "triangle notes"
+      ],
+      "broken": {}
+    },
+    {
+      "id": "real-house-vocals",
+      "map": "constellation",
+      "rows": 0,
+      "names": [],
+      "broken": {}
+    },
+    {
+      "id": "real-dnb-arranged",
+      "map": "sheet",
+      "rows": 7,
+      "names": [
+        "darkPad",
+        "vocalIntro",
+        "dnbDrums",
+        "snare",
+        "reeseBass",
+        "vocalStab",
+        "triangle notes"
+      ],
+      "broken": {}
+    },
+    {
+      "id": "real-dnb-arranged",
+      "map": "constellation",
+      "rows": 0,
+      "names": [],
+      "broken": {}
+    },
+    {
+      "id": "switch-angel",
+      "map": "sheet",
+      "rows": 5,
+      "names": [
+        "pattern",
+        "kick",
+        "supersaw notes",
+        "supersaw notes 2",
+        "pulse"
+      ],
+      "broken": {
+        "n1": "setCpm is not defined",
+        "n7": "setCpm is not defined",
+        "n10": "setCpm is not defined",
+        "n31": "setCpm is not defined",
+        "n55": "setCpm is not defined"
+      }
+    },
+    {
+      "id": "switch-angel",
+      "map": "constellation",
+      "rows": 0,
+      "names": [],
+      "broken": {
+        "n1": "setCpm is not defined",
+        "n7": "setCpm is not defined",
+        "n10": "setCpm is not defined",
+        "n31": "setCpm is not defined",
+        "n55": "setCpm is not defined"
+      }
+    },
+    {
+      "id": "twenty",
+      "map": "sheet",
+      "rows": 20,
+      "names": [
+        "lead",
+        "bass",
+        "bell",
+        "reed",
+        "spark",
+        "pad",
+        "glass",
+        "pulse",
+        "copper",
+        "drift",
+        "tide",
+        "dust",
+        "moss",
+        "chime",
+        "hush",
+        "bloom",
+        "grain",
+        "glow",
+        "air",
+        "shore"
+      ],
+      "broken": {}
+    },
+    {
+      "id": "twenty",
+      "map": "constellation",
+      "rows": 0,
+      "names": [],
+      "broken": {}
+    }
+  ]
+}

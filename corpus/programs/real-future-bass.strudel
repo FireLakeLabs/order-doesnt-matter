@@ -1,0 +1,15 @@
+setcpm(145 / 4)
+
+stack(
+  // Trap-style drums with hi-hat rolls
+  s("bd ~ ~ bd ~ ~ ~ ~"),
+  s("~ ~ sd ~ ~ ~ sd ~"),
+  s("hh*4 [hh*8] hh*4 [hh*6]").gain(0.6),
+  // Lush supersaw chords with LFO volume pumping
+  note("<[f3,ab3,c4,eb4,g4] [db3,f3,ab3,c4,eb4]>")
+    .s("supersaw")
+    .lpf(3000)
+    .gain(sine.range(0.1, 0.7).fast(4)),
+  // Deep 808 bass
+  note("<f1 db1>").s("sine").gain(0.9)
+)

@@ -1,0 +1,1440 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n41",
+      "tier": 1,
+      "span": {
+        "start": 1306,
+        "end": 1400
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n86",
+        "tier": 1,
+        "span": {
+          "start": 1306,
+          "end": 1400
+        },
+        "core": {
+          "kind": "group",
+          "how": "arrange",
+          "parts": [
+            {
+              "cycles": 4,
+              "pattern": {
+                "id": "n50",
+                "tier": 1,
+                "span": {
+                  "start": 747,
+                  "end": 800
+                },
+                "core": {
+                  "kind": "group",
+                  "how": "stack",
+                  "parts": [
+                    {
+                      "pattern": {
+                        "id": "n42",
+                        "tier": 1,
+                        "span": {
+                          "start": 757,
+                          "end": 767
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "percussion"
+                        },
+                        "layers": [
+                          {
+                            "id": "n45",
+                            "tier": 1,
+                            "span": {
+                              "start": 757,
+                              "end": 777
+                            },
+                            "kind": "settings",
+                            "settings": [
+                              {
+                                "id": "n43",
+                                "tier": 1,
+                                "span": {
+                                  "start": 757,
+                                  "end": 777
+                                },
+                                "name": "cutoff",
+                                "value": {
+                                  "id": "n44",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 772,
+                                    "end": 776
+                                  },
+                                  "core": {
+                                    "kind": "constant",
+                                    "value": 1200
+                                  },
+                                  "layers": []
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "pattern": {
+                        "id": "n46",
+                        "tier": 1,
+                        "span": {
+                          "start": 782,
+                          "end": 788
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "chords"
+                        },
+                        "layers": [
+                          {
+                            "id": "n49",
+                            "tier": 1,
+                            "span": {
+                              "start": 782,
+                              "end": 797
+                            },
+                            "kind": "settings",
+                            "settings": [
+                              {
+                                "id": "n47",
+                                "tier": 1,
+                                "span": {
+                                  "start": 782,
+                                  "end": 797
+                                },
+                                "name": "cutoff",
+                                "value": {
+                                  "id": "n48",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 793,
+                                    "end": 796
+                                  },
+                                  "core": {
+                                    "kind": "constant",
+                                    "value": 600
+                                  },
+                                  "layers": []
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "layers": [],
+                "comment": "1. Intro: Filtered chords and minimal percussion (4 bars)",
+                "label": "intro"
+              }
+            },
+            {
+              "cycles": 4,
+              "pattern": {
+                "id": "n69",
+                "tier": 1,
+                "span": {
+                  "start": 882,
+                  "end": 920
+                },
+                "core": {
+                  "kind": "group",
+                  "how": "stack",
+                  "parts": [
+                    {
+                      "pattern": {
+                        "id": "n64",
+                        "tier": 1,
+                        "span": {
+                          "start": 538,
+                          "end": 639
+                        },
+                        "core": {
+                          "kind": "group",
+                          "how": "stack",
+                          "parts": [
+                            {
+                              "pattern": {
+                                "id": "n51",
+                                "tier": 1,
+                                "span": {
+                                  "start": 548,
+                                  "end": 557
+                                },
+                                "core": {
+                                  "kind": "generator",
+                                  "name": "s",
+                                  "args": [
+                                    {
+                                      "kind": "pattern",
+                                      "pattern": {
+                                        "id": "n52",
+                                        "tier": 1,
+                                        "span": {
+                                          "start": 550,
+                                          "end": 556
+                                        },
+                                        "core": {
+                                          "kind": "sequence",
+                                          "steps": [
+                                            {
+                                              "kind": "other",
+                                              "notation": "cp*8"
+                                            }
+                                          ],
+                                          "notation": "cp*8"
+                                        },
+                                        "layers": []
+                                      }
+                                    }
+                                  ]
+                                },
+                                "layers": [
+                                  {
+                                    "id": "n57",
+                                    "tier": 1,
+                                    "span": {
+                                      "start": 548,
+                                      "end": 591
+                                    },
+                                    "kind": "settings",
+                                    "settings": [
+                                      {
+                                        "id": "n53",
+                                        "tier": 1,
+                                        "span": {
+                                          "start": 548,
+                                          "end": 591
+                                        },
+                                        "name": "gain",
+                                        "value": {
+                                          "id": "n54",
+                                          "tier": 1,
+                                          "span": {
+                                            "start": 563,
+                                            "end": 566
+                                          },
+                                          "core": {
+                                            "kind": "signal",
+                                            "shape": "saw"
+                                          },
+                                          "layers": [
+                                            {
+                                              "id": "n55",
+                                              "tier": 1,
+                                              "span": {
+                                                "start": 563,
+                                                "end": 582
+                                              },
+                                              "kind": "rewrite",
+                                              "name": "range",
+                                              "args": [
+                                                {
+                                                  "kind": "literal",
+                                                  "value": 0.2
+                                                },
+                                                {
+                                                  "kind": "literal",
+                                                  "value": 0.9
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "id": "n56",
+                                              "tier": 1,
+                                              "span": {
+                                                "start": 563,
+                                                "end": 590
+                                              },
+                                              "kind": "rewrite",
+                                              "name": "slow",
+                                              "args": [
+                                                {
+                                                  "kind": "literal",
+                                                  "value": 4
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            },
+                            {
+                              "pattern": {
+                                "id": "n58",
+                                "tier": 1,
+                                "span": {
+                                  "start": 596,
+                                  "end": 602
+                                },
+                                "core": {
+                                  "kind": "ref",
+                                  "name": "chords"
+                                },
+                                "layers": [
+                                  {
+                                    "id": "n63",
+                                    "tier": 1,
+                                    "span": {
+                                      "start": 596,
+                                      "end": 636
+                                    },
+                                    "kind": "settings",
+                                    "settings": [
+                                      {
+                                        "id": "n59",
+                                        "tier": 1,
+                                        "span": {
+                                          "start": 596,
+                                          "end": 636
+                                        },
+                                        "name": "cutoff",
+                                        "value": {
+                                          "id": "n60",
+                                          "tier": 1,
+                                          "span": {
+                                            "start": 607,
+                                            "end": 610
+                                          },
+                                          "core": {
+                                            "kind": "signal",
+                                            "shape": "saw"
+                                          },
+                                          "layers": [
+                                            {
+                                              "id": "n61",
+                                              "tier": 1,
+                                              "span": {
+                                                "start": 607,
+                                                "end": 627
+                                              },
+                                              "kind": "rewrite",
+                                              "name": "range",
+                                              "args": [
+                                                {
+                                                  "kind": "literal",
+                                                  "value": 300
+                                                },
+                                                {
+                                                  "kind": "literal",
+                                                  "value": 4000
+                                                }
+                                              ]
+                                            },
+                                            {
+                                              "id": "n62",
+                                              "tier": 1,
+                                              "span": {
+                                                "start": 607,
+                                                "end": 635
+                                              },
+                                              "kind": "rewrite",
+                                              "name": "slow",
+                                              "args": [
+                                                {
+                                                  "kind": "literal",
+                                                  "value": 4
+                                                }
+                                              ]
+                                            }
+                                          ]
+                                        }
+                                      }
+                                    ]
+                                  }
+                                ]
+                              }
+                            }
+                          ]
+                        },
+                        "layers": [],
+                        "comment": "Snare roll & filter sweep for the build-up",
+                        "label": "buildup"
+                      }
+                    },
+                    {
+                      "pattern": {
+                        "id": "n65",
+                        "tier": 1,
+                        "span": {
+                          "start": 904,
+                          "end": 908
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "bass"
+                        },
+                        "layers": [
+                          {
+                            "id": "n68",
+                            "tier": 1,
+                            "span": {
+                              "start": 904,
+                              "end": 917
+                            },
+                            "kind": "settings",
+                            "settings": [
+                              {
+                                "id": "n66",
+                                "tier": 1,
+                                "span": {
+                                  "start": 904,
+                                  "end": 917
+                                },
+                                "name": "cutoff",
+                                "value": {
+                                  "id": "n67",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 913,
+                                    "end": 916
+                                  },
+                                  "core": {
+                                    "kind": "constant",
+                                    "value": 250
+                                  },
+                                  "layers": []
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "layers": [],
+                "comment": "2. Build-up: Tension rises without the kick (4 bars)",
+                "label": "buildSection"
+              }
+            },
+            {
+              "cycles": 8,
+              "pattern": {
+                "id": "n70",
+                "tier": 1,
+                "span": {
+                  "start": 1359,
+                  "end": 1363
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "drop"
+                },
+                "layers": []
+              }
+            },
+            {
+              "cycles": 4,
+              "pattern": {
+                "id": "n84",
+                "tier": 1,
+                "span": {
+                  "start": 1137,
+                  "end": 1257
+                },
+                "core": {
+                  "kind": "group",
+                  "how": "stack",
+                  "parts": [
+                    {
+                      "pattern": {
+                        "id": "n71",
+                        "tier": 1,
+                        "span": {
+                          "start": 1147,
+                          "end": 1153
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "chords"
+                        },
+                        "layers": [
+                          {
+                            "id": "n74",
+                            "tier": 1,
+                            "span": {
+                              "start": 1147,
+                              "end": 1163
+                            },
+                            "kind": "settings",
+                            "settings": [
+                              {
+                                "id": "n72",
+                                "tier": 1,
+                                "span": {
+                                  "start": 1147,
+                                  "end": 1163
+                                },
+                                "name": "room",
+                                "value": {
+                                  "id": "n73",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 1159,
+                                    "end": 1162
+                                  },
+                                  "core": {
+                                    "kind": "constant",
+                                    "value": 0.8
+                                  },
+                                  "layers": []
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "pattern": {
+                        "id": "n75",
+                        "tier": 1,
+                        "span": {
+                          "start": 1168,
+                          "end": 1199
+                        },
+                        "core": {
+                          "kind": "generator",
+                          "name": "note",
+                          "args": [
+                            {
+                              "kind": "pattern",
+                              "pattern": {
+                                "id": "n76",
+                                "tier": 1,
+                                "span": {
+                                  "start": 1173,
+                                  "end": 1198
+                                },
+                                "core": {
+                                  "kind": "sequence",
+                                  "steps": [
+                                    {
+                                      "kind": "value",
+                                      "value": "g4"
+                                    },
+                                    {
+                                      "kind": "rest"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "eb4"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "c4"
+                                    },
+                                    {
+                                      "kind": "rest"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "d4"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "eb4"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "g4"
+                                    }
+                                  ],
+                                  "notation": "g4 ~ eb4 c4 ~ d4 eb4 g4"
+                                },
+                                "layers": []
+                              }
+                            }
+                          ]
+                        },
+                        "layers": [
+                          {
+                            "id": "n79",
+                            "tier": 1,
+                            "span": {
+                              "start": 1168,
+                              "end": 1219
+                            },
+                            "kind": "settings",
+                            "settings": [
+                              {
+                                "id": "n77",
+                                "tier": 1,
+                                "span": {
+                                  "start": 1168,
+                                  "end": 1219
+                                },
+                                "name": "s",
+                                "value": {
+                                  "id": "n78",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 1208,
+                                    "end": 1218
+                                  },
+                                  "core": {
+                                    "kind": "sequence",
+                                    "steps": [
+                                      {
+                                        "kind": "value",
+                                        "value": "triangle"
+                                      }
+                                    ],
+                                    "notation": "triangle"
+                                  },
+                                  "layers": []
+                                }
+                              },
+                              {
+                                "id": "n80",
+                                "tier": 1,
+                                "span": {
+                                  "start": 1168,
+                                  "end": 1238
+                                },
+                                "name": "delay",
+                                "value": {
+                                  "id": "n81",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 1232,
+                                    "end": 1237
+                                  },
+                                  "core": {
+                                    "kind": "constant",
+                                    "value": 0.375
+                                  },
+                                  "layers": []
+                                }
+                              },
+                              {
+                                "id": "n82",
+                                "tier": 1,
+                                "span": {
+                                  "start": 1168,
+                                  "end": 1254
+                                },
+                                "name": "gain",
+                                "value": {
+                                  "id": "n83",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 1250,
+                                    "end": 1253
+                                  },
+                                  "core": {
+                                    "kind": "constant",
+                                    "value": 0.4
+                                  },
+                                  "layers": []
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "layers": [],
+                "comment": "4. Breakdown: Drums drop out for melodic breathing room (4 bars)",
+                "label": "breakdown"
+              }
+            },
+            {
+              "cycles": 8,
+              "pattern": {
+                "id": "n85",
+                "tier": 1,
+                "span": {
+                  "start": 1392,
+                  "end": 1396
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "drop"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [],
+        "comment": "--- FULL ARRANGEMENT (28 Bars Total) ---"
+      }
+    }
+  ],
+  "shared": {
+    "percussion": {
+      "id": "n14",
+      "tier": 1,
+      "span": {
+        "start": 101,
+        "end": 245
+      },
+      "core": {
+        "kind": "group",
+        "how": "stack",
+        "parts": [
+          {
+            "pattern": {
+              "id": "n1",
+              "tier": 1,
+              "span": {
+                "start": 111,
+                "end": 125
+              },
+              "core": {
+                "kind": "generator",
+                "name": "s",
+                "args": [
+                  {
+                    "kind": "pattern",
+                    "pattern": {
+                      "id": "n2",
+                      "tier": 1,
+                      "span": {
+                        "start": 113,
+                        "end": 124
+                      },
+                      "core": {
+                        "kind": "sequence",
+                        "steps": [
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "cp"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "cp"
+                          }
+                        ],
+                        "notation": "~ cp ~ cp"
+                      },
+                      "layers": []
+                    }
+                  }
+                ]
+              },
+              "layers": []
+            }
+          },
+          {
+            "pattern": {
+              "id": "n3",
+              "tier": 1,
+              "span": {
+                "start": 130,
+                "end": 154
+              },
+              "core": {
+                "kind": "generator",
+                "name": "s",
+                "args": [
+                  {
+                    "kind": "pattern",
+                    "pattern": {
+                      "id": "n4",
+                      "tier": 1,
+                      "span": {
+                        "start": 132,
+                        "end": 153
+                      },
+                      "core": {
+                        "kind": "sequence",
+                        "steps": [
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "oh"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "oh"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "oh"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "oh"
+                          }
+                        ],
+                        "notation": "~ oh ~ oh ~ oh ~ oh"
+                      },
+                      "layers": []
+                    }
+                  }
+                ]
+              },
+              "layers": [
+                {
+                  "id": "n7",
+                  "tier": 1,
+                  "span": {
+                    "start": 130,
+                    "end": 164
+                  },
+                  "kind": "settings",
+                  "settings": [
+                    {
+                      "id": "n5",
+                      "tier": 1,
+                      "span": {
+                        "start": 130,
+                        "end": 164
+                      },
+                      "name": "gain",
+                      "value": {
+                        "id": "n6",
+                        "tier": 1,
+                        "span": {
+                          "start": 160,
+                          "end": 163
+                        },
+                        "core": {
+                          "kind": "constant",
+                          "value": 0.7
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "pattern": {
+              "id": "n8",
+              "tier": 1,
+              "span": {
+                "start": 169,
+                "end": 179
+              },
+              "core": {
+                "kind": "generator",
+                "name": "s",
+                "args": [
+                  {
+                    "kind": "pattern",
+                    "pattern": {
+                      "id": "n9",
+                      "tier": 1,
+                      "span": {
+                        "start": 171,
+                        "end": 178
+                      },
+                      "core": {
+                        "kind": "sequence",
+                        "steps": [
+                          {
+                            "kind": "other",
+                            "notation": "hh*16"
+                          }
+                        ],
+                        "notation": "hh*16"
+                      },
+                      "layers": []
+                    }
+                  }
+                ]
+              },
+              "layers": [
+                {
+                  "id": "n13",
+                  "tier": 1,
+                  "span": {
+                    "start": 169,
+                    "end": 209
+                  },
+                  "kind": "settings",
+                  "settings": [
+                    {
+                      "id": "n10",
+                      "tier": 1,
+                      "span": {
+                        "start": 169,
+                        "end": 209
+                      },
+                      "name": "gain",
+                      "value": {
+                        "id": "n11",
+                        "tier": 1,
+                        "span": {
+                          "start": 185,
+                          "end": 191
+                        },
+                        "core": {
+                          "kind": "signal",
+                          "shape": "perlin"
+                        },
+                        "layers": [
+                          {
+                            "id": "n12",
+                            "tier": 1,
+                            "span": {
+                              "start": 185,
+                              "end": 208
+                            },
+                            "kind": "rewrite",
+                            "name": "range",
+                            "args": [
+                              {
+                                "kind": "literal",
+                                "value": 0.1
+                              },
+                              {
+                                "kind": "literal",
+                                "value": 0.35
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "layers": [],
+      "label": "percussion"
+    },
+    "bass": {
+      "id": "n15",
+      "tier": 1,
+      "span": {
+        "start": 262,
+        "end": 290
+      },
+      "core": {
+        "kind": "generator",
+        "name": "note",
+        "args": [
+          {
+            "kind": "pattern",
+            "pattern": {
+              "id": "n16",
+              "tier": 1,
+              "span": {
+                "start": 267,
+                "end": 289
+              },
+              "core": {
+                "kind": "sequence",
+                "steps": [
+                  {
+                    "kind": "value",
+                    "value": "c2"
+                  },
+                  {
+                    "kind": "rest"
+                  },
+                  {
+                    "kind": "value",
+                    "value": "c2"
+                  },
+                  {
+                    "kind": "value",
+                    "value": "g1"
+                  },
+                  {
+                    "kind": "rest"
+                  },
+                  {
+                    "kind": "value",
+                    "value": "a1"
+                  },
+                  {
+                    "kind": "rest"
+                  },
+                  {
+                    "kind": "value",
+                    "value": "g1"
+                  }
+                ],
+                "notation": "c2 ~ c2 g1 ~ a1 ~ g1"
+              },
+              "layers": []
+            }
+          }
+        ]
+      },
+      "layers": [
+        {
+          "id": "n19",
+          "tier": 1,
+          "span": {
+            "start": 262,
+            "end": 308
+          },
+          "kind": "settings",
+          "settings": [
+            {
+              "id": "n17",
+              "tier": 1,
+              "span": {
+                "start": 262,
+                "end": 308
+              },
+              "name": "s",
+              "value": {
+                "id": "n18",
+                "tier": 1,
+                "span": {
+                  "start": 297,
+                  "end": 307
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "sawtooth"
+                    }
+                  ],
+                  "notation": "sawtooth"
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n20",
+              "tier": 1,
+              "span": {
+                "start": 262,
+                "end": 321
+              },
+              "name": "cutoff",
+              "value": {
+                "id": "n21",
+                "tier": 1,
+                "span": {
+                  "start": 317,
+                  "end": 320
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 450
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n22",
+              "tier": 1,
+              "span": {
+                "start": 262,
+                "end": 338
+              },
+              "name": "resonance",
+              "value": {
+                "id": "n23",
+                "tier": 1,
+                "span": {
+                  "start": 336,
+                  "end": 337
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 4
+                },
+                "layers": []
+              }
+            }
+          ]
+        }
+      ],
+      "label": "bass"
+    },
+    "chords": {
+      "id": "n24",
+      "tier": 1,
+      "span": {
+        "start": 357,
+        "end": 398
+      },
+      "core": {
+        "kind": "generator",
+        "name": "note",
+        "args": [
+          {
+            "kind": "pattern",
+            "pattern": {
+              "id": "n25",
+              "tier": 1,
+              "span": {
+                "start": 362,
+                "end": 397
+              },
+              "core": {
+                "kind": "sequence",
+                "steps": [
+                  {
+                    "kind": "alternate",
+                    "steps": [
+                      {
+                        "kind": "together",
+                        "steps": [
+                          {
+                            "kind": "value",
+                            "value": "c4"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "eb4"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "g4"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "bb4"
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "together",
+                        "steps": [
+                          {
+                            "kind": "value",
+                            "value": "f4"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "ab4"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "c5"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "eb5"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "notation": "<[c4,eb4,g4,bb4] [f4,ab4,c5,eb5]>"
+              },
+              "layers": []
+            }
+          }
+        ]
+      },
+      "layers": [
+        {
+          "id": "n26",
+          "tier": 1,
+          "span": {
+            "start": 357,
+            "end": 426
+          },
+          "kind": "rewrite",
+          "name": "struct",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n27",
+                "tier": 1,
+                "span": {
+                  "start": 410,
+                  "end": 425
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "rest"
+                    },
+                    {
+                      "kind": "sub",
+                      "steps": [
+                        {
+                          "kind": "value",
+                          "value": "x"
+                        },
+                        {
+                          "kind": "rest"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "x"
+                        }
+                      ]
+                    },
+                    {
+                      "kind": "rest"
+                    },
+                    {
+                      "kind": "rest"
+                    }
+                  ],
+                  "notation": "~ [x ~ x] ~ ~"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        {
+          "id": "n30",
+          "tier": 1,
+          "span": {
+            "start": 357,
+            "end": 441
+          },
+          "kind": "settings",
+          "settings": [
+            {
+              "id": "n28",
+              "tier": 1,
+              "span": {
+                "start": 357,
+                "end": 441
+              },
+              "name": "s",
+              "value": {
+                "id": "n29",
+                "tier": 1,
+                "span": {
+                  "start": 433,
+                  "end": 440
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "piano"
+                    }
+                  ],
+                  "notation": "piano"
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n31",
+              "tier": 1,
+              "span": {
+                "start": 357,
+                "end": 457
+              },
+              "name": "delay",
+              "value": {
+                "id": "n32",
+                "tier": 1,
+                "span": {
+                  "start": 452,
+                  "end": 456
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.25
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n33",
+              "tier": 1,
+              "span": {
+                "start": 357,
+                "end": 471
+              },
+              "name": "room",
+              "value": {
+                "id": "n34",
+                "tier": 1,
+                "span": {
+                  "start": 467,
+                  "end": 470
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.4
+                },
+                "layers": []
+              }
+            }
+          ]
+        }
+      ],
+      "label": "chords"
+    },
+    "drop": {
+      "id": "n40",
+      "tier": 1,
+      "span": {
+        "start": 994,
+        "end": 1046
+      },
+      "core": {
+        "kind": "group",
+        "how": "stack",
+        "parts": [
+          {
+            "pattern": {
+              "id": "n35",
+              "tier": 1,
+              "span": {
+                "start": 69,
+                "end": 78
+              },
+              "core": {
+                "kind": "generator",
+                "name": "s",
+                "args": [
+                  {
+                    "kind": "pattern",
+                    "pattern": {
+                      "id": "n36",
+                      "tier": 1,
+                      "span": {
+                        "start": 71,
+                        "end": 77
+                      },
+                      "core": {
+                        "kind": "sequence",
+                        "steps": [
+                          {
+                            "kind": "other",
+                            "notation": "bd*4"
+                          }
+                        ],
+                        "notation": "bd*4"
+                      },
+                      "layers": []
+                    }
+                  }
+                ]
+              },
+              "layers": [],
+              "comment": "--- INDIVIDUAL INSTRUMENTS ---",
+              "label": "kick"
+            }
+          },
+          {
+            "pattern": {
+              "id": "n37",
+              "tier": 1,
+              "span": {
+                "start": 1013,
+                "end": 1023
+              },
+              "core": {
+                "kind": "ref",
+                "name": "percussion"
+              },
+              "layers": []
+            }
+          },
+          {
+            "pattern": {
+              "id": "n38",
+              "tier": 1,
+              "span": {
+                "start": 1028,
+                "end": 1032
+              },
+              "core": {
+                "kind": "ref",
+                "name": "bass"
+              },
+              "layers": []
+            }
+          },
+          {
+            "pattern": {
+              "id": "n39",
+              "tier": 1,
+              "span": {
+                "start": 1037,
+                "end": 1043
+              },
+              "core": {
+                "kind": "ref",
+                "name": "chords"
+              },
+              "layers": []
+            }
+          }
+        ]
+      },
+      "layers": [],
+      "comment": "3. Drop: Full beat, bass, and bright chords (8 bars)",
+      "label": "drop"
+    }
+  },
+  "order": [
+    {
+      "kind": "tempo"
+    },
+    {
+      "kind": "shared",
+      "name": "percussion"
+    },
+    {
+      "kind": "shared",
+      "name": "bass"
+    },
+    {
+      "kind": "shared",
+      "name": "chords"
+    },
+    {
+      "kind": "shared",
+      "name": "drop"
+    },
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": [],
+  "tempo": {
+    "cpm": 31
+  }
+}

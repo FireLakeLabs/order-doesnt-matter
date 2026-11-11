@@ -1,0 +1,5 @@
+
+> odm-editor-study@0.0.0 test:browser
+> node browser-test.mjs
+
+{"pass":"final","durationMs":29637.500673,"checks":12,"shots":69,"errors":[]}

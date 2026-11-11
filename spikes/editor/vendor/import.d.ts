@@ -1,4 +1,4 @@
-import type { Doc } from "../../import/src/document";
+import type { Doc, Pattern } from "../../import/src/document";
 export { Doc };
 export interface PlainEvent {
   whole: [number, number] | null;
@@ -15,6 +15,7 @@ export interface EventResult {
 }
 export function importStrudel(source: string): { doc: Doc; warnings: string[] };
 export function generate(doc: Doc): string;
+export function generatePattern(pattern:Pattern):string;
 export function queryEvents(
   source: string,
   fromCycle: number,

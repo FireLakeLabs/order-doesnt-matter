@@ -1,0 +1,68 @@
+setcpm(124 / 4)
+
+// --- INDIVIDUAL INSTRUMENTS ---
+
+const kick = s("bd*4")
+
+const percussion = stack(
+  s("~ cp ~ cp"),
+  s("~ oh ~ oh ~ oh ~ oh").gain(0.7),
+  s("hh*16").gain(perlin.range(0.1, 0.35)) // Subtle rolling shaker texture
+)
+
+const bass = note("c2 ~ c2 g1 ~ a1 ~ g1")
+  .s("sawtooth")
+  .lpf(450)
+  .resonance(4)
+
+const chords = note("<[c4,eb4,g4,bb4] [f4,ab4,c5,eb5]>")
+  .struct("~ [x ~ x] ~ ~")
+  .s("piano")
+  .delay(0.25)
+  .room(0.4)
+
+// Snare roll & filter sweep for the build-up
+const buildup = stack(
+  s("cp*8").gain(saw.range(0.2, 0.9).slow(4)),
+  chords.lpf(saw.range(300, 4000).slow(4))
+)
+
+// --- SONG SECTIONS ---
+
+// 1. Intro: Filtered chords and minimal percussion (4 bars)
+const intro = stack(
+  percussion.lpf(1200),
+  chords.lpf(600)
+)
+
+// 2. Build-up: Tension rises without the kick (4 bars)
+const buildSection = stack(
+  buildup,
+  bass.lpf(250)
+)
+
+// 3. Drop: Full beat, bass, and bright chords (8 bars)
+const drop = stack(
+  kick,
+  percussion,
+  bass,
+  chords
+)
+
+// 4. Breakdown: Drums drop out for melodic breathing room (4 bars)
+const breakdown = stack(
+  chords.room(0.8),
+  note("g4 ~ eb4 c4 ~ d4 eb4 g4")
+    .s("triangle")
+    .delay(0.375)
+    .gain(0.4)
+)
+
+// --- FULL ARRANGEMENT (28 Bars Total) ---
+arrange(
+  [4, intro],
+  [4, buildSection],
+  [8, drop],
+  [4, breakdown],
+  [8, drop]
+)

@@ -1,0 +1,2 @@
+setcpm(34.5);
+$: /*@odm-voice {"name":"$","muted":false}*/ stack((/*@odm-pattern {"comment":"Driving kick & off-beat hat"}*/ s("bd*4")), s("~ oh ~ oh ~ oh ~ oh"), (/*@odm-pattern {"comment":"Rolling trance bassline (galloping rhythm)"}*/ note("c2 [c3 c3] c2 [c3 c3] ab1 [ab2 ab2] bb1 [bb2 bb2]").s("sawtooth").cutoff(600)), (/*@odm-pattern {"comment":"Euphoric arpeggiated supersaw lead"}*/ note("c4 eb4 g4 c5 g4 eb4 d5 c5").s("supersaw").delay(0.375).room(0.7).gain(0.6)));

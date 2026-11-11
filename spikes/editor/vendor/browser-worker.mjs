@@ -7,10 +7,12 @@ async function evaluate({ source, fromCycle, toCycle }, run, query) {
   const events = [], labels = /* @__PURE__ */ new Map(), transforms = [];
   let phase = "evaluation", cps = 0.5, anonymous = 0, opaqueValues = false;
   mini.miniAllStrings();
+  const drawParameters = core.createParams("fill");
   const scope = {
     ...core,
     ...mini,
     ...tonal,
+    ...drawParameters,
     console: { log() {
     }, warn() {
     }, error() {
@@ -41,6 +43,7 @@ async function evaluate({ source, fromCycle, toCycle }, run, query) {
       return result;
     }
   });
+  scope.setCpm = scope.setcpm;
   core.Pattern.prototype.p = function(name) {
     if (name.startsWith("_") || name.endsWith("_")) return core.silence;
     labels.set(name.includes("$") ? `${name}${anonymous++}` : name, this);
@@ -94,9 +97,11 @@ async function evaluate({ source, fromCycle, toCycle }, run, query) {
           async function() {
           }
         ).constructor;
-        return new AsyncFunction(...Object.keys(scope2), code2)(
-          ...Object.values(scope2)
-        );
+        return new AsyncFunction(
+          ...Object.keys(scope2),
+          `return (async()=>{${code2}
+})()`
+        )(...Object.values(scope2));
       };
     const result = await run(code, scope);
     let pattern = labels.size ? core.stack(...labels.values()) : result;

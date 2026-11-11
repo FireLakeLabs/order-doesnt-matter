@@ -1,0 +1,346 @@
+{
+  "window": [
+    0,
+    17
+  ],
+  "cyclesInclusive": [
+    0,
+    16
+  ],
+  "reports": [
+    {
+      "id": "real-house",
+      "title": "House sketch",
+      "localOnly": false,
+      "path": "programs/real-house.strudel",
+      "evaluates": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "idempotent": true,
+      "originalError": null,
+      "freshError": null,
+      "events": 391,
+      "tiers": {
+        "1": 23,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "tier3": [],
+      "warnings": []
+    },
+    {
+      "id": "real-techno",
+      "title": "Techno sketch",
+      "localOnly": false,
+      "path": "programs/real-techno.strudel",
+      "evaluates": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "idempotent": true,
+      "originalError": null,
+      "freshError": null,
+      "events": 306,
+      "tiers": {
+        "1": 26,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "tier3": [],
+      "warnings": []
+    },
+    {
+      "id": "real-trance",
+      "title": "Trance sketch",
+      "localOnly": false,
+      "path": "programs/real-trance.strudel",
+      "evaluates": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "idempotent": true,
+      "originalError": null,
+      "freshError": null,
+      "events": 476,
+      "tiers": {
+        "1": 21,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "tier3": [],
+      "warnings": []
+    },
+    {
+      "id": "real-dnb",
+      "title": "Drum and Bass sketch",
+      "localOnly": false,
+      "path": "programs/real-dnb.strudel",
+      "evaluates": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "idempotent": true,
+      "originalError": null,
+      "freshError": null,
+      "events": 215,
+      "tiers": {
+        "1": 19,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "tier3": [],
+      "warnings": []
+    },
+    {
+      "id": "real-dubstep",
+      "title": "Dubstep sketch",
+      "localOnly": false,
+      "path": "programs/real-dubstep.strudel",
+      "evaluates": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "idempotent": true,
+      "originalError": null,
+      "freshError": null,
+      "events": 238,
+      "tiers": {
+        "1": 24,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "tier3": [],
+      "warnings": []
+    },
+    {
+      "id": "real-ambient",
+      "title": "Ambient sketch",
+      "localOnly": false,
+      "path": "programs/real-ambient.strudel",
+      "evaluates": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "idempotent": true,
+      "originalError": null,
+      "freshError": null,
+      "events": 102,
+      "tiers": {
+        "1": 27,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "tier3": [],
+      "warnings": []
+    },
+    {
+      "id": "real-future-bass",
+      "title": "Future Bass sketch",
+      "localOnly": false,
+      "path": "programs/real-future-bass.strudel",
+      "evaluates": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "idempotent": true,
+      "originalError": null,
+      "freshError": null,
+      "events": 799,
+      "tiers": {
+        "1": 28,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "tier3": [],
+      "warnings": []
+    },
+    {
+      "id": "real-synthwave",
+      "title": "Synthwave sketch",
+      "localOnly": false,
+      "path": "programs/real-synthwave.strudel",
+      "evaluates": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "idempotent": true,
+      "originalError": null,
+      "freshError": null,
+      "events": 442,
+      "tiers": {
+        "1": 29,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "tier3": [],
+      "warnings": []
+    },
+    {
+      "id": "real-house-arranged",
+      "title": "House arrangement",
+      "localOnly": false,
+      "path": "programs/real-house-arranged.strudel",
+      "evaluates": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "idempotent": true,
+      "originalError": null,
+      "freshError": null,
+      "events": 530,
+      "tiers": {
+        "1": 82,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "tier3": [],
+      "warnings": []
+    },
+    {
+      "id": "real-house-vocals",
+      "title": "House with vocals",
+      "localOnly": false,
+      "path": "programs/real-house-vocals.strudel",
+      "evaluates": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "idempotent": true,
+      "originalError": null,
+      "freshError": null,
+      "events": 575,
+      "tiers": {
+        "1": 115,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "tier3": [],
+      "warnings": []
+    },
+    {
+      "id": "real-custom-samples",
+      "title": "Custom sample usage snippet",
+      "localOnly": false,
+      "path": "programs/real-custom-samples.strudel",
+      "evaluates": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "idempotent": true,
+      "originalError": null,
+      "freshError": null,
+      "events": 136,
+      "tiers": {
+        "1": 6,
+        "2": 1,
+        "3": 1
+      },
+      "tier2": {
+        "slice": 1
+      },
+      "tier3": [
+        {
+          "fragment": "samples({\r\n  myvocal: 'https://your-url.com'\r\n})",
+          "reason": "setup effect"
+        }
+      ],
+      "warnings": [
+        "setup effect: samples({\r\n  myvocal: 'https://your-url.com'\r\n})"
+      ]
+    },
+    {
+      "id": "real-dnb-arranged",
+      "title": "Drum and Bass arrangement",
+      "localOnly": false,
+      "path": "programs/real-dnb-arranged.strudel",
+      "evaluates": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "idempotent": true,
+      "originalError": null,
+      "freshError": null,
+      "events": 330,
+      "tiers": {
+        "1": 148,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "tier3": [],
+      "warnings": []
+    },
+    {
+      "id": "real-dubstep-arranged",
+      "title": "Dubstep arrangement",
+      "localOnly": false,
+      "path": "programs/real-dubstep-arranged.strudel",
+      "evaluates": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "idempotent": true,
+      "originalError": null,
+      "freshError": null,
+      "events": 229,
+      "tiers": {
+        "1": 164,
+        "2": 0,
+        "3": 0
+      },
+      "tier2": {},
+      "tier3": [],
+      "warnings": []
+    },
+    {
+      "id": "local-switch-angel",
+      "title": "Switch Angel trance demo (local only)",
+      "localOnly": true,
+      "path": "/home/aaron/projects/monkeyboys-modular-synth/src/library/patches/switch-angel-trance-demo.strudel",
+      "evaluates": true,
+      "equivalent": true,
+      "matchingProjection": true,
+      "idempotent": true,
+      "originalError": null,
+      "freshError": null,
+      "events": 992,
+      "tiers": {
+        "1": 43,
+        "2": 15,
+        "3": 4
+      },
+      "tier2": {
+        "add": 3,
+        "trancegate": 2,
+        "seg": 1,
+        "o": 3,
+        "rlpf": 2,
+        "lpenv": 2,
+        "fmi": 1,
+        "fmh": 1
+      },
+      "tier3": [
+        {
+          "fragment": "register rlpf · local source line 4",
+          "reason": "register body"
+        },
+        {
+          "fragment": "register rhpf · local source line 7",
+          "reason": "register body"
+        },
+        {
+          "fragment": "register o · local source line 9",
+          "reason": "register body"
+        },
+        {
+          "fragment": "register trancegate · local source line 11",
+          "reason": "register body"
+        }
+      ],
+      "warnings": [
+        "register body: [local source]",
+        "register body: [local source]",
+        "register body: [local source]",
+        "register body: [local source]"
+      ]
+    }
+  ]
+}

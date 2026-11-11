@@ -28,7 +28,7 @@ export const tierOneControls = new Set(
     .map(canonicalName),
 );
 export const signals = new Set(
-  "sine cosine saw isaw tri square perlin rand irand".split(" "),
+  "sine cosine saw isaw tri square perlin rand irand time".split(" "),
 );
 export const rewrites = new Set(
   "fast slow early late rev ply euclid euclidRot degradeBy sometimes sometimesBy often rarely every firstOf off jux superimpose layer struct mask".split(

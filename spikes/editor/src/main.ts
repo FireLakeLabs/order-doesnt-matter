@@ -1,4 +1,5 @@
 import "./style.css";
+import corpusIndex from "../../../corpus/index.json";
 import * as core from "@strudel/core";
 import { fixtures, shell } from "./fixtures";
 import {
@@ -35,10 +36,14 @@ import {
   colors,
   span,
   valueAt,
+  settingName,
   type EventMap,
 } from "./scene";
+import { controlInfo } from "./controls";
+import { eventLanes, shortValue, staticValue } from "./miniature";
+import { song, currentSection, instrumentEvents } from "./song";
 import { Engine } from "./engine";
-import { tagVoices, atBoundary } from "./query-document";
+import { tagVoices, atBoundary, driverDocument } from "./query-document";
 const app = document.querySelector<HTMLDivElement>("#app");
 if (!app) throw Error("No app root");
 const corpusSources = import.meta.glob("../../../corpus/programs/*.strudel", {
@@ -49,25 +54,32 @@ const corpusSources = import.meta.glob("../../../corpus/programs/*.strudel", {
 const corpusDocs = Object.entries(corpusSources).map(([file, source]) => ({
   id: file.split("/").at(-1)!.replace(".strudel", ""),
   source,
+  title:
+    corpusIndex.find((e) => e.file.endsWith(file.split("/").at(-1) ?? ""))
+      ?.title ?? file.split("/").at(-1),
   ...importStrudel(source),
 }));
-const history = new History(structuredClone(fixtures[0]!.doc));
+const history = new History(
+  structuredClone(
+    corpusDocs.find((f) => f.id === "real-house")?.doc ?? fixtures[0]!.doc,
+  ),
+);
 const engine = new Engine();
-let map: "constellation" | "sheet" = "constellation",
+let map: "constellation" | "sheet" = "sheet",
   selected = "",
   open = false,
   events: EventMap = {},
   errors: Record<string, string> = {},
   cycle = 0,
   phase = 0,
-  piece = "three",
+  piece = "real-house",
   query = "",
   collapsed = new Set<string>(),
   solo = "",
   zoom = Math.min(
     1,
     (window.innerWidth - (window.innerWidth > 650 ? 240 : 0)) /
-      (window.innerWidth <= 650 ? 400 : 1200),
+      (window.innerWidth <= 650 ? 420 : 1260),
   ),
   pan = { x: 0, y: 0 },
   editPath: number[] = [0],
@@ -84,6 +96,9 @@ let map: "constellation" | "sheet" = "constellation",
   revision = 0,
   queued: Doc | undefined;
 let rowOrder: string[] = [];
+let moreColumns = false;
+let sampledDrivers: EventMap = {};
+let driverErrors: Record<string, string> = {};
 let gestureActive = false;
 let pending:
   | { id: string; revision: number; first: number; queued: boolean }
@@ -103,25 +118,45 @@ const target = (id: string) => targets(doc()).find((t) => t.id === id);
 const button = (text: string, action: string, extra = "") =>
   `<button data-action="${action}" ${extra}>${text}</button>`;
 function lane(es: PlainEvent[], name = "", height = 32) {
-  const vals = es
-      .map((e) => Number(name ? valueAt(e, name) : e.value))
-      .filter(Number.isFinite),
-    lo = Math.min(0, ...vals),
-    hi = Math.max(1, ...vals);
-  return `<svg class="lane" style="height:${height}px" viewBox="0 0 300 ${height}" preserveAspectRatio="none" role="img" aria-label="Real queried ${esc(name || "event")} spans, cycle ${cycle}"><path d="M0 ${height - 2}H300" class="axis"/>${[0, 0.25, 0.5, 0.75, 1].map((x) => `<path d="M${x * 300} 0V${height}" class="tick"/>`).join("")}${es
-    .slice(0, 400)
-    .map((e, i) => {
-      const [a, b] = span(e, cycle),
-        v = name ? valueAt(e, name) : e.value,
-        n = Number(v),
-        h = Number.isFinite(n)
-          ? 7 + ((n - lo) / (hi - lo)) * (height - 12)
-          : height - 10;
-      return `<rect x="${a * 300}" y="${height - h - 2}" width="${Math.max(0.7, (b - a) * 300 - 1)}" height="${Math.max(2, h)}" rx="2" fill="${name ? "#c3b0f1" : colors[i % 4]}" opacity=".8"><title>${esc(v)} · ${a.toFixed(4)}–${b.toFixed(4)}</title></rect>`;
-    })
-    .join(
-      "",
-    )}<path class="playline" d="M${(phase % 1) * 300} 0V${height}"/></svg>`;
+  const { keys, parts } = eventLanes(es, name),
+    signal = name === "value";
+  const numeric = parts.map((p) => Number(p.value)).filter(Number.isFinite),
+    lo = Math.min(...numeric),
+    hi = Math.max(...numeric);
+  const pitched = !name || name === "s" || name === "note" || name === "n";
+  const curve = signal
+    ? parts
+        .map((p) => {
+          const x = (p.event.part[0] - cycle) * 300,
+            y =
+              height -
+              4 -
+              ((Number(p.value) - lo) / (hi - lo || 1)) * (height - 8);
+          return `${x},${y}`;
+        })
+        .join(" ")
+    : "";
+  return `<svg class="lane" style="height:${height}px" viewBox="0 0 300 ${height}" preserveAspectRatio="none" role="img" aria-label="Real queried ${esc(name || "pitch / sound")} spans: ${esc(keys.slice(0, 12).join(", "))}, cycle ${cycle}"><path d="M0 ${height - 2}H300" class="axis"/>${
+    signal
+      ? `<polyline points="${curve}" fill="none" stroke="#c3b0f1" stroke-width="2"/>`
+      : parts
+          .slice(0, 400)
+          .map(({ event: e, value, track }) => {
+            const [a, b] = span(e, cycle),
+              count = Math.min(keys.length || 1, 8),
+              band = (height - 6) / count;
+            const y = pitched
+              ? 3 + (track % 8) * band
+              : height -
+                4 -
+                (Number.isFinite(Number(value))
+                  ? 5 + ((Number(value) - lo) / (hi - lo || 1)) * (height - 10)
+                  : height - 8);
+            const h = pitched ? Math.max(2, band - 1) : height - y - 3;
+            return `<rect x="${a * 300}" y="${y}" width="${Math.max(0.7, (b - a) * 300 - 1)}" height="${h}" rx="1" fill="${colors[track % 4]}" opacity=".85"><title>${esc(value)} · ${e.part[0]}–${e.part[1]}</title></rect>`;
+          })
+          .join("")
+  }<path class="playline" d="M${(phase % 1) * 300} 0V${height}"/></svg>`;
 }
 function ring(es: PlainEvent[], size = 92) {
   const p = (a: number, r: number) =>
@@ -149,11 +184,15 @@ function chosen(id: string) {
 function sourceNodes() {
   return `<div class="source-nodes">${doc()
     .setup.map((x, i) =>
-      button(`◇ Setup ${i + 1} · source`, "select", `data-id="${x.id}"`),
+      button(
+        `◇ ${esc(x.code.match(/register\(\s*[\'"]([^\'"]+)/)?.[1] ?? `Setup ${i + 1}`)} · source`,
+        "select",
+        `data-id="${x.id}"`,
+      ),
     )
     .join("")}${Object.entries(doc().shared)
     .map(([name, p]) =>
-      button(`↳ Shared: ${esc(name)}`, "select", `data-id="${p.id}"`),
+      button(`↳ ${esc(name)} · shared`, "select", `data-id="${p.id}"`),
     )
     .join("")}${
     doc()
@@ -163,6 +202,20 @@ function sourceNodes() {
       .join("") ?? ""
   }</div>`;
 }
+function arrangementHtml() {
+  const structure = song(doc()),
+    section = currentSection(structure.sections, cycle, structure.total);
+  if (!structure.sections.length)
+    return `<div class="arrangement loop-strip"><span>↻ Repeating score</span><small>Viewing cycle ${cycle} · select a rhythm or setting to edit</small>${button("Previous cycle", "cycle-prev")}${button("Next cycle", "cycle-next")}</div>`;
+  return `<nav class="arrangement" aria-label="Song arrangement"><div class="arrangement-caption"><strong>SONG · ${structure.total} cycles</strong><span>Click a section to explore · ${section ? esc(section.name) : ""} now</span></div><div class="sections">${structure.sections.map((x) => button(`<span>${esc(x.name)}</span><small>${x.cycles} cycles · ${x.start}–${x.start + x.cycles}</small>`, "jump-section", `data-id="${x.index}" style="flex:${x.cycles}" aria-current="${x.index === section?.index ? "step" : "false"}" title="${esc(x.comment ?? x.name)} · jump to cycle ${x.start}"`)).join("")}</div></nav>`;
+}
+function sectionUses(i: ReturnType<typeof song>["instruments"][number]) {
+  const s = song(doc());
+  const sections = i.sections.filter((n) => n >= 0);
+  return sections.length
+    ? `<span class="shared-mark" title="${esc(sections.map((n) => (s.sections[n]?.name ?? "") + " @ " + s.sections[n]?.start).join(" · "))} · editing the shared instrument changes every occurrence">${sections.length > 1 ? "↳ Shared · " + sections.length + " sections" : "In " + esc(s.sections[sections[0] ?? 0]?.name)}</span>`
+    : "";
+}
 function mapHtml() {
   if (map === "sheet") return sourceNodes() + sheetHtml();
   const scene = constellation(
@@ -170,102 +223,120 @@ function mapHtml() {
     events,
     collapsed,
     window.innerWidth <= 650 ? 1 : 3,
+    cycle,
   );
   return (
     sourceNodes() +
-    `<div class="space" id="space"><svg id="universe" viewBox="0 0 ${scene.width} ${scene.height}" style="width:${scene.width * zoom}px;height:${scene.height * zoom}px;transform:translate(${pan.x}px,${pan.y}px)" aria-label="Constellation map. Orbits mean belongs to, never sound flow.">
-${scene.rooms
-  .map((r) => {
-    const ps = scene.planets.filter(
-      (p) =>
-        r.voices.includes(p.voice) &&
-        p.events.some(
-          (e) =>
-            String(valueAt(e, "orbit") ?? 1) === r.id &&
-            (Number(valueAt(e, "room")) > 0 || Number(valueAt(e, "delay")) > 0),
-        ),
-    );
-    if (!ps.length) return "";
-    const minx = Math.min(...ps.map((p) => p.x)) - 190,
-      miny = Math.min(...ps.map((p) => p.y)) - 195,
-      maxx = Math.max(...ps.map((p) => p.x)) + 190,
-      maxy = Math.max(...ps.map((p) => p.y)) + 200;
-    return `<rect class="room-region" x="${minx}" y="${miny}" width="${maxx - minx}" height="${maxy - miny}" rx="30"/><text x="${minx + 15}" y="${miny + 23}" class="room-label">ROOM ${esc(r.id)} · ${r.voices.length} voices ${r.conflict ? "· ⚠ CONFLICT" : ""}</text>`;
-  })
-  .join("")}
-${scene.planets
-  .map(
-    (
-      p,
-    ) => `<g class="planet ${pending && target(pending.id)?.voice.id === p.voice ? "pending" : ""}">${p.group ? `<rect x="${p.x - 185}" y="${p.y - 180}" width="370" height="370" rx="24" class="group-box"/><text x="${p.x - 170}" y="${p.y - 153}" class="room-label">${esc(p.group)} contains</text>` : ""}${p.shells.map((s) => `<g data-select="${s.id}" tabindex="0" role="button" aria-label="${esc(p.name)} rewrite ${esc(s.name)}"><circle cx="${p.x}" cy="${p.y}" r="${s.r}" class="shell${chosen(s.id)}"/><rect x="${p.x - 37}" y="${p.y + s.r - 9}" width="75" height="19" rx="7" class="shell-label-bg"/><text x="${p.x}" y="${p.y + s.r + 4}" text-anchor="middle" class="shell-label">${esc(s.name)}</text></g>`).join("")}${p.nodes
-      .filter((n) => n.kind === "setting")
-      .map(
-        (n) =>
-          `<circle cx="${p.x}" cy="${p.y}" r="${Math.hypot(n.x - p.x, n.y - p.y)}" class="orbit"/>`,
-      )
-      .join("")}
-<g data-select="${p.id}" tabindex="0" role="button" aria-label="${esc(p.name)} rhythm" class="planet-face${chosen(p.id)} ${p.tier === 3 ? "opaque" : ""}"><circle cx="${p.x}" cy="${p.y}" r="${p.radius}"/> <svg x="${p.x - 41}" y="${p.y - 39}" width="82" height="82" viewBox="0 0 100 100">${ring(
-      p.events,
-    )
-      .replace(/^.*?<svg[^>]*>/, "")
-      .replace(
-        /<\/svg>$/,
-        "",
-      )}</svg><text x="${p.x}" y="${p.y - 7}" text-anchor="middle">${esc(p.name)}</text><text x="${p.x}" y="${p.y + 11}" text-anchor="middle" class="small">${p.tier === 3 ? "◇ SOURCE" : "rhythm"}</text></g>
-${p.nodes.map((n) => `<g data-select="${n.id}" tabindex="0" role="button" aria-label="${esc(p.name)} ${esc(target(n.id)?.path.slice(1).join(" › ") ?? n.label)}" class="moon ${n.kind} ${n.tier === 3 ? "opaque" : ""}${chosen(n.id)}">${n.kind === "driver" ? `<circle cx="${p.nodes.find((q) => q.id === n.owner)?.x ?? p.x}" cy="${p.nodes.find((q) => q.id === n.owner)?.y ?? p.y}" r="55" class="driver-orbit"/>` : ""}<circle cx="${n.x}" cy="${n.y}" r="${n.r}"/><text x="${n.x}" y="${n.y + 4}" text-anchor="middle">${esc(n.label)}</text>${n.kind === "setting" ? `<text class="level" x="${n.x}" y="${n.y + 33}" text-anchor="middle">level ${n.level + 1}</text>` : ""}</g>`).join("")}
-<g role="button" tabindex="0" data-collapse="${p.id}" aria-label="${p.collapsed ? "Expand" : "Collapse"} ${esc(p.name)}"><rect x="${p.x - 42}" y="${p.y + 160}" width="84" height="25" rx="10" class="collapse-bg"/><text class="small" x="${p.x}" y="${p.y + 177}" text-anchor="middle">${p.collapsed ? "+ expand" : "− collapse"}</text></g></g>`,
+    `<div class="space" id="space"><svg id="universe" viewBox="0 0 ${scene.width} ${scene.height}" style="width:${scene.width * zoom}px;height:${scene.height * zoom}px;transform:translate(${pan.x}px,${pan.y}px)" aria-label="Constellation: rhythms at the centre, settings on orbits, rewrites on rings">${scene.planets
+      .map((p) => {
+        const broken = errors[p.voice];
+        return `<g class="planet ${p.active ? "" : "inactive"} ${pending && target(pending.id)?.voice.id === p.voice ? "pending" : ""}"><rect x="${p.x - 200}" y="${p.y - 238}" width="400" height="464" rx="14" class="planet-card"/><text x="${p.x - 177}" y="${p.y - 208}" class="planet-title">${esc(p.name.length > 29 ? p.name.slice(0, 28) + "…" : p.name)}<title>${esc(p.name)} · ${esc(p.pattern.comment ?? "Click its rhythm, settings or rings to edit")}</title></text><text x="${p.x - 177}" y="${p.y - 188}" class="planet-state">${broken ? "⚠ BROKEN" : !p.active ? "○ Not in this section" : p.events.length ? "● Playing this section" : "◌ Rest this cycle"}${p.instrument.sections.length > 1 ? " · ↳ shared in " + p.instrument.sections.length + " sections" : ""}${scene.rooms
+          .filter((r) => r.voices.includes(p.id))
+          .map((r) => " · room " + r.id + (r.conflict ? " ⚠" : ""))
+          .join("")}</text>
+  <circle cx="${p.x}" cy="${p.y}" r="${p.orbit}" class="orbit"/>
+  ${p.shells.map((sh, j) => `<g data-select="${sh.id}" tabindex="0" role="button" aria-label="${esc(p.name)} rewrite ${esc(sh.name)}"><title>${esc(sh.name)} rewrites the score · click to edit. Settings inside this ring are rewritten with the rhythm.</title><circle cx="${p.x}" cy="${p.y}" r="${sh.r}" class="shell${chosen(sh.id)}"/><rect x="${sh.labelX - 32}" y="${sh.labelY - 8}" width="64" height="17" rx="6" class="shell-label-bg"/><text x="${sh.labelX}" y="${sh.labelY + 4}" text-anchor="middle" class="shell-label">${esc(sh.name)}</text></g>`).join("")}
+  <g data-select="${p.id}" tabindex="0" role="button" aria-label="${esc(p.name)} rhythm" class="planet-face${chosen(p.id)} ${p.tier === 3 ? "opaque" : ""}"><title>${esc(p.name)} · rhythm. Click to edit the source pattern${p.instrument.sections.length > 1 ? " shared by every marked section" : ""}.</title><circle cx="${p.x}" cy="${p.y}" r="${p.radius}"/><svg x="${p.x - 27}" y="${p.y - 27}" width="54" height="54" viewBox="0 0 100 100">${ring(
+    p.events,
   )
-  .join("")}</svg></div>`
+    .replace(/^.*?<svg[^>]*>/, "")
+    .replace(
+      /<\/svg>$/,
+      "",
+    )}</svg><text x="${p.x}" y="${p.y + 4}" text-anchor="middle" class="small">${broken ? "BROKEN" : !p.active ? "resting" : "rhythm ↗"}</text></g>
+  ${p.nodes
+    .filter((n) => n.kind === "setting")
+    .map(
+      (n) =>
+        `<g data-select="${n.id}" tabindex="0" role="button" aria-label="${esc(p.name)} ${esc(n.label)}" class="moon setting${chosen(n.id)}"><title>${esc(settingName(n.label))} (${esc(n.label)}) · click to edit${n.value?.core.kind === "signal" ? " the wave driving this setting" : ""}</title><circle cx="${n.x}" cy="${n.y}" r="${n.r}"/><text x="${n.x}" y="${n.y - 2}" text-anchor="middle">${esc(settingName(n.label).slice(0, 10))}</text><text x="${n.x}" y="${n.y + 11}" text-anchor="middle" class="moon-value">${esc(n.value ? (staticValue(n.value) !== undefined ? shortValue(staticValue(n.value)) : n.value.core.kind === "signal" ? "∿ " + n.value.core.shape : n.value.core.kind === "sequence" ? n.value.core.notation.slice(0, 9) : "↳ driver") : "")}</text></g>`,
+    )
+    .join("")}
+  ${p.nodes
+    .filter((n) => n.kind === "driver")
+    .slice(0, 5)
+    .map(
+      (n) =>
+        `<g data-select="${n.id}" tabindex="0" role="button" class="driver-chip" aria-label="${esc(p.name)} ${esc(n.label)} driver"><title>Open ${esc(n.label)} driver · nested setting pattern</title><text x="${n.x}" y="${n.y + 30}">↳ ${esc(n.label)}</text></g>`,
+    )
+    .join("")}
+  <g role="button" tabindex="0" data-collapse="${p.id}" aria-label="${p.collapsed ? "Expand" : "Collapse"} ${esc(p.name)}"><text class="small" x="${p.x + 120}" y="${p.y + 215}">${p.collapsed ? "+ expand" : "− fold"}</text></g></g>`;
+      })
+      .join("")}</svg></div>`
   );
 }
+function valueMini(es: PlainEvent[], name: string, p: Pattern, id: string) {
+  const values = [
+    ...new Set(
+      es
+        .map((e) => valueAt(e, name))
+        .filter((v) => v !== undefined)
+        .map((v) =>
+          typeof v === "number" ? String(Number(v.toPrecision(4))) : String(v),
+        ),
+    ),
+  ];
+  const unit = ["cutoff", "lpf", "hcutoff", "hpf"].includes(name)
+    ? " Hz"
+    : ["attack", "release", "decay", "delaytime"].includes(name)
+      ? " s"
+      : name === "pan"
+        ? " L–R"
+        : name === "gain"
+          ? " ×"
+          : "";
+  if (driverErrors[id])
+    return `<span class="error-box">⚠ Driver query failed</span>`;
+  if (sampledDrivers[id]?.length) {
+    const samples = sampledDrivers[id] ?? [];
+    const values = samples.map((e) => Number(valueAt(e, "value")));
+    return `<span class="mini-caption">∿ ${p.core.kind === "signal" ? esc(p.core.shape) : "wave"} · ${esc(shortValue(Math.min(...values)))}–${esc(shortValue(Math.max(...values)))}${unit}</span>${lane(samples, "value", 28)}`;
+  }
+  if (!es.length) {
+    const value = staticValue(p);
+    return value !== undefined
+      ? `<span class="constant-mini inactive-value"><i></i><b>${esc(shortValue(value))}<small>${unit}</small></b></span>`
+      : `<span class="quiet-cell">○ Pattern ready</span>`;
+  }
+  if (values.length === 1)
+    return `<span class="constant-mini"><i style="width:${Number.isFinite(Number(values[0])) ? Math.max(3, Math.min(100, ((Number(values[0]) - controlInfo(name).min) / (controlInfo(name).max - controlInfo(name).min)) * 100)) : 100}%"></i><b>${esc(values[0])}<small>${unit}</small></b></span>`;
+  return `<span class="mini-caption">${p.core.kind === "signal" ? "∿ " + esc(p.core.shape) + " · " : ""}${esc(values.slice(0, 3).join(" → "))}${values.length > 3 ? " …" : ""}${unit}</span>${lane(es, name, 28)}`;
+}
 function sheetHtml() {
-  const data = sheet(doc(), events);
+  const data = sheet(doc(), events, cycle);
   if (rowOrder.length)
     data.rows.sort(
       (a, b) => rowOrder.indexOf(a.voice.id) - rowOrder.indexOf(b.voice.id),
     );
-  return `<div class="sheet-scroll"><table><thead><tr><th class="voice-col">VOICE / RHYTHM</th><th>REAL EVENTS · ONE CYCLE</th>${data.columns.map((c) => `<th>${esc(c)}</th>`).join("")}<th>REWRITES · INNER → OUTER</th><th>ROOM</th></tr></thead><tbody>${data.rows
-    .map(
-      ({ voice: v, events: es, settings: ss }, i) =>
-        `<tr class="${v.muted ? "muted" : ""} ${pending && target(pending.id)?.voice.id === v.id ? "pending" : ""}"><th class="voice-col"><div class="voice-name">${button(esc(v.name), "select", `data-id="${v.id}" class="name${chosen(v.id)}"`)} <span class="index">${String(i + 1).padStart(2, "0")}</span></div><div class="row-actions">${button(v.muted ? "Unmute" : "M", "mute", `data-id="${v.id}" title="Mute ${esc(v.name)}"`)}${button(solo === v.id ? "Unsolo" : "S", "solo", `data-id="${v.id}" title="Solo ${esc(v.name)}"`)}${button("↑", "row-up", `data-id="${v.id}" aria-label="Move ${esc(v.name)} up"`)}${button("↓", "row-down", `data-id="${v.id}" aria-label="Move ${esc(v.name)} down"`)}${button(collapsed.has(v.id) ? "+" : "−", "collapse", `data-id="${v.id}" aria-label="Collapse ${esc(v.name)}"`)}</div></th><td>${button(v.pattern.tier === 3 ? "◇ not modelled" : (v.pattern.core.kind === "generator" && !(["note", "s", "n"].includes(v.pattern.core.name) && v.pattern.core.args[0]?.kind === "pattern" && v.pattern.core.args[0].pattern.core.kind === "sequence")) || v.pattern.layers.some((l) => l.kind === "rewrite" && ["euclid", "degradeBy", "sometimes"].includes(l.name)) ? "◉ rule-made" : "▤ typed", "select", `data-id="${v.pattern.id}" class="cell${chosen(v.pattern.id)}"`)}${collapsed.has(v.id) ? "" : lane(es)}</td>${data.columns
-          .map((c) => {
-            const matches = targets({ ...doc(), voices: [v] }).filter(
-              (t) => "value" in t.node && "name" in t.node && t.label === c,
-            );
-            return `<td>${
-              matches
-                .map((t) => {
-                  const s = t.setting;
-                  return s
-                    ? button(
-                        `${s.value.core.kind === "constant" ? esc(typeof s.value.core.value === "number" ? Number(s.value.core.value.toPrecision(5)) : s.value.core.value) : `${s.value.core.kind === "signal" ? "∿" : "▤"} ${esc(s.value.core.kind === "signal" ? s.value.core.shape : "pattern")} <span class="nested">↳ inspect driver</span>`}${!collapsed.has(v.id) && s.value.core.kind !== "constant" ? lane(es, c) : ""}`,
-                        "select",
-                        `data-id="${s.id}" class="cell${chosen(s.id)}" title="${esc(t.path.join(" › "))}"`,
-                      )
-                    : "";
-                })
-                .join("") || '<span class="empty">—</span>'
-            }</td>`;
-          })
-          .join(
-            "",
-          )}<td><div class="chips">${v.pattern.layers.flatMap((l, k) => (l.kind === "settings" ? [] : [button(`${k + 1} ${esc(l.kind === "rewrite" ? l.name : "◇ source")}`, "select", `data-id="${l.id}" class="chip"`)])).join("")}</div></td><td>${
-          rooms(doc(), events)
-            .filter((r) => r.voices.includes(v.id))
-            .map(
-              (r) =>
-                `<span class="room-pill">${r.id}${r.conflict ? " ⚠ conflict" : ""}</span>`,
-            )
-            .join("") || "—"
-        }</td></tr>`,
-    )
+  const columns = moreColumns ? data.columns : data.columns.slice(0, 5),
+    extra = data.columns.length - columns.length;
+  return `<div class="sheet-summary"><span>${data.rows.filter((r) => r.active).length} in this section · ${data.rows.length} instruments in the piece</span>${data.columns.length > 5 ? button(moreColumns ? "Fewer settings" : `+ ${extra} more settings`, "more-columns") : ""}</div><div class="sheet-scroll"><table><thead><tr><th class="voice-col">INSTRUMENT · click to edit</th><th>RHYTHM · cycle ${cycle}</th>${columns.map((c) => `<th title="${esc(c)} · ordered by use in this piece">${esc(settingName(c))}<small>${esc(c)}</small></th>`).join("")}<th>REWRITES</th><th>ROOM</th></tr></thead><tbody>${data.rows
+    .map(({ voice: v, events: es, settings: ss, active, instrument: i }) => {
+      const broken = errors[i.voice.id];
+      return `<tr class="${v.muted ? "muted" : ""} ${active ? "" : "inactive"} ${pending && target(pending.id)?.voice.id === i.voice.id ? "pending" : ""}" data-instrument="${v.id}"><th class="voice-col"><div class="voice-name">${button(esc(v.name), "select", `data-id="${v.id}" class="name${chosen(v.id)}" title="${esc(v.pattern.comment ?? v.name)} · edit this instrument everywhere it is used"`)}</div><div class="membership">${sectionUses(i)}</div><div class="row-actions">${button(v.muted ? "Unmute" : "M", "mute", `data-id="${v.id}" title="Mute ${esc(v.name)}"`)}${button(solo === v.id ? "Unsolo" : "S", "solo", `data-id="${v.id}" title="Solo ${esc(v.name)}"`)}${button("↑", "row-up", `data-id="${v.id}" aria-label="Move ${esc(v.name)} up"`)}${button("↓", "row-down", `data-id="${v.id}" aria-label="Move ${esc(v.name)} down"`)}${button(collapsed.has(v.id) ? "+" : "−", "collapse", `data-id="${v.id}" aria-label="Collapse ${esc(v.name)}"`)}</div></th><td>${broken ? `<span class="error-box">⚠ BROKEN</span>` : !active ? `<span class="rest-state">○ Not in this section</span>` : !es.length ? `<span class="rest-state">◌ Rest this cycle</span>` : button(`${collapsed.has(v.id) ? "Show rhythm" : lane(es, "", 34)}`, "select", `data-id="${v.pattern.id}" class="cell" title="${es.length} real queried event parts · click to edit rhythm"`)}</td>${columns
+        .map((c) => {
+          const matches = ss.filter((s) => s.name === c),
+            s = matches.at(-1);
+          return `<td>${s ? button(`${collapsed.has(v.id) ? `<span>${esc(shortValue(staticValue(s.value) ?? settingName(c)))}</span>` : valueMini(es, c, s.value, s.id)}${staticValue(s.value) === undefined ? '<span class="nested">↳ Open driver</span>' : ""}${matches.length > 1 ? `<span class="variant">${v.pattern.core.kind === "group" ? matches.length + " parts · open group" : "section variation ↗"}</span>` : ""}`, "select", `data-id="${matches.length > 1 && v.pattern.core.kind === "group" ? i.id : s.id}" class="cell${chosen(s.id)}" title="${esc(settingName(c))} (${esc(c)}) · click to edit; ↳ follows its driver"`) : '<span class="empty">—</span>'}</td>`;
+        })
+        .join(
+          "",
+        )}<td><div class="chips">${v.pattern.layers.flatMap((l) => (l.kind === "settings" ? [] : [button(esc(l.kind === "rewrite" ? l.name : "◇ source"), "select", `data-id="${l.id}" class="chip"`)])).join("")}</div></td><td>${
+        data.rooms
+          .filter((r) => r.voices.includes(i.id))
+          .map(
+            (r) =>
+              `<span class="room-pill">${r.id}${r.conflict ? " ⚠ conflict" : ""}</span>`,
+          )
+          .join("") || "—"
+      }</td></tr>`;
+    })
     .join("")}</tbody></table></div>`;
 }
 function render() {
   // A cycle/query refresh must not replace a captured drag target.
   if (gestureActive) return;
   const t = selectedTarget();
-  app!.innerHTML = `<header><a class="brand" href="#">◎ <span>Order Doesn’t Matter</span></a><span class="study">TWO MAPS / ONE SCORE</span><div class="transport">${button(engine.playing ? "■ Stop" : "▶ Play", "play", 'id="play" class="primary"')}<span id="clock">${String(cycle).padStart(2, "0")} / ${(phase % 1).toFixed(2)}</span>${button("Undo", "undo", history.past.length ? "" : "disabled")}${button("Redo", "redo", history.future.length ? "" : "disabled")}</div></header><div class="workspace"><aside class="navigator" ${open ? "inert" : ""}><p class="eyebrow">AN INSTRUMENT FOR FINDING</p><h1>The score,<br>at a glance.</h1><label class="label" for="piece">PIECE</label><select id="piece"><optgroup label="Six design fixtures">${fixtures.map((f) => `<option value="${f.id}" ${f.id === piece ? "selected" : ""}>${esc(f.name)}</option>`).join("")}</optgroup><optgroup label="72 corpus programs">${corpusDocs.map((f) => `<option value="${f.id}" ${f.id === piece ? "selected" : ""}>${esc(f.id)}</option>`).join("")}</optgroup></select>${button("Paste Strudel…", "paste", 'class="text-button"')}<div class="nav-divider"></div><label class="label" for="find">FIND A VOICE OR SETTING</label><input id="find" type="search" placeholder="Try “shore lpf”" value="${esc(query)}" autocomplete="off"><div class="results">${
+  app!.innerHTML = `<header><a class="brand" href="#">◎ <span>Order Doesn’t Matter</span></a><span class="study">TWO MAPS / ONE SCORE</span><div class="transport">${button(engine.playing ? "■ Stop" : "▶ Play", "play", 'id="play" class="primary"')}<span id="clock">${String(cycle).padStart(2, "0")} / ${(phase % 1).toFixed(2)}</span>${button("Undo", "undo", history.past.length ? "" : "disabled")}${button("Redo", "redo", history.future.length ? "" : "disabled")}</div></header><div class="workspace"><aside class="navigator" ${open ? "inert" : ""}><p class="eyebrow">AN INSTRUMENT FOR FINDING</p><h1>The score,<br>at a glance.</h1><label class="label" for="piece">PIECE</label><select id="piece">${piece === "paste" || piece === "local-switch" ? `<option selected value="${piece}">${piece === "local-switch" ? "Switch Angel · local only" : "Imported score"}</option>` : ""}<optgroup label="Design fixtures (secondary)">${fixtures.map((f) => `<option value="${f.id}" ${f.id === piece ? "selected" : ""}>${esc(f.name)}</option>`).join("")}</optgroup><optgroup label="Real input + corpus programs">${corpusDocs.map((f) => `<option value="${f.id}" ${f.id === piece ? "selected" : ""}>${esc(f.title ?? f.id)}</option>`).join("")}</optgroup></select>${button("Switch Angel · local file", "local-switch", 'class="text-button" title="Reads the earlier project at runtime; source is not redistributed"')}${button("Paste Strudel…", "paste", 'class="text-button"')}<div class="nav-divider"></div><label class="label" for="find">FIND A VOICE OR SETTING</label><input id="find" type="search" placeholder="Try “shore lpf”" value="${esc(query)}" autocomplete="off"><div class="results">${
     query
       ? searchTargets(doc(), query)
           .slice(0, 50)
@@ -277,13 +348,13 @@ function render() {
             ),
           )
           .join("") || "<p>No matches</p>"
-      : doc()
-          .voices.map(
-            (v, i) =>
-              `<div class="voice-nav"><button data-action="select" data-id="${v.id}"><i style="background:${colors[i % 4]}"></i>${esc(v.name)}${v.pattern.tier === 3 ? " ◇" : ""}</button><button data-action="focus" data-id="${v.id}" aria-label="Find ${esc(v.name)} in map">⌖</button></div>`,
+      : song(doc())
+          .instruments.map(
+            (i, n) =>
+              `<div class="voice-nav"><button data-action="select" data-id="${i.id}" title="Edit ${esc(i.name)}${i.sections.length > 1 ? " everywhere it is used" : ""}"><i style="background:${colors[n % 4]}"></i>${esc(i.name)}</button><button data-action="focus" data-id="${i.id}" aria-label="Find ${esc(i.name)} in map">⌖</button></div>`,
           )
           .join("")
-  }</div>${button("+ Add voice", "add-voice", 'class="add-voice"')}<div class="legend"><p><i class="mint"></i> Planet = rhythm / real events</p><p><i class="violet"></i> Moon = setting; satellite = driver</p><p><i class="amber"></i> Shell = ordered rewrite</p><p>Orbits mean “belongs to”.<br>There is no sound-flow path.</p><p>◇ Dashed = not modelled</p><small>Corpus importer · real Strudel queries</small></div></aside><main><div class="toolbar"><div class="tabs">${button("◎ Constellation", "map-a", `aria-pressed="${map === "constellation"}"`)}${button("▤ Score sheet", "map-b", `aria-pressed="${map === "sheet"}"`)}</div><div class="map-tools" ${open ? "inert" : ""}>${map === "constellation" ? `${button("−", "zoom-out", 'aria-label="Zoom out"')}${button("Fit", "fit")}${button("+", "zoom-in", 'aria-label="Zoom in"')}` : ""}<span>${doc().voices.length} voices · cycle ${cycle}</span></div></div><div class="map-intro"><div><p class="eyebrow">${map === "constellation" ? "BELONGING, WITHOUT WIRES" : "COMPARE ACROSS VOICES"}</p><h2>${map === "constellation" ? "A small universe of settings." : "One piece. All its settings."}</h2><p>${map === "constellation" ? "Click a planet, moon or labelled shell to edit. Drag empty space to pan. Scroll to explore; + / − to zoom." : "Click a cell to edit. ↳ opens nested drivers. Horizontal scroll reveals every setting; names stay pinned."}</p></div><div class="map-key">${map === "constellation" ? "Inner → outer: rewrite order<br>level N: settings at that shell" : "Bars are actual event spans<br>No equal-step grid is assumed"}</div></div><div class="map-container" ${open ? "inert" : ""}>${mapHtml()}</div><footer><span id="status" class="${Object.keys(errors).length ? "error" : ""}">${warning ? esc(warning) : Object.keys(errors).length ? `⚠ BROKEN · ${esc(Object.values(errors).join(" · "))}` : busy ? "Querying real events…" : `${Object.values(events).flat().length} queried event parts · scored length, not audible tails`}</span><span id="pending">${pending ? "◌ PENDING · waiting for first changed onset" : "● document and preview agree"}</span></footer></main></div>${open && t ? `<div class="scrim"></div>${editorHtml(t)}` : ""}${paste ? `<div class="modal-scrim"><section class="paste-panel"><h2>Bring in a score</h2><p>Executable Strudel, for this local study. Structured import; unsupported source stays selectable.</p><textarea id="paste-source" aria-label="Strudel to import">note("60 [64 67] 72").s("triangle")</textarea>${button("Import expression", "import", 'class="primary"')}${button("Cancel", "cancel-paste")}</section></div>` : ""}`;
+  }</div>${button("+ Add voice", "add-voice", 'class="add-voice"')}<div class="legend"><p><i class="mint"></i> Planet = rhythm / real events</p><p><i class="violet"></i> Moon = setting; satellite = driver</p><p><i class="amber"></i> Shell = ordered rewrite</p><p>Orbits mean “belongs to”.<br>There is no sound-flow path.</p><p>◇ Dashed = not modelled</p><small>Corpus importer · real Strudel queries</small></div></aside><main><div class="toolbar"><div class="tabs">${button("◎ Constellation", "map-a", `aria-pressed="${map === "constellation"}"`)}${button("▤ Score sheet", "map-b", `aria-pressed="${map === "sheet"}"`)}</div><div class="map-tools" ${open ? "inert" : ""}>${map === "constellation" ? `${button("−", "zoom-out", 'aria-label="Zoom out"')}${button("Fit", "fit")}${button("+", "zoom-in", 'aria-label="Zoom in"')}` : ""}<span>${song(doc()).instruments.length} instruments · cycle ${cycle}</span></div></div><div class="map-intro"><div><p class="eyebrow">${map === "constellation" ? "BELONGING, WITHOUT WIRES" : "COMPARE ACROSS VOICES"}</p><h2>${map === "constellation" ? "A small universe of settings." : "One piece. All its settings."}</h2><p>${map === "constellation" ? "Click a planet, moon or labelled shell to edit. Drag empty space to pan. Scroll to explore; + / − to zoom." : "Click a cell to edit. ↳ opens nested drivers. Horizontal scroll reveals every setting; names stay pinned."}</p></div><div class="map-key">${map === "constellation" ? "Inner → outer: rewrite order<br>Moons inside rings are rewritten<br>Outer orbit: freely placed constants" : "Bars are actual event spans<br>No equal-step grid is assumed"}</div></div>${arrangementHtml()}<div class="map-container" ${open ? "inert" : ""}>${mapHtml()}</div><footer><span id="status" class="${Object.keys(errors).length ? "error" : ""}">${warning ? esc(warning) : Object.keys(errors).length ? `⚠ BROKEN · ${esc(Object.values(errors).join(" · "))}` : busy ? "Querying real events…" : `${Object.values(events).flat().length} queried event parts · scored length, not audible tails`}</span><span id="pending">${pending ? "◌ PENDING · waiting for first changed onset" : "● document and preview agree"}</span></footer></main></div>${open && t ? `<div class="scrim"></div>${editorHtml(t)}` : ""}${paste ? `<div class="modal-scrim"><section class="paste-panel"><h2>Bring in a score</h2><p>Executable Strudel, for this local study. Structured import; unsupported source stays selectable.</p><textarea id="paste-source" aria-label="Strudel to import">note("60 [64 67] 72").s("triangle")</textarea>${button("Import expression", "import", 'class="primary"')}${button("Cancel", "cancel-paste")}</section></div>` : ""}`;
   bind();
 }
 function argLabels(name: string) {
@@ -308,7 +379,7 @@ function argForm(
   args: import("../../import/src/document").Arg[],
   prefix: string,
 ) {
-  return `<div class="fields">${args.map((a, i) => `<label>${esc(argLabels(name)[i] ?? `Argument ${i + 1}`)}${a.kind === "literal" ? `<input data-arg="${i}" data-prefix="${prefix}" value="${esc(a.value)}" type="${typeof a.value === "number" ? "number" : "text"}" step="any">` : a.kind === "pattern" ? button(`↳ ${esc(a.pattern.core.kind)} · inspect`, "select", `data-id="${a.pattern.id}"`) : a.kind === "callback" ? button("↳ callback pattern · inspect", "select", `data-id="${a.body.id}"`) : `<textarea data-arg-source="${i}" data-prefix="${prefix}" aria-label="Argument ${i + 1} source">${esc(a.code)}</textarea>`}</label>`).join("")}</div>`;
+  return `<div class="fields">${args.map((a, i) => `<label>${esc(argLabels(name)[i] ?? `Argument ${i + 1}`)}${a.kind === "literal" ? `<input data-arg="${i}" data-prefix="${prefix}" value="${esc(a.value)}" type="${typeof a.value === "number" ? "number" : "text"}" step="any">` : a.kind === "pattern" ? button(`↳ ${esc(a.pattern.core.kind)} · open driver`, "select", `data-id="${a.pattern.id}"`) : a.kind === "callback" ? button("↳ callback pattern · open driver", "select", `data-id="${a.body.id}"`) : `<textarea data-arg-source="${i}" data-prefix="${prefix}" aria-label="Argument ${i + 1} source">${esc(a.code)}</textarea>`}</label>`).join("")}</div>`;
 }
 function strip(steps: Step[], path: number[] = []): string {
   const total = steps.reduce(
@@ -323,80 +394,48 @@ function strip(steps: Step[], path: number[] = []): string {
     })
     .join("")}</div>`;
 }
-function controlInfo(name: string) {
-  return (
-    (
-      {
-        lpf: {
-          name: "Low-pass cutoff",
-          unit: "Hz",
-          min: 20,
-          max: 16000,
-          step: 10,
-        },
-        hpf: {
-          name: "High-pass cutoff",
-          unit: "Hz",
-          min: 20,
-          max: 16000,
-          step: 10,
-        },
-        delaytime: {
-          name: "Delay time",
-          unit: "seconds",
-          min: 0,
-          max: 2,
-          step: 0.01,
-        },
-        delayfeedback: {
-          name: "Delay feedback",
-          unit: "×",
-          min: 0,
-          max: 0.95,
-          step: 0.01,
-        },
-        delay: { name: "Delay send", unit: "×", min: 0, max: 1, step: 0.01 },
-        release: {
-          name: "Release",
-          unit: "seconds",
-          min: 0,
-          max: 4,
-          step: 0.01,
-        },
-        crush: { name: "Bit depth", unit: "bits", min: 1, max: 16, step: 1 },
-        distort: { name: "Distortion", unit: "×", min: 0, max: 10, step: 0.1 },
-        note: { name: "Pitch", unit: "MIDI", min: 0, max: 127, step: 1 },
-        gain: { name: "Gain", unit: "×", min: 0, max: 2, step: 0.01 },
-        pan: {
-          name: "Pan · left → right",
-          unit: "",
-          min: 0,
-          max: 1,
-          step: 0.01,
-        },
-        room: { name: "Reverb send", unit: "×", min: 0, max: 1, step: 0.01 },
-        roomsize: {
-          name: "Room size",
-          unit: "seconds",
-          min: 0.1,
-          max: 4,
-          step: 0.1,
-        },
-        orbit: {
-          name: "Shared room number",
-          unit: "room",
-          min: 1,
-          max: 16,
-          step: 1,
-        },
-      } as Record<
-        string,
-        { name: string; unit: string; min: number; max: number; step: number }
-      >
-    )[name] ?? { name, unit: "value", min: 0, max: 10, step: 0.01 }
-  );
+function selectionContext(t: Target) {
+  const structure = song(doc());
+  const contains = (
+    p: Pattern,
+    i: ReturnType<typeof song>["instruments"][number],
+  ) =>
+    targets({
+      ...doc(),
+      setup: [],
+      transforms: [],
+      shared: {},
+      voices: [{ ...i.voice, id: i.id, name: i.name, pattern: p }],
+    }).some((x) => x.id === t.id);
+  for (const instrument of structure.instruments) {
+    if (contains(instrument.pattern, instrument))
+      return { instrument, sections: instrument.sections, local: false };
+    const uses = instrument.uses.filter((u) => contains(u.pattern, instrument));
+    if (uses.length)
+      return {
+        instrument,
+        sections: [...new Set(uses.map((u) => u.section))],
+        local: true,
+      };
+  }
+}
+function editingScopeHtml(t: Target) {
+  const context = selectionContext(t),
+    structure = song(doc());
+  if (!context || (!context.local && context.sections.length <= 1)) return "";
+  return `<div class="sharing-notice"><strong>${context.local ? "Section variation" : "↳ One shared instrument"} · ${esc(context.instrument.name)}</strong><span>Changes here apply in ${context.sections
+    .filter((n) => n >= 0)
+    .map(
+      (n) =>
+        esc(structure.sections[n]?.name) + " @ " + structure.sections[n]?.start,
+    )
+    .join(", ")}.</span></div>`;
 }
 function editorHtml(t: Target) {
+  const context = selectionContext(t);
+  const resultEvents = context
+    ? instrumentEvents(context.instrument, events)
+    : (events[t.voice.id] ?? []);
   const node = t.node;
   const p = "pattern" in node ? node.pattern : t.pattern;
   const layer = "kind" in node && node.kind === "rewrite" ? node : undefined;
@@ -438,9 +477,9 @@ function editorHtml(t: Target) {
   if (opaque) {
     body = `<div class="notice source-notice">◇ NOT MODELLED · source stays visible and playable.</div><label class="label">SOURCE TEXT · edits evaluate automatically<textarea id="opaque-code" spellcheck="false">${esc(opaque.code)}</textarea></label><p class="help">Broken source shows an error, never a silent-looking empty lane.</p>`;
   } else if (layer) {
-    body = `<div class="notice amber-text">Order matters here. Shells apply from inside to outside; moving past a settings bag also changes its level.</div><div class="comparison"><div><span class="label">ENTERING THIS SHELL</span>${lane(before)}</div><div><span class="label">LEAVING THIS SHELL</span>${lane(after)}</div></div><h3>${esc(layer.name)} arguments</h3>${argForm(layer.name, layer.args, "layer")}<div class="actions" ${t.layerIndex === undefined ? "hidden" : ""}>${button("← Move inward", "shell-in")}${button("Move outward →", "shell-out")}${button("Remove shell", "shell-remove", 'class="danger"')}</div><div class="order-list">${p.layers.map((l, i) => button(`${i + 1} · ${esc(l.kind === "rewrite" ? l.name : l.kind === "settings" ? "settings bag" : "source")}`, "select", `data-id="${l.id}" class="${l.id === layer.id ? "current" : ""}"`)).join("")}</div>`;
+    body = `<div class="notice amber-text">Order matters here. Shells apply from inside to outside; moving past a settings bag also changes which rewrites apply to it.</div><div class="comparison"><div><span class="label">ENTERING THIS SHELL</span>${lane(before)}</div><div><span class="label">LEAVING THIS SHELL</span>${lane(after)}</div></div><h3>${esc(layer.name)} arguments</h3>${argForm(layer.name, layer.args, "layer")}<div class="actions" ${t.layerIndex === undefined ? "hidden" : ""}>${button("← Move inward", "shell-in")}${button("Move outward →", "shell-out")}${button("Remove shell", "shell-remove", 'class="danger"')}</div><div class="order-list">${p.layers.map((l, i) => button(`${i + 1} · ${esc(l.kind === "rewrite" ? l.name : l.kind === "settings" ? "settings bag" : "source")}`, "select", `data-id="${l.id}" class="${l.id === layer.id ? "current" : ""}"`)).join("")}</div>`;
   } else if ("kind" in node && node.kind === "settings") {
-    body = `<h3>Unordered settings · level ${(t.layerIndex ?? 0) + 1}</h3><div class="driver-tree">${node.settings.map((s) => button(esc(s.name), "select", `data-id="${s.id}"`)).join("")}</div>`;
+    body = `<h3>Settings at this ring</h3><div class="driver-tree">${node.settings.map((s) => button(esc(s.name), "select", `data-id="${s.id}"`)).join("")}</div>`;
   } else if (rule && rule.kind === "rewrite") {
     body = `<div class="notice">◉ Events come from <b>${esc(rule.name)}</b>. Individual notes cannot be moved: change the rule to change the rhythm.</div><h3>${esc(rule.name)}</h3>${argForm(rule.name, rule.args, "rule")}`;
     if (p.core.kind === "generator")
@@ -472,11 +511,11 @@ function editorHtml(t: Target) {
     body = `<h3>Shared pattern · ${esc(p.core.name)}</h3>${doc().shared[p.core.name] ? button("Inspect shared pattern", "select", `data-id="${doc().shared[p.core.name]!.id}"`) : '<div class="error-box">Missing shared definition</div>'}`;
   } else if (p.core.kind === "group") {
     body = `<h3>${esc(p.core.how)} contains</h3><div class="driver-tree">${p.core.parts.map((x, i) => button(`Part ${i + 1}${x.cycles ? " · " + x.cycles + " cycles" : ""}`, "select", `data-id="${x.pattern.id}"`)).join("")}</div>`;
-  } else body = "<p>Select a child to inspect its arguments.</p>";
+  } else body = "<p>Select a child to open its arguments.</p>";
   const children = targets({ ...doc(), voices: [t.voice] }).filter(
     (x) => x.parent?.id === p.id && x.id !== t.id && "core" in x.node,
   );
-  return `<section class="editor" role="dialog" aria-modal="true" aria-label="Edit ${esc(t.path.join(" › "))}"><div class="editor-head"><div><p class="eyebrow">ONE THING AT A TIME · ${kind}</p><h2 id="breadcrumb">${esc(t.path.join(" › "))}</h2></div>${button("Done ×", "done", 'class="done"')}</div><div class="editor-scroll"><div class="voice-preview"><div><span class="label">REAL RESULT · CYCLE ${cycle} · ${esc(t.voice.name)}</span>${errors[t.voice.id] ? `<div class="error-box">⚠ BROKEN · ${esc(errors[t.voice.id])}</div>` : lane(events[t.voice.id] ?? [], "", 60)}<div class="axis-labels"><span>start</span><span>½ cycle</span><span>end</span></div></div><figure>${ring(events[t.voice.id] ?? [])}<figcaption>read-only</figcaption></figure></div><div id="editor-error" role="alert">${warning ? `<p class="error-box">${esc(warning)}</p>` : ""}</div>${body}${t.setting ? `<div class="driver-tree"><span class="label">WHAT DRIVES ${esc(t.setting.name)}?</span>${button(`${esc(t.setting.value.core.kind)} › inspect`, "select", `data-id="${t.setting.value.id}"`)}${["constant", "sequence", "signal"].map((x) => button(`Use ${x}`, "driver", `data-kind="${x}"`)).join("")}</div>` : ""}${children.length ? `<div class="driver-tree"><span class="label">NESTED DRIVERS · FOLLOW TO INSPECT</span>${children.map((x) => button(esc(x.path.slice(t.path.length).join(" › ") || x.label), "select", `data-id="${x.id}"`)).join("")}</div>` : ""}<div class="context"><span class="label">OTHER SETTINGS · SELECT TO EDIT</span>${settings(
+  return `<section class="editor" role="dialog" aria-modal="true" aria-label="Edit ${esc(t.path.join(" › "))}"><div class="editor-head"><div><p class="eyebrow">ONE THING AT A TIME · ${kind}</p><h2 id="breadcrumb">${esc(t.path.join(" › "))}</h2></div>${button("Done ×", "done", 'class="done"')}</div><div class="editor-scroll"><div class="voice-preview"><div><span class="label">REAL RESULT · CYCLE ${cycle} · ${esc(context?.instrument.name ?? t.pattern.label ?? t.voice.name)}</span>${errors[t.voice.id] ? `<div class="error-box">⚠ BROKEN · ${esc(errors[t.voice.id])}</div>` : lane(events[t.voice.id] ?? [], "", 60)}<div class="axis-labels"><span>start</span><span>½ cycle</span><span>end</span></div></div><figure>${ring(resultEvents)}<figcaption>read-only</figcaption></figure></div><div id="editor-error" role="alert">${warning ? `<p class="error-box">${esc(warning)}</p>` : ""}</div>${editingScopeHtml(t)}${body}${t.setting ? `<div class="driver-tree"><span class="label">WHAT DRIVES ${esc(t.setting.name)}?</span>${button(`${esc(t.setting.value.core.kind)} › open driver`, "select", `data-id="${t.setting.value.id}"`)}${["constant", "sequence", "signal"].map((x) => button(`Use ${x}`, "driver", `data-kind="${x}"`)).join("")}</div>` : ""}${children.length ? `<div class="driver-tree"><span class="label">NESTED DRIVERS · CLICK TO OPEN</span>${children.map((x) => button(esc(x.path.slice(t.path.length).join(" › ") || x.label), "select", `data-id="${x.id}"`)).join("")}</div>` : ""}<div class="context"><span class="label">OTHER SETTINGS · SELECT TO EDIT</span>${settings(
     t.voice,
   )
     .filter((s) => s.id !== t.setting?.id)
@@ -548,6 +587,20 @@ async function refresh() {
     (events[id] ??= []).push(e);
   }
   if (r.error) for (const v of d.voices) errors[v.id] = r.error;
+  sampledDrivers = {};
+  driverErrors = {};
+  const drivers = driverDocument(d);
+  if (drivers) {
+    const sampled = await queryEvents(generate(drivers), c, c + 1);
+    if (token !== serial) return;
+    for (const e of sampled.events) {
+      const id = String(valueAt(e, "__driver"));
+      (sampledDrivers[id] ??= []).push(e);
+    }
+    if (sampled.error)
+      for (const v of drivers.voices)
+        driverErrors[v.id.replace("driver-", "")] = sampled.error;
+  }
   const t = selectedTarget();
   before = [];
   after = [];
@@ -750,11 +803,22 @@ function bind() {
           id = el.dataset.id;
         handle(action ?? "", id, el).catch((e) => {
           warning = String(e);
+          busy = false;
           render();
         });
       }),
   );
   document.querySelectorAll<SVGElement>("[data-select]").forEach((el) => {
+    const explain = () => {
+      const hint = document.querySelector(".map-key");
+      if (hint)
+        hint.textContent =
+          el.querySelector("title")?.textContent ??
+          el.getAttribute("aria-label") ??
+          "";
+    };
+    el.onfocus = explain;
+    el.onmouseenter = explain;
     el.onclick = () => choose(el.dataset.select ?? "").catch(fail);
     el.onkeydown = (e) => {
       if (e.key === "Enter" || e.key === " ") {
@@ -794,7 +858,7 @@ function bind() {
       zoom = Math.min(
         1,
         (window.innerWidth - (window.innerWidth > 650 ? 240 : 0)) /
-          (window.innerWidth <= 650 ? 400 : 1200),
+          (window.innerWidth <= 650 ? 420 : 1260),
       );
       pan = { x: 0, y: 0 };
       refresh().catch(fail);
@@ -983,6 +1047,35 @@ function bindAdd() {
 async function handle(action: string, id?: string, el?: HTMLElement) {
   const t = selectedTarget();
   switch (action) {
+    case "more-columns":
+      moreColumns = !moreColumns;
+      render();
+      break;
+    case "jump-section": {
+      const section = song(doc()).sections[Number(id)];
+      if (section) {
+        busy = true;
+        const playing = engine.playing;
+        engine.stop();
+        cycle = section.start;
+        phase = cycle;
+        lastCycle = cycle;
+        pending = undefined;
+        if (playing) await engine.play(playDoc(), cycle);
+        await refresh();
+      }
+      break;
+    }
+    case "cycle-prev":
+      cycle = Math.max(0, cycle - 1);
+      phase = cycle;
+      await refresh();
+      break;
+    case "cycle-next":
+      cycle++;
+      phase = cycle;
+      await refresh();
+      break;
     case "select":
       if (id) await choose(id);
       break;
@@ -1005,7 +1098,7 @@ async function handle(action: string, id?: string, el?: HTMLElement) {
         pending = undefined;
         queued = undefined;
       } else {
-        await engine.play(playDoc());
+        await engine.play(playDoc(), cycle);
       }
       render();
       break;
@@ -1024,6 +1117,27 @@ async function handle(action: string, id?: string, el?: HTMLElement) {
     case "add-voice":
       await changed(addVoice(doc()));
       break;
+    case "local-switch": {
+      busy = true;
+      const response = await fetch("/__local/switch-angel");
+      if (!response.ok) {
+        busy = false;
+        warning = "Switch Angel source unavailable on this machine";
+        render();
+        break;
+      }
+      const imported = importStrudel(await response.text());
+      engine.stop();
+      history.set(imported.doc);
+      piece = "local-switch";
+      selected = "";
+      open = false;
+      cycle = 0;
+      phase = 0;
+      warning = imported.warnings.join(" · ");
+      await refresh();
+      break;
+    }
     case "paste":
       paste = true;
       render();
@@ -1042,6 +1156,13 @@ async function handle(action: string, id?: string, el?: HTMLElement) {
       warning = r.warnings.join(" ");
       paste = false;
       piece = "paste";
+      cycle = 0;
+      phase = 0;
+      lastCycle = 0;
+      pending = undefined;
+      solo = "";
+      rowOrder = [];
+      collapsed.clear();
       selected = r.doc.voices[0]?.id ?? "";
       open = !!selected;
       await refresh();
@@ -1059,7 +1180,7 @@ async function handle(action: string, id?: string, el?: HTMLElement) {
       zoom = Math.min(
         1,
         (document.querySelector(".map-container")?.clientWidth ?? 1200) /
-          (window.innerWidth <= 650 ? 400 : 1200),
+          (window.innerWidth <= 650 ? 420 : 1260),
       );
       pan = { x: 0, y: 0 };
       render();
@@ -1447,7 +1568,7 @@ Object.assign(window, {
       zoom = Math.min(
         1,
         (window.innerWidth - (window.innerWidth > 650 ? 240 : 0)) /
-          (window.innerWidth <= 650 ? 400 : 1200),
+          (window.innerWidth <= 650 ? 420 : 1260),
       );
       await refresh();
     },

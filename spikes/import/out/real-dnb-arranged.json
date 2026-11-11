@@ -1,0 +1,2289 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n98",
+      "tier": 1,
+      "span": {
+        "start": 2485,
+        "end": 2579
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n148",
+        "tier": 1,
+        "span": {
+          "start": 2485,
+          "end": 2579
+        },
+        "core": {
+          "kind": "group",
+          "how": "arrange",
+          "parts": [
+            {
+              "cycles": 4,
+              "pattern": {
+                "id": "n112",
+                "tier": 1,
+                "span": {
+                  "start": 1718,
+                  "end": 1781
+                },
+                "core": {
+                  "kind": "group",
+                  "how": "stack",
+                  "parts": [
+                    {
+                      "pattern": {
+                        "id": "n99",
+                        "tier": 1,
+                        "span": {
+                          "start": 1728,
+                          "end": 1735
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "darkPad"
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "pattern": {
+                        "id": "n100",
+                        "tier": 1,
+                        "span": {
+                          "start": 1740,
+                          "end": 1750
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "vocalIntro"
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "pattern": {
+                        "id": "n101",
+                        "tier": 1,
+                        "span": {
+                          "start": 1040,
+                          "end": 1048
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "dnbDrums"
+                        },
+                        "layers": [
+                          {
+                            "id": "n106",
+                            "tier": 1,
+                            "span": {
+                              "start": 1040,
+                              "end": 1086
+                            },
+                            "kind": "settings",
+                            "settings": [
+                              {
+                                "id": "n102",
+                                "tier": 1,
+                                "span": {
+                                  "start": 1040,
+                                  "end": 1086
+                                },
+                                "name": "hcutoff",
+                                "value": {
+                                  "id": "n103",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 1057,
+                                    "end": 1060
+                                  },
+                                  "core": {
+                                    "kind": "signal",
+                                    "shape": "saw"
+                                  },
+                                  "layers": [
+                                    {
+                                      "id": "n104",
+                                      "tier": 1,
+                                      "span": {
+                                        "start": 1057,
+                                        "end": 1077
+                                      },
+                                      "kind": "rewrite",
+                                      "name": "range",
+                                      "args": [
+                                        {
+                                          "kind": "literal",
+                                          "value": 1200
+                                        },
+                                        {
+                                          "kind": "literal",
+                                          "value": 300
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "id": "n105",
+                                      "tier": 1,
+                                      "span": {
+                                        "start": 1057,
+                                        "end": 1085
+                                      },
+                                      "kind": "rewrite",
+                                      "name": "slow",
+                                      "args": [
+                                        {
+                                          "kind": "literal",
+                                          "value": 4
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              },
+                              {
+                                "id": "n107",
+                                "tier": 1,
+                                "span": {
+                                  "start": 1040,
+                                  "end": 1100
+                                },
+                                "name": "gain",
+                                "value": {
+                                  "id": "n108",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 1096,
+                                    "end": 1099
+                                  },
+                                  "core": {
+                                    "kind": "constant",
+                                    "value": 0.7
+                                  },
+                                  "layers": []
+                                }
+                              }
+                            ]
+                          },
+                          {
+                            "id": "n111",
+                            "tier": 1,
+                            "span": {
+                              "start": 1755,
+                              "end": 1778
+                            },
+                            "kind": "settings",
+                            "settings": [
+                              {
+                                "id": "n109",
+                                "tier": 1,
+                                "span": {
+                                  "start": 1755,
+                                  "end": 1778
+                                },
+                                "name": "hcutoff",
+                                "value": {
+                                  "id": "n110",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 1773,
+                                    "end": 1777
+                                  },
+                                  "core": {
+                                    "kind": "constant",
+                                    "value": 1500
+                                  },
+                                  "layers": []
+                                }
+                              }
+                            ]
+                          }
+                        ],
+                        "comment": "High-passed filtered breakbeat for the intro and build-up",
+                        "label": "filteredDrums"
+                      }
+                    }
+                  ]
+                },
+                "layers": [],
+                "comment": "1. Intro: Atmospheric pad, deep vocal, and high-passed drums (4 bars)",
+                "label": "intro"
+              }
+            },
+            {
+              "cycles": 4,
+              "pattern": {
+                "id": "n128",
+                "tier": 1,
+                "span": {
+                  "start": 1877,
+                  "end": 2007
+                },
+                "core": {
+                  "kind": "group",
+                  "how": "stack",
+                  "parts": [
+                    {
+                      "pattern": {
+                        "id": "n113",
+                        "tier": 1,
+                        "span": {
+                          "start": 1887,
+                          "end": 1894
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "darkPad"
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "pattern": {
+                        "id": "n114",
+                        "tier": 1,
+                        "span": {
+                          "start": 1899,
+                          "end": 1909
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "vocalIntro"
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "pattern": {
+                        "id": "n115",
+                        "tier": 1,
+                        "span": {
+                          "start": 1914,
+                          "end": 1923
+                        },
+                        "core": {
+                          "kind": "generator",
+                          "name": "s",
+                          "args": [
+                            {
+                              "kind": "pattern",
+                              "pattern": {
+                                "id": "n116",
+                                "tier": 1,
+                                "span": {
+                                  "start": 1916,
+                                  "end": 1922
+                                },
+                                "core": {
+                                  "kind": "sequence",
+                                  "steps": [
+                                    {
+                                      "kind": "other",
+                                      "notation": "sd*8"
+                                    }
+                                  ],
+                                  "notation": "sd*8"
+                                },
+                                "layers": []
+                              }
+                            }
+                          ]
+                        },
+                        "layers": [
+                          {
+                            "id": "n121",
+                            "tier": 1,
+                            "span": {
+                              "start": 1914,
+                              "end": 1957
+                            },
+                            "kind": "settings",
+                            "settings": [
+                              {
+                                "id": "n117",
+                                "tier": 1,
+                                "span": {
+                                  "start": 1914,
+                                  "end": 1957
+                                },
+                                "name": "gain",
+                                "value": {
+                                  "id": "n118",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 1929,
+                                    "end": 1932
+                                  },
+                                  "core": {
+                                    "kind": "signal",
+                                    "shape": "saw"
+                                  },
+                                  "layers": [
+                                    {
+                                      "id": "n119",
+                                      "tier": 1,
+                                      "span": {
+                                        "start": 1929,
+                                        "end": 1948
+                                      },
+                                      "kind": "rewrite",
+                                      "name": "range",
+                                      "args": [
+                                        {
+                                          "kind": "literal",
+                                          "value": 0.2
+                                        },
+                                        {
+                                          "kind": "literal",
+                                          "value": 0.9
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "id": "n120",
+                                      "tier": 1,
+                                      "span": {
+                                        "start": 1929,
+                                        "end": 1956
+                                      },
+                                      "kind": "rewrite",
+                                      "name": "slow",
+                                      "args": [
+                                        {
+                                          "kind": "literal",
+                                          "value": 4
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "pattern": {
+                        "id": "n122",
+                        "tier": 1,
+                        "span": {
+                          "start": 1962,
+                          "end": 1971
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "reeseBass"
+                        },
+                        "layers": [
+                          {
+                            "id": "n127",
+                            "tier": 1,
+                            "span": {
+                              "start": 1962,
+                              "end": 2004
+                            },
+                            "kind": "settings",
+                            "settings": [
+                              {
+                                "id": "n123",
+                                "tier": 1,
+                                "span": {
+                                  "start": 1962,
+                                  "end": 2004
+                                },
+                                "name": "cutoff",
+                                "value": {
+                                  "id": "n124",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 1976,
+                                    "end": 1979
+                                  },
+                                  "core": {
+                                    "kind": "signal",
+                                    "shape": "saw"
+                                  },
+                                  "layers": [
+                                    {
+                                      "id": "n125",
+                                      "tier": 1,
+                                      "span": {
+                                        "start": 1976,
+                                        "end": 1995
+                                      },
+                                      "kind": "rewrite",
+                                      "name": "range",
+                                      "args": [
+                                        {
+                                          "kind": "literal",
+                                          "value": 100
+                                        },
+                                        {
+                                          "kind": "literal",
+                                          "value": 300
+                                        }
+                                      ]
+                                    },
+                                    {
+                                      "id": "n126",
+                                      "tier": 1,
+                                      "span": {
+                                        "start": 1976,
+                                        "end": 2003
+                                      },
+                                      "kind": "rewrite",
+                                      "name": "slow",
+                                      "args": [
+                                        {
+                                          "kind": "literal",
+                                          "value": 4
+                                        }
+                                      ]
+                                    }
+                                  ]
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "layers": [],
+                "comment": "2. Build-up: Snare roll accelerates while filter opens up (4 bars)",
+                "label": "buildSection"
+              }
+            },
+            {
+              "cycles": 8,
+              "pattern": {
+                "id": "n129",
+                "tier": 1,
+                "span": {
+                  "start": 2538,
+                  "end": 2542
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "drop"
+                },
+                "layers": []
+              }
+            },
+            {
+              "cycles": 4,
+              "pattern": {
+                "id": "n146",
+                "tier": 1,
+                "span": {
+                  "start": 2288,
+                  "end": 2436
+                },
+                "core": {
+                  "kind": "group",
+                  "how": "stack",
+                  "parts": [
+                    {
+                      "pattern": {
+                        "id": "n130",
+                        "tier": 1,
+                        "span": {
+                          "start": 2298,
+                          "end": 2305
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "darkPad"
+                        },
+                        "layers": [
+                          {
+                            "id": "n133",
+                            "tier": 1,
+                            "span": {
+                              "start": 2298,
+                              "end": 2315
+                            },
+                            "kind": "settings",
+                            "settings": [
+                              {
+                                "id": "n131",
+                                "tier": 1,
+                                "span": {
+                                  "start": 2298,
+                                  "end": 2315
+                                },
+                                "name": "cutoff",
+                                "value": {
+                                  "id": "n132",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 2310,
+                                    "end": 2314
+                                  },
+                                  "core": {
+                                    "kind": "constant",
+                                    "value": 1400
+                                  },
+                                  "layers": []
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    },
+                    {
+                      "pattern": {
+                        "id": "n134",
+                        "tier": 1,
+                        "span": {
+                          "start": 2320,
+                          "end": 2330
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "vocalIntro"
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "pattern": {
+                        "id": "n135",
+                        "tier": 1,
+                        "span": {
+                          "start": 2335,
+                          "end": 2363
+                        },
+                        "core": {
+                          "kind": "generator",
+                          "name": "note",
+                          "args": [
+                            {
+                              "kind": "pattern",
+                              "pattern": {
+                                "id": "n136",
+                                "tier": 1,
+                                "span": {
+                                  "start": 2340,
+                                  "end": 2362
+                                },
+                                "core": {
+                                  "kind": "sequence",
+                                  "steps": [
+                                    {
+                                      "kind": "value",
+                                      "value": "g4"
+                                    },
+                                    {
+                                      "kind": "rest"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "eb4"
+                                    },
+                                    {
+                                      "kind": "rest"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "d4"
+                                    },
+                                    {
+                                      "kind": "rest"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "c4"
+                                    },
+                                    {
+                                      "kind": "rest"
+                                    }
+                                  ],
+                                  "notation": "g4 ~ eb4 ~ d4 ~ c4 ~"
+                                },
+                                "layers": []
+                              }
+                            }
+                          ]
+                        },
+                        "layers": [
+                          {
+                            "id": "n139",
+                            "tier": 1,
+                            "span": {
+                              "start": 2335,
+                              "end": 2383
+                            },
+                            "kind": "settings",
+                            "settings": [
+                              {
+                                "id": "n137",
+                                "tier": 1,
+                                "span": {
+                                  "start": 2335,
+                                  "end": 2383
+                                },
+                                "name": "s",
+                                "value": {
+                                  "id": "n138",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 2372,
+                                    "end": 2382
+                                  },
+                                  "core": {
+                                    "kind": "sequence",
+                                    "steps": [
+                                      {
+                                        "kind": "value",
+                                        "value": "triangle"
+                                      }
+                                    ],
+                                    "notation": "triangle"
+                                  },
+                                  "layers": []
+                                }
+                              },
+                              {
+                                "id": "n140",
+                                "tier": 1,
+                                "span": {
+                                  "start": 2335,
+                                  "end": 2400
+                                },
+                                "name": "delay",
+                                "value": {
+                                  "id": "n141",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 2396,
+                                    "end": 2399
+                                  },
+                                  "core": {
+                                    "kind": "constant",
+                                    "value": 0.5
+                                  },
+                                  "layers": []
+                                }
+                              },
+                              {
+                                "id": "n142",
+                                "tier": 1,
+                                "span": {
+                                  "start": 2335,
+                                  "end": 2416
+                                },
+                                "name": "room",
+                                "value": {
+                                  "id": "n143",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 2412,
+                                    "end": 2415
+                                  },
+                                  "core": {
+                                    "kind": "constant",
+                                    "value": 0.9
+                                  },
+                                  "layers": []
+                                }
+                              },
+                              {
+                                "id": "n144",
+                                "tier": 1,
+                                "span": {
+                                  "start": 2335,
+                                  "end": 2433
+                                },
+                                "name": "gain",
+                                "value": {
+                                  "id": "n145",
+                                  "tier": 1,
+                                  "span": {
+                                    "start": 2428,
+                                    "end": 2432
+                                  },
+                                  "core": {
+                                    "kind": "constant",
+                                    "value": 0.35
+                                  },
+                                  "layers": []
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                },
+                "layers": [],
+                "comment": "4. Breakdown: Drums cut out completely; spacious pads and vocal take over (4 bars)",
+                "label": "breakdown"
+              }
+            },
+            {
+              "cycles": 8,
+              "pattern": {
+                "id": "n147",
+                "tier": 1,
+                "span": {
+                  "start": 2571,
+                  "end": 2575
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "drop"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [],
+        "comment": "--- FULL ARRANGEMENT (28 Bars Total) ---"
+      }
+    }
+  ],
+  "shared": {
+    "vocalIntro": {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 147,
+        "end": 157
+      },
+      "core": {
+        "kind": "generator",
+        "name": "s",
+        "args": [
+          {
+            "kind": "pattern",
+            "pattern": {
+              "id": "n2",
+              "tier": 1,
+              "span": {
+                "start": 149,
+                "end": 156
+              },
+              "core": {
+                "kind": "sequence",
+                "steps": [
+                  {
+                    "kind": "other",
+                    "notation": "ade:1"
+                  }
+                ],
+                "notation": "ade:1"
+              },
+              "layers": []
+            }
+          }
+        ]
+      },
+      "layers": [
+        {
+          "id": "n3",
+          "tier": 1,
+          "span": {
+            "start": 147,
+            "end": 169
+          },
+          "kind": "rewrite",
+          "name": "slow",
+          "args": [
+            {
+              "kind": "literal",
+              "value": 4
+            }
+          ]
+        },
+        {
+          "id": "n6",
+          "tier": 1,
+          "span": {
+            "start": 147,
+            "end": 185
+          },
+          "kind": "settings",
+          "settings": [
+            {
+              "id": "n4",
+              "tier": 1,
+              "span": {
+                "start": 147,
+                "end": 185
+              },
+              "name": "speed",
+              "value": {
+                "id": "n5",
+                "tier": 1,
+                "span": {
+                  "start": 180,
+                  "end": 184
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.85
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n7",
+              "tier": 1,
+              "span": {
+                "start": 147,
+                "end": 266
+              },
+              "name": "cutoff",
+              "value": {
+                "id": "n8",
+                "tier": 1,
+                "span": {
+                  "start": 261,
+                  "end": 265
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 2200
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n9",
+              "tier": 1,
+              "span": {
+                "start": 147,
+                "end": 280
+              },
+              "name": "room",
+              "value": {
+                "id": "n10",
+                "tier": 1,
+                "span": {
+                  "start": 276,
+                  "end": 279
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.9
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n11",
+              "tier": 1,
+              "span": {
+                "start": 147,
+                "end": 295
+              },
+              "name": "roomsize",
+              "value": {
+                "id": "n12",
+                "tier": 1,
+                "span": {
+                  "start": 290,
+                  "end": 294
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.95
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n13",
+              "tier": 1,
+              "span": {
+                "start": 147,
+                "end": 312
+              },
+              "name": "delay",
+              "value": {
+                "id": "n14",
+                "tier": 1,
+                "span": {
+                  "start": 306,
+                  "end": 311
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.375
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n15",
+              "tier": 1,
+              "span": {
+                "start": 147,
+                "end": 326
+              },
+              "name": "gain",
+              "value": {
+                "id": "n16",
+                "tier": 1,
+                "span": {
+                  "start": 322,
+                  "end": 325
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.8
+                },
+                "layers": []
+              }
+            }
+          ]
+        }
+      ],
+      "comment": "1. Pitched-down atmospheric vocal phrase for the intro & breakdown",
+      "label": "vocalIntro"
+    },
+    "dnbDrums": {
+      "id": "n42",
+      "tier": 1,
+      "span": {
+        "start": 740,
+        "end": 952
+      },
+      "core": {
+        "kind": "group",
+        "how": "stack",
+        "parts": [
+          {
+            "pattern": {
+              "id": "n17",
+              "tier": 1,
+              "span": {
+                "start": 750,
+                "end": 772
+              },
+              "core": {
+                "kind": "generator",
+                "name": "s",
+                "args": [
+                  {
+                    "kind": "pattern",
+                    "pattern": {
+                      "id": "n18",
+                      "tier": 1,
+                      "span": {
+                        "start": 752,
+                        "end": 771
+                      },
+                      "core": {
+                        "kind": "sequence",
+                        "steps": [
+                          {
+                            "kind": "value",
+                            "value": "bd"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "bd"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "rest"
+                          }
+                        ],
+                        "notation": "bd ~ ~ ~ ~ bd ~ ~"
+                      },
+                      "layers": []
+                    }
+                  }
+                ]
+              },
+              "layers": [
+                {
+                  "id": "n21",
+                  "tier": 1,
+                  "span": {
+                    "start": 750,
+                    "end": 784
+                  },
+                  "kind": "settings",
+                  "settings": [
+                    {
+                      "id": "n19",
+                      "tier": 1,
+                      "span": {
+                        "start": 750,
+                        "end": 784
+                      },
+                      "name": "shape",
+                      "value": {
+                        "id": "n20",
+                        "tier": 1,
+                        "span": {
+                          "start": 779,
+                          "end": 783
+                        },
+                        "core": {
+                          "kind": "constant",
+                          "value": 0.35
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "pattern": {
+              "id": "n22",
+              "tier": 1,
+              "span": {
+                "start": 789,
+                "end": 811
+              },
+              "core": {
+                "kind": "generator",
+                "name": "s",
+                "args": [
+                  {
+                    "kind": "pattern",
+                    "pattern": {
+                      "id": "n23",
+                      "tier": 1,
+                      "span": {
+                        "start": 791,
+                        "end": 810
+                      },
+                      "core": {
+                        "kind": "sequence",
+                        "steps": [
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "sd"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "sd"
+                          },
+                          {
+                            "kind": "rest"
+                          }
+                        ],
+                        "notation": "~ ~ sd ~ ~ ~ sd ~"
+                      },
+                      "layers": []
+                    }
+                  }
+                ]
+              },
+              "layers": [
+                {
+                  "id": "n26",
+                  "tier": 1,
+                  "span": {
+                    "start": 789,
+                    "end": 822
+                  },
+                  "kind": "settings",
+                  "settings": [
+                    {
+                      "id": "n24",
+                      "tier": 1,
+                      "span": {
+                        "start": 789,
+                        "end": 822
+                      },
+                      "name": "room",
+                      "value": {
+                        "id": "n25",
+                        "tier": 1,
+                        "span": {
+                          "start": 817,
+                          "end": 821
+                        },
+                        "core": {
+                          "kind": "constant",
+                          "value": 0.25
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "id": "n27",
+                      "tier": 1,
+                      "span": {
+                        "start": 789,
+                        "end": 833
+                      },
+                      "name": "gain",
+                      "value": {
+                        "id": "n28",
+                        "tier": 1,
+                        "span": {
+                          "start": 828,
+                          "end": 832
+                        },
+                        "core": {
+                          "kind": "constant",
+                          "value": 0.95
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "pattern": {
+              "id": "n29",
+              "tier": 1,
+              "span": {
+                "start": 838,
+                "end": 847
+              },
+              "core": {
+                "kind": "generator",
+                "name": "s",
+                "args": [
+                  {
+                    "kind": "pattern",
+                    "pattern": {
+                      "id": "n30",
+                      "tier": 1,
+                      "span": {
+                        "start": 840,
+                        "end": 846
+                      },
+                      "core": {
+                        "kind": "sequence",
+                        "steps": [
+                          {
+                            "kind": "other",
+                            "notation": "hh*8"
+                          }
+                        ],
+                        "notation": "hh*8"
+                      },
+                      "layers": []
+                    }
+                  }
+                ]
+              },
+              "layers": [
+                {
+                  "id": "n34",
+                  "tier": 1,
+                  "span": {
+                    "start": 838,
+                    "end": 877
+                  },
+                  "kind": "settings",
+                  "settings": [
+                    {
+                      "id": "n31",
+                      "tier": 1,
+                      "span": {
+                        "start": 838,
+                        "end": 877
+                      },
+                      "name": "gain",
+                      "value": {
+                        "id": "n32",
+                        "tier": 1,
+                        "span": {
+                          "start": 853,
+                          "end": 859
+                        },
+                        "core": {
+                          "kind": "signal",
+                          "shape": "perlin"
+                        },
+                        "layers": [
+                          {
+                            "id": "n33",
+                            "tier": 1,
+                            "span": {
+                              "start": 853,
+                              "end": 876
+                            },
+                            "kind": "rewrite",
+                            "name": "range",
+                            "args": [
+                              {
+                                "kind": "literal",
+                                "value": 0.4
+                              },
+                              {
+                                "kind": "literal",
+                                "value": 0.75
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "pattern": {
+              "id": "n35",
+              "tier": 1,
+              "span": {
+                "start": 882,
+                "end": 904
+              },
+              "core": {
+                "kind": "generator",
+                "name": "s",
+                "args": [
+                  {
+                    "kind": "pattern",
+                    "pattern": {
+                      "id": "n36",
+                      "tier": 1,
+                      "span": {
+                        "start": 884,
+                        "end": 903
+                      },
+                      "core": {
+                        "kind": "sequence",
+                        "steps": [
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "hh"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "rest"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "hh"
+                          },
+                          {
+                            "kind": "rest"
+                          }
+                        ],
+                        "notation": "~ ~ ~ hh ~ ~ hh ~"
+                      },
+                      "layers": []
+                    }
+                  }
+                ]
+              },
+              "layers": [
+                {
+                  "id": "n39",
+                  "tier": 1,
+                  "span": {
+                    "start": 882,
+                    "end": 912
+                  },
+                  "kind": "settings",
+                  "settings": [
+                    {
+                      "id": "n37",
+                      "tier": 1,
+                      "span": {
+                        "start": 882,
+                        "end": 912
+                      },
+                      "name": "s",
+                      "value": {
+                        "id": "n38",
+                        "tier": 1,
+                        "span": {
+                          "start": 907,
+                          "end": 911
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "oh"
+                            }
+                          ],
+                          "notation": "oh"
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "id": "n40",
+                      "tier": 1,
+                      "span": {
+                        "start": 882,
+                        "end": 922
+                      },
+                      "name": "gain",
+                      "value": {
+                        "id": "n41",
+                        "tier": 1,
+                        "span": {
+                          "start": 918,
+                          "end": 921
+                        },
+                        "core": {
+                          "kind": "constant",
+                          "value": 0.4
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "layers": [],
+      "comment": "Classic syncopated 2-step DnB beat",
+      "label": "dnbDrums"
+    },
+    "reeseBass": {
+      "id": "n43",
+      "tier": 1,
+      "span": {
+        "start": 1186,
+        "end": 1227
+      },
+      "core": {
+        "kind": "generator",
+        "name": "note",
+        "args": [
+          {
+            "kind": "pattern",
+            "pattern": {
+              "id": "n44",
+              "tier": 1,
+              "span": {
+                "start": 1191,
+                "end": 1226
+              },
+              "core": {
+                "kind": "sequence",
+                "steps": [
+                  {
+                    "kind": "alternate",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "c1"
+                      },
+                      {
+                        "kind": "rest"
+                      },
+                      {
+                        "kind": "sub",
+                        "steps": [
+                          {
+                            "kind": "value",
+                            "value": "eb1"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "d1"
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "rest"
+                      },
+                      {
+                        "kind": "value",
+                        "value": "f1"
+                      },
+                      {
+                        "kind": "rest"
+                      },
+                      {
+                        "kind": "sub",
+                        "steps": [
+                          {
+                            "kind": "value",
+                            "value": "g1"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "bb1"
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "rest"
+                      }
+                    ]
+                  }
+                ],
+                "notation": "<c1 ~ [eb1 d1] ~ f1 ~ [g1 bb1] ~>"
+              },
+              "layers": []
+            }
+          }
+        ]
+      },
+      "layers": [
+        {
+          "id": "n47",
+          "tier": 1,
+          "span": {
+            "start": 1186,
+            "end": 1245
+          },
+          "kind": "settings",
+          "settings": [
+            {
+              "id": "n45",
+              "tier": 1,
+              "span": {
+                "start": 1186,
+                "end": 1245
+              },
+              "name": "s",
+              "value": {
+                "id": "n46",
+                "tier": 1,
+                "span": {
+                  "start": 1234,
+                  "end": 1244
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "sawtooth"
+                    }
+                  ],
+                  "notation": "sawtooth"
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n48",
+              "tier": 1,
+              "span": {
+                "start": 1186,
+                "end": 1283
+              },
+              "name": "cutoff",
+              "value": {
+                "id": "n49",
+                "tier": 1,
+                "span": {
+                  "start": 1254,
+                  "end": 1258
+                },
+                "core": {
+                  "kind": "signal",
+                  "shape": "sine"
+                },
+                "layers": [
+                  {
+                    "id": "n50",
+                    "tier": 1,
+                    "span": {
+                      "start": 1254,
+                      "end": 1274
+                    },
+                    "kind": "rewrite",
+                    "name": "range",
+                    "args": [
+                      {
+                        "kind": "literal",
+                        "value": 180
+                      },
+                      {
+                        "kind": "literal",
+                        "value": 650
+                      }
+                    ]
+                  },
+                  {
+                    "id": "n51",
+                    "tier": 1,
+                    "span": {
+                      "start": 1254,
+                      "end": 1282
+                    },
+                    "kind": "rewrite",
+                    "name": "slow",
+                    "args": [
+                      {
+                        "kind": "literal",
+                        "value": 2
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "n52",
+              "tier": 1,
+              "span": {
+                "start": 1186,
+                "end": 1324
+              },
+              "name": "resonance",
+              "value": {
+                "id": "n53",
+                "tier": 1,
+                "span": {
+                  "start": 1322,
+                  "end": 1323
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 6
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n54",
+              "tier": 1,
+              "span": {
+                "start": 1186,
+                "end": 1340
+              },
+              "name": "shape",
+              "value": {
+                "id": "n55",
+                "tier": 1,
+                "span": {
+                  "start": 1335,
+                  "end": 1339
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.55
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n56",
+              "tier": 1,
+              "span": {
+                "start": 1186,
+                "end": 1407
+              },
+              "name": "gain",
+              "value": {
+                "id": "n57",
+                "tier": 1,
+                "span": {
+                  "start": 1402,
+                  "end": 1406
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.95
+                },
+                "layers": []
+              }
+            }
+          ]
+        }
+      ],
+      "comment": "Gritty, growling Reese bassline",
+      "label": "reeseBass"
+    },
+    "darkPad": {
+      "id": "n58",
+      "tier": 1,
+      "span": {
+        "start": 1453,
+        "end": 1493
+      },
+      "core": {
+        "kind": "generator",
+        "name": "note",
+        "args": [
+          {
+            "kind": "pattern",
+            "pattern": {
+              "id": "n59",
+              "tier": 1,
+              "span": {
+                "start": 1458,
+                "end": 1492
+              },
+              "core": {
+                "kind": "sequence",
+                "steps": [
+                  {
+                    "kind": "alternate",
+                    "steps": [
+                      {
+                        "kind": "together",
+                        "steps": [
+                          {
+                            "kind": "value",
+                            "value": "c3"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "eb3"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "g3"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "d4"
+                          }
+                        ]
+                      },
+                      {
+                        "kind": "together",
+                        "steps": [
+                          {
+                            "kind": "value",
+                            "value": "ab2"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "eb3"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "g3"
+                          },
+                          {
+                            "kind": "value",
+                            "value": "c4"
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ],
+                "notation": "<[c3,eb3,g3,d4] [ab2,eb3,g3,c4]>"
+              },
+              "layers": []
+            }
+          }
+        ]
+      },
+      "layers": [
+        {
+          "id": "n60",
+          "tier": 1,
+          "span": {
+            "start": 1453,
+            "end": 1505
+          },
+          "kind": "rewrite",
+          "name": "slow",
+          "args": [
+            {
+              "kind": "literal",
+              "value": 2
+            }
+          ]
+        },
+        {
+          "id": "n63",
+          "tier": 1,
+          "span": {
+            "start": 1453,
+            "end": 1523
+          },
+          "kind": "settings",
+          "settings": [
+            {
+              "id": "n61",
+              "tier": 1,
+              "span": {
+                "start": 1453,
+                "end": 1523
+              },
+              "name": "s",
+              "value": {
+                "id": "n62",
+                "tier": 1,
+                "span": {
+                  "start": 1512,
+                  "end": 1522
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "value",
+                      "value": "supersaw"
+                    }
+                  ],
+                  "notation": "supersaw"
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n64",
+              "tier": 1,
+              "span": {
+                "start": 1453,
+                "end": 1536
+              },
+              "name": "cutoff",
+              "value": {
+                "id": "n65",
+                "tier": 1,
+                "span": {
+                  "start": 1532,
+                  "end": 1535
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 900
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n66",
+              "tier": 1,
+              "span": {
+                "start": 1453,
+                "end": 1552
+              },
+              "name": "attack",
+              "value": {
+                "id": "n67",
+                "tier": 1,
+                "span": {
+                  "start": 1548,
+                  "end": 1551
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.5
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n68",
+              "tier": 1,
+              "span": {
+                "start": 1453,
+                "end": 1569
+              },
+              "name": "release",
+              "value": {
+                "id": "n69",
+                "tier": 1,
+                "span": {
+                  "start": 1565,
+                  "end": 1568
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 1.5
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n70",
+              "tier": 1,
+              "span": {
+                "start": 1453,
+                "end": 1583
+              },
+              "name": "room",
+              "value": {
+                "id": "n71",
+                "tier": 1,
+                "span": {
+                  "start": 1579,
+                  "end": 1582
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.8
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n72",
+              "tier": 1,
+              "span": {
+                "start": 1453,
+                "end": 1598
+              },
+              "name": "gain",
+              "value": {
+                "id": "n73",
+                "tier": 1,
+                "span": {
+                  "start": 1593,
+                  "end": 1597
+                },
+                "core": {
+                  "kind": "constant",
+                  "value": 0.45
+                },
+                "layers": []
+              }
+            }
+          ]
+        }
+      ],
+      "comment": "Dark, eerie minor pad",
+      "label": "darkPad"
+    },
+    "drop": {
+      "id": "n97",
+      "tier": 1,
+      "span": {
+        "start": 2109,
+        "end": 2179
+      },
+      "core": {
+        "kind": "group",
+        "how": "stack",
+        "parts": [
+          {
+            "pattern": {
+              "id": "n74",
+              "tier": 1,
+              "span": {
+                "start": 2119,
+                "end": 2127
+              },
+              "core": {
+                "kind": "ref",
+                "name": "dnbDrums"
+              },
+              "layers": []
+            }
+          },
+          {
+            "pattern": {
+              "id": "n75",
+              "tier": 1,
+              "span": {
+                "start": 2132,
+                "end": 2141
+              },
+              "core": {
+                "kind": "ref",
+                "name": "reeseBass"
+              },
+              "layers": []
+            }
+          },
+          {
+            "pattern": {
+              "id": "n76",
+              "tier": 1,
+              "span": {
+                "start": 2146,
+                "end": 2153
+              },
+              "core": {
+                "kind": "ref",
+                "name": "darkPad"
+              },
+              "layers": [
+                {
+                  "id": "n79",
+                  "tier": 1,
+                  "span": {
+                    "start": 2146,
+                    "end": 2162
+                  },
+                  "kind": "settings",
+                  "settings": [
+                    {
+                      "id": "n77",
+                      "tier": 1,
+                      "span": {
+                        "start": 2146,
+                        "end": 2162
+                      },
+                      "name": "cutoff",
+                      "value": {
+                        "id": "n78",
+                        "tier": 1,
+                        "span": {
+                          "start": 2158,
+                          "end": 2161
+                        },
+                        "core": {
+                          "kind": "constant",
+                          "value": 600
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "pattern": {
+              "id": "n80",
+              "tier": 1,
+              "span": {
+                "start": 419,
+                "end": 450
+              },
+              "core": {
+                "kind": "generator",
+                "name": "s",
+                "args": [
+                  {
+                    "kind": "pattern",
+                    "pattern": {
+                      "id": "n81",
+                      "tier": 1,
+                      "span": {
+                        "start": 421,
+                        "end": 449
+                      },
+                      "core": {
+                        "kind": "sequence",
+                        "steps": [
+                          {
+                            "kind": "other",
+                            "notation": "speech:3"
+                          },
+                          {
+                            "kind": "other",
+                            "notation": "speech:1"
+                          },
+                          {
+                            "kind": "other",
+                            "notation": "speech:5"
+                          }
+                        ],
+                        "notation": "speech:3 speech:1 speech:5"
+                      },
+                      "layers": []
+                    }
+                  }
+                ]
+              },
+              "layers": [
+                {
+                  "id": "n82",
+                  "tier": 1,
+                  "span": {
+                    "start": 419,
+                    "end": 484
+                  },
+                  "kind": "rewrite",
+                  "name": "struct",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n83",
+                        "tier": 1,
+                        "span": {
+                          "start": 462,
+                          "end": 483
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "x"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "x"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "sub",
+                              "steps": [
+                                {
+                                  "kind": "value",
+                                  "value": "x"
+                                },
+                                {
+                                  "kind": "value",
+                                  "value": "x"
+                                }
+                              ]
+                            }
+                          ],
+                          "notation": "~ ~ ~ x ~ x ~ [x x]"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                {
+                  "id": "n86",
+                  "tier": 1,
+                  "span": {
+                    "start": 419,
+                    "end": 530
+                  },
+                  "kind": "settings",
+                  "settings": [
+                    {
+                      "id": "n84",
+                      "tier": 1,
+                      "span": {
+                        "start": 419,
+                        "end": 530
+                      },
+                      "name": "speed",
+                      "value": {
+                        "id": "n85",
+                        "tier": 1,
+                        "span": {
+                          "start": 525,
+                          "end": 529
+                        },
+                        "core": {
+                          "kind": "constant",
+                          "value": 1.15
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "id": "n87",
+                      "tier": 1,
+                      "span": {
+                        "start": 419,
+                        "end": 541
+                      },
+                      "name": "cut",
+                      "value": {
+                        "id": "n88",
+                        "tier": 1,
+                        "span": {
+                          "start": 539,
+                          "end": 540
+                        },
+                        "core": {
+                          "kind": "constant",
+                          "value": 1
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "id": "n89",
+                      "tier": 1,
+                      "span": {
+                        "start": 419,
+                        "end": 557
+                      },
+                      "name": "delay",
+                      "value": {
+                        "id": "n90",
+                        "tier": 1,
+                        "span": {
+                          "start": 552,
+                          "end": 556
+                        },
+                        "core": {
+                          "kind": "constant",
+                          "value": 0.25
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "id": "n91",
+                      "tier": 1,
+                      "span": {
+                        "start": 419,
+                        "end": 581
+                      },
+                      "name": "delayfeedback",
+                      "value": {
+                        "id": "n92",
+                        "tier": 1,
+                        "span": {
+                          "start": 576,
+                          "end": 580
+                        },
+                        "core": {
+                          "kind": "constant",
+                          "value": 0.55
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "id": "n93",
+                      "tier": 1,
+                      "span": {
+                        "start": 419,
+                        "end": 632
+                      },
+                      "name": "room",
+                      "value": {
+                        "id": "n94",
+                        "tier": 1,
+                        "span": {
+                          "start": 628,
+                          "end": 631
+                        },
+                        "core": {
+                          "kind": "constant",
+                          "value": 0.4
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "id": "n95",
+                      "tier": 1,
+                      "span": {
+                        "start": 419,
+                        "end": 647
+                      },
+                      "name": "gain",
+                      "value": {
+                        "id": "n96",
+                        "tier": 1,
+                        "span": {
+                          "start": 642,
+                          "end": 646
+                        },
+                        "core": {
+                          "kind": "constant",
+                          "value": 0.75
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                }
+              ],
+              "comment": "2. Rapid-fire, chopped ragga/jungle-style vocal stabs for the drop",
+              "label": "vocalStab"
+            }
+          }
+        ]
+      },
+      "layers": [],
+      "comment": "3. Drop: Full-weight 174 BPM drums, sub/Reese bass, and dub vocal stabs (8 bars)",
+      "label": "drop"
+    }
+  },
+  "order": [
+    {
+      "kind": "tempo"
+    },
+    {
+      "kind": "shared",
+      "name": "vocalIntro"
+    },
+    {
+      "kind": "shared",
+      "name": "dnbDrums"
+    },
+    {
+      "kind": "shared",
+      "name": "reeseBass"
+    },
+    {
+      "kind": "shared",
+      "name": "darkPad"
+    },
+    {
+      "kind": "shared",
+      "name": "drop"
+    },
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": [],
+  "tempo": {
+    "cpm": 43.5
+  }
+}

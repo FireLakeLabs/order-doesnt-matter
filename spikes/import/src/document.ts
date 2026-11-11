@@ -48,6 +48,10 @@ export interface Voice extends Meta {
 }
 
 export interface Pattern extends Meta {
+  /** Author vocabulary; kept even when a single-use const is inlined. */
+  label?: string;
+  /** Adjacent author comment, independent of the executable pattern. */
+  comment?: string;
   core: Core;
   /** Applied in order, first to last (innermost shell first). */
   layers: Layer[];

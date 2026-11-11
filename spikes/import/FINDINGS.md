@@ -76,3 +76,47 @@ Seven warmed samples/program, alternating import/generate order; outputs consume
 | Generate  |                  0.013 ms |             0.044 ms |                0.088 ms |
 
 **37 fast behavior tests**, TypeScript and browser bundling pass. No audio was heard; no browser UI, decoded samples, trigger scheduling, room/tail behavior, future cycles or arbitrary impure JavaScript equivalence was checked. External effects are stubbed. Swallowed inner query errors remain an engine limitation. D2/D3 are supported for this bounded score study, not universally proved for JavaScript.
+
+## Study 02: real input
+
+All 13 owner-collected blocks evaluate and regenerate with equal plain events,
+including the explicitly marked custom-sample usage snippet. The local-only
+Switch Angel piece also matches. Study 02 queries **cycles 0–16 inclusive**
+([0,17)); the standard 85-program study separately passes [0,16), with its
+three previously documented error/function qualifications unchanged.
+[Detailed results](study-02-results.json) contain every tier count, tier-2 name,
+tier-3 fragment/reason and warning; [documents](out/) and [generated source](generated/)
+include all collected programs. IDs/spans aside, all new documents are idempotent.
+
+The smallest shape change is optional `Pattern.label` and `Pattern.comment`:
+const names survive single-use inlining, adjacent instrument/section comments
+stay independent, and generation carries them as metadata. Shared references
+remain references. Named sections need no new storage: they are labelled arrange
+parts.
+
+Failing-before tests exposed lost vocabulary, browser scope collisions (`drop`),
+missing `setCpm`/`time`, the draw `fill` parameter, and unrecognised `silence`.
+All **43 import tests** now pass. The host registers the pinned draw parameter
+without canvas/audio. External sample loading remains stubbed. Equivalence is
+bounded score evidence, not proof of playback, sample access or audible tails.
+
+No redistribution permission is clearly recorded for Switch Angel; its source
+stays in the earlier project. Tools read that local path when present. The four
+register bodies are identified by local lines, not copied into public outputs.
+
+| Program                               | Evaluates | Equal, cycles 0–16 | T1 / T2 / T3 | Every T2 name (count)                                                                  | T3 fragment / reason; warnings                                                                       |
+| ------------------------------------- | --------- | ------------------ | ------------ | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| House sketch                          | yes       | yes                | 23 / 0 / 0   | —                                                                                      | —; none                                                                                              |
+| Techno sketch                         | yes       | yes                | 26 / 0 / 0   | —                                                                                      | —; none                                                                                              |
+| Trance sketch                         | yes       | yes                | 21 / 0 / 0   | —                                                                                      | —; none                                                                                              |
+| Drum and Bass sketch                  | yes       | yes                | 19 / 0 / 0   | —                                                                                      | —; none                                                                                              |
+| Dubstep sketch                        | yes       | yes                | 24 / 0 / 0   | —                                                                                      | —; none                                                                                              |
+| Ambient sketch                        | yes       | yes                | 27 / 0 / 0   | —                                                                                      | —; none                                                                                              |
+| Future Bass sketch                    | yes       | yes                | 28 / 0 / 0   | —                                                                                      | —; none                                                                                              |
+| Synthwave sketch                      | yes       | yes                | 29 / 0 / 0   | —                                                                                      | —; none                                                                                              |
+| House arrangement                     | yes       | yes                | 82 / 0 / 0   | —                                                                                      | —; none                                                                                              |
+| House with vocals                     | yes       | yes                | 115 / 0 / 0  | —                                                                                      | —; none                                                                                              |
+| Custom sample usage snippet           | yes       | yes                | 6 / 1 / 1    | `slice` ×1                                                                             | `samples({myvocal: 'https://your-url.com'})` — setup effect (1 warning)                              |
+| Drum and Bass arrangement             | yes       | yes                | 148 / 0 / 0  | —                                                                                      | —; none                                                                                              |
+| Dubstep arrangement                   | yes       | yes                | 164 / 0 / 0  | —                                                                                      | —; none                                                                                              |
+| Switch Angel trance demo (local only) | yes       | yes                | 43 / 15 / 4  | `add` ×3, `trancegate` ×2, `seg` ×1, `o` ×3, `rlpf` ×2, `lpenv` ×2, `fmi` ×1, `fmh` ×1 | `register rlpf` L4; `rhpf` L7; `o` L9; `trancegate` L11 — register bodies (4 warnings; local source) |

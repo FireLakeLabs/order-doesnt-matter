@@ -1,0 +1,18 @@
+
+> check
+> tsc --noEmit && vitest run
+
+
+ RUN  v3.2.4 /home/aaron/projects/order-doesnt-matter/spikes/import
+
+ ✓ browser-binding.test.ts (1 test) 125ms
+ ✓ import.test.ts (41 tests) 5202ms
+   ✓ document import and fresh generation > preserves template substitutions, mutable setup and compiler directives  381ms
+   ✓ event queries > can be called from Node --input-type=module  335ms
+   ✓ event queries > interrupts synchronous infinite queries  337ms
+
+ Test Files  2 passed (2)
+      Tests  42 passed (42)
+   Start at  13:44:35
+   Duration  5.60s (transform 105ms, setup 0ms, collect 168ms, tests 5.33s, environment 0ms, prepare 143ms)
+

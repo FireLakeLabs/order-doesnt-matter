@@ -18,7 +18,7 @@ const outputs = new Set(
   ),
 );
 const setupCalls = new Set(
-  "samples hush register setcpm setcps setbpm".split(" "),
+  "samples hush register setcpm setCpm setcps setbpm".split(" "),
 );
 function position(node: JS.Node): { start: number; end: number } {
   if (
@@ -331,7 +331,37 @@ export function importStrudel(source: string): {
       };
     return pattern(node, hole);
   }
+  function leadingComment(node: JS.Node): Comment | undefined {
+    return comments
+      .filter(
+        (c) =>
+          c.end <= position(node).start &&
+          /^\s*$/.test(source.slice(c.end, position(node).start)),
+      )
+      .at(-1);
+  }
+  function vocabulary(p: Pattern, node: JS.Node): Pattern {
+    const c = leadingComment(node);
+    if (!c) return p;
+    if (c.value.startsWith("@odm-pattern ")) {
+      try {
+        const data: unknown = JSON.parse(c.value.slice("@odm-pattern ".length));
+        if (data && typeof data === "object") {
+          if ("label" in data && typeof data.label === "string")
+            p.label = data.label;
+          if ("comment" in data && typeof data.comment === "string")
+            p.comment = data.comment;
+        }
+      } catch {}
+    } else if (!c.value.startsWith("@odm-voice ")) {
+      p.comment = c.value.trim();
+    }
+    return p;
+  }
   function pattern(node: JS.Node, hole?: string): Pattern {
+    return vocabulary(parsePattern(node, hole), node);
+  }
+  function parsePattern(node: JS.Node, hole?: string): Pattern {
     const p = plain(node);
     if (p && typeof p.value === "string") {
       try {
@@ -355,6 +385,12 @@ export function importStrudel(source: string): {
         layers: [],
       };
     if (node.type === "Identifier") {
+      if (node.name === "silence" && !definitions.has(node.name))
+        return {
+          ...meta(node, 1),
+          core: { kind: "generator", name: "silence", args: [] },
+          layers: [],
+        };
       if (node.name === hole)
         return { ...meta(node, 1), core: { kind: "hole" }, layers: [] };
       if (signals.has(node.name) && node.name !== "irand")
@@ -376,6 +412,8 @@ export function importStrudel(source: string): {
         active.add(node.name);
         const result = definitionPattern(def.init, hole);
         active.delete(node.name);
+        vocabulary(result, def.statement);
+        result.label = node.name;
         return result;
       }
       return opaque(node);
@@ -593,7 +631,11 @@ export function importStrudel(source: string): {
       if (def) {
         if (def.count > 1) {
           active.add(name);
-          doc.shared[name] = definitionPattern(def.init);
+          doc.shared[name] = vocabulary(
+            definitionPattern(def.init),
+            def.statement,
+          );
+          doc.shared[name].label = name;
           active.delete(name);
           order.push({ kind: "shared", name });
         } else if (def.count === 0) setup(statement, "unused declaration");
@@ -607,7 +649,7 @@ export function importStrudel(source: string): {
     if (expr?.type === "CallExpression" && expr.callee.type === "Identifier") {
       const name = expr.callee.name;
       if (
-        ["setcpm", "setcps"].includes(name) &&
+        ["setcpm", "setCpm", "setcps"].includes(name) &&
         expr.arguments.length === 1 &&
         !doc.tempo
       ) {
@@ -718,7 +760,7 @@ export function importStrudel(source: string): {
             s.type === "ExpressionStatement" &&
             s.expression.type === "CallExpression" &&
             s.expression.callee.type === "Identifier" &&
-            ["setcpm", "setcps"].includes(s.expression.callee.name),
+            ["setcpm", "setCpm", "setcps"].includes(s.expression.callee.name),
         );
         return statement ? position(statement).start : Infinity;
       }
@@ -729,7 +771,8 @@ export function importStrudel(source: string): {
     const def = definitions.get(name);
     if (!def) continue;
     active.add(name);
-    doc.shared[name] = definitionPattern(def.init);
+    doc.shared[name] = vocabulary(definitionPattern(def.init), def.statement);
+    doc.shared[name].label = name;
     active.delete(name);
     const at = order.findIndex(
       (entry) => entryOffset(entry) > position(def.statement).start,

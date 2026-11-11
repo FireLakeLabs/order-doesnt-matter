@@ -994,5 +994,235 @@
     ],
     "cycles": 32,
     "notes": "Original multi-voice piece; no audio audition. Final arrangement transition occurs outside checker window."
+  },
+  {
+    "id": "real-house",
+    "file": "programs/real-house.strudel",
+    "title": "House sketch",
+    "origin": "owner-collected",
+    "tags": [
+      "S1",
+      "G1",
+      "E3",
+      "T1",
+      "A2"
+    ],
+    "cycles": 16,
+    "kind": "composition",
+    "notes": "Extracted verbatim from owner attachment. Collection is provenance, not a third-party licence grant."
+  },
+  {
+    "id": "real-techno",
+    "file": "programs/real-techno.strudel",
+    "title": "Techno sketch",
+    "origin": "owner-collected",
+    "tags": [
+      "S1",
+      "G1",
+      "E3",
+      "T1",
+      "G4",
+      "E1",
+      "A2"
+    ],
+    "cycles": 16,
+    "kind": "composition",
+    "notes": "Extracted verbatim from owner attachment. Collection is provenance, not a third-party licence grant."
+  },
+  {
+    "id": "real-trance",
+    "file": "programs/real-trance.strudel",
+    "title": "Trance sketch",
+    "origin": "owner-collected",
+    "tags": [
+      "S1",
+      "G1",
+      "E3",
+      "A2"
+    ],
+    "cycles": 16,
+    "kind": "composition",
+    "notes": "Extracted verbatim from owner attachment. Collection is provenance, not a third-party licence grant."
+  },
+  {
+    "id": "real-dnb",
+    "file": "programs/real-dnb.strudel",
+    "title": "Drum and Bass sketch",
+    "origin": "owner-collected",
+    "tags": [
+      "S1",
+      "G1",
+      "E3",
+      "T1",
+      "A2"
+    ],
+    "cycles": 16,
+    "kind": "composition",
+    "notes": "Extracted verbatim from owner attachment. Collection is provenance, not a third-party licence grant."
+  },
+  {
+    "id": "real-dubstep",
+    "file": "programs/real-dubstep.strudel",
+    "title": "Dubstep sketch",
+    "origin": "owner-collected",
+    "tags": [
+      "S1",
+      "G1",
+      "E3",
+      "T1",
+      "G4",
+      "E1"
+    ],
+    "cycles": 16,
+    "kind": "composition",
+    "notes": "Extracted verbatim from owner attachment. Collection is provenance, not a third-party licence grant."
+  },
+  {
+    "id": "real-ambient",
+    "file": "programs/real-ambient.strudel",
+    "title": "Ambient sketch",
+    "origin": "owner-collected",
+    "tags": [
+      "S1",
+      "G1",
+      "E3",
+      "T1",
+      "A2",
+      "A4"
+    ],
+    "cycles": 16,
+    "kind": "composition",
+    "notes": "Extracted verbatim from owner attachment. Collection is provenance, not a third-party licence grant."
+  },
+  {
+    "id": "real-future-bass",
+    "file": "programs/real-future-bass.strudel",
+    "title": "Future Bass sketch",
+    "origin": "owner-collected",
+    "tags": [
+      "S1",
+      "G1",
+      "E3",
+      "T1",
+      "G4",
+      "E1"
+    ],
+    "cycles": 16,
+    "kind": "composition",
+    "notes": "Extracted verbatim from owner attachment. Collection is provenance, not a third-party licence grant."
+  },
+  {
+    "id": "real-synthwave",
+    "file": "programs/real-synthwave.strudel",
+    "title": "Synthwave sketch",
+    "origin": "owner-collected",
+    "tags": [
+      "S1",
+      "G1",
+      "E3",
+      "T1",
+      "A2"
+    ],
+    "cycles": 16,
+    "kind": "composition",
+    "notes": "Extracted verbatim from owner attachment. Collection is provenance, not a third-party licence grant."
+  },
+  {
+    "id": "real-house-arranged",
+    "file": "programs/real-house-arranged.strudel",
+    "title": "House arrangement",
+    "origin": "owner-collected",
+    "tags": [
+      "S1",
+      "G1",
+      "E3",
+      "G3",
+      "T1",
+      "G4",
+      "E1",
+      "T2",
+      "A2"
+    ],
+    "cycles": 28,
+    "kind": "composition",
+    "notes": "Extracted verbatim from owner attachment. Collection is provenance, not a third-party licence grant."
+  },
+  {
+    "id": "real-house-vocals",
+    "file": "programs/real-house-vocals.strudel",
+    "title": "House with vocals",
+    "origin": "owner-collected",
+    "tags": [
+      "S1",
+      "G1",
+      "E3",
+      "G3",
+      "T1",
+      "G4",
+      "E1",
+      "T2",
+      "A2",
+      "A3"
+    ],
+    "cycles": 28,
+    "kind": "composition",
+    "notes": "Extracted verbatim from owner attachment. Collection is provenance, not a third-party licence grant."
+  },
+  {
+    "id": "real-custom-samples",
+    "file": "programs/real-custom-samples.strudel",
+    "title": "Custom sample usage snippet",
+    "origin": "owner-collected",
+    "tags": [
+      "S1",
+      "E4",
+      "Q3"
+    ],
+    "cycles": 16,
+    "kind": "usage-snippet",
+    "notes": "Extracted verbatim from owner attachment. Collection is provenance, not a third-party licence grant. Placeholder URL; not a full piece. External sample loading is stubbed in checks."
+  },
+  {
+    "id": "real-dnb-arranged",
+    "file": "programs/real-dnb-arranged.strudel",
+    "title": "Drum and Bass arrangement",
+    "origin": "owner-collected",
+    "tags": [
+      "S1",
+      "G1",
+      "E3",
+      "G3",
+      "T1",
+      "G4",
+      "E1",
+      "T2",
+      "A2",
+      "A3",
+      "A4"
+    ],
+    "cycles": 28,
+    "kind": "composition",
+    "notes": "Extracted verbatim from owner attachment. Collection is provenance, not a third-party licence grant."
+  },
+  {
+    "id": "real-dubstep-arranged",
+    "file": "programs/real-dubstep-arranged.strudel",
+    "title": "Dubstep arrangement",
+    "origin": "owner-collected",
+    "tags": [
+      "S1",
+      "G1",
+      "E3",
+      "G3",
+      "T1",
+      "G4",
+      "E1",
+      "T2",
+      "A2",
+      "A4"
+    ],
+    "cycles": 28,
+    "kind": "composition",
+    "notes": "Extracted verbatim from owner attachment. Collection is provenance, not a third-party licence grant."
   }
 ]

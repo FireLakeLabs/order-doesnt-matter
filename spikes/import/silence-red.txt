@@ -1,0 +1,38 @@
+
+> test
+> vitest run --reporter=dot
+
+
+ RUN  v3.2.4 /home/aaron/projects/order-doesnt-matter/spikes/import
+
+··········································x
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  import.test.ts > recognises an explicit silent part without an unresolved-identifier warning
+AssertionError: expected [ 'unresolved identifier: silence' ] to deeply equal []
+
+- Expected
++ Received
+
+- []
++ [
++   "unresolved identifier: silence",
++ ]
+
+ ❯ import.test.ts:304:41
+    302| it('recognises an explicit silent part without an unresolved-identifie…
+    303|  const source='cat(silence,s("bd"))';
+    304|  expect(importStrudel(source).warnings).toEqual([]);
+       |                                         ^
+    305|  await equivalent(source,4);
+    306| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 42 passed (43)
+   Start at  13:47:44
+   Duration  5.65s (transform 140ms, setup 0ms, collect 246ms, tests 5.31s, environment 0ms, prepare 157ms)
+

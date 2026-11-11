@@ -14,10 +14,14 @@ export async function evaluate({ source, fromCycle, toCycle }, run, query) {
     anonymous = 0,
     opaqueValues = false;
   mini.miniAllStrings();
+  // @strudel/draw 1.2.6 animate.mjs installs this exact createParams parameter.
+  // It is score data; registering it requires neither a canvas nor audio.
+  const drawParameters = core.createParams("fill");
   const scope = {
     ...core,
     ...mini,
     ...tonal,
+    ...drawParameters,
     console: { log() {}, warn() {}, error() {} },
   };
   const scalar = (x) => (core.isPattern(x) ? x.__pure : x);
@@ -44,6 +48,7 @@ export async function evaluate({ source, fromCycle, toCycle }, run, query) {
       return result;
     },
   });
+  scope.setCpm = scope.setcpm;
   core.Pattern.prototype.p = function (name) {
     if (name.startsWith("_") || name.endsWith("_")) return core.silence;
     labels.set(name.includes("$") ? `${name}${anonymous++}` : name, this);
@@ -100,9 +105,10 @@ export async function evaluate({ source, fromCycle, toCycle }, run, query) {
         const AsyncFunction = Object.getPrototypeOf(
           async function () {},
         ).constructor;
-        return new AsyncFunction(...Object.keys(scope), code)(
-          ...Object.values(scope),
-        );
+        return new AsyncFunction(
+          ...Object.keys(scope),
+          `return (async()=>{${code}\n})()`,
+        )(...Object.values(scope));
       };
     const result = await run(code, scope);
     let pattern = labels.size ? core.stack(...labels.values()) : result;

@@ -1,0 +1,129 @@
+{
+  "durationMs": 24134.749784000003,
+  "checks": [
+    "sheet 3 voices",
+    "sheet 8 voices",
+    "sheet 20 voices",
+    "broken source + undo",
+    "20-voice lookup: focus + type + click = 3 actions; selection survives map switch",
+    "split document/generation + undo",
+    "constant edit changes real events",
+    "live swap + pending lands on dispatched changed revision",
+    "next uncommitted cycle swap lands on changed onset",
+    "mute + collapse row",
+    "signal handles regenerate",
+    "registry setting add"
+  ],
+  "errors": [],
+  "shots": [],
+  "dispatches": [
+    {
+      "revision": 1,
+      "target": 0.2484875,
+      "begin": 0.0625,
+      "value": {
+        "note": 48,
+        "s": "triangle",
+        "gain": 0.6,
+        "cutoff": 1450,
+        "pan": 0.2,
+        "room": 0.25,
+        "roomsize": 0.4,
+        "orbit": 1,
+        "__planet": "e207",
+        "__voice": "e207",
+        "duration": 0.9375
+      }
+    },
+    {
+      "revision": 1,
+      "target": 0.2484875,
+      "begin": 0.0625,
+      "value": {
+        "note": 49,
+        "s": "sine",
+        "gain": 0.3,
+        "cutoff": 600,
+        "pan": 0.4,
+        "room": 0.25,
+        "roomsize": 1.2,
+        "orbit": 1,
+        "__planet": "e230",
+        "__voice": "e230",
+        "duration": 0.9375
+      }
+    },
+    {
+      "revision": 1,
+      "target": 0.2484875,
+      "begin": 0.0625,
+      "value": {
+        "note": 50,
+        "s": "sawtooth",
+        "gain": 0.3,
+        "cutoff": 1400,
+        "pan": 0.6000000000000001,
+        "room": 0.25,
+        "roomsize": 0.4,
+        "orbit": 1,
+        "__planet": "e251",
+        "__voice": "e251",
+        "duration": 0.9375
+      }
+    },
+    {
+      "revision": 2,
+      "target": 1.1859875000000002,
+      "begin": 0.5625,
+      "value": {
+        "note": 55,
+        "s": "triangle",
+        "gain": 0.4,
+        "cutoff": 2600,
+        "pan": 0.2,
+        "room": 0.25,
+        "roomsize": 0.4,
+        "orbit": 1,
+        "__planet": "e207",
+        "__voice": "e207",
+        "duration": 0.234375
+      }
+    },
+    {
+      "revision": 2,
+      "target": 1.1859875000000002,
+      "begin": 0.5625,
+      "value": {
+        "note": 56,
+        "s": "sine",
+        "gain": 0.3,
+        "cutoff": 600,
+        "pan": 0.4,
+        "room": 0.25,
+        "roomsize": 1.2,
+        "orbit": 1,
+        "__planet": "e230",
+        "__voice": "e230",
+        "duration": 0.234375
+      }
+    },
+    {
+      "revision": 2,
+      "target": 1.1859875000000002,
+      "begin": 0.5625,
+      "value": {
+        "note": 57,
+        "s": "sawtooth",
+        "gain": 0.3,
+        "cutoff": 1400,
+        "pan": 0.6000000000000001,
+        "room": 0.25,
+        "roomsize": 0.4,
+        "orbit": 1,
+        "__planet": "e251",
+        "__voice": "e251",
+        "duration": 0.234375
+      }
+    }
+  ]
+}

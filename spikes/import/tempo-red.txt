@@ -1,0 +1,37 @@
+
+> test
+> vitest run --reporter=dot
+
+
+ RUN  v3.2.4 /home/aaron/projects/order-doesnt-matter/spikes/import
+
+········································x
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  import.test.ts > recognises setCpm tempo and the time signal used by the local trance piece
+AssertionError: setCpm(140/4); s("pulse!16").fm(time).fmh(time): expected 'setCpm is not defined' to be null
+
+- Expected: 
+null
+
++ Received: 
+"setCpm is not defined"
+
+ ❯ equivalent import.test.ts:15:34
+     13|     queryEvents(fresh, 0, cycles),
+     14|   ]);
+     15|   expect(original.error, source).toBeNull();
+       |                                  ^
+     16|   expect(result.error, fresh).toBeNull();
+     17|   expect(eventIdentity(result), fresh).toBe(eventIdentity(original));
+ ❯ import.test.ts:294:14
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 40 passed (41)
+   Start at  13:39:59
+   Duration  5.91s (transform 126ms, setup 0ms, collect 226ms, tests 5.60s, environment 0ms, prepare 157ms)
+

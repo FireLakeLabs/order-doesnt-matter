@@ -49,6 +49,11 @@ async function choose(label, voice = 0) {
 try {
   await page.goto(`http://localhost:${server.httpServer.address().port}`);
   await ready();
+  await page.evaluate(() => window.editorStudy.setFixture("three"));
+  await ready();
+  await page
+    .getByRole("button", { name: "◎ Constellation", exact: true })
+    .click();
   await choose("lpf", 1);
   const before = await page.evaluate(() => window.editorStudy.source),
     box = await page.locator("#paint-lane").boundingBox();
@@ -72,7 +77,7 @@ try {
   await page.getByRole("button", { name: "Done ×" }).click();
   await choose("lpf");
   await page
-    .getByRole("button", { name: "signal › inspect", exact: true })
+    .getByRole("button", { name: "signal › open driver", exact: true })
     .click();
   await ready();
   const low = await page.locator('[data-signal="0"]').inputValue(),
@@ -95,7 +100,10 @@ try {
     Number(await page.locator('[data-signal="0"]').inputValue()) > Number(low),
   );
   await page.screenshot({
-    path: "shots/pointer-wave-handle.jpg",
+    path:
+      process.env.PASS === "study02"
+        ? "shots/v2/after-wave-handle.jpg"
+        : "shots/pointer-wave-handle.jpg",
     type: "jpeg",
     quality: 63,
   });

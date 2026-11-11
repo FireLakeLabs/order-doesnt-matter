@@ -1,0 +1,17 @@
+
+> check
+> tsc --noEmit && vitest run
+
+
+ RUN  v3.2.4 /home/aaron/projects/order-doesnt-matter/spikes/import
+
+ ✓ import.test.ts (39 tests) 5243ms
+   ✓ document import and fresh generation > preserves template substitutions, mutable setup and compiler directives  400ms
+   ✓ event queries > can be called from Node --input-type=module  347ms
+   ✓ event queries > interrupts synchronous infinite queries  343ms
+
+ Test Files  1 passed (1)
+      Tests  39 passed (39)
+   Start at  13:32:59
+   Duration  5.63s (transform 83ms, setup 0ms, collect 132ms, tests 5.24s, environment 0ms, prepare 76ms)
+

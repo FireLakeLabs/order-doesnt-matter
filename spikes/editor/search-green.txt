@@ -1,0 +1,16 @@
+
+> odm-editor-study@0.0.0 test
+> node prepare-import.mjs && vitest run
+
+
+ RUN  v3.2.4 /home/aaron/projects/order-doesnt-matter/spikes/editor
+
+ ✓ src/song.test.ts (5 tests) 345ms
+ ✓ src/study.test.ts (17 tests) 2586ms
+   ✓ document to real Strudel events > queries all six fixtures including unequal weights, alternation, rules, opaque code and nested signals  646ms
+
+ Test Files  2 passed (2)
+      Tests  22 passed (22)
+   Start at  13:53:32
+   Duration  3.18s (transform 249ms, setup 0ms, collect 574ms, tests 2.93s, environment 1ms, prepare 158ms)
+

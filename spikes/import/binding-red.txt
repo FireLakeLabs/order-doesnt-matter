@@ -1,0 +1,36 @@
+
+> test
+> vitest run --reporter=dot
+
+
+ RUN  v3.2.4 /home/aaron/projects/order-doesnt-matter/spikes/import
+
+x·······································
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  browser-binding.test.ts > lets author const names shadow engine exports in the browser evaluator
+AssertionError: expected 'Identifier \'drop\' has already been …' to be null
+
+- Expected: 
+null
+
++ Received: 
+"Identifier 'drop' has already been declared"
+
+ ❯ browser-binding.test.ts:13:23
+     11|  `]);
+     12|  const result=JSON.parse(stdout.trim().split('\n').at(-1)??'{}');
+     13|  expect(result.error).toBeNull();
+       |                       ^
+     14|  expect(result.count).toBe(4);
+     15| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 39 passed (40)
+   Start at  13:34:55
+   Duration  5.80s (transform 140ms, setup 0ms, collect 235ms, tests 5.48s, environment 0ms, prepare 158ms)
+

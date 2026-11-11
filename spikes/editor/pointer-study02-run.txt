@@ -1,0 +1,1 @@
+{"durationMs":2460.1346399999998,"checks":["pointer painting changes weighted stepped setting","direct wave handle drag changes signal range","map and navigator locked while editor open","pan and Fit recover camera"],"errors":[],"painted":["5612.996","3216.002"]}

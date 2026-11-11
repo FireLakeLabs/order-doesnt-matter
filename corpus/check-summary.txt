@@ -74,9 +74,22 @@
 🌀 @strudel/core loaded 🌀
 🌀 @strudel/core loaded 🌀
 🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
+🌀 @strudel/core loaded 🌀
 {
-  "total": 72,
-  "ok": 70,
+  "total": 85,
+  "ok": 83,
   "intendedFailures": 2,
   "unexpectedFailures": [],
   "missingIntendedFailures": []

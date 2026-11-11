@@ -1,5 +1,12 @@
 import type { Doc, Pattern, Setting, Voice } from "../../import/src/document";
 import { targets, type Target } from "./document";
+import {
+  song,
+  currentSection,
+  instrumentEvents,
+  resolve,
+  type Instrument,
+} from "./song";
 import type { PlainEvent } from "./adapter";
 export type EventMap = Record<string, PlainEvent[]>;
 export const colors = ["#a3efd5", "#c3b0f1", "#efbd75", "#82bdde"];
@@ -118,6 +125,31 @@ export function rooms(doc: Doc, events: EventMap) {
   }
   return [...r.values()];
 }
+export const settingNames: Record<string, string> = {
+  cutoff: "filter",
+  lpf: "filter",
+  hcutoff: "high-pass",
+  hpf: "high-pass",
+  room: "reverb",
+  roomsize: "room size",
+  shape: "drive",
+  orbit: "shared room",
+  lpenv: "filter env",
+  fmi: "FM amount",
+  fmh: "FM ratio",
+  gain: "level",
+  s: "sound",
+  lpq: "resonance",
+  delayfeedback: "echo feedback",
+  delay: "echo",
+  pan: "pan",
+  attack: "attack",
+  release: "release",
+  note: "pitch",
+  n: "pitch",
+  speed: "speed",
+};
+export const settingName = (name: string) => settingNames[name] ?? name;
 export interface Moon {
   id: string;
   label: string;
@@ -128,6 +160,7 @@ export interface Moon {
   tier: number;
   kind: "setting" | "driver" | "shell" | "group";
   owner: string;
+  value?: Pattern;
 }
 export interface Planet {
   id: string;
@@ -137,217 +170,249 @@ export interface Planet {
   y: number;
   radius: number;
   nodes: Moon[];
-  shells: { id: string; name: string; r: number }[];
+  shells: {
+    id: string;
+    name: string;
+    r: number;
+    labelX: number;
+    labelY: number;
+  }[];
   events: PlainEvent[];
   tier: number;
   group?: string;
   collapsed: boolean;
   pattern: Pattern;
+  instrument: Instrument;
+  active: boolean;
+  orbit: number;
 }
 export function constellation(
   doc: Doc,
   events: EventMap,
   collapsed: Set<string> = new Set(),
   columns = 3,
-): {
-  planets: Planet[];
-  rooms: ReturnType<typeof rooms>;
-  width: number;
-  height: number;
-} {
-  const all = targets(doc),
-    planets: Planet[] = [];
-  const roomList = rooms(doc, events);
-  const sorted = [...doc.voices].sort(
-    (a, b) =>
-      roomList.findIndex((r) => r.voices.includes(a.id)) -
-      roomList.findIndex((r) => r.voices.includes(b.id)),
-  );
-  let i = 0;
-  let previousRoom = "";
-  for (const v of sorted) {
-    const room = roomList.find((r) => r.voices.includes(v.id))?.id ?? "none";
-    if (previousRoom && room !== previousRoom && i % columns)
-      i += columns - (i % columns);
-    previousRoom = room;
-    const children: { p: Pattern; id: string; name: string; group?: string }[] =
-      [];
-    const leaf = (
-      p: Pattern,
-      name: string,
-      parentLayers: Pattern["layers"] = [],
-      groups: string[] = [],
-    ) => {
-      if (p.core.kind === "group") {
-        p.core.parts.forEach((x, j) =>
-          leaf(
-            x.pattern,
-            `${name} · ${j + 1}`,
-            [...p.layers, ...parentLayers],
-            [...groups, p.core.kind === "group" ? p.core.how : "group"],
-          ),
-        );
-      } else
-        children.push({
-          p: { ...p, layers: [...p.layers, ...parentLayers] },
-          id: p === v.pattern ? v.id : p.id,
-          name,
-          group: groups.join(" / ") || undefined,
-        });
-    };
-    leaf(v.pattern, v.name);
-    for (const child of children) {
-      const x = 205 + (i % columns) * 400,
-        y = 215 + Math.floor(i / columns) * 410;
-      i++;
-      const shells = child.p.layers.flatMap((l, k) =>
-        l.kind !== "settings"
-          ? [
-              {
-                id: l.id,
-                name:
-                  l.kind === "rewrite"
-                    ? `${k + 1} · ${l.name}`
-                    : "source shell",
-                r: 63 + k * 15,
-              },
-            ]
-          : [],
+  cycle = 0,
+) {
+  const structure = song(doc),
+    active = currentSection(structure.sections, cycle, structure.total);
+  const planets: Planet[] = structure.instruments.map((i, index) => {
+    const use = i.uses.find(
+      (u) => !active || u.section === active.index || u.section === -1,
+    );
+    const p = resolve(doc, use?.pattern ?? i.pattern),
+      x = 210 + (index % columns) * 420,
+      y = 250 + Math.floor(index / columns) * 480;
+    const rewrites = p.layers.filter((l) => l.kind !== "settings");
+    const shellStep = Math.min(28, 60 / Math.max(1, rewrites.length - 1));
+    const shells = rewrites.map((l, j) => {
+      const r = 76 + j * shellStep,
+        dx = rewrites.length > 4 ? (j % 2 ? -32 : 32) : 0;
+      return {
+        id: l.id,
+        name: l.kind === "rewrite" ? l.name : "source",
+        r,
+        labelX: x + dx,
+        labelY: y + Math.sqrt(r * r - dx * dx),
+      };
+    });
+    const outer = Math.max(96, ...shells.map((s) => s.r + 34));
+    const nodes: Moon[] = [],
+      ss = p.layers.flatMap((l, k) =>
+        l.kind === "settings" ? l.settings.map((s) => ({ s, k })) : [],
       );
-      const nodes: Moon[] = [];
-      if (!collapsed.has(child.id)) {
-        let j = 0;
-        for (const [k, l] of child.p.layers.entries())
-          if (l.kind === "settings")
-            for (const s of l.settings) {
-              const angle =
-                  -Math.PI / 2 +
-                  (j++ /
-                    Math.max(5, settings({ ...v, pattern: child.p }).length)) *
-                    Math.PI *
-                    2,
-                r = 74 + k * 16;
-              const mx = x + Math.cos(angle) * r,
-                my = y + Math.sin(angle) * r;
-              nodes.push({
-                id: s.id,
-                label: s.name,
-                x: mx,
-                y: my,
-                r: 20,
-                level: k,
-                tier: s.tier,
-                kind: "setting",
-                owner: child.id,
-              });
-              const descend = (
-                p: Pattern,
-                depth: number,
-                px: number,
-                py: number,
-                owner: string,
-              ) => {
-                if (depth > 5) return;
-                const choices = Array.from({ length: 24 }, (_, k) => {
-                  const a = angle + (k * Math.PI) / 12,
-                    dx = px + Math.cos(a) * 55,
-                    dy = py + Math.sin(a) * 55;
-                  const overflow =
-                    Math.max(0, Math.abs(dx - x) - 175) +
-                    Math.max(0, Math.abs(dy - y) - 155);
-                  const collision =
-                    nodes.reduce(
-                      (n, q) =>
-                        n + Math.max(0, 38 - Math.hypot(dx - q.x, dy - q.y)),
-                      0,
-                    ) + Math.max(0, 88 - Math.hypot(dx - x, dy - y));
-                  return {
-                    dx,
-                    dy,
-                    cost: overflow * 20 + collision * 4 + k * 0.03,
-                  };
-                }).sort((a, b) => a.cost - b.cost);
-                const { dx, dy } = choices[0]!;
-                nodes.push({
-                  id: p.id,
-                  label:
-                    p.core.kind === "signal"
-                      ? p.core.shape
-                      : p.core.kind === "sequence"
-                        ? "steps"
-                        : p.core.kind,
-                  x: dx,
-                  y: dy,
-                  r: 14,
-                  level: depth,
-                  tier: p.tier,
-                  kind: "driver",
-                  owner,
-                });
-                for (const t of all.filter(
-                  (t) => t.parent?.id === p.id && "core" in t.node,
-                ))
-                  descend(t.pattern, depth + 1, dx, dy, p.id);
-              };
-              if (s.value.core.kind !== "constant")
-                descend(s.value, 1, mx, my, s.id);
-            }
+    if (!collapsed.has(i.id)) {
+      for (const [j, { s, k }] of ss.entries()) {
+        const constant =
+          s.value.core.kind === "constant" ||
+          (s.value.core.kind === "sequence" &&
+            s.value.core.steps.length === 1 &&
+            s.value.core.steps[0]?.kind === "value" &&
+            !s.value.layers.length);
+        const before = p.layers
+          .slice(0, k)
+          .filter((l) => l.kind !== "settings").length;
+        const inner = shells[before - 1]?.r ?? 52,
+          next = shells[before]?.r ?? outer;
+        const radius = constant ? outer : Math.max(64, (inner + next) / 2);
+        const candidates = Array.from({ length: 144 }, (_, n) => {
+          const angle = -Math.PI / 2 + (n / 144) * Math.PI * 2,
+            mx = x + Math.cos(angle) * radius,
+            my = y + Math.sin(angle) * radius;
+          const collision = nodes
+            .filter((n) => n.kind === "setting")
+            .reduce(
+              (sum, n) =>
+                sum + Math.max(0, 56 - Math.hypot(mx - n.x, my - n.y)) ** 2,
+              0,
+            );
+          const labels = shells.reduce(
+            (sum, sh) =>
+              sum +
+              (Math.abs(mx - sh.labelX) < 61 && Math.abs(my - sh.labelY) < 37
+                ? 1000
+                : 0),
+            0,
+          );
+          const heading = Math.max(0, y - 170 - (my - 23)) * 100;
+          const desired = -Math.PI / 2 + j * 2.3999632297;
+          const preference = 1 - Math.cos(angle - desired);
+          return {
+            mx,
+            my,
+            cost: collision * 100 + labels + heading + preference,
+          };
+        }).sort((a, b) => a.cost - b.cost);
+        const best = candidates[0];
+        if (!best) throw Error("No moon placement");
+        const { mx, my } = best;
+        nodes.push({
+          id: s.id,
+          label: s.name,
+          x: mx,
+          y: my,
+          r: 23,
+          level: k,
+          tier: s.tier,
+          kind: "setting",
+          owner: i.id,
+          value: s.value,
+        });
+        const descend = (p: Pattern, depth: number, owner: string) => {
+          if (depth > 5) return;
+          const count = nodes.filter((n) => n.kind === "driver").length;
+          nodes.push({
+            id: p.id,
+            label:
+              p.core.kind === "signal"
+                ? p.core.shape
+                : p.core.kind === "sequence"
+                  ? "steps"
+                  : p.core.kind,
+            x: x - 170 + (count % 5) * 70,
+            y: y + 172 + Math.floor(count / 5) * 28,
+            r: 12,
+            level: depth,
+            tier: p.tier,
+            kind: "driver",
+            owner,
+          });
+          for (const a of p.layers.flatMap((l) =>
+            l.kind === "rewrite" ? l.args : [],
+          ))
+            if (a.kind === "pattern") descend(a.pattern, depth + 1, p.id);
+        };
+        if (s.value.core.kind !== "constant") descend(s.value, 1, s.id);
       }
-      planets.push({
-        id: child.id,
-        voice: v.id,
-        name: child.name,
-        x,
-        y,
-        radius: 54,
-        nodes,
-        shells,
-        events: (events[v.id] ?? []).filter(
-          (e) => !child.group || String(valueAt(e, "__planet")) === child.id,
-        ),
-        tier: child.p.tier,
-        group: child.group,
-        collapsed: collapsed.has(child.id),
-        pattern: child.p,
-      });
     }
-  }
+    return {
+      id: i.id,
+      voice: i.voice.id,
+      name: i.name,
+      x,
+      y,
+      radius: 32,
+      nodes,
+      shells,
+      orbit: outer,
+      events: instrumentEvents(i, events),
+      tier: p.tier,
+      group: p.core.kind === "group" ? p.core.how : undefined,
+      collapsed: collapsed.has(i.id),
+      pattern: p,
+      instrument: i,
+      active:
+        !active || i.sections.includes(active.index) || i.sections.includes(-1),
+    };
+  });
+  const roomEvents = Object.fromEntries(planets.map((p) => [p.id, p.events]));
+  const roomDoc = {
+    ...doc,
+    voices: planets.map((p) => ({
+      ...p.instrument.voice,
+      id: p.id,
+      name: p.name,
+      pattern: p.pattern,
+    })),
+  };
   return {
     planets,
-    rooms: roomList,
-    width: columns * 400,
-    height: Math.max(430, Math.ceil(i / columns) * 410),
+    rooms: rooms(roomDoc, roomEvents),
+    width: columns * 420,
+    height: Math.max(480, Math.ceil(planets.length / columns) * 480),
   };
 }
-export function sheet(doc: Doc, events: EventMap) {
-  const columns = [
-    ...new Set(
-      targets(doc)
-        .filter((t) => "value" in t.node && "name" in t.node)
-        .map((t) => t.label),
-    ),
-  ];
-  const byId = new Map(doc.voices.map((v) => [v.id, v]));
-  return {
-    columns,
-    rows: constellation(doc, events).planets.map((p) => {
-      const root = byId.get(p.voice)!;
-      const v = {
-        ...root,
-        id: p.id,
-        name: p.name,
-        pattern: p.pattern,
-        muted:
-          root.muted || p.pattern.layers.some((l) => l.id === "mute-" + p.id),
-      };
-      return { voice: v, events: p.events, settings: settings(v) };
-    }),
-  };
+export function sheet(doc: Doc, events: EventMap, cycle = 0) {
+  const scene = constellation(doc, events, new Set(), 3, cycle),
+    planets = scene.planets;
+  const counts = new Map<string, number>();
+  const rows = planets.map((p) => {
+    const v = {
+      ...p.instrument.voice,
+      id: p.id,
+      name: p.name,
+      pattern: p.pattern,
+      muted:
+        p.instrument.voice.muted ||
+        p.pattern.layers.some((l) => l.id === "mute-" + p.id),
+    };
+    // Query only this instrument's actual settings; never descend through the whole arrangement.
+    const active = currentSection(song(doc).sections, cycle, song(doc).total);
+    const uses = p.instrument.uses.filter(
+      (u) => !active || u.section === active.index || u.section === -1,
+    );
+    const values: Setting[] = [];
+    function gather(pat: Pattern, seen = new Set<string>()) {
+      if (seen.has(pat.id)) return;
+      seen.add(pat.id);
+      const resolved = resolve(doc, pat);
+      if (resolved.core.kind === "group")
+        for (const part of resolved.core.parts) gather(part.pattern, seen);
+      if (resolved.core.kind === "generator" && resolved.core.name === "s") {
+        const arg = resolved.core.args[0];
+        if (arg?.kind === "pattern")
+          values.push({
+            id: arg.pattern.id,
+            tier: arg.pattern.tier,
+            name: "s",
+            value: arg.pattern,
+          });
+      }
+      values.push(
+        ...resolved.layers.flatMap((l) =>
+          l.kind === "settings" ? l.settings : [],
+        ),
+      );
+    }
+    gather(p.pattern);
+    for (const use of uses) gather(use.pattern);
+    const ss = [...new Map(values.map((s) => [s.id, s])).values()];
+    for (const name of new Set(ss.map((s) => s.name)))
+      counts.set(name, (counts.get(name) ?? 0) + 1);
+    return {
+      voice: v,
+      events: p.events,
+      settings: ss,
+      active: p.active,
+      instrument: p.instrument,
+    };
+  });
+  const columns = [...counts.keys()].sort(
+    (a, b) => (counts.get(b) ?? 0) - (counts.get(a) ?? 0) || a.localeCompare(b),
+  );
+  return { columns, rows, rooms: scene.rooms };
 }
 export function searchTargets(doc: Doc, q: string): Target[] {
   return targets(doc).filter(
     (t) =>
       !("kind" in t.node && t.node.kind === "settings") &&
-      t.path.join(" ").toLowerCase().includes(q.toLowerCase()),
+      q
+        .toLowerCase()
+        .split(/\s+/)
+        .every((word) =>
+          [...t.path, settingName(t.label)]
+            .join(" ")
+            .toLowerCase()
+            .includes(word),
+        ),
   );
 }

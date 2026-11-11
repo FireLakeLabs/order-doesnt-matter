@@ -1,0 +1,16 @@
+setcpm(124 / 4)
+
+stack(
+  // Four-on-the-floor kick
+  s("bd*4"),
+  // Clap on 2 and 4 + off-beat open hats
+  s("~ cp ~ cp"),
+  s("~ oh ~ oh ~ oh ~ oh").gain(0.7),
+  // Syncopated groovy bass
+  note("c2 ~ c2 g1 ~ a1 ~ g1").s("sawtooth").lpf(400),
+  // Rhythmic house stabs
+  note("<[c4,eb4,g4,bb4] [f4,ab4,c5,eb5]>")
+    .struct("~ [x ~ x] ~ ~")
+    .s("piano")
+    .delay(0.25)
+)

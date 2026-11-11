@@ -1,0 +1,2 @@
+setcpm(43.5);
+$: /*@odm-voice {"name":"$","muted":false}*/ stack((/*@odm-pattern {"comment":"Classic 2-step DnB drum pattern"}*/ s("bd ~ ~ ~ ~ bd ~ ~")), s("~ ~ sd ~ ~ ~ sd ~").room(0.3), s("hh*8").gain(0.6), (/*@odm-pattern {"comment":"Heavy rolling sub/reese bass"}*/ note("<c1 ~ [eb1 d1] ~ f1 ~ g1 ~>").s("sawtooth").cutoff(350).shape(0.5)));

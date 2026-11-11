@@ -1,0 +1,53 @@
+
+> odm-editor-study@0.0.0 test
+> node prepare-import.mjs && vitest run
+
+
+ RUN  v3.2.4 /home/aaron/projects/order-doesnt-matter/spikes/editor
+
+ ❯ src/song.test.ts (6 tests | 1 failed) 369ms
+   ✓ shows one named instrument reused in sections and edits every occurrence 145ms
+   ✓ keeps simultaneous pitches in separate miniature lanes 108ms
+   ✓ keeps moon circles and shell labels apart in a dense constellation 4ms
+   ✓ retains old shared values before an aligned edit and new values after it 99ms
+   ✓ finds section-specific settings by their author instrument and human setting name 2ms
+   × gives canonical imported cutoff names the frequency control units and range 10ms
+     → expected { name: 'cutoff', unit: 'value', …(3) } to match object { unit: 'Hz', min: 20, max: 16000 }
+(2 matching properties omitted from actual)
+ ✓ src/study.test.ts (17 tests) 2591ms
+   ✓ document to real Strudel events > queries all six fixtures including unequal weights, alternation, rules, opaque code and nested signals  639ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/song.test.ts > gives canonical imported cutoff names the frequency control units and range
+AssertionError: expected { name: 'cutoff', unit: 'value', …(3) } to match object { unit: 'Hz', min: 20, max: 16000 }
+(2 matching properties omitted from actual)
+
+- Expected
++ Received
+
+  {
+-   "max": 16000,
+-   "min": 20,
+-   "unit": "Hz",
++   "max": 10,
++   "min": 0,
++   "unit": "value",
+  }
+
+ ❯ src/song.test.ts:58:32
+     56| it('gives canonical imported cutoff names the frequency control units …
+     57|  const {controlInfo}=await import('./controls');
+     58|  expect(controlInfo('cutoff')).toMatchObject({unit:'Hz',min:20,max:160…
+       |                                ^
+     59|  expect(controlInfo('hcutoff')).toMatchObject({unit:'Hz',min:20,max:16…
+     60| });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 22 passed (23)
+   Start at  14:01:21
+   Duration  3.19s (transform 273ms, setup 0ms, collect 587ms, tests 2.96s, environment 0ms, prepare 156ms)
+

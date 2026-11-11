@@ -1,0 +1,173 @@
+{
+  "durationMs": 2341.202545,
+  "errors": [],
+  "observations": [
+    {
+      "id": "real-house",
+      "map": "sheet",
+      "rows": 5,
+      "names": [
+        "$ · 1 01",
+        "$ · 2 02",
+        "$ · 3 03",
+        "$ · 4 04",
+        "$ · 5 05"
+      ],
+      "broken": {}
+    },
+    {
+      "id": "real-house",
+      "map": "constellation",
+      "rows": 0,
+      "names": [],
+      "broken": {}
+    },
+    {
+      "id": "real-techno",
+      "map": "sheet",
+      "rows": 4,
+      "names": [
+        "$ · 1 01",
+        "$ · 2 02",
+        "$ · 3 03",
+        "$ · 4 04"
+      ],
+      "broken": {}
+    },
+    {
+      "id": "real-techno",
+      "map": "constellation",
+      "rows": 0,
+      "names": [],
+      "broken": {}
+    },
+    {
+      "id": "real-house-vocals",
+      "map": "sheet",
+      "rows": 11,
+      "names": [
+        "$ · 1 · 1 01",
+        "$ · 1 · 2 02",
+        "$ · 2 · 1 03",
+        "$ · 2 · 2 04",
+        "$ · 2 · 3 05",
+        "$ · 2 · 4 06",
+        "$ · 3 07",
+        "$ · 4 · 1 08",
+        "$ · 4 · 2 09",
+        "$ · 4 · 3 10",
+        "$ · 5 11"
+      ],
+      "broken": {
+        "n74": "Identifier 'drop' has already been declared"
+      }
+    },
+    {
+      "id": "real-house-vocals",
+      "map": "constellation",
+      "rows": 0,
+      "names": [],
+      "broken": {
+        "n74": "Identifier 'drop' has already been declared"
+      }
+    },
+    {
+      "id": "real-dnb-arranged",
+      "map": "sheet",
+      "rows": 12,
+      "names": [
+        "$ · 1 · 1 01",
+        "$ · 1 · 2 02",
+        "$ · 1 · 3 03",
+        "$ · 2 · 1 04",
+        "$ · 2 · 2 05",
+        "$ · 2 · 3 06",
+        "$ · 2 · 4 07",
+        "$ · 3 08",
+        "$ · 4 · 1 09",
+        "$ · 4 · 2 10",
+        "$ · 4 · 3 11",
+        "$ · 5 12"
+      ],
+      "broken": {
+        "n98": "Identifier 'drop' has already been declared"
+      }
+    },
+    {
+      "id": "real-dnb-arranged",
+      "map": "constellation",
+      "rows": 0,
+      "names": [],
+      "broken": {
+        "n98": "Identifier 'drop' has already been declared"
+      }
+    },
+    {
+      "id": "switch-angel",
+      "map": "sheet",
+      "rows": 5,
+      "names": [
+        "$ 01",
+        "$ 02",
+        "$ 03",
+        "$ 04",
+        "$ 05"
+      ],
+      "broken": {
+        "n1": "setCpm is not defined",
+        "n7": "setCpm is not defined",
+        "n10": "setCpm is not defined",
+        "n31": "setCpm is not defined",
+        "n55": "setCpm is not defined"
+      }
+    },
+    {
+      "id": "switch-angel",
+      "map": "constellation",
+      "rows": 0,
+      "names": [],
+      "broken": {
+        "n1": "setCpm is not defined",
+        "n7": "setCpm is not defined",
+        "n10": "setCpm is not defined",
+        "n31": "setCpm is not defined",
+        "n55": "setCpm is not defined"
+      }
+    },
+    {
+      "id": "twenty",
+      "map": "sheet",
+      "rows": 20,
+      "names": [
+        "lead 01",
+        "bass 02",
+        "bell 03",
+        "reed 04",
+        "spark 05",
+        "pad 06",
+        "glass 07",
+        "pulse 08",
+        "copper 09",
+        "drift 10",
+        "tide 11",
+        "dust 12",
+        "moss 13",
+        "chime 14",
+        "hush 15",
+        "bloom 16",
+        "grain 17",
+        "glow 18",
+        "air 19",
+        "shore 20"
+      ],
+      "broken": {}
+    },
+    {
+      "id": "twenty",
+      "map": "constellation",
+      "rows": 0,
+      "names": [],
+      "broken": {}
+    }
+  ]
+}

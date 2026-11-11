@@ -1,0 +1,5 @@
+
+> odm-editor-study@0.0.0 shots:v2
+> ROUND=after node study-02-browser.mjs
+
+{"round":"after","durationMs":3487.568267,"errors":[]}

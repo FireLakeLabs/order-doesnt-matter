@@ -25,6 +25,7 @@ export class Engine {
   revision = 0;
   dispatches: Dispatch[] = [];
   private web?: typeof import("@strudel/web");
+  private startCycle = 0;
   private queue = Promise.resolve();
   async init() {
     if (this.repl) return;
@@ -56,10 +57,17 @@ export class Engine {
       },
     });
   }
-  async play(doc: Doc) {
+  async play(doc: Doc, fromCycle = 0) {
     await this.init();
     await this.web?.getAudioContext().resume();
     await this.web?.initAudio();
+    this.startCycle = fromCycle;
+    // Cyclist's first tick starts from lastEnd; set it before autostart.
+    if (this.repl) {
+      this.repl.scheduler.lastEnd = fromCycle;
+      this.repl.scheduler.num_cycles_at_cps_change = fromCycle;
+      this.repl.scheduler.seconds_at_cps_change = this.audioTime();
+    }
     this.playing = true;
     await this.swap(doc);
   }
@@ -82,7 +90,7 @@ export class Engine {
     const s = this.repl?.scheduler;
     if (!s?.started || !this.web) return 0;
     return Math.max(
-      0,
+      this.startCycle,
       s.num_cycles_at_cps_change +
         (this.web.getAudioContext().currentTime -
           s.seconds_at_cps_change -

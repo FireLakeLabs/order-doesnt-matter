@@ -1,0 +1,15 @@
+setcpm(135 / 4)
+
+stack(
+  // Hard driving kick
+  s("bd*4").shape(0.4),
+  // Crisp metallic hi-hats and claps
+  s("~ hh ~ hh ~ hh ~ hh"),
+  s("~ cp ~ cp").room(0.5),
+  // Hypnotic rolling bass/synth sequence
+  note("c2 c2 eb2 c2 f2 c2 g2 bb1")
+    .s("sawtooth")
+    .lpf(sine.range(200, 1800).slow(4))
+    .resonance(12)
+    .shape(0.3)
+)

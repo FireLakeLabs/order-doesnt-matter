@@ -1,0 +1,2 @@
+setcpm(15);
+$: /*@odm-voice {"name":"$","muted":false}*/ stack((/*@odm-pattern {"comment":"Slow evolving harmonic drones"}*/ note("<[c3,g3,d4,eb4] [ab2,eb3,bb3,c4] [f2,c3,g3,ab3]>").slow(4).s("sine").attack(2).release(3).room(0.95).gain(0.5)), (/*@odm-pattern {"comment":"Sparse crystalline high notes"}*/ note("g5 ~ bb5 ~ d6 ~ c6 ~").slow(2).s("triangle").delay(0.5).room(0.9).gain(0.3)));

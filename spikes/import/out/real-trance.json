@@ -1,0 +1,487 @@
+{
+  "setup": [],
+  "voices": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "span": {
+        "start": 19,
+        "end": 400
+      },
+      "name": "$",
+      "muted": false,
+      "pattern": {
+        "id": "n24",
+        "tier": 1,
+        "span": {
+          "start": 19,
+          "end": 400
+        },
+        "core": {
+          "kind": "group",
+          "how": "stack",
+          "parts": [
+            {
+              "pattern": {
+                "id": "n2",
+                "tier": 1,
+                "span": {
+                  "start": 63,
+                  "end": 72
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "s",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n3",
+                        "tier": 1,
+                        "span": {
+                          "start": 65,
+                          "end": 71
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "other",
+                              "notation": "bd*4"
+                            }
+                          ],
+                          "notation": "bd*4"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": [],
+                "comment": "Driving kick & off-beat hat"
+              }
+            },
+            {
+              "pattern": {
+                "id": "n4",
+                "tier": 1,
+                "span": {
+                  "start": 77,
+                  "end": 101
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "s",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n5",
+                        "tier": 1,
+                        "span": {
+                          "start": 79,
+                          "end": 100
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "oh"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "oh"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "oh"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "oh"
+                            }
+                          ],
+                          "notation": "~ oh ~ oh ~ oh ~ oh"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": []
+              }
+            },
+            {
+              "pattern": {
+                "id": "n6",
+                "tier": 1,
+                "span": {
+                  "start": 155,
+                  "end": 212
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "note",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n7",
+                        "tier": 1,
+                        "span": {
+                          "start": 160,
+                          "end": 211
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "c2"
+                            },
+                            {
+                              "kind": "sub",
+                              "steps": [
+                                {
+                                  "kind": "value",
+                                  "value": "c3"
+                                },
+                                {
+                                  "kind": "value",
+                                  "value": "c3"
+                                }
+                              ]
+                            },
+                            {
+                              "kind": "value",
+                              "value": "c2"
+                            },
+                            {
+                              "kind": "sub",
+                              "steps": [
+                                {
+                                  "kind": "value",
+                                  "value": "c3"
+                                },
+                                {
+                                  "kind": "value",
+                                  "value": "c3"
+                                }
+                              ]
+                            },
+                            {
+                              "kind": "value",
+                              "value": "ab1"
+                            },
+                            {
+                              "kind": "sub",
+                              "steps": [
+                                {
+                                  "kind": "value",
+                                  "value": "ab2"
+                                },
+                                {
+                                  "kind": "value",
+                                  "value": "ab2"
+                                }
+                              ]
+                            },
+                            {
+                              "kind": "value",
+                              "value": "bb1"
+                            },
+                            {
+                              "kind": "sub",
+                              "steps": [
+                                {
+                                  "kind": "value",
+                                  "value": "bb2"
+                                },
+                                {
+                                  "kind": "value",
+                                  "value": "bb2"
+                                }
+                              ]
+                            }
+                          ],
+                          "notation": "c2 [c3 c3] c2 [c3 c3] ab1 [ab2 ab2] bb1 [bb2 bb2]"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": [
+                  {
+                    "id": "n10",
+                    "tier": 1,
+                    "span": {
+                      "start": 155,
+                      "end": 232
+                    },
+                    "kind": "settings",
+                    "settings": [
+                      {
+                        "id": "n8",
+                        "tier": 1,
+                        "span": {
+                          "start": 155,
+                          "end": 232
+                        },
+                        "name": "s",
+                        "value": {
+                          "id": "n9",
+                          "tier": 1,
+                          "span": {
+                            "start": 221,
+                            "end": 231
+                          },
+                          "core": {
+                            "kind": "sequence",
+                            "steps": [
+                              {
+                                "kind": "value",
+                                "value": "sawtooth"
+                              }
+                            ],
+                            "notation": "sawtooth"
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n11",
+                        "tier": 1,
+                        "span": {
+                          "start": 155,
+                          "end": 247
+                        },
+                        "name": "cutoff",
+                        "value": {
+                          "id": "n12",
+                          "tier": 1,
+                          "span": {
+                            "start": 243,
+                            "end": 246
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 600
+                          },
+                          "layers": []
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "comment": "Rolling trance bassline (galloping rhythm)"
+              }
+            },
+            {
+              "pattern": {
+                "id": "n13",
+                "tier": 1,
+                "span": {
+                  "start": 293,
+                  "end": 326
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "note",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n14",
+                        "tier": 1,
+                        "span": {
+                          "start": 298,
+                          "end": 325
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "c4"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "eb4"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "g4"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "c5"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "g4"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "eb4"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "d5"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "c5"
+                            }
+                          ],
+                          "notation": "c4 eb4 g4 c5 g4 eb4 d5 c5"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": [
+                  {
+                    "id": "n17",
+                    "tier": 1,
+                    "span": {
+                      "start": 293,
+                      "end": 346
+                    },
+                    "kind": "settings",
+                    "settings": [
+                      {
+                        "id": "n15",
+                        "tier": 1,
+                        "span": {
+                          "start": 293,
+                          "end": 346
+                        },
+                        "name": "s",
+                        "value": {
+                          "id": "n16",
+                          "tier": 1,
+                          "span": {
+                            "start": 335,
+                            "end": 345
+                          },
+                          "core": {
+                            "kind": "sequence",
+                            "steps": [
+                              {
+                                "kind": "value",
+                                "value": "supersaw"
+                              }
+                            ],
+                            "notation": "supersaw"
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n18",
+                        "tier": 1,
+                        "span": {
+                          "start": 293,
+                          "end": 365
+                        },
+                        "name": "delay",
+                        "value": {
+                          "id": "n19",
+                          "tier": 1,
+                          "span": {
+                            "start": 359,
+                            "end": 364
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.375
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n20",
+                        "tier": 1,
+                        "span": {
+                          "start": 293,
+                          "end": 381
+                        },
+                        "name": "room",
+                        "value": {
+                          "id": "n21",
+                          "tier": 1,
+                          "span": {
+                            "start": 377,
+                            "end": 380
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.7
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n22",
+                        "tier": 1,
+                        "span": {
+                          "start": 293,
+                          "end": 397
+                        },
+                        "name": "gain",
+                        "value": {
+                          "id": "n23",
+                          "tier": 1,
+                          "span": {
+                            "start": 393,
+                            "end": 396
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.6
+                          },
+                          "layers": []
+                        }
+                      }
+                    ]
+                  }
+                ],
+                "comment": "Euphoric arpeggiated supersaw lead"
+              }
+            }
+          ]
+        },
+        "layers": []
+      }
+    }
+  ],
+  "shared": {},
+  "order": [
+    {
+      "kind": "tempo"
+    },
+    {
+      "kind": "voice",
+      "index": 0
+    }
+  ],
+  "transforms": [],
+  "tempo": {
+    "cpm": 34.5
+  }
+}

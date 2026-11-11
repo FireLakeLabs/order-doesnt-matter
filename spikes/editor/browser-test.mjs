@@ -59,6 +59,7 @@ async function pick(label, voice = 0) {
   );
 }
 async function shot(name) {
+  if (pass === "study02") return; // Study 02 captures real pieces with shots:v2.
   const path = `shots/${pass}-${name}.jpg`;
   await page.screenshot({ path, quality: 63, fullPage: false, type: "jpeg" });
   shots.push(path);
@@ -215,7 +216,7 @@ try {
   checks.push("mute + collapse row");
   await pick("lpf");
   await page
-    .getByRole("button", { name: "signal › inspect", exact: true })
+    .getByRole("button", { name: "signal › open driver", exact: true })
     .click();
   await page.locator('[data-signal="0"]').fill("450");
   await page.locator('[data-signal="0"]').press("Tab");

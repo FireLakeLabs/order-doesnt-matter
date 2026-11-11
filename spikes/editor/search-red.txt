@@ -1,0 +1,44 @@
+
+> odm-editor-study@0.0.0 test
+> node prepare-import.mjs && vitest run
+
+
+ RUN  v3.2.4 /home/aaron/projects/order-doesnt-matter/spikes/editor
+
+ ❯ src/song.test.ts (5 tests | 1 failed) 352ms
+   ✓ shows one named instrument reused in sections and edits every occurrence 136ms
+   ✓ keeps simultaneous pitches in separate miniature lanes 108ms
+   ✓ keeps moon circles and shell labels apart in a dense constellation 4ms
+   ✓ retains old shared values before an aligned edit and new values after it 97ms
+   × finds section-specific settings by their author instrument and human setting name 6ms
+     → expected false to be true // Object.is equality
+ ✓ src/study.test.ts (17 tests) 2563ms
+   ✓ document to real Strudel events > queries all six fixtures including unequal weights, alternation, rules, opaque code and nested signals  631ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  src/song.test.ts > finds section-specific settings by their author instrument and human setting name
+AssertionError: expected false to be true // Object.is equality
+
+- Expected
++ Received
+
+- true
++ false
+
+ ❯ src/song.test.ts:54:81
+     52| it('finds section-specific settings by their author instrument and hum…
+     53|  const {doc}=importStrudel('const chords=note("[c4,e4,g4]").s("piano")…
+     54|  expect(searchTargets(doc,'chords filter').some(t=>t.setting?.name==='…
+       |                                                                                 ^
+     55| });
+     56| 
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+
+ Test Files  1 failed | 1 passed (2)
+      Tests  1 failed | 21 passed (22)
+   Start at  13:52:54
+   Duration  3.16s (transform 256ms, setup 0ms, collect 584ms, tests 2.92s, environment 0ms, prepare 166ms)
+

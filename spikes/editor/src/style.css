@@ -1375,3 +1375,378 @@ header {
   right: 2%;
   cursor: ew-resize;
 }
+/* Study 02, round 1: bounded rows and a persistent song timeline. */
+.map-intro {
+  padding: 4px 24px 16px;
+}
+.map-intro h2 {
+  font-size: 23px;
+  margin: 6px 0 8px;
+}
+.navigator h1 {
+  font-size: 26px;
+}
+.arrangement {
+  padding: 14px 24px 16px;
+  border-top: 1px solid var(--line);
+  background: #172831;
+}
+.arrangement-caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 10px;
+  margin-bottom: 10px;
+  color: #a3b5bd;
+}
+.arrangement-caption strong {
+  color: var(--mint);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+}
+.sections {
+  display: flex;
+  gap: 5px;
+}
+.sections button {
+  min-width: 85px;
+  text-align: left;
+  border-radius: 5px;
+  background: #1d303b;
+  position: relative;
+  padding: 10px 12px;
+}
+.sections span {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+}
+.sections small {
+  display: block;
+  font-size: 9px;
+  color: #91aab8;
+  margin-top: 6px;
+}
+.sections [aria-current="step"] {
+  background: #a3efd519;
+  border-color: var(--mint);
+  box-shadow: inset 0 3px var(--mint);
+}
+.sections [aria-current="step"] span {
+  color: var(--mint);
+}
+.loop-strip {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 24px;
+  font-size: 11px;
+}
+.loop-strip small {
+  color: #96acb7;
+  margin-right: auto;
+}
+.loop-strip button {
+  font-size: 10px;
+  padding: 5px 9px;
+}
+.sheet-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background: #17242e;
+  font-size: 10px;
+  color: #93acb4;
+}
+.sheet-summary button {
+  font-size: 10px;
+  padding: 5px 10px;
+}
+.sheet-scroll table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  min-width: 1120px;
+  width: 100%;
+}
+.sheet-scroll td {
+  height: 110px;
+  max-height: 110px;
+  padding: 10px 12px;
+  width: 145px;
+  vertical-align: middle;
+}
+.sheet-scroll th {
+  width: 145px;
+}
+.sheet-scroll .voice-col {
+  width: 195px;
+  min-width: 195px;
+  max-width: 195px;
+  padding: 10px 14px;
+}
+.sheet-scroll thead th {
+  height: 48px;
+  font-size: 9px;
+  letter-spacing: 0.7px;
+  padding: 12px;
+}
+.sheet-scroll thead th small {
+  display: block;
+  letter-spacing: 0;
+  font-size: 9px;
+  color: #718b9c;
+  margin-top: 4px;
+  font-weight: 400;
+}
+.sheet-scroll .name {
+  font-size: 13px;
+  padding: 0;
+  text-align: left;
+  max-width: 175px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sheet-scroll .cell {
+  padding: 3px 0;
+  width: 100%;
+  text-align: left;
+  font-size: 10px;
+  border: 0;
+  background: none;
+  min-height: 40px;
+}
+.sheet-scroll .cell:hover {
+  background: #a3efd509;
+}
+.sheet-scroll .lane {
+  height: 28px;
+  max-height: 34px;
+  width: 100%;
+  display: block;
+}
+.constant-mini {
+  display: block;
+  position: relative;
+  height: 35px;
+  border-radius: 4px;
+  background: #c3b0f10b;
+  overflow: hidden;
+  padding: 10px 8px;
+}
+.constant-mini i {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  background: #a3efd580;
+}
+.constant-mini b {
+  font-weight: 500;
+  color: #dcebe6;
+  font-size: 12px;
+}
+.constant-mini small {
+  font-size: 9px;
+  color: #8faab5;
+  margin-left: 2px;
+}
+.mini-caption {
+  display: block;
+  color: #b5b4d0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 9px;
+  margin-bottom: 5px;
+}
+.nested {
+  display: block;
+  font-size: 9px;
+  color: #a69ac3;
+  margin-top: 5px;
+}
+.membership {
+  display: flex;
+  gap: 3px;
+  max-width: 175px;
+  overflow: hidden;
+  margin: 6px 0;
+}
+.section-use {
+  font-size: 8px;
+  padding: 2px 4px;
+  background: #a3efd508;
+  color: #93b7ac;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.row-actions {
+  gap: 3px;
+}
+.row-actions button {
+  font-size: 9px;
+  padding: 2px 5px;
+}
+.rest-state,
+.quiet-cell {
+  font-size: 10px;
+  color: #8ca2ac;
+  display: block;
+  line-height: 1.6;
+}
+.inactive {
+  opacity: 0.55;
+}
+.inactive .name {
+  color: #bdcbd0;
+}
+.variant {
+  display: block;
+  font-size: 8px;
+  color: var(--amber);
+}
+.planet-card {
+  fill: #172630;
+  stroke: #31414e;
+  stroke-width: 1;
+}
+.planet-title {
+  font:
+    600 16px Space,
+    sans-serif;
+  fill: #dbe8e7;
+}
+.planet-state {
+  font-size: 10px;
+  fill: #8baaa7;
+}
+.planet-face circle {
+  fill: #15252d;
+  stroke: #a3efd58a;
+}
+.planet-face text {
+  font-size: 9px;
+  fill: #a3efd5;
+  paint-order: stroke;
+  stroke: #15252d;
+  stroke-width: 4px;
+}
+.moon.setting text {
+  font-size: 9px;
+  fill: #e3dcf3;
+}
+.moon.setting circle {
+  fill: #2b2c42;
+  stroke: #9f91b8;
+}
+.moon.setting .moon-value {
+  font-size: 8px;
+  fill: #9eaec5;
+}
+.driver-chip {
+  cursor: pointer;
+  font-size: 9px;
+  fill: #aa9ac4;
+}
+.shell {
+  stroke: #b8996266;
+}
+.shell-label-bg {
+  fill: #273136;
+  stroke: #b8996266;
+}
+.shell-label {
+  font-size: 9px;
+  fill: #e2bb7a;
+}
+.source-nodes button {
+  font-size: 9px;
+  padding: 5px 8px;
+}
+@media (max-width: 650px) {
+  .arrangement {
+    padding: 10px 12px;
+  }
+  .sections {
+    overflow: auto;
+  }
+  .sections button {
+    min-width: 105px;
+    padding: 8px;
+  }
+  .arrangement-caption span {
+    display: none;
+  }
+  .loop-strip small {
+    display: none;
+  }
+  .sheet-scroll .voice-col {
+    width: 160px;
+    min-width: 160px;
+  }
+  .map-intro h2 {
+    font-size: 19px;
+  }
+  .membership {
+    max-width: 135px;
+  }
+}
+/* Round 4: reserve label space, make sharing an explicit editing affordance. */
+.shared-mark {
+  font-size: 9px;
+  color: #97bdb0;
+  white-space: nowrap;
+  cursor: help;
+}
+.membership {
+  min-height: 13px;
+  margin: 5px 0;
+  max-width: 100%;
+}
+.sharing-notice {
+  border: 1px solid #81bca144;
+  background: #a3efd50a;
+  border-radius: 7px;
+  padding: 12px;
+  margin: 12px 0 20px;
+  color: #b6d9ca;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.sharing-notice span {
+  display: block;
+  color: #99b7af;
+  font-size: 10px;
+}
+.map-intro {
+  padding-top: 0;
+  padding-bottom: 12px;
+}
+.map-intro h2 {
+  font-size: 21px;
+}
+.source-nodes {
+  max-height: 68px;
+  overflow: auto;
+}
+#status {
+  max-width: 68%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.planet-state {
+  font-size: 10px;
+}
+.inactive {
+  opacity: 0.68;
+}
+.moon.setting .moon-value {
+  font-size: 8px;
+}
+.inactive-value {
+  opacity: 0.7;
+}

@@ -1,0 +1,2 @@
+setcpm(31);
+$: /*@odm-voice {"name":"$","muted":false}*/ stack((/*@odm-pattern {"comment":"Four-on-the-floor kick"}*/ s("bd*4")), (/*@odm-pattern {"comment":"Clap on 2 and 4 + off-beat open hats"}*/ s("~ cp ~ cp")), s("~ oh ~ oh ~ oh ~ oh").gain(0.7), (/*@odm-pattern {"comment":"Syncopated groovy bass"}*/ note("c2 ~ c2 g1 ~ a1 ~ g1").s("sawtooth").cutoff(400)), (/*@odm-pattern {"comment":"Rhythmic house stabs"}*/ note("<[c4,eb4,g4,bb4] [f4,ab4,c5,eb5]>").struct("~ [x ~ x] ~ ~").s("piano").delay(0.25)));

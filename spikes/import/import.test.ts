@@ -267,3 +267,46 @@ describe("event queries", () => {
     expect(r.events).toEqual([]);
   });
 });
+
+describe("author vocabulary", () => {
+  it("retains single-use const names and section comments through generation", async () => {
+    const source = `const kick=s("bd*4");
+// Intro: only the kick
+const intro=stack(kick);
+arrange([4,intro],[4,stack(s("hh"))])`;
+    const { doc, fresh } = await equivalent(source, 9);
+    expect(JSON.stringify(doc)).toContain('"label":"intro"');
+    expect(JSON.stringify(doc)).toContain("Intro: only the kick");
+    expect(JSON.stringify(doc)).toContain('"label":"kick"');
+    expect(fresh).toContain("Intro: only the kick");
+  });
+  it("retains comments naming anonymous stack parts", async () => {
+    const { doc } = await equivalent(`stack(
+// Four-on-the-floor kick
+s("bd*4"),
+// Piano chords
+note("[c4,e4,g4]").s("piano"))`);
+    expect(JSON.stringify(doc)).toContain("Four-on-the-floor kick");
+    expect(JSON.stringify(doc)).toContain("Piano chords");
+  });
+});
+it("recognises setCpm tempo and the time signal used by the local trance piece", async () => {
+  const { doc } = await equivalent(
+    'setCpm(140/4); s("pulse!16").fm(time).fmh(time)',
+  );
+  expect(doc.tempo).toEqual({ cpm: 35 });
+  expect(JSON.stringify(doc)).toContain('"shape":"time"');
+});
+it("queries the draw fill parameter used by registered gates without initializing a canvas", async () => {
+  const { result } = await equivalent('s("bd").fill(.8).clip(.8)');
+  expect(result.events[0]?.value).toMatchObject({
+    s: "bd",
+    fill: 0.8,
+    clip: 0.8,
+  });
+});
+it("recognises an explicit silent part without an unresolved-identifier warning", async () => {
+  const source = 'cat(silence,s("bd"))';
+  expect(importStrudel(source).warnings).toEqual([]);
+  await equivalent(source, 4);
+});

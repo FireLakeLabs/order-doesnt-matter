@@ -1,80 +1,92 @@
 import type { Arg, Doc, Pattern } from "./document.ts";
 import { printSteps } from "./mini.ts";
 
+function literal(value: unknown): string {
+  if (typeof value === "string")
+    return `'${value.replaceAll("\\", "\\\\").replaceAll("'", "\\'").replaceAll("\n", "\\n").replaceAll("\r", "\\r")}'`;
+  if (Array.isArray(value)) return `[${value.map(literal).join(", ")}]`;
+  if (value && typeof value === "object")
+    return `{${Object.entries(value)
+      .map(([k, v]) => `${literal(k)}: ${literal(v)}`)
+      .join(", ")}}`;
+  return JSON.stringify(value);
+}
+function argument(arg: Arg, hole?: string): string {
+  switch (arg.kind) {
+    case "literal":
+      return literal(arg.value);
+    case "pattern":
+      return generatePattern(arg.pattern, hole);
+    case "opaque":
+      return arg.code;
+    case "callback": {
+      const parameter = arg.parameter ?? "p";
+      return `${parameter} => ${generatePattern(arg.body, parameter)}`;
+    }
+  }
+}
+export function generatePattern(p: Pattern, hole?: string): string {
+  let text: string;
+  const core = p.core;
+  switch (core.kind) {
+    case "sequence":
+      text = JSON.stringify(printSteps(core.steps));
+      break;
+    case "constant":
+      text = literal(core.value);
+      break;
+    case "data":
+      text = literal(core.value);
+      break;
+    case "signal":
+      text = core.shape;
+      break;
+    case "ref":
+      text = core.name;
+      break;
+    case "hole":
+      text = hole ?? "p";
+      break;
+    case "opaque":
+      text = `(${core.code})`;
+      break;
+    case "generator":
+      text =
+        core.name === "silence" && !core.args.length
+          ? "silence"
+          : `${core.name}(${core.args.map((a) => argument(a, hole)).join(", ")})`;
+      break;
+    case "group":
+      text = `${core.how}(${core.parts.map((part) => (core.how === "arrange" ? `[${part.cycles ?? 1}, ${generatePattern(part.pattern, hole)}]` : generatePattern(part.pattern, hole))).join(", ")})`;
+      break;
+  }
+  // Strudel transpiles double-quoted mini strings itself. Numeric/data
+  // receivers need pure() when chained; plain arguments stay plain.
+  if (p.layers.length && ["constant", "data"].includes(core.kind))
+    text = `pure(${text})`;
+  for (const layer of p.layers) {
+    if (layer.kind === "settings")
+      for (const setting of layer.settings)
+        text += `.${setting.name}(${generatePattern(setting.value, hole)})`;
+    else if (layer.kind === "rewrite")
+      text += `.${layer.name}(${layer.args.map((a) => argument(a, hole)).join(", ")})`;
+    else text += layer.code;
+  }
+  if (p.label !== undefined || p.comment !== undefined) {
+    const metadata = JSON.stringify({
+      label: p.label,
+      comment: p.comment,
+    }).replaceAll("*/", "*\\/");
+    text = `(/*@odm-pattern ${metadata}*/ ${text})`;
+  }
+  return text;
+}
 export function generate(doc: Doc): string {
-  function literal(value: unknown): string {
-    if (typeof value === "string")
-      return `'${value.replaceAll("\\", "\\\\").replaceAll("'", "\\'").replaceAll("\n", "\\n").replaceAll("\r", "\\r")}'`;
-    if (Array.isArray(value)) return `[${value.map(literal).join(", ")}]`;
-    if (value && typeof value === "object")
-      return `{${Object.entries(value)
-        .map(([k, v]) => `${literal(k)}: ${literal(v)}`)
-        .join(", ")}}`;
-    return JSON.stringify(value);
-  }
-  function argument(arg: Arg, hole?: string): string {
-    switch (arg.kind) {
-      case "literal":
-        return literal(arg.value);
-      case "pattern":
-        return pattern(arg.pattern, hole);
-      case "opaque":
-        return arg.code;
-      case "callback": {
-        const parameter = arg.parameter ?? "p";
-        return `${parameter} => ${pattern(arg.body, parameter)}`;
-      }
-    }
-  }
-  function pattern(p: Pattern, hole?: string): string {
-    let text: string;
-    const core = p.core;
-    switch (core.kind) {
-      case "sequence":
-        text = JSON.stringify(printSteps(core.steps));
-        break;
-      case "constant":
-        text = literal(core.value);
-        break;
-      case "data":
-        text = literal(core.value);
-        break;
-      case "signal":
-        text = core.shape;
-        break;
-      case "ref":
-        text = core.name;
-        break;
-      case "hole":
-        text = hole ?? "p";
-        break;
-      case "opaque":
-        text = `(${core.code})`;
-        break;
-      case "generator":
-        text = `${core.name}(${core.args.map((a) => argument(a, hole)).join(", ")})`;
-        break;
-      case "group":
-        text = `${core.how}(${core.parts.map((part) => (core.how === "arrange" ? `[${part.cycles ?? 1}, ${pattern(part.pattern, hole)}]` : pattern(part.pattern, hole))).join(", ")})`;
-        break;
-    }
-    // Strudel transpiles double-quoted mini strings itself. Numeric/data
-    // receivers need pure() when chained; plain arguments stay plain.
-    if (p.layers.length && ["constant", "data"].includes(core.kind))
-      text = `pure(${text})`;
-    for (const layer of p.layers) {
-      if (layer.kind === "settings")
-        for (const setting of layer.settings)
-          text += `.${setting.name}(${pattern(setting.value, hole)})`;
-      else if (layer.kind === "rewrite")
-        text += `.${layer.name}(${layer.args.map((a) => argument(a, hole)).join(", ")})`;
-      else text += layer.code;
-    }
-    return text;
-  }
   const setup = (i: number) => doc.setup[i]?.code ?? "";
   const shared = (name: string) =>
-    doc.shared[name] ? `const ${name} = ${pattern(doc.shared[name])};` : "";
+    doc.shared[name]
+      ? `const ${name} = ${generatePattern(doc.shared[name])};`
+      : "";
   const voice = (i: number) => {
     const v = doc.voices[i];
     if (!v) return "";
@@ -84,7 +96,7 @@ export function generate(doc: Doc): string {
       name: v.name,
       muted: v.muted,
     }).replaceAll("*/", "*\\/");
-    return `${v.muted ? "_$" : "$"}: /*@odm-voice ${metadata}*/ ${pattern(v.pattern)};`;
+    return `${v.muted ? "_$" : "$"}: /*@odm-voice ${metadata}*/ ${generatePattern(v.pattern)};`;
   };
   const tempo = () => (doc.tempo ? `setcpm(${doc.tempo.cpm});` : "");
   const transform = (i: number) => {
