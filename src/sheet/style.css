@@ -218,7 +218,7 @@
   }
   .odm-sheet th:first-child {
     /* Small-screen table scrolling avoids Chromium dropping tall sticky cells. */
-    position: static;
+    position: relative;
     min-width: 155px;
     max-width: 155px;
   }
