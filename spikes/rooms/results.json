@@ -1,0 +1,6936 @@
+{
+  "browser": "158.0.8127.18",
+  "method": {
+    "sampleRate": 24000,
+    "cps": 1,
+    "onsetOffset": 0.05,
+    "threshold": 0.0001,
+    "seed": 719
+  },
+  "pairs": [
+    {
+      "name": "lpf/gain",
+      "nullRms": 0,
+      "relativeNull": 0,
+      "maxDifference": 0,
+      "zeroLagCorrelation": 1
+    },
+    {
+      "name": "lpf/distort",
+      "nullRms": 0,
+      "relativeNull": 0,
+      "maxDifference": 0,
+      "zeroLagCorrelation": 1
+    },
+    {
+      "name": "hpf/distort",
+      "nullRms": 0,
+      "relativeNull": 0,
+      "maxDifference": 0,
+      "zeroLagCorrelation": 1
+    },
+    {
+      "name": "pan/crush",
+      "nullRms": 0,
+      "relativeNull": 0,
+      "maxDifference": 0,
+      "zeroLagCorrelation": 1
+    },
+    {
+      "name": "vowel/lpf",
+      "nullRms": 0.0006490360647601225,
+      "relativeNull": 0.010593025961494616,
+      "maxDifference": 0.013736817985773087,
+      "zeroLagCorrelation": 0.9999438923264358
+    },
+    {
+      "name": "vowel/distort",
+      "nullRms": 0.0010609271425288367,
+      "relativeNull": 0.01478525724309332,
+      "maxDifference": 0.0161562692373991,
+      "zeroLagCorrelation": 0.9998906921100066
+    },
+    {
+      "name": "coarse/crush",
+      "nullRms": 0,
+      "relativeNull": 0,
+      "maxDifference": 0,
+      "zeroLagCorrelation": 1
+    },
+    {
+      "name": "gain/distort",
+      "nullRms": 0,
+      "relativeNull": 0,
+      "maxDifference": 0,
+      "zeroLagCorrelation": 1
+    },
+    {
+      "name": "pan/delay",
+      "nullRms": 0,
+      "relativeNull": 0,
+      "maxDifference": 0,
+      "zeroLagCorrelation": 1
+    },
+    {
+      "name": "lpf/delay",
+      "nullRms": 0,
+      "relativeNull": 0,
+      "maxDifference": 0,
+      "zeroLagCorrelation": 1
+    },
+    {
+      "name": "distort/room",
+      "nullRms": 0,
+      "relativeNull": 0,
+      "maxDifference": 0,
+      "zeroLagCorrelation": 1
+    },
+    {
+      "name": "delay/room",
+      "nullRms": 2.7284610204939777e-9,
+      "relativeNull": 3.887797014806296e-8,
+      "maxDifference": 2.9802322387695312e-8,
+      "zeroLagCorrelation": 0.999999999999986
+    },
+    {
+      "name": "room/size",
+      "nullRms": 0,
+      "relativeNull": 0,
+      "maxDifference": 0,
+      "zeroLagCorrelation": 1
+    },
+    {
+      "name": "pan/vowel",
+      "nullRms": 0.002373216589374914,
+      "relativeNull": 0.04198726878090035,
+      "maxDifference": 0.04756622761487961,
+      "zeroLagCorrelation": 0.9991181457967254
+    },
+    {
+      "name": "lpf/hpf",
+      "nullRms": 0,
+      "relativeNull": 0,
+      "maxDifference": 0,
+      "zeroLagCorrelation": 1
+    }
+  ],
+  "experiments": [
+    {
+      "name": "lpf/gain",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).lpf(800).gain(.5).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).gain(.5).lpf(800).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.043052356864420376,
+        "peak": 0.1638869047164917,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 508.7504315116532
+      },
+      "bMetrics": {
+        "rms": 0.043052356864420376,
+        "peak": 0.1638869047164917,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 508.7504315116532
+      },
+      "windows": {
+        "a": 0.07508835681961089,
+        "b": 0.07508835681961089
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "cutoff": 800,
+            "gain": 0.5,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "gain": 0.5,
+            "cutoff": 800,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "lpf/distort",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).lpf(800).distort(2).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).distort(2).lpf(800).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.25945059251265634,
+        "peak": 0.7242283225059509,
+        "lastAboveMinus80dB": 1.07,
+        "centroidHz": 771.1989542998765
+      },
+      "bMetrics": {
+        "rms": 0.25945059251265634,
+        "peak": 0.7242283225059509,
+        "lastAboveMinus80dB": 1.07,
+        "centroidHz": 771.1989542998765
+      },
+      "windows": {
+        "a": 0.45165800480731105,
+        "b": 0.45165800480731105
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "cutoff": 800,
+            "distort": 2,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "distort": 2,
+            "cutoff": 800,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "hpf/distort",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).hpf(1200).distort(2).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).distort(2).hpf(1200).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.07976618441908817,
+        "peak": 0.7780097126960754,
+        "lastAboveMinus80dB": 1.07,
+        "centroidHz": 3387.179929313164
+      },
+      "bMetrics": {
+        "rms": 0.07976618441908817,
+        "peak": 0.7780097126960754,
+        "lastAboveMinus80dB": 1.07,
+        "centroidHz": 3387.179929313164
+      },
+      "windows": {
+        "a": 0.13913733501080666,
+        "b": 0.13913733501080666
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "hcutoff": 1200,
+            "distort": 2,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "distort": 2,
+            "hcutoff": 1200,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "pan/crush",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).pan(.2).crush(4).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).crush(4).pan(.2).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.04872283864847889,
+        "peak": 0.2377641350030899,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 3291.3752575993053
+      },
+      "bMetrics": {
+        "rms": 0.04872283864847889,
+        "peak": 0.2377641350030899,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 3291.3752575993053
+      },
+      "windows": {
+        "a": 0.08526409272794312,
+        "b": 0.08526409272794312
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "pan": 0.2,
+            "crush": 4,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "crush": 4,
+            "pan": 0.2,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "vowel/lpf",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).vowel(\"a\").lpf(800).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).lpf(800).vowel(\"a\").delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0.0006490360647601225,
+        "relativeNull": 0.010593025961494616,
+        "maxDifference": 0.013736817985773087,
+        "zeroLagCorrelation": 0.9999438923264358
+      },
+      "earlyComparison": {
+        "nullRms": 5.129253068028929e-9,
+        "relativeNull": 5.019140548581099e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999847
+      },
+      "lateComparison": {
+        "nullRms": 0.0008112950809410755,
+        "relativeNull": 0.1472863043847619,
+        "maxDifference": 0.013736817985773087,
+        "zeroLagCorrelation": 0.9890939007701331
+      },
+      "aMetrics": {
+        "rms": 0.06127012877334064,
+        "peak": 0.18339136242866516,
+        "lastAboveMinus80dB": 1.17,
+        "centroidHz": 663.6837111962894
+      },
+      "bMetrics": {
+        "rms": 0.06126669104142136,
+        "peak": 0.18339136242866516,
+        "lastAboveMinus80dB": 1.15,
+        "centroidHz": 663.6835509530789
+      },
+      "windows": {
+        "a": 0.105291774071665,
+        "b": 0.1052917741330385
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "vowel": "a",
+            "cutoff": 800,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "cutoff": 800,
+            "vowel": "a",
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 4.7492491794068614e-9,
+        "relativeNull": 4.978183741816157e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999912
+      },
+      "windowAfter": {
+        "nullRms": 0.0011720214050882805,
+        "relativeNull": 0.013861702287956143,
+        "maxDifference": 0.013736817985773087,
+        "zeroLagCorrelation": 0.9999039219893406
+      }
+    },
+    {
+      "name": "vowel/distort",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).vowel(\"e\").distort(2).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).distort(2).vowel(\"e\").delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0.0010609271425288367,
+        "relativeNull": 0.01478525724309332,
+        "maxDifference": 0.0161562692373991,
+        "zeroLagCorrelation": 0.9998906921100066
+      },
+      "earlyComparison": {
+        "nullRms": 6.707272344925967e-9,
+        "relativeNull": 5.566725640751758e-8,
+        "maxDifference": 4.470348358154297e-8,
+        "zeroLagCorrelation": 0.9999999999999851
+      },
+      "lateComparison": {
+        "nullRms": 0.0013261589281516098,
+        "relativeNull": 0.30264112922986935,
+        "maxDifference": 0.0161562692373991,
+        "zeroLagCorrelation": 0.953104583400197
+      },
+      "aMetrics": {
+        "rms": 0.07175574459649128,
+        "peak": 0.2861216366291046,
+        "lastAboveMinus80dB": 1.27,
+        "centroidHz": 1169.1227111412604
+      },
+      "bMetrics": {
+        "rms": 0.0717479011604127,
+        "peak": 0.2861216068267822,
+        "lastAboveMinus80dB": 1.15,
+        "centroidHz": 1169.1227288324922
+      },
+      "windows": {
+        "a": 0.12223724749716497,
+        "b": 0.12223724747806573
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "vowel": "e",
+            "distort": 2,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "distort": 2,
+            "vowel": "e",
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 6.406152345525587e-9,
+        "relativeNull": 5.504375680272289e-8,
+        "maxDifference": 4.470348358154297e-8,
+        "zeroLagCorrelation": 0.9999999999999909
+      },
+      "windowAfter": {
+        "nullRms": 0.0019158092867219804,
+        "relativeNull": 0.019678726821489186,
+        "maxDifference": 0.0161562692373991,
+        "zeroLagCorrelation": 0.9998063551061551
+      }
+    },
+    {
+      "name": "coarse/crush",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).coarse(8).crush(4).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).crush(4).coarse(8).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.06892024376045111,
+        "peak": 0.25,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 2827.9958419432064
+      },
+      "bMetrics": {
+        "rms": 0.06892024376045111,
+        "peak": 0.25,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 2827.9958419432064
+      },
+      "windows": {
+        "a": 0.1182188413259259,
+        "b": 0.1182188413259259
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "coarse": 8,
+            "crush": 4,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "crush": 4,
+            "coarse": 8,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "gain/distort",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).gain(.2).distort(2).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).distort(2).gain(.2).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.10101019045101055,
+        "peak": 0.31561025977134705,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 2070.087664912696
+      },
+      "bMetrics": {
+        "rms": 0.10101019045101055,
+        "peak": 0.31561025977134705,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 2070.087664912696
+      },
+      "windows": {
+        "a": 0.17615497347952666,
+        "b": 0.17615497347952666
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "gain": 0.2,
+            "distort": 2,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "distort": 2,
+            "gain": 0.2,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "pan/delay",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).pan(.2).delay(.6).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).delay(.6).pan(.2).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "aMetrics": {
+        "rms": 0.050174592702381546,
+        "peak": 0.2901507616043091,
+        "lastAboveMinus80dB": 2.14,
+        "centroidHz": 1956.5748798719453
+      },
+      "bMetrics": {
+        "rms": 0.050174592702381546,
+        "peak": 0.2901507616043091,
+        "lastAboveMinus80dB": 2.14,
+        "centroidHz": 1956.5748798719453
+      },
+      "windows": {
+        "a": 0.08966996993967259,
+        "b": 0.08966996993967259
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "pan": 0.2,
+            "delay": 0.6,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "delay": 0.6,
+            "pan": 0.2,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.15000000596046448,
+              "feedback": 0.4000000059604645
+            }
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.15000000596046448,
+              "feedback": 0.4000000059604645
+            }
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {
+          "delaytime": 0.15000000596046448,
+          "feedback": 0.4000000059604645
+        }
+      },
+      "endOrbitsB": {
+        "1": {
+          "delaytime": 0.15000000596046448,
+          "feedback": 0.4000000059604645
+        }
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "lpf/delay",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).lpf(800).delay(.6).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).delay(.6).lpf(800).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "aMetrics": {
+        "rms": 0.07265759123377676,
+        "peak": 0.31565189361572266,
+        "lastAboveMinus80dB": 2.29,
+        "centroidHz": 508.72292783849394
+      },
+      "bMetrics": {
+        "rms": 0.07265759123377676,
+        "peak": 0.31565189361572266,
+        "lastAboveMinus80dB": 2.29,
+        "centroidHz": 508.72292783849394
+      },
+      "windows": {
+        "a": 0.130090194100244,
+        "b": 0.130090194100244
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "cutoff": 800,
+            "delay": 0.6,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "delay": 0.6,
+            "cutoff": 800,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.15000000596046448,
+              "feedback": 0.4000000059604645
+            }
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.15000000596046448,
+              "feedback": 0.4000000059604645
+            }
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {
+          "delaytime": 0.15000000596046448,
+          "feedback": 0.4000000059604645
+        }
+      },
+      "endOrbitsB": {
+        "1": {
+          "delaytime": 0.15000000596046448,
+          "feedback": 0.4000000059604645
+        }
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "distort/room",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).distort(2).room(.5).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).room(.5).distort(2).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "aMetrics": {
+        "rms": 0.25962151186918797,
+        "peak": 0.7834804058074951,
+        "lastAboveMinus80dB": 1.47,
+        "centroidHz": 2284.2941982351417
+      },
+      "bMetrics": {
+        "rms": 0.25962151186918797,
+        "peak": 0.7834804058074951,
+        "lastAboveMinus80dB": 1.47,
+        "centroidHz": 2284.2941982351417
+      },
+      "windows": {
+        "a": 0.4518428321831189,
+        "b": 0.4518428321831189
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "distort": 2,
+            "room": 0.5,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "room": 0.5,
+            "distort": 2,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "roomsize": 0.4
+            }
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "roomsize": 0.4
+            }
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {
+          "roomsize": 0.4,
+          "impulseSeconds": 0.6
+        }
+      },
+      "finalOrbitsB": {
+        "1": {
+          "roomsize": 0.4,
+          "impulseSeconds": 0.6
+        }
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "delay/room",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).delay(.5).room(.5).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).room(.5).delay(.5).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 2.7284610204939777e-9,
+        "relativeNull": 3.887797014806296e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.999999999999986
+      },
+      "earlyComparison": {
+        "nullRms": 4.556934488169655e-9,
+        "relativeNull": 3.938914669656722e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999887
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "aMetrics": {
+        "rms": 0.0701801305495856,
+        "peak": 0.30909937620162964,
+        "lastAboveMinus80dB": 2.24,
+        "centroidHz": 1985.276440080167
+      },
+      "bMetrics": {
+        "rms": 0.07018013054593657,
+        "peak": 0.30909937620162964,
+        "lastAboveMinus80dB": 2.24,
+        "centroidHz": 1985.276440492474
+      },
+      "windows": {
+        "a": 0.12531974530138726,
+        "b": 0.12531974512266872
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "delay": 0.5,
+            "room": 0.5,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "room": 0.5,
+            "delay": 0.5,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.15000000596046448,
+              "feedback": 0.4000000059604645,
+              "roomsize": 0.4
+            }
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.15000000596046448,
+              "feedback": 0.4000000059604645,
+              "roomsize": 0.4
+            }
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {
+          "roomsize": 0.4,
+          "impulseSeconds": 0.6
+        }
+      },
+      "finalOrbitsB": {
+        "1": {
+          "roomsize": 0.4,
+          "impulseSeconds": 0.6
+        }
+      },
+      "endOrbitsA": {
+        "1": {
+          "delaytime": 0.15000000596046448,
+          "feedback": 0.4000000059604645
+        }
+      },
+      "endOrbitsB": {
+        "1": {
+          "delaytime": 0.15000000596046448,
+          "feedback": 0.4000000059604645
+        }
+      },
+      "windowBefore": {
+        "nullRms": 2.851185286703632e-9,
+        "relativeNull": 2.7392700907982235e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999983
+      },
+      "windowAfter": {
+        "nullRms": 4.094720362440288e-9,
+        "relativeNull": 4.153126466722089e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999942
+      }
+    },
+    {
+      "name": "room/size",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).room(.5).roomsize(.4).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).roomsize(.4).room(.5).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "aMetrics": {
+        "rms": 0.06687457387229187,
+        "peak": 0.2521435022354126,
+        "lastAboveMinus80dB": 1.41,
+        "centroidHz": 1985.145047400162
+      },
+      "bMetrics": {
+        "rms": 0.06687457387229187,
+        "peak": 0.2521435022354126,
+        "lastAboveMinus80dB": 1.41,
+        "centroidHz": 1985.145047400162
+      },
+      "windows": {
+        "a": 0.11648429201714236,
+        "b": 0.11648429201714236
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "room": 0.5,
+            "roomsize": 0.4,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "roomsize": 0.4,
+            "room": 0.5,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "roomsize": 0.4
+            }
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "roomsize": 0.4
+            }
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {
+          "roomsize": 0.4,
+          "impulseSeconds": 0.6
+        }
+      },
+      "finalOrbitsB": {
+        "1": {
+          "roomsize": 0.4,
+          "impulseSeconds": 0.6
+        }
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "pan/vowel",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).pan(.7).vowel(\"i\").delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).vowel(\"i\").pan(.7).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0.002373216589374914,
+        "relativeNull": 0.04198726878090035,
+        "maxDifference": 0.04756622761487961,
+        "zeroLagCorrelation": 0.9991181457967254
+      },
+      "earlyComparison": {
+        "nullRms": 5.442405085414039e-9,
+        "relativeNull": 5.7801570321656135e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999828
+      },
+      "lateComparison": {
+        "nullRms": 0.0029665207367158522,
+        "relativeNull": 0.48333155187862176,
+        "maxDifference": 0.04756622761487961,
+        "zeroLagCorrelation": 0.8754373826600036
+      },
+      "aMetrics": {
+        "rms": 0.056522290167501404,
+        "peak": 0.23039327561855316,
+        "lastAboveMinus80dB": 1.26,
+        "centroidHz": 382.43716392979877
+      },
+      "bMetrics": {
+        "rms": 0.056472445777472145,
+        "peak": 0.23039327561855316,
+        "lastAboveMinus80dB": 1.12,
+        "centroidHz": 382.43690110392856
+      },
+      "windows": {
+        "a": 0.09655115817808115,
+        "b": 0.09655115817519838
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "pan": 0.7,
+            "vowel": "i",
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "vowel": "i",
+            "pan": 0.7,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 5.190900035223463e-9,
+        "relativeNull": 5.786243362271252e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999927
+      },
+      "windowAfter": {
+        "nullRms": 0.004285525555036255,
+        "relativeNull": 0.05526921071154092,
+        "maxDifference": 0.04756622761487961,
+        "zeroLagCorrelation": 0.9984714890007097
+      }
+    },
+    {
+      "name": "lpf/hpf",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).lpf(800).hpf(400).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).hpf(400).lpf(800).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "aMetrics": {
+        "rms": 0.04082506943108248,
+        "peak": 0.2256295531988144,
+        "lastAboveMinus80dB": 1.07,
+        "centroidHz": 701.1724212828353
+      },
+      "bMetrics": {
+        "rms": 0.04082506943108248,
+        "peak": 0.2256295531988144,
+        "lastAboveMinus80dB": 1.07,
+        "centroidHz": 701.1724212828353
+      },
+      "windows": {
+        "a": 0.07125458999831669,
+        "b": 0.07125458999831669
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "cutoff": 800,
+            "hcutoff": 400,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "hcutoff": 400,
+            "cutoff": 800,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "vowel/lpf same-code control",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).vowel(\"a\").lpf(800).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).vowel(\"a\").lpf(800).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0.00015731631709314946,
+        "relativeNull": 0.0025675249032138274,
+        "maxDifference": 0.0030460203997790813,
+        "zeroLagCorrelation": 0.9999967039242322
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0.00019664539636643684,
+        "relativeNull": 0.03553715263367309,
+        "maxDifference": 0.0030460203997790813,
+        "zeroLagCorrelation": 0.9993691528460537
+      },
+      "aMetrics": {
+        "rms": 0.061271583732734655,
+        "peak": 0.18339136242866516,
+        "lastAboveMinus80dB": 1.21,
+        "centroidHz": 663.6837126149834
+      },
+      "bMetrics": {
+        "rms": 0.061271785689182644,
+        "peak": 0.18339136242866516,
+        "lastAboveMinus80dB": 1.24,
+        "centroidHz": 663.6837126149834
+      },
+      "windows": {
+        "a": 0.10529177403902665,
+        "b": 0.10529177403902665
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "vowel": "a",
+            "cutoff": 800,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "vowel": "a",
+            "cutoff": 800,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0.0002840798855635526,
+        "relativeNull": 0.0033597259121938114,
+        "maxDifference": 0.0030460203997790813,
+        "zeroLagCorrelation": 0.9999943561686768
+      }
+    },
+    {
+      "name": "vowel/distort same-code control",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).vowel(\"e\").distort(2).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).vowel(\"e\").distort(2).delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0.0014929541692895775,
+        "relativeNull": 0.02081397724184618,
+        "maxDifference": 0.029889948666095734,
+        "zeroLagCorrelation": 0.9997834595305136
+      },
+      "earlyComparison": {
+        "nullRms": 5.20109348892546e-9,
+        "relativeNull": 4.316666893073306e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999813
+      },
+      "lateComparison": {
+        "nullRms": 0.0018661927116080035,
+        "relativeNull": 0.5159931054518309,
+        "maxDifference": 0.029889948666095734,
+        "zeroLagCorrelation": 0.8886698823487049
+      },
+      "aMetrics": {
+        "rms": 0.07172844247604906,
+        "peak": 0.2861216068267822,
+        "lastAboveMinus80dB": 1.11,
+        "centroidHz": 1169.122756482364
+      },
+      "bMetrics": {
+        "rms": 0.07174397792849728,
+        "peak": 0.2861216366291046,
+        "lastAboveMinus80dB": 1.14,
+        "centroidHz": 1169.1227454783857
+      },
+      "windows": {
+        "a": 0.12223724739999418,
+        "b": 0.1222372475873694
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "vowel": "e",
+            "distort": 2,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "vowel": "e",
+            "distort": 2,
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 5.155914036160387e-9,
+        "relativeNull": 4.4301300165044976e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999963
+      },
+      "windowAfter": {
+        "nullRms": 0.0026959584193157055,
+        "relativeNull": 0.02771090948628813,
+        "maxDifference": 0.029889948666095734,
+        "zeroLagCorrelation": 0.999616273729464
+      }
+    },
+    {
+      "name": "pan/vowel same-code control",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).pan(.7).vowel(\"i\").delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).pan(.7).vowel(\"i\").delaytime(.15).delayfeedback(.4).roomsize(.4)",
+      "comparison": {
+        "nullRms": 0.00021664245240663973,
+        "relativeNull": 0.003832972476290849,
+        "maxDifference": 0.009514334611594677,
+        "zeroLagCorrelation": 0.9999926541340025
+      },
+      "earlyComparison": {
+        "nullRms": 5.432782211412517e-9,
+        "relativeNull": 5.76993697043941e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999842
+      },
+      "lateComparison": {
+        "nullRms": 0.0002708030654778125,
+        "relativeNull": 0.04428251492481611,
+        "maxDifference": 0.009514334611594677,
+        "zeroLagCorrelation": 0.9990190483028489
+      },
+      "aMetrics": {
+        "rms": 0.056520743038646744,
+        "peak": 0.23039327561855316,
+        "lastAboveMinus80dB": 1.2,
+        "centroidHz": 382.43713590727657
+      },
+      "bMetrics": {
+        "rms": 0.05652032787602335,
+        "peak": 0.23039327561855316,
+        "lastAboveMinus80dB": 1.19,
+        "centroidHz": 382.43672734969874
+      },
+      "windows": {
+        "a": 0.09655115822295839,
+        "b": 0.09655115806209263
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "pan": 0.7,
+            "vowel": "i",
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "pan": 0.7,
+            "vowel": "i",
+            "delaytime": 0.15,
+            "delayfeedback": 0.4,
+            "roomsize": 0.4
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 5.172703483577984e-9,
+        "relativeNull": 5.7659598506158685e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999948
+      },
+      "windowAfter": {
+        "nullRms": 0.00039121029669462033,
+        "relativeNull": 0.0050455678299639465,
+        "maxDifference": 0.009514334611594677,
+        "zeroLagCorrelation": 0.9999872710416139
+      }
+    },
+    {
+      "name": "vowel/lpf held control",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).slow(4).vowel(\"a\").lpf(800)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).slow(4).lpf(800).vowel(\"a\")",
+      "comparison": {
+        "nullRms": 6.262615796664099e-9,
+        "relativeNull": 6.128172751055784e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999771
+      },
+      "earlyComparison": {
+        "nullRms": 6.262615796664099e-9,
+        "relativeNull": 6.128172751055784e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999771
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.10219385208396928,
+        "peak": 0.18339136242866516,
+        "lastAboveMinus80dB": 1,
+        "centroidHz": 663.6828721530178
+      },
+      "bMetrics": {
+        "rms": 0.10219385208286982,
+        "peak": 0.18339136242866516,
+        "lastAboveMinus80dB": 1,
+        "centroidHz": 663.6837232915565
+      },
+      "windows": {
+        "a": 0.10529177410235353,
+        "b": 0.10529177405572615
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 4,
+          "duration": 4,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "vowel": "a",
+            "cutoff": 800
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 4,
+          "duration": 4,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "cutoff": 800,
+            "vowel": "a"
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 5.8575356068655506e-9,
+        "relativeNull": 6.139894405648352e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999912
+      },
+      "windowAfter": {
+        "nullRms": 6.486999363702282e-9,
+        "relativeNull": 6.164418549621835e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999918
+      }
+    },
+    {
+      "name": "vowel/distort held control",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).slow(4).vowel(\"e\").distort(2)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).slow(4).distort(2).vowel(\"e\")",
+      "comparison": {
+        "nullRms": 6.304464198327167e-9,
+        "relativeNull": 5.23241351949102e-8,
+        "maxDifference": 4.470348358154297e-8,
+        "zeroLagCorrelation": 0.9999999999999892
+      },
+      "earlyComparison": {
+        "nullRms": 6.304464198327167e-9,
+        "relativeNull": 5.23241351949102e-8,
+        "maxDifference": 4.470348358154297e-8,
+        "zeroLagCorrelation": 0.9999999999999892
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.12048864591536382,
+        "peak": 0.2861216366291046,
+        "lastAboveMinus80dB": 1,
+        "centroidHz": 1169.122733571058
+      },
+      "bMetrics": {
+        "rms": 0.12048864595922412,
+        "peak": 0.2861216068267822,
+        "lastAboveMinus80dB": 1,
+        "centroidHz": 1169.1227503244486
+      },
+      "windows": {
+        "a": 0.12223724776031716,
+        "b": 0.1222372475867894
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 4,
+          "duration": 4,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "vowel": "e",
+            "distort": 2
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 4,
+          "duration": 4,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "distort": 2,
+            "vowel": "e"
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 6.033616241250886e-9,
+        "relativeNull": 5.1842804712582964e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999925
+      },
+      "windowAfter": {
+        "nullRms": 6.452872913353737e-9,
+        "relativeNull": 5.2719636360286736e-8,
+        "maxDifference": 4.470348358154297e-8,
+        "zeroLagCorrelation": 0.9999999999999906
+      }
+    },
+    {
+      "name": "pan/vowel held control",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).slow(4).pan(.7).vowel(\"i\")",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).slow(4).vowel(\"i\").pan(.7)",
+      "comparison": {
+        "nullRms": 1.0962503577211724e-9,
+        "relativeNull": 1.1642829073062713e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 1.0962503577211724e-9,
+        "relativeNull": 1.1642829073062713e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.09415669944494007,
+        "peak": 0.23039327561855316,
+        "lastAboveMinus80dB": 1,
+        "centroidHz": 382.43714489899133
+      },
+      "bMetrics": {
+        "rms": 0.09415669944482598,
+        "peak": 0.23039327561855316,
+        "lastAboveMinus80dB": 1,
+        "centroidHz": 382.43713590727657
+      },
+      "windows": {
+        "a": 0.09655115822460132,
+        "b": 0.09655115822295839
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 4,
+          "duration": 4,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "pan": 0.7,
+            "vowel": "i"
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 4,
+          "duration": 4,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "vowel": "i",
+            "pan": 0.7
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 1.1355993339399822e-9,
+        "relativeNull": 1.2658410027573781e-8,
+        "maxDifference": 2.9802322387695312e-8,
+        "zeroLagCorrelation": 0.9999999999999996
+      },
+      "windowAfter": {
+        "nullRms": 1.0529684904162404e-9,
+        "relativeNull": 1.0945395213177462e-8,
+        "maxDifference": 1.4901161193847656e-8,
+        "zeroLagCorrelation": 1.0000000000000002
+      }
+    },
+    {
+      "name": "implicit LFO target order",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).lpf(800).gain(.5).lfo({rate:4,depth:.8})",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).gain(.5).lpf(800).lfo({rate:4,depth:.8})",
+      "comparison": {
+        "nullRms": 0.012425938727340704,
+        "relativeNull": 0.2813077269340368,
+        "maxDifference": 0.10734375566244125,
+        "zeroLagCorrelation": 0.9597376434642847
+      },
+      "earlyComparison": {
+        "nullRms": 0.020807627234167986,
+        "relativeNull": 0.27640315213089955,
+        "maxDifference": 0.10734375566244125,
+        "zeroLagCorrelation": 0.9610440639377257
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.04417204910355783,
+        "peak": 0.22899311780929565,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 509.0567502789766
+      },
+      "bMetrics": {
+        "rms": 0.04306403598052839,
+        "peak": 0.1687716394662857,
+        "lastAboveMinus80dB": 1.07,
+        "centroidHz": 612.1902336586097
+      },
+      "windows": {
+        "a": 0.0853301887718136,
+        "b": 0.07506697996732364
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "cutoff": 800,
+            "gain": 0.5,
+            "lfo": {
+              "0": {
+                "control": "gain",
+                "rate": 4,
+                "depth": 0.8
+              },
+              "__ids": {}
+            }
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "gain": 0.5,
+            "cutoff": 800,
+            "lfo": {
+              "0": {
+                "control": "cutoff",
+                "rate": 4,
+                "depth": 0.8
+              },
+              "__ids": {}
+            }
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0.020492642382784837,
+        "relativeNull": 0.29833395344800795,
+        "maxDifference": 0.10502496361732483,
+        "zeroLagCorrelation": 0.9552072253817084
+      },
+      "windowAfter": {
+        "nullRms": 0.016828325622223993,
+        "relativeNull": 0.28448691748881993,
+        "maxDifference": 0.10378237068653107,
+        "zeroLagCorrelation": 0.9593547102305401
+      }
+    },
+    {
+      "name": "patterned controls order",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).lpf(\"400 1600\").gain(\".2 .8 .5\")",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).gain(\".2 .8 .5\").lpf(\"400 1600\")",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.01727863126414712,
+        "peak": 0.05900852754712105,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 323.88119130258394
+      },
+      "bMetrics": {
+        "rms": 0.01727863126414712,
+        "peak": 0.05900852754712105,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 323.88119130258394
+      },
+      "windows": {
+        "a": 0.030137146356371925,
+        "b": 0.030137146356371925
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "cutoff": 400,
+            "gain": 0.2
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "gain": 0.2,
+            "cutoff": 400
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "same setting overwrite order",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).lpf(400).lpf(2400)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).lpf(2400).lpf(400)",
+      "comparison": {
+        "nullRms": 0.04927795340633955,
+        "relativeNull": 0.721320971996574,
+        "maxDifference": 0.4264596849679947,
+        "zeroLagCorrelation": 0.742920220524941
+      },
+      "earlyComparison": {
+        "nullRms": 0.08297153978913087,
+        "relativeNull": 0.7211722809195973,
+        "maxDifference": 0.4264596849679947,
+        "zeroLagCorrelation": 0.7429932367098289
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.06831626324400407,
+        "peak": 0.2829113304615021,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 1037.4206407467739
+      },
+      "bMetrics": {
+        "rms": 0.06911452505658848,
+        "peak": 0.2360341101884842,
+        "lastAboveMinus80dB": 1.07,
+        "centroidHz": 323.88119130258394
+      },
+      "windows": {
+        "a": 0.11918064954274306,
+        "b": 0.1205485854254877
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "cutoff": 2400
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "cutoff": 400
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0.07793567904412528,
+        "relativeNull": 0.7202972449752423,
+        "maxDifference": 0.4264500141143799,
+        "zeroLagCorrelation": 0.7434901292269013
+      },
+      "windowAfter": {
+        "nullRms": 0.06737005331643697,
+        "relativeNull": 0.7215032250921353,
+        "maxDifference": 0.4264596849679947,
+        "zeroLagCorrelation": 0.7428347662721467
+      }
+    },
+    {
+      "name": "FX reversal",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).gain(1).FX(lpf(800),distort(2))",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).gain(1).FX(distort(2),lpf(800))",
+      "comparison": {
+        "nullRms": 0.022916406460592856,
+        "relativeNull": 0.10013864201956015,
+        "maxDifference": 0.14092373847961426,
+        "zeroLagCorrelation": 0.9973213993407298
+      },
+      "earlyComparison": {
+        "nullRms": 0.038596587215097095,
+        "relativeNull": 0.10019193964227344,
+        "maxDifference": 0.14092373847961426,
+        "zeroLagCorrelation": 0.9973196212150068
+      },
+      "lateComparison": {
+        "nullRms": 2.3383700656226102e-24,
+        "relativeNull": 7.098792402935853e-7,
+        "maxDifference": 2.012250883280255e-22,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.22884678679901052,
+        "peak": 0.6623355150222778,
+        "lastAboveMinus80dB": 1.07,
+        "centroidHz": 716.7789506090766
+      },
+      "bMetrics": {
+        "rms": 0.21258208066864376,
+        "peak": 0.7105885744094849,
+        "lastAboveMinus80dB": 1.07,
+        "centroidHz": 480.60946629214254
+      },
+      "windows": {
+        "a": 0.3985051213224373,
+        "b": 0.370090251517138
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "gain": 1,
+            "FX": [
+              {
+                "cutoff": 800
+              },
+              {
+                "distort": 2
+              }
+            ]
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "gain": 1,
+            "FX": [
+              {
+                "distort": 2
+              },
+              {
+                "cutoff": 800
+              }
+            ]
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0.03627850259679431,
+        "relativeNull": 0.10010622386419038,
+        "maxDifference": 0.14092373847961426,
+        "zeroLagCorrelation": 0.9973271205290641
+      },
+      "windowAfter": {
+        "nullRms": 0.031323876800583,
+        "relativeNull": 0.10011630337299213,
+        "maxDifference": 0.1409202218055725,
+        "zeroLagCorrelation": 0.997321820044929
+      }
+    },
+    {
+      "name": "native equals LP then distortion",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).gain(1).lpf(800).distort(2)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).gain(1).FX(lpf(800).distort(2).gain(1))",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.2910252707891797,
+        "peak": 0.7827439308166504,
+        "lastAboveMinus80dB": 1.07,
+        "centroidHz": 834.4414576542637
+      },
+      "bMetrics": {
+        "rms": 0.2910252707891797,
+        "peak": 0.7827439308166504,
+        "lastAboveMinus80dB": 1.07,
+        "centroidHz": 834.4414576542637
+      },
+      "windows": {
+        "a": 0.5064456780457347,
+        "b": 0.5064456780457347
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "gain": 1,
+            "cutoff": 800,
+            "distort": 2
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "gain": 1,
+            "FX": [
+              {
+                "cutoff": 800,
+                "distort": 2,
+                "gain": 1
+              }
+            ]
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "native vs distortion then LP",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).gain(1).lpf(800).distort(2)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).gain(1).FX(distort(2).gain(1)).lpf(800)",
+      "comparison": {
+        "nullRms": 0.027456000923078587,
+        "relativeNull": 0.09434232583522713,
+        "maxDifference": 0.19541555643081665,
+        "zeroLagCorrelation": 0.9959547471796403
+      },
+      "earlyComparison": {
+        "nullRms": 0.0462316737002344,
+        "relativeNull": 0.094383680659509,
+        "maxDifference": 0.19541555643081665,
+        "zeroLagCorrelation": 0.9959510547428864
+      },
+      "lateComparison": {
+        "nullRms": 3.6513617891760155e-24,
+        "relativeNull": 0.0000011084755022499606,
+        "maxDifference": 3.1421160367713917e-22,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.2910252707891797,
+        "peak": 0.7827439308166504,
+        "lastAboveMinus80dB": 1.07,
+        "centroidHz": 834.4414576542637
+      },
+      "bMetrics": {
+        "rms": 0.29821381423688614,
+        "peak": 0.9780303835868835,
+        "lastAboveMinus80dB": 1.07,
+        "centroidHz": 477.7336981320988
+      },
+      "windows": {
+        "a": 0.5064456780457347,
+        "b": 0.5189845217332228
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "gain": 1,
+            "cutoff": 800,
+            "distort": 2
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "gain": 1,
+            "FX": [
+              {
+                "distort": 2,
+                "gain": 1
+              }
+            ],
+            "cutoff": 800
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0.04342631859889693,
+        "relativeNull": 0.09422590123064922,
+        "maxDifference": 0.19541513919830322,
+        "zeroLagCorrelation": 0.995964124831576
+      },
+      "windowAfter": {
+        "nullRms": 0.03753601833192215,
+        "relativeNull": 0.09433265973414666,
+        "maxDifference": 0.19541555643081665,
+        "zeroLagCorrelation": 0.9959555802463113
+      }
+    },
+    {
+      "name": "FX precedes native",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).gain(1).FX(distort(2).gain(1)).lpf(800)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).gain(1).FX(distort(2).gain(1),lpf(800).gain(1))",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "aMetrics": {
+        "rms": 0.29821381423688614,
+        "peak": 0.9780303835868835,
+        "lastAboveMinus80dB": 1.07,
+        "centroidHz": 477.7336981320988
+      },
+      "bMetrics": {
+        "rms": 0.29821381423688614,
+        "peak": 0.9780303835868835,
+        "lastAboveMinus80dB": 1.07,
+        "centroidHz": 477.7336981320988
+      },
+      "windows": {
+        "a": 0.5189845217332228,
+        "b": 0.5189845217332228
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "gain": 1,
+            "FX": [
+              {
+                "distort": 2,
+                "gain": 1
+              }
+            ],
+            "cutoff": 800
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "gain": 1,
+            "FX": [
+              {
+                "distort": 2,
+                "gain": 1
+              },
+              {
+                "cutoff": 800,
+                "gain": 1
+              }
+            ]
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "shared delay changes other tail",
+      "a": "s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).delay(1).delaytime(.2).delayfeedback(.65).dry(0).orbit(1)",
+      "b": "stack(s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).delay(1).delaytime(.2).delayfeedback(.65).dry(0).orbit(1),s(\"sine\").freq(880).gain(0).clip(.1).delay(1).delaytime(.07).delayfeedback(.65).orbit(1).late(.4))",
+      "comparison": {
+        "nullRms": 0.03248548761142114,
+        "relativeNull": 1,
+        "maxDifference": 0.15600000321865082,
+        "zeroLagCorrelation": 0
+      },
+      "earlyComparison": {
+        "nullRms": 0.04472786752178378,
+        "relativeNull": 0.6352106544147176,
+        "maxDifference": 0.15600000321865082,
+        "zeroLagCorrelation": 0.7723389311163974
+      },
+      "lateComparison": {
+        "nullRms": 0.01045531940759616,
+        "relativeNull": 1,
+        "maxDifference": 0.04284149780869484,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.045259078450363276,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 2.42,
+        "centroidHz": 0
+      },
+      "bMetrics": {
+        "rms": 0.03439523978383793,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 0.36,
+        "centroidHz": 0
+      },
+      "windows": {
+        "a": 0.09442764767473039,
+        "b": 0
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.2,
+            "delayfeedback": 0.65,
+            "dry": 0,
+            "orbit": 1
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.2,
+            "delayfeedback": 0.65,
+            "dry": 0,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0.4,
+          "end": 1.4,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.07,
+            "delayfeedback": 0.65,
+            "orbit": 1
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.20000000298023224,
+              "feedback": 0.6499999761581421
+            }
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.20000000298023224,
+              "feedback": 0.6499999761581421
+            }
+          }
+        },
+        {
+          "at": 0.4,
+          "orbits": {
+            "1": {
+              "delay": 0.20000000298023224,
+              "feedback": 0.6499999761581421
+            }
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {
+          "delaytime": 0.20000000298023224,
+          "feedback": 0.6499999761581421
+        }
+      },
+      "endOrbitsB": {
+        "1": {
+          "delaytime": 0.07000000029802322,
+          "feedback": 0.6499999761581421
+        }
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0.04478584368717864,
+        "relativeNull": 1,
+        "maxDifference": 0.15600000321865082,
+        "zeroLagCorrelation": 0
+      }
+    },
+    {
+      "name": "separate delay isolates tail",
+      "a": "s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).delay(1).delaytime(.2).delayfeedback(.65).dry(0).orbit(1)",
+      "b": "stack(s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).delay(1).delaytime(.2).delayfeedback(.65).dry(0).orbit(1),s(\"sine\").freq(880).gain(0).clip(.1).delay(1).delaytime(.07).delayfeedback(.65).orbit(2).late(.4))",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "aMetrics": {
+        "rms": 0.045259078450363276,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 2.42,
+        "centroidHz": 0
+      },
+      "bMetrics": {
+        "rms": 0.045259078450363276,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 2.42,
+        "centroidHz": 0
+      },
+      "windows": {
+        "a": 0.09442764767473039,
+        "b": 0.09442764767473039
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.2,
+            "delayfeedback": 0.65,
+            "dry": 0,
+            "orbit": 1
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.2,
+            "delayfeedback": 0.65,
+            "dry": 0,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0.4,
+          "end": 1.4,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.07,
+            "delayfeedback": 0.65,
+            "orbit": 2
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.20000000298023224,
+              "feedback": 0.6499999761581421
+            }
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.20000000298023224,
+              "feedback": 0.6499999761581421
+            }
+          }
+        },
+        {
+          "at": 0.4,
+          "orbits": {
+            "1": {
+              "delay": 0.20000000298023224,
+              "feedback": 0.6499999761581421
+            },
+            "2": {
+              "delay": 0.07000000029802322,
+              "feedback": 0.6499999761581421
+            }
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {},
+        "2": {}
+      },
+      "endOrbitsA": {
+        "1": {
+          "delaytime": 0.20000000298023224,
+          "feedback": 0.6499999761581421
+        }
+      },
+      "endOrbitsB": {
+        "1": {
+          "delaytime": 0.20000000298023224,
+          "feedback": 0.6499999761581421
+        },
+        "2": {
+          "delaytime": 0.07000000029802322,
+          "feedback": 0.6499999761581421
+        }
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "simultaneous shared delay stack reversal",
+      "a": "stack(s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).delay(1).delaytime(.2).delayfeedback(.65).dry(0).orbit(1),s(\"sine\").freq(880).gain(0).clip(.1).delay(1).delaytime(.07).delayfeedback(.65).orbit(1))",
+      "b": "stack(s(\"sine\").freq(880).gain(0).clip(.1).delay(1).delaytime(.07).delayfeedback(.65).orbit(1),s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).delay(1).delaytime(.2).delayfeedback(.65).dry(0).orbit(1))",
+      "comparison": {
+        "nullRms": 0.060234525914227545,
+        "relativeNull": 1.1968122927082525,
+        "maxDifference": 0.36009055376052856,
+        "zeroLagCorrelation": 0.20923407651889964
+      },
+      "earlyComparison": {
+        "nullRms": 0.09437145196112565,
+        "relativeNull": 1.1859433917313622,
+        "maxDifference": 0.36009055376052856,
+        "zeroLagCorrelation": 0.21276847659143094
+      },
+      "lateComparison": {
+        "nullRms": 0.010493847906675995,
+        "relativeNull": 31.94531607926095,
+        "maxDifference": 0.04384642536751926,
+        "zeroLagCorrelation": -0.10179493506658337
+      },
+      "aMetrics": {
+        "rms": 0.05032913371730447,
+        "peak": 0.36009055376052856,
+        "lastAboveMinus80dB": 1.58,
+        "centroidHz": 340.14380235571156
+      },
+      "bMetrics": {
+        "rms": 0.045259078450363276,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 2.42,
+        "centroidHz": 0
+      },
+      "windows": {
+        "a": 0.040683642110783784,
+        "b": 0.09442764767473039
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.2,
+            "delayfeedback": 0.65,
+            "dry": 0,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.07,
+            "delayfeedback": 0.65,
+            "orbit": 1
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.07,
+            "delayfeedback": 0.65,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.2,
+            "delayfeedback": 0.65,
+            "dry": 0,
+            "orbit": 1
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.20000000298023224,
+              "feedback": 0.6499999761581421
+            }
+          }
+        },
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.20000000298023224,
+              "feedback": 0.6499999761581421
+            }
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.07000000029802322,
+              "feedback": 0.6499999761581421
+            }
+          }
+        },
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.07000000029802322,
+              "feedback": 0.6499999761581421
+            }
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {
+          "delaytime": 0.07000000029802322,
+          "feedback": 0.6499999761581421
+        }
+      },
+      "endOrbitsB": {
+        "1": {
+          "delaytime": 0.20000000298023224,
+          "feedback": 0.6499999761581421
+        }
+      },
+      "windowBefore": {
+        "nullRms": 0.12662424824450372,
+        "relativeNull": 0.9700233578340451,
+        "maxDifference": 0.36009055376052856,
+        "zeroLagCorrelation": 0.3509913886515925
+      },
+      "windowAfter": {
+        "nullRms": 0.04960680256396073,
+        "relativeNull": 3.906889702428782,
+        "maxDifference": 0.17748479172587395,
+        "zeroLagCorrelation": -0.25836514191215687
+      }
+    },
+    {
+      "name": "shared delay return to initial offline",
+      "a": "stack(s(\"sine\").freq(330).sustain(1).release(.01).clip(.9).delay(1).delaytime(.25).delayfeedback(.65).dry(0).orbit(1),s(\"sine\").freq(880).gain(0).clip(.1).delay(1).delaytime(.125).delayfeedback(.65).orbit(1).late(.4))",
+      "b": "stack(s(\"sine\").freq(330).sustain(1).release(.01).clip(.9).delay(1).delaytime(.25).delayfeedback(.65).dry(0).orbit(1),s(\"sine\").freq(880).gain(0).clip(.1).delay(1).delaytime(.125).delayfeedback(.65).orbit(1).late(.4),s(\"sine\").freq(880).gain(0).clip(.1).delay(1).delaytime(.25).delayfeedback(.65).orbit(1).late(.8))",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "aMetrics": {
+        "rms": 0.17474610644989869,
+        "peak": 0.5982702970504761,
+        "lastAboveMinus80dB": 3,
+        "centroidHz": 0
+      },
+      "bMetrics": {
+        "rms": 0.17474610644989869,
+        "peak": 0.5982702970504761,
+        "lastAboveMinus80dB": 3,
+        "centroidHz": 0
+      },
+      "windows": {
+        "a": 0.1925277219310392,
+        "b": 0.1925277219310392
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.9,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.9,
+            "delay": 1,
+            "delaytime": 0.25,
+            "delayfeedback": 0.65,
+            "dry": 0,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0.4,
+          "end": 1.4,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.125,
+            "delayfeedback": 0.65,
+            "orbit": 1
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.9,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.9,
+            "delay": 1,
+            "delaytime": 0.25,
+            "delayfeedback": 0.65,
+            "dry": 0,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0.4,
+          "end": 1.4,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.125,
+            "delayfeedback": 0.65,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0.8,
+          "end": 1.8,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.25,
+            "delayfeedback": 0.65,
+            "orbit": 1
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.25,
+              "feedback": 0.6499999761581421
+            }
+          }
+        },
+        {
+          "at": 0.4,
+          "orbits": {
+            "1": {
+              "delay": 0.25,
+              "feedback": 0.6499999761581421
+            }
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.25,
+              "feedback": 0.6499999761581421
+            }
+          }
+        },
+        {
+          "at": 0.4,
+          "orbits": {
+            "1": {
+              "delay": 0.25,
+              "feedback": 0.6499999761581421
+            }
+          }
+        },
+        {
+          "at": 0.8,
+          "orbits": {
+            "1": {
+              "delay": 0.25,
+              "feedback": 0.6499999761581421
+            }
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {
+          "delaytime": 0.125,
+          "feedback": 0.6499999761581421
+        }
+      },
+      "endOrbitsB": {
+        "1": {
+          "delaytime": 0.125,
+          "feedback": 0.6499999761581421
+        }
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "shared delay return to initial live",
+      "a": "stack(s(\"sine\").freq(330).sustain(1).release(.01).clip(.9).delay(1).delaytime(.25).delayfeedback(.65).dry(0).orbit(1),s(\"sine\").freq(880).gain(0).clip(.1).delay(1).delaytime(.125).delayfeedback(.65).orbit(1).late(.4))",
+      "b": "stack(s(\"sine\").freq(330).sustain(1).release(.01).clip(.9).delay(1).delaytime(.25).delayfeedback(.65).dry(0).orbit(1),s(\"sine\").freq(880).gain(0).clip(.1).delay(1).delaytime(.125).delayfeedback(.65).orbit(1).late(.4),s(\"sine\").freq(880).gain(0).clip(.1).delay(1).delaytime(.25).delayfeedback(.65).orbit(1).late(.8))",
+      "alignment": {
+        "correlation": 0.46734402768073535,
+        "lag": -208,
+        "lagSeconds": -0.008666666666666666,
+        "nullRms": 0.1853047219595595
+      },
+      "comparison": {
+        "nullRms": 0.22019460507360228,
+        "relativeNull": 1.2616683313875574,
+        "maxDifference": 0.8234825730323792,
+        "zeroLagCorrelation": 0.24195387314801425
+      },
+      "earlyComparison": {
+        "nullRms": 0.21244986430581939,
+        "relativeNull": 0.8640389509003916,
+        "maxDifference": 0.8234825134277344,
+        "zeroLagCorrelation": 0.6132304533774342
+      },
+      "lateComparison": {
+        "nullRms": 0.1955968980322044,
+        "relativeNull": 2.092021120761072,
+        "maxDifference": 0.7263719439506531,
+        "zeroLagCorrelation": -0.5337430928890137
+      },
+      "aMetrics": {
+        "rms": 0.17452653728055037,
+        "peak": 0.5982702970504761,
+        "lastAboveMinus80dB": 3,
+        "centroidHz": 0
+      },
+      "bMetrics": {
+        "rms": 0.18297289665628821,
+        "peak": 0.5982653498649597,
+        "lastAboveMinus80dB": 3,
+        "centroidHz": 0
+      },
+      "windows": {
+        "a": 0.19243212355593997,
+        "b": 0.19252772160338805
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.9,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.9,
+            "delay": 1,
+            "delaytime": 0.25,
+            "delayfeedback": 0.65,
+            "dry": 0,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0.4,
+          "end": 1.4,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.125,
+            "delayfeedback": 0.65,
+            "orbit": 1
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.9,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.9,
+            "delay": 1,
+            "delaytime": 0.25,
+            "delayfeedback": 0.65,
+            "dry": 0,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0.4,
+          "end": 1.4,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.125,
+            "delayfeedback": 0.65,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0.8,
+          "end": 1.8,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.25,
+            "delayfeedback": 0.65,
+            "orbit": 1
+          }
+        }
+      ],
+      "observedA": [
+        {
+          "onset": 0,
+          "scheduledAt": 0
+        },
+        {
+          "onset": 0.4,
+          "scheduledAt": 0.3946666666666667
+        }
+      ],
+      "observedB": [
+        {
+          "onset": 0,
+          "scheduledAt": 0
+        },
+        {
+          "onset": 0.4,
+          "scheduledAt": 0.384
+        },
+        {
+          "onset": 0.8,
+          "scheduledAt": 0.8
+        }
+      ],
+      "windowBefore": {
+        "nullRms": 2.2250908169276678e-8,
+        "relativeNull": 5.36263028961365e-7,
+        "maxDifference": 2.1606683731079102e-7,
+        "zeroLagCorrelation": 0.9999999999998549
+      },
+      "windowAfter": {
+        "nullRms": 0.37953039760801227,
+        "relativeNull": 1.2582428375144254,
+        "maxDifference": 0.8234825730323792,
+        "zeroLagCorrelation": 0.21102213133652345
+      }
+    },
+    {
+      "name": "shared room changes other tail offline",
+      "a": "s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).room(1).roomsize(.35).dry(0).orbit(1)",
+      "b": "stack(s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).room(1).roomsize(.35).dry(0).orbit(1),s(\"sine\").freq(880).gain(0).clip(.1).room(1).roomsize(1.2).orbit(1).late(.4))",
+      "comparison": {
+        "nullRms": 0.015099165953867646,
+        "relativeNull": 2.460662906369885,
+        "maxDifference": 0.13953209668397903,
+        "zeroLagCorrelation": -0.22792132674431714
+      },
+      "earlyComparison": {
+        "nullRms": 0.02615150441350662,
+        "relativeNull": 2.460567107794843,
+        "maxDifference": 0.13953209668397903,
+        "zeroLagCorrelation": -0.22793434097643797
+      },
+      "lateComparison": {
+        "nullRms": 0.0000919374010183981,
+        "relativeNull": 27910232579944.508,
+        "maxDifference": 0.0008692373521625996,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.006136218786726381,
+        "peak": 0.05876319482922554,
+        "lastAboveMinus80dB": 0.52,
+        "centroidHz": 377.15250081398483
+      },
+      "bMetrics": {
+        "rms": 0.01246820690374261,
+        "peak": 0.11438179016113281,
+        "lastAboveMinus80dB": 1.36,
+        "centroidHz": 458.7198066209354
+      },
+      "windows": {
+        "a": 0.00020122213929645063,
+        "b": 0.011425466337348377
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 0.35,
+            "dry": 0,
+            "orbit": 1
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 0.35,
+            "dry": 0,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0.4,
+          "end": 1.4,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 1.2,
+            "orbit": 1
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "roomsize": 0.35
+            }
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "roomsize": 0.35
+            }
+          }
+        },
+        {
+          "at": 0.4,
+          "orbits": {
+            "1": {
+              "roomsize": 1.2
+            }
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {
+          "roomsize": 0.35,
+          "impulseSeconds": 0.525
+        }
+      },
+      "finalOrbitsB": {
+        "1": {
+          "roomsize": 1.2,
+          "impulseSeconds": 1.8
+        }
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0.04166480456603769,
+        "relativeNull": 2.2202226463564507,
+        "maxDifference": 0.13953209668397903,
+        "zeroLagCorrelation": -0.2572159711955033
+      },
+      "windowAfter": {
+        "nullRms": 0.003407070868821001,
+        "relativeNull": 100.02621752358257,
+        "maxDifference": 0.01868944486432156,
+        "zeroLagCorrelation": 0.26663799448724185
+      }
+    },
+    {
+      "name": "separate room isolates tail",
+      "a": "s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).room(1).roomsize(.35).dry(0).orbit(1)",
+      "b": "stack(s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).room(1).roomsize(.35).dry(0).orbit(1),s(\"sine\").freq(880).gain(0).clip(.1).room(1).roomsize(1.2).orbit(2).late(.4))",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.006136218786726381,
+        "peak": 0.05876319482922554,
+        "lastAboveMinus80dB": 0.52,
+        "centroidHz": 377.15250081398483
+      },
+      "bMetrics": {
+        "rms": 0.006136218786726381,
+        "peak": 0.05876319482922554,
+        "lastAboveMinus80dB": 0.52,
+        "centroidHz": 377.15250081398483
+      },
+      "windows": {
+        "a": 0.00020122213929645063,
+        "b": 0.00020122213929645063
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 0.35,
+            "dry": 0,
+            "orbit": 1
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 0.35,
+            "dry": 0,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0.4,
+          "end": 1.4,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 1.2,
+            "orbit": 2
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "roomsize": 0.35
+            }
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "roomsize": 0.35
+            }
+          }
+        },
+        {
+          "at": 0.4,
+          "orbits": {
+            "1": {
+              "roomsize": 0.35
+            },
+            "2": {
+              "roomsize": 1.2
+            }
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {
+          "roomsize": 0.35,
+          "impulseSeconds": 0.525
+        }
+      },
+      "finalOrbitsB": {
+        "1": {
+          "roomsize": 0.35,
+          "impulseSeconds": 0.525
+        },
+        "2": {
+          "roomsize": 1.2,
+          "impulseSeconds": 1.8
+        }
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {},
+        "2": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "simultaneous shared room stack reversal",
+      "a": "stack(s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).room(1).roomsize(.35).dry(0).orbit(1),s(\"sine\").freq(880).gain(0).clip(.1).room(1).roomsize(1.2).orbit(1))",
+      "b": "stack(s(\"sine\").freq(880).gain(0).clip(.1).room(1).roomsize(1.2).orbit(1),s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).room(1).roomsize(.35).dry(0).orbit(1))",
+      "comparison": {
+        "nullRms": 0.021377605535627536,
+        "relativeNull": 1.7145693603472838,
+        "maxDifference": 0.1989240124821663,
+        "zeroLagCorrelation": -0.19696549262829344
+      },
+      "earlyComparison": {
+        "nullRms": 0.037025963819407745,
+        "relativeNull": 1.714614696399084,
+        "maxDifference": 0.1989240124821663,
+        "zeroLagCorrelation": -0.19699063121342944
+      },
+      "lateComparison": {
+        "nullRms": 0.00017034818775955263,
+        "relativeNull": 1.8528714742051855,
+        "maxDifference": 0.001423862762749195,
+        "zeroLagCorrelation": -0.26268813112412626
+      },
+      "aMetrics": {
+        "rms": 0.01246820690374261,
+        "peak": 0.11438179016113281,
+        "lastAboveMinus80dB": 1.36,
+        "centroidHz": 458.7198066209354
+      },
+      "bMetrics": {
+        "rms": 0.01508206167591392,
+        "peak": 0.17703381180763245,
+        "lastAboveMinus80dB": 1.42,
+        "centroidHz": 427.74040522070754
+      },
+      "windows": {
+        "a": 0.011425466337348377,
+        "b": 0.011498043629549017
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 0.35,
+            "dry": 0,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 1.2,
+            "orbit": 1
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 1.2,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 0.35,
+            "dry": 0,
+            "orbit": 1
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "roomsize": 0.35
+            }
+          }
+        },
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "roomsize": 1.2
+            }
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "roomsize": 1.2
+            }
+          }
+        },
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "roomsize": 0.35
+            }
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {
+          "roomsize": 1.2,
+          "impulseSeconds": 1.8
+        }
+      },
+      "finalOrbitsB": {
+        "1": {
+          "roomsize": 0.35,
+          "impulseSeconds": 1.8
+        }
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0.06172461696131268,
+        "relativeNull": 1.8885108802679023,
+        "maxDifference": 0.1989240124821663,
+        "zeroLagCorrelation": -0.2817265849791308
+      },
+      "windowAfter": {
+        "nullRms": 0.005362313130568666,
+        "relativeNull": 1.5697661542781083,
+        "maxDifference": 0.03358495468273759,
+        "zeroLagCorrelation": 0.19023623216562202
+      }
+    },
+    {
+      "name": "duck offline",
+      "a": "s(\"sine\").freq(440).sustain(1).release(.01).orbit(2)",
+      "b": "stack(s(\"sine\").freq(440).sustain(1).release(.01).orbit(2),s(\"sine\").gain(0).late(.4).orbit(1).duck(2).duckdepth(1).duckattack(.25))",
+      "comparison": {
+        "nullRms": 0.05647912360841903,
+        "relativeNull": 0.4070735292168966,
+        "maxDifference": 0.23758683586493134,
+        "zeroLagCorrelation": 0.9138670135151027
+      },
+      "earlyComparison": {
+        "nullRms": 0.06917251698010282,
+        "relativeNull": 0.4183511954621835,
+        "maxDifference": 0.23758683586493134,
+        "zeroLagCorrelation": 0.9088227863821939
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.1387442797301736,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 440.1410262570918
+      },
+      "bMetrics": {
+        "rms": 0.12272083912560831,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 440.1410262570918
+      },
+      "windows": {
+        "a": 0.1699678542206919,
+        "b": 0.14764991281106563
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "freq": 440,
+            "sustain": 1,
+            "release": 0.01,
+            "orbit": 2
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "freq": 440,
+            "sustain": 1,
+            "release": 0.01,
+            "orbit": 2
+          }
+        },
+        {
+          "begin": 0.4,
+          "end": 1.4,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "gain": 0,
+            "orbit": 1,
+            "duckorbit": 2,
+            "duckdepth": 1,
+            "duckattack": 0.25
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "2": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "2": {}
+          }
+        },
+        {
+          "at": 0.4,
+          "orbits": {
+            "1": {},
+            "2": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "2": {}
+      },
+      "finalOrbitsB": {
+        "1": {},
+        "2": {}
+      },
+      "endOrbitsA": {
+        "2": {}
+      },
+      "endOrbitsB": {
+        "1": {},
+        "2": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0.07211733423479598,
+        "relativeNull": 0.5382477354188987,
+        "maxDifference": 0.23758683586493134,
+        "zeroLagCorrelation": 0.8447579331528366
+      }
+    },
+    {
+      "name": "duck checkpoint offline",
+      "a": "s(\"sine\").freq(440).sustain(1).release(.01).orbit(2)",
+      "b": "stack(s(\"sine\").freq(440).sustain(1).release(.01).orbit(2),s(\"sine\").gain(0).late(.4).orbit(1).duck(2).duckdepth(1).duckattack(.25))",
+      "comparison": {
+        "nullRms": 0.05790393653659205,
+        "relativeNull": 0.41734287459779407,
+        "maxDifference": 0.2375100995413959,
+        "zeroLagCorrelation": 0.909280377089077
+      },
+      "earlyComparison": {
+        "nullRms": 0.07091754930657516,
+        "relativeNull": 0.42890504534030566,
+        "maxDifference": 0.2375100995413959,
+        "zeroLagCorrelation": 0.9039558424848075
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.1387442797301736,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 440.1410262570918
+      },
+      "bMetrics": {
+        "rms": 0.12184547355824168,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 440.1410262570918
+      },
+      "windows": {
+        "a": 0.1699678542206919,
+        "b": 0.042160590193686384
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "freq": 440,
+            "sustain": 1,
+            "release": 0.01,
+            "orbit": 2
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "freq": 440,
+            "sustain": 1,
+            "release": 0.01,
+            "orbit": 2
+          }
+        },
+        {
+          "begin": 0.4,
+          "end": 1.4,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "gain": 0,
+            "orbit": 1,
+            "duckorbit": 2,
+            "duckdepth": 1,
+            "duckattack": 0.25
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "2": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "2": {}
+          }
+        },
+        {
+          "at": 0.4,
+          "orbits": {
+            "1": {},
+            "2": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "2": {}
+      },
+      "finalOrbitsB": {
+        "1": {},
+        "2": {}
+      },
+      "endOrbitsA": {
+        "2": {}
+      },
+      "endOrbitsB": {
+        "1": {},
+        "2": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0.06633986492616799,
+        "relativeNull": 0.4951275923240808,
+        "maxDifference": 0.23573212418705225,
+        "zeroLagCorrelation": 0.8706305403195221
+      }
+    },
+    {
+      "name": "cut shared sample group",
+      "a": "stack(s(\"longlocal\").gain(.6).cut(78),s(\"local\").gain(0).late(.35).cut(79))",
+      "b": "stack(s(\"longlocal\").gain(.6).cut(80),s(\"local\").gain(0).late(.35).cut(80))",
+      "comparison": {
+        "nullRms": 0.16707096306430633,
+        "relativeNull": 0.881950625399361,
+        "maxDifference": 0.2999359369277954,
+        "zeroLagCorrelation": 0.4713470731979868
+      },
+      "earlyComparison": {
+        "nullRms": 0.16336700310519034,
+        "relativeNull": 0.7912052408335694,
+        "maxDifference": 0.2999359369277954,
+        "zeroLagCorrelation": 0.611557545856478
+      },
+      "lateComparison": {
+        "nullRms": 0.1666054859769151,
+        "relativeNull": 1,
+        "maxDifference": 0.2999359369277954,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.18943346515419027,
+        "peak": 0.2999359369277954,
+        "lastAboveMinus80dB": 1.65,
+        "centroidHz": 222.30583225513809
+      },
+      "bMetrics": {
+        "rms": 0.08886663609782515,
+        "peak": 0.2999359369277954,
+        "lastAboveMinus80dB": 0.41,
+        "centroidHz": 222.30583225513809
+      },
+      "windows": {
+        "a": 0.21177437796658635,
+        "b": 0
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "longlocal",
+            "gain": 0.6,
+            "cut": 78
+          }
+        },
+        {
+          "begin": 0.35,
+          "end": 1.35,
+          "duration": 1,
+          "value": {
+            "s": "local",
+            "gain": 0,
+            "cut": 79
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "longlocal",
+            "gain": 0.6,
+            "cut": 80
+          }
+        },
+        {
+          "begin": 0.35,
+          "end": 1.35,
+          "duration": 1,
+          "value": {
+            "s": "local",
+            "gain": 0,
+            "cut": 80
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        },
+        {
+          "at": 0.35,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        },
+        {
+          "at": 0.35,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {}
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0.21210032664379408,
+        "relativeNull": 1,
+        "maxDifference": 0.2999359369277954,
+        "zeroLagCorrelation": 0
+      }
+    },
+    {
+      "name": "cut on synth",
+      "a": "stack(s(\"sine\").freq(440).sustain(1).release(.01).orbit(2).cut(81),s(\"sine\").gain(0).late(.4).orbit(1).cut(82))",
+      "b": "stack(s(\"sine\").freq(440).sustain(1).release(.01).orbit(2).cut(83),s(\"sine\").gain(0).late(.4).orbit(1).cut(83))",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.1387442797301736,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 440.1410262570918
+      },
+      "bMetrics": {
+        "rms": 0.1387442797301736,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 440.1410262570918
+      },
+      "windows": {
+        "a": 0.1699678542206919,
+        "b": 0.1699678542206919
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "freq": 440,
+            "sustain": 1,
+            "release": 0.01,
+            "orbit": 2,
+            "cut": 81
+          }
+        },
+        {
+          "begin": 0.4,
+          "end": 1.4,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "gain": 0,
+            "orbit": 1,
+            "cut": 82
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "freq": 440,
+            "sustain": 1,
+            "release": 0.01,
+            "orbit": 2,
+            "cut": 83
+          }
+        },
+        {
+          "begin": 0.4,
+          "end": 1.4,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "gain": 0,
+            "orbit": 1,
+            "cut": 83
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "2": {}
+          }
+        },
+        {
+          "at": 0.4,
+          "orbits": {
+            "1": {},
+            "2": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "2": {}
+          }
+        },
+        {
+          "at": 0.4,
+          "orbits": {
+            "1": {},
+            "2": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {},
+        "2": {}
+      },
+      "finalOrbitsB": {
+        "1": {},
+        "2": {}
+      },
+      "endOrbitsA": {
+        "1": {},
+        "2": {}
+      },
+      "endOrbitsB": {
+        "1": {},
+        "2": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "bus modulation offline",
+      "a": "s(\"sine\").freq(440).sustain(1).release(.01).orbit(2).gain(.3)",
+      "b": "stack(s(\"sine\").freq(25).gain(1).bus(1).dry(0),s(\"sine\").freq(440).sustain(1).release(.01).orbit(2).gain(.3).bmod({bus:1,c:\"gain\",da:.6}))",
+      "comparison": {
+        "nullRms": 0.04412081403019198,
+        "relativeNull": 0.8480025389293211,
+        "maxDifference": 0.13796503469347954,
+        "zeroLagCorrelation": 0.7584517666176173
+      },
+      "earlyComparison": {
+        "nullRms": 0.05265900559478373,
+        "relativeNull": 0.8492759230907881,
+        "maxDifference": 0.13796503469347954,
+        "zeroLagCorrelation": 0.7600087736138295
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.05202910605184944,
+        "peak": 0.09000000357627869,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 440.1411177011741
+      },
+      "bMetrics": {
+        "rms": 0.06768980956760544,
+        "peak": 0.21705763041973114,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 439.8057971793329
+      },
+      "windows": {
+        "a": 0.06373794671298001,
+        "b": 0.08346549516116601
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "freq": 440,
+            "sustain": 1,
+            "release": 0.01,
+            "orbit": 2,
+            "gain": 0.3
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "freq": 25,
+            "gain": 1,
+            "bus": 1,
+            "dry": 0
+          }
+        },
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "freq": 440,
+            "sustain": 1,
+            "release": 0.01,
+            "orbit": 2,
+            "gain": 0.3,
+            "bmod": {
+              "0": {
+                "control": "gain",
+                "bus": 1,
+                "depthabs": 0.6
+              },
+              "__ids": {}
+            }
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "2": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        },
+        {
+          "at": 0,
+          "orbits": {
+            "1": {},
+            "2": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "2": {}
+      },
+      "finalOrbitsB": {
+        "1": {},
+        "2": {}
+      },
+      "endOrbitsA": {
+        "2": {}
+      },
+      "endOrbitsB": {
+        "1": {},
+        "2": {}
+      },
+      "windowBefore": {
+        "nullRms": 0.04970207601793594,
+        "relativeNull": 0.8512698159981056,
+        "maxDifference": 0.13796503469347954,
+        "zeroLagCorrelation": 0.7535622036185792
+      },
+      "windowAfter": {
+        "nullRms": 0.04253070960882248,
+        "relativeNull": 0.8464745351851395,
+        "maxDifference": 0.10792607814073563,
+        "zeroLagCorrelation": 0.7594111829436606
+      }
+    },
+    {
+      "name": "analyze offline",
+      "a": "s(\"sine\").freq(440).sustain(1).release(.01).orbit(2)",
+      "b": "s(\"sine\").freq(440).sustain(1).release(.01).orbit(2).analyze(1)",
+      "comparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.1387442797301736,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 440.1410262570918
+      },
+      "bMetrics": {
+        "rms": 0.1387442797301736,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 440.1410262570918
+      },
+      "windows": {
+        "a": 0.1699678542206919,
+        "b": 0.1699678542206919
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "freq": 440,
+            "sustain": 1,
+            "release": 0.01,
+            "orbit": 2
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "freq": 440,
+            "sustain": 1,
+            "release": 0.01,
+            "orbit": 2,
+            "analyze": 1
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "2": {}
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "2": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "2": {}
+      },
+      "finalOrbitsB": {
+        "2": {}
+      },
+      "endOrbitsA": {
+        "2": {}
+      },
+      "endOrbitsB": {
+        "2": {}
+      },
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      }
+    },
+    {
+      "name": "duck live",
+      "a": "s(\"sine\").freq(440).sustain(1).release(.01).orbit(2)",
+      "b": "stack(s(\"sine\").freq(440).sustain(1).release(.01).orbit(2),s(\"sine\").gain(0).late(.4).orbit(1).duck(2).duckdepth(1).duckattack(.25))",
+      "alignment": {
+        "correlation": 0.9112511602240706,
+        "lag": 0,
+        "lagSeconds": 0,
+        "nullRms": 0.057709454695180226
+      },
+      "comparison": {
+        "nullRms": 0.05729760675853361,
+        "relativeNull": 0.4129727502761722,
+        "maxDifference": 0.2375100995413959,
+        "zeroLagCorrelation": 0.9112513184919192
+      },
+      "earlyComparison": {
+        "nullRms": 0.07017495002052518,
+        "relativeNull": 0.4244138500013893,
+        "maxDifference": 0.2375100995413959,
+        "zeroLagCorrelation": 0.906047608906525
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.13874427966546304,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 440.1407471221023
+      },
+      "bMetrics": {
+        "rms": 0.12221012088145482,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 440.1410262570918
+      },
+      "windows": {
+        "a": 0.1699678543279048,
+        "b": 0.06326429361157582
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "freq": 440,
+            "sustain": 1,
+            "release": 0.01,
+            "orbit": 2
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "freq": 440,
+            "sustain": 1,
+            "release": 0.01,
+            "orbit": 2
+          }
+        },
+        {
+          "begin": 0.4,
+          "end": 1.4,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "gain": 0,
+            "orbit": 1,
+            "duckorbit": 2,
+            "duckdepth": 1,
+            "duckattack": 0.25
+          }
+        }
+      ],
+      "observedA": [
+        {
+          "onset": 0,
+          "scheduledAt": 0
+        }
+      ],
+      "observedB": [
+        {
+          "onset": 0,
+          "scheduledAt": 0
+        },
+        {
+          "onset": 0.4,
+          "scheduledAt": 0.3946666666666667
+        }
+      ],
+      "windowBefore": {
+        "nullRms": 4.292517913604259e-8,
+        "relativeNull": 2.756995763042976e-7,
+        "maxDifference": 2.1606683731079102e-7,
+        "zeroLagCorrelation": 0.9999999999999589
+      },
+      "windowAfter": {
+        "nullRms": 0.06633986487989135,
+        "relativeNull": 0.495127592350107,
+        "maxDifference": 0.23573212418705225,
+        "zeroLagCorrelation": 0.870630540261605
+      }
+    },
+    {
+      "name": "bus modulation live",
+      "a": "s(\"sine\").freq(440).sustain(1).release(.01).orbit(2).gain(.3)",
+      "b": "stack(s(\"sine\").freq(25).gain(1).bus(1).dry(0),s(\"sine\").freq(440).sustain(1).release(.01).orbit(2).gain(.3).bmod({bus:1,c:\"gain\",da:.6}))",
+      "alignment": {
+        "correlation": 0.7577078772437624,
+        "lag": 0,
+        "lagSeconds": 0,
+        "nullRms": 0.04530018682525644
+      },
+      "comparison": {
+        "nullRms": 0.04497689857773733,
+        "relativeNull": 0.8644564937026398,
+        "maxDifference": 0.16725358366966248,
+        "zeroLagCorrelation": 0.7577065933168171
+      },
+      "earlyComparison": {
+        "nullRms": 0.05373438034504885,
+        "relativeNull": 0.8666193933061191,
+        "maxDifference": 0.16725358366966248,
+        "zeroLagCorrelation": 0.7592648541216317
+      },
+      "lateComparison": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.052029106039901914,
+        "peak": 0.09000000357627869,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 440.14074249680374
+      },
+      "bMetrics": {
+        "rms": 0.06891941394239201,
+        "peak": 0.25723379850387573,
+        "lastAboveMinus80dB": 1.06,
+        "centroidHz": 439.80552196270503
+      },
+      "windows": {
+        "a": 0.06373794669823243,
+        "b": 0.08346549474581362
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "freq": 440,
+            "sustain": 1,
+            "release": 0.01,
+            "orbit": 2,
+            "gain": 0.3
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "freq": 25,
+            "gain": 1,
+            "bus": 1,
+            "dry": 0
+          }
+        },
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "sine",
+            "freq": 440,
+            "sustain": 1,
+            "release": 0.01,
+            "orbit": 2,
+            "gain": 0.3,
+            "bmod": {
+              "0": {
+                "control": "gain",
+                "bus": 1,
+                "depthabs": 0.6
+              },
+              "__ids": {}
+            }
+          }
+        }
+      ],
+      "observedA": [
+        {
+          "onset": 0,
+          "scheduledAt": 0
+        }
+      ],
+      "observedB": [
+        {
+          "onset": 0,
+          "scheduledAt": 0.010666666666666658
+        },
+        {
+          "onset": 0,
+          "scheduledAt": 0.010666666666666658
+        }
+      ],
+      "windowBefore": {
+        "nullRms": 0.053177403589271144,
+        "relativeNull": 0.9107933141191544,
+        "maxDifference": 0.16725358366966248,
+        "zeroLagCorrelation": 0.7521016071780912
+      },
+      "windowAfter": {
+        "nullRms": 0.04253070957401987,
+        "relativeNull": 0.846474535028308,
+        "maxDifference": 0.10792607814073563,
+        "zeroLagCorrelation": 0.7594111781035962
+      }
+    },
+    {
+      "name": "shared room changes tail live",
+      "a": "s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).room(1).roomsize(1.2).dry(0).orbit(1)",
+      "b": "stack(s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).room(1).roomsize(1.2).dry(0).orbit(1),s(\"sine\").freq(880).gain(0).clip(.1).room(1).roomsize(.35).orbit(1).late(.25))",
+      "alignment": {
+        "correlation": 0.6555741536980397,
+        "lag": 0,
+        "lagSeconds": 0,
+        "nullRms": 0.013200298522089138
+      },
+      "comparison": {
+        "nullRms": 0.013129708184399904,
+        "relativeNull": 0.7108021741866997,
+        "maxDifference": 0.17703385651111603,
+        "zeroLagCorrelation": 0.7034220488697783
+      },
+      "earlyComparison": {
+        "nullRms": 0.018567135089894878,
+        "relativeNull": 0.7107817885778952,
+        "maxDifference": 0.17703385651111603,
+        "zeroLagCorrelation": 0.7034426495237133
+      },
+      "lateComparison": {
+        "nullRms": 0.00017520052283257178,
+        "relativeNull": 1,
+        "maxDifference": 0.0009642663644626737,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.018471677016777405,
+        "peak": 0.17703385651111603,
+        "lastAboveMinus80dB": 1.42,
+        "centroidHz": 427.74049454614646
+      },
+      "bMetrics": {
+        "rms": 0.013113535541399199,
+        "peak": 0.1721012145280838,
+        "lastAboveMinus80dB": 0.25,
+        "centroidHz": 1004.331661081328
+      },
+      "windows": {
+        "a": 0.011498042892520183,
+        "b": 0
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 1.2,
+            "dry": 0,
+            "orbit": 1
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 1.2,
+            "dry": 0,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0.25,
+          "end": 1.25,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 0.35,
+            "orbit": 1
+          }
+        }
+      ],
+      "observedA": [
+        {
+          "onset": 0,
+          "scheduledAt": 0.010666666666666658,
+          "roomsize": 1.2
+        }
+      ],
+      "observedB": [
+        {
+          "onset": 0,
+          "scheduledAt": 0.010666666666666685,
+          "roomsize": 1.2
+        },
+        {
+          "onset": 0.25,
+          "scheduledAt": 0.23466666666666666,
+          "roomsize": 0.35
+        }
+      ],
+      "windowBefore": {
+        "nullRms": 0.02961549771255586,
+        "relativeNull": 0.6737475172546697,
+        "maxDifference": 0.17703385651111603,
+        "zeroLagCorrelation": 0.7389932205003905
+      },
+      "windowAfter": {
+        "nullRms": 0.004834063922018646,
+        "relativeNull": 1,
+        "maxDifference": 0.027994271367788315,
+        "zeroLagCorrelation": 0
+      }
+    },
+    {
+      "name": "shared delay changes tail live",
+      "a": "s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).delay(1).delaytime(.2).delayfeedback(.65).dry(0).orbit(1)",
+      "b": "stack(s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).delay(1).delaytime(.2).delayfeedback(.65).dry(0).orbit(1),s(\"sine\").freq(880).gain(0).clip(.1).delay(1).delaytime(.07).delayfeedback(.65).orbit(1).late(.4))",
+      "alignment": {
+        "correlation": 0.7601113728380188,
+        "lag": 0,
+        "lagSeconds": 0,
+        "nullRms": 0.033050638156974954
+      },
+      "comparison": {
+        "nullRms": 0.032875317066358996,
+        "relativeNull": 0.6498091770193164,
+        "maxDifference": 0.15600000321865082,
+        "zeroLagCorrelation": 0.7600973841959152
+      },
+      "earlyComparison": {
+        "nullRms": 0.0447278673960408,
+        "relativeNull": 0.6352106536638361,
+        "maxDifference": 0.15600000321865082,
+        "zeroLagCorrelation": 0.7723389317339555
+      },
+      "lateComparison": {
+        "nullRms": 0.012913561261651664,
+        "relativeNull": 1,
+        "maxDifference": 0.04284149780869484,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.05059226343517957,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 2,
+        "centroidHz": 0
+      },
+      "bMetrics": {
+        "rms": 0.03845504709738682,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 0.36,
+        "centroidHz": 0
+      },
+      "windows": {
+        "a": 0.0944276472026885,
+        "b": 0
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.2,
+            "delayfeedback": 0.65,
+            "dry": 0,
+            "orbit": 1
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.2,
+            "delayfeedback": 0.65,
+            "dry": 0,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0.4,
+          "end": 1.4,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.07,
+            "delayfeedback": 0.65,
+            "orbit": 1
+          }
+        }
+      ],
+      "observedA": [
+        {
+          "onset": 0,
+          "scheduledAt": 0
+        }
+      ],
+      "observedB": [
+        {
+          "onset": 0,
+          "scheduledAt": 0
+        },
+        {
+          "onset": 0.4,
+          "scheduledAt": 0.384
+        }
+      ],
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 0.044785843577218716,
+        "relativeNull": 1,
+        "maxDifference": 0.15600000321865082,
+        "zeroLagCorrelation": 0
+      }
+    },
+    {
+      "name": "room live same-code control",
+      "a": "s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).room(1).roomsize(1.2).dry(0).orbit(1)",
+      "b": "s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).room(1).roomsize(1.2).dry(0).orbit(1)",
+      "alignment": {
+        "correlation": 0.9999999999997342,
+        "lag": 0,
+        "lagSeconds": 0,
+        "nullRms": 1.1404999961301674e-8
+      },
+      "comparison": {
+        "nullRms": 1.1344010219496459e-8,
+        "relativeNull": 6.148121025211153e-7,
+        "maxDifference": 1.3783574104309082e-7,
+        "zeroLagCorrelation": 0.9999999999998049
+      },
+      "earlyComparison": {
+        "nullRms": 1.6042332233103013e-8,
+        "relativeNull": 6.148101861510314e-7,
+        "maxDifference": 1.3783574104309082e-7,
+        "zeroLagCorrelation": 0.9999999999998056
+      },
+      "lateComparison": {
+        "nullRms": 9.817784968093082e-11,
+        "relativeNull": 5.603741849084148e-7,
+        "maxDifference": 6.693881005048752e-10,
+        "zeroLagCorrelation": 0.9999999999998339
+      },
+      "aMetrics": {
+        "rms": 0.018451182357957785,
+        "peak": 0.17703385651111603,
+        "lastAboveMinus80dB": 1.42,
+        "centroidHz": 1004.3312227683244
+      },
+      "bMetrics": {
+        "rms": 0.018451182067292543,
+        "peak": 0.17703382670879364,
+        "lastAboveMinus80dB": 1.42,
+        "centroidHz": 1004.331661081328
+      },
+      "windows": {
+        "a": 0.011498043517100522,
+        "b": 0.011498043733602347
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 1.2,
+            "dry": 0,
+            "orbit": 1
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 1.2,
+            "dry": 0,
+            "orbit": 1
+          }
+        }
+      ],
+      "observedA": [
+        {
+          "onset": 0,
+          "scheduledAt": 0.021333333333333315,
+          "roomsize": 1.2
+        }
+      ],
+      "observedB": [
+        {
+          "onset": 0,
+          "scheduledAt": 0.010666666666666685,
+          "roomsize": 1.2
+        }
+      ],
+      "windowBefore": {
+        "nullRms": 2.6529301408838417e-8,
+        "relativeNull": 6.042771014775933e-7,
+        "maxDifference": 1.3783574104309082e-7,
+        "zeroLagCorrelation": 0.9999999999998129
+      },
+      "windowAfter": {
+        "nullRms": 3.0998950376904553e-9,
+        "relativeNull": 6.412606511677712e-7,
+        "maxDifference": 2.60770320892334e-8,
+        "zeroLagCorrelation": 0.9999999999997965
+      }
+    },
+    {
+      "name": "separate room live",
+      "a": "s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).room(1).roomsize(1.2).dry(0).orbit(1)",
+      "b": "stack(s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).room(1).roomsize(1.2).dry(0).orbit(1),s(\"sine\").freq(880).gain(0).clip(.1).room(1).roomsize(.35).orbit(2).late(.25))",
+      "alignment": {
+        "correlation": 0.9999999999997286,
+        "lag": 0,
+        "lagSeconds": 0,
+        "nullRms": 1.2094862289021117e-8
+      },
+      "comparison": {
+        "nullRms": 1.2030183417413927e-8,
+        "relativeNull": 6.512772668777543e-7,
+        "maxDifference": 1.4156103134155273e-7,
+        "zeroLagCorrelation": 0.9999999999997705
+      },
+      "earlyComparison": {
+        "nullRms": 1.7012745263381298e-8,
+        "relativeNull": 6.512770738483671e-7,
+        "maxDifference": 1.4156103134155273e-7,
+        "zeroLagCorrelation": 0.9999999999997735
+      },
+      "lateComparison": {
+        "nullRms": 9.905574433756351e-11,
+        "relativeNull": 5.653850093324394e-7,
+        "maxDifference": 6.693881005048752e-10,
+        "zeroLagCorrelation": 0.9999999999998194
+      },
+      "aMetrics": {
+        "rms": 0.01847167716307235,
+        "peak": 0.17703382670879364,
+        "lastAboveMinus80dB": 1.42,
+        "centroidHz": 427.7399122444377
+      },
+      "bMetrics": {
+        "rms": 0.018471677017591195,
+        "peak": 0.17703385651111603,
+        "lastAboveMinus80dB": 1.42,
+        "centroidHz": 427.7404958075777
+      },
+      "windows": {
+        "a": 0.011498043733602347,
+        "b": 0.011498042889542587
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 1.2,
+            "dry": 0,
+            "orbit": 1
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 1.2,
+            "dry": 0,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0.25,
+          "end": 1.25,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "room": 1,
+            "roomsize": 0.35,
+            "orbit": 2
+          }
+        }
+      ],
+      "observedA": [
+        {
+          "onset": 0,
+          "scheduledAt": 0.010666666666666685,
+          "roomsize": 1.2
+        }
+      ],
+      "observedB": [
+        {
+          "onset": 0,
+          "scheduledAt": 0.010666666666666658,
+          "roomsize": 1.2
+        },
+        {
+          "onset": 0.25,
+          "scheduledAt": 0.24533333333333332,
+          "roomsize": 1.2
+        }
+      ],
+      "windowBefore": {
+        "nullRms": 2.855246028137942e-8,
+        "relativeNull": 6.495635909505035e-7,
+        "maxDifference": 1.4156103134155273e-7,
+        "zeroLagCorrelation": 0.9999999999997832
+      },
+      "windowAfter": {
+        "nullRms": 3.070171790004602e-9,
+        "relativeNull": 6.35111945374352e-7,
+        "maxDifference": 2.514570951461792e-8,
+        "zeroLagCorrelation": 0.9999999999997775
+      }
+    },
+    {
+      "name": "separate delay live",
+      "a": "s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).delay(1).delaytime(.2).delayfeedback(.65).dry(0).orbit(1)",
+      "b": "stack(s(\"sine\").freq(330).sustain(1).release(.01).clip(.1).delay(1).delaytime(.2).delayfeedback(.65).dry(0).orbit(1),s(\"sine\").freq(880).gain(0).clip(.1).delay(1).delaytime(.07).delayfeedback(.65).orbit(2).late(.4))",
+      "alignment": {
+        "correlation": 1,
+        "lag": 0,
+        "lagSeconds": 0,
+        "nullRms": 1.1369811391610785e-10
+      },
+      "comparison": {
+        "nullRms": 1.1312323350183845e-10,
+        "relativeNull": 2.2359788991745288e-9,
+        "maxDifference": 1.6763806343078613e-8,
+        "zeroLagCorrelation": 1
+      },
+      "earlyComparison": {
+        "nullRms": 1.5757379318699836e-10,
+        "relativeNull": 2.2378118608911533e-9,
+        "maxDifference": 1.6763806343078613e-8,
+        "zeroLagCorrelation": 1.0000000000000002
+      },
+      "lateComparison": {
+        "nullRms": 2.882163318857074e-11,
+        "relativeNull": 2.231888834131433e-9,
+        "maxDifference": 2.561137080192566e-9,
+        "zeroLagCorrelation": 1
+      },
+      "aMetrics": {
+        "rms": 0.05059226343486479,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 2,
+        "centroidHz": 0
+      },
+      "bMetrics": {
+        "rms": 0.05059226343517957,
+        "peak": 0.24000000953674316,
+        "lastAboveMinus80dB": 2,
+        "centroidHz": 0
+      },
+      "windows": {
+        "a": 0.0944276472026885,
+        "b": 0.0944276472026885
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.2,
+            "delayfeedback": 0.65,
+            "dry": 0,
+            "orbit": 1
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 330,
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.2,
+            "delayfeedback": 0.65,
+            "dry": 0,
+            "orbit": 1
+          }
+        },
+        {
+          "begin": 0.4,
+          "end": 1.4,
+          "duration": 0.1,
+          "value": {
+            "s": "sine",
+            "freq": 880,
+            "gain": 0,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.07,
+            "delayfeedback": 0.65,
+            "orbit": 2
+          }
+        }
+      ],
+      "observedA": [
+        {
+          "onset": 0,
+          "scheduledAt": 0
+        }
+      ],
+      "observedB": [
+        {
+          "onset": 0,
+          "scheduledAt": 0
+        },
+        {
+          "onset": 0.4,
+          "scheduledAt": 0.3946666666666667
+        }
+      ],
+      "windowBefore": {
+        "nullRms": 0,
+        "relativeNull": 0,
+        "maxDifference": 0,
+        "zeroLagCorrelation": 1
+      },
+      "windowAfter": {
+        "nullRms": 1.0476990161040045e-10,
+        "relativeNull": 2.3393530911277926e-9,
+        "maxDifference": 1.0244548320770264e-8,
+        "zeroLagCorrelation": 1.0000000000000002
+      }
+    },
+    {
+      "name": "FX delay is local",
+      "a": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).clip(.1).delay(1).delaytime(.2).delayfeedback(.65)",
+      "b": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).clip(.1).FX(delay(1).delaytime(.2).delayfeedback(.65).gain(1))",
+      "comparison": {
+        "nullRms": 0.02472874279322117,
+        "relativeNull": 0.7961874018570835,
+        "maxDifference": 0.23483459651470184,
+        "zeroLagCorrelation": 0.6050500980283192
+      },
+      "earlyComparison": {
+        "nullRms": 0.04866314130268511,
+        "relativeNull": 0.791433680960169,
+        "maxDifference": 0.23483459651470184,
+        "zeroLagCorrelation": 0.6112550438579887
+      },
+      "lateComparison": {
+        "nullRms": 0.005053923778942133,
+        "relativeNull": 1,
+        "maxDifference": 0.041875191032886505,
+        "zeroLagCorrelation": 0
+      },
+      "aMetrics": {
+        "rms": 0.03105894759894665,
+        "peak": 0.23483459651470184,
+        "lastAboveMinus80dB": 3.64,
+        "centroidHz": 1947.8799046943316
+      },
+      "bMetrics": {
+        "rms": 0.01879221928939947,
+        "peak": 0.23483459651470184,
+        "lastAboveMinus80dB": 0.16,
+        "centroidHz": 1947.8799046943316
+      },
+      "windows": {
+        "a": 0.06643878031867816,
+        "b": 0
+      },
+      "eventsA": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "delay": 1,
+            "delaytime": 0.2,
+            "delayfeedback": 0.65
+          }
+        }
+      ],
+      "eventsB": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 0.1,
+          "value": {
+            "note": "c3",
+            "s": "sawtooth",
+            "sustain": 1,
+            "release": 0.01,
+            "clip": 0.1,
+            "FX": [
+              {
+                "delay": 1,
+                "delaytime": 0.2,
+                "delayfeedback": 0.65,
+                "gain": 1
+              }
+            ]
+          }
+        }
+      ],
+      "controlsA": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {
+              "delay": 0.20000000298023224,
+              "feedback": 0.6499999761581421
+            }
+          }
+        }
+      ],
+      "controlsB": [
+        {
+          "at": 0,
+          "orbits": {
+            "1": {}
+          }
+        }
+      ],
+      "finalOrbitsA": {
+        "1": {}
+      },
+      "finalOrbitsB": {
+        "1": {}
+      },
+      "endOrbitsA": {
+        "1": {
+          "delaytime": 0.20000000298023224,
+          "feedback": 0.6499999761581421
+        }
+      },
+      "endOrbitsB": {
+        "1": {}
+      },
+      "windowBefore": {
+        "nullRms": 0.05433165963301511,
+        "relativeNull": 0.6330369561233886,
+        "maxDifference": 0.23483459651470184,
+        "zeroLagCorrelation": 0.7741215745488734
+      },
+      "windowAfter": {
+        "nullRms": 0.031012326228259293,
+        "relativeNull": 1,
+        "maxDifference": 0.15173658728599548,
+        "zeroLagCorrelation": 0
+      }
+    }
+  ],
+  "sampleMetadata": {
+    "registered": true,
+    "before": false,
+    "afterQuery": false,
+    "decodedDuration": 0.8,
+    "afterDecode": true,
+    "queried": [
+      {
+        "begin": 0,
+        "end": 1,
+        "duration": 1,
+        "value": {
+          "s": "local",
+          "speed": 1,
+          "unit": "c"
+        }
+      }
+    ]
+  },
+  "analyzer": {
+    "rms": 0.03864046700786565,
+    "bins": 4096
+  },
+  "lengths": [
+    {
+      "name": "clip .25",
+      "code": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).clip(.25)",
+      "scoredEnd": 1.05,
+      "rms": 0.029475721224840528,
+      "peak": 0.23497624695301056,
+      "lastAboveMinus80dB": 0.31,
+      "centroidHz": 1956.537907215581
+    },
+    {
+      "name": "legato 1.5",
+      "code": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).legato(1.5)",
+      "scoredEnd": 1.05,
+      "rms": 0.07178527135085962,
+      "peak": 0.23497746884822845,
+      "lastAboveMinus80dB": 1.56,
+      "centroidHz": 1956.537907215581
+    },
+    {
+      "name": "release .8",
+      "code": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).release(.8)",
+      "scoredEnd": 1.05,
+      "rms": 0.06589576935405524,
+      "peak": 0.23497746884822845,
+      "lastAboveMinus80dB": 1.85,
+      "centroidHz": 1956.537907215581
+    },
+    {
+      "name": "delay tail",
+      "code": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).clip(.1).delay(1).delaytime(.2).delayfeedback(.65)",
+      "scoredEnd": 1.05,
+      "rms": 0.03105894759894665,
+      "peak": 0.23483459651470184,
+      "lastAboveMinus80dB": 3.64,
+      "centroidHz": 1947.8799046943316
+    },
+    {
+      "name": "room tail",
+      "code": "note(\"c3\").s(\"sawtooth\").sustain(1).release(.01).clip(.1).room(1).roomsize(1)",
+      "scoredEnd": 1.05,
+      "rms": 0.01980780072189698,
+      "peak": 0.2600182294845581,
+      "lastAboveMinus80dB": 1.07,
+      "centroidHz": 2029.2424421997373
+    },
+    {
+      "name": "sample natural",
+      "code": "s(\"local\")",
+      "scoredEnd": 1.05,
+      "rms": 0.12611541016240432,
+      "peak": 0.39991456270217896,
+      "lastAboveMinus80dB": 0.85,
+      "centroidHz": 222.30588319522505
+    },
+    {
+      "name": "sample clip",
+      "code": "s(\"local\").clip(.25)",
+      "scoredEnd": 1.05,
+      "rms": 0.07085966476289046,
+      "peak": 0.39991456270217896,
+      "lastAboveMinus80dB": 0.31,
+      "centroidHz": 222.30588319522505
+    }
+  ],
+  "samples": [
+    {
+      "code": "s(\"local\")",
+      "decodedSeconds": 0.8,
+      "events": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "local"
+          }
+        }
+      ],
+      "metrics": {
+        "rms": 0.15952477766381734,
+        "peak": 0.39991456270217896,
+        "lastAboveMinus80dB": 0.85,
+        "centroidHz": 222.30588319522505
+      }
+    },
+    {
+      "code": "s(\"longlocal\")",
+      "decodedSeconds": 1.6,
+      "events": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "longlocal"
+          }
+        }
+      ],
+      "metrics": {
+        "rms": 0.2259125838569864,
+        "peak": 0.39991456270217896,
+        "lastAboveMinus80dB": 1.65,
+        "centroidHz": 222.30588319522505
+      }
+    },
+    {
+      "code": "s(\"local\").loopAt(1)",
+      "decodedSeconds": 0.8,
+      "events": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "local",
+            "speed": 1,
+            "unit": "c"
+          }
+        }
+      ],
+      "metrics": {
+        "rms": 0.1780010791392909,
+        "peak": 0.39991456270217896,
+        "lastAboveMinus80dB": 1.05,
+        "centroidHz": 178.9377859158385
+      }
+    },
+    {
+      "code": "s(\"longlocal\").loopAt(1)",
+      "decodedSeconds": 1.6,
+      "events": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "longlocal",
+            "speed": 1,
+            "unit": "c"
+          }
+        }
+      ],
+      "metrics": {
+        "rms": 0.17824110073959515,
+        "peak": 0.3998169004917145,
+        "lastAboveMinus80dB": 1.05,
+        "centroidHz": 355.3884619516336
+      }
+    },
+    {
+      "code": "s(\"local\").fit()",
+      "decodedSeconds": 0.8,
+      "events": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "local",
+            "speed": 1,
+            "unit": "c"
+          }
+        }
+      ],
+      "metrics": {
+        "rms": 0.1780010791392909,
+        "peak": 0.39991456270217896,
+        "lastAboveMinus80dB": 1.05,
+        "centroidHz": 178.9377859158385
+      }
+    },
+    {
+      "code": "s(\"longlocal\").fit()",
+      "decodedSeconds": 1.6,
+      "events": [
+        {
+          "begin": 0,
+          "end": 1,
+          "duration": 1,
+          "value": {
+            "s": "longlocal",
+            "speed": 1,
+            "unit": "c"
+          }
+        }
+      ],
+      "metrics": {
+        "rms": 0.17824110073959515,
+        "peak": 0.3998169004917145,
+        "lastAboveMinus80dB": 1.05,
+        "centroidHz": 355.3884619516336
+      }
+    },
+    {
+      "code": "s(\"local\").splice(4,\"0 1 2 3\")",
+      "decodedSeconds": 0.8,
+      "events": [
+        {
+          "begin": 0,
+          "end": 0.25,
+          "duration": 0.25,
+          "value": {
+            "speed": 1,
+            "unit": "c",
+            "begin": 0,
+            "end": 0.25,
+            "_slices": 4,
+            "s": "local"
+          }
+        },
+        {
+          "begin": 0.25,
+          "end": 0.5,
+          "duration": 0.25,
+          "value": {
+            "speed": 1,
+            "unit": "c",
+            "begin": 0.25,
+            "end": 0.5,
+            "_slices": 4,
+            "s": "local"
+          }
+        },
+        {
+          "begin": 0.5,
+          "end": 0.75,
+          "duration": 0.25,
+          "value": {
+            "speed": 1,
+            "unit": "c",
+            "begin": 0.5,
+            "end": 0.75,
+            "_slices": 4,
+            "s": "local"
+          }
+        },
+        {
+          "begin": 0.75,
+          "end": 1,
+          "duration": 0.25,
+          "value": {
+            "speed": 1,
+            "unit": "c",
+            "begin": 0.75,
+            "end": 1,
+            "_slices": 4,
+            "s": "local"
+          }
+        }
+      ],
+      "metrics": {
+        "rms": 0.18112604726655565,
+        "peak": 0.753982424736023,
+        "lastAboveMinus80dB": 1.05,
+        "centroidHz": 178.9377859158385
+      }
+    },
+    {
+      "code": "s(\"longlocal\").splice(4,\"0 1 2 3\")",
+      "decodedSeconds": 1.6,
+      "events": [
+        {
+          "begin": 0,
+          "end": 0.25,
+          "duration": 0.25,
+          "value": {
+            "speed": 1,
+            "unit": "c",
+            "begin": 0,
+            "end": 0.25,
+            "_slices": 4,
+            "s": "longlocal"
+          }
+        },
+        {
+          "begin": 0.25,
+          "end": 0.5,
+          "duration": 0.25,
+          "value": {
+            "speed": 1,
+            "unit": "c",
+            "begin": 0.25,
+            "end": 0.5,
+            "_slices": 4,
+            "s": "longlocal"
+          }
+        },
+        {
+          "begin": 0.5,
+          "end": 0.75,
+          "duration": 0.25,
+          "value": {
+            "speed": 1,
+            "unit": "c",
+            "begin": 0.5,
+            "end": 0.75,
+            "_slices": 4,
+            "s": "longlocal"
+          }
+        },
+        {
+          "begin": 0.75,
+          "end": 1,
+          "duration": 0.25,
+          "value": {
+            "speed": 1,
+            "unit": "c",
+            "begin": 0.75,
+            "end": 1,
+            "_slices": 4,
+            "s": "longlocal"
+          }
+        }
+      ],
+      "metrics": {
+        "rms": 0.18135311269964638,
+        "peak": 0.7539827227592468,
+        "lastAboveMinus80dB": 1.05,
+        "centroidHz": 355.3884619516336
+      }
+    },
+    {
+      "code": "s(\"local\").chop(4)",
+      "decodedSeconds": 0.8,
+      "events": [
+        {
+          "begin": 0,
+          "end": 0.25,
+          "duration": 0.25,
+          "value": {
+            "s": "local",
+            "begin": 0,
+            "end": 0.25
+          }
+        },
+        {
+          "begin": 0.25,
+          "end": 0.5,
+          "duration": 0.25,
+          "value": {
+            "s": "local",
+            "begin": 0.25,
+            "end": 0.5
+          }
+        },
+        {
+          "begin": 0.5,
+          "end": 0.75,
+          "duration": 0.25,
+          "value": {
+            "s": "local",
+            "begin": 0.5,
+            "end": 0.75
+          }
+        },
+        {
+          "begin": 0.75,
+          "end": 1,
+          "duration": 0.25,
+          "value": {
+            "s": "local",
+            "begin": 0.75,
+            "end": 1
+          }
+        }
+      ],
+      "metrics": {
+        "rms": 0.16031948662223855,
+        "peak": 0.39991456270217896,
+        "lastAboveMinus80dB": 1,
+        "centroidHz": 222.30588319522505
+      }
+    },
+    {
+      "code": "s(\"longlocal\").chop(4)",
+      "decodedSeconds": 1.6,
+      "events": [
+        {
+          "begin": 0,
+          "end": 0.25,
+          "duration": 0.25,
+          "value": {
+            "s": "longlocal",
+            "begin": 0,
+            "end": 0.25
+          }
+        },
+        {
+          "begin": 0.25,
+          "end": 0.5,
+          "duration": 0.25,
+          "value": {
+            "s": "longlocal",
+            "begin": 0.25,
+            "end": 0.5
+          }
+        },
+        {
+          "begin": 0.5,
+          "end": 0.75,
+          "duration": 0.25,
+          "value": {
+            "s": "longlocal",
+            "begin": 0.5,
+            "end": 0.75
+          }
+        },
+        {
+          "begin": 0.75,
+          "end": 1,
+          "duration": 0.25,
+          "value": {
+            "s": "longlocal",
+            "begin": 0.75,
+            "end": 1
+          }
+        }
+      ],
+      "metrics": {
+        "rms": 0.2284198847866523,
+        "peak": 0.7874913215637207,
+        "lastAboveMinus80dB": 1.2,
+        "centroidHz": 222.30588319522505
+      }
+    }
+  ]
+}

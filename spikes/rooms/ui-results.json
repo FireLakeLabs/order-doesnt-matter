@@ -1,0 +1,52 @@
+{
+  "checks": [
+    {
+      "example": 1,
+      "notes": 4,
+      "errors": "",
+      "rooms": 1,
+      "conflicts": 0,
+      "inserts": 0,
+      "relationships": "RELATIONSHIPS / CROSS-NOTE STATENo duck, cut or bus relationships in this cycle."
+    },
+    {
+      "example": 2,
+      "notes": 7,
+      "errors": "",
+      "rooms": 1,
+      "conflicts": 0,
+      "inserts": 2,
+      "relationships": "RELATIONSHIPS / CROSS-NOTE STATENo duck, cut or bus relationships in this cycle."
+    },
+    {
+      "example": 3,
+      "notes": 10,
+      "errors": "",
+      "rooms": 1,
+      "conflicts": 1,
+      "inserts": 0,
+      "relationships": "RELATIONSHIPS / CROSS-NOTE STATENo duck, cut or bus relationships in this cycle."
+    },
+    {
+      "example": 4,
+      "notes": 13,
+      "errors": "",
+      "rooms": 2,
+      "conflicts": 0,
+      "inserts": 0,
+      "relationships": "RELATIONSHIPS / CROSS-NOTE STATENo duck, cut or bus relationships in this cycle."
+    },
+    {
+      "example": 5,
+      "notes": 19,
+      "errors": "",
+      "rooms": 2,
+      "conflicts": 0,
+      "inserts": 0,
+      "relationships": "RELATIONSHIPS / CROSS-NOTE STATEAMBER → ducks MINT (room 2) depth 0.9 · recover 0.25sVIOLET → BUS 1 send 1; consumer needs .bmod()VIOLET → ANALYZER 1 meter tap; sound unchangedAMBER ↔ VIOLET CUT 3next sample fades the previous in 10ms; synths unaffected"
+    }
+  ],
+  "errorRecovery": true,
+  "pastedLocalSample": true,
+  "mobileNoHorizontalOverflow": true
+}

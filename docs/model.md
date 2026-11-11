@@ -15,7 +15,9 @@ A Strudel program does not describe sound flowing through boxes. It describes a
 3. **Some calls dress the notes.** `lpf`, `gain`, `pan`, `room` and about 400
    others each add one setting to the bag. Two different settings can be
    applied in either order with the same result. This is where the project
-   name comes from.
+   name comes from. The exceptions: setting the same thing twice (the last one
+   wins), and a modulator such as `lfo` with no named target, which attaches to
+   whatever was set just before it.
 4. **Some calls rewrite the score.** `fast`, `rev`, `off`, `every`, `jux`
    change which events exist and when. Here order does matter.
 5. **Programs are trees, not chains.** `stack`, `cat`, `arrange`, `off`, `jux`,
@@ -27,21 +29,28 @@ A Strudel program does not describe sound flowing through boxes. It describes a
 7. **Not everything is a note.** `sine`, `perlin` and friends are continuous
    signals with no events of their own. They only ever shape a setting.
 8. **Sound is made at the end, per note.** Each note starts one voice whose
-   internal order is fixed, unless the program uses `.FX()` to add ordered
-   effects. Delay and reverb live in shared **rooms** (Strudel calls them
-   orbits) that several patterns can send to, and can fight over.
+   internal order is fixed: filters, then crush and distortion, then tremolo,
+   compressor, pan and phaser. `.FX()` inserts extra ordered stages before
+   that, each with its own private delay and reverb.
+9. **Rooms are shared and unruly.** A voice's ordinary delay and reverb sends
+   go to a shared **room** (Strudel calls it an orbit). Any note sent to a room
+   can change that room's settings for everyone in it, including tails already
+   ringing, and when two disagree the winner is not reliably the last one.
+10. **What you hear is longer or shorter than what is scored.** Release, delay,
+    reverb and sample length decide when a note really ends, and that cannot be
+    worked out from the note alone.
 
 ## How we draw it
 
-| Thing in Strudel       | What you see                                              |
-| ---------------------- | --------------------------------------------------------- |
-| The program            | **Floor plan**: a branching map of stations, one per call |
-| A score at any station | **Spiral**: one turn per cycle; the current turn is a ring |
-| A note                 | **Creature**: a glyph wearing its settings                |
-| A setting over time    | **Lane**: a band along the same turn, drawn or painted    |
-| A continuous signal    | A lane only, never a creature                             |
-| The voice              | One fixed strip that lights up as notes arrive            |
-| An orbit               | **Room**: a shared space several scores send into         |
+| Thing in Strudel       | What you see                                                     |
+| ---------------------- | ---------------------------------------------------------------- |
+| The program            | **Floor plan**: a branching map of stations, one per call        |
+| A score at any station | **Spiral**: one turn per cycle; the current turn is a ring       |
+| A note                 | **Creature**: a glyph wearing its settings                       |
+| A setting over time    | **Lane**: a band along the same turn, drawn or painted           |
+| A continuous signal    | A lane only, never a creature                                    |
+| The voice              | One fixed strip that lights up as notes arrive                   |
+| An orbit               | **Room**: a shared space several scores send into                |
 | Code we do not model   | An **opaque station**: still visible, playable, editable as text |
 
 ## Rules that follow
@@ -62,4 +71,5 @@ Phase 0 exists to answer these. See `research/dark-corners.md`.
 
 - How much of the floor plan can be live when callbacks run late or repeatedly.
 - What the spiral does with long, dense, or overlapping scores.
-- How ordered `.FX()` stages and room conflicts are drawn.
+- How a room shows a conflict whose outcome cannot be predicted.
+- Whether heard length is drawn at all, and if so from what.

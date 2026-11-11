@@ -1,0 +1,25 @@
+{
+  "name": "odm-rooms-spike",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node serve.mjs",
+    "build": "vite build",
+    "measure": "npm run build && node measure.mjs && node write-findings.mjs",
+    "shots": "npm run build && node measure.mjs --shots && python3 compress-shots.py"
+  },
+  "dependencies": {
+    "@strudel/core": "1.2.6",
+    "@strudel/mini": "1.2.6",
+    "@strudel/tonal": "1.2.6",
+    "@strudel/transpiler": "1.2.6",
+    "@strudel/web": "1.3.0",
+    "@strudel/webaudio": "1.3.0",
+    "superdough": "1.3.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "vite": "7.2.2"
+  }
+}

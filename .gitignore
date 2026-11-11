@@ -18,3 +18,4 @@ spikes/spiral/shots/*
 !spikes/spiral/shots/density-512-auto-ring.png
 !spikes/spiral/shots/arrange-256-side.png
 !spikes/spiral/shots/touch-mobile.png
+.npm-cache/
