@@ -1,0 +1,41 @@
+{
+  "durationMs": 86546.609155,
+  "runs": [
+    {
+      "script": "study-03-browser.mjs",
+      "durationMs": 7520.233245
+    },
+    {
+      "script": "pointer-check.mjs",
+      "durationMs": 3564.614404
+    },
+    {
+      "script": "sound-audit.mjs",
+      "durationMs": 11854.893891
+    },
+    {
+      "script": "verify-real.mjs",
+      "durationMs": 5295.321634999999
+    },
+    {
+      "script": "browser-test.mjs",
+      "durationMs": 27850.399244
+    },
+    {
+      "script": "corpus-audit.mjs",
+      "durationMs": 17830.075169999996
+    },
+    {
+      "script": "owner-browser.mjs",
+      "durationMs": 25268.494977000002
+    },
+    {
+      "script": "owner-regressions.mjs",
+      "durationMs": 1682.2242220000044
+    },
+    {
+      "script": "owner-browser.mjs (offline)",
+      "durationMs": 1096.2206779999979
+    }
+  ]
+}

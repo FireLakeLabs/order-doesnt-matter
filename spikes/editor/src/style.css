@@ -1824,3 +1824,503 @@ button[aria-pressed="true"][data-action="solo"] {
   border-color: #efd08b;
   color: #efd08b;
 }
+/* Study 03 · one space; containment carries ownership. */
+.constellation-view .workspace {
+  min-height: 0;
+}
+.constellation-view main {
+  min-height: 0;
+}
+.constellation-view .map-container {
+  overflow: hidden;
+}
+.constellation-view .map-intro {
+  padding-bottom: 10px;
+}
+.constellation-view .map-intro h2 {
+  font-size: 18px;
+  margin: 3px 0;
+}
+.constellation-view .map-intro .eyebrow {
+  margin: 0;
+}
+.semantic-space {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+  touch-action: none;
+}
+#universe {
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+}
+.camera-caption {
+  position: absolute;
+  left: 16px;
+  top: 9px;
+  z-index: 1;
+  font-size: 9px;
+  color: #9eb9b6;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.camera-caption button {
+  font-size: 9px;
+  padding: 3px 7px;
+}
+.camera-caption span {
+  color: #738e9b;
+}
+.room-wash {
+  fill: hsla(var(--room-hue), 45%, 62%, 0.085);
+  stroke: hsla(var(--room-hue), 50%, 65%, 0.15);
+  stroke-width: 1;
+}
+.conflict .room-wash {
+  fill: #efbd7510;
+  stroke: #efbd752c;
+}
+.territory-label {
+  fill: #a4bfb8;
+  font-size: 10px;
+  letter-spacing: 0.7px;
+}
+.conflict .territory-label {
+  fill: #edc791;
+}
+.system {
+  opacity: 1;
+}
+.system.inactive {
+  opacity: 0.43;
+}
+.system.inactive:hover {
+  opacity: 0.85;
+}
+.system-name {
+  font:
+    600 15px Space,
+    sans-serif;
+  fill: #e1eee9;
+}
+.system-state {
+  font-size: 9px;
+  fill: #93b4ad;
+}
+.system-sound {
+  font-size: 9px;
+  fill: #d9c68f;
+}
+.system-sound[data-sound-state="ready"] {
+  fill: #8bb9aa;
+}
+.system-sound[data-sound-state="missing"],
+.broken-glyph {
+  fill: #ffa897;
+}
+.system .planet-face .planet-skin {
+  fill: #142a30;
+  stroke: #9cdec775;
+  stroke-width: 1.5;
+}
+.system.quiet .planet-face {
+  opacity: 0.4;
+}
+.onset-pulse {
+  fill: none !important;
+  stroke: #b7ffe2 !important;
+  stroke-width: 3;
+  opacity: 0;
+}
+.event-arc {
+  fill: none;
+  stroke: #a3efd5;
+  stroke-width: 2;
+  opacity: 0.8;
+}
+.planet-clock {
+  fill: none;
+  stroke: #fff5ce;
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+.ownership-orbit {
+  fill: none;
+  stroke: #a3efd51a;
+  stroke-dasharray: 2 6;
+}
+.system .shell {
+  fill: none;
+  stroke: #efbd7566;
+  stroke-width: 1;
+}
+.rewrite-name {
+  font-size: 11px;
+  fill: #edca91;
+  paint-order: stroke;
+  stroke: #172630;
+  stroke-width: 7px;
+  stroke-linejoin: round;
+}
+.system-moon {
+  cursor: pointer;
+}
+.system-moon > circle {
+  fill: #222d3d;
+  stroke: #b1a2d478;
+  stroke-width: 1;
+}
+.system-moon.selected > circle {
+  stroke: #d8c7ff;
+  stroke-width: 2;
+}
+.nested-moon > circle {
+  fill: #30324a;
+  stroke: #c8b2f088;
+}
+.moon-name {
+  font-size: 10px;
+  fill: #e1d7f1;
+}
+.moon-reading {
+  font-size: 9px;
+  fill: #a9b8cc;
+}
+.live-value {
+  font-size: 9px;
+  fill: #b9e4d5;
+}
+.planet-actions {
+  text-align: center;
+}
+.system .planet-actions button {
+  font-size: 9px;
+  padding: 1px 7px;
+  background: #172a32;
+}
+.system-inset {
+  position: fixed;
+  z-index: 22;
+  right: min(620px, 52vw);
+  top: 100px;
+  width: min(430px, 35vw);
+  max-height: calc(100dvh - 130px);
+  overflow: auto;
+  background: #16242e;
+  border: 1px solid #45515d;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 16px 70px #0005;
+}
+.system-inset svg {
+  display: block;
+  width: 100%;
+  max-height: 490px;
+}
+.inset-heading strong {
+  font:
+    500 20px Space,
+    sans-serif;
+}
+.inset-heading p,
+.inset-room p {
+  font-size: 10px;
+  color: #9db3bb;
+  line-height: 1.6;
+}
+.inset-room {
+  padding: 14px;
+  background: #a3efd508;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.inset-room strong {
+  display: block;
+  color: #b2d5c9;
+}
+@media (max-width: 650px) {
+  .constellation-view header {
+    height: 58px;
+  }
+  .constellation-view .workspace {
+    height: calc(100dvh - 58px);
+    display: flex;
+    flex-direction: column;
+  }
+  .constellation-view .navigator {
+    flex: none;
+    max-height: 110px;
+    padding: 8px 12px;
+    overflow: auto;
+  }
+  .constellation-view .navigator h1,
+  .constellation-view .navigator > .eyebrow,
+  .constellation-view .navigator > .legend,
+  .constellation-view .navigator > .nav-divider,
+  .constellation-view .navigator > .label,
+  .constellation-view .navigator > .text-button,
+  .constellation-view .navigator > .add-voice {
+    display: none;
+  }
+  .constellation-view #piece {
+    width: 56%;
+    padding: 6px;
+    font-size: 10px;
+  }
+  .constellation-view #find {
+    width: 40%;
+    padding: 6px;
+    font-size: 10px;
+    position: absolute;
+    right: 12px;
+    top: 66px;
+  }
+  .constellation-view .results {
+    display: flex;
+    margin: 5px 0;
+    min-height: 25px;
+    overflow: auto;
+  }
+  .constellation-view .voice-nav {
+    flex: none;
+    width: auto;
+  }
+  .constellation-view .voice-nav .sound-status,
+  .constellation-view .voice-nav .instrument-state {
+    display: none;
+  }
+  .constellation-view .voice-nav button {
+    font-size: 9px;
+    white-space: nowrap;
+  }
+  .constellation-view main {
+    flex: 1;
+    min-height: 0;
+  }
+  .constellation-view .toolbar {
+    padding: 6px 10px;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .constellation-view .tabs button {
+    font-size: 10px;
+    padding: 7px;
+  }
+  .constellation-view .map-tools {
+    width: 100%;
+  }
+  .constellation-view .map-tools span {
+    font-size: 8px;
+    margin-left: auto;
+  }
+  .constellation-view .map-intro {
+    padding: 0 12px 6px;
+  }
+  .constellation-view .map-intro .eyebrow,
+  .constellation-view .map-intro p,
+  .constellation-view .map-key {
+    display: none;
+  }
+  .constellation-view .map-intro h2 {
+    font-size: 14px;
+  }
+  .constellation-view .source-nodes {
+    max-height: 30px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    padding: 4px;
+  }
+  .constellation-view footer {
+    padding: 6px;
+    font-size: 8px;
+  }
+  .constellation-view #status {
+    max-width: 50%;
+  }
+  .camera-caption {
+    left: 8px;
+    top: 5px;
+    font-size: 8px;
+    gap: 6px;
+  }
+  .camera-caption span {
+    display: none;
+  }
+  .has-inset .editor {
+    top: 220px;
+    height: calc(100dvh - 220px);
+  }
+  .system-inset {
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 220px;
+    max-height: 220px;
+    border-radius: 0;
+    padding: 9px;
+    display: grid;
+    grid-template-columns: 100px 150px 1fr;
+    gap: 5px;
+    align-items: center;
+  }
+  .system-inset svg {
+    width: 150px;
+    height: 200px;
+  }
+  .system-inset .system-name,
+  .system-inset .system-state,
+  .system-inset .system-sound,
+  .system-inset foreignObject {
+    display: none;
+  }
+  .inset-heading strong {
+    font-size: 14px;
+  }
+  .inset-heading p {
+    font-size: 8px;
+  }
+  .inset-room {
+    padding: 6px;
+    font-size: 9px;
+  }
+  .inset-room p {
+    font-size: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .system animateTransform {
+    display: none;
+  }
+  .onset-pulse {
+    stroke-width: 1;
+  }
+}
+/* Round 2: unified room washes, legible selection, a truly adjacent inset. */
+.system-moon text {
+  stroke: none;
+  filter: none;
+}
+.system-moon.selected {
+  stroke: none;
+  filter: none;
+}
+.system-inset {
+  right: min(740px, calc(100vw - 32px));
+  width: min(360px, calc(100vw - 760px));
+}
+.territory-settings {
+  fill: #a2b7ac;
+  font-size: 9px;
+  letter-spacing: 0;
+}
+.system.inactive .planet-face {
+  opacity: 0.8;
+}
+@media (max-width: 1100px) and (min-width: 651px) {
+  .has-inset .editor {
+    width: 60vw;
+  }
+  .system-inset {
+    right: 60vw;
+    width: 37vw;
+    padding: 12px;
+  }
+}
+@media (max-width: 650px) {
+  .constellation-view .navigator {
+    display: block;
+    height: 76px;
+    max-height: 76px;
+  }
+  .constellation-view .navigator #piece {
+    width: 56%;
+  }
+  .constellation-view .results {
+    max-height: 27px;
+  }
+  .constellation-view .voice-nav {
+    display: flex;
+  }
+  .system-inset {
+    right: 0;
+    width: 100%;
+  }
+}
+/* Round 3: keep a dive quiet, and give full context to the selected system. */
+.near-room-caption {
+  position: absolute;
+  bottom: 10px;
+  left: 16px;
+  right: 16px;
+  font-size: 11px;
+  color: #b8c9be;
+  background: #14252bea;
+  padding: 9px 12px;
+  border-radius: 7px;
+  line-height: 1.5;
+}
+.system-moon .system-moon .moon-name {
+  font-size: 9px;
+}
+.system-inset {
+  max-height: calc(100dvh - 120px);
+}
+.system-inset svg {
+  max-height: 420px;
+}
+@media (max-width: 650px) {
+  .near-room-caption {
+    font-size: 9px;
+    bottom: 6px;
+    left: 8px;
+    right: 8px;
+    max-height: 70px;
+    overflow: auto;
+  }
+  .system-inset {
+    max-height: 220px;
+  }
+}
+/* Round 4: far names stay at screen size, dense detail remains a deliberate dive. */
+[data-detail="far"] .system-name {
+  font-size: calc(12px * var(--label-scale));
+}
+[data-detail="far"] .system-sound {
+  font-size: calc(8px * var(--label-scale));
+}
+[data-detail="far"][data-compact="compact"] .system-state,
+[data-detail="far"][data-compact="compact"] .planet-actions {
+  display: none;
+}
+[data-detail="far"] .territory-label {
+  font-size: calc(9px * var(--label-scale));
+}
+.system-moon .nested-moon .system-moon {
+  opacity: 0.95;
+}
+.constellation-view .map-container {
+  display: flex;
+  flex-direction: column;
+}
+.constellation-view .source-nodes {
+  flex: none;
+}
+.constellation-view .source-nodes:empty {
+  display: none;
+}
+.constellation-view .semantic-space {
+  flex: 1;
+  height: auto;
+  min-height: 0;
+}
+
+@media (min-width: 651px) {
+  .system-inset {
+    top: 150px;
+    max-height: calc(100dvh - 175px);
+  }
+}

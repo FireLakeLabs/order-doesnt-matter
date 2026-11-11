@@ -59,7 +59,7 @@ async function pick(label, voice = 0) {
   );
 }
 async function shot(name) {
-  if (pass === "study02") return; // Study 02 captures real pieces with shots:v2.
+  if (pass === "study02" || pass === "study03") return; // Study 02 captures real pieces with shots:v2.
   const path = `shots/${pass}-${name}.jpg`;
   await page.screenshot({ path, quality: 63, fullPage: false, type: "jpeg" });
   shots.push(path);

@@ -1,0 +1,290 @@
+{
+  "durationMs": 7062.607644,
+  "checks": [
+    "twenty real planets fit far on desktop and phone, with no map scroll",
+    "double-click dives without opening an editor; back restores all; search flies to the owner",
+    "selected-only inset nests driver ownership, changes the single editor, and sits beside/above it",
+    "engine-clock pulses and real driver values move; typed mute is visible and consistent",
+    "section jump retains shared planet identities and animates active/peripheral changes",
+    "reduced motion suppresses spatial transitions"
+  ],
+  "errors": [],
+  "samples": [
+    {
+      "phase": 0,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "∿"
+      ]
+    },
+    {
+      "phase": 0,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "1450"
+      ]
+    },
+    {
+      "phase": 0,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "1450"
+      ]
+    },
+    {
+      "phase": 0.003928888888888856,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "1450"
+      ]
+    },
+    {
+      "phase": 0.03806222222222222,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "1563"
+      ]
+    },
+    {
+      "phase": 0.07788444444444431,
+      "pulse": [
+        32.63942708333334,
+        32.63942708333334,
+        32.63942708333334
+      ],
+      "drivers": [
+        "1674"
+      ]
+    },
+    {
+      "phase": 0.11628444444444436,
+      "pulse": [
+        31.839427083333337,
+        31.839427083333337,
+        31.839427083333337
+      ],
+      "drivers": [
+        "1837"
+      ]
+    },
+    {
+      "phase": 0.15184000000000028,
+      "pulse": [
+        31.039427083333333,
+        31.039427083333333,
+        31.039427083333333
+      ],
+      "drivers": [
+        "1942"
+      ]
+    },
+    {
+      "phase": 0.19166222222222237,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "2041"
+      ]
+    },
+    {
+      "phase": 0.22579555555555572,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "2180"
+      ]
+    },
+    {
+      "phase": 0.26561777777777784,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "2263"
+      ]
+    },
+    {
+      "phase": 0.2997511111111112,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "2374"
+      ]
+    },
+    {
+      "phase": 0.3395733333333333,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "2436"
+      ]
+    },
+    {
+      "phase": 0.3793955555555554,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "2490"
+      ]
+    },
+    {
+      "phase": 0.4135288888888888,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "2550"
+      ]
+    },
+    {
+      "phase": 0.4533511111111113,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "2578"
+      ]
+    },
+    {
+      "phase": 0.48748444444444466,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "2599"
+      ]
+    },
+    {
+      "phase": 0.5273066666666668,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "2599"
+      ]
+    },
+    {
+      "phase": 0.5671288888888888,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "2588"
+      ]
+    },
+    {
+      "phase": 0.6012622222222221,
+      "pulse": [
+        32.091510416666665,
+        32.091510416666665,
+        32.091510416666665
+      ],
+      "drivers": [
+        "2550"
+      ]
+    },
+    {
+      "phase": 0.6410844444444443,
+      "pulse": [
+        31.291510416666664,
+        31.291510416666664,
+        31.291510416666664
+      ],
+      "drivers": [
+        "2512"
+      ]
+    },
+    {
+      "phase": 0.6752177777777777,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "2464"
+      ]
+    },
+    {
+      "phase": 0.7150400000000002,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "2374"
+      ]
+    },
+    {
+      "phase": 0.7548622222222223,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "2302"
+      ]
+    },
+    {
+      "phase": 0.7889955555555557,
+      "pulse": [
+        31,
+        31,
+        31
+      ],
+      "drivers": [
+        "2180"
+      ]
+    }
+  ],
+  "frames": []
+}

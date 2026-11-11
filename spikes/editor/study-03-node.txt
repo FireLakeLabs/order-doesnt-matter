@@ -1,0 +1,29 @@
+
+> odm-editor-study@0.0.0 test
+> node prepare-import.mjs && vitest run
+
+
+ RUN  v3.2.4 /home/aaron/projects/order-doesnt-matter/spikes/editor
+
+stdout | src/sounds.test.ts
+🌀 @strudel/core loaded 🌀
+
+stderr | src/sounds.test.ts
+cannot use window: not in browser?
+
+ ✓ src/sounds.test.ts (3 tests) 155ms
+ ✓ src/song.test.ts (6 tests) 415ms
+ ✓ src/cosmos.test.ts (8 tests) 1051ms
+   ✓ a continuous space with honest containment > keeps systems apart and room territories exclude every nonmember in real pieces  757ms
+ ✓ src/owner-fixes.test.ts (4 tests) 2391ms
+   ✓ real-techno: mute is instrument state, survives editing/history, and removes exactly its events in every section  1004ms
+   ✓ real-house-vocals: mute is instrument state, survives editing/history, and removes exactly its events in every section  1282ms
+ ✓ src/study.test.ts (17 tests) 2819ms
+   ✓ document to real Strudel events > queries all six fixtures including unequal weights, alternation, rules, opaque code and nested signals  753ms
+   ✓ document to real Strudel events > splits, merges, rests, changes and stretches typed structure and the resulting score  302ms
+
+ Test Files  5 passed (5)
+      Tests  38 passed (38)
+   Start at  15:45:32
+   Duration  3.41s (transform 654ms, setup 0ms, collect 1.82s, tests 6.83s, environment 1ms, prepare 332ms)
+

@@ -10,7 +10,7 @@ async function run(script, env = {}, label = script) {
   await new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [script], {
       stdio: "inherit",
-      env: { ...process.env, PASS: "study02", ...env },
+      env: { ...process.env, PASS: "study03", ...env },
     });
     running.add(child);
     const timer = setTimeout(() => {
@@ -37,13 +37,11 @@ const audit = run("sound-audit.mjs").then(
   (error) => error,
 );
 try {
-  for (const script of [
-    "verify-real.mjs",
-    "browser-test.mjs",
-    "pointer-check.mjs",
-    "corpus-audit.mjs",
-  ])
-    await run(script);
+  await run("study-03-browser.mjs");
+  // These checks own independent browser instances and write separate reports.
+  await Promise.all([run("verify-real.mjs"), run("pointer-check.mjs")]);
+  await run("browser-test.mjs");
+  await run("corpus-audit.mjs");
   const error = await audit;
   if (error) throw error;
   await run("owner-browser.mjs");
@@ -55,7 +53,7 @@ try {
   );
   const result = { durationMs: performance.now() - start, runs };
   writeFileSync(
-    "browser-suite-study02.json",
+    "browser-suite-study03.json",
     JSON.stringify(result, null, 2) + "\n",
   );
   console.log(JSON.stringify(result));

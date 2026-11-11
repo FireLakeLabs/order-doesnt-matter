@@ -1,0 +1,27 @@
+{
+  "checks": [
+    "not checked: offline"
+  ],
+  "errors": [],
+  "audio": {
+    "status": "not checked: offline",
+    "readiness": [
+      {
+        "state": "missing",
+        "name": "bd",
+        "reason": "not registered; default samples unavailable (offline or network error)"
+      },
+      {
+        "state": "missing",
+        "name": "hh",
+        "reason": "not registered; default samples unavailable (offline or network error)"
+      },
+      {
+        "state": "missing",
+        "name": "cp",
+        "reason": "not registered; default samples unavailable (offline or network error)"
+      }
+    ]
+  },
+  "durationMs": 715.5204480000001
+}

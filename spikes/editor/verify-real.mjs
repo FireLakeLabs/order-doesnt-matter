@@ -70,7 +70,10 @@ try {
     ),
   );
   await page.screenshot({
-    path: "shots/v2/after-shared-editor.jpg",
+    path:
+      process.env.PASS === "study03"
+        ? "shots/v3/after-shared-editor.jpg"
+        : "shots/v2/after-shared-editor.jpg",
     quality: 65,
     type: "jpeg",
   });

@@ -1,4 +1,14 @@
 import "./style.css";
+import {
+  cosmos,
+  bounds,
+  pulse,
+  driverValue,
+  type Detail,
+  type Disk,
+  type System,
+} from "./cosmos";
+import { systemMarkup, roomsMarkup, type View } from "./cosmos-view";
 import corpusIndex from "../../../corpus/index.json";
 import * as core from "@strudel/core";
 import { fixtures, shell } from "./fixtures";
@@ -77,11 +87,7 @@ let map: "constellation" | "sheet" = "sheet",
   query = "",
   collapsed = new Set<string>(),
   solo = "",
-  zoom = Math.min(
-    1,
-    (window.innerWidth - (window.innerWidth > 650 ? 240 : 0)) /
-      (window.innerWidth <= 650 ? 420 : 1260),
-  ),
+  zoom = 1,
   pan = { x: 0, y: 0 },
   editPath: number[] = [0],
   before: PlainEvent[] = [],
@@ -252,55 +258,130 @@ function soundHtml(id: string) {
 function instrumentButtons(i: Instrument) {
   return `${button(i.muted ? "Unmute" : "M", "mute", `data-id="${i.id}" title="Mute ${esc(i.name)}" aria-label="${i.muted ? "Unmute" : "Mute"} ${esc(i.name)}" aria-pressed="${i.muted}"`)}${button(solo === i.id ? "Unsolo" : "S", "solo", `data-id="${i.id}" title="Solo ${esc(i.name)}" aria-label="${solo === i.id ? "Unsolo" : "Solo"} ${esc(i.name)}" aria-pressed="${solo === i.id}"`)}`;
 }
+let detail: Detail = "far";
+let cameraId = "";
+let layoutPiece = "";
+const layoutMemory = new Map<Detail, Map<string, Disk>>();
+let lastDetail: Detail = "far";
+let lastCamera = "";
+let lastSystems = new Map<string, Disk>();
+let liveSystems: System[] = [];
+function sceneNow() {
+  if (layoutPiece !== piece) {
+    layoutMemory.clear();
+    lastSystems.clear();
+    cameraId = "";
+    layoutPiece = piece;
+  }
+  const scene = cosmos(doc(), events, detail, cycle, layoutMemory.get(detail));
+  layoutMemory.set(detail, scene.positions);
+  return scene;
+}
+function viewState(): View {
+  return {
+    reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)")
+      .matches,
+    cycle,
+    phase,
+    selected,
+    solo,
+    broken: errors,
+    sound: (id) => ({
+      state: engine.sounds?.reports[id]?.state ?? "loading",
+      text: soundText(id),
+    }),
+    buttons: (s) => instrumentButtons(s.planet.instrument),
+    pending: pending ? target(pending.id)?.voice.id : undefined,
+  };
+}
 function mapHtml() {
   if (map === "sheet") return sourceNodes() + sheetHtml();
-  const scene = constellation(
-    doc(),
-    events,
-    collapsed,
-    window.innerWidth <= 650 ? 1 : 3,
-    cycle,
+  const scene = sceneNow();
+  liveSystems = scene.systems;
+  const focus = scene.systems.find((s) => s.planet.id === cameraId);
+  const box = detail === "near" && focus ? bounds([focus]) : scene.bounds;
+  const pad = 48;
+  const container = document.querySelector(".map-container");
+  const scale = Math.min(
+    (container?.clientWidth ?? window.innerWidth) / (box.width + pad * 2),
+    (container?.clientHeight ?? 500) / (box.height + pad * 2),
   );
+  const visible = detail === "near" && focus ? [focus] : scene.systems;
+  const content =
+    roomsMarkup(scene.rooms, visible) +
+    visible
+      .map((s) =>
+        systemMarkup(
+          s,
+          detail,
+          viewState(),
+          lastDetail === detail ? lastSystems.get(s.planet.id) : undefined,
+        ),
+      )
+      .join("");
+  const roomCaption = focus
+    ? scene.rooms
+        .filter((r) => r.members.includes(focus.planet.id))
+        .map(
+          (r) =>
+            `Room ${r.id}${r.conflict ? " · conflict" : ""} · ${r.settings.join(" · ") || "shared defaults"} · with ${
+              r.members
+                .filter((id) => id !== focus.planet.id)
+                .map(
+                  (id) =>
+                    scene.systems.find((s) => s.planet.id === id)?.planet.name,
+                )
+                .join(", ") || "no others"
+            }`,
+        )
+        .join(" / ")
+    : "";
+  lastDetail = detail;
+  lastSystems = new Map(
+    scene.systems.map((s) => [s.planet.id, { x: s.x, y: s.y, r: s.r }]),
+  );
+  const camera = `${box.x - pad} ${box.y - pad} ${box.width + pad * 2} ${box.height + pad * 2}`;
+  const flight =
+    lastCamera &&
+    lastCamera !== camera &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      ? `<animate attributeName="viewBox" from="${lastCamera}" to="${camera}" dur=".5s" calcMode="spline" keySplines=".2 0 .2 1" keyTimes="0;1"/>`
+      : "";
+  lastCamera = camera;
   return (
     sourceNodes() +
-    `<div class="space" id="space"><svg id="universe" viewBox="0 0 ${scene.width} ${scene.height}" style="width:${scene.width * zoom}px;height:${scene.height * zoom}px;transform:translate(${pan.x}px,${pan.y}px)" aria-label="Constellation: rhythms at the centre, settings on orbits, rewrites on rings">${scene.planets
-      .map((p) => {
-        const broken = errors[p.voice];
-        return `<g data-instrument="${p.id}" data-muted="${p.muted}" class="planet ${p.muted ? "muted" : ""} ${p.active ? "" : "inactive"} ${pending && target(pending.id)?.voice.id === p.voice ? "pending" : ""}"><rect x="${p.x - 200}" y="${p.y - 238}" width="400" height="464" rx="14" class="planet-card"/><text x="${p.x - 177}" y="${p.y - 208}" class="planet-title">${esc(p.name.length > 29 ? p.name.slice(0, 28) + "…" : p.name)}<title>${esc(p.name)} · ${esc(p.pattern.comment ?? "Click its rhythm, settings or rings to edit")}</title></text><text x="${p.x - 177}" y="${p.y - 188}" class="planet-state">${p.muted ? "Muted" : solo && solo !== p.id ? "Quiet · solo elsewhere" : broken ? "⚠ BROKEN" : engine.sounds?.reports[p.id]?.state !== "ready" ? "⚠ Sound unavailable / loading" : !p.active ? "○ Not in this section" : p.events.length ? "● Playing this section" : "◌ Rest this cycle"}${p.instrument.sections.length > 1 ? " · ↳ shared in " + p.instrument.sections.length + " sections" : ""}${scene.rooms
-          .filter((r) => r.voices.includes(p.id))
-          .map((r) => " · room " + r.id + (r.conflict ? " ⚠" : ""))
-          .join(
-            "",
-          )}</text><text x="${p.x - 177}" y="${p.y - 170}" class="planet-sound" data-sound-state="${engine.sounds?.reports[p.id]?.state ?? "loading"}">${esc(soundText(p.id))}<title>${esc(soundText(p.id))}</title></text><foreignObject x="${p.x - 177}" y="${p.y + 195}" width="180" height="28"><div xmlns="http://www.w3.org/1999/xhtml" class="planet-actions">${instrumentButtons(p.instrument)}</div></foreignObject>
-  <circle cx="${p.x}" cy="${p.y}" r="${p.orbit}" class="orbit"/>
-  ${p.shells.map((sh, j) => `<g data-select="${sh.id}" tabindex="0" role="button" aria-label="${esc(p.name)} rewrite ${esc(sh.name)}"><title>${esc(sh.name)} rewrites the score · click to edit. Settings inside this ring are rewritten with the rhythm.</title><circle cx="${p.x}" cy="${p.y}" r="${sh.r}" class="shell${chosen(sh.id)}"/><rect x="${sh.labelX - 32}" y="${sh.labelY - 8}" width="64" height="17" rx="6" class="shell-label-bg"/><text x="${sh.labelX}" y="${sh.labelY + 4}" text-anchor="middle" class="shell-label">${esc(sh.name)}</text></g>`).join("")}
-  <g data-select="${p.id}" tabindex="0" role="button" aria-label="${esc(p.name)} rhythm" class="planet-face${chosen(p.id)} ${p.tier === 3 ? "opaque" : ""}"><title>${esc(p.name)} · rhythm. Click to edit the source pattern${p.instrument.sections.length > 1 ? " shared by every marked section" : ""}.</title><circle cx="${p.x}" cy="${p.y}" r="${p.radius}"/><svg x="${p.x - 27}" y="${p.y - 27}" width="54" height="54" viewBox="0 0 100 100">${ring(
-    p.events,
-  )
-    .replace(/^.*?<svg[^>]*>/, "")
-    .replace(
-      /<\/svg>$/,
-      "",
-    )}</svg><text x="${p.x}" y="${p.y + 4}" text-anchor="middle" class="small">${broken ? "BROKEN" : !p.active ? "resting" : "rhythm ↗"}</text></g>
-  ${p.nodes
-    .filter((n) => n.kind === "setting")
-    .map(
-      (n) =>
-        `<g data-select="${n.id}" tabindex="0" role="button" aria-label="${esc(p.name)} ${esc(n.label)}" class="moon setting${chosen(n.id)}"><title>${esc(settingName(n.label))} (${esc(n.label)}) · click to edit${n.value?.core.kind === "signal" ? " the wave driving this setting" : ""}</title><circle cx="${n.x}" cy="${n.y}" r="${n.r}"/><text x="${n.x}" y="${n.y - 2}" text-anchor="middle">${esc(settingName(n.label).slice(0, 10))}</text><text x="${n.x}" y="${n.y + 11}" text-anchor="middle" class="moon-value">${esc(n.value ? (staticValue(n.value) !== undefined ? shortValue(staticValue(n.value)) : n.value.core.kind === "signal" ? "∿ " + n.value.core.shape : n.value.core.kind === "sequence" ? n.value.core.notation.slice(0, 9) : "↳ driver") : "")}</text></g>`,
-    )
-    .join("")}
-  ${p.nodes
-    .filter((n) => n.kind === "driver")
-    .slice(0, 5)
-    .map(
-      (n) =>
-        `<g data-select="${n.id}" tabindex="0" role="button" class="driver-chip" aria-label="${esc(p.name)} ${esc(n.label)} driver"><title>Open ${esc(n.label)} driver · nested setting pattern</title><text x="${n.x}" y="${n.y + 30}">↳ ${esc(n.label)}</text></g>`,
-    )
-    .join("")}
-  <g role="button" tabindex="0" data-collapse="${p.id}" aria-label="${p.collapsed ? "Expand" : "Collapse"} ${esc(p.name)}"><text class="small" x="${p.x + 120}" y="${p.y + 215}">${p.collapsed ? "+ expand" : "− fold"}</text></g></g>`;
-      })
-      .join("")}</svg></div>`
+    `<div class="space semantic-space" id="space" data-detail="${detail}" style="--label-scale:${1 / Math.max(0.1, scale)}" data-compact="${scale < 0.65 ? "compact" : ""}"><div class="camera-caption">${detail === "far" ? "THE WHOLE PIECE" : detail === "middle" ? "SETTINGS BELONG TO THEIR PLANET" : "INSIDE " + esc(focus?.planet.name ?? "A SYSTEM")} · ${button("All instruments", "all-systems")}<span>Double-click a planet or pinch to dive</span></div><svg id="universe" viewBox="${box.x - pad} ${box.y - pad} ${box.width + pad * 2} ${box.height + pad * 2}" style="transform:translate(${pan.x}px,${pan.y}px) scale(${zoom})" aria-label="Constellation: one continuous space, shared rooms, nested settings">${flight}${content}</svg>${detail === "near" ? `<div class="near-room-caption">${esc(roomCaption || "No shared room")}</div>` : ""}</div>`
   );
+}
+function insetHtml(t: Target) {
+  const context = selectionContext(t);
+  if (!context) return "";
+  const scene = cosmos(doc(), events, "near", cycle),
+    system = scene.systems.find((s) => s.planet.id === context.instrument.id);
+  if (!system) return "";
+  const rooms = scene.rooms.filter((r) => r.members.includes(system.planet.id));
+  system.x = 0;
+  system.y = 0;
+  liveSystems = [system];
+  return `<aside class="system-inset" aria-label="Selected instrument system"><div class="inset-heading"><p class="eyebrow">THIS INSTRUMENT'S SYSTEM</p><strong>${esc(system.planet.name)}</strong><p>Click a moon, nested driver or shell to change the editor.</p></div><svg viewBox="${-system.r - 12} ${-system.r - 12} ${system.r * 2 + 24} ${system.r * 2 + 24}" aria-label="${esc(system.planet.name)} system">${systemMarkup(system, "near", viewState())}</svg><div class="inset-room">${
+    rooms.length
+      ? rooms
+          .map(
+            (r) =>
+              `<strong>Room ${esc(r.id)}${r.conflict ? " · conflict" : ""}</strong><p>${esc(r.settings.join(" · ") || "Shared defaults")}</p><p>With ${esc(
+                r.members
+                  .filter((id) => id !== system.planet.id)
+                  .map(
+                    (id) =>
+                      scene.systems.find((s) => s.planet.id === id)?.planet
+                        .name,
+                  )
+                  .join(", ") || "no other instruments",
+              )}</p>`,
+          )
+          .join("")
+      : "<strong>No shared room</strong>"
+  }</div></aside>`;
 }
 function valueMini(es: PlainEvent[], name: string, p: Pattern, id: string) {
   const values = [
@@ -394,6 +475,8 @@ function render() {
   });
   const t = selectedTarget();
   renderedDocument = doc();
+  app!.classList.toggle("constellation-view", map === "constellation");
+  app!.classList.toggle("has-inset", open && map === "sheet");
   app!.innerHTML = `<header><a class="brand" href="#">◎ <span>Order Doesn’t Matter</span></a><span class="study">TWO MAPS / ONE SCORE</span><div class="transport">${button(engine.playing ? "■ Stop" : "▶ Play", "play", 'id="play" class="primary"')}<span id="clock">${String(cycle).padStart(2, "0")} / ${(phase % 1).toFixed(2)}</span>${button("Undo", "undo", history.past.length ? "" : "disabled")}${button("Redo", "redo", history.future.length ? "" : "disabled")}</div></header><div class="workspace"><aside class="navigator" ${open ? "inert" : ""}><p class="eyebrow">AN INSTRUMENT FOR FINDING</p><h1>The score,<br>at a glance.</h1><label class="label" for="piece">PIECE</label><select id="piece">${piece === "paste" || piece === "local-switch" ? `<option selected value="${piece}">${piece === "local-switch" ? "Switch Angel · local only" : "Imported score"}</option>` : ""}<optgroup label="Design fixtures (secondary)">${fixtures.map((f) => `<option value="${f.id}" ${f.id === piece ? "selected" : ""}>${esc(f.name)}</option>`).join("")}</optgroup><optgroup label="Real input + corpus programs">${corpusDocs.map((f) => `<option value="${f.id}" ${f.id === piece ? "selected" : ""}>${esc(f.title ?? f.id)}</option>`).join("")}</optgroup></select>${button("Switch Angel · local file", "local-switch", 'class="text-button" title="Reads the earlier project at runtime; source is not redistributed"')}${button("Paste Strudel…", "paste", 'class="text-button"')}<div class="nav-divider"></div><label class="label" for="find">FIND A VOICE OR SETTING</label><input id="find" type="search" placeholder="Try “shore lpf”" value="${esc(query)}" autocomplete="off"><div class="results">${
     query
       ? searchTargets(doc(), query)
@@ -412,7 +495,7 @@ function render() {
               `<div class="voice-nav" data-instrument="${i.id}" data-muted="${i.muted}"><button data-action="select" data-id="${i.id}" title="Edit ${esc(i.name)}${i.sections.length > 1 ? " everywhere it is used" : ""}"><i style="background:${colors[n % 4]}"></i>${esc(i.name)}<small class="instrument-state">${esc(instrumentState(i))}</small>${soundHtml(i.id)}</button><button data-action="focus" data-id="${i.id}" aria-label="Find ${esc(i.name)} in map">⌖</button></div>`,
           )
           .join("")
-  }</div>${button("+ Add voice", "add-voice", 'class="add-voice"')}<div class="legend"><p><i class="mint"></i> Planet = rhythm / real events</p><p><i class="violet"></i> Moon = setting; satellite = driver</p><p><i class="amber"></i> Shell = ordered rewrite</p><p>Orbits mean “belongs to”.<br>There is no sound-flow path.</p><p>◇ Dashed = not modelled</p><small>Corpus importer · real Strudel queries</small></div></aside><main><div class="toolbar"><div class="tabs">${button("◎ Constellation", "map-a", `aria-pressed="${map === "constellation"}"`)}${button("▤ Score sheet", "map-b", `aria-pressed="${map === "sheet"}"`)}</div><div class="map-tools" ${open ? "inert" : ""}>${map === "constellation" ? `${button("−", "zoom-out", 'aria-label="Zoom out"')}${button("Fit", "fit")}${button("+", "zoom-in", 'aria-label="Zoom in"')}` : ""}<span>${song(doc()).instruments.length} instruments · cycle ${cycle}</span></div></div><div class="map-intro"><div><p class="eyebrow">${map === "constellation" ? "BELONGING, WITHOUT WIRES" : "COMPARE ACROSS VOICES"}</p><h2>${map === "constellation" ? "A small universe of settings." : "One piece. All its settings."}</h2><p>${map === "constellation" ? "Click a planet, moon or labelled shell to edit. Drag empty space to pan. Scroll to explore; + / − to zoom." : "Click a cell to edit. ↳ opens nested drivers. Horizontal scroll reveals every setting; names stay pinned."}</p></div><div class="map-key">${map === "constellation" ? "Inner → outer: rewrite order<br>Moons inside rings are rewritten<br>Outer orbit: freely placed constants" : "Bars are actual event spans<br>No equal-step grid is assumed"}</div></div>${arrangementHtml()}<div class="map-container" ${open ? "inert" : ""}>${mapHtml()}</div><footer><span id="status" class="${Object.keys(errors).length ? "error" : ""}">${warning ? esc(warning) : Object.keys(errors).length ? `⚠ BROKEN · ${esc(Object.values(errors).join(" · "))}` : busy ? "Querying real events…" : `${Object.values(events).flat().length} queried event parts · scored length, not audible tails`}</span><span id="pending">${pending ? "◌ PENDING · waiting for first changed onset" : "● document and preview agree"}</span></footer></main></div>${open && t ? `<div class="scrim"></div>${editorHtml(t)}` : ""}${paste ? `<div class="modal-scrim"><section class="paste-panel"><h2>Bring in a score</h2><p>Executable Strudel, for this local study. Structured import; unsupported source stays selectable.</p><textarea id="paste-source" aria-label="Strudel to import">note("60 [64 67] 72").s("triangle")</textarea>${button("Import expression", "import", 'class="primary"')}${button("Cancel", "cancel-paste")}</section></div>` : ""}`;
+  }</div>${button("+ Add voice", "add-voice", 'class="add-voice"')}<div class="legend"><p><i class="mint"></i> Planet = rhythm / real events</p><p><i class="violet"></i> Moon = setting; satellite = driver</p><p><i class="amber"></i> Shell = ordered rewrite</p><p>Orbits mean “belongs to”.<br>There is no sound-flow path.</p><p>◇ Dashed = not modelled</p><small>Corpus importer · real Strudel queries</small></div></aside><main><div class="toolbar"><div class="tabs">${button("◎ Constellation", "map-a", `aria-pressed="${map === "constellation"}"`)}${button("▤ Score sheet", "map-b", `aria-pressed="${map === "sheet"}"`)}</div><div class="map-tools" ${open ? "inert" : ""}>${map === "constellation" ? `${button("−", "zoom-out", 'aria-label="Zoom out"')}${button("Far", "detail-far", `aria-pressed="${detail === "far"}"`)}${button("Middle", "detail-middle", `aria-pressed="${detail === "middle"}"`)}${button("Near", "detail-near", `aria-pressed="${detail === "near"}"`)}${button("Fit", "fit")}${button("+", "zoom-in", 'aria-label="Zoom in"')}` : ""}<span>${song(doc()).instruments.length} instruments · cycle ${cycle}</span></div></div><div class="map-intro"><div><p class="eyebrow">${map === "constellation" ? "BELONGING, WITHOUT WIRES" : "COMPARE ACROSS VOICES"}</p><h2>${map === "constellation" ? "A small universe of settings." : "One piece. All its settings."}</h2><p>${map === "constellation" ? "Explore rooms and belonging. Far shows the piece; Middle reveals settings; Near reveals nested drivers and ordered shells." : "Click a cell to edit. ↳ opens nested drivers. Horizontal scroll reveals every setting; names stay pinned."}</p></div><div class="map-key">${map === "constellation" ? "Inner → outer: rewrite order<br>Moons inside rings are rewritten<br>Outer orbit: freely placed constants" : "Bars are actual event spans<br>No equal-step grid is assumed"}</div></div>${arrangementHtml()}<div class="map-container" ${open ? "inert" : ""}>${mapHtml()}</div><footer><span id="status" class="${Object.keys(errors).length ? "error" : ""}">${warning ? esc(warning) : Object.keys(errors).length ? `⚠ BROKEN · ${esc(Object.values(errors).join(" · "))}` : busy ? "Querying real events…" : `${Object.values(events).flat().length} queried event parts · scored length, not audible tails`}</span><span id="pending">${pending ? "◌ PENDING · waiting for first changed onset" : "● document and preview agree"}</span></footer></main></div>${open && t ? `<div class="scrim"></div>${editorHtml(t)}${map === "sheet" ? insetHtml(t) : ""}` : ""}${paste ? `<div class="modal-scrim"><section class="paste-panel"><h2>Bring in a score</h2><p>Executable Strudel, for this local study. Structured import; unsupported source stays selectable.</p><textarea id="paste-source" aria-label="Strudel to import">note("60 [64 67] 72").s("triangle")</textarea>${button("Import expression", "import", 'class="primary"')}${button("Cancel", "cancel-paste")}</section></div>` : ""}`;
   bind();
   for (const { selector, top, left } of scrolls) {
     const el = document.querySelector(selector);
@@ -856,6 +939,15 @@ function playDoc(): Doc {
 
 async function choose(id: string) {
   const t = target(id);
+  if (map === "constellation" && t) {
+    const context = selectionContext(t);
+    if (context) {
+      cameraId = context.instrument.id;
+      detail = "near";
+      pan = { x: 0, y: 0 };
+      zoom = 1;
+    }
+  }
   const c = t?.voice.pattern.core;
   if (
     t &&
@@ -912,7 +1004,27 @@ function bind() {
     };
     el.onfocus = explain;
     el.onmouseenter = explain;
-    el.onclick = () => choose(el.dataset.select ?? "").catch(fail);
+    let clickTimer: ReturnType<typeof setTimeout>;
+    el.onclick = (e) => {
+      e.stopPropagation();
+      if (el.dataset.dive) {
+        clearTimeout(clickTimer);
+        clickTimer = setTimeout(
+          () => choose(el.dataset.select ?? "").catch(fail),
+          230,
+        );
+      } else choose(el.dataset.select ?? "").catch(fail);
+    };
+    if (el.dataset.dive)
+      el.ondblclick = (e) => {
+        e.stopPropagation();
+        clearTimeout(clickTimer);
+        cameraId = el.dataset.dive ?? "";
+        detail = "near";
+        zoom = 1;
+        pan = { x: 0, y: 0 };
+        render();
+      };
     el.onkeydown = (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
@@ -950,11 +1062,7 @@ function bind() {
       phase = 0;
       pending = undefined;
       query = "";
-      zoom = Math.min(
-        1,
-        (window.innerWidth - (window.innerWidth > 650 ? 240 : 0)) /
-          (window.innerWidth <= 650 ? 420 : 1260),
-      );
+      zoom = 1;
       pan = { x: 0, y: 0 };
       refresh().catch(fail);
     }
@@ -1181,6 +1289,8 @@ async function handle(action: string, id?: string, el?: HTMLElement) {
       break;
     case "map-a":
       map = "constellation";
+      zoom = 1;
+      pan = { x: 0, y: 0 };
       render();
       break;
     case "map-b":
@@ -1266,6 +1376,33 @@ async function handle(action: string, id?: string, el?: HTMLElement) {
       await refresh();
       break;
     }
+    case "detail-far":
+    case "detail-middle":
+    case "detail-near": {
+      detail =
+        action === "detail-far"
+          ? "far"
+          : action === "detail-middle"
+            ? "middle"
+            : "near";
+      if (detail === "near") {
+        const scene = sceneNow();
+        if (!scene.systems.some((s) => s.planet.id === cameraId))
+          cameraId =
+            scene.systems.sort((a, b) => b.r - a.r)[0]?.planet.id ?? "";
+      }
+      zoom = 1;
+      pan = { x: 0, y: 0 };
+      render();
+      break;
+    }
+    case "all-systems":
+      detail = "far";
+      cameraId = "";
+      zoom = 1;
+      pan = { x: 0, y: 0 };
+      render();
+      break;
     case "zoom-in":
       zoom = Math.min(2, zoom * 1.2);
       render();
@@ -1275,22 +1412,21 @@ async function handle(action: string, id?: string, el?: HTMLElement) {
       render();
       break;
     case "fit":
-      zoom = Math.min(
-        1,
-        (document.querySelector(".map-container")?.clientWidth ?? 1200) /
-          (window.innerWidth <= 650 ? 420 : 1260),
-      );
+      zoom = 1;
       pan = { x: 0, y: 0 };
       render();
       break;
     case "focus": {
-      if (map === "sheet") {
+      if (map === "sheet")
         document
           .querySelector(`[data-id="${id}"].name`)
           ?.scrollIntoView({ block: "center", inline: "start" });
-      } else {
-        const g = document.querySelector(`[data-select="${id}"]`);
-        g?.scrollIntoView({ block: "center", inline: "center" });
+      else {
+        cameraId = id ?? "";
+        detail = "near";
+        zoom = 1;
+        pan = { x: 0, y: 0 };
+        render();
       }
       break;
     }
@@ -1462,8 +1598,45 @@ function bindPan() {
   const el = document.querySelector<HTMLElement>("#space"),
     svg = document.querySelector<SVGElement>("#universe");
   if (!el || !svg) return;
+  const touches = new Map<number, { x: number; y: number }>();
+  let pinchDistance = 0;
+  el.addEventListener("pointerdown", (e) => {
+    if (e.pointerType === "touch") {
+      touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (touches.size === 2) {
+        const [a, b] = [...touches.values()];
+        pinchDistance = Math.hypot(a!.x - b!.x, a!.y - b!.y);
+      }
+    }
+  });
+  el.addEventListener("pointermove", (e) => {
+    if (!touches.has(e.pointerId)) return;
+    touches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (touches.size === 2) {
+      const [a, b] = [...touches.values()],
+        distance = Math.hypot(a!.x - b!.x, a!.y - b!.y);
+      if (distance > pinchDistance * 1.2) {
+        const hit = document
+          .elementFromPoint((a!.x + b!.x) / 2, (a!.y + b!.y) / 2)
+          ?.closest<SVGElement>("[data-instrument]");
+        cameraId = hit?.dataset.instrument ?? cameraId;
+        detail = "near";
+        zoom = 1;
+        touches.clear();
+        render();
+      } else if (distance < pinchDistance * 0.8) {
+        detail = "far";
+        zoom = 1;
+        touches.clear();
+        render();
+      }
+    }
+  });
+  el.addEventListener("pointerup", (e) => touches.delete(e.pointerId));
+  el.addEventListener("pointercancel", (e) => touches.delete(e.pointerId));
   let drag: { x: number; y: number; px: number; py: number } | undefined;
   el.onpointerdown = (e) => {
+    if (touches.size > 1) return;
     if (
       (e.target as Element).closest(
         "[data-select],[data-collapse],[data-action]",
@@ -1474,6 +1647,10 @@ function bindPan() {
     el.setPointerCapture(e.pointerId);
   };
   el.onpointermove = (e) => {
+    if (touches.size > 1) {
+      drag = undefined;
+      return;
+    }
     if (drag) {
       pan = {
         x: drag.px + e.clientX - drag.x,
@@ -1589,10 +1766,60 @@ function tick() {
       }
     }
   }
+  const now = engine.playing ? phase : cycle;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  for (const el of document.querySelectorAll<SVGCircleElement>(
+    "[data-pulse]",
+  )) {
+    const s = liveSystems.find((s) => s.planet.id === el.dataset.pulse);
+    const amount =
+      engine.playing &&
+      s &&
+      s.planet.active &&
+      !s.planet.muted &&
+      (!solo || solo === s.planet.id)
+        ? pulse(s.planet.events, now, doc().tempo?.cpm ?? 32)
+        : 0;
+    el.setAttribute("r", String(31 + (reduced ? 0 : amount * 2)));
+    el.style.opacity = String(amount * 0.65);
+  }
+  for (const el of document.querySelectorAll<SVGElement>("[data-clock-hand]"))
+    el.setAttribute("transform", `rotate(${(now % 1) * 360})`);
+  for (const el of document.querySelectorAll<SVGTextElement>(
+    "[data-driver-value]",
+  )) {
+    const value = driverValue(
+      sampledDrivers[el.dataset.driverValue ?? ""] ?? [],
+      now,
+    );
+    el.textContent =
+      value !== undefined
+        ? shortValue(value)
+        : driverErrors[el.dataset.driverValue ?? ""]
+          ? "BROKEN"
+          : "∿";
+  }
   requestAnimationFrame(tick);
 }
 Object.assign(window, {
   editorStudy: {
+    get visualState() {
+      const scene = sceneNow();
+      return {
+        detail,
+        cameraId,
+        systems: scene.systems.map((s) => ({
+          id: s.planet.id,
+          name: s.planet.name,
+          x: s.x,
+          y: s.y,
+          r: s.r,
+          active: s.planet.active,
+        })),
+        rooms: scene.rooms,
+        bounds: scene.bounds,
+      };
+    },
     get document() {
       return doc();
     },
@@ -1684,14 +1911,13 @@ Object.assign(window, {
       query = "";
       open = false;
       pending = undefined;
-      zoom = Math.min(
-        1,
-        (window.innerWidth - (window.innerWidth > 650 ? 240 : 0)) /
-          (window.innerWidth <= 650 ? 420 : 1260),
-      );
+      zoom = 1;
       await refresh();
     },
   },
+});
+window.addEventListener("resize", () => {
+  if (map === "constellation") render();
 });
 engine.onSoundsChanged = () => render();
 render();

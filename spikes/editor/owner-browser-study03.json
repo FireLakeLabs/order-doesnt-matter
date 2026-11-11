@@ -1,0 +1,210 @@
+{
+  "checks": [
+    {
+      "piece": "real-techno",
+      "initialDispatches": {
+        "rev": 1,
+        "ids": [
+          "n14",
+          "n2",
+          "n7",
+          "n9"
+        ]
+      }
+    },
+    {
+      "piece": "real-techno",
+      "planets": [
+        {
+          "id": "n2",
+          "muted": "false",
+          "text": "Scored onsets"
+        },
+        {
+          "id": "n7",
+          "muted": "true",
+          "text": "Muted"
+        },
+        {
+          "id": "n9",
+          "muted": "false",
+          "text": "Scored onsets"
+        },
+        {
+          "id": "n14",
+          "muted": "false",
+          "text": "Scored onsets"
+        }
+      ]
+    },
+    "real-techno: mute two, unmute first, section/cycle, map, undo/redo, solo, reorder, collapse; real pointer clicks and scheduler tags",
+    {
+      "piece": "real-house-vocals",
+      "initialDispatches": {
+        "rev": 9,
+        "ids": [
+          "n29",
+          "n49",
+          "n28"
+        ]
+      }
+    },
+    {
+      "piece": "real-house-vocals",
+      "planets": [
+        {
+          "id": "n28",
+          "muted": "false",
+          "text": "Scored onsets"
+        },
+        {
+          "id": "n38",
+          "muted": "true",
+          "text": "Muted"
+        },
+        {
+          "id": "n1",
+          "muted": "false",
+          "text": "Not in this section"
+        },
+        {
+          "id": "n85",
+          "muted": "false",
+          "text": "Not in this section"
+        },
+        {
+          "id": "n29",
+          "muted": "false",
+          "text": "Scored onsets"
+        },
+        {
+          "id": "n49",
+          "muted": "false",
+          "text": "Scored onsets"
+        },
+        {
+          "id": "n54",
+          "muted": "false",
+          "text": "Scored onsets"
+        },
+        {
+          "id": "n109",
+          "muted": "false",
+          "text": "Not in this section"
+        }
+      ]
+    },
+    "real-house-vocals: mute two, unmute first, section/cycle, map, undo/redo, solo, reorder, collapse; real pointer clicks and scheduler tags",
+    "non-silent drum onsets measured",
+    "program-level unawaited samples setup downloads and decodes a WAV; a separate missing name is visible in both maps and editor",
+    "real-techno: next-cycle mute retains old events before boundary, removes instrument after boundary, clears pending without requiring a nonexistent onset; Apply now restores its dispatches",
+    "real-house-vocals: next-cycle mute retains old events before boundary, removes instrument after boundary, clears pending without requiring a nonexistent onset; Apply now restores its dispatches"
+  ],
+  "errors": [],
+  "audio": {
+    "status": "non-silent drum onsets measured",
+    "rate": 48000,
+    "readiness": [
+      {
+        "state": "ready",
+        "name": "bd",
+        "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/bd/BT0A0A7.wav"
+      },
+      {
+        "state": "ready",
+        "name": "hh",
+        "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/hh/000_hh3closedhh.wav"
+      },
+      {
+        "state": "ready",
+        "name": "cp",
+        "url": "https://raw.githubusercontent.com/tidalcycles/Dirt-Samples/master/cp/HANDCLP0.wav"
+      }
+    ],
+    "measured": [
+      {
+        "sound": "bd",
+        "begin": 0,
+        "target": 8.6327,
+        "rms": 0.4431572199396798,
+        "peak": 0.9135739207267761,
+        "samples": 9600,
+        "beforeRms": 0.021476563312260832,
+        "beforeSamples": 9600
+      },
+      {
+        "sound": "bd",
+        "begin": 0.25,
+        "target": 9.077144444444444,
+        "rms": 0.4431709270834733,
+        "peak": 0.8975342512130737,
+        "samples": 9600,
+        "beforeRms": 0.007841046577456996,
+        "beforeSamples": 9600
+      },
+      {
+        "sound": "hh",
+        "begin": 0.125,
+        "target": 10.657522222222221,
+        "rms": 0.015743768463815,
+        "peak": 0.12255983054637909,
+        "samples": 9600,
+        "beforeRms": 0.004227022201924406,
+        "beforeSamples": 9600
+      },
+      {
+        "sound": "hh",
+        "begin": 0.375,
+        "target": 11.101966666666666,
+        "rms": 0.014910123001603553,
+        "peak": 0.11269722133874893,
+        "samples": 9600,
+        "beforeRms": 0.004282265367887468,
+        "beforeSamples": 9600
+      },
+      {
+        "sound": "cp",
+        "begin": 0.25,
+        "target": 13.151744444444445,
+        "rms": 0.13178207059713443,
+        "peak": 0.7316416501998901,
+        "samples": 9600,
+        "beforeRms": 0.002706464044202139,
+        "beforeSamples": 9600
+      },
+      {
+        "sound": "cp",
+        "begin": 0.75,
+        "target": 14.040633333333334,
+        "rms": 0.13110155035682194,
+        "peak": 0.7345294952392578,
+        "samples": 9600,
+        "beforeRms": 0.003256738384349906,
+        "beforeSamples": 9600
+      }
+    ],
+    "bassMuted": true
+  },
+  "audit": {
+    "pieces": 85,
+    "missing": [
+      {
+        "id": "real-custom-samples",
+        "sounds": [
+          "myvocal"
+        ]
+      }
+    ],
+    "queryErrors": [
+      {
+        "id": "micro-query-throws",
+        "error": "corpus intentional query failure"
+      },
+      {
+        "id": "micro-query-late-throws",
+        "error": "corpus intentional late failure"
+      }
+    ]
+  },
+  "durationMs": 24893.117641
+}

@@ -112,15 +112,14 @@ export function atBoundary(previous: Doc, next: Doc, boundary: number): Doc {
 
 /** Query signals at 64 actual times per cycle; the drawing never invents a wave. */
 export function driverDocument(d: Doc): Doc | undefined {
-  const unique = new Map(
-    targets(d).flatMap((t) =>
-      t.setting &&
-      t.id === t.setting.id &&
-      t.setting.value.core.kind === "signal"
-        ? [[t.setting.id, t.setting] as const]
-        : [],
-    ),
-  );
+  const unique = new Map<string, { id: string; value: Pattern }>();
+  for (const t of targets(d)) {
+    if (t.pattern.core.kind !== "signal") continue;
+    if (t.id !== t.pattern.id && t.id !== t.setting?.id) continue;
+    const id =
+      t.setting?.value.id === t.pattern.id ? t.setting.id : t.pattern.id;
+    unique.set(t.pattern.id, { id, value: t.pattern });
+  }
   if (!unique.size) return;
   return {
     ...d,

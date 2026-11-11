@@ -1,0 +1,34 @@
+{
+  "durationMs": 41112.990410000006,
+  "errors": [],
+  "records": [
+    {
+      "id": "real-techno",
+      "errors": {}
+    },
+    {
+      "id": "real-house-vocals",
+      "errors": {}
+    },
+    {
+      "id": "real-dnb-arranged",
+      "errors": {}
+    },
+    {
+      "id": "real-dubstep-arranged",
+      "errors": {}
+    },
+    {
+      "id": "switch-angel",
+      "errors": {}
+    },
+    {
+      "id": "micro-orbit-conflict",
+      "errors": {}
+    },
+    {
+      "id": "twenty",
+      "errors": {}
+    }
+  ]
+}

@@ -168,3 +168,50 @@ the browser checks and finish before registry resolution.
 [Browser evidence](owner-browser-results.json), [offline evidence](owner-browser-offline.json),
 and [gate timings](browser-suite-study02.json) record the assertions and durations.
 `dist/` was rebuilt. No audio was heard; nothing was committed or pushed.
+
+
+## Study 03: constellation, last attempt
+
+**Recommendation: keep only the system inset.** Both alternatives remain runnable
+for comparison; the Score sheet remains the default.
+
+The full map now has content-sized systems, nested driver disks, shared room
+regions with settings and explicit `conflict`, ordered shells, semantic
+Far/Middle/Near, double-click/pinch navigation, search-to-owner, and one planet per
+shared instrument. Real queried event spans and the engine clock drive the
+playhead and restrained onset halos. Signals show their queried current values.
+Inactive instruments dim and shift outward on section changes; nothing wanders
+continuously. Mute/solo, sound readiness and the existing single editor remain.
+The sheet's inset shows that editor's instrument, nested settings and shells,
+plus its room and named neighbours.
+
+Four screenshot rounds changed the design:
+
+1. Removing cards exposed separate room puddles, an overlapping inset and bad
+   selection text.
+2. Continuous room regions and an adjacent inset restored belonging, but cluster
+   packing wasted space and near view included distracting neighbours.
+3. Focused dives and composite ownership exposed oversized child systems and
+   stretched values in the real arrangements.
+4. Content-sized children, tighter room packing, stable moon angles and
+   screen-sized far labels made 20 planets fit desktop and phone without map
+   scrolling. Final refinements fixed phone overflow and reduced-motion handling.
+
+**For the full map:** room membership, conflict and current-section participation
+are much clearer. The short real-clock frame sequence looked calm: small onset
+halos and one section drift, without perpetual motion.
+
+**Against:** far hides ownership and shell detail; middle makes dense real pieces
+and 20-voice settings too small. Near restores those jobs by becoming a selected
+system view. The inset supplies that explanation where editing happens, without
+another camera. Dense phone insets still require selection/inspection.
+
+[Before/after, all four rounds and motion evidence](shots/v3/README.md) cover the
+four owner pieces, local Switch Angel, conflict micro and 20 voices; about 4.5 MB.
+**Checked:** 38 Node tests (3.41 s), TypeScript/build, all 85 corpus maps and
+the complete browser gate (86.55 s), including owner regressions, both apply
+modes, forced-offline sound state and reduced motion. Pure tests cover stability,
+separation, full-footprint room membership, shell ownership and far-fit bounds.
+
+**Not judged:** hearing, audible tails/continuity, physical-phone gestures,
+long-session fatigue, or first-time clarity tested on people. No audio was heard.

@@ -101,9 +101,11 @@ try {
   );
   await page.screenshot({
     path:
-      process.env.PASS === "study02"
-        ? "shots/v2/after-wave-handle.jpg"
-        : "shots/pointer-wave-handle.jpg",
+      process.env.PASS === "study03"
+        ? "shots/v3/after-wave-handle.jpg"
+        : process.env.PASS === "study02"
+          ? "shots/v2/after-wave-handle.jpg"
+          : "shots/pointer-wave-handle.jpg",
     type: "jpeg",
     quality: 63,
   });

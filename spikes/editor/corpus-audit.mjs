@@ -70,6 +70,13 @@ try {
           ?.innerHTML.match(/(?:="NaN|="Infinity)/),
     );
     record.finite = finite;
+    record.mapScrolls = await page
+      .locator(".map-container")
+      .evaluate(
+        (el) =>
+          el.scrollHeight > el.clientHeight + 1 ||
+          el.scrollWidth > el.clientWidth + 1,
+      );
     await page
       .getByRole("button", { name: "▤ Score sheet", exact: true })
       .click();
@@ -88,8 +95,8 @@ try {
       rendered,
     );
     record.wrong = [];
-    if (record.planets > 10)
-      record.wrong.push("constellation: many planets require long scroll");
+    if (record.mapScrolls)
+      record.wrong.push("constellation: map viewport requires scrolling");
     if (record.opaque)
       record.wrong.push(
         "opaque source needs inspection; semantic layout is incomplete",
