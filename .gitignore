@@ -9,3 +9,12 @@ spikes/capture/results/programs--*.json
 spikes/capture/results/seeds--*.json
 spikes/capture/results/probes--*.json
 spikes/capture/results/profile/
+
+# Spiral screenshots: keep only the ones FINDINGS cites
+spikes/spiral/shots/*
+!spikes/spiral/shots/full-piece-ring.png
+!spikes/spiral/shots/full-piece-fly.png
+!spikes/spiral/shots/density-512-raw-ring.png
+!spikes/spiral/shots/density-512-auto-ring.png
+!spikes/spiral/shots/arrange-256-side.png
+!spikes/spiral/shots/touch-mobile.png

@@ -1,0 +1,6505 @@
+{
+  "claim": "Descriptive headless frame intervals and main-thread render submission times for this spike; no comparative speed claim.",
+  "environment": {
+    "timestamp": "2026-11-11T01:27:22.035Z",
+    "node": "v24.22.2",
+    "os": "linux 7.2.15-300.fc45.x86_64",
+    "cpu": "AMD Ryzen 7 PRO 6850U with Radeon Graphics",
+    "cores": 16,
+    "loadBefore": [
+      2.48,
+      5.85,
+      4.89
+    ],
+    "viewport": {
+      "width": 1440,
+      "height": 1000
+    },
+    "browser": "158.0.8127.18",
+    "renderer": "ANGLE SwiftShader (software; forced by launch flags)",
+    "server": "Vite development, OS-selected free port",
+    "audio": "none",
+    "pixelRatio": 1,
+    "concurrentWork": "Sibling-agent capture process and another software-rendered Chromium were active; not stopped. A separate development-pass ps sample showed a spiral harness SwiftShader GPU process at ~730% CPU. No hardware-GPU or comparative speed claim.",
+    "loadAfter": [
+      5.84,
+      6.37,
+      5.08
+    ]
+  },
+  "method": {
+    "runs": 5,
+    "perRunFrames": 12,
+    "warmupFrames": 6,
+    "order": "program → repetition → fly/ring/side; same queried data in each view; paused camera, live render loop",
+    "query": "one worker evaluation per program; queryMs excludes worker startup/message/geometry. loadMs includes them.",
+    "draw": "performance.now around controls.update + renderer.render + label projection; CPU submission, not GPU completion",
+    "frame": "requestAnimationFrame interval; screenshot and query warmup excluded; no forced-fps flags",
+    "limits": "150k haps/sample window, 256 cycles, 8 second worker timeout; no speedup claim",
+    "reusedPrograms": "Existing coverage reused for this focused behavior-only rerun"
+  },
+  "programs": [
+    {
+      "id": "alternation",
+      "rows": "T1",
+      "cycles": 12,
+      "onsets": 60,
+      "fragments": 0,
+      "signalSamples": 0,
+      "queryMs": 12.300000011920929,
+      "loadMs": 232.64817500000004,
+      "perCycle": [
+        {
+          "cycle": 0,
+          "onsets": 5,
+          "parts": 5,
+          "changed": false
+        },
+        {
+          "cycle": 1,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 2,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 3,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 4,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 5,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 6,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 7,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 8,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 9,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 10,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 11,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        }
+      ],
+      "views": {
+        "fly": {
+          "runs": [
+            {
+              "frameMedianMs": 16.699999999999818,
+              "frameP95Ms": 16.799999999999955,
+              "drawMedianMs": 1.5,
+              "drawP95Ms": 1.899999976158142,
+              "frames": 12,
+              "onsets": 60,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 50,
+              "aggregated": 0,
+              "queryMs": 12.300000011920929,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.699999999999818,
+              "frameP95Ms": 16.700000000000273,
+              "drawMedianMs": 1.100000023841858,
+              "drawP95Ms": 1.600000023841858,
+              "frames": 12,
+              "onsets": 60,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 50,
+              "aggregated": 0,
+              "queryMs": 12.300000011920929,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.699999999999818,
+              "frameP95Ms": 16.700000000000273,
+              "drawMedianMs": 0.699999988079071,
+              "drawP95Ms": 1.600000023841858,
+              "frames": 12,
+              "onsets": 60,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 50,
+              "aggregated": 0,
+              "queryMs": 12.300000011920929,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.699999999999818,
+              "frameP95Ms": 16.800000000000182,
+              "drawMedianMs": 0.8999999761581421,
+              "drawP95Ms": 1.300000011920929,
+              "frames": 12,
+              "onsets": 60,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 50,
+              "aggregated": 0,
+              "queryMs": 12.300000011920929,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.699999999999818,
+              "frameP95Ms": 16.699999999999818,
+              "drawMedianMs": 0.9000000357627869,
+              "drawP95Ms": 1.4000000357627869,
+              "frames": 12,
+              "onsets": 60,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 50,
+              "aggregated": 0,
+              "queryMs": 12.300000011920929,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/alternation-fly.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.699999999999818,
+            "frameMedianRangeMs": [
+              16.699999999999818,
+              16.699999999999818
+            ],
+            "frameP95Ms": 16.700000000000273,
+            "drawMedianMs": 0.9000000357627869,
+            "drawP95Ms": 1.600000023841858
+          }
+        },
+        "ring": {
+          "runs": [
+            {
+              "frameMedianMs": 16.700000000000045,
+              "frameP95Ms": 16.700000000000045,
+              "drawMedianMs": 0.800000011920929,
+              "drawP95Ms": 1.100000023841858,
+              "frames": 12,
+              "onsets": 60,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 15,
+              "aggregated": 0,
+              "queryMs": 12.300000011920929,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.699999999999818,
+              "frameP95Ms": 16.800000000000182,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 60,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 15,
+              "aggregated": 0,
+              "queryMs": 12.300000011920929,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.699999999999818,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.699999988079071,
+              "drawP95Ms": 1,
+              "frames": 12,
+              "onsets": 60,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 15,
+              "aggregated": 0,
+              "queryMs": 12.300000011920929,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.699999999999818,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.800000011920929,
+              "frames": 12,
+              "onsets": 60,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 15,
+              "aggregated": 0,
+              "queryMs": 12.300000011920929,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.699999999999818,
+              "frameP95Ms": 16.699999999999818,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 60,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 15,
+              "aggregated": 0,
+              "queryMs": 12.300000011920929,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/alternation-ring.png",
+          "canvasPixel": [
+            92,
+            99,
+            96,
+            102
+          ],
+          "summary": {
+            "frameMedianMs": 16.699999999999818,
+            "frameMedianRangeMs": [
+              16.699999999999818,
+              16.700000000000045
+            ],
+            "frameP95Ms": 16.700000000000728,
+            "drawMedianMs": 0.6000000238418579,
+            "drawP95Ms": 0.800000011920929
+          }
+        },
+        "side": {
+          "runs": [
+            {
+              "frameMedianMs": 16.699999999999818,
+              "frameP95Ms": 16.700000000000273,
+              "drawMedianMs": 1.0999999642372131,
+              "drawP95Ms": 1.300000011920929,
+              "frames": 12,
+              "onsets": 60,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 60,
+              "aggregated": 0,
+              "queryMs": 12.300000011920929,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.699999999999818,
+              "frameP95Ms": 16.799999999999727,
+              "drawMedianMs": 1.0999999642372131,
+              "drawP95Ms": 1.600000023841858,
+              "frames": 12,
+              "onsets": 60,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 60,
+              "aggregated": 0,
+              "queryMs": 12.300000011920929,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.699999999999818,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 1.199999988079071,
+              "drawP95Ms": 1.4000000357627869,
+              "frames": 12,
+              "onsets": 60,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 60,
+              "aggregated": 0,
+              "queryMs": 12.300000011920929,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.699999999999818,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 1,
+              "drawP95Ms": 1.300000011920929,
+              "frames": 12,
+              "onsets": 60,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 60,
+              "aggregated": 0,
+              "queryMs": 12.300000011920929,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.699999999999818,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.8999999761581421,
+              "drawP95Ms": 1.5,
+              "frames": 12,
+              "onsets": 60,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 60,
+              "aggregated": 0,
+              "queryMs": 12.300000011920929,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/alternation-side.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.699999999999818,
+            "frameMedianRangeMs": [
+              16.699999999999818,
+              16.699999999999818
+            ],
+            "frameP95Ms": 16.700000000000728,
+            "drawMedianMs": 1.0999999642372131,
+            "drawP95Ms": 1.4000000357627869
+          }
+        }
+      }
+    },
+    {
+      "id": "every-four",
+      "rows": "T1",
+      "cycles": 16,
+      "onsets": 120,
+      "fragments": 0,
+      "signalSamples": 0,
+      "queryMs": 20.399999976158142,
+      "loadMs": 189.78354500000023,
+      "perCycle": [
+        {
+          "cycle": 0,
+          "onsets": 12,
+          "parts": 12,
+          "changed": false
+        },
+        {
+          "cycle": 1,
+          "onsets": 6,
+          "parts": 6,
+          "changed": true
+        },
+        {
+          "cycle": 2,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 3,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 4,
+          "onsets": 12,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 5,
+          "onsets": 6,
+          "parts": 6,
+          "changed": true
+        },
+        {
+          "cycle": 6,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 7,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 8,
+          "onsets": 12,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 9,
+          "onsets": 6,
+          "parts": 6,
+          "changed": true
+        },
+        {
+          "cycle": 10,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 11,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 12,
+          "onsets": 12,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 13,
+          "onsets": 6,
+          "parts": 6,
+          "changed": true
+        },
+        {
+          "cycle": 14,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 15,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        }
+      ],
+      "views": {
+        "fly": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999891,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.9000000357627869,
+              "drawP95Ms": 1.300000011920929,
+              "frames": 12,
+              "onsets": 120,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 96,
+              "aggregated": 0,
+              "queryMs": 20.399999976158142,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999891,
+              "frameP95Ms": 16.80000000000109,
+              "drawMedianMs": 0.7000000476837158,
+              "drawP95Ms": 1.399999976158142,
+              "frames": 12,
+              "onsets": 120,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 96,
+              "aggregated": 0,
+              "queryMs": 20.399999976158142,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999891,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.9000000357627869,
+              "drawP95Ms": 1.5,
+              "frames": 12,
+              "onsets": 120,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 96,
+              "aggregated": 0,
+              "queryMs": 20.399999976158142,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999891,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 1,
+              "drawP95Ms": 1.100000023841858,
+              "frames": 12,
+              "onsets": 120,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 96,
+              "aggregated": 0,
+              "queryMs": 20.399999976158142,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999891,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.800000011920929,
+              "drawP95Ms": 1.300000011920929,
+              "frames": 12,
+              "onsets": 120,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 96,
+              "aggregated": 0,
+              "queryMs": 20.399999976158142,
+              "cycles": 16
+            }
+          ],
+          "screenshot": "shots/every-four-fly.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999891,
+            "frameMedianRangeMs": [
+              16.69999999999891,
+              16.69999999999891
+            ],
+            "frameP95Ms": 16.799999999999272,
+            "drawMedianMs": 0.9000000357627869,
+            "drawP95Ms": 1.300000011920929
+          }
+        },
+        "ring": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999891,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.9000000357627869,
+              "frames": 12,
+              "onsets": 120,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 24,
+              "aggregated": 0,
+              "queryMs": 20.399999976158142,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999891,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.9000000357627869,
+              "frames": 12,
+              "onsets": 120,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 24,
+              "aggregated": 0,
+              "queryMs": 20.399999976158142,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.800000011920929,
+              "frames": 12,
+              "onsets": 120,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 24,
+              "aggregated": 0,
+              "queryMs": 20.399999976158142,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999891,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 120,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 24,
+              "aggregated": 0,
+              "queryMs": 20.399999976158142,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999891,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.800000011920929,
+              "frames": 12,
+              "onsets": 120,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 24,
+              "aggregated": 0,
+              "queryMs": 20.399999976158142,
+              "cycles": 16
+            }
+          ],
+          "screenshot": "shots/every-four-ring.png",
+          "canvasPixel": [
+            92,
+            99,
+            96,
+            102
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999891,
+            "frameMedianRangeMs": [
+              16.69999999999891,
+              16.700000000000728
+            ],
+            "frameP95Ms": 16.700000000000728,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.800000011920929
+          }
+        },
+        "side": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999891,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 1.100000023841858,
+              "drawP95Ms": 1.5999999642372131,
+              "frames": 12,
+              "onsets": 120,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 120,
+              "aggregated": 0,
+              "queryMs": 20.399999976158142,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999891,
+              "frameP95Ms": 16.80000000000109,
+              "drawMedianMs": 1.2000000476837158,
+              "drawP95Ms": 1.600000023841858,
+              "frames": 12,
+              "onsets": 120,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 120,
+              "aggregated": 0,
+              "queryMs": 20.399999976158142,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999891,
+              "frameP95Ms": 16.80000000000109,
+              "drawMedianMs": 1,
+              "drawP95Ms": 1.600000023841858,
+              "frames": 12,
+              "onsets": 120,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 120,
+              "aggregated": 0,
+              "queryMs": 20.399999976158142,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999891,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.7000000476837158,
+              "drawP95Ms": 1.9000000357627869,
+              "frames": 12,
+              "onsets": 120,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 120,
+              "aggregated": 0,
+              "queryMs": 20.399999976158142,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.699999988079071,
+              "drawP95Ms": 1.5,
+              "frames": 12,
+              "onsets": 120,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 120,
+              "aggregated": 0,
+              "queryMs": 20.399999976158142,
+              "cycles": 16
+            }
+          ],
+          "screenshot": "shots/every-four-side.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999891,
+            "frameMedianRangeMs": [
+              16.69999999999891,
+              16.700000000000728
+            ],
+            "frameP95Ms": 16.700000000000728,
+            "drawMedianMs": 1,
+            "drawP95Ms": 1.600000023841858
+          }
+        }
+      }
+    },
+    {
+      "id": "polymeter",
+      "rows": "T1 · E3",
+      "cycles": 16,
+      "onsets": 160,
+      "fragments": 0,
+      "signalSamples": 0,
+      "queryMs": 25,
+      "loadMs": 204.67151700000068,
+      "perCycle": [
+        {
+          "cycle": 0,
+          "onsets": 10,
+          "parts": 10,
+          "changed": false
+        },
+        {
+          "cycle": 1,
+          "onsets": 10,
+          "parts": 10,
+          "changed": true
+        },
+        {
+          "cycle": 2,
+          "onsets": 10,
+          "parts": 10,
+          "changed": true
+        },
+        {
+          "cycle": 3,
+          "onsets": 10,
+          "parts": 10,
+          "changed": true
+        },
+        {
+          "cycle": 4,
+          "onsets": 10,
+          "parts": 10,
+          "changed": true
+        },
+        {
+          "cycle": 5,
+          "onsets": 10,
+          "parts": 10,
+          "changed": true
+        },
+        {
+          "cycle": 6,
+          "onsets": 10,
+          "parts": 10,
+          "changed": true
+        },
+        {
+          "cycle": 7,
+          "onsets": 10,
+          "parts": 10,
+          "changed": true
+        },
+        {
+          "cycle": 8,
+          "onsets": 10,
+          "parts": 10,
+          "changed": true
+        },
+        {
+          "cycle": 9,
+          "onsets": 10,
+          "parts": 10,
+          "changed": true
+        },
+        {
+          "cycle": 10,
+          "onsets": 10,
+          "parts": 10,
+          "changed": true
+        },
+        {
+          "cycle": 11,
+          "onsets": 10,
+          "parts": 10,
+          "changed": true
+        },
+        {
+          "cycle": 12,
+          "onsets": 10,
+          "parts": 10,
+          "changed": true
+        },
+        {
+          "cycle": 13,
+          "onsets": 10,
+          "parts": 10,
+          "changed": true
+        },
+        {
+          "cycle": 14,
+          "onsets": 10,
+          "parts": 10,
+          "changed": true
+        },
+        {
+          "cycle": 15,
+          "onsets": 10,
+          "parts": 10,
+          "changed": true
+        }
+      ],
+      "views": {
+        "fly": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999891,
+              "frameP95Ms": 16.80000000000109,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.9000000357627869,
+              "frames": 12,
+              "onsets": 160,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 140,
+              "aggregated": 0,
+              "queryMs": 25,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 160,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 140,
+              "aggregated": 0,
+              "queryMs": 25,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 160,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 140,
+              "aggregated": 0,
+              "queryMs": 25,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.7999999523162842,
+              "frames": 12,
+              "onsets": 160,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 140,
+              "aggregated": 0,
+              "queryMs": 25,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 1,
+              "frames": 12,
+              "onsets": 160,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 140,
+              "aggregated": 0,
+              "queryMs": 25,
+              "cycles": 16
+            }
+          ],
+          "screenshot": "shots/polymeter-fly.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999891,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.700000000000728
+            ],
+            "frameP95Ms": 16.799999999999272,
+            "drawMedianMs": 0.5999999642372131,
+            "drawP95Ms": 0.7999999523162842
+          }
+        },
+        "ring": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999891,
+              "frameP95Ms": 16.80000000000109,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 160,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 30,
+              "aggregated": 0,
+              "queryMs": 25,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.40000003576278687,
+              "drawP95Ms": 0.8999999761581421,
+              "frames": 12,
+              "onsets": 160,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 30,
+              "aggregated": 0,
+              "queryMs": 25,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 160,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 30,
+              "aggregated": 0,
+              "queryMs": 25,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.800000011920929,
+              "frames": 12,
+              "onsets": 160,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 30,
+              "aggregated": 0,
+              "queryMs": 25,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 160,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 30,
+              "aggregated": 0,
+              "queryMs": 25,
+              "cycles": 16
+            }
+          ],
+          "screenshot": "shots/polymeter-ring.png",
+          "canvasPixel": [
+            92,
+            99,
+            96,
+            102
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.700000000000728
+            ],
+            "frameP95Ms": 16.799999999999272,
+            "drawMedianMs": 0.5999999642372131,
+            "drawP95Ms": 0.699999988079071
+          }
+        },
+        "side": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.800000011920929,
+              "drawP95Ms": 1.600000023841858,
+              "frames": 12,
+              "onsets": 160,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 160,
+              "aggregated": 0,
+              "queryMs": 25,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.7999999523162842,
+              "drawP95Ms": 1.399999976158142,
+              "frames": 12,
+              "onsets": 160,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 160,
+              "aggregated": 0,
+              "queryMs": 25,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.600000000002183,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.699999988079071,
+              "drawP95Ms": 1.7999999523162842,
+              "frames": 12,
+              "onsets": 160,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 160,
+              "aggregated": 0,
+              "queryMs": 25,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 1.199999988079071,
+              "frames": 12,
+              "onsets": 160,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 160,
+              "aggregated": 0,
+              "queryMs": 25,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.699999988079071,
+              "drawP95Ms": 1.5,
+              "frames": 12,
+              "onsets": 160,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 160,
+              "aggregated": 0,
+              "queryMs": 25,
+              "cycles": 16
+            }
+          ],
+          "screenshot": "shots/polymeter-side.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.600000000002183,
+              16.700000000000728
+            ],
+            "frameP95Ms": 16.799999999999272,
+            "drawMedianMs": 0.699999988079071,
+            "drawP95Ms": 1.5
+          }
+        }
+      }
+    },
+    {
+      "id": "randomness",
+      "rows": "T2 · T4",
+      "cycles": 16,
+      "onsets": 225,
+      "fragments": 0,
+      "signalSamples": 0,
+      "queryMs": 35.799999952316284,
+      "loadMs": 219.99535900000046,
+      "perCycle": [
+        {
+          "cycle": 0,
+          "onsets": 10,
+          "parts": 10,
+          "changed": false
+        },
+        {
+          "cycle": 1,
+          "onsets": 16,
+          "parts": 16,
+          "changed": true
+        },
+        {
+          "cycle": 2,
+          "onsets": 14,
+          "parts": 14,
+          "changed": true
+        },
+        {
+          "cycle": 3,
+          "onsets": 14,
+          "parts": 14,
+          "changed": true
+        },
+        {
+          "cycle": 4,
+          "onsets": 10,
+          "parts": 10,
+          "changed": true
+        },
+        {
+          "cycle": 5,
+          "onsets": 13,
+          "parts": 13,
+          "changed": true
+        },
+        {
+          "cycle": 6,
+          "onsets": 19,
+          "parts": 19,
+          "changed": true
+        },
+        {
+          "cycle": 7,
+          "onsets": 14,
+          "parts": 14,
+          "changed": true
+        },
+        {
+          "cycle": 8,
+          "onsets": 18,
+          "parts": 18,
+          "changed": true
+        },
+        {
+          "cycle": 9,
+          "onsets": 11,
+          "parts": 11,
+          "changed": true
+        },
+        {
+          "cycle": 10,
+          "onsets": 14,
+          "parts": 14,
+          "changed": true
+        },
+        {
+          "cycle": 11,
+          "onsets": 17,
+          "parts": 17,
+          "changed": true
+        },
+        {
+          "cycle": 12,
+          "onsets": 13,
+          "parts": 13,
+          "changed": true
+        },
+        {
+          "cycle": 13,
+          "onsets": 11,
+          "parts": 11,
+          "changed": true
+        },
+        {
+          "cycle": 14,
+          "onsets": 18,
+          "parts": 18,
+          "changed": true
+        },
+        {
+          "cycle": 15,
+          "onsets": 13,
+          "parts": 13,
+          "changed": true
+        }
+      ],
+      "views": {
+        "fly": {
+          "runs": [
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.8999999761581421,
+              "drawP95Ms": 1.0999999642372131,
+              "frames": 12,
+              "onsets": 225,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 199,
+              "aggregated": 0,
+              "queryMs": 35.799999952316284,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 1.300000011920929,
+              "frames": 12,
+              "onsets": 225,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 199,
+              "aggregated": 0,
+              "queryMs": 35.799999952316284,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.7000000476837158,
+              "drawP95Ms": 1.699999988079071,
+              "frames": 12,
+              "onsets": 225,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 199,
+              "aggregated": 0,
+              "queryMs": 35.799999952316284,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 1.2000000476837158,
+              "frames": 12,
+              "onsets": 225,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 199,
+              "aggregated": 0,
+              "queryMs": 35.799999952316284,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 1.199999988079071,
+              "frames": 12,
+              "onsets": 225,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 199,
+              "aggregated": 0,
+              "queryMs": 35.799999952316284,
+              "cycles": 16
+            }
+          ],
+          "screenshot": "shots/randomness-fly.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.700000000000728,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.700000000000728
+            ],
+            "frameP95Ms": 16.700000000000728,
+            "drawMedianMs": 0.6000000238418579,
+            "drawP95Ms": 1.2000000476837158
+          }
+        },
+        "ring": {
+          "runs": [
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.8999999761581421,
+              "frames": 12,
+              "onsets": 225,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 38,
+              "aggregated": 0,
+              "queryMs": 35.799999952316284,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.5,
+              "frames": 12,
+              "onsets": 225,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 38,
+              "aggregated": 0,
+              "queryMs": 35.799999952316284,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 225,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 38,
+              "aggregated": 0,
+              "queryMs": 35.799999952316284,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 0.800000011920929,
+              "frames": 12,
+              "onsets": 225,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 38,
+              "aggregated": 0,
+              "queryMs": 35.799999952316284,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 225,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 38,
+              "aggregated": 0,
+              "queryMs": 35.799999952316284,
+              "cycles": 16
+            }
+          ],
+          "screenshot": "shots/randomness-ring.png",
+          "canvasPixel": [
+            92,
+            99,
+            96,
+            102
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.700000000000728
+            ],
+            "frameP95Ms": 16.799999999999272,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.7000000476837158
+          }
+        },
+        "side": {
+          "runs": [
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 1.100000023841858,
+              "drawP95Ms": 1.5999999642372131,
+              "frames": 12,
+              "onsets": 225,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 225,
+              "aggregated": 0,
+              "queryMs": 35.799999952316284,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.7999999523162842,
+              "drawP95Ms": 1.399999976158142,
+              "frames": 12,
+              "onsets": 225,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 225,
+              "aggregated": 0,
+              "queryMs": 35.799999952316284,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.7000000476837158,
+              "drawP95Ms": 1.7000000476837158,
+              "frames": 12,
+              "onsets": 225,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 225,
+              "aggregated": 0,
+              "queryMs": 35.799999952316284,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 1,
+              "drawP95Ms": 1.300000011920929,
+              "frames": 12,
+              "onsets": 225,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 225,
+              "aggregated": 0,
+              "queryMs": 35.799999952316284,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.699999988079071,
+              "drawP95Ms": 1.699999988079071,
+              "frames": 12,
+              "onsets": 225,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 225,
+              "aggregated": 0,
+              "queryMs": 35.799999952316284,
+              "cycles": 16
+            }
+          ],
+          "screenshot": "shots/randomness-side.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.700000000000728,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.700000000000728
+            ],
+            "frameP95Ms": 16.799999999999272,
+            "drawMedianMs": 0.7999999523162842,
+            "drawP95Ms": 1.5999999642372131
+          }
+        }
+      }
+    },
+    {
+      "id": "arrange-64",
+      "rows": "T3 · T1",
+      "cycles": 64,
+      "onsets": 416,
+      "fragments": 0,
+      "signalSamples": 0,
+      "queryMs": 46.59999996423721,
+      "loadMs": 254.16861100000096,
+      "perCycle": [
+        {
+          "cycle": 0,
+          "onsets": 2,
+          "parts": 2,
+          "changed": false
+        },
+        {
+          "cycle": 1,
+          "onsets": 2,
+          "parts": 2,
+          "changed": false
+        },
+        {
+          "cycle": 2,
+          "onsets": 2,
+          "parts": 2,
+          "changed": false
+        },
+        {
+          "cycle": 3,
+          "onsets": 2,
+          "parts": 2,
+          "changed": false
+        },
+        {
+          "cycle": 4,
+          "onsets": 2,
+          "parts": 2,
+          "changed": false
+        },
+        {
+          "cycle": 5,
+          "onsets": 2,
+          "parts": 2,
+          "changed": false
+        },
+        {
+          "cycle": 6,
+          "onsets": 2,
+          "parts": 2,
+          "changed": false
+        },
+        {
+          "cycle": 7,
+          "onsets": 2,
+          "parts": 2,
+          "changed": false
+        },
+        {
+          "cycle": 8,
+          "onsets": 2,
+          "parts": 2,
+          "changed": false
+        },
+        {
+          "cycle": 9,
+          "onsets": 2,
+          "parts": 2,
+          "changed": false
+        },
+        {
+          "cycle": 10,
+          "onsets": 2,
+          "parts": 2,
+          "changed": false
+        },
+        {
+          "cycle": 11,
+          "onsets": 2,
+          "parts": 2,
+          "changed": false
+        },
+        {
+          "cycle": 12,
+          "onsets": 2,
+          "parts": 2,
+          "changed": false
+        },
+        {
+          "cycle": 13,
+          "onsets": 2,
+          "parts": 2,
+          "changed": false
+        },
+        {
+          "cycle": 14,
+          "onsets": 2,
+          "parts": 2,
+          "changed": false
+        },
+        {
+          "cycle": 15,
+          "onsets": 2,
+          "parts": 2,
+          "changed": false
+        },
+        {
+          "cycle": 16,
+          "onsets": 6,
+          "parts": 6,
+          "changed": true
+        },
+        {
+          "cycle": 17,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 18,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 19,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 20,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 21,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 22,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 23,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 24,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 25,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 26,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 27,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 28,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 29,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 30,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 31,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 32,
+          "onsets": 16,
+          "parts": 16,
+          "changed": true
+        },
+        {
+          "cycle": 33,
+          "onsets": 16,
+          "parts": 16,
+          "changed": false
+        },
+        {
+          "cycle": 34,
+          "onsets": 16,
+          "parts": 16,
+          "changed": false
+        },
+        {
+          "cycle": 35,
+          "onsets": 16,
+          "parts": 16,
+          "changed": false
+        },
+        {
+          "cycle": 36,
+          "onsets": 16,
+          "parts": 16,
+          "changed": false
+        },
+        {
+          "cycle": 37,
+          "onsets": 16,
+          "parts": 16,
+          "changed": false
+        },
+        {
+          "cycle": 38,
+          "onsets": 16,
+          "parts": 16,
+          "changed": false
+        },
+        {
+          "cycle": 39,
+          "onsets": 16,
+          "parts": 16,
+          "changed": false
+        },
+        {
+          "cycle": 40,
+          "onsets": 16,
+          "parts": 16,
+          "changed": false
+        },
+        {
+          "cycle": 41,
+          "onsets": 16,
+          "parts": 16,
+          "changed": false
+        },
+        {
+          "cycle": 42,
+          "onsets": 16,
+          "parts": 16,
+          "changed": false
+        },
+        {
+          "cycle": 43,
+          "onsets": 16,
+          "parts": 16,
+          "changed": false
+        },
+        {
+          "cycle": 44,
+          "onsets": 16,
+          "parts": 16,
+          "changed": false
+        },
+        {
+          "cycle": 45,
+          "onsets": 16,
+          "parts": 16,
+          "changed": false
+        },
+        {
+          "cycle": 46,
+          "onsets": 16,
+          "parts": 16,
+          "changed": false
+        },
+        {
+          "cycle": 47,
+          "onsets": 16,
+          "parts": 16,
+          "changed": false
+        },
+        {
+          "cycle": 48,
+          "onsets": 2,
+          "parts": 2,
+          "changed": true
+        },
+        {
+          "cycle": 49,
+          "onsets": 2,
+          "parts": 2,
+          "changed": true
+        },
+        {
+          "cycle": 50,
+          "onsets": 2,
+          "parts": 2,
+          "changed": true
+        },
+        {
+          "cycle": 51,
+          "onsets": 2,
+          "parts": 2,
+          "changed": true
+        },
+        {
+          "cycle": 52,
+          "onsets": 2,
+          "parts": 2,
+          "changed": true
+        },
+        {
+          "cycle": 53,
+          "onsets": 2,
+          "parts": 2,
+          "changed": true
+        },
+        {
+          "cycle": 54,
+          "onsets": 2,
+          "parts": 2,
+          "changed": true
+        },
+        {
+          "cycle": 55,
+          "onsets": 2,
+          "parts": 2,
+          "changed": true
+        },
+        {
+          "cycle": 56,
+          "onsets": 2,
+          "parts": 2,
+          "changed": true
+        },
+        {
+          "cycle": 57,
+          "onsets": 2,
+          "parts": 2,
+          "changed": true
+        },
+        {
+          "cycle": 58,
+          "onsets": 2,
+          "parts": 2,
+          "changed": true
+        },
+        {
+          "cycle": 59,
+          "onsets": 2,
+          "parts": 2,
+          "changed": true
+        },
+        {
+          "cycle": 60,
+          "onsets": 2,
+          "parts": 2,
+          "changed": true
+        },
+        {
+          "cycle": 61,
+          "onsets": 2,
+          "parts": 2,
+          "changed": true
+        },
+        {
+          "cycle": 62,
+          "onsets": 2,
+          "parts": 2,
+          "changed": true
+        },
+        {
+          "cycle": 63,
+          "onsets": 2,
+          "parts": 2,
+          "changed": true
+        }
+      ],
+      "views": {
+        "fly": {
+          "runs": [
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 33.39999999999782,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 416,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 230,
+              "aggregated": 0,
+              "queryMs": 46.59999996423721,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 416,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 230,
+              "aggregated": 0,
+              "queryMs": 46.59999996423721,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.299999999995634,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 416,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 230,
+              "aggregated": 0,
+              "queryMs": 46.59999996423721,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.30000000000291,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 416,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 230,
+              "aggregated": 0,
+              "queryMs": 46.59999996423721,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 416,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 230,
+              "aggregated": 0,
+              "queryMs": 46.59999996423721,
+              "cycles": 64
+            }
+          ],
+          "screenshot": "shots/arrange-64-fly.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.700000000000728
+            ],
+            "frameP95Ms": 33.299999999995634,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.6000000238418579
+          }
+        },
+        "ring": {
+          "runs": [
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.700000000000728,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 416,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 38,
+              "aggregated": 0,
+              "queryMs": 46.59999996423721,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.700000000000728,
+              "frameP95Ms": 16.799999999999272,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 416,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 38,
+              "aggregated": 0,
+              "queryMs": 46.59999996423721,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 416,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 38,
+              "aggregated": 0,
+              "queryMs": 46.59999996423721,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 416,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 38,
+              "aggregated": 0,
+              "queryMs": 46.59999996423721,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 416,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 38,
+              "aggregated": 0,
+              "queryMs": 46.59999996423721,
+              "cycles": 64
+            }
+          ],
+          "screenshot": "shots/arrange-64-ring.png",
+          "canvasPixel": [
+            92,
+            99,
+            96,
+            102
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.700000000000728
+            ],
+            "frameP95Ms": 16.700000000004366,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.699999988079071
+          }
+        },
+        "side": {
+          "runs": [
+            {
+              "frameMedianMs": 33.20000000000073,
+              "frameP95Ms": 33.29999999999927,
+              "drawMedianMs": 1.399999976158142,
+              "drawP95Ms": 1.5,
+              "frames": 12,
+              "onsets": 416,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 416,
+              "aggregated": 0,
+              "queryMs": 46.59999996423721,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 33.299999999995634,
+              "frameP95Ms": 33.400000000001455,
+              "drawMedianMs": 1.399999976158142,
+              "drawP95Ms": 2.100000023841858,
+              "frames": 12,
+              "onsets": 416,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 416,
+              "aggregated": 0,
+              "queryMs": 46.59999996423721,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 33.299999999995634,
+              "frameP95Ms": 33.400000000001455,
+              "drawMedianMs": 1.399999976158142,
+              "drawP95Ms": 1.5,
+              "frames": 12,
+              "onsets": 416,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 416,
+              "aggregated": 0,
+              "queryMs": 46.59999996423721,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 33.299999999995634,
+              "frameP95Ms": 33.400000000001455,
+              "drawMedianMs": 1.5,
+              "drawP95Ms": 1.9000000357627869,
+              "frames": 12,
+              "onsets": 416,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 416,
+              "aggregated": 0,
+              "queryMs": 46.59999996423721,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 33.30000000000291,
+              "frameP95Ms": 33.400000000001455,
+              "drawMedianMs": 1.399999976158142,
+              "drawP95Ms": 1.5,
+              "frames": 12,
+              "onsets": 416,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 416,
+              "aggregated": 0,
+              "queryMs": 46.59999996423721,
+              "cycles": 64
+            }
+          ],
+          "screenshot": "shots/arrange-64-side.png",
+          "canvasPixel": [
+            92,
+            99,
+            96,
+            102
+          ],
+          "summary": {
+            "frameMedianMs": 33.299999999995634,
+            "frameMedianRangeMs": [
+              33.20000000000073,
+              33.30000000000291
+            ],
+            "frameP95Ms": 33.400000000001455,
+            "drawMedianMs": 1.399999976158142,
+            "drawP95Ms": 1.5
+          }
+        }
+      }
+    },
+    {
+      "id": "density-64",
+      "rows": "E4",
+      "cycles": 12,
+      "onsets": 6144,
+      "fragments": 0,
+      "signalSamples": 0,
+      "queryMs": 271.5999999642372,
+      "loadMs": 1374.6906390000004,
+      "perCycle": [
+        {
+          "cycle": 0,
+          "onsets": 512,
+          "parts": 512,
+          "changed": false
+        },
+        {
+          "cycle": 1,
+          "onsets": 512,
+          "parts": 512,
+          "changed": false
+        },
+        {
+          "cycle": 2,
+          "onsets": 512,
+          "parts": 512,
+          "changed": false
+        },
+        {
+          "cycle": 3,
+          "onsets": 512,
+          "parts": 512,
+          "changed": false
+        },
+        {
+          "cycle": 4,
+          "onsets": 512,
+          "parts": 512,
+          "changed": false
+        },
+        {
+          "cycle": 5,
+          "onsets": 512,
+          "parts": 512,
+          "changed": false
+        },
+        {
+          "cycle": 6,
+          "onsets": 512,
+          "parts": 512,
+          "changed": false
+        },
+        {
+          "cycle": 7,
+          "onsets": 512,
+          "parts": 512,
+          "changed": false
+        },
+        {
+          "cycle": 8,
+          "onsets": 512,
+          "parts": 512,
+          "changed": false
+        },
+        {
+          "cycle": 9,
+          "onsets": 512,
+          "parts": 512,
+          "changed": false
+        },
+        {
+          "cycle": 10,
+          "onsets": 512,
+          "parts": 512,
+          "changed": false
+        },
+        {
+          "cycle": 11,
+          "onsets": 512,
+          "parts": 512,
+          "changed": false
+        }
+      ],
+      "views": {
+        "fly": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.5999999642372131,
+              "frames": 12,
+              "onsets": 6144,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 3200,
+              "aggregated": 1920,
+              "queryMs": 271.5999999642372,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.7999999523162842,
+              "frames": 12,
+              "onsets": 6144,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 3200,
+              "aggregated": 1920,
+              "queryMs": 271.5999999642372,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.40000003576278687,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 6144,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 3200,
+              "aggregated": 1920,
+              "queryMs": 271.5999999642372,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.40000003576278687,
+              "drawP95Ms": 0.5,
+              "frames": 12,
+              "onsets": 6144,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 3200,
+              "aggregated": 1920,
+              "queryMs": 271.5999999642372,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.40000003576278687,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 6144,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 3200,
+              "aggregated": 1920,
+              "queryMs": 271.5999999642372,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/density-64-fly.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.700000000004366,
+            "drawMedianMs": 0.40000003576278687,
+            "drawP95Ms": 0.6000000238418579
+          }
+        },
+        "ring": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 0.7999999523162842,
+              "frames": 12,
+              "onsets": 6144,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 960,
+              "aggregated": 576,
+              "queryMs": 271.5999999642372,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 6144,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 960,
+              "aggregated": 576,
+              "queryMs": 271.5999999642372,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 6144,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 960,
+              "aggregated": 576,
+              "queryMs": 271.5999999642372,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 6144,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 960,
+              "aggregated": 576,
+              "queryMs": 271.5999999642372,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 6144,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 960,
+              "aggregated": 576,
+              "queryMs": 271.5999999642372,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/density-64-ring.png",
+          "canvasPixel": [
+            92,
+            99,
+            96,
+            102
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.700000000004366,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.7000000476837158
+          }
+        },
+        "side": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.799999999995634,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 6144,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 3840,
+              "aggregated": 2304,
+              "queryMs": 271.5999999642372,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 6144,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 3840,
+              "aggregated": 2304,
+              "queryMs": 271.5999999642372,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.40000003576278687,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 6144,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 3840,
+              "aggregated": 2304,
+              "queryMs": 271.5999999642372,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 1,
+              "frames": 12,
+              "onsets": 6144,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 3840,
+              "aggregated": 2304,
+              "queryMs": 271.5999999642372,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 6144,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 3840,
+              "aggregated": 2304,
+              "queryMs": 271.5999999642372,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/density-64-side.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.80000000000291,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.699999988079071
+          }
+        }
+      }
+    },
+    {
+      "id": "chop-striate",
+      "rows": "E4 · C2",
+      "cycles": 12,
+      "onsets": 1152,
+      "fragments": 0,
+      "signalSamples": 0,
+      "queryMs": 60.30000001192093,
+      "loadMs": 355.2407869999952,
+      "perCycle": [
+        {
+          "cycle": 0,
+          "onsets": 96,
+          "parts": 96,
+          "changed": false
+        },
+        {
+          "cycle": 1,
+          "onsets": 96,
+          "parts": 96,
+          "changed": false
+        },
+        {
+          "cycle": 2,
+          "onsets": 96,
+          "parts": 96,
+          "changed": false
+        },
+        {
+          "cycle": 3,
+          "onsets": 96,
+          "parts": 96,
+          "changed": false
+        },
+        {
+          "cycle": 4,
+          "onsets": 96,
+          "parts": 96,
+          "changed": false
+        },
+        {
+          "cycle": 5,
+          "onsets": 96,
+          "parts": 96,
+          "changed": false
+        },
+        {
+          "cycle": 6,
+          "onsets": 96,
+          "parts": 96,
+          "changed": false
+        },
+        {
+          "cycle": 7,
+          "onsets": 96,
+          "parts": 96,
+          "changed": false
+        },
+        {
+          "cycle": 8,
+          "onsets": 96,
+          "parts": 96,
+          "changed": false
+        },
+        {
+          "cycle": 9,
+          "onsets": 96,
+          "parts": 96,
+          "changed": false
+        },
+        {
+          "cycle": 10,
+          "onsets": 96,
+          "parts": 96,
+          "changed": false
+        },
+        {
+          "cycle": 11,
+          "onsets": 96,
+          "parts": 96,
+          "changed": false
+        }
+      ],
+      "views": {
+        "fly": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 1,
+              "frames": 12,
+              "onsets": 1152,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 960,
+              "aggregated": 0,
+              "queryMs": 60.30000001192093,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 1.199999988079071,
+              "frames": 12,
+              "onsets": 1152,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 960,
+              "aggregated": 0,
+              "queryMs": 60.30000001192093,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.7000000476837158,
+              "drawP95Ms": 1.2000000476837158,
+              "frames": 12,
+              "onsets": 1152,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 960,
+              "aggregated": 0,
+              "queryMs": 60.30000001192093,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 1.0999999642372131,
+              "frames": 12,
+              "onsets": 1152,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 960,
+              "aggregated": 0,
+              "queryMs": 60.30000001192093,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 1152,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 960,
+              "aggregated": 0,
+              "queryMs": 60.30000001192093,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/chop-striate-fly.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.700000000004366,
+            "drawMedianMs": 0.5999999642372131,
+            "drawP95Ms": 1.0999999642372131
+          }
+        },
+        "ring": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 1152,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 288,
+              "aggregated": 0,
+              "queryMs": 60.30000001192093,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.7999999523162842,
+              "frames": 12,
+              "onsets": 1152,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 288,
+              "aggregated": 0,
+              "queryMs": 60.30000001192093,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.30000001192092896,
+              "drawP95Ms": 0.40000003576278687,
+              "frames": 12,
+              "onsets": 1152,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 288,
+              "aggregated": 0,
+              "queryMs": 60.30000001192093,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.799999999995634,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.800000011920929,
+              "frames": 12,
+              "onsets": 1152,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 288,
+              "aggregated": 0,
+              "queryMs": 60.30000001192093,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 1152,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 288,
+              "aggregated": 0,
+              "queryMs": 60.30000001192093,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/chop-striate-ring.png",
+          "canvasPixel": [
+            92,
+            99,
+            96,
+            102
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.700000000004366,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.7000000476837158
+          }
+        },
+        "side": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.699999988079071,
+              "drawP95Ms": 1.2000000476837158,
+              "frames": 12,
+              "onsets": 1152,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 1152,
+              "aggregated": 0,
+              "queryMs": 60.30000001192093,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.800000011920929,
+              "drawP95Ms": 1.399999976158142,
+              "frames": 12,
+              "onsets": 1152,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 1152,
+              "aggregated": 0,
+              "queryMs": 60.30000001192093,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.800000011920929,
+              "drawP95Ms": 1.199999988079071,
+              "frames": 12,
+              "onsets": 1152,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 1152,
+              "aggregated": 0,
+              "queryMs": 60.30000001192093,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 1.100000023841858,
+              "frames": 12,
+              "onsets": 1152,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 1152,
+              "aggregated": 0,
+              "queryMs": 60.30000001192093,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.9000000357627869,
+              "drawP95Ms": 1.300000011920929,
+              "frames": 12,
+              "onsets": 1152,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 1152,
+              "aggregated": 0,
+              "queryMs": 60.30000001192093,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/chop-striate-side.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.700000000004366,
+            "drawMedianMs": 0.800000011920929,
+            "drawP95Ms": 1.2000000476837158
+          }
+        }
+      }
+    },
+    {
+      "id": "chords",
+      "rows": "E3",
+      "cycles": 12,
+      "onsets": 312,
+      "fragments": 0,
+      "signalSamples": 0,
+      "queryMs": 32.19999998807907,
+      "loadMs": 219.37627700000303,
+      "perCycle": [
+        {
+          "cycle": 0,
+          "onsets": 26,
+          "parts": 26,
+          "changed": false
+        },
+        {
+          "cycle": 1,
+          "onsets": 26,
+          "parts": 26,
+          "changed": false
+        },
+        {
+          "cycle": 2,
+          "onsets": 26,
+          "parts": 26,
+          "changed": false
+        },
+        {
+          "cycle": 3,
+          "onsets": 26,
+          "parts": 26,
+          "changed": false
+        },
+        {
+          "cycle": 4,
+          "onsets": 26,
+          "parts": 26,
+          "changed": false
+        },
+        {
+          "cycle": 5,
+          "onsets": 26,
+          "parts": 26,
+          "changed": false
+        },
+        {
+          "cycle": 6,
+          "onsets": 26,
+          "parts": 26,
+          "changed": false
+        },
+        {
+          "cycle": 7,
+          "onsets": 26,
+          "parts": 26,
+          "changed": false
+        },
+        {
+          "cycle": 8,
+          "onsets": 26,
+          "parts": 26,
+          "changed": false
+        },
+        {
+          "cycle": 9,
+          "onsets": 26,
+          "parts": 26,
+          "changed": false
+        },
+        {
+          "cycle": 10,
+          "onsets": 26,
+          "parts": 26,
+          "changed": false
+        },
+        {
+          "cycle": 11,
+          "onsets": 26,
+          "parts": 26,
+          "changed": false
+        }
+      ],
+      "views": {
+        "fly": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.30000000000291,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.5,
+              "frames": 12,
+              "onsets": 312,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 260,
+              "aggregated": 0,
+              "queryMs": 32.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.400000000001455,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 312,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 260,
+              "aggregated": 0,
+              "queryMs": 32.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.700000000004366,
+              "frameP95Ms": 33.400000000001455,
+              "drawMedianMs": 0.3999999761581421,
+              "drawP95Ms": 0.5,
+              "frames": 12,
+              "onsets": 312,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 260,
+              "aggregated": 0,
+              "queryMs": 32.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.30000000000291,
+              "drawMedianMs": 0.3999999761581421,
+              "drawP95Ms": 0.5,
+              "frames": 12,
+              "onsets": 312,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 260,
+              "aggregated": 0,
+              "queryMs": 32.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.39999999999418,
+              "drawMedianMs": 0.40000003576278687,
+              "drawP95Ms": 0.5,
+              "frames": 12,
+              "onsets": 312,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 260,
+              "aggregated": 0,
+              "queryMs": 32.19999998807907,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/chords-fly.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.700000000004366
+            ],
+            "frameP95Ms": 33.39999999999418,
+            "drawMedianMs": 0.40000003576278687,
+            "drawP95Ms": 0.5
+          }
+        },
+        "ring": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.799999999995634,
+              "drawMedianMs": 0.40000003576278687,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 312,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 78,
+              "aggregated": 0,
+              "queryMs": 32.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.699999988079071,
+              "drawP95Ms": 0.9000000357627869,
+              "frames": 12,
+              "onsets": 312,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 78,
+              "aggregated": 0,
+              "queryMs": 32.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.40000003576278687,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 312,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 78,
+              "aggregated": 0,
+              "queryMs": 32.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 312,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 78,
+              "aggregated": 0,
+              "queryMs": 32.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 312,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 78,
+              "aggregated": 0,
+              "queryMs": 32.19999998807907,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/chords-ring.png",
+          "canvasPixel": [
+            92,
+            99,
+            96,
+            102
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.700000000004366,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.699999988079071
+          }
+        },
+        "side": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.40000003576278687,
+              "drawP95Ms": 0.5,
+              "frames": 12,
+              "onsets": 312,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 312,
+              "aggregated": 0,
+              "queryMs": 32.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.799999999995634,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 312,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 312,
+              "aggregated": 0,
+              "queryMs": 32.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 312,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 312,
+              "aggregated": 0,
+              "queryMs": 32.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 312,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 312,
+              "aggregated": 0,
+              "queryMs": 32.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.799999999995634,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 312,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 312,
+              "aggregated": 0,
+              "queryMs": 32.19999998807907,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/chords-side.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.799999999995634,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.6000000238418579
+          }
+        }
+      }
+    },
+    {
+      "id": "signals",
+      "rows": "E1 · C1 · T2",
+      "cycles": 12,
+      "onsets": 48,
+      "fragments": 0,
+      "signalSamples": 768,
+      "queryMs": 85.69999998807907,
+      "loadMs": 294.7719699999943,
+      "perCycle": [
+        {
+          "cycle": 0,
+          "onsets": 4,
+          "parts": 4,
+          "changed": false
+        },
+        {
+          "cycle": 1,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 2,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 3,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 4,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 5,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 6,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 7,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 8,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 9,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 10,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 11,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        }
+      ],
+      "views": {
+        "fly": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.699999988079071,
+              "drawP95Ms": 0.8999999761581421,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 768,
+              "drawn": 40,
+              "aggregated": 0,
+              "queryMs": 85.69999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.799999999995634,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.8999999761581421,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 768,
+              "drawn": 40,
+              "aggregated": 0,
+              "queryMs": 85.69999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 1.100000023841858,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 768,
+              "drawn": 40,
+              "aggregated": 0,
+              "queryMs": 85.69999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 1.4000000357627869,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 768,
+              "drawn": 40,
+              "aggregated": 0,
+              "queryMs": 85.69999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.69999999999709,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.8999999761581421,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 768,
+              "drawn": 40,
+              "aggregated": 0,
+              "queryMs": 85.69999998807907,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/signals-fly.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.70000000001164,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.8999999761581421
+          }
+        },
+        "ring": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.9000000357627869,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 768,
+              "drawn": 12,
+              "aggregated": 0,
+              "queryMs": 85.69999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 768,
+              "drawn": 12,
+              "aggregated": 0,
+              "queryMs": 85.69999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 768,
+              "drawn": 12,
+              "aggregated": 0,
+              "queryMs": 85.69999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 768,
+              "drawn": 12,
+              "aggregated": 0,
+              "queryMs": 85.69999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.79999999998836,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 0.800000011920929,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 768,
+              "drawn": 12,
+              "aggregated": 0,
+              "queryMs": 85.69999998807907,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/signals-ring.png",
+          "canvasPixel": [
+            92,
+            99,
+            96,
+            102
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.80000000000291,
+            "drawMedianMs": 0.5999999642372131,
+            "drawP95Ms": 0.7000000476837158
+          }
+        },
+        "side": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.700000000004366,
+              "drawMedianMs": 0.7999999523162842,
+              "drawP95Ms": 1.5,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 768,
+              "drawn": 48,
+              "aggregated": 0,
+              "queryMs": 85.69999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.79999999998836,
+              "drawMedianMs": 0.800000011920929,
+              "drawP95Ms": 1.0999999642372131,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 768,
+              "drawn": 48,
+              "aggregated": 0,
+              "queryMs": 85.69999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 1,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 768,
+              "drawn": 48,
+              "aggregated": 0,
+              "queryMs": 85.69999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.8999999761581421,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 768,
+              "drawn": 48,
+              "aggregated": 0,
+              "queryMs": 85.69999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.7999999523162842,
+              "drawP95Ms": 1.399999976158142,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 768,
+              "drawn": 48,
+              "aggregated": 0,
+              "queryMs": 85.69999998807907,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/signals-side.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.79999999998836,
+            "drawMedianMs": 0.7999999523162842,
+            "drawP95Ms": 1.0999999642372131
+          }
+        }
+      }
+    },
+    {
+      "id": "bare-values",
+      "rows": "E5",
+      "cycles": 12,
+      "onsets": 64,
+      "fragments": 8,
+      "signalSamples": 0,
+      "queryMs": 13.699999988079071,
+      "loadMs": 169.66529200000514,
+      "perCycle": [
+        {
+          "cycle": 0,
+          "onsets": 6,
+          "parts": 6,
+          "changed": false
+        },
+        {
+          "cycle": 1,
+          "onsets": 5,
+          "parts": 6,
+          "changed": true
+        },
+        {
+          "cycle": 2,
+          "onsets": 5,
+          "parts": 6,
+          "changed": true
+        },
+        {
+          "cycle": 3,
+          "onsets": 6,
+          "parts": 6,
+          "changed": true
+        },
+        {
+          "cycle": 4,
+          "onsets": 5,
+          "parts": 6,
+          "changed": true
+        },
+        {
+          "cycle": 5,
+          "onsets": 5,
+          "parts": 6,
+          "changed": true
+        },
+        {
+          "cycle": 6,
+          "onsets": 6,
+          "parts": 6,
+          "changed": true
+        },
+        {
+          "cycle": 7,
+          "onsets": 5,
+          "parts": 6,
+          "changed": true
+        },
+        {
+          "cycle": 8,
+          "onsets": 5,
+          "parts": 6,
+          "changed": true
+        },
+        {
+          "cycle": 9,
+          "onsets": 6,
+          "parts": 6,
+          "changed": true
+        },
+        {
+          "cycle": 10,
+          "onsets": 5,
+          "parts": 6,
+          "changed": true
+        },
+        {
+          "cycle": 11,
+          "onsets": 5,
+          "parts": 6,
+          "changed": true
+        }
+      ],
+      "views": {
+        "fly": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 1.0999999642372131,
+              "frames": 12,
+              "onsets": 64,
+              "fragments": 8,
+              "signals": 0,
+              "drawn": 60,
+              "aggregated": 0,
+              "queryMs": 13.699999988079071,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.7000000476837158,
+              "drawP95Ms": 1.300000011920929,
+              "frames": 12,
+              "onsets": 64,
+              "fragments": 8,
+              "signals": 0,
+              "drawn": 60,
+              "aggregated": 0,
+              "queryMs": 13.699999988079071,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.69999999999709,
+              "drawMedianMs": 0.9000000357627869,
+              "drawP95Ms": 1.199999988079071,
+              "frames": 12,
+              "onsets": 64,
+              "fragments": 8,
+              "signals": 0,
+              "drawn": 60,
+              "aggregated": 0,
+              "queryMs": 13.699999988079071,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 1.199999988079071,
+              "frames": 12,
+              "onsets": 64,
+              "fragments": 8,
+              "signals": 0,
+              "drawn": 60,
+              "aggregated": 0,
+              "queryMs": 13.699999988079071,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.7000000476837158,
+              "drawP95Ms": 1,
+              "frames": 12,
+              "onsets": 64,
+              "fragments": 8,
+              "signals": 0,
+              "drawn": 60,
+              "aggregated": 0,
+              "queryMs": 13.699999988079071,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/bare-values-fly.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.70000000001164,
+            "drawMedianMs": 0.7000000476837158,
+            "drawP95Ms": 1.199999988079071
+          }
+        },
+        "ring": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 64,
+              "fragments": 8,
+              "signals": 0,
+              "drawn": 18,
+              "aggregated": 0,
+              "queryMs": 13.699999988079071,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.7999999523162842,
+              "frames": 12,
+              "onsets": 64,
+              "fragments": 8,
+              "signals": 0,
+              "drawn": 18,
+              "aggregated": 0,
+              "queryMs": 13.699999988079071,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.69999999999709,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 64,
+              "fragments": 8,
+              "signals": 0,
+              "drawn": 18,
+              "aggregated": 0,
+              "queryMs": 13.699999988079071,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 64,
+              "fragments": 8,
+              "signals": 0,
+              "drawn": 18,
+              "aggregated": 0,
+              "queryMs": 13.699999988079071,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.800000011920929,
+              "frames": 12,
+              "onsets": 64,
+              "fragments": 8,
+              "signals": 0,
+              "drawn": 18,
+              "aggregated": 0,
+              "queryMs": 13.699999988079071,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/bare-values-ring.png",
+          "canvasPixel": [
+            92,
+            99,
+            96,
+            102
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.70000000001164,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.699999988079071
+          }
+        },
+        "side": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.8999999761581421,
+              "drawP95Ms": 1.300000011920929,
+              "frames": 12,
+              "onsets": 64,
+              "fragments": 8,
+              "signals": 0,
+              "drawn": 72,
+              "aggregated": 0,
+              "queryMs": 13.699999988079071,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.800000011920929,
+              "drawP95Ms": 1.199999988079071,
+              "frames": 12,
+              "onsets": 64,
+              "fragments": 8,
+              "signals": 0,
+              "drawn": 72,
+              "aggregated": 0,
+              "queryMs": 13.699999988079071,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.69999999999709,
+              "drawMedianMs": 0.800000011920929,
+              "drawP95Ms": 1.600000023841858,
+              "frames": 12,
+              "onsets": 64,
+              "fragments": 8,
+              "signals": 0,
+              "drawn": 72,
+              "aggregated": 0,
+              "queryMs": 13.699999988079071,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 1,
+              "drawP95Ms": 1.600000023841858,
+              "frames": 12,
+              "onsets": 64,
+              "fragments": 8,
+              "signals": 0,
+              "drawn": 72,
+              "aggregated": 0,
+              "queryMs": 13.699999988079071,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 1.199999988079071,
+              "frames": 12,
+              "onsets": 64,
+              "fragments": 8,
+              "signals": 0,
+              "drawn": 72,
+              "aggregated": 0,
+              "queryMs": 13.699999988079071,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/bare-values-side.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.70000000001164,
+            "drawMedianMs": 0.800000011920929,
+            "drawP95Ms": 1.300000011920929
+          }
+        }
+      }
+    },
+    {
+      "id": "long-overlap",
+      "rows": "E2 · E3",
+      "cycles": 16,
+      "onsets": 26,
+      "fragments": 22,
+      "signalSamples": 0,
+      "queryMs": 15.900000035762787,
+      "loadMs": 168.67205800001102,
+      "perCycle": [
+        {
+          "cycle": 0,
+          "onsets": 3,
+          "parts": 3,
+          "changed": false
+        },
+        {
+          "cycle": 1,
+          "onsets": 1,
+          "parts": 3,
+          "changed": true
+        },
+        {
+          "cycle": 2,
+          "onsets": 1,
+          "parts": 3,
+          "changed": true
+        },
+        {
+          "cycle": 3,
+          "onsets": 2,
+          "parts": 3,
+          "changed": true
+        },
+        {
+          "cycle": 4,
+          "onsets": 2,
+          "parts": 3,
+          "changed": true
+        },
+        {
+          "cycle": 5,
+          "onsets": 1,
+          "parts": 3,
+          "changed": true
+        },
+        {
+          "cycle": 6,
+          "onsets": 2,
+          "parts": 3,
+          "changed": true
+        },
+        {
+          "cycle": 7,
+          "onsets": 1,
+          "parts": 3,
+          "changed": true
+        },
+        {
+          "cycle": 8,
+          "onsets": 2,
+          "parts": 3,
+          "changed": true
+        },
+        {
+          "cycle": 9,
+          "onsets": 2,
+          "parts": 3,
+          "changed": true
+        },
+        {
+          "cycle": 10,
+          "onsets": 1,
+          "parts": 3,
+          "changed": true
+        },
+        {
+          "cycle": 11,
+          "onsets": 1,
+          "parts": 3,
+          "changed": true
+        },
+        {
+          "cycle": 12,
+          "onsets": 3,
+          "parts": 3,
+          "changed": true
+        },
+        {
+          "cycle": 13,
+          "onsets": 1,
+          "parts": 3,
+          "changed": true
+        },
+        {
+          "cycle": 14,
+          "onsets": 1,
+          "parts": 3,
+          "changed": true
+        },
+        {
+          "cycle": 15,
+          "onsets": 2,
+          "parts": 3,
+          "changed": true
+        }
+      ],
+      "views": {
+        "fly": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.69999999999709,
+              "drawMedianMs": 0.8999999761581421,
+              "drawP95Ms": 1.699999988079071,
+              "frames": 12,
+              "onsets": 26,
+              "fragments": 22,
+              "signals": 0,
+              "drawn": 42,
+              "aggregated": 0,
+              "queryMs": 15.900000035762787,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 26,
+              "fragments": 22,
+              "signals": 0,
+              "drawn": 42,
+              "aggregated": 0,
+              "queryMs": 15.900000035762787,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.5999999642372131,
+              "frames": 12,
+              "onsets": 26,
+              "fragments": 22,
+              "signals": 0,
+              "drawn": 42,
+              "aggregated": 0,
+              "queryMs": 15.900000035762787,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.79999999998836,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 26,
+              "fragments": 22,
+              "signals": 0,
+              "drawn": 42,
+              "aggregated": 0,
+              "queryMs": 15.900000035762787,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.70000000001164,
+              "frameP95Ms": 33.29999999998836,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 1.5,
+              "frames": 12,
+              "onsets": 26,
+              "fragments": 22,
+              "signals": 0,
+              "drawn": 42,
+              "aggregated": 0,
+              "queryMs": 15.900000035762787,
+              "cycles": 16
+            }
+          ],
+          "screenshot": "shots/long-overlap-fly.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.70000000001164
+            ],
+            "frameP95Ms": 16.79999999998836,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.7000000476837158
+          }
+        },
+        "ring": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.69999999999709,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 26,
+              "fragments": 22,
+              "signals": 0,
+              "drawn": 9,
+              "aggregated": 0,
+              "queryMs": 15.900000035762787,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.40000003576278687,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 26,
+              "fragments": 22,
+              "signals": 0,
+              "drawn": 9,
+              "aggregated": 0,
+              "queryMs": 15.900000035762787,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.40000003576278687,
+              "drawP95Ms": 0.5999999642372131,
+              "frames": 12,
+              "onsets": 26,
+              "fragments": 22,
+              "signals": 0,
+              "drawn": 9,
+              "aggregated": 0,
+              "queryMs": 15.900000035762787,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.69999999999709,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.800000011920929,
+              "frames": 12,
+              "onsets": 26,
+              "fragments": 22,
+              "signals": 0,
+              "drawn": 9,
+              "aggregated": 0,
+              "queryMs": 15.900000035762787,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.3999999761581421,
+              "drawP95Ms": 0.5,
+              "frames": 12,
+              "onsets": 26,
+              "fragments": 22,
+              "signals": 0,
+              "drawn": 9,
+              "aggregated": 0,
+              "queryMs": 15.900000035762787,
+              "cycles": 16
+            }
+          ],
+          "screenshot": "shots/long-overlap-ring.png",
+          "canvasPixel": [
+            92,
+            99,
+            96,
+            102
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.80000000000291,
+            "drawMedianMs": 0.40000003576278687,
+            "drawP95Ms": 0.699999988079071
+          }
+        },
+        "side": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.699999988079071,
+              "drawP95Ms": 0.8999999761581421,
+              "frames": 12,
+              "onsets": 26,
+              "fragments": 22,
+              "signals": 0,
+              "drawn": 48,
+              "aggregated": 0,
+              "queryMs": 15.900000035762787,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.8999999761581421,
+              "frames": 12,
+              "onsets": 26,
+              "fragments": 22,
+              "signals": 0,
+              "drawn": 48,
+              "aggregated": 0,
+              "queryMs": 15.900000035762787,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.800000011920929,
+              "frames": 12,
+              "onsets": 26,
+              "fragments": 22,
+              "signals": 0,
+              "drawn": 48,
+              "aggregated": 0,
+              "queryMs": 15.900000035762787,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.9000000357627869,
+              "frames": 12,
+              "onsets": 26,
+              "fragments": 22,
+              "signals": 0,
+              "drawn": 48,
+              "aggregated": 0,
+              "queryMs": 15.900000035762787,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 1.199999988079071,
+              "frames": 12,
+              "onsets": 26,
+              "fragments": 22,
+              "signals": 0,
+              "drawn": 48,
+              "aggregated": 0,
+              "queryMs": 15.900000035762787,
+              "cycles": 16
+            }
+          ],
+          "screenshot": "shots/long-overlap-side.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.80000000000291,
+            "drawMedianMs": 0.6000000238418579,
+            "drawP95Ms": 0.8999999761581421
+          }
+        }
+      }
+    },
+    {
+      "id": "full-piece",
+      "rows": "T1 · T2 · E3 · C1",
+      "cycles": 16,
+      "onsets": 452,
+      "fragments": 24,
+      "signalSamples": 0,
+      "queryMs": 52.69999998807907,
+      "loadMs": 253.29849699999613,
+      "perCycle": [
+        {
+          "cycle": 0,
+          "onsets": 27,
+          "parts": 27,
+          "changed": false
+        },
+        {
+          "cycle": 1,
+          "onsets": 26,
+          "parts": 29,
+          "changed": true
+        },
+        {
+          "cycle": 2,
+          "onsets": 29,
+          "parts": 29,
+          "changed": true
+        },
+        {
+          "cycle": 3,
+          "onsets": 29,
+          "parts": 32,
+          "changed": true
+        },
+        {
+          "cycle": 4,
+          "onsets": 28,
+          "parts": 28,
+          "changed": true
+        },
+        {
+          "cycle": 5,
+          "onsets": 25,
+          "parts": 28,
+          "changed": true
+        },
+        {
+          "cycle": 6,
+          "onsets": 31,
+          "parts": 31,
+          "changed": true
+        },
+        {
+          "cycle": 7,
+          "onsets": 25,
+          "parts": 28,
+          "changed": true
+        },
+        {
+          "cycle": 8,
+          "onsets": 35,
+          "parts": 35,
+          "changed": true
+        },
+        {
+          "cycle": 9,
+          "onsets": 28,
+          "parts": 31,
+          "changed": true
+        },
+        {
+          "cycle": 10,
+          "onsets": 28,
+          "parts": 28,
+          "changed": true
+        },
+        {
+          "cycle": 11,
+          "onsets": 30,
+          "parts": 33,
+          "changed": true
+        },
+        {
+          "cycle": 12,
+          "onsets": 30,
+          "parts": 30,
+          "changed": true
+        },
+        {
+          "cycle": 13,
+          "onsets": 26,
+          "parts": 29,
+          "changed": true
+        },
+        {
+          "cycle": 14,
+          "onsets": 32,
+          "parts": 32,
+          "changed": true
+        },
+        {
+          "cycle": 15,
+          "onsets": 23,
+          "parts": 26,
+          "changed": true
+        }
+      ],
+      "views": {
+        "fly": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.39999999999418,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 452,
+              "fragments": 24,
+              "signals": 0,
+              "drawn": 420,
+              "aggregated": 0,
+              "queryMs": 52.69999998807907,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.70000000001164,
+              "frameP95Ms": 50,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 1.199999988079071,
+              "frames": 12,
+              "onsets": 452,
+              "fragments": 24,
+              "signals": 0,
+              "drawn": 420,
+              "aggregated": 0,
+              "queryMs": 52.69999998807907,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.70000000001164,
+              "frameP95Ms": 33.39999999999418,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.800000011920929,
+              "frames": 12,
+              "onsets": 452,
+              "fragments": 24,
+              "signals": 0,
+              "drawn": 420,
+              "aggregated": 0,
+              "queryMs": 52.69999998807907,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.40000000000873,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 452,
+              "fragments": 24,
+              "signals": 0,
+              "drawn": 420,
+              "aggregated": 0,
+              "queryMs": 52.69999998807907,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.70000000001164,
+              "frameP95Ms": 33.40000000000873,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 452,
+              "fragments": 24,
+              "signals": 0,
+              "drawn": 420,
+              "aggregated": 0,
+              "queryMs": 52.69999998807907,
+              "cycles": 16
+            }
+          ],
+          "screenshot": "shots/full-piece-fly.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.70000000001164,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.70000000001164
+            ],
+            "frameP95Ms": 33.40000000000873,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.7000000476837158
+          }
+        },
+        "ring": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.8999999761581421,
+              "frames": 12,
+              "onsets": 452,
+              "fragments": 24,
+              "signals": 0,
+              "drawn": 89,
+              "aggregated": 0,
+              "queryMs": 52.69999998807907,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 452,
+              "fragments": 24,
+              "signals": 0,
+              "drawn": 89,
+              "aggregated": 0,
+              "queryMs": 52.69999998807907,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 452,
+              "fragments": 24,
+              "signals": 0,
+              "drawn": 89,
+              "aggregated": 0,
+              "queryMs": 52.69999998807907,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.69999999999709,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 452,
+              "fragments": 24,
+              "signals": 0,
+              "drawn": 89,
+              "aggregated": 0,
+              "queryMs": 52.69999998807907,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 452,
+              "fragments": 24,
+              "signals": 0,
+              "drawn": 89,
+              "aggregated": 0,
+              "queryMs": 52.69999998807907,
+              "cycles": 16
+            }
+          ],
+          "screenshot": "shots/full-piece-ring.png",
+          "canvasPixel": [
+            92,
+            99,
+            96,
+            102
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.70000000001164,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.7000000476837158
+          }
+        },
+        "side": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.39999999999418,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 452,
+              "fragments": 24,
+              "signals": 0,
+              "drawn": 476,
+              "aggregated": 0,
+              "queryMs": 52.69999998807907,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.70000000001164,
+              "frameP95Ms": 33.30000000000291,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 452,
+              "fragments": 24,
+              "signals": 0,
+              "drawn": 476,
+              "aggregated": 0,
+              "queryMs": 52.69999998807907,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.5,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 452,
+              "fragments": 24,
+              "signals": 0,
+              "drawn": 476,
+              "aggregated": 0,
+              "queryMs": 52.69999998807907,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.40000000000873,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 0.9000000357627869,
+              "frames": 12,
+              "onsets": 452,
+              "fragments": 24,
+              "signals": 0,
+              "drawn": 476,
+              "aggregated": 0,
+              "queryMs": 52.69999998807907,
+              "cycles": 16
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.29999999998836,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 452,
+              "fragments": 24,
+              "signals": 0,
+              "drawn": 476,
+              "aggregated": 0,
+              "queryMs": 52.69999998807907,
+              "cycles": 16
+            }
+          ],
+          "screenshot": "shots/full-piece-side.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.70000000001164
+            ],
+            "frameP95Ms": 33.39999999999418,
+            "drawMedianMs": 0.5999999642372131,
+            "drawP95Ms": 0.699999988079071
+          }
+        }
+      }
+    },
+    {
+      "id": "control-bags",
+      "rows": "C1 · C2",
+      "cycles": 12,
+      "onsets": 48,
+      "fragments": 0,
+      "signalSamples": 0,
+      "queryMs": 34.60000002384186,
+      "loadMs": 234.42950099999143,
+      "perCycle": [
+        {
+          "cycle": 0,
+          "onsets": 4,
+          "parts": 4,
+          "changed": false
+        },
+        {
+          "cycle": 1,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 2,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 3,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 4,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 5,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 6,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 7,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 8,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 9,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 10,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        },
+        {
+          "cycle": 11,
+          "onsets": 4,
+          "parts": 4,
+          "changed": true
+        }
+      ],
+      "views": {
+        "fly": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.69999999999709,
+              "drawMedianMs": 0.800000011920929,
+              "drawP95Ms": 0.9000000357627869,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 40,
+              "aggregated": 0,
+              "queryMs": 34.60000002384186,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.8999999761581421,
+              "drawP95Ms": 1.100000023841858,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 40,
+              "aggregated": 0,
+              "queryMs": 34.60000002384186,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.7999999523162842,
+              "drawP95Ms": 1.100000023841858,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 40,
+              "aggregated": 0,
+              "queryMs": 34.60000002384186,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.69999999999709,
+              "drawMedianMs": 0.7000000476837158,
+              "drawP95Ms": 0.8999999761581421,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 40,
+              "aggregated": 0,
+              "queryMs": 34.60000002384186,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.60000000000582,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.800000011920929,
+              "drawP95Ms": 1.4000000357627869,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 40,
+              "aggregated": 0,
+              "queryMs": 34.60000002384186,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/control-bags-fly.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.60000000000582,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.80000000000291,
+            "drawMedianMs": 0.800000011920929,
+            "drawP95Ms": 1.100000023841858
+          }
+        },
+        "ring": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 12,
+              "aggregated": 0,
+              "queryMs": 34.60000002384186,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.9000000357627869,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 12,
+              "aggregated": 0,
+              "queryMs": 34.60000002384186,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 0.800000011920929,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 12,
+              "aggregated": 0,
+              "queryMs": 34.60000002384186,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 12,
+              "aggregated": 0,
+              "queryMs": 34.60000002384186,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 12,
+              "aggregated": 0,
+              "queryMs": 34.60000002384186,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/control-bags-ring.png",
+          "canvasPixel": [
+            92,
+            99,
+            96,
+            102
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.70000000001164,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.699999988079071
+          }
+        },
+        "side": {
+          "runs": [
+            {
+              "frameMedianMs": 16.60000000000582,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.8999999761581421,
+              "drawP95Ms": 1.399999976158142,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 48,
+              "aggregated": 0,
+              "queryMs": 34.60000002384186,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.8999999761581421,
+              "drawP95Ms": 1.5,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 48,
+              "aggregated": 0,
+              "queryMs": 34.60000002384186,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.69999999999709,
+              "drawMedianMs": 1,
+              "drawP95Ms": 1.399999976158142,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 48,
+              "aggregated": 0,
+              "queryMs": 34.60000002384186,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.69999999999709,
+              "drawMedianMs": 0.800000011920929,
+              "drawP95Ms": 1.100000023841858,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 48,
+              "aggregated": 0,
+              "queryMs": 34.60000002384186,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.9000000357627869,
+              "drawP95Ms": 1.399999976158142,
+              "frames": 12,
+              "onsets": 48,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 48,
+              "aggregated": 0,
+              "queryMs": 34.60000002384186,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/control-bags-side.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.60000000000582,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.80000000000291,
+            "drawMedianMs": 0.8999999761581421,
+            "drawP95Ms": 1.399999976158142
+          }
+        }
+      }
+    },
+    {
+      "id": "no-repeat",
+      "rows": "T4 · T2",
+      "cycles": 64,
+      "onsets": 503,
+      "fragments": 27,
+      "signalSamples": 0,
+      "queryMs": 64.5,
+      "loadMs": 291.83687099999224,
+      "perCycle": [
+        {
+          "cycle": 0,
+          "onsets": 5,
+          "parts": 5,
+          "changed": false
+        },
+        {
+          "cycle": 1,
+          "onsets": 7,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 2,
+          "onsets": 11,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 3,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 4,
+          "onsets": 8,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 5,
+          "onsets": 11,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 6,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 7,
+          "onsets": 7,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 8,
+          "onsets": 12,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 9,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 10,
+          "onsets": 8,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 11,
+          "onsets": 11,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 12,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 13,
+          "onsets": 7,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 14,
+          "onsets": 11,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 15,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 16,
+          "onsets": 8,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 17,
+          "onsets": 11,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 18,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 19,
+          "onsets": 7,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 20,
+          "onsets": 12,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 21,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 22,
+          "onsets": 8,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 23,
+          "onsets": 11,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 24,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 25,
+          "onsets": 7,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 26,
+          "onsets": 11,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 27,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 28,
+          "onsets": 8,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 29,
+          "onsets": 11,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 30,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 31,
+          "onsets": 7,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 32,
+          "onsets": 12,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 33,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 34,
+          "onsets": 8,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 35,
+          "onsets": 11,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 36,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 37,
+          "onsets": 7,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 38,
+          "onsets": 11,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 39,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 40,
+          "onsets": 8,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 41,
+          "onsets": 11,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 42,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 43,
+          "onsets": 7,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 44,
+          "onsets": 12,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 45,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 46,
+          "onsets": 8,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 47,
+          "onsets": 11,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 48,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 49,
+          "onsets": 7,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 50,
+          "onsets": 11,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 51,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 52,
+          "onsets": 8,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 53,
+          "onsets": 11,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 54,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 55,
+          "onsets": 7,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 56,
+          "onsets": 12,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 57,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 58,
+          "onsets": 8,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 59,
+          "onsets": 11,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 60,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        },
+        {
+          "cycle": 61,
+          "onsets": 7,
+          "parts": 8,
+          "changed": true
+        },
+        {
+          "cycle": 62,
+          "onsets": 11,
+          "parts": 12,
+          "changed": true
+        },
+        {
+          "cycle": 63,
+          "onsets": 5,
+          "parts": 5,
+          "changed": true
+        }
+      ],
+      "views": {
+        "fly": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.699999988079071,
+              "drawP95Ms": 1.5,
+              "frames": 12,
+              "onsets": 503,
+              "fragments": 27,
+              "signals": 0,
+              "drawn": 125,
+              "aggregated": 0,
+              "queryMs": 64.5,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.69999999999709,
+              "drawMedianMs": 0.6000000238418579,
+              "drawP95Ms": 1.100000023841858,
+              "frames": 12,
+              "onsets": 503,
+              "fragments": 27,
+              "signals": 0,
+              "drawn": 125,
+              "aggregated": 0,
+              "queryMs": 64.5,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.699999988079071,
+              "drawP95Ms": 1.4000000357627869,
+              "frames": 12,
+              "onsets": 503,
+              "fragments": 27,
+              "signals": 0,
+              "drawn": 125,
+              "aggregated": 0,
+              "queryMs": 64.5,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.69999999999709,
+              "drawMedianMs": 0.699999988079071,
+              "drawP95Ms": 1.100000023841858,
+              "frames": 12,
+              "onsets": 503,
+              "fragments": 27,
+              "signals": 0,
+              "drawn": 125,
+              "aggregated": 0,
+              "queryMs": 64.5,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.800000011920929,
+              "drawP95Ms": 1.600000023841858,
+              "frames": 12,
+              "onsets": 503,
+              "fragments": 27,
+              "signals": 0,
+              "drawn": 125,
+              "aggregated": 0,
+              "queryMs": 64.5,
+              "cycles": 64
+            }
+          ],
+          "screenshot": "shots/no-repeat-fly.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.70000000001164,
+            "drawMedianMs": 0.699999988079071,
+            "drawP95Ms": 1.4000000357627869
+          }
+        },
+        "ring": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.79999999998836,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 503,
+              "fragments": 27,
+              "signals": 0,
+              "drawn": 25,
+              "aggregated": 0,
+              "queryMs": 64.5,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 503,
+              "fragments": 27,
+              "signals": 0,
+              "drawn": 25,
+              "aggregated": 0,
+              "queryMs": 64.5,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.40000003576278687,
+              "drawP95Ms": 0.7000000476837158,
+              "frames": 12,
+              "onsets": 503,
+              "fragments": 27,
+              "signals": 0,
+              "drawn": 25,
+              "aggregated": 0,
+              "queryMs": 64.5,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.69999999999709,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 503,
+              "fragments": 27,
+              "signals": 0,
+              "drawn": 25,
+              "aggregated": 0,
+              "queryMs": 64.5,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 0.800000011920929,
+              "frames": 12,
+              "onsets": 503,
+              "fragments": 27,
+              "signals": 0,
+              "drawn": 25,
+              "aggregated": 0,
+              "queryMs": 64.5,
+              "cycles": 64
+            }
+          ],
+          "screenshot": "shots/no-repeat-ring.png",
+          "canvasPixel": [
+            92,
+            99,
+            96,
+            102
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.79999999998836,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.7000000476837158
+          }
+        },
+        "side": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.39999999999418,
+              "drawMedianMs": 1.399999976158142,
+              "drawP95Ms": 1.5,
+              "frames": 12,
+              "onsets": 503,
+              "fragments": 27,
+              "signals": 0,
+              "drawn": 530,
+              "aggregated": 0,
+              "queryMs": 64.5,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.70000000001164,
+              "frameP95Ms": 33.40000000000873,
+              "drawMedianMs": 1.4000000357627869,
+              "drawP95Ms": 2.199999988079071,
+              "frames": 12,
+              "onsets": 503,
+              "fragments": 27,
+              "signals": 0,
+              "drawn": 530,
+              "aggregated": 0,
+              "queryMs": 64.5,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.40000000000873,
+              "drawMedianMs": 1.4000000357627869,
+              "drawP95Ms": 1.800000011920929,
+              "frames": 12,
+              "onsets": 503,
+              "fragments": 27,
+              "signals": 0,
+              "drawn": 530,
+              "aggregated": 0,
+              "queryMs": 64.5,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.39999999999418,
+              "drawMedianMs": 1.399999976158142,
+              "drawP95Ms": 1.9000000357627869,
+              "frames": 12,
+              "onsets": 503,
+              "fragments": 27,
+              "signals": 0,
+              "drawn": 530,
+              "aggregated": 0,
+              "queryMs": 64.5,
+              "cycles": 64
+            },
+            {
+              "frameMedianMs": 16.70000000001164,
+              "frameP95Ms": 33.40000000000873,
+              "drawMedianMs": 1.5,
+              "drawP95Ms": 1.600000023841858,
+              "frames": 12,
+              "onsets": 503,
+              "fragments": 27,
+              "signals": 0,
+              "drawn": 530,
+              "aggregated": 0,
+              "queryMs": 64.5,
+              "cycles": 64
+            }
+          ],
+          "screenshot": "shots/no-repeat-side.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.70000000001164
+            ],
+            "frameP95Ms": 33.40000000000873,
+            "drawMedianMs": 1.4000000357627869,
+            "drawP95Ms": 1.800000011920929
+          }
+        }
+      }
+    },
+    {
+      "id": "heard-length",
+      "rows": "A4 · E3",
+      "cycles": 12,
+      "onsets": 84,
+      "fragments": 0,
+      "signalSamples": 0,
+      "queryMs": 20.19999998807907,
+      "loadMs": 220.06950899999356,
+      "perCycle": [
+        {
+          "cycle": 0,
+          "onsets": 7,
+          "parts": 7,
+          "changed": false
+        },
+        {
+          "cycle": 1,
+          "onsets": 7,
+          "parts": 7,
+          "changed": false
+        },
+        {
+          "cycle": 2,
+          "onsets": 7,
+          "parts": 7,
+          "changed": false
+        },
+        {
+          "cycle": 3,
+          "onsets": 7,
+          "parts": 7,
+          "changed": false
+        },
+        {
+          "cycle": 4,
+          "onsets": 7,
+          "parts": 7,
+          "changed": false
+        },
+        {
+          "cycle": 5,
+          "onsets": 7,
+          "parts": 7,
+          "changed": false
+        },
+        {
+          "cycle": 6,
+          "onsets": 7,
+          "parts": 7,
+          "changed": false
+        },
+        {
+          "cycle": 7,
+          "onsets": 7,
+          "parts": 7,
+          "changed": false
+        },
+        {
+          "cycle": 8,
+          "onsets": 7,
+          "parts": 7,
+          "changed": false
+        },
+        {
+          "cycle": 9,
+          "onsets": 7,
+          "parts": 7,
+          "changed": false
+        },
+        {
+          "cycle": 10,
+          "onsets": 7,
+          "parts": 7,
+          "changed": false
+        },
+        {
+          "cycle": 11,
+          "onsets": 7,
+          "parts": 7,
+          "changed": false
+        }
+      ],
+      "views": {
+        "fly": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.40000003576278687,
+              "drawP95Ms": 0.5,
+              "frames": 12,
+              "onsets": 84,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 70,
+              "aggregated": 0,
+              "queryMs": 20.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.30000000000291,
+              "drawMedianMs": 0.40000003576278687,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 84,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 70,
+              "aggregated": 0,
+              "queryMs": 20.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.40000003576278687,
+              "drawP95Ms": 0.5,
+              "frames": 12,
+              "onsets": 84,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 70,
+              "aggregated": 0,
+              "queryMs": 20.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 33.30000000000291,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.5,
+              "frames": 12,
+              "onsets": 84,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 70,
+              "aggregated": 0,
+              "queryMs": 20.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.69999999999709,
+              "drawMedianMs": 0.3999999761581421,
+              "drawP95Ms": 0.5,
+              "frames": 12,
+              "onsets": 84,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 70,
+              "aggregated": 0,
+              "queryMs": 20.19999998807907,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/heard-length-fly.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.80000000000291,
+            "drawMedianMs": 0.40000003576278687,
+            "drawP95Ms": 0.5
+          }
+        },
+        "ring": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.79999999998836,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 84,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 21,
+              "aggregated": 0,
+              "queryMs": 20.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.699999988079071,
+              "frames": 12,
+              "onsets": 84,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 21,
+              "aggregated": 0,
+              "queryMs": 20.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5999999642372131,
+              "drawP95Ms": 0.800000011920929,
+              "frames": 12,
+              "onsets": 84,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 21,
+              "aggregated": 0,
+              "queryMs": 20.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.80000000000291,
+              "drawMedianMs": 0.3999999761581421,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 84,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 21,
+              "aggregated": 0,
+              "queryMs": 20.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.800000011920929,
+              "frames": 12,
+              "onsets": 84,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 21,
+              "aggregated": 0,
+              "queryMs": 20.19999998807907,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/heard-length-ring.png",
+          "canvasPixel": [
+            92,
+            99,
+            96,
+            102
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.70000000001164,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.699999988079071
+          }
+        },
+        "side": {
+          "runs": [
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.79999999998836,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 84,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 84,
+              "aggregated": 0,
+              "queryMs": 20.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.5,
+              "frames": 12,
+              "onsets": 84,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 84,
+              "aggregated": 0,
+              "queryMs": 20.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 84,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 84,
+              "aggregated": 0,
+              "queryMs": 20.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.79999999998836,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.6000000238418579,
+              "frames": 12,
+              "onsets": 84,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 84,
+              "aggregated": 0,
+              "queryMs": 20.19999998807907,
+              "cycles": 12
+            },
+            {
+              "frameMedianMs": 16.69999999999709,
+              "frameP95Ms": 16.70000000001164,
+              "drawMedianMs": 0.5,
+              "drawP95Ms": 0.7999999523162842,
+              "frames": 12,
+              "onsets": 84,
+              "fragments": 0,
+              "signals": 0,
+              "drawn": 84,
+              "aggregated": 0,
+              "queryMs": 20.19999998807907,
+              "cycles": 12
+            }
+          ],
+          "screenshot": "shots/heard-length-side.png",
+          "canvasPixel": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "summary": {
+            "frameMedianMs": 16.69999999999709,
+            "frameMedianRangeMs": [
+              16.69999999999709,
+              16.69999999999709
+            ],
+            "frameP95Ms": 16.70000000001164,
+            "drawMedianMs": 0.5,
+            "drawP95Ms": 0.6000000238418579
+          }
+        }
+      }
+    }
+  ],
+  "checks": [
+    {
+      "check": "all 15 programs × 3 views × 5 frame windows",
+      "passed": true
+    },
+    {
+      "check": "fast(64): 512 real onsets/cycle, explicit LOD aggregation",
+      "passed": true
+    },
+    {
+      "check": "continuous values produce bands in addition to 48 genuine note onsets",
+      "passed": true
+    },
+    {
+      "check": "time-addressed randomness is deterministic across new workers",
+      "passed": true
+    },
+    {
+      "check": "range beginning inside long note gives continuations, zero duplicate onsets",
+      "passed": true
+    },
+    {
+      "check": "identical stacked unison voices remain two haps",
+      "passed": true
+    },
+    {
+      "check": "bare values retained without inventing notes or sounds",
+      "passed": true
+    },
+    {
+      "check": "pasted multi-label program and explicit tempo evaluate",
+      "passed": true
+    },
+    {
+      "check": "query errors show failure and clear prior data",
+      "passed": true
+    },
+    {
+      "check": "60 CPM playhead follows elapsed time; fly camera advances 1.75 world units/cycle",
+      "passed": true,
+      "before": {
+        "cycle": 0,
+        "camera": {
+          "position": [
+            0.9999999999999994,
+            1.9999999999999991,
+            19.999999999999993
+          ],
+          "target": [
+            0,
+            0,
+            -7
+          ]
+        },
+        "time": 2714.800000011921
+      },
+      "after": {
+        "cycle": 0.9500000000000003,
+        "camera": {
+          "position": [
+            0.9999999999999947,
+            1.9999999999999925,
+            18.33749999999991
+          ],
+          "target": [
+            0,
+            0,
+            -8.66249999999999
+          ]
+        },
+        "time": 3781.599999964237
+      }
+    },
+    {
+      "check": "mouse drag orbits and wheel zooms a real 3D camera",
+      "passed": true
+    },
+    {
+      "check": "query horizon stops playback explicitly; no false loop or inferred repeat",
+      "passed": true
+    },
+    {
+      "check": "390px touch viewport: orbit and two-finger pinch change camera",
+      "passed": true
+    },
+    {
+      "check": "256-cycle window evaluates and fits in the coil (visual readability judged separately)",
+      "passed": true,
+      "metrics": {
+        "frameMedianMs": 16.80000000000109,
+        "frameP95Ms": 200,
+        "drawMedianMs": 7.100000023841858,
+        "drawP95Ms": 42.40000003576279,
+        "frames": 19,
+        "onsets": 1664,
+        "fragments": 0,
+        "signals": 0,
+        "drawn": 1664,
+        "aggregated": 0,
+        "queryMs": 82.89999997615814,
+        "cycles": 256
+      }
+    },
+    {
+      "check": "close zoom restores individual haps from auto LOD",
+      "passed": true
+    },
+    {
+      "check": "density sweep: real queries at 16/32/64/128/256/512 onsets per cycle",
+      "passed": true
+    }
+  ],
+  "errors": [],
+  "failedRequests": [],
+  "density": [
+    {
+      "onsetsPerCycle": 16,
+      "detail": "raw",
+      "metrics": {
+        "frameMedianMs": 16.69999999999891,
+        "frameP95Ms": 83.29999999999927,
+        "drawMedianMs": 0.3999999761581421,
+        "drawP95Ms": 88.30000001192093,
+        "frames": 15,
+        "onsets": 64,
+        "fragments": 0,
+        "signals": 0,
+        "drawn": 48,
+        "aggregated": 0,
+        "queryMs": 16.899999976158142,
+        "cycles": 4
+      }
+    },
+    {
+      "onsetsPerCycle": 16,
+      "detail": "auto",
+      "metrics": {
+        "frameMedianMs": 16.69999999999891,
+        "frameP95Ms": 66.80000000000109,
+        "drawMedianMs": 0.3999999761581421,
+        "drawP95Ms": 21.600000023841858,
+        "frames": 32,
+        "onsets": 64,
+        "fragments": 0,
+        "signals": 0,
+        "drawn": 48,
+        "aggregated": 0,
+        "queryMs": 16.899999976158142,
+        "cycles": 4
+      }
+    },
+    {
+      "onsetsPerCycle": 32,
+      "detail": "raw",
+      "metrics": {
+        "frameMedianMs": 16.700000000000728,
+        "frameP95Ms": 100,
+        "drawMedianMs": 0.30000001192092896,
+        "drawP95Ms": 110.69999998807907,
+        "frames": 18,
+        "onsets": 128,
+        "fragments": 0,
+        "signals": 0,
+        "drawn": 96,
+        "aggregated": 0,
+        "queryMs": 16.900000035762787,
+        "cycles": 4
+      }
+    },
+    {
+      "onsetsPerCycle": 32,
+      "detail": "auto",
+      "metrics": {
+        "frameMedianMs": 16.69999999999891,
+        "frameP95Ms": 83.20000000000073,
+        "drawMedianMs": 0.3999999761581421,
+        "drawP95Ms": 86.20000004768372,
+        "frames": 34,
+        "onsets": 128,
+        "fragments": 0,
+        "signals": 0,
+        "drawn": 96,
+        "aggregated": 0,
+        "queryMs": 16.900000035762787,
+        "cycles": 4
+      }
+    },
+    {
+      "onsetsPerCycle": 64,
+      "detail": "raw",
+      "metrics": {
+        "frameMedianMs": 16.69999999999891,
+        "frameP95Ms": 100.10000000000036,
+        "drawMedianMs": 0.3999999761581421,
+        "drawP95Ms": 109.39999997615814,
+        "frames": 18,
+        "onsets": 256,
+        "fragments": 0,
+        "signals": 0,
+        "drawn": 192,
+        "aggregated": 0,
+        "queryMs": 26.100000023841858,
+        "cycles": 4
+      }
+    },
+    {
+      "onsetsPerCycle": 64,
+      "detail": "auto",
+      "metrics": {
+        "frameMedianMs": 16.69999999999891,
+        "frameP95Ms": 83.39999999999964,
+        "drawMedianMs": 0.3999999761581421,
+        "drawP95Ms": 87.30000001192093,
+        "frames": 34,
+        "onsets": 256,
+        "fragments": 0,
+        "signals": 0,
+        "drawn": 192,
+        "aggregated": 0,
+        "queryMs": 26.100000023841858,
+        "cycles": 4
+      }
+    },
+    {
+      "onsetsPerCycle": 128,
+      "detail": "raw",
+      "metrics": {
+        "frameMedianMs": 16.700000000000728,
+        "frameP95Ms": 83.29999999999927,
+        "drawMedianMs": 0.3999999761581421,
+        "drawP95Ms": 86.5,
+        "frames": 16,
+        "onsets": 512,
+        "fragments": 0,
+        "signals": 0,
+        "drawn": 384,
+        "aggregated": 0,
+        "queryMs": 34.30000001192093,
+        "cycles": 4
+      }
+    },
+    {
+      "onsetsPerCycle": 128,
+      "detail": "auto",
+      "metrics": {
+        "frameMedianMs": 16.69999999999891,
+        "frameP95Ms": 66.70000000000073,
+        "drawMedianMs": 0.3999999761581421,
+        "drawP95Ms": 22.19999998807907,
+        "frames": 33,
+        "onsets": 512,
+        "fragments": 0,
+        "signals": 0,
+        "drawn": 384,
+        "aggregated": 0,
+        "queryMs": 34.30000001192093,
+        "cycles": 4
+      }
+    },
+    {
+      "onsetsPerCycle": 256,
+      "detail": "raw",
+      "metrics": {
+        "frameMedianMs": 16.69999999999891,
+        "frameP95Ms": 83.29999999999927,
+        "drawMedianMs": 0.3999999761581421,
+        "drawP95Ms": 82.59999996423721,
+        "frames": 18,
+        "onsets": 1024,
+        "fragments": 0,
+        "signals": 0,
+        "drawn": 768,
+        "aggregated": 0,
+        "queryMs": 52.90000003576279,
+        "cycles": 4
+      }
+    },
+    {
+      "onsetsPerCycle": 256,
+      "detail": "auto",
+      "metrics": {
+        "frameMedianMs": 16.69999999999891,
+        "frameP95Ms": 66.60000000000036,
+        "drawMedianMs": 0.30000001192092896,
+        "drawP95Ms": 26.599999964237213,
+        "frames": 36,
+        "onsets": 1024,
+        "fragments": 0,
+        "signals": 0,
+        "drawn": 480,
+        "aggregated": 288,
+        "queryMs": 52.90000003576279,
+        "cycles": 4
+      }
+    },
+    {
+      "onsetsPerCycle": 512,
+      "detail": "raw",
+      "metrics": {
+        "frameMedianMs": 16.69999999999891,
+        "frameP95Ms": 100.10000000000036,
+        "drawMedianMs": 0.3999999761581421,
+        "drawP95Ms": 110.89999997615814,
+        "frames": 19,
+        "onsets": 2048,
+        "fragments": 0,
+        "signals": 0,
+        "drawn": 1536,
+        "aggregated": 0,
+        "queryMs": 94.60000002384186,
+        "cycles": 4
+      }
+    },
+    {
+      "onsetsPerCycle": 512,
+      "detail": "auto",
+      "metrics": {
+        "frameMedianMs": 16.69999999999891,
+        "frameP95Ms": 66.70000000000073,
+        "drawMedianMs": 0.30000001192092896,
+        "drawP95Ms": 38.5,
+        "frames": 36,
+        "onsets": 2048,
+        "fragments": 0,
+        "signals": 0,
+        "drawn": 960,
+        "aggregated": 576,
+        "queryMs": 94.60000002384186,
+        "cycles": 4
+      }
+    }
+  ],
+  "totalSeconds": 17.43397694
+}

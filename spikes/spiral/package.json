@@ -1,0 +1,28 @@
+{
+  "name": "odm-spiral-spike",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.22.2"
+  },
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "tsc --noEmit && vite build",
+    "test": "node scripts/verify.mjs",
+    "shots": "node scripts/verify.mjs"
+  },
+  "dependencies": {
+    "@strudel/core": "1.2.6",
+    "@strudel/mini": "1.2.6",
+    "@strudel/tonal": "1.2.6",
+    "@strudel/transpiler": "1.2.6",
+    "three": "0.174.0"
+  },
+  "devDependencies": {
+    "@types/three": "0.174.0",
+    "playwright": "1.51.1",
+    "typescript": "5.7.3",
+    "vite": "6.1.0"
+  }
+}
