@@ -23,3 +23,22 @@ Keep each entry to a few lines.
   evidence, not authority.
 - **D7 (2026-11-10) Phase 0 writes no production code.** Everything under
   `spikes/` is throwaway and is not imported by later phases.
+- **D8 (2026-11-11) Three views, one editor.** The score sheet with its song
+  strip is where you find and edit. The constellation is a live overview and
+  the spiral is for watching; neither is an editor. Selecting anything opens
+  one editor for that one thing. Evidence: `spikes/editor/FINDINGS.md`,
+  `spikes/spiral/FINDINGS.md`.
+- **D9 (2026-11-11) Changes are shown pending until heard.** Sound follows an
+  edit by about a third of a second, or up to a cycle for a note that plays
+  once. The changed element is drawn as pending until the first event that
+  carries it. Evidence: `spikes/gesture/FINDINGS.md`.
+- **D10 (2026-11-11) Three tiers of understanding.** Understood (purpose-built
+  editor), recognised by shape (generic editor for a named call), not modelled
+  (source text). Import never drops code. Evidence: `spikes/import/FINDINGS.md`.
+- **D11 (2026-11-11) No assumed grid.** Rhythm is drawn and edited from real
+  event spans and the nested structure that produced them, never equal steps.
+- **D12 (2026-11-11) Missing is not quiet.** Every instrument shows whether its
+  sound is loading, ready, or missing. Extends the rule that broken never looks
+  like silence.
+- **D13 (2026-11-11) Other people's music stays out of the repository** unless
+  permission to redistribute is recorded. It may be tested from a local path.

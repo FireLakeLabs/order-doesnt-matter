@@ -42,22 +42,34 @@ A Strudel program does not describe sound flowing through boxes. It describes a
 
 ## How we draw it
 
-| Thing in Strudel       | What you see                                                     |
-| ---------------------- | ---------------------------------------------------------------- |
-| The program            | **Floor plan**: a branching map of stations, one per call        |
-| A score at any station | **Spiral**: one turn per cycle; the current turn is a ring       |
-| A note                 | **Creature**: a glyph wearing its settings                       |
-| A setting over time    | **Lane**: a band along the same turn, drawn or painted           |
-| A continuous signal    | A lane only, never a creature                                    |
-| The voice              | One fixed strip that lights up as notes arrive                   |
-| An orbit               | **Room**: a shared space several scores send into                |
-| Code we do not model   | An **opaque station**: still visible, playable, editable as text |
+Three views of one piece, each with one job.
+
+| View              | Job                                                                                                    |
+| ----------------- | ------------------------------------------------------------------------------------------------------ |
+| **Score sheet**   | Find and edit. One row per instrument, one column per setting in use, a song strip of sections on top. |
+| **Constellation** | Overview. Which instruments are sounding now, and who shares a room. Not an editor.                    |
+| **Spiral**        | Watch. One turn per cycle, with "now" as a bright gate. Not an editor.                                 |
+
+| Thing in Strudel      | What you see                                                            |
+| --------------------- | ----------------------------------------------------------------------- |
+| An instrument         | A row in the sheet; a planet in the constellation; a band in the spiral |
+| A setting over time   | A cell drawn from its real values; a **lane** when opened               |
+| What drives a setting | Nested under it: a moon of the moon                                     |
+| A rewrite             | An ordered chip in the sheet; a **shell** around the planet             |
+| A note                | A mark with its real start and end, never a step in an assumed grid     |
+| A continuous signal   | A curve only, never a note                                              |
+| A section of the song | A block in the song strip; instruments not in it say so                 |
+| An orbit              | **Room**: a region around the instruments that send into it             |
+| Code we do not model  | Still visible, playable, and editable as text                           |
+
+Selecting anything opens **one editor** for that one thing, named by a
+breadcrumb. Nothing else is editable while it is open.
 
 ## Rules that follow
 
 - We own the document. Strudel comes in one way, and fresh Strudel is generated
   to play it. We do not preserve the text that came in.
-- Every station can show the score leaving it, whether or not we understand the
+- Anything can show the score it produces, whether or not we understand the
   call, because any pattern can be asked what happens.
 - Broken is not quiet. A station whose question failed says so; it never looks
   like silence.
@@ -67,9 +79,6 @@ A Strudel program does not describe sound flowing through boxes. It describes a
 
 ## Not yet settled
 
-Phase 0 exists to answer these. See `research/dark-corners.md`.
-
-- How much of the floor plan can be live when callbacks run late or repeatedly.
-- What the spiral does with long, dense, or overlapping scores.
 - How a room shows a conflict whose outcome cannot be predicted.
 - Whether heard length is drawn at all, and if so from what.
+- How the selected instrument's own system is drawn beside the editor.
