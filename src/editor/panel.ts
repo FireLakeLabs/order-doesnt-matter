@@ -25,13 +25,21 @@ export function createPanel(host: HTMLElement, close: () => void) {
   conversionError.setAttribute('role', 'alert');
   // An empty alert is still an alert to assistive technology; hide it until it says something.
   conversionError.hidden = true;
+  const header = el('header'),
+    footer = el('footer');
+  body.className = 'editor-body';
+  conversions.className = 'editor-conversions';
+  conversionError.className = 'editor-error';
+  done.className = 'editor-done';
+  header.append(heading);
+  footer.append(status, done);
   heading.id = 'editor-breadcrumb';
   status.id = 'editor-status';
   status.setAttribute('role', 'status');
   done.onclick = close;
   host.setAttribute('aria-labelledby', heading.id);
   host.setAttribute('role', 'region');
-  host.append(heading, body, conversions, conversionError, status, done);
+  host.append(header, body, footer);
   return (context: EditorContext | null, entry: PendingEntry | undefined, playing: boolean) => {
     host.hidden = !context;
     if (!context) {
@@ -69,7 +77,10 @@ export function createPanel(host: HTMLElement, close: () => void) {
       conversions.replaceChildren();
       conversionError.textContent = '';
       conversionError.hidden = true;
-      if (offers.length) conversions.append(el('p', 'Change to…'));
+      if (offers.length) {
+        const title = el('h3', 'Change to…');
+        conversions.append(title);
+      }
       offers.forEach((offer, index) => {
         const button = el('button', offer.label);
         button.dataset.conversion = String(index);
@@ -88,6 +99,7 @@ export function createPanel(host: HTMLElement, close: () => void) {
         body.querySelector<HTMLElement>('input,select,button')?.focus({ preventScroll: true });
       }
     };
+    if (body.lastElementChild !== conversionError) body.append(conversions, conversionError);
     host.dataset.editState = entry?.status ?? '';
     status.textContent =
       entry?.status === 'failed'

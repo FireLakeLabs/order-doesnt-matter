@@ -56,7 +56,9 @@ test('real house: mute, use mute, solo, undo and keyboard name; phone editor fit
   await play(page);
   await selectNode(page, { nodeId: ids.chords });
   await expect(page.locator('#editor')).toContainText('piano: missing');
-  await swap(page, () => page.getByRole('button', { name: 'Plays in intro', exact: true }).click());
+  await swap(page, () =>
+    page.getByRole('checkbox', { name: 'Plays in intro', exact: true }).click(),
+  );
   await poll(async () => (await sinceSwap(page)).length).toBeGreaterThan(2);
   expect((await sinceSwap(page)).some((v) => v.s === 'piano')).toBe(false);
   // Restart at the drop through the public transport to avoid waiting through the intro.
@@ -67,7 +69,7 @@ test('real house: mute, use mute, solo, undo and keyboard name; phone editor fit
   await page.keyboard.press('Escape');
   await selectNode(page, { nodeId: ids.bass });
   await expect(page.locator('#editor')).toContainText('sawtooth: ready');
-  await swap(page, () => page.getByRole('button', { name: 'Solo', exact: true }).press('Space'));
+  await swap(page, () => page.getByRole('checkbox', { name: 'Solo', exact: true }).press('Space'));
   await expect(page.locator('#solo-banner')).toHaveText('Solo: bass — Stop solo');
   await poll(async () => (await sinceSwap(page)).length).toBeGreaterThan(2);
   expect((await sinceSwap(page)).every((v) => v.s === 'sawtooth')).toBe(true);
@@ -100,7 +102,7 @@ test('real house: mute, use mute, solo, undo and keyboard name; phone editor fit
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.screenshot({ path: 'test-results/instrument-desktop.png' });
   await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.getByRole('button', { name: 'Mute everywhere', exact: true })).toBeVisible();
+  await expect(page.getByRole('checkbox', { name: 'Mute everywhere', exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   for (const button of await page.locator('#editor button').all())
     expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);

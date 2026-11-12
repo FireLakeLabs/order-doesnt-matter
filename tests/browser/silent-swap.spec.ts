@@ -97,12 +97,12 @@ test('Kiln: mute the only sounding instrument and clear pending', async ({ page 
   }));
   await page.getByRole('button', { name: section, exact: true }).first().click();
   await selectNode(page, { nodeId: id });
-  await page.getByRole('button', { name: 'Solo', exact: true }).click();
+  await page.getByRole('checkbox', { name: 'Solo', exact: true }).click();
   await play(page);
   const count = await page.evaluate(
     () => window.odmApp.history.filter((e) => e.type === 'committed').length,
   );
-  await page.getByRole('button', { name: 'Mute everywhere', exact: true }).click();
+  await page.getByRole('checkbox', { name: 'Mute everywhere', exact: true }).click();
   await expect
     .poll(
       () => page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'committed').length),

@@ -19,23 +19,23 @@ const range = (
  * These are useful slider windows, not validation limits. Exact fields stay unbounded.
  */
 const controls: Record<string, ControlInfo> = {
-  gain: range(0, 2, 0.01, '×'),
+  gain: range(0, 2, 0.01, ''),
   lpf: range(20, 20000, 1, 'Hz', 'log'),
   hpf: range(20, 20000, 1, 'Hz', 'log'),
   resonance: range(0, 50, 0.1, 'Q'),
   pan: range(0, 1, 0.01),
-  room: range(0, 1, 0.01, '×'),
+  room: range(0, 1, 0.01, ''),
   roomsize: range(0, 10, 0.1),
-  delay: range(0, 1, 0.01, '×'),
+  delay: range(0, 1, 0.01, ''),
   delaytime: range(0, 2, 0.01, 's'),
-  delayfeedback: range(0, 0.95, 0.01, '×'),
-  speed: range(-4, 4, 0.01, '×'),
+  delayfeedback: range(0, 0.95, 0.01, ''),
+  speed: range(-4, 4, 0.01, ''),
   attack: range(0, 4, 0.01, 's'),
   decay: range(0, 4, 0.01, 's'),
-  sustain: range(0, 1, 0.01, '×'),
+  sustain: range(0, 1, 0.01, ''),
   release: range(0, 8, 0.01, 's'),
   crush: range(1, 16, 1, 'bits'),
-  distort: range(0, 10, 0.1, '×'),
+  distort: range(0, 10, 0.1, ''),
 };
 const aliases: Record<string, string> = {
   cutoff: 'lpf',

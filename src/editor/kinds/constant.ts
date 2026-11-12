@@ -1,6 +1,7 @@
 import type { EditorKind, EditorContext } from '../kind';
 import type { Constant } from '../../document/edit';
 import { setConstant } from '../../document/edits/set-constant';
+import { fieldLabel, withUnit } from '../presentation';
 import { controlInfo, sliderValue, fromSlider } from '../controls';
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text = '') => {
   const n = document.createElement(tag);
@@ -82,10 +83,14 @@ export default {
           edit(field!.valueAsNumber);
       } else edit(field!.type === 'checkbox' ? field!.checked : field!.value);
     };
-    const labelNode = el('label', typeof target.value === 'boolean' ? 'Enabled' : 'Exact value');
-    labelNode.append(field);
-    if (typeof target.value === 'number' && info?.unit) labelNode.append(el('span', info.unit));
+    const labelNode = fieldLabel(
+      typeof target.value === 'boolean' ? 'Enabled' : 'Exact value',
+      field,
+      typeof target.value === 'number' ? info?.unit : '',
+    );
+    if (field.type === 'checkbox') labelNode.className = 'editor-toggle';
     body.append(labelNode);
+    if (slider) body.append(slider);
 
     function update(nextContext: EditorContext) {
       const valueChanged =
@@ -106,7 +111,7 @@ export default {
         slider.value = String(sliderValue(controlInfo(target.control)!, Number(target.value)));
         slider.setAttribute(
           'aria-valuetext',
-          `${target.value} ${controlInfo(target.control)!.unit}`,
+          withUnit(String(target.value), controlInfo(target.control)!.unit),
         );
       }
     }

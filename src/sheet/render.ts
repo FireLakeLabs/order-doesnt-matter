@@ -110,32 +110,34 @@ export function mountSheet(
         ),
       );
       button.append(
-        element(
-          'small',
-          options.selected === section.nodeId ? 'Selected' : 'Select section',
-          'sheet-selection',
-        ),
+        element('small', options.selected === section.nodeId ? 'Selected' : '', 'sheet-selection'),
       );
       button.append(element('small', section.current ? 'Playing now' : '', 'sheet-playing'));
       item.append(button);
       if (options.onEdit) {
-        const edit = element('button', 'Edit section', 'sheet-section-edit');
+        const edit = element('button', 'Edit', 'sheet-section-edit');
         edit.type = 'button';
         edit.setAttribute('aria-label', `Edit section ${section.name}`);
         selectable(edit, section.nodeId, section.name);
         item.append(edit);
       }
-      const membership = element('details');
       const present = section.instruments.filter(
         (instrument) => instrument.state === 'present',
       ).length;
-      membership.append(
-        element('summary', `${present} in · ${section.instruments.length - present} out`),
+      const membership = element(
+        'small',
+        `${present} in · ${section.instruments.length - present} out`,
+        'sheet-membership',
       );
-      section.instruments.forEach((instrument) =>
-        membership.append(element('small', instrument.text, `sheet-${instrument.state}`)),
+      button.append(membership);
+      const alternatives = element(
+        'span',
+        section.instruments.map((i) => i.text).join('; '),
+        'sheet-sr-only',
       );
-      item.append(membership);
+      alternatives.id = `section-members-${section.nodeId}`;
+      button.setAttribute('aria-describedby', alternatives.id);
+      item.append(alternatives);
       list.append(item);
     });
     scroll.append(list);
@@ -198,7 +200,7 @@ export function mountSheet(
       name.append(
         element(
           'span',
-          `${sound.name}: ${sound.state === 'not-loaded' ? (model.playing ? 'not used yet' : 'not loaded yet') : sound.state}${sound.detail ? ` — ${sound.detail}` : ''}`,
+          `${sound.name}: ${sound.state === 'not-loaded' ? (model.playing ? 'not used yet' : 'not loaded yet') : sound.state}`,
           `sheet-sound sheet-${sound.state}`,
         ),
       ),
@@ -242,7 +244,8 @@ export function mountSheet(
     if (!row.absent)
       rewrites.append(row.rewrites.length ? chips : element('span', 'No rewrites', 'sheet-status'));
     if (options.onEdit && row.rewriteTarget) {
-      const add = element('button', 'Add rewrite');
+      const add = element('button', '+', 'sheet-add-rewrite');
+      add.setAttribute('aria-label', `Add rewrite to ${row.name.replaceAll('$', '')}`);
       add.type = 'button';
       selectable(add, row.rewriteTarget, 'Add rewrite');
       (row.absent ? name : rewrites).append(add);

@@ -8,6 +8,7 @@ import { setSignalPeriod } from '../../document/edits/signal-period';
 import { constantToSignal } from '../../document/edits/signal-from-constant';
 import { signalToConstant } from '../../document/edits/signal-to-constant';
 import { controlInfo, sliderValue, fromSlider } from '../controls';
+import { fieldLabel, withUnit, displayNumber } from '../presentation';
 import './signal.css';
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text = '') => {
   const n = document.createElement(tag);
@@ -69,7 +70,7 @@ export default {
     plot.svg.classList.add('signal-curve');
     plot.svg.setAttribute('role', 'img');
     plot.svg.setAttribute('aria-label', 'Real setting values over the current window');
-    bounds.className = 'signal-bounds';
+    bounds.className = 'editor-helper';
     error.setAttribute('role', 'alert');
     const info = controlInfo(context.target.control) ?? {
       min: 0,
@@ -93,8 +94,8 @@ export default {
     const fields = el('div');
     fields.className = 'signal-fields';
     function field(label: string, edit: (value: number) => void, fraction = false) {
-      const wrap = el('label', label),
-        input = el('input');
+      const input = el('input'),
+        wrap = fieldLabel(label, input, fraction ? 'cycles' : info.unit);
       input.type = fraction ? 'text' : 'number';
       input.setAttribute('aria-label', label);
       if (!fraction) input.step = 'any';
@@ -114,7 +115,7 @@ export default {
           commit();
         }
       };
-      wrap.append(input);
+
       fields.append(wrap);
       return input;
     }
@@ -131,20 +132,25 @@ export default {
         gesture,
       );
     };
-    const low = field(`Low bound${info.unit ? ' · ' + info.unit : ''}`, (v) => editBound(0, v));
-    const high = field(`High bound${info.unit ? ' · ' + info.unit : ''}`, (v) => editBound(1, v));
+    const low = field('Low bound', (v) => editBound(0, v));
+    const high = field('High bound', (v) => editBound(1, v));
     const period = field(
       'One sweep every N cycles',
       (v) => apply(setSignalPeriod(context.doc, context.target.nodeId, v)),
       true,
     );
-    const tracks = el('div');
-    tracks.className = 'signal-handles';
+    const tracks = fields;
     const handles = [0, 1].map((which) => {
-      const button = el('button', which === 0 ? 'Low' : 'High');
+      const button = el('button'),
+        rail = el('div');
+      rail.className = 'signal-track';
+      button.setAttribute('role', 'slider');
       button.type = 'button';
-      button.setAttribute('aria-label', `Drag ${which === 0 ? 'low' : 'high'} bound`);
-      button.style.top = `${which * 48}px`;
+      button.setAttribute('aria-label', `${which === 0 ? 'Low' : 'High'} bound slider`);
+      button.setAttribute('aria-valuemin', String(info.min));
+      button.setAttribute('aria-valuemax', String(info.max));
+      button.setAttribute('aria-orientation', 'horizontal');
+      button.onfocus = () => button.scrollIntoView({ block: 'nearest', inline: 'nearest' });
       let drag: { x: number; position: number; gesture: string } | undefined;
       button.onpointerdown = (e) => {
         const s = signalState(context.doc, context.target.nodeId);
@@ -160,7 +166,7 @@ export default {
         if (!drag) return;
         const position = Math.max(
           0,
-          Math.min(1, drag.position + (e.clientX - drag.x) / Math.max(1, tracks.clientWidth - 44)),
+          Math.min(1, drag.position + (e.clientX - drag.x) / Math.max(1, rail.clientWidth - 44)),
         );
         editBound(which, fromSlider(info, position), drag.gesture);
       };
@@ -180,7 +186,9 @@ export default {
             : Number((v + direction * info.step * (e.shiftKey ? 10 : 1)).toPrecision(12));
         editBound(which, next);
       };
-      tracks.append(button);
+      rail.append(button);
+      const exact = (which === 0 ? low : high).closest('label')!;
+      exact.after(rail);
       return button;
     });
     const shapes = el('details'),
@@ -206,20 +214,22 @@ export default {
       choices.append(b);
       return b;
     });
-    shapes.append(
-      summary,
-      choices,
-      el('small', 'Shape sketches; the curve above uses real values.'),
-    );
+    shapes.append(summary, choices);
     const others = el('ol'),
-      otherTitle = el('p', 'Other layers · read only, in order');
-    root.append(caption, bounds, plot.svg, note, tracks, fields, shapes, otherTitle, others, error);
+      otherTitle = el('h3', 'Other rewrites · in order');
+    caption.className = 'editor-helper';
+    note.className = 'editor-helper';
+    root.append(caption, plot.svg, note, fields, shapes, otherTitle, others, error);
     body.append(root);
     function update(next: EditorContext) {
       const previous = context;
       context = next;
-      caption.textContent = `${context.target.displayValue}, driven by a signal`;
+
       const s = signalState(context.doc, context.target.nodeId);
+      caption.textContent =
+        !('ok' in s) && s.low !== null && s.high !== null
+          ? `${displayNumber(s.low)} to ${withUnit(s.high, info.unit)} · signal`
+          : 'Sampled signal values';
       const { fromCycle: from, toCycle: to } = context.window;
       const points =
         context.events?.events
@@ -253,9 +263,11 @@ export default {
       if ('ok' in s) {
         error.textContent = s.reason;
         bounds.textContent = `Sampled low ${Number.isFinite(min) ? min : 'unavailable'} ${info.unit} · high ${Number.isFinite(max) ? max : 'unavailable'} ${info.unit}`;
+        if (!bounds.isConnected) note.after(bounds);
         fields.hidden = tracks.hidden = shapes.hidden = true;
         return;
       }
+      bounds.remove();
       fields.hidden = tracks.hidden = shapes.hidden = false;
       summary.textContent = `Shape · ${s.shape}`;
       const changed = previous.doc !== context.doc;
@@ -269,13 +281,16 @@ export default {
         const v = i === 0 ? s.low : s.high;
         h.disabled = v === null;
         h.style.left = `calc(${position(v ?? info.min) * 100}% - ${position(v ?? info.min) * 44}px)`;
-        h.title = `${i === 0 ? 'Low' : 'High'} ${v} ${info.unit} · drag or use arrow keys`;
+        h.parentElement!.style.setProperty('--position', `${position(v ?? info.min) * 100}%`);
+        h.setAttribute('aria-valuenow', String(v ?? info.min));
+        h.setAttribute('aria-valuetext', withUnit(v ?? info.min, info.unit));
+        h.title = `${i === 0 ? 'Low' : 'High'} ${withUnit(v ?? 'changing', info.unit)} · drag or use arrow keys`;
         h.setAttribute('aria-description', h.title);
       });
       buttons.forEach((b, i) =>
         b.setAttribute('aria-pressed', String(signalShapes[i] === s.shape)),
       );
-      bounds.textContent = `Low ${s.low ?? 'changing'} ${info.unit} · High ${s.high ?? 'changing'} ${info.unit}`;
+      bounds.textContent = `Low ${withUnit(s.low ?? 'changing', info.unit)} · High ${withUnit(s.high ?? 'changing', info.unit)}`;
       others.replaceChildren(
         ...s.others.map((l) =>
           el(

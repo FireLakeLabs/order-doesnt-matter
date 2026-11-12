@@ -13,6 +13,7 @@ import { toggleRest } from '../../document/edits/values-rest';
 import { setModifier } from '../../document/edits/values-modifier';
 import { replaceChunk } from '../../document/edits/values-chunk';
 import { convertValues } from '../../document/edits/values-convert';
+import { fieldLabel, withUnit } from '../presentation';
 import './values.css';
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text = '') => {
   const n = document.createElement(tag);
@@ -91,11 +92,12 @@ export default {
       type: string,
       value: () => string,
       change: (s: string) => void,
+      unit = '',
     ) {
-      const wrap = el('label', label),
-        input = el('input');
+      const input = el('input'),
+        wrap = fieldLabel(label, input, unit);
       input.type = type;
-      input.setAttribute('aria-label', label);
+      input.setAttribute('aria-label', `${label}${unit ? ` (${unit})` : ''}`);
       input.step = 'any';
       input.onchange = () => change(input.value);
       input.onkeydown = (e) => {
@@ -111,13 +113,47 @@ export default {
           input.value = next;
         previous = next;
       });
-      wrap.append(input);
+
       parent.append(wrap);
       return input;
     }
+    function valueName(path: number[], capital = true): string {
+      // A sole outer group is the sequence itself, not a numbered extra level.
+      const list = steps();
+      const p = list?.length === 1 && isGroup(list[0]) ? path.slice(1) : path;
+      if (p.length <= 1) return `${capital ? 'Value' : 'value'} ${(p[0] ?? 0) + 1}`;
+      const ordinal = (n: number) =>
+        `${n}${n % 100 >= 11 && n % 100 <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th')}`;
+      let parent = list;
+      if (list?.length === 1 && isGroup(list[0])) parent = list[0].steps;
+      const parts = [`${ordinal(p[0] + 1)} value`];
+      for (let depth = 1; depth < p.length; depth++) {
+        const group = parent?.[p[depth - 1]];
+        const children = group && isGroup(group) ? group.steps : [];
+        const equalHalves =
+          children.length === 2 &&
+          group?.kind === 'sub' &&
+          children.every(
+            (s) =>
+              ['value', 'rest', 'sub'].includes(s.kind) && !('weight' in s) && !('repeat' in s),
+          );
+        parts.push(
+          equalHalves
+            ? `${p[depth] === 0 ? 'first' : 'second'} half`
+            : `${ordinal(p[depth] + 1)} ${group?.kind === 'alternate' ? 'cycle' : 'part'}`,
+        );
+        parent = children;
+      }
+      return parts.join(', ');
+    }
     function group(list: Step[], parent: HTMLElement, path: number[]) {
       const box = el('fieldset'),
-        legend = el('legend', path.length ? `Group ${path.map((i) => i + 1).join('.')}` : 'Values');
+        legend = el(
+          'legend',
+          path.length && !(path.length === 1 && steps()?.length === 1 && isGroup(steps()![0]))
+            ? `Group at ${valueName(path, false)}`
+            : 'Values',
+        );
       box.append(legend);
       parent.append(box);
       const current = path.length ? at(path) : { kind: 'sub' as const };
@@ -136,14 +172,15 @@ export default {
       } else box.append(el('p', words.together));
       list.forEach((s, i) => {
         const p = [...path, i],
-          label = `Value ${p.map((j) => j + 1).join('.')}`,
+          label = valueName(p),
           row = el('div');
-        row.className = 'values-step';
+        row.className = 'editor-list-item';
         box.append(row);
         if (isGroup(s)) group(s.steps, row, p);
         else if (s.kind === 'value') {
           const numeric = Number.isFinite(Number(s.value)),
             info = controlInfo(context.target.control);
+          let range: HTMLInputElement | undefined;
           if (numeric && info) {
             let gesture: string | undefined;
             const slider = el('input');
@@ -168,21 +205,23 @@ export default {
               const current = at(p);
               if (current?.kind === 'value') {
                 slider.value = String(sliderValue(info, Number(current.value)));
-                slider.setAttribute('aria-valuetext', `${current.value} ${info.unit}`);
+                slider.setAttribute('aria-valuetext', withUnit(current.value, info.unit));
               }
             });
-            row.append(slider);
+            range = slider;
           }
           field(
             row,
-            `${label}${info?.unit && numeric ? ` (${info.unit})` : ''}`,
+            label,
             numeric ? 'number' : 'text',
             () => {
               const current = at(p);
               return current?.kind === 'value' ? current.value : '';
             },
             (value) => edit((d, id) => setValue(d, id, p, value)),
+            numeric ? info?.unit : '',
           );
+          if (range) row.append(range);
         } else if (s.kind === 'rest')
           row.append(el('p', `${label}: off${s.was ? ` (${s.was})` : ''}`));
         else {
@@ -224,7 +263,7 @@ export default {
             );
           }
         const actions = el('div');
-        actions.className = 'values-actions';
+        actions.className = 'editor-actions';
         row.append(actions);
         button(actions, 'Earlier', () => edit((d, id) => moveValue(d, id, p, i - 1)), i === 0);
         button(
@@ -282,7 +321,9 @@ export default {
         rect.setAttribute('height', '52');
         rect.setAttribute(
           'fill',
-          ['#a3efd5', '#c3b0f1', '#f0cb86'][[...values].indexOf(String(value)) % 3],
+          ['var(--accent)', 'var(--selection)', 'var(--warning)'][
+            [...values].indexOf(String(value)) % 3
+          ],
         );
         count++;
         title.textContent = `${value} · ${event.part[0]}–${event.part[1]}`;

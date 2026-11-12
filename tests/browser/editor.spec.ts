@@ -105,7 +105,7 @@ test('constant editor: pending → swapped → trigger values → undo; readonly
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await cell(page, 'lead', 'note').press('Enter');
-  await expect(page.locator('#editor')).toContainText('source text');
+  await expect(page.locator('#editor')).toContainText('Edit this rhythm');
   await expect(page.getByRole('slider')).toHaveCount(0);
 });
 test('real house: pasted local file → bass lpf 450 → 900 → unchanged other trigger values', async ({
@@ -206,6 +206,6 @@ test('section-local setting is distinct; signal stays read-only; arrow keys and 
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await page.getByRole('button', { name: 'in build: lpf signal', exact: true }).click();
   await expect(page.locator('#editor-breadcrumb')).toHaveText('chords › in build › lpf');
-  await expect(page.locator('#editor')).toContainText('400 to 2000, driven by a signal');
-  await expect(page.getByRole('slider')).toHaveCount(0);
+  await expect(page.locator('#editor')).toContainText('400 to 2000 Hz · signal');
+  await expect(page.locator('input[type="range"]')).toHaveCount(0);
 });

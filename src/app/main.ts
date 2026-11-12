@@ -13,7 +13,7 @@ document.body.innerHTML = `
     <output id="tempo" aria-label="Tempo">Tempo —</output>
     <button id="undo" disabled>Undo</button><button id="redo" disabled>Redo</button>
     <button id="paste" aria-expanded="true" aria-controls="paste-panel">Paste Strudel</button>
-  </div><p id="solo-banner" hidden><span></span> <button id="stop-solo">Stop solo</button></p><p id="message" role="status"></p></header>
+  </div><p id="solo-banner" hidden><span></span> <button id="stop-solo">Stop solo</button></p><p id="message" role="status"></p><div id="sound-notice" hidden><span role="status">Default sounds could not load. Check your connection, then press Play again.</span><button id="dismiss-sound-notice" aria-label="Dismiss sound notice">Dismiss</button></div></header>
   <main>
     <section id="paste-panel" aria-label="Paste Strudel">
       <label for="source">Your Strudel program</label>
@@ -50,7 +50,13 @@ for (const example of examples) {
   };
   get('examples').append(button);
 }
+let soundNoticeDismissed = false;
+get('dismiss-sound-notice').onclick = () => {
+  soundNoticeDismissed = true;
+  get('sound-notice').hidden = true;
+};
 play.onclick = () => {
+  soundNoticeDismissed = false;
   void app.play();
 };
 stop.onclick = () => app.stop();
@@ -130,6 +136,7 @@ function renderEditor() {
   }
   get<HTMLButtonElement>('undo').disabled = !app.editor?.canUndo;
   get<HTMLButtonElement>('redo').disabled = !app.editor?.canRedo;
+  fitEditor();
   // Keep the selected editor as the only editing surface.
   get<HTMLTextAreaElement>('source').disabled = !!targetId;
   get<HTMLButtonElement>('load').disabled = !!targetId;
@@ -166,6 +173,11 @@ app.subscribe((state) => {
   get('tempo').textContent =
     state.cps === null ? 'Tempo —' : `${Number((state.cps * 60).toFixed(2))} cycles/min`;
   get('message').textContent = state.message;
+  get('sound-notice').hidden =
+    soundNoticeDismissed ||
+    !state.sounds.some(
+      (s) => s.state === 'missing' && s.detail?.includes('Default collections could not load'),
+    );
   get('solo-banner').hidden = !state.solo;
   get('solo-banner').querySelector('span')!.textContent =
     `Solo: ${state.rows.find((r) => r.id === state.solo)?.name.replaceAll('$', '') ?? ''} —`;
@@ -217,6 +229,15 @@ app.subscribe((state) => {
           targetId = id;
           renderEditor();
           originCell()?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+          if (matchMedia('(max-width: 760px)').matches)
+            score
+              .querySelector<HTMLElement>('[data-section][aria-pressed="true"]')
+              ?.scrollIntoView({ block: 'start', inline: 'nearest' });
+          else {
+            const editor = get('editor');
+            if (editor.getBoundingClientRect().top < 16)
+              window.scrollBy(0, editor.getBoundingClientRect().top - 16);
+          }
           get('editor').querySelector<HTMLElement>('input,button')?.focus({ preventScroll: true });
         },
       },
@@ -224,6 +245,16 @@ app.subscribe((state) => {
   }
   renderEditor();
 });
+function fitEditor() {
+  const editor = get('editor');
+  const height =
+    editor.hidden || matchMedia('(max-width: 760px)').matches
+      ? ''
+      : `${Math.max(160, innerHeight - Math.max(16, editor.getBoundingClientRect().top) - 16)}px`;
+  if (editor.style.maxHeight !== height) editor.style.maxHeight = height;
+}
+window.addEventListener('scroll', fitEditor, { passive: true });
+window.addEventListener('resize', fitEditor);
 function frame() {
   const now = app.frame(),
     { fromCycle, toCycle, sections } = app.state;

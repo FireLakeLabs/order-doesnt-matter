@@ -1,66 +1,39 @@
-.rewrite-editor p,
-.rewrite-editor small {
-  font-size: 13px;
-  line-height: 1.5;
-}
-.rewrite-editor label {
-  margin-block: 14px;
-}
 .rewrite-editor pre {
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  font-size: 12px;
-}
-.rewrite-editor button {
-  min-height: 44px;
-  max-width: 100%;
-}
-.rewrite-editor input {
-  min-height: 44px;
-  box-sizing: border-box;
+  font-size: 13px;
 }
 .rewrite-editor ol {
-  padding-left: 26px;
+  padding-left: 24px;
+}
+.rewrite-editor li {
+  margin-bottom: 8px;
 }
 .rewrite-editor [aria-current] {
-  outline: 2px solid #c3b0f1;
-}
-.rewrite-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-block: 16px;
+  outline: 2px solid var(--selection);
+  outline-offset: -3px;
 }
 .rewrite-choice {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  gap: 4px;
-  margin-block: 14px;
+  gap: 8px;
+  margin-bottom: 12px;
 }
 .rewrite-editor figure {
-  margin: 16px 0;
+  margin: 12px 0;
+}
+.rewrite-editor figcaption {
+  margin-bottom: 8px;
 }
 .rewrite-editor svg {
   display: block;
   width: 100%;
-  background: #0b141b;
+  min-height: 48px;
+  background: var(--canvas);
   border-radius: 4px;
 }
 .rewrite-editor rect {
-  fill: #a3efd5;
+  fill: var(--accent);
 }
-.rewrite-editor [role='alert'] {
-  color: #ffb3a8;
-}
-#editor[data-editor-kind='rewrite'] > button {
-  min-height: 44px;
-}
-@media (min-width: 761px) {
-  #editor[data-editor-kind='rewrite'] {
-    max-height: calc(100dvh - 32px);
-    overflow-y: auto;
-  }
-}
-.odm-sheet [data-editor-target$=':rewrites'] {
-  min-height: 44px;
+.rewrite-editor figure:first-of-type rect {
+  fill: var(--selection);
 }

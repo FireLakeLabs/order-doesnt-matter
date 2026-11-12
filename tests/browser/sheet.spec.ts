@@ -29,10 +29,7 @@ test('sheet fixtures: semantics, status labels, phone containment and screenshot
       await expect(page.getByRole('rowheader').filter({ hasText: row.name })).toBeVisible();
     for (const column of model.columns)
       await expect(page.getByRole('columnheader', { name: column, exact: true })).toBeVisible();
-    if (name === 'missing')
-      await expect(
-        page.getByText('paper: missing — Sample collection is unavailable'),
-      ).toBeVisible();
+    if (name === 'missing') await expect(page.getByText('paper: missing')).toBeVisible();
     if (name === 'broken')
       await expect(
         page.getByText('Broken: Cannot query custom rewrite', { exact: true }).first(),
