@@ -23,6 +23,8 @@ export function createPanel(host: HTMLElement, close: () => void) {
     conversions = el('div'),
     conversionError = el('p');
   conversionError.setAttribute('role', 'alert');
+  // An empty alert is still an alert to assistive technology; hide it until it says something.
+  conversionError.hidden = true;
   heading.id = 'editor-breadcrumb';
   status.id = 'editor-status';
   status.setAttribute('role', 'status');
@@ -66,6 +68,7 @@ export function createPanel(host: HTMLElement, close: () => void) {
       conversions.dataset.labels = labels;
       conversions.replaceChildren();
       conversionError.textContent = '';
+      conversionError.hidden = true;
       if (offers.length) conversions.append(el('p', 'Change to…'));
       offers.forEach((offer, index) => {
         const button = el('button', offer.label);
@@ -77,8 +80,10 @@ export function createPanel(host: HTMLElement, close: () => void) {
       const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-conversion]');
       if (!button) return;
       const result = offers[Number(button.dataset.conversion)].apply();
-      if ('ok' in result) conversionError.textContent = result.reason;
-      else {
+      if ('ok' in result) {
+        conversionError.textContent = result.reason;
+        conversionError.hidden = false;
+      } else {
         context.apply(result);
         body.querySelector<HTMLElement>('input,select,button')?.focus({ preventScroll: true });
       }
