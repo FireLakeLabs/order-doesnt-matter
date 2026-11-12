@@ -58,3 +58,12 @@ test('stereo RMS clips to exact frame boundaries and rejects absent PCM', () => 
   expect(() => rms(chunks, 10, 0, 1.3)).toThrow(/captured/);
   expect(() => rms(chunks, 10, 1.3, 1)).toThrow(/window/);
 });
+
+test('tap waits for all captured frames, including delayed gaps, with a bounded failure', async () => {
+  const { capturedRms } = await import('./logic');
+  const chunks = [{ frame: 2, channels: [Float32Array.of(1, 1)] }];
+  const work = capturedRms(chunks, 10, 0, 0.4, 100);
+  setTimeout(() => chunks.unshift({ frame: 0, channels: [Float32Array.of(1, 1)] }), 10);
+  expect(await work).toBe(1);
+  await expect(capturedRms([], 10, 0, 0.4, 10)).rejects.toThrow(/Timed out.*frames 0–4/);
+});

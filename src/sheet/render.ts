@@ -147,6 +147,7 @@ export function mountSheet(
     const tr = element('tr');
     tr.dataset.nodeId = row.id;
     tr.dataset.muted = String(row.muted);
+    tr.classList.toggle('sheet-sit-out', row.absent);
     const name = element('th');
     name.scope = 'row';
     name.dataset.nodeId = row.id;
@@ -162,7 +163,7 @@ export function mountSheet(
       name.append(
         element(
           'span',
-          `${sound.name}: ${sound.state === 'not-loaded' ? 'not loaded yet' : sound.state}${sound.detail ? ` — ${sound.detail}` : ''}`,
+          `${sound.name}: ${sound.state === 'not-loaded' ? (model.playing ? 'not used yet' : 'not loaded yet') : sound.state}${sound.detail ? ` — ${sound.detail}` : ''}`,
           `sheet-sound sheet-${sound.state}`,
         ),
       ),
@@ -201,7 +202,8 @@ export function mountSheet(
       item.dataset.nodeId = chip.nodeId;
       chips.append(item);
     });
-    rewrites.append(row.rewrites.length ? chips : element('span', 'No rewrites', 'sheet-status'));
+    if (!row.absent)
+      rewrites.append(row.rewrites.length ? chips : element('span', 'No rewrites', 'sheet-status'));
     tr.append(rewrites);
     body.append(tr);
   });

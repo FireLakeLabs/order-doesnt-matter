@@ -1,5 +1,5 @@
 import type { OutputTap } from '../contract';
-import { rms } from '../engine/logic';
+import { capturedRms } from '../engine/logic';
 import type { PCM } from '../engine/logic';
 
 /** A rolling minute of PCM; expired or incomplete windows reject rather than claim silence. */
@@ -9,9 +9,15 @@ export async function createTap(context: AudioContext, output: AudioNode): Promi
       [
         `
 class ODMTap extends AudioWorkletProcessor {
-  process(inputs) {
-    const channels = inputs[0];
-    if (channels?.length) this.port.postMessage({ frame: currentFrame, channels });
+  process(inputs, outputs) {
+    // Web Audio supplies zero channels for a silent input bus. Capture that
+    // rendered quantum too, otherwise RMS windows crossing a voice end have gaps.
+    const channels = inputs[0]?.length ? inputs[0] : [new Float32Array(outputs[0][0].length)];
+    // Chromium can repeat currentFrame when the graph changes. Rendered
+    // quanta still arrive in order: never stamp two captures over one another.
+    const frame = Math.max(currentFrame, this.nextFrame ?? currentFrame);
+    this.nextFrame = frame + outputs[0][0].length;
+    this.port.postMessage({ frame, channels });
     return true;
   }
 }
@@ -40,16 +46,7 @@ registerProcessor('odm-output-tap', ODMTap);
     async rms(from, to) {
       if (!Number.isFinite(to) || to - context.currentTime > 10)
         throw Error('RMS window is too far in the future');
-      const deadline = performance.now() + 11000;
-      while (
-        !chunks.length ||
-        (chunks.at(-1)!.frame + chunks.at(-1)!.channels[0].length) / context.sampleRate < to
-      ) {
-        if (performance.now() > deadline)
-          throw Error('Output tap timed out; audio clock may be suspended');
-        await new Promise((resolve) => setTimeout(resolve, 10));
-      }
-      return rms(chunks, context.sampleRate, from, to);
+      return capturedRms(chunks, context.sampleRate, from, to);
     },
   };
 }

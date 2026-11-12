@@ -170,3 +170,18 @@ footer {
     padding-top: 12px;
   }
 }
+
+@media (max-width: 600px) {
+  .transport {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr);
+    gap: 8px;
+  }
+  #tempo {
+    text-align: right;
+    margin: 0;
+  }
+  #paste {
+    justify-self: end;
+  }
+}

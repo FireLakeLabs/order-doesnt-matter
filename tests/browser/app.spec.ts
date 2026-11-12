@@ -26,13 +26,13 @@ test('page: original arrangement → rows → measured synth PCM → pinned sect
     await expect(page.getByRole('button', { name: part.name, exact: true })).toBeVisible();
   await expect(page.getByRole('rowheader').first()).toContainText('not loaded yet');
   await expect(page.getByRole('rowheader').filter({ hasText: 'bass' })).toContainText(
-    'No events in this window',
+    'not in this section',
   );
   // The original opens with sample drums. Select its second section, which also has a synth.
   await page.getByRole('button', { name: parts[1].name, exact: true }).click();
   await expect(page.locator('#window')).toHaveText('Cycles 4–12');
   await expect(page.getByRole('rowheader').filter({ hasText: 'bass' })).not.toContainText(
-    'No events in this window',
+    'not in this section',
   );
   await expect(page.getByRole('button', { name: 'Follow', exact: true })).toHaveAttribute(
     'aria-pressed',

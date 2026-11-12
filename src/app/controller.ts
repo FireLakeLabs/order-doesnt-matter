@@ -115,7 +115,10 @@ export function createApp() {
         update(next);
         void askWindow();
       }
-      await engine.play(generate(state.doc!), { fromCycle });
+      await engine.play(generate(state.doc!), {
+        fromCycle,
+        discoverCycles: state.sections.map((s) => s.start),
+      });
       if (piece === epoch && transport === transportRevision)
         update({ ...state, message: '', sounds: sounds() });
     } catch (error) {
@@ -157,7 +160,8 @@ export function createApp() {
       dirtyRows.clear();
       editor = createEditSession(imported.doc, {
         playing: () => !!engine?.playing,
-        play: (doc) => engine!.play(generate(doc)),
+        play: (doc) =>
+          engine!.play(generate(doc), { discoverCycles: sections(doc).map((s) => s.start) }),
         changed: (pending) =>
           update({
             ...state,
@@ -217,7 +221,9 @@ export function createApp() {
       });
       if (checked && engine?.playing) {
         try {
-          await engine.play(generate(imported.doc));
+          await engine.play(generate(imported.doc), {
+            discoverCycles: sections(imported.doc).map((s) => s.start),
+          });
         } catch (error) {
           message(error);
         }

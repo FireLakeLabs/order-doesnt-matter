@@ -7,6 +7,7 @@ export interface AudioBackend {
     from: number,
     revision: number,
   ): Promise<{ values: unknown[]; commit(): Promise<void> }>;
+  discover?(code: string, starts: number[]): Promise<unknown[]>;
   check(value: unknown): Promise<void>;
   key?(value: unknown): string;
   resume(): Promise<void>;
@@ -72,6 +73,9 @@ export function engineWith(
             options.fromCycle ?? (audio.playing() ? Math.max(0, audio.now()) : 0),
             revision,
           );
+          // At most 64 additional cycles: two at each of the first 32 sections.
+          const discovered =
+            (await audio.discover?.(code, (options.discoverCycles ?? []).slice(0, 32))) ?? [];
           const next = new SoundBook(
             audio.check,
             () => {
@@ -82,7 +86,9 @@ export function engineWith(
           const previous = book;
           book = next;
           emit({ type: 'sounds', sounds: [] });
-          await Promise.all(candidate.values.map((value) => next.observe(value)));
+          await Promise.all(
+            [...candidate.values, ...discovered].map((value) => next.observe(value)),
+          );
           if (token !== epoch) {
             book = previous;
             throw Error('Playback cancelled by stop');
@@ -144,5 +150,20 @@ export function engineWith(
 export const createEngine: CreateEngine = async () => {
   const { createAudio } = await import('../strudel/audio');
   const audio = await createAudio();
-  return engineWith(audio, audio.connect);
+  const { createBrowserQueries } = await import('../strudel/evaluate-browser');
+  const queries = createBrowserQueries();
+  return engineWith(
+    {
+      ...audio,
+      async discover(code, starts) {
+        const results = await Promise.all(
+          starts.map((from) => queries.query(code, from, from + 2)),
+        );
+        return results.flatMap((r) =>
+          r.error ? [] : r.events.filter((e) => e.hasOnset).map((e) => e.value),
+        );
+      },
+    },
+    audio.connect,
+  );
 };

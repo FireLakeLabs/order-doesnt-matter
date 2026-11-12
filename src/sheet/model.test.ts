@@ -255,3 +255,12 @@ it('unpitched rhythm names the hit count instead of a generic event', () => {
   const rhythm = model.rows[0].cells.find((c) => c.name === 'rhythm')!;
   expect(rhythm.label).toBe(`${rhythm.totalCount} hits`);
 });
+
+it('a sit-out row says so once and has empty cells, distinct from silence', () => {
+  const doc = importStrudel('const bass=note(60).s("sine"); arrange([20,s("hh")],[4,bass])').doc;
+  const model = sheetModel({ ...trio, doc, fromCycle: 0, toCycle: 4, events: {} });
+  const bass = model.rows.find((r) => r.name === 'bass')!;
+  expect(bass.status).toBe('not in this section');
+  expect(bass.absent).toBe(true);
+  expect(bass.cells.every((c) => c.label === '' && !c.marks.length)).toBe(true);
+});
