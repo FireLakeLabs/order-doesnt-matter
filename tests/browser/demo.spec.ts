@@ -145,7 +145,7 @@ test('Phase 2: ten editors, one silent video', async ({ browser, request }) => {
           () => (window as unknown as { demoPendingStates: string[] }).demoPendingStates,
         ),
       ).toContain('pending');
-      await expect(page.locator('#editor-status')).toHaveText('Playing now');
+      await expect(page.locator('#editor-status')).toHaveText('Changed');
       await appSignal(page, () =>
         window.odmApp.history.some(
           (e) => e.type === 'trigger' && (e.value as { cutoff?: number }).cutoff === 900,
