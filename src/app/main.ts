@@ -1,10 +1,11 @@
-import { describeTarget } from '../document';
+import { describeTarget } from '../document/edit';
 import { definitionMuted, setMuted } from '../document/edits/set-muted';
 import { createPanel } from '../editor/panel';
 import { createApp } from './controller';
 import { examples } from './examples';
 import { sheetModel, mountSheet, setPlayhead, setCurrentSection } from '../sheet';
 import { liveModel, mountLivePanel, updateLivePanel } from '../live';
+import { createSpiral } from '../spiral';
 import './style.css';
 
 const app = createApp();
@@ -23,7 +24,7 @@ document.body.innerHTML = `
       <p id="load-error" role="alert"></p>
     </section>
     <details id="notes" hidden><summary>Notes</summary><ul></ul></details>
-    <div class="score-toolbar"><h2>The score</h2><button id="follow" aria-pressed="true">Follow</button><output id="window"></output></div>
+    <div class="score-toolbar"><h2>The score</h2><button id="follow" aria-pressed="true">Follow</button><button id="watch" disabled>Watch</button><output id="window"></output></div>
     <div id="score-workspace"><div id="score"><p class="welcome">Paste a Strudel program or choose an original to see its score. Press Play when you're ready.</p></div><aside id="live" aria-label="Now" hidden></aside><aside id="editor" hidden></aside></div>
   </main><footer>Read the score. Follow the cycles.</footer>`;
 const get = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id)! as T;
@@ -33,6 +34,26 @@ const paste = get<HTMLButtonElement>('paste'),
   panel = get('paste-panel');
 const play = get<HTMLButtonElement>('play'),
   stop = get<HTMLButtonElement>('stop');
+const watch = get<HTMLButtonElement>('watch');
+const watchDialog = document.createElement('dialog');
+watchDialog.className = 'spiral-dialog';
+watchDialog.setAttribute('aria-labelledby', 'watch-title');
+watchDialog.innerHTML = `<div class="spiral-toolbar"><h2 id="watch-title">Watch</h2><button id="watch-play">Play</button><button id="watch-stop">Stop</button><button id="watch-close">Close</button></div><p class="spiral-message" role="status"></p><div id="spiral"></div>`;
+document.body.append(watchDialog);
+const spiral = createSpiral(get('spiral'));
+watch.onclick = () => {
+  app.setWatch(true);
+  watchDialog.showModal();
+  spiral.update(app.watchInput(app.engine?.now() ?? null));
+  get('watch-close').focus();
+};
+get('watch-close').onclick = () => watchDialog.close();
+watchDialog.addEventListener('close', () => {
+  app.setWatch(false);
+  watch.focus({ preventScroll: true });
+});
+get('watch-play').onclick = () => void app.play();
+get('watch-stop').onclick = () => app.stop();
 const follow = get<HTMLButtonElement>('follow');
 paste.onclick = () => {
   panel.hidden = !panel.hidden;
@@ -169,6 +190,7 @@ function openEditor(id: string, cell: HTMLElement) {
 get('undo').onclick = () => app.editor?.undo();
 get('redo').onclick = () => app.editor?.redo();
 document.addEventListener('keydown', (event) => {
+  if (watchDialog.open) return;
   if (event.key === 'Escape' && targetId) {
     event.preventDefault();
     closeEditor();
@@ -191,6 +213,11 @@ app.subscribe((state) => {
     targetId = null;
     selectedSession = app.editor;
   }
+  watch.disabled = !state.doc;
+  get<HTMLButtonElement>('watch-play').disabled = !app.canPlay || state.playing;
+  get<HTMLButtonElement>('watch-stop').disabled =
+    !state.playing && !state.message.includes('Preparing');
+  watchDialog.querySelector('.spiral-message')!.textContent = state.message;
   play.disabled = !app.canPlay || state.playing;
   stop.disabled = !state.playing && !state.message.includes('Preparing');
   get('tempo').textContent =
@@ -287,6 +314,7 @@ function frame() {
   const now = app.frame(),
     { fromCycle, toCycle, sections } = app.state;
   updateLivePanel(get('live'), liveModel({ ...app.state, playhead: now }));
+  if (watchDialog.open) spiral.update(app.watchInput(now));
   setPlayhead(score, now === null ? null : ((now - fromCycle) / (toCycle - fromCycle)) * 100);
   const last = sections.at(-1);
   setCurrentSection(score, now, last ? last.start + last.cycles : 0);
@@ -295,9 +323,10 @@ function frame() {
 requestAnimationFrame(frame);
 // Opt-in diagnostics. Bounded event history; no engine is created by inspection.
 if (new URLSearchParams(location.search).has('inspect'))
-  Object.defineProperty(window, 'odmApp', { value: app });
+  Object.defineProperties(window, { odmApp: { value: app }, odmSpiral: { value: spiral } });
 declare global {
   interface Window {
     odmApp: typeof app;
+    odmSpiral: typeof spiral;
   }
 }
