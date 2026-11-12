@@ -202,3 +202,24 @@ it('resolves nested rhythm addresses independently inside a locally different gr
   expect(sequenceOwner(next, `${copy.id}:rhythm`)?.core).toMatchObject({ notation: '[f2 a2]' });
   expect(instrumentEditStatus(next)).toBe('');
 });
+it('moves rewrite order while retaining unrelated localized setting content', () => {
+  const { doc, canonical, copy } = localized();
+  let next = accept(addRewrite(doc, canonical.id, 'fast'));
+  next = accept(addRewrite(next, canonical.id, 'rev'));
+  const local = findWithPath(next, copy.id)!.node as Pattern;
+  if (local.layers[0].kind !== 'settings') throw Error('settings');
+  // Build a stored variation without changing the prior immutable document.
+  next = structuredClone(next);
+  const own = findWithPath(next, copy.id)!.node as Pattern;
+  if (own.layers[0].kind !== 'settings') throw Error('settings');
+  own.layers[0].settings[0].value.core = { kind: 'constant', value: 0.9 };
+  const fast = (findWithPath(next, canonical.id)!.node as Pattern).layers[1];
+  const moved = accept(moveRewrite(next, fast.id, 1));
+  expect(
+    (findWithPath(moved, copy.id)!.node as Pattern).layers.map((l) =>
+      l.kind === 'rewrite' ? l.name : 'settings',
+    ),
+  ).toEqual(['settings', 'rev', 'fast']);
+  expect((findWithPath(moved, copy.id)!.node as Pattern).layers[0]).toEqual(own.layers[0]);
+  expect(instrumentEditStatus(moved)).toBe('');
+});

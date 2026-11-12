@@ -100,14 +100,20 @@ export function replaceAtPath(doc: Doc, path: Path, value: unknown): Doc {
       });
       const agrees =
         compatible &&
-        (change.splice
+        (change.order
           ? Array.isArray(own) &&
-            own.length === change.splice.total &&
-            sameContent(
-              own.slice(change.splice.index, change.splice.index + change.splice.length),
-              change.before,
+            own.length === change.order.length &&
+            change.order.every(
+              (from, to) => from === to || sameContent(own[to], (change.before as unknown[])[to]),
             )
-          : sameContent(own, change.before));
+          : change.splice
+            ? Array.isArray(own) &&
+              own.length === change.splice.total &&
+              sameContent(
+                own.slice(change.splice.index, change.splice.index + change.splice.length),
+                change.before,
+              )
+            : sameContent(own, change.before));
       if (!agrees) {
         for (const section of sections(doc))
           if (
@@ -121,7 +127,8 @@ export function replaceAtPath(doc: Doc, path: Path, value: unknown): Doc {
         continue;
       }
       let replacement = adopt(change.after);
-      if (change.splice && Array.isArray(own)) {
+      if (change.order && Array.isArray(own)) replacement = change.order.map((i) => own[i]);
+      else if (change.splice && Array.isArray(own)) {
         const items = [...own];
         items.splice(change.splice.index, change.splice.length, ...(replacement as unknown[]));
         replacement = items;

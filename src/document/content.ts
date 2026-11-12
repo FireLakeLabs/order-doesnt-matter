@@ -39,9 +39,19 @@ export interface ContentChange {
   before: unknown;
   after: unknown;
   splice?: { index: number; length: number; total: number };
+  order?: number[];
 }
 /** Steps are edit addresses; notation is regenerated from their resulting tree. */
 export function contentChanges(before: unknown, after: unknown, path: Path = []): ContentChange[] {
+  if (Array.isArray(before) && Array.isArray(after) && before.length === after.length) {
+    const order = after.map((item) => before.indexOf(item));
+    if (
+      order.every((i) => i >= 0) &&
+      new Set(order).size === before.length &&
+      order.some((i, at) => i !== at)
+    )
+      return [{ path, before, after, order }];
+  }
   if (sameContent(before, after)) return [];
   if (Array.isArray(before) && Array.isArray(after) && before.length !== after.length) {
     let first = 0,
