@@ -43,8 +43,10 @@ Phase sums equal each test duration, not the parallel command wall time.
 engines are timed through their existing play/event/tap interfaces. No measurement
 adds a scheduling wait. No video is enabled in the default project.
 
-The default runner selects only the `default` project. `demo`, `edit-demo`, `shots`,
-`measure` and `online` belong to `optional`; none is collected or launches a page
+The default runner selects `audio`, which first runs its `default` UI dependency.
+The engine and silent-swap files then run with one worker and no concurrent UI
+project. The existing 3 s acknowledgement/RMS bounds are unchanged. `demo`, `edit-demo`, `shots`,
+`measure` and `online` belong to `optional`; none of those five specs is collected or launches a page
 in the default command. Existing opt-in/environment guards remain. Ordinary specs
 assert layout without taking screenshots; `npm run shots:editors` retains capture.
 
@@ -116,6 +118,15 @@ the public transport first; the rewrite canary observed a partial first cycle,
 so it now retains #22's future complete-cycle window and exact eight triggers.
 Neither change relaxes a threshold. Incomplete pre-fix local series and these
 failed CI attempts are excluded from consecutive evidence and reported in the PR.
+The source editor has also merged on `f9084cb`: 47 browser cases are collected,
+46 execute, and its incoming opt-in screenshot case retains its existing skip.
+Both incoming specs are unchanged. The unisolated three-worker section-base load
+series passed 15/15 (40.176–41.044 s), but the full-source CI series passed twice
+(54.280 / 57.071 s) then missed the existing Kiln silent-acknowledgement 3 s bound
+(85.738 s command). It is not eligible reliability evidence. The final matrix
+uses one serial engine/silent-swap phase after the wider UI phase. Its first full
+three-UI-worker command passed 46 active checks in 47.536 s, above the 45 s local
+target. The rebased `npm run check` passed 320 Node checks in 15.717 s.
 Final worker/load/CI evidence is recorded in the pull request before handback.
 
 ## Not checked
