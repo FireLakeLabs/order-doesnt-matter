@@ -23,7 +23,7 @@ test('Kiln Now pulses agree with predicted and triggered onsets; Stop and editor
   await play(page);
   const capture = await page.evaluateHandle(() => {
     const app = window.odmApp;
-    const from = Math.ceil(app.engine!.now()!),
+    const from = app.engine!.now()!,
       to = from + 2;
     const samples: { id: string; cycle: number; frame: number }[] = [];
     let previous = performance.now();
