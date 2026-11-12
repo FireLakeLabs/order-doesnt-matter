@@ -107,3 +107,38 @@ export function setSolo(state: AppState, id: string | null): AppState {
 }
 export const playbackOptions = (state: Pick<AppState, 'solo'>) =>
   state.solo ? { only: state.solo } : {};
+
+/** Recompute the pinned window by occurrence identity after arrangement edits. */
+export function editedPiece(state: AppState, doc: Doc): AppState {
+  const parts = sections(doc);
+  const selected =
+    parts.find((p) => p.id === state.selected) ??
+    parts[
+      Math.min(
+        Math.max(
+          0,
+          state.sections.findIndex((p) => p.id === state.selected),
+        ),
+        parts.length - 1,
+      )
+    ];
+  const rows = instruments(doc),
+    ids = new Set(rows.map((row) => row.id));
+  const next = {
+    ...state,
+    doc,
+    rows,
+    events: Object.fromEntries(Object.entries(state.events).filter(([id]) => ids.has(id))),
+    solo: state.solo && ids.has(state.solo) ? state.solo : null,
+    sections: parts,
+    selected: selected?.id ?? null,
+  };
+  const total = parts.at(-1);
+  const length = total ? total.start + total.cycles : 0;
+  const offset = state.follow && length ? Math.floor(state.fromCycle / length) * length : 0;
+  return {
+    ...next,
+    fromCycle: selected ? offset + selected.start : state.fromCycle,
+    toCycle: selected ? offset + selected.start + selected.cycles : state.toCycle,
+  };
+}
