@@ -135,27 +135,33 @@ Final worker/load/CI evidence is recorded in the pull request before handback.
 No listening, subjective visual review, live deployment or merge. Optional online,
 recording, measurement and screenshot modes are outside the offline gate.
 
-## Final width comparison
+## Worker comparison on the final test design
 
-With both new editors included, the isolated three-UI-worker configuration passed
-15/15 complete browser commands under continuous `npm test` load,
-53.286–54.451 s. Its initial CI run plus five full reruns all passed (the exact
-runner timings and links are in the PR); one exceeded the 90 s performance target.
-All original timing/RMS bounds and the new 20 s test guard passed.
+The guard caught a real growth problem: before the last move, all 46 active
+Playwright checks passed on a four-worker CI run, but the solo UI test took
+21.825 s. The runner correctly exited 1 (94.101 s complete command). Its repeated
+live name/undo/transport swaps now run in the existing real-controller Node proof;
+the browser retains keyboard/name/undo/banner checks, one real play, its actual
+ready label, Stop and the Stop-solo button. The guard remains 20 s. Harness
+construction/readiness calls now have startup marks; historical baseline
+constructor time remains in Other.
 
-Four UI workers plus the same one-worker audio phase measured 42.000 s on an
-ordinary local command. The full loaded/CI comparison is recorded in the PR;
-the default is now four to measure that exact configuration on CI. The loaded
-series uses the same effective configuration via `--workers=4` before and after
-this default change. Test code, assertions, incoming specs and audio width are
-unchanged during the comparison. Loaded times are reported separately from the
-ordinary local target; they must not be presented as under 45 s.
+After that move, three UI workers plus one subsequent audio worker passed
+15/15 full commands under continuous Node load,
+51.228–51.832 s. Its initial CI run plus five
+full reruns passed 6/6, 66.250–92.571 s read from runner logs.
+The ordinary local command was 47.458 s, above 45 s; one CI run was 90.081 s,
+just above 90 s. No failures were retried into these counts.
 
-The first four-worker CI command passed all 46 active Playwright checks but the
-new guard correctly rejected a 21.825 s solo UI test (94.101 s command). Its
-remaining repeated live name/undo/transport swaps now live in the existing real
-controller Node proof. The browser keeps all keyboard/name/undo/banner checks,
-one real playback, the actual ready label, Stop and the Stop-solo button. The
-20 s guard and all audio bounds are unchanged. Final comparison counts restart
-after this move. Harness constructor/readiness calls also now carry explicit
-Playwright startup marks; historical baseline constructor time remains in Other.
+Four UI workers with the same serial audio phase measured 41.719 s on an ordinary
+local command and are the final wider CI candidate. The loaded series uses the
+identical effective configuration via `--workers=4` before and after this default
+change. Test code, assertions, incoming specs and audio width remain unchanged.
+Final selection, all loaded/CI rows and any unmet targets are recorded in the PR
+before handback. Loaded commands are reported separately and must not be
+presented as under 45 s.
+
+The incoming source capture case keeps its opt-in skip; its two active cases and
+all three section cases run unchanged. The five named standalone optional specs
+are excluded entirely. No listening, subjective visual review, deployment or
+merge is part of this evidence.
