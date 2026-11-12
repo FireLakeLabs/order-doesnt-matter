@@ -70,6 +70,7 @@ export function createPanel(host: HTMLElement, close: () => void) {
       heading.append(alt);
     }
     const kind = kinds.find((kind) => kind.matches(next))!;
+    host.dataset.layout = kind.layout ?? 'side';
     if (id !== next.nodeId || active !== kind) {
       mounted?.destroy();
       body.replaceChildren();

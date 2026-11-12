@@ -28,10 +28,12 @@
   display: block;
   width: 100%;
   padding: 8px 1px;
-  min-width: 44px;
+  min-width: 20px;
   border-radius: 0;
   font-size: 12px;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .rhythm-stack {
   display: grid;
@@ -68,12 +70,121 @@
   display: block;
   margin-bottom: 8px;
 }
-/* Long structures need the panel's available height, including on short scores. */
-#editor[data-editor-kind='rhythm'] {
-  height: calc(100dvh - 32px);
+
+.rhythm-editor > .editor-actions {
+  margin: 0 0 8px;
+  align-items: center;
 }
-@media (max-width: 760px) {
-  #editor[data-editor-kind='rhythm'] {
-    height: 60dvh;
+#editor .rhythm-editor .editor-helper {
+  margin: 0;
+}
+.rhythm-boxes .rhythm-sub,
+.rhythm-boxes .rhythm-alternate,
+.rhythm-boxes .rhythm-together {
+  box-shadow: inset 0 0 0 2px var(--border);
+}
+.rhythm-stack small {
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+  font-size: 11px !important;
+}
+.rhythm-action-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 6px;
+  padding-right: 10px;
+  border-right: 1px solid var(--border);
+}
+.rhythm-action-group:last-child {
+  border: 0;
+}
+#editor .rhythm-action-group label {
+  margin: 0;
+  gap: 3px;
+}
+.rhythm-action-group input {
+  max-width: 230px;
+}
+.rhythm-action-group input[type='number'] {
+  width: 80px !important;
+}
+#editor .rhythm-overview {
+  margin-bottom: 8px;
+}
+.rhythm-overview .overview-part {
+  stroke: var(--canvas);
+  stroke-width: 1;
+}
+.rhythm-overview .overview-rest {
+  fill: var(--border);
+}
+.rhythm-overview .overview-window {
+  fill: var(--selection);
+  fill-opacity: 0.15;
+  stroke: var(--selection);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+@media (pointer: coarse) {
+  #editor .rhythm-boxes .rhythm-part > button {
+    min-width: 44px;
+  }
+}
+@media (min-width: 900px) {
+  .rhythm-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 10px 8px;
+    margin-top: 12px;
+  }
+  #editor .rhythm-actions h3 {
+    flex-basis: 100%;
+    margin: 0;
+  }
+}
+.rhythm-zoom-navigation {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin-bottom: 8px;
+}
+#editor .rhythm-zoom-navigation [data-rhythm-key='back'] {
+  margin: 0;
+}
+.rhythm-editor svg {
+  height: 24px;
+}
+.rhythm-overview svg {
+  height: 20px;
+}
+@media (min-width: 900px) and (pointer: fine) {
+  #editor[data-layout='wide'] button,
+  #editor[data-layout='wide'] input,
+  #editor[data-layout='wide'] select {
+    min-height: 32px;
+    padding-block: 4px;
+  }
+  #editor[data-layout='wide'] .editor-body {
+    padding: 10px 16px;
+  }
+  #editor .rhythm-actions h3 {
+    flex-basis: auto;
+    max-width: 130px;
+  }
+  .rhythm-action-group input:not([type='number']) {
+    width: 100px !important;
+  }
+}
+#editor .rhythm-action-group select {
+  width: auto;
+}
+@media (min-width: 900px) and (pointer: fine) {
+  #editor .rhythm-boxes .rhythm-part > button {
+    min-height: 24px;
+    padding-block: 2px;
   }
 }

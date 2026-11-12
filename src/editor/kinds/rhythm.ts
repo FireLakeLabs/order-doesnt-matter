@@ -51,8 +51,14 @@ const span = (boxes: Box[], path: number[]) => {
       ]
     : [0, 1];
 };
-/** Choose the shallowest view containing selection with touchable descendants. */
-export function rhythmZoom(steps: Step[], selected: number[], width: number): number[] {
+/** Choose the shallowest view whose descendants fit the primary pointer. */
+export function rhythmZoom(
+  steps: Step[],
+  selected: number[],
+  width: number,
+  pointer: 'fine' | 'coarse' = 'coarse',
+): number[] {
+  const minimum = pointer === 'coarse' ? 44 : 20;
   const boxes = layoutRhythm(steps);
   const fits = (path: number[]) => {
     const [start, end] = span(boxes, path);
@@ -60,7 +66,7 @@ export function rhythmZoom(steps: Step[], selected: number[], width: number): nu
       .filter((b) => inside(b.path, path))
       .every((b) => {
         const [a, z] = span(boxes, b.path);
-        return ((z - a) / (end - start)) * width >= 44;
+        return ((z - a) / (end - start)) * width + 1e-9 >= minimum;
       });
   };
   if (fits([])) return [];
@@ -75,6 +81,11 @@ export function rhythmZoom(steps: Step[], selected: number[], width: number): nu
     s = s.steps[0];
   }
   return path;
+}
+/** A one-cycle note strip follows the editable region; longer windows stay labelled in full. */
+export function rhythmStripWindow(window: EditorContext['window'], region: number[]) {
+  const { fromCycle: from, toCycle: to } = window;
+  return to - from === 1 ? { fromCycle: from + region[0], toCycle: from + region[1] } : window;
 }
 const ordinal = (n: number) =>
   `${n}${n % 100 >= 11 && n % 100 <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th')}`;
@@ -103,13 +114,15 @@ const description = (s: Step): string => {
 };
 export default {
   id: 'rhythm',
+  layout: 'wide',
   priority: 10,
   matches: (target) => target.kind === 'rhythm',
   mount(body, initial) {
     let context = initial,
       selected = [0],
       rendered = '',
-      view = sessionStorage.getItem('odm-rhythm-view') ?? '';
+      view = sessionStorage.getItem('odm-rhythm-view') ?? '',
+      region = [0, 1];
     const root = el('div'),
       strip = el('figure'),
       controls = el('div'),
@@ -123,8 +136,9 @@ export default {
     controls.setAttribute('aria-label', 'Rhythm view');
     error.setAttribute('role', 'alert');
     error.className = 'editor-error';
-    root.append(strip, controls, structure, actions, error);
+    root.append(controls, structure, actions, error);
     body.append(root);
+    const pointer = matchMedia('(pointer: coarse)');
     const steps = () => {
       const c = sequenceOwner(context.doc, context.target.nodeId)?.core;
       return c?.kind === 'sequence' ? c.steps : [];
@@ -200,15 +214,7 @@ export default {
           change();
         }
       };
-      parent.append(
-        fieldLabel(
-          sound
-            ? 'Sound · names in this piece, or your own'
-            : 'Note · choose or enter an exact value',
-          input,
-        ),
-        options,
-      );
+      parent.append(fieldLabel(sound ? 'Sound' : 'Note', input), options);
     }
     function render() {
       const list = steps();
@@ -216,9 +222,8 @@ export default {
       const width = structure.clientWidth || root.clientWidth;
       const unresolved = layoutRhythm(list).some((b) => !b.path.length);
       if (unresolved) view = 'List';
-      if (!view)
-        view = innerWidth <= 760 || rhythmZoom(list, selected, width).length ? 'List' : 'Boxes';
-      const key = JSON.stringify([list, selected, view, Math.floor(width)]);
+      if (!view) view = innerWidth < 900 ? 'List' : 'Boxes';
+      const key = JSON.stringify([list, selected, view, Math.floor(width), pointer.matches]);
       if (key === rendered) return;
       rendered = key;
       const focus = (document.activeElement as HTMLElement)?.dataset.rhythmKey;
@@ -239,28 +244,65 @@ export default {
       actions.replaceChildren();
       structure.dataset.view = view;
       const helper = el('p', 'Edit this rhythm. Arrows move; down enters a group, up leaves it.');
-      helper.className = 'editor-helper';
-      structure.append(helper);
+      helper.className = 'sheet-sr-only';
+      controls.append(helper);
       if (!list.length) {
         structure.append(el('p', 'This sequence is available through Edit as source.'));
         return;
       }
       const boxes = layoutRhythm(list),
-        zoom = view === 'Boxes' ? rhythmZoom(list, selected, width) : [];
+        zoom =
+          view === 'Boxes'
+            ? rhythmZoom(list, selected, width, pointer.matches ? 'coarse' : 'fine')
+            : [];
+      region = span(boxes, zoom);
       if (zoom.length > selected.length) selected = zoom;
       if (zoom.length) {
-        structure.append(el('p', `${context.target.breadcrumb[0]} › notes › ${partName(zoom)}`));
-        button(structure, 'Back to whole cycle', 'back', () => {
+        const overview = el('figure');
+        overview.className = 'rhythm-overview';
+        overview.append(el('figcaption', 'Whole cycle · highlighted part below'));
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 1000 40');
+        svg.setAttribute('preserveAspectRatio', 'none');
+        svg.setAttribute('role', 'img');
+        svg.setAttribute('aria-label', 'Whole cycle with the zoomed region highlighted');
+        for (const box of boxes) {
+          const rect = document.createElementNS(svg.namespaceURI, 'rect');
+          rect.setAttribute('x', String(fractionNumber(box.start) * 1000));
+          rect.setAttribute(
+            'width',
+            String((fractionNumber(box.end) - fractionNumber(box.start)) * 1000),
+          );
+          rect.setAttribute('y', String(4 + box.depth * 8));
+          rect.setAttribute('height', '6');
+          rect.setAttribute('class', box.kind === 'rest' ? 'overview-rest' : 'overview-part');
+          svg.append(rect);
+        }
+        const [a, z] = span(boxes, zoom);
+        const highlight = document.createElementNS(svg.namespaceURI, 'rect');
+        highlight.setAttribute('x', String(a * 1000));
+        highlight.setAttribute('width', String((z - a) * 1000));
+        highlight.setAttribute('y', '1');
+        highlight.setAttribute('height', '38');
+        highlight.setAttribute('class', 'overview-window');
+        svg.append(highlight);
+        overview.append(svg);
+        structure.append(overview);
+        const navigation = el('div');
+        navigation.className = 'rhythm-zoom-navigation';
+        navigation.append(el('span', partName(zoom)));
+        button(navigation, 'Back to whole cycle', 'back', () => {
           view = 'List';
           sessionStorage.setItem('odm-rhythm-view', view);
           render();
         });
-        structure.append(el('small', 'Zoomed · List shows the whole cycle.'));
+        structure.append(navigation);
       }
       const tree = el('div');
       tree.className = view === 'Boxes' ? 'rhythm-boxes' : 'rhythm-list';
       tree.setAttribute('aria-label', 'Rhythm parts');
-      structure.append(tree);
+      structure.append(strip, tree);
+      drawStrip();
       function part(s: Step, path: number[], parent: HTMLElement, parentSpan: number) {
         const item = el('div'),
           [a, z] = span(boxes, path);
@@ -274,6 +316,7 @@ export default {
           `part-${path.join('.')}`,
           () => select(path),
         );
+        b.title = `${partName(path)}: ${description(s)}`;
         b.dataset.path = path.join('.');
         b.setAttribute('aria-label', `${partName(path)}: ${description(s)}`);
         b.setAttribute('aria-pressed', String(same(selected, path)));
@@ -291,7 +334,9 @@ export default {
           s.steps.forEach((child, i) => {
             if (s.kind === 'alternate') {
               const row = el('div');
-              row.append(el('small', `turn ${i + 1}`));
+              const turn = el('small', `turn ${i + 1}`);
+              turn.title = `turn ${i + 1}`;
+              row.append(turn);
               children.append(row);
               part(child, [...path, i], row, z - a);
             } else part(child, [...path, i], children, z - a);
@@ -318,16 +363,24 @@ export default {
         actions.append(details);
         return;
       }
-      if (s.kind === 'value') notePicker(actions, s);
-      const buttons = el('div');
-      buttons.className = 'editor-actions';
-      actions.append(buttons);
+      let buttons!: HTMLElement;
+      const actionGroup = (name: string) => {
+        buttons = el('div');
+        buttons.className = 'rhythm-action-group';
+        buttons.setAttribute('role', 'group');
+        buttons.setAttribute('aria-label', name);
+        actions.append(buttons);
+        return buttons;
+      };
+      if (s.kind === 'value') notePicker(actionGroup('Value'), s);
+      actionGroup('Rest');
       const add = (
         text: string,
         op: (d: Doc, id: string, p: number[]) => Doc | Refusal,
         disabled = false,
       ) => button(buttons, text, text, () => edit(op), disabled);
       add(s.kind === 'rest' ? 'Bring back' : 'Rest', restRhythm);
+      actionGroup('Split');
       for (const n of [2, 3]) add(`Split in ${n}`, (d, id, p) => splitRhythm(d, id, p, n));
       const more = el('select');
       more.setAttribute('aria-label', 'Split into more parts');
@@ -348,6 +401,7 @@ export default {
         );
         actions.append(confirmation);
       }
+      actionGroup('Length');
       const length =
         ('weight' in s ? s.weight : undefined) ?? (s.kind === 'value' ? s.repeat : undefined) ?? 1;
       if (['value', 'rest', 'sub'].includes(s.kind)) {
@@ -364,6 +418,7 @@ export default {
           : sequenceOwner(context.doc, context.target.nodeId)?.control === 's'
             ? 'bd'
             : '60';
+      actionGroup('Add a part');
       for (const [text, offset] of [
         ['Add before', 0],
         ['Add after', 1],
@@ -371,7 +426,9 @@ export default {
         add(text, (d, id, p) =>
           insertRhythm(d, id, p.slice(0, -1), p.at(-1)! + offset, defaultValue),
         );
+      actionGroup('Alternatives');
       add('Take turns', (d, id, p) => wrapRhythm(d, id, p, 'alternate', defaultValue));
+      actionGroup('Simultaneous notes');
       add('Add note at the same time', (d, id, p) =>
         wrapRhythm(d, id, p, 'together', defaultValue),
       );
@@ -379,8 +436,10 @@ export default {
         group = rhythmStep(list, parent),
         siblings = parent.length && group && isGroup(group) ? group.steps : list,
         index = selected.at(-1)!;
+      actionGroup('Move');
       add('Earlier', (d, id, p) => moveRhythm(d, id, p, index - 1), index === 0);
       add('Later', (d, id, p) => moveRhythm(d, id, p, index + 1), index === siblings.length - 1);
+      actionGroup('Remove');
       add('Remove', removeRhythm, siblings.length === 1);
       if (s.kind === 'value') {
         const repeats = el('input');
@@ -392,7 +451,7 @@ export default {
         repeats.dataset.rhythmKey = 'repeats';
         repeats.onchange = () =>
           edit((d, id, p) => rhythmModifier(d, id, p, 'repeat', repeats.valueAsNumber));
-        actions.append(fieldLabel('Repeats', repeats));
+        actionGroup('Repeats').append(fieldLabel('Repeats', repeats));
       }
       if (focus)
         Array.from(root.querySelectorAll<HTMLElement>('[data-rhythm-key]'))
@@ -406,9 +465,10 @@ export default {
         [...row.pattern.layers, ...row.uses.flatMap((u) => u.layers)].some(
           (l) => l.kind === 'rewrite',
         );
+      const { fromCycle: from, toCycle: to } = rhythmStripWindow(context.window, region);
       const caption = el(
         'figcaption',
-        `Real note starts${rewrites ? ' · after rewrites' : ''} · cycles ${context.window.fromCycle}–${context.window.toCycle}`,
+        `Real note starts${rewrites ? ' · after rewrites' : ''} · cycles ${from}–${to}`,
       );
       strip.replaceChildren(caption);
       if (!context.events || context.events.error) {
@@ -422,10 +482,12 @@ export default {
       }
       const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       svg.setAttribute('viewBox', '0 0 1000 45');
+      svg.setAttribute('preserveAspectRatio', 'none');
       svg.setAttribute('role', 'img');
       svg.setAttribute('aria-label', 'Notes at their real spans');
-      const { fromCycle: from, toCycle: to } = context.window;
-      const notes = context.events.events.filter((e) => e.whole && e.part[0] === e.whole[0]);
+      const notes = context.events.events.filter(
+        (e) => e.whole && e.part[0] === e.whole[0] && e.whole[0] >= from && e.whole[0] < to,
+      );
       notes.slice(0, 500).forEach((e, i) => {
         const [a, z] = e.whole!,
           rect = document.createElementNS(svg.namespaceURI, 'rect'),
@@ -447,6 +509,7 @@ export default {
     }
     const observer = new ResizeObserver(() => render());
     observer.observe(root);
+    pointer.addEventListener('change', render);
     function update(next: EditorContext) {
       context = next;
       render();
@@ -457,6 +520,7 @@ export default {
       update,
       destroy() {
         observer.disconnect();
+        pointer.removeEventListener('change', render);
         root.remove();
       },
     };

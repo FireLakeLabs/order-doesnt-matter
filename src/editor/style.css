@@ -258,3 +258,38 @@ input:checked ~ .editor-toggle-state::before {
 .editor-list-item .editor-actions button {
   flex: 1;
 }
+
+/* A wide editor occupies the score's width and leaves the sheet above scrollable. */
+#score-workspace:has(#editor[data-layout='wide']:not([hidden])) {
+  grid-template-columns: minmax(0, 1fr);
+  padding-bottom: 60dvh;
+}
+#editor[data-layout='wide'] {
+  position: fixed;
+  z-index: 5;
+  inset: auto 0 0;
+  height: 60dvh;
+  max-height: 60dvh;
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -12px 32px #0008;
+}
+#editor[data-layout='wide'] > header,
+#editor[data-layout='wide'] > footer {
+  padding: 10px 16px;
+}
+@media (min-width: 900px) {
+  #score-workspace:has(#editor[data-layout='wide']:not([hidden])) {
+    padding-bottom: 40dvh;
+  }
+  #editor[data-layout='wide'] {
+    inset-inline: clamp(10px, 3vw, 42px);
+    height: 40dvh;
+    max-height: 40dvh;
+  }
+  #editor[data-layout='wide'] > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+}

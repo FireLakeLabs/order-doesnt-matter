@@ -224,6 +224,7 @@ app.subscribe((state) => {
             score
               .querySelector<HTMLElement>('[data-section][aria-pressed="true"]')
               ?.scrollIntoView({ block: 'start', inline: 'nearest' });
+          else if (get('editor').dataset.layout === 'wide') revealEditedRow();
           else {
             const editor = get('editor');
             if (editor.getBoundingClientRect().top < 16)
@@ -236,16 +237,28 @@ app.subscribe((state) => {
   }
   renderEditor();
 });
+function revealEditedRow() {
+  const row = originCell()?.closest('tr');
+  if (!row) return;
+  const drawerTop = get('editor').getBoundingClientRect().top;
+  const rect = row.getBoundingClientRect();
+  if (rect.bottom > drawerTop - 12) window.scrollBy(0, rect.bottom - drawerTop + 12);
+  else if (rect.top < 12) window.scrollBy(0, rect.top - 12);
+}
 function fitEditor() {
   const editor = get('editor');
   const height =
-    editor.hidden || matchMedia('(max-width: 760px)').matches
+    editor.hidden || editor.dataset.layout === 'wide' || matchMedia('(max-width: 760px)').matches
       ? ''
       : `${Math.max(160, innerHeight - Math.max(16, editor.getBoundingClientRect().top) - 16)}px`;
   if (editor.style.maxHeight !== height) editor.style.maxHeight = height;
 }
 window.addEventListener('scroll', fitEditor, { passive: true });
-window.addEventListener('resize', fitEditor);
+window.addEventListener('resize', () => {
+  fitEditor();
+  if (!get('editor').hidden && get('editor').dataset.layout === 'wide' && innerWidth >= 900)
+    revealEditedRow();
+});
 function frame() {
   const now = app.frame(),
     { fromCycle, toCycle, sections } = app.state;
