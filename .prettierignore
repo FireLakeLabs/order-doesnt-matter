@@ -6,3 +6,5 @@ dist/
 package-lock.json
 test-results/
 playwright-report/
+
+infra/cdk.out/
