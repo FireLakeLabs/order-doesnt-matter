@@ -78,3 +78,20 @@ Keep each entry to a few lines.
   time with the latest value queued; a rejected swap restores the last confirmed
   document. Measured edit-to-scheduled-sound delay: median 364 ms, worst 443 ms
   over 20 edits on one machine. Whether that feels acceptable is the owner's call.
+- **D24 (2026-11-11) Editors are files.** One editor kind per file, one document
+  edit per file; the panel shell is shared. Six kinds so far: constant, values
+  over time, signal, rewrite, instrument, and a read-only fallback that gives
+  the reason.
+- **D25 (2026-11-11) Silence is acknowledged.** The engine reports `committed`
+  when new code is in effect but has no note to play, so a change that mutes
+  stops being pending. Extends D9.
+- **D26 (2026-11-11) "The same notes" means note starts and their values.**
+  Comparisons that decide whether a change is safe ignore fragments that never
+  sound. Evidence: 720 program pairs; `fast`, `slow`, `early`, `late` across a
+  constant setting differ only in fragments.
+- **D27 (2026-11-11) One gate per pull request, both budgets enforced.** The
+  Node suite fails over 60 seconds as the browser suite fails over three
+  minutes. No retries, no raised timeouts: a slow test is fixed at its cause.
+- **D28 (2026-11-11) Parallel pull requests are checked together before the
+  last one merges.** Wave 3.1's four editors each passed alone and three
+  failed once combined.
