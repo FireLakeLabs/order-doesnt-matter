@@ -83,6 +83,9 @@ it.each(['source', 'rhythm'])(
     try {
       await app.load('s("sine")');
       await app.play();
+      await until(app, () =>
+        app.state.sounds.some((s) => s.name === 'sine' && s.state === 'ready'),
+      );
       expect(rows()[0].sounds).toEqual([{ name: 'sine', state: 'ready' }]);
       edit('fresh');
       await until(app, () =>
