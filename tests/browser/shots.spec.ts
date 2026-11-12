@@ -129,6 +129,8 @@ for (const stage of stages)
                 })
                 .click();
             }
+            // Rhythm now owns the former read-only target; dedicated captures follow below.
+            if (kind === 'readonly' && stage === 'after') continue;
             await expect(page.locator('#editor')).toHaveAttribute('data-editor-kind', kind);
             if (kind === 'rewrite') {
               await signal(() => page.locator('#editor figure').count()).toBe(2);
@@ -237,4 +239,51 @@ for (const stage of stages)
       else await page.locator('#editor figure').last().scrollIntoViewIfNeeded();
       await page.screenshot({ path: `${dir}/unchanged-rewrite-390.png` });
     });
+    if (stage === 'after')
+      for (const piece of ['real bass', 'dense hat'])
+        for (const size of [
+          { width: 1440, height: 900 },
+          { width: 390, height: 844 },
+        ])
+          test(`rhythm ${piece} ${size.width}`, async ({ page }) => {
+            await page.setViewportSize(size);
+            await openProgram(
+              page,
+              piece === 'real bass'
+                ? { path: 'corpus/programs/real-house-arranged.strudel' }
+                : {
+                    source: `s("${Array.from({ length: 16 }, () => 'hh').join(' ')} [hh [~ hh] <hh [hh hh]>]")`,
+                  },
+            );
+            if (piece === 'real bass')
+              await page.getByRole('button', { name: 'drop', exact: true }).first().click();
+            const available = await targets(page);
+            const target = available.find(
+              (t) => t.kind === 'rhythm' && (piece !== 'real bass' || t.breadcrumb[0] === 'bass'),
+            )!;
+            await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
+            await selectNode(page, { nodeId: target.nodeId });
+            if (piece === 'dense hat') {
+              await page.getByRole('button', { name: 'List', exact: true }).click();
+              await page.locator('[data-path="16"]').click();
+            }
+            await page
+              .locator('#score-workspace')
+              .evaluate((n) => n.scrollIntoView({ block: 'start' }));
+            const dir = 'test-results/rhythm';
+            await mkdir(dir, { recursive: true });
+            for (const view of ['Boxes', 'List']) {
+              await page.getByRole('button', { name: view, exact: true }).click();
+              await page.locator('#editor .editor-body').evaluate((n) => n.scrollTo(0, 0));
+              await expect(page.locator('#editor')).toHaveAttribute('data-editor-kind', 'rhythm');
+              expect(
+                await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
+              ).toBe(true);
+              if (piece === 'dense hat')
+                await page.locator('[data-path="16"]').scrollIntoViewIfNeeded();
+              await page.screenshot({
+                path: `${dir}/${piece.replaceAll(' ', '-')}-${view.toLowerCase()}-${size.width}.png`,
+              });
+            }
+          });
   });
