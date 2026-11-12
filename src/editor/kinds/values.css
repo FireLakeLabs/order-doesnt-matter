@@ -1,0 +1,75 @@
+.values-editor {
+  min-width: 0;
+}
+.values-editor fieldset {
+  min-width: 0;
+  margin: 12px 0;
+  padding: 8px;
+  border: 1px solid #52717b;
+  border-radius: 6px;
+}
+.values-editor legend {
+  font-size: 13px;
+}
+.values-step {
+  border-top: 1px solid #52717b;
+  padding: 10px 0;
+}
+.values-editor select,
+.values-editor textarea {
+  width: 100%;
+  min-width: 0;
+  font: inherit;
+  color: inherit;
+  background: #0b141b;
+  border: 1px solid #52717b;
+  border-radius: 5px;
+  padding: 8px;
+}
+.values-editor select {
+  white-space: normal;
+  font-size: 12px;
+}
+.values-editor textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+.values-editor button,
+.values-editor select,
+.values-editor input {
+  min-height: 44px;
+}
+.values-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.values-actions button {
+  flex: 1;
+  font-size: 12px;
+  padding: 8px 4px;
+}
+.values-lane svg {
+  display: block;
+  width: 100%;
+  min-height: 60px;
+  background: #0b141b;
+}
+.values-lane rect {
+  stroke: #182a35;
+  stroke-width: 2px;
+}
+.values-lane p {
+  font-size: 12px;
+}
+.values-editor [role='alert'] {
+  color: #ffb3a8;
+}
+
+@media (min-width: 761px) {
+  #editor:has(.values-editor) {
+    max-height: calc(100dvh - 32px);
+    overflow-y: auto;
+  }
+}
