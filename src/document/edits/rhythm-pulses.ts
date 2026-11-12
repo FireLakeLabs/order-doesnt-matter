@@ -21,6 +21,12 @@ export function rhythmPulses(step: Step, from: number, to: number): Pulse[] | un
       to: e.to * scale + offset,
     }));
   function query(index: number, a: number, z: number): Pulse[] | undefined {
+    // Compression can leave an interval a few ulps past an integer cycle.
+    // Snap those boundaries, retaining genuinely small intervals near zero.
+    const snap = (n: number) =>
+      Math.abs(n - Math.round(n)) <= Number.EPSILON * Math.abs(n) * 8 ? Math.round(n) : n;
+    a = snap(a);
+    z = snap(z);
     if (z <= a) return [];
     if (index >= 0) {
       const op = marks!.ops[index];
