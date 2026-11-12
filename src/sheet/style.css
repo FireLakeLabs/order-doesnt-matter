@@ -393,3 +393,8 @@
   margin: 2px 0;
   font-size: inherit;
 }
+
+/* The live views use this same sheet row index and hue. */
+.odm-sheet tbody th[scope='row'] {
+  border-left: 3px solid hsl(calc(var(--instrument-colour) * 67 + 155) 65% 75%);
+}

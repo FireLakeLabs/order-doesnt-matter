@@ -4,6 +4,7 @@ import { createPanel } from '../editor/panel';
 import { createApp } from './controller';
 import { examples } from './examples';
 import { sheetModel, mountSheet, setPlayhead, setCurrentSection } from '../sheet';
+import { liveModel, mountLivePanel, updateLivePanel } from '../live';
 import './style.css';
 
 const app = createApp();
@@ -23,7 +24,7 @@ document.body.innerHTML = `
     </section>
     <details id="notes" hidden><summary>Notes</summary><ul></ul></details>
     <div class="score-toolbar"><h2>The score</h2><button id="follow" aria-pressed="true">Follow</button><output id="window"></output></div>
-    <div id="score-workspace"><div id="score"><p class="welcome">Paste a Strudel program or choose an original to see its score. Press Play when you're ready.</p></div><aside id="editor" hidden></aside></div>
+    <div id="score-workspace"><div id="score"><p class="welcome">Paste a Strudel program or choose an original to see its score. Press Play when you're ready.</p></div><aside id="live" aria-label="Now" hidden></aside><aside id="editor" hidden></aside></div>
   </main><footer>Read the score. Follow the cycles.</footer>`;
 const get = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id)! as T;
 const source = get<HTMLTextAreaElement>('source'),
@@ -60,6 +61,7 @@ follow.onclick = () => app.follow(!app.state.follow);
 let targetId: string | null = null,
   selectedSession: typeof app.editor;
 let origin: { id: string; control?: string; row?: string } | null = null;
+let liveOrigin: string | null = null;
 function originCell() {
   return Array.from(score.querySelectorAll<HTMLElement>('[data-editor-target]')).find(
     (n) =>
@@ -71,7 +73,11 @@ function originCell() {
 function closeEditor() {
   targetId = null;
   renderEditor();
-  originCell()?.focus();
+  (
+    Array.from(get('live').querySelectorAll<HTMLElement>('[data-live-id]')).find(
+      (n) => n.dataset.liveId === liveOrigin,
+    ) ?? originCell()
+  )?.focus();
 }
 const renderPanel = createPanel(get('editor'), closeEditor);
 function renderEditor() {
@@ -139,6 +145,27 @@ function renderEditor() {
   for (const b of Array.from(score.querySelectorAll<HTMLButtonElement>('.sheet-mute')))
     b.disabled = !!targetId;
 }
+function openEditor(id: string, cell: HTMLElement) {
+  origin = {
+    id,
+    control: cell.dataset.control,
+    row: cell.dataset.liveId ?? cell.closest<HTMLElement>('tr')?.dataset.nodeId,
+  };
+  targetId = id;
+  renderEditor();
+  originCell()?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  if (matchMedia('(max-width: 760px)').matches)
+    score
+      .querySelector<HTMLElement>('[data-section][aria-pressed="true"]')
+      ?.scrollIntoView({ block: 'start', inline: 'nearest' });
+  else if (get('editor').dataset.layout === 'wide') revealEditedRow();
+  else {
+    const editor = get('editor');
+    if (editor.getBoundingClientRect().top < 16)
+      window.scrollBy(0, editor.getBoundingClientRect().top - 16);
+  }
+  get('editor').querySelector<HTMLElement>('input,button')?.focus({ preventScroll: true });
+}
 get('undo').onclick = () => app.editor?.undo();
 get('redo').onclick = () => app.editor?.redo();
 document.addEventListener('keydown', (event) => {
@@ -156,6 +183,7 @@ document.addEventListener('keydown', (event) => {
     else app.editor?.undo();
   }
 });
+let previousLiveRows = '';
 let previousNotes: unknown;
 let previousSheet: unknown[] = [];
 app.subscribe((state) => {
@@ -212,29 +240,25 @@ app.subscribe((state) => {
         },
         onSelect: (id) => app.select(id),
         onEdit: (id, _summary, cell) => {
-          origin = {
-            id,
-            control: cell.dataset.control,
-            row: cell.closest<HTMLElement>('tr')?.dataset.nodeId,
-          };
-          targetId = id;
-          renderEditor();
-          originCell()?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-          if (matchMedia('(max-width: 760px)').matches)
-            score
-              .querySelector<HTMLElement>('[data-section][aria-pressed="true"]')
-              ?.scrollIntoView({ block: 'start', inline: 'nearest' });
-          else if (get('editor').dataset.layout === 'wide') revealEditedRow();
-          else {
-            const editor = get('editor');
-            if (editor.getBoundingClientRect().top < 16)
-              window.scrollBy(0, editor.getBoundingClientRect().top - 16);
-          }
-          get('editor').querySelector<HTMLElement>('input,button')?.focus({ preventScroll: true });
+          liveOrigin = null;
+          openEditor(id, cell);
         },
       },
     );
   }
+  const liveRows = JSON.stringify(state.rows.map((r) => [r.id, r.name, r.nameSource]));
+  if (previousLiveRows !== liveRows) {
+    previousLiveRows = liveRows;
+    get('live').hidden = !state.doc;
+    mountLivePanel(get('live'), liveModel({ ...state, playhead: app.engine?.now() ?? null }), {
+      onEdit: (id, line) => {
+        if (targetId) return;
+        liveOrigin = id;
+        openEditor(id, line);
+      },
+    });
+  }
+  updateLivePanel(get('live'), liveModel({ ...state, playhead: app.engine?.now() ?? null }));
   renderEditor();
 });
 function revealEditedRow() {
@@ -262,6 +286,7 @@ window.addEventListener('resize', () => {
 function frame() {
   const now = app.frame(),
     { fromCycle, toCycle, sections } = app.state;
+  updateLivePanel(get('live'), liveModel({ ...app.state, playhead: now }));
   setPlayhead(score, now === null ? null : ((now - fromCycle) / (toCycle - fromCycle)) * 100);
   const last = sections.at(-1);
   setCurrentSection(score, now, last ? last.start + last.cycles : 0);
