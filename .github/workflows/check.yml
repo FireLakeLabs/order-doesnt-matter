@@ -25,3 +25,7 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
+      - run: npm ci --prefix infra
+      - run: npm test --prefix infra
+      - run: npx --no-install cdk synth OrderDoesntMatter --strict --quiet
+        working-directory: infra
