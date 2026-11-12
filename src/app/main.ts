@@ -1,4 +1,5 @@
 import { describeTarget } from '../document';
+import { definitionMuted, setMuted } from '../document/edits/set-muted';
 import { createPanel } from '../editor/panel';
 import { createApp } from './controller';
 import { examples } from './examples';
@@ -12,7 +13,7 @@ document.body.innerHTML = `
     <output id="tempo" aria-label="Tempo">Tempo —</output>
     <button id="undo" disabled>Undo</button><button id="redo" disabled>Redo</button>
     <button id="paste" aria-expanded="true" aria-controls="paste-panel">Paste Strudel</button>
-  </div><p id="message" role="status"></p></header>
+  </div><p id="solo-banner" hidden><span></span> <button id="stop-solo">Stop solo</button></p><p id="message" role="status"></p></header>
   <main>
     <section id="paste-panel" aria-label="Paste Strudel">
       <label for="source">Your Strudel program</label>
@@ -53,6 +54,7 @@ play.onclick = () => {
   void app.play();
 };
 stop.onclick = () => app.stop();
+get('stop-solo').onclick = () => app.solo(null);
 follow.onclick = () => app.follow(!app.state.follow);
 let targetId: string | null = null,
   selectedSession: typeof app.editor;
@@ -82,6 +84,11 @@ function renderEditor() {
       ? {
           doc,
           target,
+          instrument: {
+            sounds: app.state.sounds,
+            solo: app.state.solo,
+            setSolo: (id) => app.solo(id),
+          },
           events: events
             ? {
                 ...events,
@@ -127,6 +134,8 @@ function renderEditor() {
   get<HTMLTextAreaElement>('source').disabled = !!targetId;
   get<HTMLButtonElement>('load').disabled = !!targetId;
   for (const b of Array.from(get('examples').querySelectorAll('button'))) b.disabled = !!targetId;
+  for (const b of Array.from(score.querySelectorAll<HTMLButtonElement>('.sheet-mute')))
+    b.disabled = !!targetId;
 }
 get('undo').onclick = () => app.editor?.undo();
 get('redo').onclick = () => app.editor?.redo();
@@ -157,6 +166,9 @@ app.subscribe((state) => {
   get('tempo').textContent =
     state.cps === null ? 'Tempo —' : `${Number((state.cps * 60).toFixed(2))} cycles/min`;
   get('message').textContent = state.message;
+  get('solo-banner').hidden = !state.solo;
+  get('solo-banner').querySelector('span')!.textContent =
+    `Solo: ${state.rows.find((r) => r.id === state.solo)?.name.replaceAll('$', '') ?? ''} —`;
   get('load-error').textContent = state.loadError;
   follow.setAttribute('aria-pressed', String(state.follow));
   get('window').textContent = state.doc ? `Cycles ${state.fromCycle}–${state.toCycle}` : '';
@@ -189,6 +201,12 @@ app.subscribe((state) => {
       sheetModel({ ...state, doc: state.doc, playhead: app.engine?.now() ?? null }),
       {
         selected: state.selected,
+        definitionMuted: (id) => definitionMuted(state.doc!, id),
+        onMute: (id, muted) => {
+          if (targetId || state.doc !== app.state.doc) return;
+          const next = setMuted(state.doc!, id, muted);
+          if (!('ok' in next)) app.editor?.apply(next, {}, id);
+        },
         onSelect: (id) => app.select(id),
         onEdit: (id, _summary, cell) => {
           origin = {

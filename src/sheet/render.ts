@@ -36,6 +36,8 @@ export function mountSheet(
   options: {
     selected?: string | null;
     onSelect?(id: string): void;
+    onMute?(id: string, muted: boolean): void;
+    definitionMuted?(id: string): boolean;
     onEdit?(id: string, summary: string, origin: HTMLElement): void;
   } = {},
 ): void {
@@ -70,6 +72,7 @@ export function mountSheet(
           row: focus.closest<HTMLElement>('tr')?.dataset.nodeId,
         }
       : undefined;
+  const muteFocus = focus instanceof HTMLElement ? focus.dataset.muteId : undefined;
   const sectionFocus =
     focus instanceof HTMLButtonElement && host.contains(focus) ? focus.dataset.section : undefined;
   const scrollFocus = Array.from(host.querySelectorAll('.sheet-scroll')).indexOf(focus as Element);
@@ -165,6 +168,24 @@ export function mountSheet(
     name.scope = 'row';
     selectable(name, row.id, row.name);
     name.dataset.nodeId = row.id;
+    if (options.onMute) {
+      const muted = options.definitionMuted?.(row.id) ?? row.muted;
+      const mute = element('button', muted ? 'Unmute' : 'Mute', 'sheet-mute');
+      mute.type = 'button';
+      mute.dataset.muteId = row.id;
+      mute.setAttribute(
+        'aria-label',
+        `${muted ? 'Unmute' : 'Mute'} ${row.name.replaceAll('$', '')}`,
+      );
+      mute.setAttribute('aria-pressed', String(muted));
+      mute.onclick = (event) => {
+        event.stopPropagation();
+        // Replaced rows may retain queued clicks. A detached row is never current.
+        if (host.contains(mute)) options.onMute?.(row.id, !muted);
+      };
+      mute.onkeydown = (event) => event.stopPropagation();
+      name.append(mute);
+    }
     name.append(element(row.nameSource === 'generated' ? 'em' : 'strong', row.name));
     if (row.nameSource === 'generated') {
       const alternative = element('span', 'Generated instrument name', 'sheet-sr-only');
@@ -247,6 +268,10 @@ export function mountSheet(
           n.dataset.control === targetFocus.control &&
           n.closest<HTMLElement>('tr')?.dataset.nodeId === targetFocus.row,
       )
+      ?.focus({ preventScroll: true });
+  if (muteFocus)
+    Array.from(host.querySelectorAll<HTMLButtonElement>('[data-mute-id]'))
+      .find((button) => button.dataset.muteId === muteFocus)
       ?.focus({ preventScroll: true });
   if (sectionFocus)
     Array.from(host.querySelectorAll<HTMLButtonElement>('[data-section]'))

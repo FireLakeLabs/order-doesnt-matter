@@ -351,3 +351,16 @@
   font-size: 10px;
   color: #c3b0f1;
 }
+
+.odm-sheet .sheet-mute {
+  float: right;
+  margin: 0 0 6px 8px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 6px;
+  font-size: 11px;
+}
+.odm-sheet .sheet-mute[aria-pressed='true'] {
+  color: #f0cb86;
+  border-color: currentColor;
+}
