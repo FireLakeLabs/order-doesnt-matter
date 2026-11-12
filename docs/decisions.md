@@ -52,3 +52,22 @@ Keep each entry to a few lines.
 - **D16 (2026-11-11) Budgets are checked, not promised.** The browser suite
   fails over three minutes; the four living documents fail over their word
   budgets; fixed ports fail the boundary check.
+- **D17 (2026-11-11) An instrument is a leaf of the score tree.** Walk each
+  top-level pattern down through groups and shared names; each leaf, with its
+  own layers, is one instrument however many sections use it. Layers applied on
+  the way down are that instrument's section-local changes, not new instruments.
+  A bare `silence` is a spacer, not an instrument. Sections come from a single
+  top-level `arrange`. Replaces "one row per top-level pattern".
+- **D18 (2026-11-11) One section at a time.** The song strip shows the whole
+  song; cells show the selected section, or a four-cycle page when there are no
+  sections. Follow tracks the playhead; choosing a section pins it, and Play
+  then starts there.
+- **D19 (2026-11-11) Not loaded yet is its own state.** Before the engine has
+  looked at a sound it says "not loaded yet", distinct from loading, ready and
+  missing. Extends D12.
+- **D20 (2026-11-11) Score questions run in a worker with a time limit.** A
+  pasted program that never finishes becomes a broken row, not a frozen page.
+  Playback still evaluates on the main thread; that gap is open.
+- **D21 (2026-11-11) Every wave contract has an end-to-end check on a real
+  piece.** Wave 1's parts each passed alone while the seam between them was
+  wrong for arranged pieces.
