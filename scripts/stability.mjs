@@ -5,10 +5,13 @@ import { spawn } from 'node:child_process';
 import { mkdirSync, openSync, closeSync, readFileSync, writeFileSync } from 'node:fs';
 const mode = process.argv[2];
 if (!['matrix', 'browser', 'node'].includes(mode)) throw Error('Expected matrix, browser, or node');
-const directory = `test-results/stability/${mode}`;
+const selectedWorkers = process.argv[3];
+if (selectedWorkers && !/^[1-9][0-9]*$/.test(selectedWorkers))
+  throw Error('Expected a positive worker count');
+const directory = `test-results/stability/${mode}${selectedWorkers ? `-${selectedWorkers}` : ''}`;
 mkdirSync(directory, { recursive: true });
 const rows = [];
-const configurations = mode === 'matrix' ? ['1', '2', '4', 'default'] : ['configured'];
+const configurations = mode === 'matrix' ? ['2', '3', '4'] : [selectedWorkers ?? 'configured'];
 for (const workers of configurations) {
   for (let run = 1; run <= (mode === 'matrix' ? 3 : mode === 'browser' ? 15 : 10); run++) {
     const label = `${workers}-${run}`;
@@ -24,7 +27,7 @@ for (const workers of configurations) {
             '--',
             'ci',
             '--reporter=line,json',
-            ...(workers === 'configured' || workers === 'default' ? [] : [`--workers=${workers}`]),
+            ...(workers === 'configured' ? [] : [`--workers=${workers}`]),
           ];
     const code = await new Promise((resolve, reject) => {
       const child = spawn('npm', args, {
@@ -32,7 +35,7 @@ for (const workers of configurations) {
         env: {
           ...process.env,
           PLAYWRIGHT_JSON_OUTPUT_NAME: `${directory}/${label}.json`,
-          ...(workers === 'default' ? { ODM_DEFAULT_WORKERS: '1' } : {}),
+          ODM_PROFILE_PATH: `${directory}/${label}-timings.json`,
         },
       });
       child.once('error', reject);

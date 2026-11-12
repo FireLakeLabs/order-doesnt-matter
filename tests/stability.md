@@ -1,106 +1,112 @@
-# Test stability evidence
+# Test stability and time evidence
 
-This records checks of the tests, not a listening or visual review. No agent can
-hear. Full local measurement logs are ignored under `test-results/stability/`.
+These are assertions and measurements, not listening or subjective visual review.
+No agent can hear. Full local logs and timing reports are ignored beneath
+`test-results/`. PR #22 established the observable-readiness helpers and two-worker
+baseline; the browser-time follow-up keeps those signals, deadlines and thresholds.
 
-## Causes and boundaries
+## Boundaries retained
 
-- Fresh Node workers repeatedly imported Strudel. Twenty identical four-cycle
-  questions measured 2414.76 ms fresh versus 170.02 ms in a one-slot pool;
-  warm medians were 118.44 ms and 2.70 ms. This profiles import/startup overhead,
-  not application performance. The baseline Node suite took 23.78 s.
-- Play's enabled Stop button also covers preparation. Playback readiness now
-  requires a new `swapped` event, `canPlay`, and playing transport, followed by
-  an empty message. Load readiness waits for `canPlay` and all row queries.
-- The old instrument workflow measured 15.416 s and signal workflow 11.872 s.
-  Independent cases now own their setup and the unchanged 30 s test deadline.
-- Observation windows must stay inside their intended section. The section-mute
-  case uses a slower test tempo; the final solo-release observation rewinds the
-  drop through the public transport.
-- Score proofs retain two worker slots per test file and two Vitest file workers.
-  Every question still executes independently; no cross-question result cache.
-  Fresh-worker import, termination, and global-isolation canaries remain fresh.
-  Pool canaries cover registry/tempo restoration, independent execution, event
-  budgets, timeout replacement, queued work, and closing.
-- Global Vitest timeout is back to its 5 s default. Named 10/15/20 s overrides
-  and the corpus 30 s override are removed. Browser's global deadline remains
-  30 s, with no retries. Readiness polls explicitly use that enclosing deadline.
-- PRs run Check once, including infra tests and synth. Deploy no longer has a
-  PR trigger. This is simpler than conditional duplicate root steps. Its main
-  checks, tested-artifact handoff, environments, guard and roles are unchanged.
+Node proofs use real Strudel and the two-slot per-file query pool, with two Vitest
+file workers. Every question executes independently; no result cache. Fresh-worker
+import, termination, global isolation and pool-recovery canaries remain. The Node
+wrapper enforces 60 s, and the complete browser command (build, serve, tests,
+shutdown, cleanup) enforces 180 s. No retries or raised timeouts.
 
-- CI also exposed a null bounding box in the stale-row test: `app.load()`
-  resolves after preflight while row queries are still running. Wait for all
-  replacement row results and visibility before retaining the 44 px assertion.
+Play readiness requires a new `swapped`, `canPlay`, playing transport and an empty
+message. Score readiness requires every row result. Pending waits require the
+coordinator to clear entries and replacement rows to finish. Negative trigger
+observations retain a full post-swap cycle. PCM/Stop observations use captured
+audio-clock frames; separate pages isolate voices. Both deliberately nonterminating
+programs still exercise the real worker's 5 s deadline and <7 s responsive-page bound.
 
-## Wait inventory
+## Measuring and guarding growth
 
-Each row lists the original time-sensitive waits, including optional local modes.
-Locator assertions after a completed signal retain their ordinary assertion
-budget. A signal that never arrives fails the enclosing test; it is never quiet.
+Every default run prints executed test count, complete-command seconds per test,
+and the five slowest Playwright tests (including their per-test hooks). Any test
+above 20 s fails the command, even when Playwright reports it passed; 20 s exactly
+passes. `tests/checks.test.ts` covers the boundary, ranking, skips and empty reports
+without sleeping. The 180 s command budget remains independent.
 
-| File                 | Original wait                                                                                                      | Current signal or observation                                                                                                                                                                                |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `helpers.ts`         | default 5 s load-row and swap polls; editor attribute may already be clear                                         | row results + `canPlay`; new `swapped`; all coordinator entries leave pending                                                                                                                                |
-| `app.spec.ts`        | Play/trigger poll; playhead poll; 300 ms advance sleep; 350 ms Stop sleep; error poll; two timeouts sharing a test | playback helper; trigger history; SVG path change; advancing `now()`; 350 ms of captured audio-clock frames; error history; separate 5 s product-timeout cases retain the asserted <7 s responsiveness bound |
-| `cleanup.spec.ts`    | ready/not-used labels within 5 s of Play; row-results poll                                                         | playback helper before status assertions; score readiness                                                                                                                                                    |
-| `demo.spec.ts`       | 20 s trigger poll, 3200/700/150 ms sleeps; 6500 ms host probe                                                      | playback and cycle signals; queried rows; scroll completion; host request deadline retained                                                                                                                  |
-| `edit-demo.spec.ts`  | row/swap polls; 18 × 45 ms drag sleeps; 700 ms final sleep                                                         | score/playback helpers; actual pointer moves; pending clears before capture/Stop                                                                                                                             |
-| `editor.spec.ts`     | first swap, playing-now, value/undo polls and 10 s full-cycle poll                                                 | playback + pending helpers; carrying trigger values/history markers; complete cycle                                                                                                                          |
-| `engine.spec.ts`     | initialization poll; 400 × 10 ms event loop; 350 ms Stop + 350/500 ms voice-drain sleeps                           | inspect initialization; subscribe-before-check engine event waiter; captured 350 ms PCM window; independent sample/missing/seek pages remove previous voices                                                 |
-| `instrument.spec.ts` | repeated default 5 s swap and value polls across one long test                                                     | new swap signal; one complete post-swap cycle before positive and negative assertions; independent mute/use/solo/name cases                                                                                  |
-| `measure.spec.ts`    | initial swapped poll; each measured edit waits for swapped                                                         | shared playback signal; existing per-edit event subscription retained                                                                                                                                        |
-| `online.spec.ts`     | 6500 ms host probe; 20 s ready; 900 ms voice drain per drum; 5 s/10 ms trigger loop                                | host request deadline retained; independent per-drum page and playback signal; PCM capture bounds the measurement                                                                                            |
-| `rewrite.spec.ts`    | default 5 s full-cycle polls and pending waits across several swaps                                                | independent doubled/reset/degraded/restored cases; carrying revision + complete cycle + pending clears                                                                                                       |
-| `seam.spec.ts`       | pending and default 5 s carrying-value poll                                                                        | coordinator state and carrying trigger signal                                                                                                                                                                |
-| `sheet.spec.ts`      | loaded region/`tbody` selector                                                                                     | existing explicit rendered-sheet readiness; no clock sleep/audio/swap waits                                                                                                                                  |
-| `shell.spec.ts`      | `networkidle`'s quiet-time delay                                                                                   | navigation's load event; shell has no requests started after load                                                                                                                                            |
-| `signal.spec.ts`     | carrying gain poll, 10 s two-cycle poll, result-values poll; many changes in one test                              | independent bound/period/undo cases; pending, trigger-cycle and queried-value signals                                                                                                                        |
-| `values.spec.ts`     | default 5 s cycle polls following Play; pending after edits                                                        | playback/pending helpers and completed cycle in trigger history                                                                                                                                              |
+`ODM_PROFILE_PATH=test-results/timing/run.json npm run test:browser` also retains
+per-test timings. `scripts/browser-report.mjs` uses Playwright's leaf-step clock,
+`ODM:` helper steps and browser performance measures. Categories are navigation,
+import plus row questions, engine/start, swap acknowledgement, event/audio-clock
+observation, PCM/screenshot capture, teardown and other interactions. Nested steps, poll intervals and gaps
+are counted once on one timeline. Overlapping browser marks are unioned (capture, then swap,
+playback, observation) inside the surrounding page evaluation.
+Categories are elapsed test activity, not CPU profiles; concurrent work overlaps
+across tests. Fixture overhead and gaps between API calls are included.
+Phase sums equal each test duration, not the parallel command wall time.
 
-The later rebase onto the merged editor polish also brings two browser files:
+`play()` includes engine creation and first scheduling acknowledgement. Harness
+engines are timed through their existing play/event/tap interfaces. No measurement
+adds a scheduling wait. No video is enabled in the default project.
 
-- `silent-swap.spec.ts`: replace the 10 ms acknowledgement loop with the engine
-  subscription helper and the 300 ms sleep with a captured audio-clock window.
-  Each silent program has its own setup. Keep the original 3000 ms bounds for
-  initial, silent, and resumed acknowledgements, now as explicit measurements.
-- `shots.spec.ts`: its opt-in capture tests wait for the queried comparison
-  figures through the helper. The existing named 120 s capture limit and opt-in
-  conditions come from main; this change adds neither skips nor timeout raises.
+The default runner selects only the `default` project. `demo`, `edit-demo`, `shots`,
+`measure` and `online` belong to `optional`; none is collected or launches a page
+in the default command. Existing opt-in/environment guards remain. Ordinary specs
+assert layout without taking screenshots; `npm run shots:editors` retains capture.
 
-The engine transport's 5 ms interval samples `playing` during a swap. It is a
-measurement, not a readiness wait. PCM RMS waits for complete captured frames.
+## Assertion audit
+
+UI input, pointer, focus, keyboard, containment, real audio/trigger delivery,
+worker limits and one real-piece integration per editor kind remain in Chromium.
+The table lists every removed assertion family and its Node replacement. Exact
+multisets are queried at the same absolute cycles, including time-addressed Perlin.
+
+| Was in browser                                                                                                                                  | Now in Node                                                                                                                                                                                                    | File                                                |
+| ----------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------- |
+| Constant real-house bass 450 → 900, nonempty bass/other bags, exact unchanged other values                                                      | Explicit bass 450 → 900 full-event multiset; existing independent row round trips                                                                                                                              | `tests/edit.test.ts`                                |
+| Mute's exact five unaffected sound names; section mute removes piano only in intro, leaves drop                                                 | Real-house mute/use-mute exact per-row events over all 28 cycles, unmute restoration and generation round trip                                                                                                 | `tests/instrument-editor.test.ts`                   |
+| Solo-only event bags before/after rename and undo; section/definition undo/redo preserves solo; kick mute restored; release restores six sounds | Real-house history snapshots, solo playback options across stop/restart, exact bass events, restored mute, six released sounds                                                                                 | `tests/instrument-editor.test.ts`                   |
+| Rewrite double/reset/degrade/order/restore counts and exact untouched event bags                                                                | Real-house add/edit/reorder/remove exact per-row events; browser retains doubled-kick delivery and all editing/focus paths                                                                                     | `tests/rewrite-editor.test.ts`                      |
+| Signal saw two-cycle 32-value rise, bounds, exact unaffected values; queried values restored after undo                                         | Real-house range/shape/period per-row proof, exact 32-value count; immutable prior snapshots and history tests                                                                                                 | `tests/signal-editor.test.ts`, `tests/edit.test.ts` |
+| Techno alternating room value at every event, same counts and untouched fields/instruments                                                      | 16-cycle per-row alternating room proof with every span and unaffected value preserved                                                                                                                         | `tests/values-editor.test.ts`                       |
+| Kiln bass alternating cutoff 700/900 and nonempty events                                                                                        | Explicit two-cycle Kiln proof plus two undo snapshots; browser retains input and conversion undo                                                                                                               | `tests/values-editor.test.ts`                       |
+| Real-house Node bundle/import/generate/query/model JSON pipeline and eight rows/local label                                                     | Real worker per-row queries, eight-row sheet model, local target label and JSON round trip; browser seam retains real rendering/count/local label and page-error check; fixture suite retains JSON-fetch/mount | `tests/targets.test.ts`                             |
+| Seam's pure instrument-kind assertion                                                                                                           | Every selectable real-house/techno target kind, plus handwritten target cases                                                                                                                                  | `tests/targets.test.ts`                             |
+
+Routine screenshots were artifacts, not assertions; all viewport, containment,
+control-size, focus, sticky-heading and DOM-identity assertions remain. The nested
+values lane's actual SVG attributes remain a browser check: its renderer has no
+exported pure geometry function, and this task does not change product code.
+
+## Setup decisions
+
+The baseline's largest costs were full-cycle observations and repeated playback,
+not navigation. Independent tests retain their own pages: PCM isolation, pinned
+section positions, undo histories and pending revisions make shared mutable setup
+costly to restore safely. The rewrite variants still name one behavior each, but
+only the real delivery canary starts playback; reset/degrade/order/remove exercise
+real keyboard controls and previews while stopped. This removes expensive setup
+without coupling failures to a preceding case. Instrument solo keeps its actual
+keyboard/banner/stop/restart/release path; repeated score proofs run in Node.
 
 ## Reproduction
 
 Use Node `.node-version`, `npm ci`, and installed Playwright Chromium.
 
-- `node scripts/profile-queries.mjs`: cold/warm worker comparison (20 queries).
-- `node scripts/stability.mjs matrix`: workers 1/2/4/default, three runs each.
-- `node scripts/stability.mjs node`: ten consecutive Node suites.
-- `node scripts/stability.mjs browser`: fifteen consecutive browser suites; run
-  `npm test` continuously in another shell for the entire measurement.
+- `npm run check`
+- `node scripts/stability.mjs matrix`: three runs each at 2/3/4 workers.
+- `node scripts/stability.mjs browser 3` and `... browser 4`: fifteen consecutive
+  complete browser commands at each count. Run `npm test` continuously in another
+  shell for the entire series. Stress stops on its first failure, without retry.
+- `node scripts/stability.mjs node`: ten consecutive complete Node commands.
 
-The browser/Node stress commands stop at their first failure; the matrix records
-all three planned runs per worker count. Each writes durations and exit codes to `test-results/stability/<mode>/runs.json`. Browser JSON reports
-include per-test durations. No failed run is retried by the runner.
-
-## Assertions changed
-
-No score/value/count/RMS threshold assertion was removed or relaxed. Long tests
-are partitioned into independent setups. Instrument negative assertions observe
-an entire post-swap cycle. Stop's equal trigger-count assertion spans 350 ms of
-captured audio time instead of 350 ms of host sleep. Optional online drums each
-start on a fresh page, retaining every drum's ready/RMS/background assertion.
-The local edit recording now asserts the current `Playing now` label instead of
-its stale `Heard by the engine` label, after the coordinator clears pending.
-
-## Product changes requested
-
-None required so far. The page already exposes the signals used above. The
-suite does not infer voice-tail completion: independent pages isolate RMS cases.
+Each series writes exit codes, wall seconds, Playwright JSON and phase timings
+under `test-results/stability/<mode>[-<workers>]/`. CI reruns use the same head for
+one worker setting; changing worker count starts a new head and count.
 
 ## Measured
 
-Final worker matrix, stress runs, and CI logs are recorded in the pull request.
-Local baseline browser suite: 27.153 s (24 regular checks; optional modes excluded).
+Local baseline on `c34ab45`: 46 checks, two workers, 73.115 s including build and
+shutdown. The marked per-test profile took 77.257 s without deliberate load after phase instrumentation. An earlier
+84.296 s diagnostic overlapped a Node run and is excluded from comparisons. Preliminary
+reduced-suite runs: 41 checks, 34.017 s at three workers; 30.749 s at four workers.
+Final worker/load/CI evidence is recorded in the pull request before handback.
+
+## Not checked
+
+No listening, subjective visual review, live deployment or merge. Optional online,
+recording, measurement and screenshot modes are outside the offline gate.
