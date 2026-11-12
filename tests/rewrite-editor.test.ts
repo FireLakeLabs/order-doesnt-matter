@@ -8,7 +8,7 @@ import { moveRewrite } from '../src/document/edits/rewrite-move';
 import { removeRewrite } from '../src/document/edits/rewrite-remove';
 import { importStrudel } from '../src/import';
 import { generate } from '../src/generate';
-import { queryEventsNode } from '../src/strudel/evaluate-node';
+import { queryEventsNode } from './node-query';
 const load = (s: string) => importStrudel(s).doc;
 const good = (d: ReturnType<typeof addRewrite>): Doc => {
   if ('ok' in d) throw Error(d.reason);
@@ -115,7 +115,7 @@ it('real house: fast doubles kick onsets, degradation removes them, removal rest
     } else for (const result of [b, c, d, e, f]) expect(result).toEqual(a);
     expect(g).toEqual(a);
   }
-}, 20000);
+});
 it('existing real-ambient numeric rewrite edits survive generation and change only their instrument', async () => {
   const d = load(readFileSync('corpus/programs/real-ambient.strudel', 'utf8'));
   const row = instruments(d).find((r) =>

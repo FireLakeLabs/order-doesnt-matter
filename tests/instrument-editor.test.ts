@@ -3,7 +3,7 @@ import { expect, it } from 'vitest';
 import { describeTarget, instruments, sections, type Doc } from '../src/document';
 import { importStrudel } from '../src/import';
 import { generate } from '../src/generate';
-import { queryEventsNode } from '../src/strudel/evaluate-node';
+import { queryEventsNode } from './node-query';
 import { definitionMuted, setMuted } from '../src/document/edits/set-muted';
 import { setUseMuted } from '../src/document/edits/set-use-muted';
 import { renameInstrument } from '../src/document/edits/rename-instrument';
@@ -128,7 +128,7 @@ it('real house: mute/use mute remove exactly the selected events; rename preserv
   );
   expect(solo.error).toBeNull();
   expect(solo.events.length).toBeGreaterThan(0);
-}, 20000);
+});
 
 it('a repeated section can mute one occurrence without changing definition ids or other sections', async () => {
   const doc = fixture(),

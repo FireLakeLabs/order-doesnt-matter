@@ -1,3 +1,4 @@
+import { scoreReady, play, waitForPending, signal } from './helpers';
 import { mkdir, readFile, rename } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import type {} from '../../src/app/main';
@@ -21,18 +22,15 @@ test('record real house constant edit and undo (video has no audio)', async ({ b
       .getByLabel('Your Strudel program')
       .fill(await readFile('corpus/programs/real-house-arranged.strudel', 'utf8'));
     await page.getByRole('button', { name: 'Load', exact: true }).click();
+    await scoreReady(page);
     await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
-    await expect
-      .poll(() => page.evaluate(() => Object.keys(window.odmApp.state.events).length))
-      .toBe(8);
+    await signal(() => page.evaluate(() => Object.keys(window.odmApp.state.events).length)).toBe(8);
     await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
     await page.getByRole('button', { name: 'drop', exact: true }).first().click();
-    await page.getByRole('button', { name: 'Play', exact: true }).click();
-    await expect
-      .poll(() =>
-        page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'swapped').length),
-      )
-      .toBeGreaterThan(0);
+    await play(page);
+    await signal(() =>
+      page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'swapped').length),
+    ).toBeGreaterThan(0);
     await page
       .getByRole('row')
       .filter({
@@ -57,15 +55,16 @@ test('record real house constant edit and undo (video has no audio)', async ({ b
     await page.mouse.down();
     for (let i = 0; i < 18; i++) {
       await page.mouse.move(box.x + box.width * (0.45 + i * 0.012), box.y + box.height / 2);
-      await page.waitForTimeout(45);
     }
     await page.screenshot({ path: 'test-results/edit-demo/drag-desktop.png' });
     await page.mouse.up();
-    await expect(page.locator('#editor-status')).toHaveText('Heard by the engine');
+    await waitForPending(page);
+    await expect(page.locator('#editor-status')).toHaveText('Playing now');
     await page.screenshot({ path: 'test-results/edit-demo/heard-desktop.png' });
     await page.getByRole('button', { name: 'Undo', exact: true }).click();
     await expect(page.getByRole('spinbutton')).toHaveValue('450');
-    await expect(page.locator('#editor-status')).toHaveText('Heard by the engine');
+    await waitForPending(page);
+    await expect(page.locator('#editor-status')).toHaveText('Playing now');
     await page.setViewportSize({ width: 390, height: 844 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
@@ -74,7 +73,7 @@ test('record real house constant edit and undo (video has no audio)', async ({ b
     expect(
       await page.evaluate(() => (window as unknown as { editDemoStates: string[] }).editDemoStates),
     ).toContain('pending');
-    await page.waitForTimeout(700);
+    await waitForPending(page);
     await page.getByRole('button', { name: 'Stop', exact: true }).click();
   } finally {
     await context.close();

@@ -1,3 +1,4 @@
+import { scoreReady, play, appSignal, signal } from './helpers';
 import { expect, test } from '@playwright/test';
 import { instruments, sections } from '../../src/document';
 import type {} from '../../src/app/main';
@@ -14,6 +15,7 @@ test('page: original arrangement → rows → measured synth PCM → pinned sect
   await offline(page);
   await page.goto('/?inspect');
   await page.getByRole('button', { name: 'Kiln', exact: true }).click();
+  await scoreReady(page);
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
   expect(await page.evaluate(() => window.odmApp.engine)).toBeNull();
   const doc = await page.evaluate(() => window.odmApp.state.doc!);
@@ -41,13 +43,11 @@ test('page: original arrangement → rows → measured synth PCM → pinned sect
   await expect(page.getByRole('rowheader').filter({ hasText: 'bass' })).toContainText(
     'not loaded yet',
   );
-  await page.getByRole('button', { name: 'Play', exact: true }).click();
+  await play(page);
   await expect(page.getByRole('button', { name: 'Stop', exact: true })).toBeEnabled();
-  await expect
-    .poll(() =>
-      page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'trigger').length),
-    )
-    .toBeGreaterThan(4);
+  await signal(() =>
+    page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'trigger').length),
+  ).toBeGreaterThan(4);
   const measured = await page.evaluate(async () => {
     const app = window.odmApp,
       e = app.engine!;
@@ -69,7 +69,7 @@ test('page: original arrangement → rows → measured synth PCM → pinned sect
   await expect(page.getByText(/Default sounds could not load/).first()).toBeVisible();
   const mark = page.locator('.sheet-playhead').first();
   const before = await mark.getAttribute('d');
-  await expect.poll(() => mark.getAttribute('d')).not.toBe(before);
+  await signal(() => mark.getAttribute('d')).not.toBe(before);
   await expect(page.getByRole('button', { name: parts[1].name, exact: true })).toHaveAttribute(
     'aria-current',
     'true',
@@ -81,7 +81,7 @@ test('page: original arrangement → rows → measured synth PCM → pinned sect
   );
   // Pinned cells survive continued playback in a different section.
   const current = await page.evaluate(() => window.odmApp.engine!.now());
-  await page.waitForTimeout(300);
+  await appSignal(page, (previous) => window.odmApp.engine!.now()! > previous!, current);
   expect(await page.evaluate(() => window.odmApp.engine!.now())).toBeGreaterThan(current!);
   await expect(page.locator('#window')).toHaveText('Cycles 12–28');
   await expect(page.getByRole('button', { name: parts[2].name, exact: true })).toHaveAttribute(
@@ -104,7 +104,12 @@ test('page: original arrangement → rows → measured synth PCM → pinned sect
   const count = await page.evaluate(
     () => window.odmApp.history.filter((e) => e.type === 'trigger').length,
   );
-  await page.waitForTimeout(350);
+  // Observe a real audio-clock window after Stop, including captured frames.
+  await page.evaluate(async () => {
+    const e = window.odmApp.engine!;
+    const from = e.audioTime();
+    await e.tap().rms(from, from + 0.35);
+  });
   expect(
     await page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'trigger').length),
   ).toBe(count);
@@ -112,12 +117,10 @@ test('page: original arrangement → rows → measured synth PCM → pinned sect
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
-test('worker timeout leaves the page responsive; superseded results never replace a new piece', async ({
-  page,
-}) => {
-  await offline(page);
-  await page.goto('/?inspect');
-  for (const source of ['new Pattern(()=>{while(true){}})', 'while(true){}; silence']) {
+for (const source of ['new Pattern(()=>{while(true){}})', 'while(true){}; silence'])
+  test(`worker timeout leaves the page responsive: ${source}`, async ({ page }) => {
+    await offline(page);
+    await page.goto('/?inspect');
     await page.getByLabel('Your Strudel program').fill(source);
     const start = Date.now();
     await page.getByRole('button', { name: 'Load', exact: true }).click();
@@ -128,10 +131,14 @@ test('worker timeout leaves the page responsive; superseded results never replac
     if (source.startsWith('new'))
       await expect(page.getByRole('rowheader').first()).toContainText('Broken: Question timed out');
     await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
-  }
+  });
+test('superseded results never replace a new piece', async ({ page }) => {
+  await offline(page);
+  await page.goto('/?inspect');
   await page.getByLabel('Your Strudel program').fill('new Pattern(()=>{while(true){}})');
   await page.getByRole('button', { name: 'Load', exact: true }).click();
   await page.getByRole('button', { name: 'Lichen', exact: true }).click();
+  await scoreReady(page);
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
   await expect(page.getByRole('rowheader').first()).not.toContainText('Broken');
   await expect(page.locator('#message')).toBeEmpty();
@@ -142,11 +149,12 @@ test('engine errors appear in the top bar', async ({ page }) => {
   await page.goto('/?inspect');
   await page.getByLabel('Your Strudel program').fill('note("not_a_note").s("sine")');
   await page.getByRole('button', { name: 'Load', exact: true }).click();
+  await scoreReady(page);
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect(page.locator('#message')).not.toBeEmpty();
-  await expect
-    .poll(() => page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'error').length))
-    .toBeGreaterThan(0);
+  await signal(() =>
+    page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'error').length),
+  ).toBeGreaterThan(0);
   await expect(page.locator('#message')).not.toContainText('Preparing');
 });

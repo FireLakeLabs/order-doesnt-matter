@@ -4,7 +4,8 @@ import { importStrudel } from '../src/import';
 import { generate } from '../src/generate';
 import { parseSteps, printSteps } from '../src/import/mini';
 import { queryEvents, queryEventsWithBudget } from '../src/strudel/evaluate';
-import { queryEventsNode } from '../src/strudel/evaluate-node';
+import { queryEventsNode as queryFresh } from '../src/strudel/evaluate-node';
+import { queryEventsNode } from './node-query';
 import { checkDoc, voices, instruments } from '../src/document';
 import type { Doc } from '../src/document';
 import baseline from './corpus/tier3-baseline.json';
@@ -46,9 +47,8 @@ async function equivalent(source: string, horizon = 2) {
   return { doc, fresh, result: a };
 }
 
-// Vitest bounds concurrent tests to five. Every evaluation still has its own worker
-// and all original/round-trip/isolation assertions remain independent.
-describe('corpus proof', { concurrent: true, timeout: 30_000 }, () => {
+// Trusted corpus proofs reuse imports; every comparison still evaluates separately.
+describe('corpus proof', { concurrent: true }, () => {
   it('baseline covers exactly the indexed corpus', () =>
     expect(Object.keys(baseline).sort()).toEqual(index.map((p) => p.id).sort()));
   for (const entry of index)
@@ -288,11 +288,11 @@ describe('no-audio evaluator', () => {
     'new Pattern(()=>{while(true){}})',
     'await new Promise(()=>{}); silence',
   ])('a fresh Node worker interrupts %s', async (source) => {
-    const result = await queryEventsNode(source, 0, 1, { timeoutMs: 700 });
+    const result = await queryFresh(source, 0, 1, { timeoutMs: 700 });
     expect(result.error?.phase).toBe('timeout');
   });
   it('runs real Strudel in a fresh Node worker', async () =>
-    expect(await queryEventsNode('note(60)', 0, 1)).toMatchObject({
+    expect(await queryFresh('note(60)', 0, 1)).toMatchObject({
       error: null,
       events: [{ value: { note: 60 } }],
     }));

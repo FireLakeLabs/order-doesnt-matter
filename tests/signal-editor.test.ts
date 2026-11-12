@@ -4,7 +4,7 @@ import { checkDoc, instruments, walk, type Doc, type Setting } from '../src/docu
 import { describeTarget } from '../src/document/edit';
 import { importStrudel } from '../src/import';
 import { generate } from '../src/generate';
-import { queryEventsNode } from '../src/strudel/evaluate-node';
+import { queryEventsNode } from './node-query';
 import { signalState, signalShapes } from '../src/document/edits/signal-shared';
 import { setSignalShape } from '../src/document/edits/signal-shape';
 import { setSignalRange } from '../src/document/edits/signal-range';
@@ -194,7 +194,7 @@ it('real house worker: range → saw → two-cycle rise; every other instrument 
       }
     }
   }
-}, 20000);
+});
 it('all supported shapes and both conversions generate real worker events without changing neighbours', async () => {
   const a = load('const hats=s("hh*8").gain(.5); $: hats; s("bd*2").gain(.7)'),
     id = settings(a).find((s) => s.name === 'gain')!.id;
@@ -217,7 +217,7 @@ it('all supported shapes and both conversions generate real worker events withou
     expect(hats.length).toBe(32);
     expect(hats.every((e) => Number.isFinite((e.value as { gain: number }).gain))).toBe(true);
   }
-}, 15000);
+});
 
 it('exposes both conversion offers as pure operations, including their actual returned documents', () => {
   const a = load('s("hh*8").gain(.5)'),

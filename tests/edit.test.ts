@@ -4,7 +4,7 @@ import { describeTarget, setConstant } from '../src/document/edit';
 import { instruments, walk, type Doc, type Setting } from '../src/document';
 import { importStrudel } from '../src/import';
 import { generate } from '../src/generate';
-import { queryEventsNode } from '../src/strudel/evaluate-node';
+import { queryEventsNode } from './node-query';
 import { controlInfo, sliderValue, fromSlider } from '../src/editor/controls';
 import { history, push, undo, redo } from '../src/editor/history';
 import { pending, transition } from '../src/editor/pending';
@@ -191,7 +191,7 @@ for (const file of ['real-house-arranged', 'real-techno'])
         );
       } else expect(b.events.map(stable).sort()).toEqual(a.events.map(stable).sort());
     }
-  }, 20000);
+  });
 
 it('one throttled revision carries earlier edits to other targets; late promises cannot regress good', () => {
   const a = load('note(60).gain(.5).pan(.2)'),

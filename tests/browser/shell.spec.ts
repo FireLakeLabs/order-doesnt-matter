@@ -12,6 +12,6 @@ test('built shell loads without browser or request errors', async ({ page }) => 
   await page.goto('/');
   await expect(page.getByRole('heading', { name: "Order Doesn't Matter" })).toBeVisible();
   await expect(page.getByRole('main')).toBeAttached();
-  await page.waitForLoadState('networkidle');
+  // goto waits for load; the shell has no asynchronous requests after load.
   expect(errors).toEqual([]);
 });

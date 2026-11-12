@@ -1,7 +1,7 @@
 import { expect, test } from 'vitest';
 import { docBudgets, inspectDocs } from '../scripts/docs.mjs';
 import { boundaryProblems } from '../scripts/boundaries.mjs';
-import { timingResult, BROWSER_LIMIT_SECONDS } from '../scripts/timing.mjs';
+import { timingResult, BROWSER_LIMIT_SECONDS, NODE_LIMIT_SECONDS } from '../scripts/timing.mjs';
 
 test('document budgets detect missing and oversized living docs', () => {
   const read = (path: string) => (path === 'AGENTS.md' ? 'word '.repeat(401) : '');
@@ -45,4 +45,10 @@ test('browser timing includes the boundary and fails above it without sleeping',
   expect(timingResult(0, 180_000)).toMatchObject({ seconds: 180, ok: true });
   expect(timingResult(0, 180_001)).toMatchObject({ ok: false });
   expect(timingResult(10, 20, 0)).toMatchObject({ ok: false });
+});
+
+test('Node timing includes 60 seconds and rejects excess without sleeping', () => {
+  expect(NODE_LIMIT_SECONDS).toBe(60);
+  expect(timingResult(50, 60_050, NODE_LIMIT_SECONDS)).toEqual({ seconds: 60, ok: true });
+  expect(timingResult(50, 60_051, NODE_LIMIT_SECONDS).ok).toBe(false);
 });

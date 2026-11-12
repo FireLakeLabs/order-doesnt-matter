@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { expect, type Page } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { describeTarget } from '../../src/document/edit';
 import type { EngineEvent } from '../../src/contract';
 import type {} from '../../src/app/main';
@@ -22,27 +22,74 @@ export async function openProgram(
     await page.getByRole('button', { name: 'Load', exact: true }).click();
   }
   if (input.example || input.path || input.source) {
+    await scoreReady(page);
     await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
-    await expect
-      .poll(() =>
-        page.evaluate(
-          () => Object.keys(window.odmApp.state.events).length === window.odmApp.state.rows.length,
-        ),
-      )
-      .toBe(true);
   }
 }
 export async function play(page: Page) {
+  await swap(page, () => page.getByRole('button', { name: 'Play', exact: true }).click());
+  await appSignal(page, () => window.odmApp.canPlay && window.odmApp.state.playing);
+  await expect(page.locator('#message')).toBeEmpty();
+}
+
+// Signal waits share the enclosing test's deadline, rather than an unrelated 5 s
+// assertion budget. No global timeouts or retries; a stuck engine fails the test.
+export async function appSignal<A>(page: Page, predicate: (arg: A) => unknown, arg?: A) {
+  const handle = await page.waitForFunction(predicate as (arg: unknown) => unknown, arg, {
+    timeout: 0,
+  });
+  await handle.dispose();
+}
+export async function scoreReady(page: Page) {
+  await appSignal(
+    page,
+    () =>
+      window.odmApp.canPlay &&
+      Object.keys(window.odmApp.state.events).length === window.odmApp.state.rows.length,
+  );
+}
+export async function swap(page: Page, action: () => Promise<unknown>) {
   const before = await page.evaluate(
     () => window.odmApp.history.filter((e) => e.type === 'swapped').length,
   );
-  await page.getByRole('button', { name: 'Play', exact: true }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'swapped').length),
-    )
-    .toBeGreaterThan(before);
+  await action();
+  await appSignal(
+    page,
+    (count) => window.odmApp.history.filter((e) => e.type === 'swapped').length > count,
+    before,
+  );
 }
+export async function throughCycle(page: Page, cycle: number) {
+  await appSignal(
+    page,
+    (c) => window.odmApp.history.some((e) => e.type === 'trigger' && e.cycle >= c),
+    cycle,
+  );
+}
+
+// Runs inside harness/online page evaluations. Subscribe before checking history
+// so both an already recorded signal and a later event are handled without races.
+export function installEngineSignals() {
+  window.odmUntil = (engine, predicate) =>
+    new Promise<void>((resolve) => {
+      const off = engine.subscribe(() => {
+        if (predicate()) {
+          off();
+          resolve();
+        }
+      });
+      if (predicate()) {
+        off();
+        resolve();
+      }
+    });
+}
+declare global {
+  interface Window {
+    odmUntil(engine: import('../../src/contract').Engine, predicate: () => boolean): Promise<void>;
+  }
+}
+
 export async function selectNode(
   page: Page,
   target: { nodeId: string } | { breadcrumb: string | string[] },
@@ -67,7 +114,10 @@ export async function selectNode(
   return selected;
 }
 export async function waitForPending(page: Page) {
-  await expect(page.locator('#editor')).not.toHaveAttribute('data-edit-state', 'pending');
+  await appSignal(page, () =>
+    Object.values(window.odmApp.editor!.state.entries).every((e) => e.status !== 'pending'),
+  );
+  await scoreReady(page);
   await expect(page.locator('#editor-status')).not.toContainText('Change failed');
 }
 export async function triggerValues(page: Page, after = 0) {
@@ -79,4 +129,14 @@ export async function triggerValues(page: Page, after = 0) {
         .map((e) => e.value),
     after,
   );
+}
+
+/** Poll only an observable signal, sharing the enclosing test deadline. Keep
+ * assertions about the resulting score/UI outside this readiness wait. */
+export function signal<T>(read: () => T | Promise<T>, options: { timeout?: number } = {}) {
+  const info = test.info();
+  return expect.poll(read, {
+    timeout: info.timeout,
+    ...options,
+  });
 }

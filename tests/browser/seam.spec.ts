@@ -1,7 +1,7 @@
+import { signal, openProgram, play, selectNode, waitForPending, triggerValues } from './helpers';
 import { expect, test } from '@playwright/test';
 import { instruments } from '../../src/document';
 import { describeTarget } from '../../src/document/edit';
-import { openProgram, play, selectNode, waitForPending, triggerValues } from './helpers';
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 
 test('real house: instrument, rewrite, signal, section, rhythm and constant share one editor', async ({
@@ -22,10 +22,10 @@ test('real house: instrument, rewrite, signal, section, rhythm and constant shar
   await expect(page.locator('[data-editor-selected="true"]')).toHaveCount(1);
   await page.keyboard.press('Escape');
   await expect(chip).toBeFocused();
-  const signal = await page
+  const signalIds = await page
     .locator('[data-editor-target]')
     .evaluateAll((nodes) => nodes.map((n) => (n as HTMLElement).dataset.editorTarget!));
-  const signalId = signal.find((id) => describeTarget(doc, id).kind === 'setting-signal')!;
+  const signalId = signalIds.find((id) => describeTarget(doc, id).kind === 'setting-signal')!;
   await selectNode(page, { nodeId: signalId });
   await expect(page.locator('#editor')).toContainText('0.1 to 0.35 · signal');
   await expect(page.locator('input[type="range"]')).toHaveCount(0);
@@ -48,11 +48,9 @@ test('real house: instrument, rewrite, signal, section, rhythm and constant shar
   await page.getByRole('spinbutton').fill('900');
   await page.getByRole('spinbutton').press('Enter');
   await waitForPending(page);
-  await expect
-    .poll(
-      async () =>
-        (await triggerValues(page)).filter((v) => (v as { cutoff?: number }).cutoff === 900).length,
-    )
-    .toBeGreaterThan(0);
+  await signal(
+    async () =>
+      (await triggerValues(page)).filter((v) => (v as { cutoff?: number }).cutoff === 900).length,
+  ).toBeGreaterThan(0);
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
 });

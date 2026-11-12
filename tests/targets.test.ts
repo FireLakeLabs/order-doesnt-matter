@@ -4,7 +4,7 @@ import { importStrudel } from '../src/import';
 import { instruments, sections, type Doc } from '../src/document';
 import { describeTarget } from '../src/document/edit';
 import { sheetModel } from '../src/sheet/model';
-import { queryEventsNode } from '../src/strudel/evaluate-node';
+import { queryEventsNode } from './node-query';
 import { generate } from '../src/generate';
 
 for (const name of ['real-house-arranged', 'real-techno'])

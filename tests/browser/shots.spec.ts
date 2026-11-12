@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { test, expect, type Page } from '@playwright/test';
 import { build, preview, type PreviewServer } from 'vite';
 import { describeTarget, type Target } from '../../src/document/edit';
-import { openProgram, play, selectNode } from './helpers';
+import { openProgram, play, selectNode, signal } from './helpers';
 
 // Opt-in only. The real score is read by openProgram from disk, never imported.
 // Baseline sources come from git; only the two project originals enter its bundle.
@@ -130,7 +130,10 @@ for (const stage of stages)
                 .click();
             }
             await expect(page.locator('#editor')).toHaveAttribute('data-editor-kind', kind);
-            if (kind === 'rewrite') await expect(page.locator('#editor figure')).toHaveCount(2);
+            if (kind === 'rewrite') {
+              await signal(() => page.locator('#editor figure').count()).toBe(2);
+              await expect(page.locator('#editor figure')).toHaveCount(2);
+            }
             // Reset panel scroll without moving the selected cell's horizontal position.
             await page.locator('#editor').evaluate((n) => {
               n.scrollTop = 0;
@@ -221,6 +224,7 @@ for (const stage of stages)
         (t) => t.kind === 'rewrite' && !t.nodeId.endsWith(':rewrites'),
       )!;
       await selectNode(page, { nodeId: rewrite.nodeId });
+      await signal(() => page.locator('#editor figure').count()).toBe(2);
       await expect(page.locator('#editor figure')).toHaveCount(2);
       if (stage === 'after')
         await expect(page.locator('#editor')).toContainText(

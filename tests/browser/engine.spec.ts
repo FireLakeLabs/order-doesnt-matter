@@ -1,12 +1,11 @@
+import { installEngineSignals, signal } from './helpers';
 import { expect, test } from '@playwright/test';
 import type { EngineEvent } from '../../src/contract';
 import type {} from '../../src/engine/harness';
 
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 // Trusted click plus autoplay flag: Chromium runs a real advancing headless audio clock.
-test('engine: rendered synth/sample PCM, missing files, live revisions, errors and seek', async ({
-  page,
-}) => {
+test('engine: synth PCM, live revisions, rejected edit and Stop', async ({ page }) => {
   const defaults: string[] = [];
   await page.route(
     (url) => url.protocol === 'https:',
@@ -15,23 +14,14 @@ test('engine: rendered synth/sample PCM, missing files, live revisions, errors a
       return route.abort('internetdisconnected');
     },
   );
+  await page.addInitScript(installEngineSignals);
   await page.goto('/harness/engine.html');
   await page.getByRole('button').click();
-  await expect.poll(() => page.evaluate(() => window.odm.error || !!window.odm.engine)).toBe(true);
+  await signal(() => page.evaluate(() => window.odm.error || !!window.odm.engine)).toBe(true);
   const measured = await page.evaluate(async () => {
-    const { engine: e, events, fixture } = window.odm;
+    const { engine: e, events } = window.odm;
     if (!e) throw Error('engine not initialized');
-    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-    const until = async (predicate: () => boolean) => {
-      for (let i = 0; i < 400; i++) {
-        if (predicate()) return;
-        await sleep(10);
-      }
-      throw Error(
-        'Timed out waiting for engine event: ' +
-          JSON.stringify({ events, now: e.audioTime(), playing: e.playing }),
-      );
-    };
+    const until = (predicate: () => boolean) => window.odmUntil(e, predicate);
     const triggers = () =>
       events.filter(
         (event): event is Extract<EngineEvent, { type: 'trigger' }> => event.type === 'trigger',
@@ -69,39 +59,14 @@ test('engine: rendered synth/sample PCM, missing files, live revisions, errors a
     e.stop();
     const stoppedCount = triggers().length,
       stoppedNow = e.now();
-    await sleep(350);
+    const from = e.audioTime();
+    await tap.rms(from, from + 0.35);
     const stoppedTriggers = triggers().length;
-    // Let the previous voices finish before measuring the next isolated source.
-    await sleep(350);
-    events.length = 0;
-    await e.play(`samples({fixture: ['${fixture}']}); s("fixture").fast(4)`);
-    await until(() => triggers().length >= 1);
-    const sampleTrigger = triggers()[0];
-    const sample = await tap.rms(sampleTrigger.time + 0.005, sampleTrigger.time + 0.085);
-    const sampleStates = events.filter((t) => t.type === 'sounds').flatMap((t) => t.sounds);
-    e.stop();
-    await sleep(500);
-    events.length = 0;
-    await e.play('s("definitely_not_a_sound")');
-    await until(() => triggers().length > 0);
-    const missingStates = e.sounds();
-    const missing = await tap.rms(triggers()[0].time + 0.005, triggers()[0].time + 0.105);
-    e.stop();
-    events.length = 0;
-    await e.play('note("c3").s("sine")', { fromCycle: 8 });
-    await until(() => triggers().length > 0);
-    const sought = triggers()[0].cycle,
-      playhead = e.now();
-    e.stop();
     return {
       rate: tap.sampleRate,
       baseline,
       synth,
       cycles: first.map((t) => t.cycle),
-      sample,
-      sampleStates,
-      missingStates,
-      missing,
       wasPlaying,
       transportObservations: transportStates.length,
       continuouslyPlaying: transportStates.every(Boolean),
@@ -114,8 +79,6 @@ test('engine: rendered synth/sample PCM, missing files, live revisions, errors a
       stoppedCount,
       stoppedTriggers,
       stoppedNow,
-      sought,
-      playhead,
       failureErrors,
     };
   });
@@ -125,16 +88,6 @@ test('engine: rendered synth/sample PCM, missing files, live revisions, errors a
     expect(level).toBeGreaterThan(0.001);
     expect(level).toBeGreaterThan(measured.baseline * 10);
   }
-  expect(measured.sample).toBeGreaterThan(0.001);
-  expect(measured.sampleStates.map((s) => s.state)).toEqual(
-    expect.arrayContaining(['loading', 'ready']),
-  );
-  expect(measured.missingStates[0]).toMatchObject({
-    name: 'definitely_not_a_sound',
-    state: 'missing',
-    detail: expect.stringContaining('Unknown sound'),
-  });
-  expect(measured.missing).toBeLessThan(0.000001);
   expect(measured.wasPlaying).toBe(true);
   expect(measured.transportObservations).toBeGreaterThan(0);
   expect(measured.continuouslyPlaying).toBe(true);
@@ -147,13 +100,68 @@ test('engine: rendered synth/sample PCM, missing files, live revisions, errors a
   expect(measured.afterFailure.value).toMatchObject({ s: 'square' });
   expect(measured.stoppedTriggers).toBe(measured.stoppedCount);
   expect(measured.stoppedNow).toBeNull();
-  expect(measured.sought).toBe(8);
-  expect(measured.playhead).not.toBeNull();
 });
+
+for (const scenario of ['sample', 'missing', 'seek'] as const) {
+  test(`engine: isolated ${scenario}`, async ({ page }) => {
+    await page.route(
+      (url) => url.protocol === 'https:',
+      (route) => route.abort('internetdisconnected'),
+    );
+    await page.addInitScript(installEngineSignals);
+    await page.goto('/harness/engine.html');
+    await page.getByRole('button').click();
+    await signal(() => page.evaluate(() => window.odm.error || !!window.odm.engine)).toBe(true);
+    const result = await page.evaluate(async (scenario) => {
+      const { engine: e, events, fixture } = window.odm;
+      if (!e) throw Error('engine not initialized');
+      const source =
+        scenario === 'sample'
+          ? `samples({fixture: ['${fixture}']}); s("fixture").fast(4)`
+          : scenario === 'missing'
+            ? 's("definitely_not_a_sound")'
+            : 'note("c3").s("sine")';
+      await e.play(source, scenario === 'seek' ? { fromCycle: 8 } : {});
+      await window.odmUntil(e, () => events.some((t) => t.type === 'trigger'));
+      const trigger = events.find(
+        (t): t is Extract<EngineEvent, { type: 'trigger' }> => t.type === 'trigger',
+      )!;
+      const result = {
+        rms: await e
+          .tap()
+          .rms(trigger.time + 0.005, trigger.time + (scenario === 'sample' ? 0.085 : 0.105)),
+        states: events.filter((t) => t.type === 'sounds').flatMap((t) => t.sounds),
+        sounds: e.sounds(),
+        sought: trigger.cycle,
+        playhead: e.now(),
+      };
+      e.stop();
+      return result;
+    }, scenario);
+    console.log(`ENGINE ${scenario} MEASURED`, JSON.stringify(result));
+    if (scenario === 'sample') {
+      expect(result.rms).toBeGreaterThan(0.001);
+      expect(result.states.map((s) => s.state)).toEqual(
+        expect.arrayContaining(['loading', 'ready']),
+      );
+    } else if (scenario === 'missing') {
+      expect(result.sounds[0]).toMatchObject({
+        name: 'definitely_not_a_sound',
+        state: 'missing',
+        detail: expect.stringContaining('Unknown sound'),
+      });
+      expect(result.rms).toBeLessThan(0.000001);
+    } else {
+      expect(result.sought).toBe(8);
+      expect(result.playhead).not.toBeNull();
+    }
+  });
+}
 
 test('canary: web bundle registry, REPL capture, final output gain and failed sample decode', async ({
   page,
 }) => {
+  await page.addInitScript(installEngineSignals);
   await page.goto('/harness/engine.html');
   const fixture = await page.evaluate(() => window.odm.fixture);
   let collections = 0;
@@ -168,7 +176,7 @@ test('canary: web bundle registry, REPL capture, final output gain and failed sa
   );
   await page.route('**/absent.wav', (route) => route.fulfill({ status: 404, body: 'not a WAV' }));
   await page.getByRole('button').click();
-  await expect.poll(() => page.evaluate(() => window.odm.error || !!window.odm.engine)).toBe(true);
+  await signal(() => page.evaluate(() => window.odm.error || !!window.odm.engine)).toBe(true);
   const result = await page.evaluate(async () => {
     const e = window.odm.engine!;
     await e.play('s("defaultbank")');

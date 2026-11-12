@@ -1,3 +1,4 @@
+import { scoreReady, play, waitForPending, signal } from './helpers';
 import { queryEventsNode } from '../../src/strudel/evaluate-node';
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
@@ -19,15 +20,6 @@ const row = (page: Page, name: string) =>
   });
 const cell = (page: Page, name: string, control: string) =>
   row(page, name).locator(`.sheet-cell[data-control="${control}"]`);
-async function play(page: Page) {
-  await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
-  await page.getByRole('button', { name: 'Play', exact: true }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'swapped').length),
-    )
-    .toBeGreaterThan(0);
-}
 async function setValue(page: Page, value: number) {
   const input = page.getByRole('spinbutton');
   await input.fill(String(value));
@@ -48,6 +40,7 @@ test('constant editor: pending → swapped → trigger values → undo; readonly
 }) => {
   await open(page);
   await page.getByRole('button', { name: 'Kiln', exact: true }).click();
+  await scoreReady(page);
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Section 2', exact: true }).click();
   await play(page);
@@ -56,32 +49,29 @@ test('constant editor: pending → swapped → trigger values → undo; readonly
   await expect(page.locator('#editor-breadcrumb')).toHaveText('bass › lpf');
   const old = Number(await page.getByRole('spinbutton').inputValue());
   await setValue(page, 900);
+  await waitForPending(page);
   await expect(page.locator('#editor-status')).toHaveText('Playing now');
-  await expect
-    .poll(() =>
-      page.evaluate(
-        () =>
-          window.odmApp.history.filter(
-            (e) => e.type === 'trigger' && (e.value as { cutoff?: number }).cutoff === 900,
-          ).length,
-      ),
-    )
-    .toBeGreaterThan(0);
+  await signal(() =>
+    page.evaluate(
+      () =>
+        window.odmApp.history.filter(
+          (e) => e.type === 'trigger' && (e.value as { cutoff?: number }).cutoff === 900,
+        ).length,
+    ),
+  ).toBeGreaterThan(0);
   const marker = await page.evaluate(() => window.odmApp.history.length);
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
   await expect(page.getByRole('spinbutton')).toHaveValue(String(old));
-  await expect
-    .poll(() =>
-      page.evaluate(
-        ({ old, marker }) =>
-          window.odmApp.history
-            .slice(marker)
-            .filter((e) => e.type === 'trigger' && (e.value as { cutoff?: number }).cutoff === old)
-            .length,
-        { old, marker },
-      ),
-    )
-    .toBeGreaterThan(0);
+  await signal(() =>
+    page.evaluate(
+      ({ old, marker }) =>
+        window.odmApp.history
+          .slice(marker)
+          .filter((e) => e.type === 'trigger' && (e.value as { cutoff?: number }).cutoff === old)
+          .length,
+      { old, marker },
+    ),
+  ).toBeGreaterThan(0);
   await page.evaluate(() => {
     const engine = window.odmApp.engine!,
       original = engine.play;
@@ -112,9 +102,13 @@ test('real house: pasted local file → bass lpf 450 → 900 → unchanged other
   page,
 }) => {
   await open(page);
-  const source = await readFile('corpus/programs/real-house-arranged.strudel', 'utf8');
+  const source = (await readFile('corpus/programs/real-house-arranged.strudel', 'utf8')).replace(
+    /setcpm\([^)]*\)/,
+    'setcpm(90)',
+  );
   await page.getByLabel('Your Strudel program').fill(source);
   await page.getByRole('button', { name: 'Load', exact: true }).click();
+  await scoreReady(page);
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'drop', exact: true }).first().click();
   await play(page);
@@ -122,17 +116,15 @@ test('real house: pasted local file → bass lpf 450 → 900 → unchanged other
   await expect(page.getByRole('spinbutton')).toHaveValue('450');
   // Compare a full cycle's event bags, normalized by phase and with multiplicity.
   const collect = async (cycle: number) => {
-    await expect
-      .poll(
-        () =>
-          page.evaluate(
-            (c) =>
-              window.odmApp.history.filter((e) => e.type === 'trigger' && e.cycle >= c + 1).length,
-            cycle,
-          ),
-        { timeout: 10000 },
-      )
-      .toBeGreaterThan(0);
+    await signal(
+      () =>
+        page.evaluate(
+          (c) =>
+            window.odmApp.history.filter((e) => e.type === 'trigger' && e.cycle >= c + 1).length,
+          cycle,
+        ),
+      { timeout: 10000 },
+    ).toBeGreaterThan(0);
     return page.evaluate(
       (c) =>
         window.odmApp.history.filter(
@@ -144,6 +136,7 @@ test('real house: pasted local file → bass lpf 450 → 900 → unchanged other
   };
   const before = await collect(8);
   await setValue(page, 900);
+  await waitForPending(page);
   await expect(page.locator('#editor-status')).toHaveText('Playing now');
   const now = await page.evaluate(() => window.odmApp.engine!.now()!);
   const afterCycle = Math.ceil(now) + 1;
@@ -187,6 +180,7 @@ test('section-local setting is distinct; signal stays read-only; arrow keys and 
       'const chords=note(60).s("sine").lpf(450); const intro=stack(chords.lpf(600)); const build=stack(chords.lpf(sine.range(400,2000))); arrange([4,intro],[4,build],[4,chords])',
     );
   await page.getByRole('button', { name: 'Load', exact: true }).click();
+  await scoreReady(page);
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'in intro: lpf 600', exact: true }).press('Enter');
   await expect(page.locator('#editor-breadcrumb')).toHaveText('chords › in intro › lpf');
