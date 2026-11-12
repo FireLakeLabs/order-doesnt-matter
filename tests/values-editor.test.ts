@@ -3,7 +3,7 @@ import { expect, it } from 'vitest';
 import { instruments, walk, type Doc, type Setting } from '../src/document';
 import { importStrudel } from '../src/import';
 import { generate } from '../src/generate';
-import { queryEventsNode } from '../src/strudel/evaluate-node';
+import { queryEventsNode } from './node-query';
 import { setValue } from '../src/document/edits/values-set';
 import { insertValue } from '../src/document/edits/values-insert';
 import { removeValue } from '../src/document/edits/values-remove';
@@ -143,7 +143,7 @@ it('real techno: the alternating room send changes in the right cycles; every ot
       }
     }
   }
-}, 20000);
+});
 const roundTrips: [string, string, (d: Doc, id: string) => ReturnType<typeof setValue>, string][] =
   [
     ['set', '.2 [.4 .6]', (d, id) => setValue(d, id, [1, 0], '.8'), '.2 [.8 .6]'],
@@ -178,7 +178,7 @@ for (const [name, pattern, operation, expected] of roundTrips)
       expect(await queryEventsNode(generate(next, { only: row.id }), 0, 4)).toEqual(
         await queryEventsNode(generate(doc, { only: row.id }), 0, 4),
       );
-  }, 10000);
+  });
 
 it('switching a repeated weighted chance value off and on restores its full value and duration', () => {
   const doc = load('note(60).gain(".4!3@2?0.2 .8")'),
