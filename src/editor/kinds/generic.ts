@@ -1,5 +1,6 @@
 import type { EditorKind } from '../kind';
 import { callAt, argumentSource } from '../../document/edits/source-shared';
+import { rewriteOwner } from '../../document/edits/rewrite-shared';
 import { setGenericArgument } from '../../document/edits/generic-argument';
 import type { Arg } from '../../document';
 import { describeTarget } from '../../document/edit';
@@ -94,6 +95,21 @@ export default {
       }
       root.append(item);
     });
+    const owner = rewriteOwner(context.doc, context.target.nodeId);
+    if (owner) {
+      const ordered = el('ol');
+      ordered.setAttribute('aria-label', 'Rewrites · in order');
+      owner.pattern.layers.forEach((layer) => {
+        if (layer.kind !== 'rewrite') return;
+        const item = el('li'),
+          open = el('button', layer.name);
+        if (layer.id === context.target.nodeId) open.setAttribute('aria-current', 'true');
+        open.onclick = () => context.apply(context.doc, { selection: layer.id });
+        item.append(open);
+        ordered.append(item);
+      });
+      root.append(el('h4', 'Rewrites · in order'), ordered);
+    }
     root.append(error);
     body.append(root);
     return {

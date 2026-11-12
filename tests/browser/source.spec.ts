@@ -32,6 +32,10 @@ test('source applies once, confirms trigger values, preserves refused text and r
   await page.keyboard.press('Escape');
   await expect(origin).toBeFocused();
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await page.getByRole('button', { name: 'Undo', exact: true }).click();
+  await origin.click();
+  await expect(page.locator('#editor')).toHaveAttribute('data-editor-kind', 'constant');
+  await expect(page.getByRole('spinbutton')).toHaveValue(old.match(/\d+(?:\.\d+)?/)![0]);
 });
 
 test('phone source escape hatch supports keyboard, Done and an unclipped panel', async ({

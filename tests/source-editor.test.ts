@@ -93,7 +93,9 @@ it('real custom samples: tier 3 setup and tier 2 slice survive valid editing and
   expect(row.pattern.layers.some((l) => l.tier === 2 && 'name' in l && l.name === 'slice')).toBe(
     true,
   );
-  const text = "samples({myvocal: 'https://your-url.com'}); all(p => p.gain(.2));";
+  const setup = doc.body[0];
+  if (setup.kind !== 'setup') throw Error('Missing setup');
+  const text = `${setup.code}\nall(p => p.gain(.2));`;
   const next = accepted(replaceOpaque(doc, doc.body[0].id, text));
   expect(generate(next)).toContain(text);
   expect(next.body[1]).toBe(doc.body[1]);
@@ -172,6 +174,10 @@ it('promotion is gated on whole onset multisets, with opaque source kept on fail
 it('source operations cover top level, arguments, scoped callbacks and all parse refusals immutably', () => {
   const doc = load(
     'setcpm(30); const values=note(60); values.off(.1,q=>q.fast(2)).withValue(v=>({...v}));',
+  );
+  expect(replaceFromSource(doc, doc.body[0].id, '// keep my text')).toMatchObject({ ok: false });
+  expect(generate(accepted(replaceOpaque(doc, doc.body[0].id, '// keep my text')))).toContain(
+    '// keep my text',
   );
   const before = JSON.stringify(doc),
     row = instruments(doc)[0];

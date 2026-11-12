@@ -166,6 +166,7 @@ export function installSource(
     const fresh = freshIds(doc);
     if (slot.shape === 'top') {
       const parsed = importStrudel(code).doc;
+      if (understood && !parsed.body.length) return refusal('Keep this text as source.');
       const items = understood
         ? adopt(doc, parsed.body, fresh)
         : [{ ...slot.node, kind: 'setup', tier: 3, code }];
