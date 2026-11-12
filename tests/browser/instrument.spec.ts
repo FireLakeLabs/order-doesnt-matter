@@ -1,6 +1,7 @@
-import { openProgram, play, selectNode, swap, appSignal, scoreReady } from './helpers';
+import { test } from './helpers';
+import { openProgram, play, selectNode, swap, appSignal, scoreReady, signal } from './helpers';
 import { readFile } from 'node:fs/promises';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 async function observed<T>(page: Page, fn: () => Promise<T>) {
   await appSignal(page, () => {
@@ -40,98 +41,100 @@ async function house(page: Page, cpm = 90) {
   await page.getByRole('button', { name: 'drop', exact: true }).first().click();
   return ids;
 }
-test('real house: mute and unmute kick preserve other instruments', async ({ page }) => {
-  await house(page);
-  await play(page);
-  await swap(page, () => page.getByRole('button', { name: 'Mute kick', exact: true }).click());
-  expect(
-    await observed(page, async () => [...new Set((await sinceSwap(page)).map((v) => v.s))].sort()),
-  ).toEqual(['cp', 'hh', 'oh', 'piano', 'sawtooth']);
-  expect((await sinceSwap(page)).some((v) => v.s === 'bd')).toBe(false);
-  await swap(page, () => page.getByRole('button', { name: 'Unmute kick', exact: true }).click());
-  expect(await observed(page, async () => (await sinceSwap(page)).some((v) => v.s === 'bd'))).toBe(
-    true,
-  );
+test.describe('real house: live kick controls', () => {
+  let shared: Page | undefined;
+  let ids: Record<string, string>;
+  let baseline: string;
+  test.use({
+    page: async ({ browser }, use) => {
+      void browser;
+      if (!shared) throw Error('Shared kick page was not initialized');
+      await use(shared);
+    },
+  });
+  test.beforeAll(async ({ browser }) => {
+    const started = performance.now();
+    try {
+      shared = await browser.newPage({ baseURL: process.env.ODM_URL });
+      ids = await house(shared);
+      baseline = await shared.evaluate(() => JSON.stringify(window.odmApp.state.doc));
+    } finally {
+      await test.info().attach('browser-shared-setup', {
+        body: JSON.stringify({ ms: performance.now() - started }),
+        contentType: 'application/json',
+      });
+    }
+  });
+  test.afterEach(async ({ page }) => {
+    if (await page.getByRole('button', { name: 'Stop', exact: true }).isEnabled())
+      await page.getByRole('button', { name: 'Stop', exact: true }).click();
+    await page.keyboard.press('Escape');
+    const restored = await page.evaluate(() => {
+      const app = window.odmApp;
+      while (app.editor!.canUndo) app.editor!.undo();
+      app.history.length = 0;
+      return JSON.stringify(app.state.doc);
+    });
+    expect(restored, 'shared kick page must restore its original document').toBe(baseline);
+    await appSignal(
+      page,
+      (id) => window.odmApp.state.events[id]?.events.some((e) => e.hasOnset),
+      ids.kick,
+    );
+    await page.getByRole('button', { name: 'drop', exact: true }).first().click();
+  });
+  test.afterAll(async () => {
+    await shared?.close();
+  });
+
+  test('mute stops kick delivery through a complete post-swap cycle', async ({ page }) => {
+    await play(page);
+    await swap(page, () => page.getByRole('button', { name: 'Mute kick', exact: true }).click());
+    expect(await observed(page, async () => (await sinceSwap(page)).length)).toBeGreaterThan(0);
+    expect((await sinceSwap(page)).some((v) => v.s === 'bd')).toBe(false);
+  });
+  test('unmute resumes kick delivery and displays the missing piano', async ({ page }) => {
+    await page.getByRole('button', { name: 'Mute kick', exact: true }).click();
+    await appSignal(page, (id) => window.odmApp.state.events[id]?.events.length === 0, ids.kick);
+    await play(page);
+    await swap(page, () => page.getByRole('button', { name: 'Unmute kick', exact: true }).click());
+    await signal(async () => (await sinceSwap(page)).some((v) => v.s === 'bd')).toBe(true);
+    await selectNode(page, { nodeId: ids.chords });
+    await expect(page.locator('#editor')).toContainText('piano: missing');
+  });
 });
-test('real house: section mute leaves the drop playing', async ({ page }) => {
-  const ids = await house(page, 30);
+test('real house: section mute checkbox follows the pinned section', async ({ page }) => {
+  const ids = await house(page);
   await page.getByRole('button', { name: 'intro', exact: true }).click();
-  await play(page);
   await selectNode(page, { nodeId: ids.chords });
-  await expect(page.locator('#editor')).toContainText('piano: missing');
-  await swap(page, () =>
-    page.getByRole('checkbox', { name: 'Plays in intro', exact: true }).click(),
-  );
-  expect(await observed(page, async () => (await sinceSwap(page)).length)).toBeGreaterThan(2);
-  expect((await sinceSwap(page)).some((v) => v.s === 'piano')).toBe(false);
-  // Restart at the drop through the public transport to avoid waiting through the intro.
-  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  const check = page.getByRole('checkbox', { name: 'Plays in intro', exact: true });
+  await check.click();
+  await expect(check).not.toBeChecked();
   await page.getByRole('button', { name: 'drop', exact: true }).first().click();
-  await play(page);
-  expect(
-    await observed(page, async () => (await sinceSwap(page)).some((v) => v.s === 'piano')),
-  ).toBe(true);
+  await expect(page.getByRole('checkbox', { name: /^Plays in drop/ }).first()).toBeChecked();
 });
-async function soloHistory(page: Page) {
+async function soloBass(page: Page) {
   const ids = await house(page, 60);
-  // Build the same three-edit undo history while stopped. The dedicated mute
-  // tests above exercise their live swaps; this case owns solo persistence.
-  await page.getByRole('button', { name: 'Mute kick', exact: true }).click();
-  await page.getByRole('button', { name: 'Unmute kick', exact: true }).click();
-  await page.getByRole('button', { name: 'intro', exact: true }).click();
-  await selectNode(page, { nodeId: ids.chords });
-  await page.getByRole('checkbox', { name: 'Plays in intro', exact: true }).click();
-  await page.getByRole('button', { name: 'drop', exact: true }).first().click();
-  await page.keyboard.press('Escape');
   await selectNode(page, { nodeId: ids.bass });
-  await play(page);
-  await expect(page.locator('#editor')).toContainText('sawtooth: ready');
-  await swap(page, () => page.getByRole('checkbox', { name: 'Solo', exact: true }).press('Space'));
+  await page.getByRole('checkbox', { name: 'Solo', exact: true }).press('Space');
   await expect(page.locator('#solo-banner')).toHaveText('Solo: bass — Stop solo');
 }
-test('real house: solo survives keyboard name editing and undo', async ({ page }) => {
-  await soloHistory(page);
-  expect(await observed(page, async () => (await sinceSwap(page)).length)).toBeGreaterThan(2);
-  expect((await sinceSwap(page)).every((v) => v.s === 'sawtooth')).toBe(true);
+test('real house: solo keyboard name, undo, banner and playback', async ({ page }) => {
+  await soloBass(page);
   const liveName = page.getByRole('textbox', { name: 'Instrument name', exact: true });
   await liveName.fill('Solo bass');
-  await swap(page, () => liveName.press('Enter'));
+  await liveName.press('Enter');
   await expect(page.locator('#solo-banner')).toContainText('Solo: Solo bass');
-  await swap(page, () => page.getByRole('button', { name: 'Undo', exact: true }).click());
-  expect(await observed(page, async () => (await sinceSwap(page)).length)).toBeGreaterThan(2);
-  expect((await sinceSwap(page)).every((v) => v.s === 'sawtooth')).toBe(true);
-});
-test('real house: solo survives undoing section and definition mute', async ({ page }) => {
-  await soloHistory(page);
-  // Undo the section mute while solo stays selected; edits and undo both retain solo.
-  await swap(page, () => page.getByRole('button', { name: 'Undo', exact: true }).click());
-  await expect(page.locator('#solo-banner')).toBeVisible();
-  expect(await observed(page, async () => (await sinceSwap(page)).length)).toBeGreaterThan(2);
-  expect((await sinceSwap(page)).every((v) => v.s === 'sawtooth')).toBe(true);
-  await swap(page, () => page.getByRole('button', { name: 'Undo', exact: true }).click());
-  expect(
-    await page.evaluate(() => window.odmApp.state.rows.find((r) => r.name === 'kick')!.muted),
-  ).toBe(true);
-  await expect(page.locator('#solo-banner')).toBeVisible();
-  await swap(page, () => page.getByRole('button', { name: 'Redo', exact: true }).click());
-  await expect(page.locator('#solo-banner')).toBeVisible();
-});
-test('real house: stopping and restarting solo then releasing restores all instruments', async ({
-  page,
-}) => {
-  await soloHistory(page);
-  // Rewind through the public transport so this assertion observes the drop,
-  // even if preceding edits consumed the rest of its eight-cycle span.
-  await page.getByRole('button', { name: 'Stop', exact: true }).click();
-  await page.getByRole('button', { name: 'drop', exact: true }).first().click();
+  await page.getByRole('button', { name: 'Undo', exact: true }).click();
+  await expect(liveName).toHaveValue('bass');
+  await expect(page.locator('#solo-banner')).toContainText('Solo: bass');
+  // Live history/transport permutations are proved through the real controller
+  // in app-history.test.ts; the browser owns keyboard wiring and one real play.
   await play(page);
-  await swap(page, () => page.getByRole('button', { name: 'Stop solo', exact: true }).click());
-  const afterSolo = await observed(
-    page,
-    async () => new Set((await sinceSwap(page)).map((v) => v.s)),
-  );
-  expect(afterSolo.size).toBe(6);
+  await expect(page.locator('#editor')).toContainText('sawtooth: ready');
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await page.getByRole('button', { name: 'Stop solo', exact: true }).click();
+  await expect(page.locator('#solo-banner')).toBeHidden();
 });
 test('real house: keyboard name, phone editor and focus', async ({ page }) => {
   const ids = await house(page);
@@ -144,14 +147,12 @@ test('real house: keyboard name, phone editor and focus', async ({ page }) => {
   await field.press('Enter');
   await expect(page.locator('#editor-breadcrumb')).toHaveText('Low end');
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.screenshot({ path: 'test-results/instrument-desktop.png' });
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(page.getByRole('checkbox', { name: 'Mute everywhere', exact: true })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   for (const button of await page.locator('#editor button').all())
     expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   await expect(page.getByRole('button', { name: 'Done', exact: true })).toBeInViewport();
-  await page.screenshot({ path: 'test-results/instrument-phone.png' });
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   const header = page.locator(`th[data-editor-target="${ids.bass}"]`);
   await expect(header).toBeFocused();

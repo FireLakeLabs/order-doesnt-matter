@@ -1,5 +1,6 @@
+import { test } from './helpers';
 import { signal, openProgram, play, selectNode, waitForPending, triggerValues } from './helpers';
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
 import { instruments } from '../../src/document';
 import { describeTarget } from '../../src/document/edit';
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
@@ -7,13 +8,16 @@ test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required']
 test('real house: instrument, rewrite, signal, section, rhythm and constant share one editor', async ({
   page,
 }) => {
+  const errors: string[] = [];
+  page.on('pageerror', (error) => errors.push(error.message));
   await openProgram(page, { path: 'corpus/programs/real-house-arranged.strudel' });
+  await expect(page.getByRole('rowheader')).toHaveCount(8);
+  await expect(page.getByRole('button', { name: 'in intro: lpf 600', exact: true })).toBeVisible();
   const doc = await page.evaluate(() => window.odmApp.state.doc!);
   const bass = instruments(doc).find((r) => r.name === 'bass')!;
   await selectNode(page, { nodeId: bass.id });
   await expect(page.locator('#editor-breadcrumb')).toHaveText('bass');
   await expect(page.locator('#editor')).toHaveAttribute('data-editor-kind', 'instrument');
-  expect(describeTarget(doc, bass.id).kind).toBe('instrument');
   await expect(page.getByRole('checkbox', { name: 'Mute everywhere', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   const chip = page.locator('.sheet-chips [data-editor-target]').first();
@@ -53,4 +57,5 @@ test('real house: instrument, rewrite, signal, section, rhythm and constant shar
       (await triggerValues(page)).filter((v) => (v as { cutoff?: number }).cutoff === 900).length,
   ).toBeGreaterThan(0);
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  expect(errors).toEqual([]);
 });

@@ -237,3 +237,39 @@ it('describes instruments, rhythms, rewrites, sections, signals and patterned se
   const rewrite = row.pattern.layers.find((l) => l.kind === 'rewrite')!;
   expect(describeTarget(doc, rewrite.id).kind).toBe('rewrite');
 });
+
+it('real house bass lpf 450 → 900 preserves every other event at the same absolute cycle', async () => {
+  const source = readFileSync('corpus/programs/real-house-arranged.strudel', 'utf8');
+  const original = load(source);
+  const setting = settings(original).find(
+    (s) => describeTarget(original, s.id).breadcrumb.join(' › ') === 'bass › lpf',
+  )!;
+  expect(describeTarget(original, setting.id).value).toBe(450);
+  const edited = changed(original, setting.id, 900);
+  const [before, after] = await Promise.all([
+    queryEventsNode(source, 8, 10),
+    queryEventsNode(generate(edited), 8, 10),
+  ]);
+  expect(before.error).toBeNull();
+  expect(after.error).toBeNull();
+  const expected = before.events.map((e) => ({
+    ...e,
+    value:
+      (e.value as { s?: string }).s === 'sawtooth'
+        ? { ...(e.value as object), cutoff: 900 }
+        : e.value,
+  }));
+  const stable = (x: unknown): string =>
+    x && typeof x === 'object'
+      ? Array.isArray(x)
+        ? `[${x.map(stable)}]`
+        : `{${Object.entries(x)
+            .sort(([a], [b]) => a.localeCompare(b))
+            .map(([k, v]) => `${k}:${stable(v)}`)}}`
+      : JSON.stringify(x);
+  const bags = (events: typeof before.events) => events.map(stable).sort();
+  expect(bags(after.events)).toEqual(bags(expected));
+  expect(
+    after.events.filter((e) => (e.value as { s?: string }).s === 'sawtooth').length,
+  ).toBeGreaterThan(0);
+});

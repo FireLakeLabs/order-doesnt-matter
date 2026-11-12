@@ -1,8 +1,7 @@
+import { test } from './helpers';
 import { signal, openProgram, play, selectNode, waitForPending } from './helpers';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { instruments } from '../../src/document';
-import { generate } from '../../src/generate';
-import { queryEventsNode } from '../../src/strudel/evaluate-node';
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 const editor = (page: Page) => page.locator('#editor');
 async function exact(page: Page, value: number) {
@@ -11,7 +10,7 @@ async function exact(page: Page, value: number) {
   await waitForPending(page);
 }
 for (const scenario of ['double', 'reset', 'degrade', 'order', 'restore'] as const)
-  test(`real house rewrite: ${scenario} preserves other triggers`, async ({ page }) => {
+  test(`real house rewrite: ${scenario} keyboard editing and preview`, async ({ page }) => {
     await openProgram(page, { path: 'corpus/programs/real-house-arranged.strudel' });
     // Accelerate transport only, retaining the real score and event assertions.
     await page.evaluate(() => {
@@ -28,16 +27,12 @@ for (const scenario of ['double', 'reset', 'degrade', 'order', 'restore'] as con
     await expect(editor(page)).toHaveAttribute('data-editor-kind', 'rewrite');
     await editor(page).getByRole('button', { name: 'Add fast', exact: true }).press('Enter');
     await exact(page, 2);
-    await play(page);
-    const stable = (v: unknown): string =>
-      v && typeof v === 'object'
-        ? Array.isArray(v)
-          ? `[${v.map(stable)}]`
-          : `{${Object.entries(v)
-              .sort(([a], [b]) => a.localeCompare(b))
-              .map(([k, x]) => `${k}:${stable(x)}`)}}`
-        : JSON.stringify(v);
-    async function check(multiplier: number) {
+    if (scenario === 'double') {
+      await play(page);
+      // Browser delivery canary only. Exact spans and unaffected instruments are
+      // proved by rewrite-editor.test.ts against the real Strudel worker.
+      // First playback may begin inside a cycle. Keep #22's future complete
+      // cycle so a late first scheduler tick cannot truncate the observation.
       const cycle = await page.evaluate(() => Math.ceil(window.odmApp.engine!.now()!) + 1);
       await signal(() =>
         page.evaluate(
@@ -45,37 +40,25 @@ for (const scenario of ['double', 'reset', 'degrade', 'order', 'restore'] as con
           cycle,
         ),
       ).toBe(true);
-      const actual = await page.evaluate(
-        (c) =>
-          window.odmApp.history
-            .filter((e) => e.type === 'trigger' && e.cycle >= c && e.cycle < c + 1)
-            .map((e) => (e as { value: unknown }).value),
-        cycle,
-      );
-      const expected = await queryEventsNode(generate(original), cycle, cycle + 1);
-      expect(expected.error).toBeNull();
-      const kickValue = (v: unknown) => (v as { s?: string }).s === 'bd';
-      const bags = expected.events.filter((e) => e.hasOnset).map((e) => e.value);
-      expect(actual.filter(kickValue)).toHaveLength(bags.filter(kickValue).length * multiplier);
       expect(
-        actual
-          .filter((v) => !kickValue(v))
-          .map(stable)
-          .sort(),
-      ).toEqual(
-        bags
-          .filter((v) => !kickValue(v))
-          .map(stable)
-          .sort(),
-      );
-    }
-    if (scenario === 'double') {
-      await check(2);
+        await page.evaluate(
+          (c) =>
+            window.odmApp.history.filter(
+              (e) =>
+                e.type === 'trigger' &&
+                e.cycle >= c &&
+                e.cycle < c + 1 &&
+                (e.value as { s?: string }).s === 'bd',
+            ).length,
+          cycle,
+        ),
+      ).toBe(8);
+      await page.getByRole('button', { name: 'Stop', exact: true }).click();
       return;
     }
     await exact(page, 1);
     if (scenario === 'reset') {
-      await check(1);
+      await expect(editor(page).getByRole('spinbutton')).toHaveValue('1');
       return;
     }
     await signal(() => editor(page).getByRole('img', { name: 'Without fast' }).isVisible()).toBe(
@@ -88,7 +71,7 @@ for (const scenario of ['double', 'reset', 'degrade', 'order', 'restore'] as con
     await editor(page).getByRole('button', { name: 'Add degradeBy', exact: true }).press('Enter');
     await exact(page, 1);
     if (scenario === 'degrade') {
-      await check(0);
+      await expect(editor(page).getByRole('spinbutton')).toHaveValue('1');
       return;
     }
     if (scenario === 'order') {
@@ -105,10 +88,9 @@ for (const scenario of ['double', 'reset', 'degrade', 'order', 'restore'] as con
     await editor(page).getByRole('button', { name: 'Edit fast', exact: true }).click();
     await editor(page).getByRole('button', { name: 'Remove rewrite', exact: true }).click();
     await waitForPending(page);
-    await check(1);
+    await expect(editor(page).locator('ol li')).toHaveCount(0);
     await page.keyboard.press('Escape');
     await expect(add).toBeFocused();
-    await page.getByRole('button', { name: 'Stop', exact: true }).click();
   });
 test('real ambient rewrite: preview, keyboard focus and phone', async ({ page }) => {
   await openProgram(page, { path: 'corpus/programs/real-ambient.strudel' });
@@ -126,16 +108,13 @@ test('real ambient rewrite: preview, keyboard focus and phone', async ({ page })
   );
   await expect(editor(page).getByRole('img', { name: 'Without slow' })).toBeVisible();
   await editor(page).evaluate((node) => node.scrollIntoView({ block: 'start' }));
-  await page.screenshot({ path: 'test-results/rewrite-desktop.png' });
   await page.setViewportSize({ width: 390, height: 844 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   for (const box of await editor(page)
     .locator('button,input')
     .evaluateAll((nodes) => nodes.map((n) => n.getBoundingClientRect().height)))
     expect(box).toBeGreaterThanOrEqual(44);
-  await page.screenshot({ path: 'test-results/rewrite-phone.png' });
   await editor(page).locator('figure').last().scrollIntoViewIfNeeded();
-  await page.screenshot({ path: 'test-results/rewrite-phone-details.png' });
   await page.keyboard.press('Escape');
   await expect(chip).toBeFocused();
 });

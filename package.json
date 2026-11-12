@@ -21,7 +21,7 @@
     "demo": "node scripts/browser.mjs demo",
     "measure:edit": "node scripts/browser.mjs measure",
     "demo:edit": "node scripts/browser.mjs edit-demo",
-    "shots:editors": "ODM_EDITOR_SHOTS=1 playwright test tests/browser/shots.spec.ts --workers=1 --output=.browser-build-shots-results"
+    "shots:editors": "ODM_EDITOR_SHOTS=1 playwright test tests/browser/shots.spec.ts --project=optional --workers=1 --output=.browser-build-shots-results"
   },
   "dependencies": {
     "@strudel/core": "1.2.6",

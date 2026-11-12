@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test';
+import { test } from './helpers';
+import { expect } from '@playwright/test';
 test('built shell loads without browser or request errors', async ({ page }) => {
   const errors: string[] = [];
   page.on('console', (message) => {

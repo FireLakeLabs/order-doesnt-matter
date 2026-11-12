@@ -1,5 +1,6 @@
+import { test } from './helpers';
 import { scoreReady, play, appSignal, signal } from './helpers';
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
 import { instruments, sections } from '../../src/document';
 import type {} from '../../src/app/main';
 
@@ -48,18 +49,19 @@ test('page: original arrangement → rows → measured synth PCM → pinned sect
   await signal(() =>
     page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'trigger').length),
   ).toBeGreaterThan(4);
-  const measured = await page.evaluate(async () => {
-    const app = window.odmApp,
-      e = app.engine!;
-    const triggers = app.history.filter((t) => t.type === 'trigger');
-    const synth = triggers.find((t) => (t.value as { s: string }).s === 'triangle')!;
-    const tap = e.tap();
-    return {
-      baseline: await tap.rms(triggers[0].time - 0.08, triggers[0].time - 0.02),
-      rms: await tap.rms(synth.time + 0.005, synth.time + 0.105),
-      firstCycle: triggers[0].cycle,
-    };
-  });
+  const measured = await test.step('ODM:capture', () =>
+    page.evaluate(async () => {
+      const app = window.odmApp,
+        e = app.engine!;
+      const triggers = app.history.filter((t) => t.type === 'trigger');
+      const synth = triggers.find((t) => (t.value as { s: string }).s === 'triangle')!;
+      const tap = e.tap();
+      return {
+        baseline: await tap.rms(triggers[0].time - 0.08, triggers[0].time - 0.02),
+        rms: await tap.rms(synth.time + 0.005, synth.time + 0.105),
+        firstCycle: triggers[0].cycle,
+      };
+    }));
   console.log('APP MEASURED (rendered PCM, threshold 0.001)', JSON.stringify(measured));
   expect(measured.rms).toBeGreaterThan(0.001);
   expect(measured.rms).toBeGreaterThan(measured.baseline * 10);

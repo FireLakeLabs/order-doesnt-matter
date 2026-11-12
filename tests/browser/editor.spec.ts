@@ -1,8 +1,6 @@
+import { test } from './helpers';
 import { scoreReady, play, waitForPending, signal } from './helpers';
-import { queryEventsNode } from '../../src/strudel/evaluate-node';
-import { readFile } from 'node:fs/promises';
-import { expect, test, type Page } from '@playwright/test';
-import type { EngineEvent } from '../../src/contract';
+import { expect, type Page } from '@playwright/test';
 import type {} from '../../src/app/main';
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 async function open(page: Page) {
@@ -98,78 +96,6 @@ test('constant editor: pending → swapped → trigger values → undo; readonly
   await expect(page.locator('#editor')).toContainText('Edit this rhythm');
   await expect(page.getByRole('slider')).toHaveCount(0);
 });
-test('real house: pasted local file → bass lpf 450 → 900 → unchanged other trigger values', async ({
-  page,
-}) => {
-  await open(page);
-  const source = (await readFile('corpus/programs/real-house-arranged.strudel', 'utf8')).replace(
-    /setcpm\([^)]*\)/,
-    'setcpm(90)',
-  );
-  await page.getByLabel('Your Strudel program').fill(source);
-  await page.getByRole('button', { name: 'Load', exact: true }).click();
-  await scoreReady(page);
-  await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
-  await page.getByRole('button', { name: 'drop', exact: true }).first().click();
-  await play(page);
-  await cell(page, 'bass', 'lpf').click();
-  await expect(page.getByRole('spinbutton')).toHaveValue('450');
-  // Compare a full cycle's event bags, normalized by phase and with multiplicity.
-  const collect = async (cycle: number) => {
-    await signal(
-      () =>
-        page.evaluate(
-          (c) =>
-            window.odmApp.history.filter((e) => e.type === 'trigger' && e.cycle >= c + 1).length,
-          cycle,
-        ),
-      { timeout: 10000 },
-    ).toBeGreaterThan(0);
-    return page.evaluate(
-      (c) =>
-        window.odmApp.history.filter(
-          (e): e is Extract<EngineEvent, { type: 'trigger' }> =>
-            e.type === 'trigger' && e.cycle >= c && e.cycle < c + 1,
-        ),
-      cycle,
-    );
-  };
-  const before = await collect(8);
-  await setValue(page, 900);
-  await waitForPending(page);
-  await expect(page.locator('#editor-status')).toHaveText('Playing now');
-  const now = await page.evaluate(() => window.odmApp.engine!.now()!);
-  const afterCycle = Math.ceil(now) + 1;
-  const after = await collect(afterCycle);
-  const expected = await queryEventsNode(source, afterCycle, afterCycle + 1);
-  expect(expected.error).toBeNull();
-  const stable = (x: unknown): string =>
-    x && typeof x === 'object'
-      ? Array.isArray(x)
-        ? `[${x.map(stable)}]`
-        : `{${Object.entries(x)
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([k, v]) => `${k}:${stable(v)}`)}}`
-      : JSON.stringify(x);
-  const bags = (items: typeof before, bass: boolean) =>
-    items
-      .filter((e) => ((e.value as { s?: string }).s === 'sawtooth') === bass)
-      .map((e) => stable(e.value))
-      .sort();
-  expect(bags(before, false).length).toBeGreaterThan(0);
-  // Perlin is fixed by absolute time, so compare unedited source at the same
-  // future cycle rather than demanding identical values in different cycles.
-  const otherExpected = expected.events
-    .filter((e) => e.hasOnset && (e.value as { s?: string }).s !== 'sawtooth')
-    .map((e) => stable(e.value))
-    .sort();
-  expect(bags(after, false)).toEqual(otherExpected);
-  expect(bags(after, true).length).toBeGreaterThan(0);
-  for (const e of after.filter((e) => (e.value as { s?: string }).s === 'sawtooth'))
-    expect(e.value).toMatchObject({ cutoff: 900 });
-  await page.getByRole('button', { name: 'Stop', exact: true }).click();
-});
-
 test('section-local setting is distinct; signal stays read-only; arrow keys and undo shortcuts', async ({
   page,
 }) => {

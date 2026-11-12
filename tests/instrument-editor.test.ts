@@ -202,3 +202,51 @@ it('definition mute remains separate from section mutes', () => {
   expect(definitionMuted(next, row.id)).toBe(false);
   expect(instruments(next)[0].uses.every((u) => u.muted)).toBe(true);
 });
+
+it('real house: solo persists through section/definition mute undo, redo, rename and restart', async () => {
+  const { history, push, undo, redo } = await import('../src/editor/history');
+  const doc = load(readFileSync('corpus/programs/real-house-arranged.strudel', 'utf8'));
+  const rows = instruments(doc),
+    bass = rows.find((r) => r.name === 'bass')!,
+    kick = rows.find((r) => r.name === 'kick')!,
+    chords = rows.find((r) => r.name === 'chords')!;
+  const intro = sections(doc).find((s) => s.name === 'intro')!;
+  let h = history(doc);
+  h = push(h, accept(setMuted(h.present, kick.id, true)), kick.id);
+  h = push(h, accept(setMuted(h.present, kick.id, false)), kick.id);
+  h = push(h, accept(setUseMuted(h.present, chords.id, intro.id, true)), chords.id);
+  const solo = setSolo(loadPiece(initialState(), '', { doc: h.present, warnings: [] }), bass.id);
+  const snapshots = [h.present];
+  h = push(h, accept(renameInstrument(h.present, bass.id, 'Solo bass')), bass.id);
+  snapshots.push(h.present);
+  h = undo(h); // name
+  snapshots.push(h.present);
+  h = undo(h); // section mute
+  snapshots.push(h.present);
+  h = undo(h); // unmute definition
+  expect(instruments(h.present).find((r) => r.id === kick.id)!.muted).toBe(true);
+  snapshots.push(h.present);
+  h = redo(h);
+  snapshots.push(h.present);
+  const reference = await queryEventsNode(generate(doc, { only: bass.id }), 8, 9);
+  expect(reference.error).toBeNull();
+  expect(reference.events.length).toBeGreaterThan(2);
+  for (const snapshot of snapshots) {
+    // The app carries solo outside document history, including transport changes.
+    const state = { ...solo, doc: snapshot, rows: instruments(snapshot) };
+    expect(state.solo).toBe(bass.id);
+    for (const playing of [true, false, true]) {
+      const transportState = { ...state, playing };
+      const options = playbackOptions(transportState);
+      expect(options).toEqual({ only: bass.id });
+    }
+    expect(await queryEventsNode(generate(snapshot, playbackOptions(state)), 8, 9)).toEqual(
+      reference,
+    );
+  }
+  const released = setSolo(solo, null);
+  expect(playbackOptions(released)).toEqual({});
+  const full = await queryEventsNode(generate(h.present, playbackOptions(released)), 8, 9);
+  expect(full.error).toBeNull();
+  expect(new Set(full.events.map((e) => (e.value as { s: string }).s)).size).toBe(6);
+});

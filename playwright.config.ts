@@ -1,9 +1,15 @@
 import { defineConfig } from '@playwright/test';
+const optional = /\/(demo|edit-demo|shots|measure|online)\.spec\.ts$/;
+const audio = /\/(engine|silent-swap)\.spec\.ts$/;
 export default defineConfig({
   testDir: './tests/browser',
-  // Audio clocks and score workers compete for CPU. See tests/stability.md.
-  // ODM_DEFAULT_WORKERS is only for the recorded 1/2/4/default comparison.
-  workers: process.env.ODM_DEFAULT_WORKERS ? undefined : 2,
+  // Three UI workers passed the load/CI matrix; audio clocks run afterward.
+  workers: 3,
   use: { browserName: 'chromium', baseURL: process.env.ODM_URL },
   reporter: 'line',
+  projects: [
+    { name: 'default', testIgnore: [optional, audio] },
+    { name: 'audio', testMatch: audio, workers: 1, dependencies: ['default'] },
+    { name: 'optional', testMatch: optional },
+  ],
 });
