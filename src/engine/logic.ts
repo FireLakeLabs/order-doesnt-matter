@@ -109,7 +109,7 @@ export async function capturedRms(
     }
     if (performance.now() >= deadline)
       throw Error(
-        `Timed out waiting for output tap frames ${begin}–${end}; captured through ${covered}. Audio may be suspended or capture expired.`,
+        `Timed out waiting for output tap frames ${begin}–${end}; captured through ${covered}, next ${chunks.find((c) => c.frame > covered)?.frame}, latest ${chunks.at(-1)?.frame}. Audio may be suspended or capture expired.`,
       );
     await new Promise((resolve) => setTimeout(resolve, 10));
   }
