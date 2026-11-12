@@ -1,5 +1,5 @@
 import { test } from './helpers';
-import { openProgram, play, selectNode, swap, appSignal, scoreReady } from './helpers';
+import { openProgram, play, selectNode, swap, appSignal, scoreReady, signal } from './helpers';
 import { readFile } from 'node:fs/promises';
 import { expect, type Page } from '@playwright/test';
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
@@ -44,16 +44,19 @@ async function house(page: Page, cpm = 90) {
 test('real house: mute and unmute kick update trigger delivery', async ({ page }) => {
   const ids = await house(page);
   await play(page);
-  await selectNode(page, { nodeId: ids.chords });
-  await expect(page.locator('#editor')).toContainText('piano: missing');
-  await page.keyboard.press('Escape');
   await swap(page, () => page.getByRole('button', { name: 'Mute kick', exact: true }).click());
   expect(await observed(page, async () => (await sinceSwap(page)).length)).toBeGreaterThan(0);
   expect((await sinceSwap(page)).some((v) => v.s === 'bd')).toBe(false);
+  // A full negative observation may consume the drop on a busy CI runner.
+  // Rewind while muted so the positive check cannot observe the kickless breakdown.
+  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await page.getByRole('button', { name: 'drop', exact: true }).first().click();
+  await play(page);
   await swap(page, () => page.getByRole('button', { name: 'Unmute kick', exact: true }).click());
-  expect(await observed(page, async () => (await sinceSwap(page)).some((v) => v.s === 'bd'))).toBe(
-    true,
-  );
+  await signal(async () => (await sinceSwap(page)).some((v) => v.s === 'bd')).toBe(true);
+  await selectNode(page, { nodeId: ids.chords });
+  await expect(page.locator('#editor')).toContainText('piano: missing');
+  await page.getByRole('button', { name: 'Stop', exact: true }).click();
 });
 test('real house: section mute checkbox follows the pinned section', async ({ page }) => {
   const ids = await house(page);
