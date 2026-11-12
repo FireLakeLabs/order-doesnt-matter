@@ -2,18 +2,17 @@ import {
   findById,
   instruments,
   sections,
+  shared,
   walk,
   type Doc,
   type Meta,
-  type Path,
   type Pattern,
   type Setting,
+  type InstrumentUse,
+  type SongSection,
 } from './index';
 export type Constant = number | string | boolean;
-export interface Refusal {
-  ok: false;
-  reason: string;
-}
+export type { Refusal } from './edits/shared';
 const isSetting = (node?: Meta): node is Setting => !!node && 'name' in node && 'value' in node;
 function contains(pattern: Pattern, id: string) {
   let found = false;
@@ -63,9 +62,34 @@ function displayValue(doc: Doc, p: Pattern, seen = new Set<string>()): string {
       return range.args.map((a) => (a.kind === 'literal' ? String(a.value) : '')).join(' to ');
     return c.shape;
   }
-  return c.kind === 'generator' ? c.name : 'a pattern of values';
+  if (c.kind === 'generator') {
+    const arg = c.args[0];
+    return arg?.kind === 'pattern'
+      ? displayValue(doc, arg.pattern, seen)
+      : arg?.kind === 'literal'
+        ? String(arg.value)
+        : c.name;
+  }
+  return 'a pattern of values';
 }
+export type TargetKind =
+  | 'instrument'
+  | 'setting-constant'
+  | 'setting-values'
+  | 'setting-signal'
+  | 'rewrite'
+  | 'rhythm'
+  | 'section'
+  | 'source'
+  | 'unknown';
 export interface Target {
+  kind: TargetKind;
+  node?: Meta;
+  instrumentId?: string;
+  use?: InstrumentUse;
+  section?: SongSection;
+  /** Parallel to breadcrumb: author names are false, generated names true. */
+  generatedParts: boolean[];
   nodeId: string;
   breadcrumb: string[];
   generated: boolean;
@@ -75,61 +99,126 @@ export interface Target {
   editable: boolean;
   reason: string;
 }
+/** A core has no serialized Meta id. Its selection address is scoped to its pattern. */
+export const rhythmTargetId = (pattern: Pattern) => `${pattern.id}:rhythm`;
 export function describeTarget(doc: Doc, nodeId: string): Target {
-  const node = findById(doc, nodeId),
-    setting = isSetting(node) ? node : undefined;
+  const rhythm = nodeId.endsWith(':rhythm'),
+    sourceAddress = nodeId.endsWith(':source');
+  const id = rhythm || sourceAddress ? nodeId.slice(0, -7) : nodeId;
+  const node = findById(doc, id);
   const rows = instruments(doc);
-  const definition = rows.find((r) => contains(r.pattern, nodeId));
-  const local = definition
-    ? undefined
-    : rows.find((r) =>
-        r.uses.some((u) =>
-          u.layers.some((l) => l.kind === 'settings' && l.settings.some((s) => s.id === nodeId)),
-        ),
-      );
+  const definition = rows.find((r) => r.id === id || contains(r.pattern, id));
+  const inUse = (use: InstrumentUse) =>
+    use.path.some((p) => p.id === id) ||
+    use.layers.some((layer) =>
+      contains({ id: 'scan-pattern', tier: 1, core: { kind: 'hole' }, layers: [layer] }, id),
+    );
+  const local = definition ? undefined : rows.find((r) => r.uses.some(inUse));
   const row = definition ?? local;
-  const use = local?.uses.find((u) =>
-    u.layers.some((l) => l.kind === 'settings' && l.settings.some((s) => s.id === nodeId)),
-  );
-  const section = use && sections(doc).find((s) => use.path.some((p) => p.id === s.id));
-  const name = setting?.name;
-  const control = name === 'cutoff' ? 'lpf' : name === 'hcutoff' ? 'hpf' : (name ?? 'Source text');
+  const use = local?.uses.find(inUse);
+  const parts = sections(doc);
+  const selectedSection = parts.find((s) => s.id === id);
+  const section =
+    selectedSection ?? (use && parts.find((s) => use.path.some((p) => p.id === s.id)));
+  const setting = isSetting(node) ? node : undefined;
+  const control =
+    setting?.name === 'cutoff'
+      ? 'lpf'
+      : setting?.name === 'hcutoff'
+        ? 'hpf'
+        : (setting?.name ?? '');
   const value = setting?.value.core.kind === 'constant' ? setting.value.core.value : null;
   const editable = !!setting && value !== null && !setting.value.layers.length;
+  function valueKind(p: Pattern, seen = new Set<string>()): TargetKind {
+    if (seen.has(p.id)) return 'unknown';
+    seen.add(p.id);
+    if (p.core.kind === 'opaque' || p.layers.some((l) => l.kind === 'opaque')) return 'source';
+    if (p.core.kind === 'signal') return 'setting-signal';
+    if (p.core.kind === 'ref') {
+      const target = shared(doc, p.core.name);
+      if (target) return valueKind(target, seen);
+    }
+    return ['sequence', 'group', 'constant', 'data'].includes(p.core.kind)
+      ? 'setting-values'
+      : 'unknown';
+  }
+  const pattern = node && 'core' in node ? (node as Pattern) : undefined;
+  const source =
+    node?.tier === 3 ||
+    (node && 'kind' in node && node.kind === 'opaque') ||
+    pattern?.core.kind === 'opaque';
+  let kind: TargetKind = 'unknown';
+  if (selectedSection && !rhythm && !sourceAddress) kind = 'section';
+  else if (setting) kind = editable ? 'setting-constant' : valueKind(setting.value);
+  else if (row?.id === id && !rhythm && !sourceAddress) kind = 'instrument';
+  else if (source || sourceAddress) kind = 'source';
+  else if (
+    rhythm &&
+    pattern &&
+    (pattern.core.kind === 'sequence' ||
+      (pattern.core.kind === 'generator' &&
+        ['note', 'n', 'freq', 's', 'sound'].includes(pattern.core.name)))
+  )
+    kind = 'rhythm';
+  else if (node && 'kind' in node && node.kind === 'rewrite') kind = 'rewrite';
+  const label =
+    control ||
+    (kind === 'rhythm'
+      ? 'Rhythm'
+      : kind === 'rewrite' && node && 'name' in node
+        ? String(node.name)
+        : kind === 'source'
+          ? 'Source text'
+          : 'Pattern');
+  const breadcrumb =
+    kind === 'section'
+      ? ['Piece', selectedSection!.name]
+      : [
+          row?.name ?? 'Piece',
+          ...(section ? [`in ${section.name}`] : []),
+          ...(kind === 'instrument' ? [] : [label]),
+        ];
   return {
     nodeId,
-    breadcrumb: [row?.name ?? 'Piece', ...(section ? [`in ${section.name}`] : []), control],
+    node,
+    kind,
+    instrumentId: kind === 'section' ? undefined : row?.id,
+    use: kind === 'section' ? undefined : use,
+    section,
+    breadcrumb: breadcrumb.map((part) => part.replaceAll('$', '')),
+    generatedParts: breadcrumb.map((_, i) =>
+      kind === 'section'
+        ? i === 1 && selectedSection!.nameSource === 'generated'
+        : i === 0
+          ? row?.nameSource === 'generated'
+          : !!section && i === 1 && section.nameSource === 'generated',
+    ),
     generated: row?.nameSource === 'generated',
-    control,
+    control: control || label,
     value,
-    displayValue: setting ? displayValue(doc, setting.value) : '',
+    displayValue: selectedSection
+      ? `${selectedSection.start}–${selectedSection.start + selectedSection.cycles} · ${selectedSection.cycles} cycles`
+      : setting
+        ? displayValue(doc, setting.value)
+        : pattern
+          ? displayValue(doc, pattern)
+          : '',
     editable,
-    reason: editable ? '' : setting ? reason(doc, setting.value) : 'source text',
+    reason: editable
+      ? ''
+      : setting
+        ? reason(doc, setting.value)
+        : ((
+            {
+              instrument: 'instrument editing is not available yet',
+              rhythm:
+                'rhythm editing is not available yet; source text is available in the pasted program',
+              rewrite: 'ordered rewrite editing is not available yet',
+              section: 'section editing is not available yet',
+              source: 'source text',
+              unknown: 'recognised by shape; no editor is available yet',
+            } as Partial<Record<TargetKind, string>>
+          )[kind] ?? 'source text'),
   };
 }
-/** Copy only the serialized path to the setting. Refusals are values, never throws. */
-export function setConstant(doc: Doc, nodeId: string, value: Constant): Doc | Refusal {
-  const target = describeTarget(doc, nodeId);
-  if (!target.editable) return { ok: false, reason: target.reason };
-  if (
-    typeof value !== typeof target.value ||
-    (typeof value === 'number' && !Number.isFinite(value))
-  )
-    return { ok: false, reason: 'Use a finite value of the same type' };
-  if (value === target.value) return doc;
-  let path: Path = [];
-  walk(doc, (node, p) => {
-    if (node.id === nodeId) path = [...p, 'value', 'core', 'value'];
-  });
-  function replace(node: unknown, depth: number): unknown {
-    if (depth === path.length) return value;
-    const key = path[depth],
-      next = Array.isArray(node) ? [...node] : { ...(node as object) };
-    (next as Record<string | number, unknown>)[key] = replace(
-      (node as Record<string | number, unknown>)[key],
-      depth + 1,
-    );
-    return next;
-  }
-  return replace(doc, 0) as Doc;
-}
+export { setConstant } from './edits/set-constant';
