@@ -1,6 +1,6 @@
 import type { CreateEngine, Engine, EngineEvent, OutputTap } from '../contract';
 import { message, Revision, SoundBook } from './logic';
-import { PlaybackOverrun, PREFLIGHT_TIMEOUT } from './playback-limits';
+import { PlaybackNotice, PlaybackOverrun, PREFLIGHT_TIMEOUT } from './playback-limits';
 
 export interface AudioBackend {
   prepare(
@@ -39,16 +39,24 @@ export function engineWith(
   };
   const error = (e: unknown) => {
     if (e instanceof PlaybackOverrun) {
+      overrun = { epoch, error: e };
       // A first tick may run inside clock.start(), before Strudel sets started.
       // Wait until that stack unwinds; the guard already drops all further haps.
       queueMicrotask(stop);
     }
-    emit({ type: 'error', message: message(e) });
+    emit({
+      type: 'error',
+      message: message(e),
+      ...(e instanceof PlaybackNotice ? { reason: e.reason } : {}),
+    });
   };
   let queue = Promise.resolve(),
     epoch = 0,
     active = 0,
     enabled = false;
+  let overrun: { epoch: number; error: PlaybackOverrun } | undefined;
+  const cancelled = (token: number) =>
+    overrun?.epoch === token ? overrun.error : Error('Playback cancelled by stop');
   const books = new Map<number, SoundBook>();
   let book = new SoundBook(audio.check, () => {});
   connect(
@@ -89,14 +97,14 @@ export function engineWith(
           if (options.fromCycle !== undefined && !Number.isFinite(options.fromCycle))
             throw Error('Start cycle must be finite');
           await audio.resume();
-          if (token !== epoch) throw Error('Playback cancelled by stop');
+          if (token !== epoch) throw cancelled(token);
           const from = options.fromCycle ?? (audio.playing() ? Math.max(0, audio.now()) : 0);
           const discovered = await audio.preflight(
             code,
             from,
             (options.discoverCycles ?? []).slice(0, 32),
           );
-          if (token !== epoch) throw Error('Playback cancelled by stop');
+          if (token !== epoch) throw cancelled(token);
           const revision = active + 1;
           const candidate = await audio.prepare(code, from, revision);
           const next = new SoundBook(
@@ -114,7 +122,7 @@ export function engineWith(
           );
           if (token !== epoch) {
             book = previous;
-            throw Error('Playback cancelled by stop');
+            throw cancelled(token);
           }
           const wasPlaying = audio.playing();
           if (options.fromCycle !== undefined && wasPlaying) audio.stop();
@@ -131,14 +139,14 @@ export function engineWith(
           }
           if (token !== epoch) {
             audio.stop();
-            throw Error('Playback cancelled by stop');
+            throw cancelled(token);
           }
           // Keep the immediately preceding book for notes already in the scheduler horizon.
           for (const key of books.keys()) if (key < active - 1) books.delete(key);
           if (!wasPlaying) emit({ type: 'transport', playing: true });
           return revision;
         } catch (e) {
-          error(e);
+          if (e !== overrun?.error) error(e);
           throw e;
         }
       });

@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 import { engineWith } from './index';
-import { PlaybackOverrun } from './playback-limits';
+import { PlaybackNotice, PlaybackOverrun } from './playback-limits';
 import type { AudioBackend, Dispatch } from './index';
 import type { EngineEvent } from '../contract';
 function fixture() {
@@ -175,4 +175,39 @@ test('Stop during worker preflight prevents evaluation, seeking and commit', asy
   await expect(pending).rejects.toThrow('cancelled');
   expect(prepared).toBe(false);
   expect(engine.playing).toBe(false);
+});
+
+test('a recovering slow query remains playing and carries a notice reason, not a stop', async () => {
+  const { engine, events, fail, trigger } = fixture();
+  await engine.play('sine');
+  fail(new PlaybackNotice('slow-query'));
+  await Promise.resolve();
+  await trigger();
+  expect(engine.playing).toBe(true);
+  expect(events.filter((e) => e.type === 'error')).toEqual([
+    { type: 'error', message: new PlaybackNotice('slow-query').message, reason: 'slow-query' },
+  ]);
+  expect(events.filter((e) => e.type === 'transport')).toEqual([
+    { type: 'transport', playing: true },
+  ]);
+});
+
+test('an overrun on the initial tick keeps its stop message and emits it once', async () => {
+  const { engine, audio, events, fail } = fixture();
+  const prepare = audio.prepare;
+  audio.prepare = async (...args) => {
+    const candidate = await prepare(...args);
+    return {
+      ...candidate,
+      async commit() {
+        await candidate.commit();
+        fail(new PlaybackOverrun());
+      },
+    };
+  };
+  await expect(engine.play('sine')).rejects.toThrow(new PlaybackOverrun().message);
+  expect(engine.playing).toBe(false);
+  expect(events.filter((e) => e.type === 'error')).toEqual([
+    { type: 'error', message: new PlaybackOverrun().message },
+  ]);
 });

@@ -69,7 +69,8 @@ export type EngineEvent =
    * `cycle` and audio-clock `time` mark that window's start, not permanent silence.
    * A later first trigger may still report `swapped` for the same revision. */
   | { type: 'committed'; revision: number; cycle: number; time: number }
-  | { type: 'error'; message: string };
+  /** A reason marks a recoverable playback notice; transport continues. */
+  | { type: 'error'; message: string; reason?: 'notes-left-out' | 'slow-query' };
 
 /** Measured output, for checks. Nothing here says how anything sounds. */
 export interface OutputTap {

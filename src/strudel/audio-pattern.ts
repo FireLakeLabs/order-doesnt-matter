@@ -1,10 +1,10 @@
 import { Pattern } from '@strudel/core';
 import type { Hap, State, Scheduler } from './index';
 import {
-  FLOOD_MESSAGE,
   MAX_WINDOW_STARTS,
+  PlaybackNotice,
   PlaybackOverrun,
-  QUERY_LIMIT_MS,
+  QueryBudget,
 } from '../engine/playback-limits';
 
 // Depends on Cyclist querying queryArc (which swallows exceptions): guard direct query first.
@@ -14,18 +14,27 @@ export function guarded(
   tag: (hap: Hap) => void,
   silent?: (state: State) => void,
 ): Pattern {
+  const budget = new QueryBudget();
   let flooded = false,
     halted = false;
   return new Pattern((state: State) => {
     if (halted) return [];
     const start = performance.now();
+    const answered = () => {
+      const notice = budget.observe(performance.now() - start);
+      if (notice instanceof PlaybackOverrun) halted = true;
+      if (notice) failed(notice);
+      return !halted;
+    };
+    let haps: Hap[];
     try {
-      const haps = pattern.query(state);
-      if (performance.now() - start > QUERY_LIMIT_MS) {
-        halted = true;
-        failed(new PlaybackOverrun());
-        return [];
-      }
+      haps = pattern.query(state);
+    } catch (error) {
+      if (answered()) failed(error);
+      return [];
+    }
+    if (!answered()) return [];
+    try {
       // Cyclist 1.2.6, cyclist.mjs:60–76, starts only hasOnset haps.
       // Filtering here bounds both its synchronous loop and asynchronous output.
       const onsets: Hap[] = [];
@@ -40,16 +49,13 @@ export function guarded(
       }
       if (excess && !flooded) {
         flooded = true;
-        failed(Error(FLOOD_MESSAGE));
+        failed(new PlaybackNotice('notes-left-out'));
       }
       onsets.forEach(tag);
       if (!onsets.length) silent?.(state);
       return onsets;
     } catch (error) {
-      if (performance.now() - start > QUERY_LIMIT_MS) {
-        halted = true;
-        failed(new PlaybackOverrun());
-      } else failed(error);
+      failed(error);
       return [];
     }
   });

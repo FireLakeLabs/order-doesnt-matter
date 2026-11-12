@@ -89,6 +89,10 @@ h1 {
   color: var(--warning);
   min-height: 22px;
 }
+#message[data-kind='warning'],
+.spiral-message[data-kind='warning'] {
+  color: var(--text);
+}
 #load-error {
   color: var(--danger);
 }

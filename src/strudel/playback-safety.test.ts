@@ -1,7 +1,15 @@
 import { expect, test, vi } from 'vitest';
 import { Pattern, pure } from '@strudel/core';
 import { guarded } from './audio-pattern';
-import { MAX_WINDOW_STARTS, QUERY_LIMIT_MS, PlaybackOverrun } from '../engine/playback-limits';
+import {
+  MAX_WINDOW_STARTS,
+  HARD_QUERY_MS,
+  LATE_QUERY_MS,
+  LATE_WINDOWS,
+  FLOOD_MESSAGE,
+  PlaybackOverrun,
+  PlaybackNotice,
+} from '../engine/playback-limits';
 
 test('a scheduler window drops excess note starts and reports the limit only once', () => {
   const failed = vi.fn(),
@@ -12,14 +20,14 @@ test('a scheduler window drops excess note starts and reports the limit only onc
   expect(p.queryArc(1, 2)).toHaveLength(MAX_WINDOW_STARTS);
   expect(tag).toHaveBeenCalledTimes(MAX_WINDOW_STARTS * 2);
   expect(failed).toHaveBeenCalledOnce();
-  expect(failed.mock.calls[0][0].message).toContain(`${MAX_WINDOW_STARTS} note starts`);
+  expect(failed.mock.calls[0][0].message).toContain(FLOOD_MESSAGE);
 });
 
 test('a query that returns too late drops its notes, reports once and stays halted', () => {
   const clock = vi
     .spyOn(performance, 'now')
     .mockReturnValueOnce(0)
-    .mockReturnValue(QUERY_LIMIT_MS + 1);
+    .mockReturnValue(HARD_QUERY_MS + 1);
   const failed = vi.fn(),
     tag = vi.fn();
   const p = guarded(pure('sine'), failed, tag);
@@ -129,7 +137,7 @@ test('worker preflight asks scheduler controls before broad discovery and checks
 test('fragments do not consume the start limit and the exact time limit is allowed', () => {
   const fragment = pure('held').queryArc(0.25, 0.75)[0],
     onset = pure('start').queryArc(0, 1)[0];
-  const clock = vi.spyOn(performance, 'now').mockReturnValueOnce(0).mockReturnValue(QUERY_LIMIT_MS);
+  const clock = vi.spyOn(performance, 'now').mockReturnValueOnce(0).mockReturnValue(LATE_QUERY_MS);
   const failed = vi.fn();
   try {
     expect(
@@ -148,7 +156,7 @@ test('a query that throws after running too long also halts', () => {
   const clock = vi
     .spyOn(performance, 'now')
     .mockReturnValueOnce(0)
-    .mockReturnValue(QUERY_LIMIT_MS + 1);
+    .mockReturnValue(HARD_QUERY_MS + 1);
   const failed = vi.fn();
   try {
     const p = guarded(
@@ -173,4 +181,72 @@ test('preflight scheduler windows inherit tempo when the next program does not s
   expect(r.error).toBeNull();
   expect(r.cps).toBe(2);
   expect(r.events[0].part).toEqual([0, 0.1]);
+});
+
+test('one slow query retains all notes and a recoverable notice; sustained late queries halt', () => {
+  let clock = 0,
+    duration = LATE_QUERY_MS + 1;
+  const time = vi.spyOn(performance, 'now').mockImplementation(() => clock);
+  const hap = pure('sine').queryArc(0, 1)[0],
+    failed = vi.fn(),
+    tag = vi.fn();
+  const p = guarded(
+    new Pattern(() => {
+      clock += duration;
+      return [hap];
+    }),
+    failed,
+    tag,
+  );
+  try {
+    expect(p.queryArc(0, 1)).toHaveLength(1);
+    expect(failed.mock.calls[0][0]).toBeInstanceOf(PlaybackNotice);
+    duration = 1;
+    expect(p.queryArc(1, 2)).toHaveLength(1);
+    duration = LATE_QUERY_MS + 1;
+    for (let i = 1; i < LATE_WINDOWS; i++) expect(p.queryArc(i, i + 1)).toHaveLength(1);
+    expect(p.queryArc(8, 9)).toEqual([]);
+    expect(failed.mock.calls.map(([e]) => e)).toEqual([
+      expect.any(PlaybackNotice),
+      expect.any(PlaybackOverrun),
+    ]);
+  } finally {
+    time.mockRestore();
+  }
+});
+
+test('twelve instruments with six-note chords deliver all 72 starts without a warning', async () => {
+  const { Cyclist } = await import('@strudel/core');
+  const { queryEventsWithBudget } = await import('./evaluate');
+  let pattern!: Pattern;
+  const result = await queryEventsWithBudget(
+    'stack(...Array(12).fill(note("[c3,e3,g3,b3,d4,f4]").s("sine")))',
+    0,
+    1,
+    undefined,
+    undefined,
+    0.5,
+    (p) => {
+      pattern = p;
+    },
+  );
+  expect(result.error).toBeNull();
+  const failed = vi.fn(),
+    trigger = vi.fn();
+  const scheduler = new Cyclist({
+    getTime: () => 10,
+    setInterval: () => 1,
+    clearInterval: () => {},
+    onTrigger: trigger,
+  });
+  try {
+    await scheduler.setPattern(
+      guarded(pattern, failed, () => {}),
+      true,
+    );
+    expect(trigger).toHaveBeenCalledTimes(72);
+    expect(failed).not.toHaveBeenCalled();
+  } finally {
+    scheduler.stop();
+  }
 });

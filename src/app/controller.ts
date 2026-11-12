@@ -148,8 +148,12 @@ export function createApp() {
     state = next;
     for (const listener of listeners) listener(state);
   };
-  const message = (error: unknown) =>
-    update({ ...state, message: String(error instanceof Error ? error.message : error) });
+  let playbackNotice: string | undefined;
+  const message = (error: unknown, warning = false) => {
+    const text = String(error instanceof Error ? error.message : error);
+    playbackNotice = warning ? text : undefined;
+    update({ ...state, message: text });
+  };
   function sounds() {
     const names = Object.values(state.events).flatMap((result) =>
       result.events.flatMap((e) => {
@@ -196,7 +200,7 @@ export function createApp() {
     history.push(event);
     if (history.length > 1000) history.shift();
     if (event.type === 'swapped' || event.type === 'committed') editor?.observe(event);
-    if (event.type === 'error') message(event.message);
+    if (event.type === 'error') message(event.message, !!event.reason);
     if (event.type === 'transport') {
       if (!event.playing) editor?.clear();
       update({ ...state, playing: event.playing });
@@ -270,6 +274,9 @@ export function createApp() {
   }
   let subscribed = false;
   return {
+    get warning() {
+      return !!state.message && state.message === playbackNotice;
+    },
     get state() {
       return state;
     },

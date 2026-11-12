@@ -229,12 +229,16 @@ app.subscribe((state) => {
   get<HTMLButtonElement>('watch-stop').disabled =
     !state.playing && !state.message.includes('Preparing');
   watchDialog.querySelector('.spiral-message')!.textContent = state.message;
+  watchDialog.querySelector<HTMLElement>('.spiral-message')!.dataset.kind = app.warning
+    ? 'warning'
+    : 'error';
   play.disabled = !app.canPlay || state.playing;
   stop.disabled = !state.playing && !state.message.includes('Preparing');
   get('tempo').textContent =
     state.cps === null ? 'Tempo —' : `${Number((state.cps * 60).toFixed(2))} cycles/min`;
   get('message').textContent =
     state.message || (editNotice?.doc === state.doc ? editNotice.text : '');
+  get('message').dataset.kind = app.warning ? 'warning' : 'error';
   get('sound-notice').hidden = !state.soundNotice.visible;
   get('solo-banner').hidden = !state.solo;
   get('solo-banner').querySelector('span')!.textContent =
