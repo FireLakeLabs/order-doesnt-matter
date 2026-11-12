@@ -8,7 +8,8 @@ test('Kiln Now pulses agree with predicted and triggered onsets; Stop and editor
   await openProgram(page, { example: 'Kiln' });
   const lines = page.locator('[data-live-id]');
   await expect(lines).toHaveCount(6);
-  await expect(lines.first()).toContainText('not loaded yet');
+  await expect(lines.first()).toHaveAccessibleName(/not loaded yet/);
+  await expect(page.locator('.live-list-disclosure')).not.toHaveAttribute('open');
   await page.evaluate(() => {
     const first = document.querySelector('[data-live-id]');
     Object.assign(window, { liveFirst: first });
@@ -83,8 +84,57 @@ test('Kiln Now pulses agree with predicted and triggered onsets; Stop and editor
       matched++;
   }
   expect(matched).toBeGreaterThan(0);
+  const expectedIds = Object.entries(observed.events)
+    .filter(([, result]) =>
+      result.events.some(
+        (e) =>
+          e.whole &&
+          e.part[0] === e.whole[0] &&
+          e.whole[0] >= observed.from &&
+          e.whole[0] < observed.to,
+      ),
+    )
+    .map(([id]) => id)
+    .sort();
+  expect([...new Set(observed.samples.map((s) => s.id))].sort()).toEqual(expectedIds);
+  expect(
+    await page.locator('#score').evaluate((n) => n.getBoundingClientRect().width),
+  ).toBeGreaterThanOrEqual(1000);
+  if (process.env.ODM_CONSTELLATION_SHOTS) {
+    await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
+    await page.locator('#live').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: 'test-results/constellation/kiln-1440.png' });
+  }
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
   await expect(page.locator('[data-lit="true"]')).toHaveCount(0);
+  await page.locator('[data-section]').nth(1).click();
+  await appSignal(page, () => {
+    const state = window.odmApp.state;
+    return (
+      state.fromCycle === state.sections[1].start &&
+      document.querySelectorAll('.constellation-planet.live-absent').length ===
+        state.rows.filter(
+          (row) =>
+            !state.events[row.id]?.events.some(
+              (e) =>
+                e.whole &&
+                e.part[0] === e.whole[0] &&
+                e.whole[0] >= state.fromCycle &&
+                e.whole[0] < state.toCycle,
+            ),
+        ).length
+    );
+  });
+  const positions = await lines.evaluateAll((nodes) =>
+    nodes.map((n) => {
+      const b = n as HTMLElement;
+      return { x: Number(b.dataset.x), y: Number(b.dataset.y), r: Number(b.dataset.r) };
+    }),
+  );
+  for (const [index, p] of positions.entries())
+    for (const q of positions.slice(index + 1))
+      expect(Math.hypot(p.x - q.x, p.y - q.y)).toBeGreaterThan(p.r + q.r);
+  await expect(page.locator('.constellation-planet.live-absent').first()).toBeVisible();
   await lines.first().click();
   await expect(page.locator('#editor')).toBeVisible();
   await expect(page.locator('#live')).toBeHidden();
@@ -98,12 +148,12 @@ test('phone strip expands with 44px targets, preserves focus across frames and f
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await openProgram(page, { example: 'Kiln' });
-  const summary = page.locator('#live summary');
+  const summary = page.locator('.live-panel > summary');
   await expect(summary).toContainText('Now:');
-  await expect(page.locator('#live details')).not.toHaveAttribute('open');
+  await expect(page.locator('.live-panel')).not.toHaveAttribute('open');
   await summary.click();
-  await expect(page.locator('[data-live-id]').nth(4)).toContainText(
-    'sits out this section · not loaded yet',
+  await expect(page.locator('[data-live-id]').nth(4)).toHaveAccessibleName(
+    /sits out this section.*not loaded yet/,
   );
   const line = page.locator('[data-live-id]').first();
   await line.focus();
@@ -116,11 +166,23 @@ test('phone strip expands with 44px targets, preserves focus across frames and f
       line.classList.add('live-playing', 'live-lit');
       const dot = getComputedStyle(line.querySelector('.live-dot')!);
       const steady =
-        dot.opacity === '1' && dot.boxShadow === 'none' && dot.transitionDuration === '0s';
+        dot.opacity === '1' &&
+        dot.boxShadow === 'none' &&
+        dot.transitionDuration === '0s' &&
+        getComputedStyle(line.querySelector('.live-dot')!, '::after').display === 'none';
       line.classList.remove('live-playing', 'live-lit');
       return steady;
     }),
   ).toBe(true);
+  if (process.env.ODM_CONSTELLATION_SHOTS) {
+    await play(page);
+    await appSignal(page, () => window.odmApp.engine!.now()! >= 0);
+    await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
+    await page.locator('#live').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: 'test-results/constellation/kiln-390.png' });
+    await page.getByRole('button', { name: 'Stop', exact: true }).click();
+    await line.focus();
+  }
   await page.keyboard.press('Enter');
   await expect(page.locator('#editor')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
