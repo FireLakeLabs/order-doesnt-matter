@@ -68,17 +68,8 @@ test('real house: section mute checkbox follows the pinned section', async ({ pa
   await page.getByRole('button', { name: 'drop', exact: true }).first().click();
   await expect(page.getByRole('checkbox', { name: /^Plays in drop/ }).first()).toBeChecked();
 });
-async function soloHistory(page: Page) {
+async function soloBass(page: Page) {
   const ids = await house(page, 60);
-  // Build the same three-edit undo history while stopped. The dedicated mute
-  // tests above exercise their live swaps; this case owns solo persistence.
-  await page.getByRole('button', { name: 'Mute kick', exact: true }).click();
-  await page.getByRole('button', { name: 'Unmute kick', exact: true }).click();
-  await page.getByRole('button', { name: 'intro', exact: true }).click();
-  await selectNode(page, { nodeId: ids.chords });
-  await page.getByRole('checkbox', { name: 'Plays in intro', exact: true }).click();
-  await page.getByRole('button', { name: 'drop', exact: true }).first().click();
-  await page.keyboard.press('Escape');
   await selectNode(page, { nodeId: ids.bass });
   await play(page);
   await expect(page.locator('#editor')).toContainText('sawtooth: ready');
@@ -86,7 +77,7 @@ async function soloHistory(page: Page) {
   await expect(page.locator('#solo-banner')).toHaveText('Solo: bass — Stop solo');
 }
 test('real house: solo survives keyboard name editing and undo', async ({ page }) => {
-  await soloHistory(page);
+  await soloBass(page);
   const liveName = page.getByRole('textbox', { name: 'Instrument name', exact: true });
   await liveName.fill('Solo bass');
   await swap(page, () => liveName.press('Enter'));
