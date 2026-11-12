@@ -1,4 +1,4 @@
-import { instruments, sections, type Doc } from '../document';
+import { sections, type Doc } from '../document';
 import { createEditSession, type EditSession } from '../editor/session';
 import type { Engine, EngineEvent, EventResult } from '../contract';
 import { generate } from '../generate';
@@ -7,6 +7,7 @@ import { createEngine } from '../engine';
 import { createBrowserQueries } from '../strudel/evaluate-browser';
 import {
   initialState,
+  editedPiece,
   setSolo,
   playbackOptions,
   loadPiece,
@@ -182,13 +183,7 @@ export function createApp() {
       editor = createEditSession(imported.doc, {
         playing: () => !!engine?.playing,
         play: (doc) => replacePlayback(doc, { discoverCycles: sections(doc).map((s) => s.start) }),
-        changed: (pending) =>
-          update({
-            ...state,
-            doc: pending.doc,
-            rows: instruments(pending.doc),
-            sections: sections(pending.doc),
-          }),
+        changed: (pending) => update(editedPiece(state, pending.doc)),
         refresh: (_doc: Doc, ids: string[]) => {
           if (!ids.length) return;
           cachedWindow = null;

@@ -364,3 +364,10 @@
     scroll-padding-left: 12px;
   }
 }
+
+.sheet-section-add {
+  min-width: 44px;
+  min-height: 44px;
+  margin: 8px;
+  color: var(--muted);
+}

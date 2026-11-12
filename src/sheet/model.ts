@@ -1,3 +1,4 @@
+import { definitionMuted } from '../document/edits/set-muted';
 import { rhythmTargetId } from '../document/edit';
 import type { SheetInput, SheetSoundState } from '../contract';
 import {
@@ -54,6 +55,7 @@ export interface Row {
   useTargets: { nodeId: string; text: string }[];
 }
 export interface Section {
+  nameSource?: 'author' | 'generated';
   nodeId: string;
   name: string;
   start: number;
@@ -256,6 +258,7 @@ function song(input: SheetInput, rows: Row[]): Section[] {
   return parts.map((part) => ({
     nodeId: part.id,
     name: part.name,
+    nameSource: part.nameSource,
     start: part.start,
     cycles: part.cycles,
     width: (part.cycles / total) * 100,
@@ -426,8 +429,14 @@ export function sheetModel(input: SheetInput): SheetModel {
     const length = total ? total.start + total.cycles : 0;
     const phase = length ? input.fromCycle % length : input.fromCycle;
     const section = songSections.find((s) => phase >= s.start && phase < s.start + s.cycles);
-    // Membership includes muted uses: mute must not masquerade as sitting out.
-    const absent = !!section && !voice.uses.some((u) => u.path.some((n) => n.id === section.id));
+    // A global mute keeps membership; a section use switched off sits out.
+    const absent =
+      !!section &&
+      !voice.uses.some(
+        (u) =>
+          u.path.some((n) => n.id === section.id) &&
+          (!u.muted || definitionMuted(input.doc, voice.id)),
+      );
     const broken = result?.error?.message ?? null;
     const status =
       broken !== null

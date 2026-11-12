@@ -1,0 +1,12 @@
+.section-editor .editor-toggle-state {
+  flex: none;
+  white-space: nowrap;
+}
+.section-editor .editor-toggle > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.section-editor .editor-toggle small {
+  flex: none;
+  font-size: 11px !important;
+}

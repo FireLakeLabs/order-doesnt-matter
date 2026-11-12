@@ -67,7 +67,11 @@ export function instruments(doc: Doc): Instrument[] {
     const cyclic = path.some((node) => node.id === p.id);
     path = [...path, p];
     muted ||= !!p.muted;
-    const ownName = author(p.label) ?? author(sharedNames.get(p.id));
+    const ownName =
+      author(p.label) ??
+      author(
+        sharedNames.get(p.id)?.startsWith('__odm_instrument_') ? undefined : sharedNames.get(p.id),
+      );
     if (!cyclic && p.core.kind === 'ref') {
       const target = shared(doc, p.core.name);
       if (target) {
@@ -149,12 +153,21 @@ export function sections(doc: Doc): SongSection[] {
   return root.core.parts.map((part, index) => {
     const name =
       author(part.label) ??
-      (part.pattern.core.kind === 'ref' ? author(part.pattern.core.name) : undefined) ??
+      (part.pattern.core.kind === 'ref'
+        ? (author(resolve(doc, part.pattern).label) ?? author(part.pattern.core.name))
+        : undefined) ??
       author(part.pattern.label);
     const section: SongSection = {
       id: part.pattern.id,
       name: name ?? `Section ${index + 1}`,
-      nameSource: name ? 'author' : 'generated',
+      nameSource:
+        !part.label &&
+        part.pattern.core.kind === 'ref' &&
+        /^__odm_section_\d+$/.test(part.pattern.core.name)
+          ? 'generated'
+          : name
+            ? 'author'
+            : 'generated',
       start,
       cycles: part.cycles ?? 1,
       instrumentIds: rows
