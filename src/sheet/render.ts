@@ -103,12 +103,13 @@ export function mountSheet(
       button.onclick = () => options.onSelect?.(section.nodeId);
       if (section.current) button.setAttribute('aria-current', 'true');
       button.append(
-        element('strong', section.name),
+        element(section.nameSource === 'generated' ? 'em' : 'strong', section.name),
         element(
           'span',
           `${section.cycles} cycle${section.cycles === 1 ? '' : 's'} · ${section.start}–${section.start + section.cycles}`,
         ),
       );
+      if (section.nameSource === 'generated') button.append(element('small', 'Generated name'));
       button.append(
         element('small', options.selected === section.nodeId ? 'Selected' : '', 'sheet-selection'),
       );
@@ -142,7 +143,20 @@ export function mountSheet(
     });
     scroll.append(list);
     strip.append(scroll);
+    if (options.onEdit) {
+      const add = element('button', '+', 'sheet-section-add');
+      add.type = 'button';
+      add.setAttribute('aria-label', 'Add a section');
+      selectable(add, 'piece:add-section', 'Add a section');
+      strip.append(add);
+    }
     sheet.append(strip);
+  }
+  if (!model.sections.length && options.onEdit) {
+    const make = element('button', 'Make sections', 'sheet-section-add');
+    make.type = 'button';
+    selectable(make, 'piece:make-sections', 'Make sections');
+    sheet.append(make);
   }
   const scroll = element('div', '', 'sheet-scroll');
   scroll.tabIndex = 0;
