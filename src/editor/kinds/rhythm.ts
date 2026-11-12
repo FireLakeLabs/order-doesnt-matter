@@ -112,7 +112,7 @@ const description = (s: Step): string => {
                   ? `${description(rhythmMarks(s)!.base)} · ${rhythmMarks(s)!
                       .ops.map(
                         (op) =>
-                          `${{ repeat: 'repeat ×', faster: 'faster ×', slower: 'slower ÷', weight: 'length ' }[op.name]}${op.amount}`,
+                          `${{ repeat: 'repeat ×', faster: 'faster ×', slower: 'slower ÷', weight: 'length ' }[op.name]}${op.name === 'weight' ? rhythmMarks(s)!.weight : op.amount}`,
                       )
                       .join(' · ')}`
                   : 'source chunk';
