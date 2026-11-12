@@ -135,8 +135,7 @@ export default {
       selected = [0],
       rendered = '',
       view = sessionStorage.getItem('odm-rhythm-view') ?? '',
-      region = [0, 1],
-      marksOpen = false;
+      region = [0, 1];
     const root = el('div'),
       strip = el('figure'),
       controls = el('div'),
@@ -257,6 +256,7 @@ export default {
       if (key === rendered) return;
       rendered = key;
       const focus = (document.activeElement as HTMLElement)?.dataset.rhythmKey;
+      const marksOpen = root.querySelector<HTMLDetailsElement>('.rhythm-marks')?.open;
       controls.replaceChildren();
       for (const label of ['Boxes', 'List']) {
         const b = button(controls, label, label, () => {
@@ -440,10 +440,7 @@ export default {
       if (marks) {
         const details = el('details');
         details.className = 'rhythm-marks';
-        details.open = marksOpen || marks.ops.length > 0;
-        details.ontoggle = () => {
-          marksOpen = details.open;
-        };
+        details.open = marksOpen ?? marks.ops.length > 0;
         details.append(el('summary', 'Speed and length'));
         for (const [name, label] of [
           ['repeat', 'Repeat ×n'],

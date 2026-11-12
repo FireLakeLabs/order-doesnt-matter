@@ -260,6 +260,7 @@ test('Kiln live: split removal, undo, literal marks and evenly spread drum hits'
       await page.screenshot({ path: `test-results/rhythm-${name}.png` });
       await page.getByText('Speed and length', { exact: true }).press('Enter');
       await page.getByLabel('Faster ×n', { exact: true }).scrollIntoViewIfNeeded();
+      await expect(page.getByLabel('Faster ×n', { exact: true })).toBeVisible();
       await page.screenshot({ path: `test-results/rhythm-speed-${name}.png` });
       await page.getByText('Speed and length', { exact: true }).press('Enter');
     }
