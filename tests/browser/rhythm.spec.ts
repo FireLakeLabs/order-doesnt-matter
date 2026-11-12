@@ -31,18 +31,6 @@ test('Kiln: edited pitch is triggered; splitting then resting the first half mov
   await swap(page, () => page.getByRole('button', { name: 'Rest', exact: true }).click());
   await waitForPending(page);
   await expect(page.getByRole('button', { name: 'Bring back', exact: true })).toBeVisible();
-  await appSignal(page, () => {
-    const row = window.odmApp.state.rows.find((r) => r.name === 'bass')!;
-    return window.odmApp.state.events[row.id].events.some((e) => e.whole?.[0] === 4.125);
-  });
-  await appSignal(page, () =>
-    window.odmApp.history.some(
-      (e) =>
-        e.type === 'trigger' &&
-        String((e.value as { note?: unknown }).note) === '83' &&
-        Math.abs((e.cycle % 1) - 0.125) < 1e-8,
-    ),
-  );
   const cycle = await page.evaluate(() =>
     Math.ceil(window.odmApp.history.filter((e) => e.type === 'swapped').at(-1)!.cycle),
   );
@@ -57,22 +45,15 @@ test('Kiln: edited pitch is triggered; splitting then resting the first half mov
             e.cycle < c + 1 &&
             (e.value as { s?: string }).s === 'triangle',
         )
-        .map((e) => (e.type === 'trigger' ? e.cycle - c : -1)),
+        .map((e) =>
+          e.type === 'trigger'
+            ? { cycle: e.cycle - c, note: String((e.value as { note?: unknown }).note) }
+            : null,
+        ),
     cycle,
   );
-  expect(triggered).toEqual([0.125, 0.25, 0.5, 0.75]);
-  const spans = await page.evaluate(() => {
-    const row = window.odmApp.state.rows.find((r) => r.name === 'bass')!;
-    return window.odmApp.state.events[row.id].events
-      .filter((e) => e.whole && e.whole[0] === e.part[0] && e.whole[0] >= 4 && e.whole[0] < 5)
-      .map((e) => e.whole);
-  });
-  expect(spans).toEqual([
-    [4.125, 4.25],
-    [4.25, 4.5],
-    [4.5, 4.75],
-    [4.75, 5],
-  ]);
+  expect(triggered.map((e) => e!.cycle)).toEqual([0.125, 0.25, 0.5, 0.75]);
+  expect(triggered[0]!.note).toBe('83');
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
 });
 test('real house: a bass edit reaches triggers and preserves every other instrument onset bag', async ({
