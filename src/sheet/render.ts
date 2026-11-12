@@ -194,9 +194,10 @@ export function mountSheet(
   head.append(labels);
   table.append(head);
   const body = element('tbody');
-  model.rows.forEach((row) => {
+  model.rows.forEach((row, colour) => {
     const tr = element('tr');
     tr.dataset.nodeId = row.id;
+    tr.style.setProperty('--instrument-colour', String(colour));
     tr.dataset.muted = String(row.muted);
     tr.classList.toggle('sheet-sit-out', row.absent);
     const name = element('th');
