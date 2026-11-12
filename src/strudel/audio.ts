@@ -44,7 +44,9 @@ async function defaults() {
     }
   return unavailable;
 }
-export async function createAudio(): Promise<
+export async function createAudio({
+  inspect,
+}: { inspect?: (pattern: Pattern, cps: number) => void } = {}): Promise<
   Omit<AudioBackend, 'preflight'> & {
     cps(): number;
     connect(dispatch: Dispatch, error: (e: unknown) => void, silent: SilentWindow): void;
@@ -103,6 +105,7 @@ export async function createAudio(): Promise<
       }
       if (!candidate) throw Error('Strudel evaluation produced no pattern');
       const pattern = candidate;
+      inspect?.(pattern, cps);
       const wrapped = guarded(
         pattern,
         failed,

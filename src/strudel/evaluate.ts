@@ -32,8 +32,11 @@ export function queryEventsWithBudget(
   eventBudget = 100_000,
   playbackStarts?: number[],
   initialCps = 0.5,
+  inspect?: (pattern: core.Pattern, cps: number) => void,
 ): Promise<EventResult> {
-  const next = tail.then(() => evaluate(code, from, to, eventBudget, playbackStarts, initialCps));
+  const next = tail.then(() =>
+    evaluate(code, from, to, eventBudget, playbackStarts, initialCps, inspect),
+  );
   tail = next.catch(() => {});
   return next;
 }
@@ -44,6 +47,7 @@ async function evaluate(
   budget: number,
   playbackStarts?: number[],
   initialCps = 0.5,
+  inspect?: (pattern: core.Pattern, cps: number) => void,
 ): Promise<EventResult> {
   const result: EventResult = { events: [], cps: initialCps, error: null, opaqueValues: false };
   let phase: 'evaluation' | 'query' = 'evaluation';
@@ -129,6 +133,10 @@ async function evaluate(
     for (const f of transforms) pattern = f(pattern);
     if (!core.isPattern(pattern)) throw Error('Program did not produce a Pattern');
     phase = 'query';
+    if (inspect) {
+      inspect(pattern, result.cps);
+      return result;
+    }
     const ranges: [number, number][] = [];
     const addCycles = (begin: number, end: number) => {
       for (let cycle = Math.floor(begin); cycle < end; cycle++)
