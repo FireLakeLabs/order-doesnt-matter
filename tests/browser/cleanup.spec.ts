@@ -58,3 +58,25 @@ test('sit-out rows, sticky headings, late sounds and phone toolbar', async ({ pa
   await page.setViewportSize({ width: 390, height: 844 });
   await page.screenshot({ path: 'test-results/cleanup-phone-heading.png', fullPage: true });
 });
+
+test('sounds beyond the discovery cap say not used yet only during playback', async ({ page }) => {
+  await page.route(
+    (url) => url.protocol === 'https:',
+    (route) => route.abort('internetdisconnected'),
+  );
+  await page.goto('/?inspect');
+  const sections = Array.from({ length: 32 }, () => '[4,early]').join(',');
+  await page
+    .getByLabel('Your Strudel program')
+    .fill(
+      `const early=s("triangle"); const late=note(60).s("sine"); arrange(${sections},[4,late])`,
+    );
+  await page.getByRole('button', { name: 'Load', exact: true }).click();
+  const late = page.getByRole('rowheader').filter({ hasText: 'late' });
+  await expect(late).toContainText('sine: not loaded yet');
+  await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
+  await page.getByRole('button', { name: 'Play', exact: true }).click();
+  await expect(late).toContainText('sine: not used yet');
+  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await expect(late).toContainText('sine: not loaded yet');
+});

@@ -167,6 +167,7 @@ app.subscribe((state) => {
     state.fromCycle,
     state.toCycle,
     state.selected,
+    state.playing,
   ];
   if (state.doc && inputs.some((value, i) => value !== previousSheet[i])) {
     previousSheet = inputs;
