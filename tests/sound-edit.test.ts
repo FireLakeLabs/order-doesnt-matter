@@ -47,6 +47,7 @@ function backend() {
     },
     playing: () => playing,
     now: () => 0,
+    outputLatency: () => 0,
     time: () => 0,
     tap: { sampleRate: 48000, rms: async () => 0 },
   };

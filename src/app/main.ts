@@ -1,3 +1,4 @@
+import { pendingWords } from '../editor/pending';
 import { describeTarget } from '../document/edit';
 import { definitionMuted, setMuted } from '../document/edits/set-muted';
 import { createPanel } from '../editor/panel';
@@ -162,7 +163,7 @@ function renderEditor() {
     if (status)
       status.textContent =
         entry?.status === 'pending'
-          ? 'Changing — not playing yet'
+          ? pendingWords(entry)
           : entry?.status === 'failed'
             ? 'Change failed; previous value restored'
             : '';
@@ -293,15 +294,30 @@ app.subscribe((state) => {
   if (previousLiveRows !== liveRows) {
     previousLiveRows = liveRows;
     get('live').hidden = !state.doc;
-    mountLivePanel(get('live'), liveModel({ ...state, playhead: app.engine?.now() ?? null }), {
-      onEdit: (id, line) => {
-        if (targetId) return;
-        liveOrigin = id;
-        openEditor(id, line);
+    mountLivePanel(
+      get('live'),
+      liveModel({
+        ...state,
+        playhead: app.engine?.now() ?? null,
+        outputLatency: app.engine?.outputLatency() ?? 0,
+      }),
+      {
+        onEdit: (id, line) => {
+          if (targetId) return;
+          liveOrigin = id;
+          openEditor(id, line);
+        },
       },
-    });
+    );
   }
-  updateLivePanel(get('live'), liveModel({ ...state, playhead: app.engine?.now() ?? null }));
+  updateLivePanel(
+    get('live'),
+    liveModel({
+      ...state,
+      playhead: app.engine?.now() ?? null,
+      outputLatency: app.engine?.outputLatency() ?? 0,
+    }),
+  );
   renderEditor();
 });
 function revealEditedRow() {
@@ -329,7 +345,10 @@ window.addEventListener('resize', () => {
 function frame() {
   const now = app.frame(),
     { fromCycle, toCycle, sections } = app.state;
-  updateLivePanel(get('live'), liveModel({ ...app.state, playhead: now }));
+  updateLivePanel(
+    get('live'),
+    liveModel({ ...app.state, playhead: now, outputLatency: app.engine?.outputLatency() ?? 0 }),
+  );
   if (watchDialog.open) spiral.update(app.watchInput(now));
   setPlayhead(score, now === null ? null : ((now - fromCycle) / (toCycle - fromCycle)) * 100);
   const last = sections.at(-1);

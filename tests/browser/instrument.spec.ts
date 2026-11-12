@@ -1,5 +1,14 @@
 import { test } from './helpers';
-import { openProgram, play, selectNode, swap, appSignal, scoreReady, signal } from './helpers';
+import {
+  openProgram,
+  play,
+  selectNode,
+  swap,
+  appSignal,
+  scoreReady,
+  signal,
+  sharedProgram,
+} from './helpers';
 import { readFile } from 'node:fs/promises';
 import { expect, type Page } from '@playwright/test';
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
@@ -41,52 +50,8 @@ async function house(page: Page, cpm = 90) {
   await page.getByRole('button', { name: 'drop', exact: true }).first().click();
   return ids;
 }
-test.describe('real house: live kick controls', () => {
-  let shared: Page | undefined;
-  let ids: Record<string, string>;
-  let baseline: string;
-  test.use({
-    page: async ({ browser }, use) => {
-      void browser;
-      if (!shared) throw Error('Shared kick page was not initialized');
-      await use(shared);
-    },
-  });
-  test.beforeAll(async ({ browser }) => {
-    const started = performance.now();
-    try {
-      shared = await browser.newPage({ baseURL: process.env.ODM_URL });
-      ids = await house(shared);
-      baseline = await shared.evaluate(() => JSON.stringify(window.odmApp.state.doc));
-    } finally {
-      await test.info().attach('browser-shared-setup', {
-        body: JSON.stringify({ ms: performance.now() - started }),
-        contentType: 'application/json',
-      });
-    }
-  });
-  test.afterEach(async ({ page }) => {
-    if (await page.getByRole('button', { name: 'Stop', exact: true }).isEnabled())
-      await page.getByRole('button', { name: 'Stop', exact: true }).click();
-    await page.keyboard.press('Escape');
-    const restored = await page.evaluate(() => {
-      const app = window.odmApp;
-      while (app.editor!.canUndo) app.editor!.undo();
-      app.history.length = 0;
-      return JSON.stringify(app.state.doc);
-    });
-    expect(restored, 'shared kick page must restore its original document').toBe(baseline);
-    await appSignal(
-      page,
-      (id) => window.odmApp.state.events[id]?.events.some((e) => e.hasOnset),
-      ids.kick,
-    );
-    await page.getByRole('button', { name: 'drop', exact: true }).first().click();
-  });
-  test.afterAll(async () => {
-    await shared?.close();
-  });
-
+test.describe('real house controls with shared setup', () => {
+  const inventory = sharedProgram((page) => house(page));
   test('mute stops kick delivery through a complete post-swap cycle', async ({ page }) => {
     await play(page);
     await swap(page, () => page.getByRole('button', { name: 'Mute kick', exact: true }).click());
@@ -95,70 +60,77 @@ test.describe('real house: live kick controls', () => {
   });
   test('unmute resumes kick delivery and displays the missing piano', async ({ page }) => {
     await page.getByRole('button', { name: 'Mute kick', exact: true }).click();
-    await appSignal(page, (id) => window.odmApp.state.events[id]?.events.length === 0, ids.kick);
+    await appSignal(
+      page,
+      (id) => window.odmApp.state.events[id]?.events.length === 0,
+      inventory().kick,
+    );
     await play(page);
     await swap(page, () => page.getByRole('button', { name: 'Unmute kick', exact: true }).click());
     await signal(async () => (await sinceSwap(page)).some((v) => v.s === 'bd')).toBe(true);
-    await selectNode(page, { nodeId: ids.chords });
+    await selectNode(page, { nodeId: inventory().chords });
     await expect(page.locator('#editor')).toContainText('piano: missing');
   });
-});
-test('real house: section mute checkbox follows the pinned section', async ({ page }) => {
-  const ids = await house(page);
-  await page.getByRole('button', { name: 'intro', exact: true }).click();
-  await selectNode(page, { nodeId: ids.chords });
-  const check = page.getByRole('checkbox', { name: 'Plays in intro', exact: true });
-  await check.click();
-  await expect(check).not.toBeChecked();
-  await page.getByRole('button', { name: 'drop', exact: true }).first().click();
-  await expect(page.getByRole('checkbox', { name: /^Plays in drop/ }).first()).toBeChecked();
-});
-async function soloBass(page: Page) {
-  const ids = await house(page, 60);
-  await selectNode(page, { nodeId: ids.bass });
-  await page.getByRole('checkbox', { name: 'Solo', exact: true }).press('Space');
-  await expect(page.locator('#solo-banner')).toHaveText('Solo: bass — Stop solo');
-}
-test('real house: solo keyboard name, undo, banner and playback', async ({ page }) => {
-  await soloBass(page);
-  const liveName = page.getByRole('textbox', { name: 'Instrument name', exact: true });
-  await liveName.fill('Solo bass');
-  await liveName.press('Enter');
-  await expect(page.locator('#solo-banner')).toContainText('Solo: Solo bass');
-  await page.getByRole('button', { name: 'Undo', exact: true }).click();
-  await expect(liveName).toHaveValue('bass');
-  await expect(page.locator('#solo-banner')).toContainText('Solo: bass');
-  // Live history/transport permutations are proved through the real controller
-  // in app-history.test.ts; the browser owns keyboard wiring and one real play.
-  await play(page);
-  await expect(page.locator('#editor')).toContainText('sawtooth: ready');
-  await page.getByRole('button', { name: 'Stop', exact: true }).click();
-  await page.getByRole('button', { name: 'Stop solo', exact: true }).click();
-  await expect(page.locator('#solo-banner')).toBeHidden();
-});
-test('real house: keyboard name, phone editor and focus', async ({ page }) => {
-  const ids = await house(page);
-  await selectNode(page, { nodeId: ids.bass });
-  const field = page.getByRole('textbox', { name: 'Instrument name', exact: true });
-  await field.fill('kick');
-  await field.press('Enter');
-  await expect(page.locator('#editor').getByRole('alert')).toContainText('already has that name');
-  await field.fill('Low end');
-  await field.press('Enter');
-  await expect(page.locator('#editor-breadcrumb')).toHaveText('Low end');
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.setViewportSize({ width: 390, height: 844 });
-  await expect(page.getByRole('checkbox', { name: 'Mute everywhere', exact: true })).toBeVisible();
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  for (const button of await page.locator('#editor button').all())
-    expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
-  await expect(page.getByRole('button', { name: 'Done', exact: true })).toBeInViewport();
-  await page.getByRole('button', { name: 'Done', exact: true }).click();
-  const header = page.locator(`th[data-editor-target="${ids.bass}"]`);
-  await expect(header).toBeFocused();
-  await header.press('Enter');
-  await page.keyboard.press('Escape');
-  await expect(header).toBeFocused();
+  test('real house: section mute checkbox follows the pinned section', async ({ page }) => {
+    await page.getByRole('button', { name: 'intro', exact: true }).click();
+    await selectNode(page, { nodeId: inventory().chords });
+    const check = page.getByRole('checkbox', { name: 'Plays in intro', exact: true });
+    await check.click();
+    await expect(check).not.toBeChecked();
+    await page.getByRole('button', { name: 'drop', exact: true }).first().click();
+    await expect(page.getByRole('checkbox', { name: /^Plays in drop/ }).first()).toBeChecked();
+  });
+  async function soloBass(page: Page) {
+    const ids = inventory();
+    await selectNode(page, { nodeId: ids.bass });
+    await page.getByRole('checkbox', { name: 'Solo', exact: true }).press('Space');
+    await expect(page.locator('#solo-banner')).toHaveText('Solo: bass — Stop solo');
+  }
+  test('real house: solo keyboard name, undo, banner and playback', async ({ page }) => {
+    await soloBass(page);
+    const liveName = page.getByRole('textbox', { name: 'Instrument name', exact: true });
+    await liveName.fill('Solo bass');
+    await liveName.press('Enter');
+    await expect(page.locator('#solo-banner')).toContainText('Solo: Solo bass');
+    await page.getByRole('button', { name: 'Undo', exact: true }).click();
+    await expect(liveName).toHaveValue('bass');
+    await expect(page.locator('#solo-banner')).toContainText('Solo: bass');
+    // Live history/transport permutations are proved through the real controller
+    // in app-history.test.ts; the browser owns keyboard wiring and one real play.
+    await play(page);
+    await expect(page.locator('#editor')).toContainText('sawtooth: ready');
+    await page.getByRole('button', { name: 'Stop', exact: true }).click();
+    await page.getByRole('button', { name: 'Stop solo', exact: true }).click();
+    await expect(page.locator('#solo-banner')).toBeHidden();
+  });
+  test('real house: keyboard name, phone editor and focus', async ({ page }) => {
+    const ids = inventory();
+    await selectNode(page, { nodeId: ids.bass });
+    const field = page.getByRole('textbox', { name: 'Instrument name', exact: true });
+    await field.fill('kick');
+    await field.press('Enter');
+    await expect(page.locator('#editor').getByRole('alert')).toContainText('already has that name');
+    await field.fill('Low end');
+    await field.press('Enter');
+    await expect(page.locator('#editor-breadcrumb')).toHaveText('Low end');
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.setViewportSize({ width: 390, height: 844 });
+    await expect(
+      page.getByRole('checkbox', { name: 'Mute everywhere', exact: true }),
+    ).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    for (const button of await page.locator('#editor button').all())
+      expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
+    await expect(page.getByRole('button', { name: 'Done', exact: true })).toBeInViewport();
+    await page.getByRole('button', { name: 'Done', exact: true }).click();
+    const header = page.locator(`th[data-editor-target="${ids.bass}"]`);
+    await expect(header).toBeFocused();
+    await header.press('Enter');
+    await page.keyboard.press('Escape');
+    await expect(header).toBeFocused();
+  });
 });
 test('stale row mute cannot target another loaded piece; solo clears on load', async ({ page }) => {
   await openProgram(page, { source: 'stack(s("bd"),s("hh"))' });

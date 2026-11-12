@@ -221,3 +221,65 @@ export function signal<T>(read: () => T | Promise<T>, options: { timeout?: numbe
     ...options,
   });
 }
+
+/** Share only identical piece setup. Every case restores the document, answers,
+ * selection, transport, editor, paste panel and viewport through existing ports.
+ * A failed case restarts Playwright's worker, so later cases get a fresh setup. */
+export function sharedProgram<T>(setup: (page: Page) => Promise<T>) {
+  let page: Page | undefined, value: T;
+  let baseline: { doc: string; events: string; selected: string | null; pasteHidden: boolean };
+  test.use({
+    page: async ({ browser }, use) => {
+      void browser;
+      if (!page) throw Error('Shared piece was not initialized');
+      await use(page);
+    },
+  });
+  test.beforeAll(async ({ browser }) => {
+    const start = performance.now();
+    try {
+      page = await browser.newPage({ baseURL: process.env.ODM_URL });
+      value = await setup(page);
+      baseline = await page.evaluate(() => ({
+        doc: JSON.stringify(window.odmApp.state.doc),
+        events: JSON.stringify(window.odmApp.state.events),
+        selected: window.odmApp.state.selected,
+        pasteHidden: document.getElementById('paste-panel')!.hidden,
+      }));
+    } finally {
+      await test.info().attach('browser-shared-setup', {
+        body: JSON.stringify({ ms: performance.now() - start }),
+        contentType: 'application/json',
+      });
+    }
+  });
+  test.afterEach(async ({ page }) => {
+    await page.keyboard.press('Escape');
+    if (await page.locator('#editor').isVisible()) await page.keyboard.press('Escape');
+    const restored = await page.evaluate((selected) => {
+      const app = window.odmApp;
+      app.stop();
+      app.solo(null);
+      while (app.editor!.canUndo) app.editor!.undo();
+      if (selected) app.select(selected);
+      app.history.length = 0;
+      return JSON.stringify(app.state.doc);
+    }, baseline.selected);
+    expect(restored, 'shared piece must restore its exact original document').toBe(baseline.doc);
+    await appSignal(
+      page,
+      (events) => JSON.stringify(window.odmApp.state.events) === events,
+      baseline.events,
+    );
+    if (
+      (await page.locator('#paste-panel').evaluate((n: HTMLElement) => n.hidden)) !==
+      baseline.pasteHidden
+    )
+      await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
+    await page.setViewportSize({ width: 1280, height: 720 });
+  });
+  test.afterAll(async () => {
+    await page?.close();
+  });
+  return () => value;
+}

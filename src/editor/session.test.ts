@@ -1,6 +1,6 @@
 import { expect, it, vi } from 'vitest';
 import { importStrudel } from '../import';
-import { walk, describeTarget, type Setting } from '../document';
+import { instruments, walk, describeTarget, type Setting } from '../document';
 import type { EditorContext, EditorKind } from './kind';
 import { createEditSession, SWAP_THROTTLE_MS } from './session';
 const setup = () => {
@@ -31,7 +31,11 @@ it('drag sends at most every 100ms, lands the last value and has one undo step',
     await vi.advanceTimersByTimeAsync(1);
     expect(play).toHaveBeenCalledTimes(2);
     expect(describeTarget(play.mock.calls[1][0], id).value).toBe(0.8);
-    s.observe({ type: 'swapped', revision: 2 });
+    s.observe({ type: 'swapped', revision: 2, cycle: 0 });
+    expect(s.state.entries[id].status).toBe('pending');
+    s.observe({ type: 'trigger', revision: 1, instrument: instruments(doc)[0].id, cycle: 0 });
+    expect(s.state.entries[id].status).toBe('pending');
+    s.observe({ type: 'trigger', revision: 2, instrument: instruments(doc)[0].id, cycle: 0.5 });
     expect(s.state.entries).toEqual({});
     s.undo();
     expect(describeTarget(s.state.doc, id).value).toBe(0.5);

@@ -1,3 +1,4 @@
+import { pendingWords } from './pending';
 import { instrumentEditStatus } from '../document/edits/shared';
 import type { PendingEntry } from './pending';
 import type { EditorContext, EditorKind } from './kind';
@@ -116,9 +117,9 @@ export function createPanel(host: HTMLElement, close: () => void) {
       entry?.status === 'failed'
         ? `Change failed: ${entry.reason}. Previous value restored.`
         : entry?.status === 'pending'
-          ? 'Changing — not playing yet'
+          ? pendingWords(entry)
           : playing
-            ? 'Playing now'
+            ? 'Changed'
             : 'Plays on next start';
     const ownVersion = instrumentEditStatus(context.doc);
     if (ownVersion) status.textContent += ` · ${ownVersion}`;

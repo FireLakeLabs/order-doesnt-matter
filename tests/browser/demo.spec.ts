@@ -145,7 +145,7 @@ test('Phase 2: ten editors, one silent video', async ({ browser, request }) => {
           () => (window as unknown as { demoPendingStates: string[] }).demoPendingStates,
         ),
       ).toContain('pending');
-      await expect(page.locator('#editor-status')).toHaveText('Playing now');
+      await expect(page.locator('#editor-status')).toHaveText('Changed');
       await appSignal(page, () =>
         window.odmApp.history.some(
           (e) => e.type === 'trigger' && (e.value as { cutoff?: number }).cutoff === 900,
@@ -857,4 +857,14 @@ test('Phase 3: eight live-view checks on the real house piece, one silent video'
       `PHASE 3: ${dir}/demo.webm (NO AUDIO), captions.txt, limitations.txt, 01–08 PNGs; ${limitations.length} limitations.`,
     );
   }
+});
+
+test('Phase 4: gaps and fixes on the real arranged house piece, one silent video', async ({
+  browser,
+}) => {
+  test.skip(process.env.ODM_BROWSER_MODE !== 'demo', 'Opt-in only: npm run demo');
+  test.skip(!!process.env.CI, 'Local music and uncommitted recordings only');
+  test.setTimeout(120000); // Same recording budget as the earlier phases; outside the normal suite.
+  const { phaseFour } = await import('./phase-four');
+  await phaseFour(browser);
 });

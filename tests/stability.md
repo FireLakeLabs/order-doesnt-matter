@@ -202,3 +202,26 @@ configuration previously measured 47.726 s. The under-45-second local target and
 under-90-second CI target are not reliably met. Remaining time includes real
 worker-deadline checks, UI input and actual playback/PCM/silent acknowledgements.
 The PR contains the final default-command measurement and every matrix row.
+
+## Phase 4 shared setup
+
+The instrument, signal and section cases that read the same real house score now
+share one setup per group; Kiln's constant/pending cases and the two Watch cases
+also share their unchanged piece. `sharedProgram` restores the exact document,
+waits for the original row answers, closes the editor/dialog, stops transport,
+releases solo, clears diagnostic history, and restores selection, paste visibility
+and viewport after each case. A failed case restarts the worker and setup. Shared
+setup time remains separately reported and included in command wall time.
+
+All prior assertions remain. Solo uses the shared house tempo (90 cpm) instead of
+its independent 60 cpm setup; no expectation concerns that tempo. Section captures
+are opt-in with `ODM_EDITOR_SHOTS`; their layout, touch and focus assertions still
+run normally. PCM and silent-clock pages keep their isolation and serial audio
+phase. No deadline, worker width, retry count or threshold changes.
+
+The added sparse-instrument check subscribes before the gesture. It checks that
+the first busy trigger of the new revision leaves pending visible, then checks the
+edited row's own trigger value and cleared status. Identity is the document row id
+in Hap context, independently checked on identical voices and every real-house
+row. No score query is added to playback. The optional sync measurement now uses
+production latency forwarding; no test-only compensated wiring remains.

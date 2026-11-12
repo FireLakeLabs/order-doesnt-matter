@@ -16,6 +16,7 @@ import type { Hap, Pattern } from './index';
 import type { AudioBackend, Dispatch, SilentWindow } from '../engine';
 import { soundName } from '../engine/logic';
 import { createTap } from './audio-tap';
+import { instrumentIdentity } from './instrument-identity';
 import { guarded, schedulingBoundary } from './audio-pattern';
 
 export const defaultCollections = [
@@ -70,6 +71,7 @@ export async function createAudio({
         Number(hap.whole?.begin ?? hap.part.begin),
         time,
         () => webaudioOutput(hap, deadline, duration, cps, time),
+        instrumentIdentity(hap),
       );
       committing?.push(work);
       return work;
@@ -186,6 +188,7 @@ export async function createAudio({
     playing: () => repl.scheduler.started,
     now: () => playheadCycle(repl.scheduler),
     time: () => context.currentTime,
+    outputLatency: () => (context.baseLatency ?? 0) + (context.outputLatency ?? 0),
     cps: () => repl.scheduler.cps,
     seek: (cycle) => {
       // The accessor validates phase anchors; Cyclist initializes one only on its first tick.

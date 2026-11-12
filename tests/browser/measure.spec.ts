@@ -25,18 +25,31 @@ test('20 serial edits: input event → swapped trigger scheduled audio time', as
     .filter({ has: page.getByRole('rowheader').filter({ hasText: 'bass' }) })
     .locator('[data-control="lpf"]')
     .click();
-  const samples: number[] = [];
+  const samples: { revisionBoundaryMs: number; ownTriggerMs: number }[] = [];
   for (let i = 0; i < 20; i++) {
     samples.push(
       await page.getByRole('slider').evaluate(
         (element, position) =>
-          new Promise<number>((resolve) => {
+          new Promise<{ revisionBoundaryMs: number; ownTriggerMs: number }>((resolve) => {
             const engine = window.odmApp.engine!;
-            let started = 0;
+            const bass = window.odmApp.state.rows.find((r) => r.name === 'bass')!.id;
+            const revision =
+              window.odmApp.history.findLast((e) => e.type === 'swapped')!.revision + 1;
+            let started = 0,
+              boundary: number | undefined,
+              own: number | undefined;
             const unsubscribe = engine.subscribe((event) => {
-              if (event.type === 'swapped') {
+              if (event.type === 'swapped' && event.revision === revision)
+                boundary = (event.time - started) * 1000;
+              if (
+                event.type === 'trigger' &&
+                event.revision === revision &&
+                event.instrument === bass
+              )
+                own ??= (event.time - started) * 1000;
+              if (boundary !== undefined && own !== undefined) {
                 unsubscribe();
-                resolve((event.time - started) * 1000);
+                resolve({ revisionBoundaryMs: boundary, ownTriggerMs: own });
               }
             });
             element.addEventListener(
@@ -54,20 +67,29 @@ test('20 serial edits: input event → swapped trigger scheduled audio time', as
       ),
     );
   }
-  const sorted = [...samples].sort((a, b) => a - b);
+  const stats = (key: keyof (typeof samples)[number]) => {
+    const sorted = samples.map((s) => s[key]).sort((a, b) => a - b);
+    return { medianMs: (sorted[9] + sorted[10]) / 2, p90Ms: sorted[17], worstMs: sorted.at(-1) };
+  };
   const result = {
     samples,
     edits: samples.length,
-    medianMs: (sorted[9] + sorted[10]) / 2,
-    p90Ms: sorted[17],
-    worstMs: sorted.at(-1),
+    revisionBoundary: stats('revisionBoundaryMs'),
+    editedInstrument: stats('ownTriggerMs'),
     browser: browser.version(),
     sampleRate: await page.evaluate(() => window.odmApp.engine!.tap().sampleRate),
     definition:
-      'Input event audio clock to swapped.time (scheduled audio clock); one machine, blocked sample hosts. No perception claim.',
+      'Input event audio clock to swapped.time and the edited row identity’s first new-revision trigger.time. Scheduled audio clock, blocked sample hosts; not a speaker measurement.',
   };
   expect(samples).toHaveLength(20);
-  expect(samples.every((n) => Number.isFinite(n) && n >= 0)).toBe(true);
+  expect(
+    samples.every(
+      (s) =>
+        Number.isFinite(s.revisionBoundaryMs) &&
+        s.revisionBoundaryMs >= 0 &&
+        s.ownTriggerMs >= s.revisionBoundaryMs - 1e-6,
+    ),
+  ).toBe(true);
   await mkdir('test-results/edit', { recursive: true });
   await writeFile('test-results/edit/measurement.json', JSON.stringify(result, null, 2));
   console.log('EDIT SCHEDULING MEASURED', JSON.stringify(result));

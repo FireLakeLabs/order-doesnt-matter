@@ -12,9 +12,9 @@ you play with the score directly, without making Strudel's syntax the subject.
 
 ## Current phase
 
-Phase 3, the live views, is built: the Now panel with the constellation
-(`src/live/`) and Watch mode with the spiral (`src/spiral/`), both drawn from
-one pure model in `src/live/model.ts`. The app is live at odm.firelakelabs.com
+Phase 4 (gaps and fixes) is built; next is an overall design review of the
+interface. Now (`src/live/`) and Watch (`src/spiral/`) share the pure model
+in `src/live/model.ts`. The app is live at odm.firelakelabs.com
 and every merge to `main` publishes. An editor is one file in `src/editor/kinds/`;
 a document change is one file in `src/document/edits/`. Production code lives
 in `src/`. `spikes/` is frozen reference and must not be imported; `corpus/`
