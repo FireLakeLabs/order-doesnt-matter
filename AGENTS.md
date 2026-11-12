@@ -9,6 +9,8 @@ you play with the score directly, without making Strudel's syntax the subject.
 - [Decisions](docs/decisions.md): what is settled.
 - [Standards](docs/standards.md): test rules, boundaries, and ownership.
 - [Dark corners](research/dark-corners.md): what is not. Evidence, not authority.
+- [Backlog](docs/backlog.md): everything known to be outstanding.
+- [Lessons](docs/lessons.md): what went wrong once, so it need not again.
 
 ## Current phase
 
