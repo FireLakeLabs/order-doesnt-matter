@@ -213,3 +213,27 @@ it('one throttled revision carries earlier edits to other targets; late promises
   p = transition(p, { type: 'sent', token: 1, revision: 2, doc: b });
   expect(p.good).toBe(c);
 });
+
+it('describes instruments, rhythms, rewrites, sections, signals and patterned settings', () => {
+  const doc = load(
+    'const bass=note("c2 e2").lpf(450).gain(".1 .8").pan(sine.slow(2)).rev(); arrange([4,bass],[4,bass.lpf(900)])',
+  );
+  const row = instruments(doc)[0];
+  expect(describeTarget(doc, row.id)).toMatchObject({
+    kind: 'instrument',
+    instrumentId: row.id,
+    breadcrumb: ['bass'],
+  });
+  expect(describeTarget(doc, `${row.pattern.id}:rhythm`)).toMatchObject({
+    kind: 'rhythm',
+    node: row.pattern,
+  });
+  expect(settings(doc).map((s) => describeTarget(doc, s.id).kind)).toEqual([
+    'setting-constant',
+    'setting-values',
+    'setting-signal',
+    'setting-constant',
+  ]);
+  const rewrite = row.pattern.layers.find((l) => l.kind === 'rewrite')!;
+  expect(describeTarget(doc, rewrite.id).kind).toBe('rewrite');
+});

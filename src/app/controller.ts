@@ -1,4 +1,4 @@
-import { instruments, sections, walk, type Doc } from '../document';
+import { instruments, sections, type Doc } from '../document';
 import { createEditSession, type EditSession } from '../editor/session';
 import type { Engine, EngineEvent, EventResult } from '../contract';
 import { generate } from '../generate';
@@ -169,34 +169,9 @@ export function createApp() {
             rows: instruments(pending.doc),
             sections: sections(pending.doc),
           }),
-        refresh: (doc: Doc, targets: string[]) => {
+        refresh: (_doc: Doc, ids: string[]) => {
+          if (!ids.length) return;
           cachedWindow = null;
-          const ids = instruments(doc)
-            .filter((row) => {
-              let found = false;
-              walk(
-                {
-                  version: 1,
-                  body: [
-                    { kind: 'shared', id: 'scan', tier: 1, name: 'scan', pattern: row.pattern },
-                  ],
-                },
-                (node) => {
-                  found ||= targets.includes(node.id);
-                },
-              );
-              return (
-                found ||
-                row.uses.some((use) =>
-                  use.layers.some(
-                    (l) =>
-                      targets.includes(l.id) ||
-                      (l.kind === 'settings' && l.settings.some((s) => targets.includes(s.id))),
-                  ),
-                )
-              );
-            })
-            .map((row) => row.id);
           ids.forEach((id) => dirtyRows.add(id));
           void askWindow([...dirtyRows]);
         },

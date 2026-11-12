@@ -1,6 +1,7 @@
 import { expect, it, vi } from 'vitest';
 import { importStrudel } from '../import';
 import { walk, describeTarget, type Setting } from '../document';
+import type { EditorContext, EditorKind } from './kind';
 import { createEditSession, SWAP_THROTTLE_MS } from './session';
 const setup = () => {
   const doc = importStrudel('note(60).gain(.5)').doc;
@@ -128,4 +129,91 @@ it('completion from a disposed piece cannot update the new piece', async () => {
   resolve(1);
   await new Promise((r) => setTimeout(r, 0));
   expect(changed).toHaveBeenCalledTimes(count);
+});
+
+it('a fake kind applies arbitrary documents, coalesces history, and refreshes only changed isolated programs', () => {
+  const doc = importStrudel('a: note(60).s("sine"); b: note(72).s("sine")').doc;
+  const refresh = vi.fn();
+  const s = createEditSession(doc, {
+    playing: () => false,
+    play: vi.fn(),
+    changed: () => {},
+    refresh,
+  });
+  const next = structuredClone(doc);
+  const voice = next.body.find((n) => n.kind === 'voice' && n.name === 'a')!;
+  if (voice.kind !== 'voice') throw Error('fixture');
+  voice.pattern.muted = true;
+  const context: EditorContext = {
+    doc,
+    target: describeTarget(doc, doc.body[0].id),
+    window: { fromCycle: 0, toCycle: 4 },
+    pending: 'none',
+    apply: (doc, options) => s.apply(doc, options),
+  };
+  const fakeKind: EditorKind = {
+    id: 'fake',
+    priority: 1,
+    matches: () => true,
+    mount(_body, context) {
+      context.apply(next, { gesture: 'fake-drag' });
+      return {
+        update: (context) => context.apply(context.doc, { gesture: 'fake-drag' }),
+        destroy() {},
+      };
+    },
+  };
+  const mounted = fakeKind.mount({} as HTMLElement, context);
+  expect(s.state.doc).toBe(next);
+  expect(refresh.mock.calls[0][1]).toHaveLength(1);
+  const third = {
+    ...next,
+    body: next.body.map((n) =>
+      n === voice ? { ...voice, pattern: { ...voice.pattern, muted: false } } : n,
+    ),
+  };
+  mounted.update({ ...context, doc: third });
+  s.undo();
+  expect(s.state.doc).toBe(doc);
+  s.redo();
+  expect(s.state.doc).toBe(third);
+});
+
+it('arbitrary playing edits use the same throttle, revision confirmation and rollback', async () => {
+  vi.useFakeTimers();
+  try {
+    const { doc } = setup();
+    let revision = 0;
+    const play = vi.fn(async () => {
+      if (++revision === 3) throw Error('arbitrary refused');
+      return revision;
+    });
+    const s = createEditSession(doc, {
+      playing: () => true,
+      play,
+      changed: () => {},
+      refresh: vi.fn(),
+    });
+    const changed = (value: number) => ({
+      ...doc,
+      body: [{ kind: 'tempo' as const, id: 'tempo', tier: 1 as const, cpm: value }, ...doc.body],
+    });
+    s.apply(changed(30), { gesture: 'tempo-drag' });
+    await vi.advanceTimersByTimeAsync(0);
+    s.apply(changed(40), { gesture: 'tempo-drag' });
+    s.apply(changed(50), { gesture: 'tempo-drag' });
+    await vi.advanceTimersByTimeAsync(100);
+    expect(play).toHaveBeenCalledTimes(2);
+    s.observe({ type: 'swapped', revision: 2 });
+    const confirmed = s.state.doc;
+    s.apply(changed(60));
+    await vi.advanceTimersByTimeAsync(100);
+    expect(s.state.doc).toBe(confirmed);
+    expect(Object.values(s.state.entries).every((e) => e.status === 'failed')).toBe(true);
+    s.undo();
+    expect(s.state.doc).toBe(doc);
+    s.dispose();
+  } finally {
+    vi.useRealTimers();
+  }
 });

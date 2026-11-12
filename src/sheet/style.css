@@ -341,3 +341,13 @@
     z-index: 3;
   }
 }
+
+.odm-sheet [data-editor-target] {
+  cursor: pointer;
+}
+.sheet-sections .sheet-section-edit {
+  min-height: 0;
+  padding: 4px 10px;
+  font-size: 10px;
+  color: #c3b0f1;
+}

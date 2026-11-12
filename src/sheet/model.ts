@@ -1,3 +1,4 @@
+import { rhythmTargetId } from '../document/edit';
 import type { SheetInput, SheetSoundState } from '../contract';
 import {
   shared,
@@ -356,7 +357,12 @@ export function sheetModel(input: SheetInput): SheetModel {
           definitionLabel: contextual.has(c.name) ? c.args.map(argument).join(', ') : undefined,
         });
       if (c.kind === 'opaque')
-        rewrites.push({ nodeId: p.id, name: 'Source text', summary: short(c.code), source: true });
+        rewrites.push({
+          nodeId: `${p.id}:source`,
+          name: 'Source text',
+          summary: short(c.code),
+          source: true,
+        });
       for (const layer of p.layers) {
         if (layer.kind === 'settings')
           for (const s of layer.settings) {
@@ -465,7 +471,11 @@ export function sheetModel(input: SheetInput): SheetModel {
         .map((name) =>
           makeCell(
             name,
-            settings.get(name)?.nodeId ?? voice.pattern.id,
+            name === 'rhythm' ||
+              (['note', 'n', 'freq', 's'].includes(name) &&
+                settings.get(name)?.nodeId === voice.pattern.id)
+              ? rhythmTargetId(voice.pattern)
+              : (settings.get(name)?.nodeId ?? voice.pattern.id),
             events,
             name === 'rhythm' || settings.has(name),
             settings.get(name)?.driven ?? false,

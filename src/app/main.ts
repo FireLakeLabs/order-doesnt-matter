@@ -55,7 +55,6 @@ play.onclick = () => {
 stop.onclick = () => app.stop();
 follow.onclick = () => app.follow(!app.state.follow);
 let targetId: string | null = null,
-  targetSummary = '',
   selectedSession: typeof app.editor;
 let origin: { id: string; control?: string; row?: string } | null = null;
 function originCell() {
@@ -71,25 +70,34 @@ function closeEditor() {
   renderEditor();
   originCell()?.focus();
 }
-const renderPanel = createPanel(
-  get('editor'),
-  (value, gesture) => {
-    if (targetId) app.editor?.edit(targetId, value, gesture);
-  },
-  closeEditor,
-);
+const renderPanel = createPanel(get('editor'), closeEditor);
 function renderEditor() {
-  const { doc, playing } = app.state;
+  const { doc, playing, fromCycle, toCycle } = app.state;
   const target = doc && targetId ? describeTarget(doc, targetId) : null;
   get('score-workspace').classList.toggle('editing', !!target);
+  const entry = targetId ? app.editor?.state.entries[targetId] : undefined;
+  const events = target?.instrumentId ? app.state.events[target.instrumentId] : undefined;
   renderPanel(
-    target,
-    targetId ? app.editor?.state.entries[targetId] : undefined,
+    target && doc
+      ? {
+          doc,
+          target,
+          events: events
+            ? {
+                ...events,
+                events: events.events.filter((e) => e.part[0] < toCycle && e.part[1] > fromCycle),
+              }
+            : undefined,
+          window: { fromCycle: app.state.fromCycle, toCycle: app.state.toCycle },
+          pending: entry?.status ?? 'none',
+          apply: (next, options) => app.editor?.apply(next, options, targetId ?? undefined),
+        }
+      : null,
+    entry,
     playing,
-    targetSummary,
   );
   for (const n of Array.from(score.querySelectorAll<HTMLElement>('[data-editor-target]'))) {
-    const selected = n.dataset.editorTarget === targetId,
+    const selected = !!targetId && n === originCell(),
       entry = app.editor?.state.entries[n.dataset.editorTarget!];
     n.dataset.editorSelected = String(selected);
     n.setAttribute('aria-expanded', String(selected));
@@ -110,7 +118,7 @@ function renderEditor() {
   }
   get<HTMLButtonElement>('undo').disabled = !app.editor?.canUndo;
   get<HTMLButtonElement>('redo').disabled = !app.editor?.canRedo;
-  // Keep the single setting editor as the only editing surface.
+  // Keep the selected editor as the only editing surface.
   get<HTMLTextAreaElement>('source').disabled = !!targetId;
   get<HTMLButtonElement>('load').disabled = !!targetId;
   for (const b of Array.from(get('examples').querySelectorAll('button'))) b.disabled = !!targetId;
@@ -177,14 +185,13 @@ app.subscribe((state) => {
       {
         selected: state.selected,
         onSelect: (id) => app.select(id),
-        onEdit: (id, summary, cell) => {
+        onEdit: (id, _summary, cell) => {
           origin = {
             id,
             control: cell.dataset.control,
             row: cell.closest<HTMLElement>('tr')?.dataset.nodeId,
           };
           targetId = id;
-          targetSummary = summary;
           renderEditor();
           originCell()?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
           get('editor').querySelector<HTMLElement>('input,button')?.focus({ preventScroll: true });
