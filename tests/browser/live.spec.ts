@@ -24,7 +24,8 @@ test('Kiln Now pulses agree with predicted and triggered onsets; Stop and editor
   await play(page);
   const capture = await page.evaluateHandle(() => {
     const app = window.odmApp;
-    const from = app.engine!.now()!,
+    // Observe complete cycles: a late play acknowledgement may follow onset zero.
+    const from = Math.ceil(app.engine!.now()!),
       to = from + 2;
     const samples: { id: string; cycle: number; frame: number }[] = [];
     let previous = performance.now();
@@ -169,7 +170,8 @@ test('phone strip expands with 44px targets, preserves focus across frames and f
         dot.opacity === '1' &&
         dot.boxShadow === 'none' &&
         dot.transitionDuration === '0s' &&
-        getComputedStyle(line.querySelector('.live-dot')!, '::after').display === 'none';
+        getComputedStyle(line.querySelector('.live-dot')!, '::after').opacity === '1' &&
+        getComputedStyle(line.querySelector('.live-dot')!, '::after').transitionDuration === '0s';
       line.classList.remove('live-playing', 'live-lit');
       return steady;
     }),
