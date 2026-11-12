@@ -29,7 +29,7 @@ passes. `tests/checks.test.ts` covers the boundary, ranking, skips and empty rep
 without sleeping. The 180 s command budget remains independent.
 
 `ODM_PROFILE_PATH=test-results/timing/run.json npm run test:browser` also retains
-per-test timings. `scripts/browser-report.mjs` uses Playwright's leaf-step clock,
+per-test timings. `scripts/browser-report.mjs` uses Playwright's step clock,
 `ODM:` helper steps and browser performance measures. Categories are navigation,
 import plus row questions, engine/start, swap acknowledgement, event/audio-clock
 observation, PCM/screenshot capture, teardown and other interactions. Nested steps, poll intervals and gaps
@@ -104,6 +104,18 @@ Local baseline on `c34ab45`: 46 checks, two workers, 73.115 s including build an
 shutdown. The marked per-test profile took 77.257 s without deliberate load after phase instrumentation. An earlier
 84.296 s diagnostic overlapped a Node run and is excluded from comparisons. Preliminary
 reduced-suite runs: 41 checks, 34.017 s at three workers; 30.749 s at four workers.
+After rebasing onto `893d971` (the section editor), the unchanged incoming section
+specs bring the total to 44 browser checks. The corrected complete command took
+34.736 s at three workers; `npm run check` passed with 311 Node checks (15.423 s).
+The incoming section spec still takes its own two screenshots, left unchanged by
+this task's ownership boundary.
+
+Preliminary CI caught two observation-window errors before reliability counts:
+unmute reached the kickless breakdown, so it now rewinds the muted drop through
+the public transport first; the rewrite canary observed a partial first cycle,
+so it now retains #22's future complete-cycle window and exact eight triggers.
+Neither change relaxes a threshold. Incomplete pre-fix local series and these
+failed CI attempts are excluded from consecutive evidence and reported in the PR.
 Final worker/load/CI evidence is recorded in the pull request before handback.
 
 ## Not checked
