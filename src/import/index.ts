@@ -424,7 +424,7 @@ export const importStrudel: ImportStrudel = (source): ImportResult => {
           pattern(d.init, undefined, d.init.type === 'Literal' && d.init.raw?.startsWith("'")),
           statement,
         );
-        p.label = d.id.name;
+        p.label ??= d.id.name;
         doc.body.push({ ...meta(statement, 1), kind: 'shared', name: d.id.name, pattern: p });
         continue;
       }
