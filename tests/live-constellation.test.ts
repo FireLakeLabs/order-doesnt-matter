@@ -97,7 +97,12 @@ it('small constellations use substantial area and reserve the halo and room head
   const measured = [];
   for (const count of [1, 2, 3, 4, 5, 6, 7, 8, 10, 30])
     for (const rooms of [0, 1, 3]) {
-      const layout = constellationLayout(model(count, rooms), box);
+      const input = model(count, rooms);
+      if (count === 1 && rooms) {
+        input.instruments[0].room = 1;
+        input.rooms[0].members = ['0'];
+      }
+      const layout = constellationLayout(input, box);
       const area =
         layout.planets.reduce((sum, p) => sum + Math.PI * p.r ** 2, 0) / (box.width * box.height);
       const min = Math.min(...layout.planets.map((p) => p.r));
