@@ -9,14 +9,17 @@ import type {} from '../../src/app/main';
 const runaway = 'new Pattern(state => { if (state.controls.cyclist) { while(true){} } return [] })';
 
 export async function playbackSafety(context: BrowserContext) {
-  const page = await context.newPage(),
-    running = await context.newPage();
+  const [page, running] = await Promise.all([context.newPage(), context.newPage()]);
   try {
-    await openProgram(running, { example: 'Kiln' });
+    await Promise.all([
+      openProgram(running, { example: 'Kiln' }),
+      openProgram(page, { source: runaway }),
+    ]);
     await running.getByRole('button', { name: 'Section 2', exact: true }).click();
-    await play(running);
-    await openProgram(page, { source: runaway });
-    await page.getByRole('button', { name: 'Play', exact: true }).click();
+    await Promise.all([
+      play(running),
+      page.getByRole('button', { name: 'Play', exact: true }).click(),
+    ]);
     await appSignal(page, () => !!window.odmApp.engine);
     await running.getByLabel('Your Strudel program').fill(runaway);
     await running.getByRole('button', { name: 'Load', exact: true }).click();
@@ -70,7 +73,8 @@ async function flood(page: Page) {
   await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
   await page
     .getByLabel('Your Strudel program')
-    .fill('s("sine*2048").note(60).release(0.01).gain(0.02)');
+    // Same 1,024 starts/second as 2,048 at the default tempo, with a smaller score.
+    .fill('setcpm(120); s("sine*512").note(60).release(0.01).gain(0.02)');
   await page.getByRole('button', { name: 'Load', exact: true }).click();
   await scoreReady(page);
   const before = await page.evaluate(() => window.odmApp.history.length);
