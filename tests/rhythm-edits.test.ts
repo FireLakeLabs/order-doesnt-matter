@@ -207,3 +207,18 @@ for (const [file, name] of [
     }
     expect(parseSteps(core.notation)).toEqual(core.steps);
   });
+
+it('groups can rest and return, retaining their timing; nested saved rests are refused', () => {
+  for (const text of ['[c2 d2]@3 e2', '[c2 d2] e2', 'c2 e2', '<c2 d2> e2', '[c2,d2] e2']) {
+    const doc = load(text),
+      target = id(doc),
+      before = printSteps(steps(doc));
+    expect(printSteps(steps(ok(restRhythm(ok(restRhythm(doc, target, [0])), target, [0]))))).toBe(
+      before,
+    );
+  }
+  const doc = load('[c2 d2] e2'),
+    target = id(doc);
+  const nested = ok(restRhythm(doc, target, [0, 0]));
+  expect(restRhythm(nested, target, [0])).toHaveProperty('ok', false);
+});
