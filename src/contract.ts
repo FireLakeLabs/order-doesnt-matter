@@ -77,7 +77,14 @@ export interface Engine {
    * Plays generated Strudel. Called while playing, it swaps without stopping and
    * resolves with the revision number later reported by `swapped`.
    */
-  play(code: string, options?: { fromCycle?: number }): Promise<number>;
+  play(
+    code: string,
+    options?: {
+      fromCycle?: number;
+      /** Section starts: discover two cycles at each of the first 32 (64 extra cycles). */
+      discoverCycles?: number[];
+    },
+  ): Promise<number>;
   stop(): void;
   readonly playing: boolean;
   /** Playhead in cycles, or null when stopped. */

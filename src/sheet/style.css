@@ -324,3 +324,20 @@
     font-size: 9px;
   }
 }
+
+.sheet-sit-out {
+  opacity: 0.55;
+}
+@media (min-width: 761px) {
+  .editing .sheet-scroll:has(table) {
+    max-height: 65dvh;
+  }
+  .editing .odm-sheet thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  .editing .odm-sheet thead th:first-child {
+    z-index: 3;
+  }
+}

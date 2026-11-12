@@ -145,9 +145,9 @@ export function createPanel(
       entry?.status === 'failed'
         ? `Change failed: ${entry.reason}. Previous value restored.`
         : entry?.status === 'pending'
-          ? 'changing — not heard yet'
+          ? 'Changing — not playing yet'
           : playing
-            ? 'Heard by the engine'
+            ? 'Playing now'
             : 'Plays on next start';
   };
 }

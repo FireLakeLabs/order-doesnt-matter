@@ -81,6 +81,7 @@ const renderPanel = createPanel(
 function renderEditor() {
   const { doc, playing } = app.state;
   const target = doc && targetId ? describeTarget(doc, targetId) : null;
+  get('score-workspace').classList.toggle('editing', !!target);
   renderPanel(
     target,
     targetId ? app.editor?.state.entries[targetId] : undefined,
@@ -102,7 +103,7 @@ function renderEditor() {
     if (status)
       status.textContent =
         entry?.status === 'pending'
-          ? 'changing — not heard yet'
+          ? 'Changing — not playing yet'
           : entry?.status === 'failed'
             ? 'Change failed; previous value restored'
             : '';

@@ -41,7 +41,7 @@ async function setValue(page: Page, value: number) {
         ?.getAttribute('data-edit-state'),
     };
   });
-  expect(seen).toEqual({ panel: 'changing — not heard yet', cell: 'pending' });
+  expect(seen).toEqual({ panel: 'Changing — not playing yet', cell: 'pending' });
 }
 test('constant editor: pending → swapped → trigger values → undo; readonly, focus and phone', async ({
   page,
@@ -56,7 +56,7 @@ test('constant editor: pending → swapped → trigger values → undo; readonly
   await expect(page.locator('#editor-breadcrumb')).toHaveText('bass › lpf');
   const old = Number(await page.getByRole('spinbutton').inputValue());
   await setValue(page, 900);
-  await expect(page.locator('#editor-status')).toHaveText('Heard by the engine');
+  await expect(page.locator('#editor-status')).toHaveText('Playing now');
   await expect
     .poll(() =>
       page.evaluate(
@@ -144,7 +144,7 @@ test('real house: pasted local file → bass lpf 450 → 900 → unchanged other
   };
   const before = await collect(8);
   await setValue(page, 900);
-  await expect(page.locator('#editor-status')).toHaveText('Heard by the engine');
+  await expect(page.locator('#editor-status')).toHaveText('Playing now');
   const now = await page.evaluate(() => window.odmApp.engine!.now()!);
   const afterCycle = Math.ceil(now) + 1;
   const after = await collect(afterCycle);

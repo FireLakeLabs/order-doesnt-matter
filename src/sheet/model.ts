@@ -42,6 +42,7 @@ export interface Row {
   name: string;
   nameSource: 'author' | 'generated';
   muted: boolean;
+  absent: boolean;
   broken: string | null;
   status: string;
   sounds: SheetSoundState[];
@@ -70,6 +71,7 @@ export interface SheetModel {
   sections: Section[];
   fromCycle: number;
   toCycle: number;
+  playing: boolean;
   playheadX: number | null;
   caption: string;
 }
@@ -413,17 +415,25 @@ export function sheetModel(input: SheetInput): SheetModel {
   ];
   const rows: Row[] = sources.map((source) => {
     const { voice, result, events, settings, rewrites, useNotes, useTargets } = source;
+    const total = songSections.at(-1);
+    const length = total ? total.start + total.cycles : 0;
+    const phase = length ? input.fromCycle % length : input.fromCycle;
+    const section = songSections.find((s) => phase >= s.start && phase < s.start + s.cycles);
+    // Membership includes muted uses: mute must not masquerade as sitting out.
+    const absent = !!section && !voice.uses.some((u) => u.path.some((n) => n.id === section.id));
     const broken = result?.error?.message ?? null;
     const status =
       broken !== null
         ? `Broken: ${broken}`
-        : !result
-          ? 'Not queried'
-          : voice.muted || voice.pattern.muted
-            ? 'Muted'
-            : !events.length
-              ? 'No events in this window'
-              : `${events.length} event${events.length === 1 ? '' : 's'}`;
+        : absent
+          ? 'not in this section'
+          : !result
+            ? 'Not queried'
+            : voice.muted || voice.pattern.muted
+              ? 'Muted'
+              : !events.length
+                ? 'No events in this window'
+                : `${events.length} event${events.length === 1 ? '' : 's'}`;
     const names = [
       ...new Set(
         (result?.error ? [] : (result?.events ?? [])).flatMap((e) =>
@@ -444,25 +454,32 @@ export function sheetModel(input: SheetInput): SheetModel {
       name: voice.name,
       nameSource: voice.nameSource,
       muted: voice.muted || !!voice.pattern.muted,
+      absent,
       broken,
       status,
       sounds,
       rewrites,
       useNotes,
       useTargets,
-      cells: ordered.map((name) =>
-        makeCell(
-          name,
-          settings.get(name)?.nodeId ?? voice.pattern.id,
-          events,
-          name === 'rhythm' || settings.has(name),
-          settings.get(name)?.driven ?? false,
-          status,
-          input,
-          settings.get(name)?.definitionValue,
-          settings.get(name)?.definitionLabel,
+      cells: ordered
+        .map((name) =>
+          makeCell(
+            name,
+            settings.get(name)?.nodeId ?? voice.pattern.id,
+            events,
+            name === 'rhythm' || settings.has(name),
+            settings.get(name)?.driven ?? false,
+            status,
+            input,
+            settings.get(name)?.definitionValue,
+            settings.get(name)?.definitionLabel,
+          ),
+        )
+        .map((cell) =>
+          absent
+            ? { ...cell, label: '', summary: '', marks: [], path: '', values: [], totalCount: 0 }
+            : cell,
         ),
-      ),
     };
   });
   const playheadX =
@@ -476,6 +493,7 @@ export function sheetModel(input: SheetInput): SheetModel {
     fromCycle: input.fromCycle,
     toCycle: input.toCycle,
     playheadX,
+    playing: input.playhead !== null,
     caption: `Cycles ${input.fromCycle}–${input.toCycle} · scored spans · at most ${DRAW_CAP} events drawn per cell`,
   };
 }

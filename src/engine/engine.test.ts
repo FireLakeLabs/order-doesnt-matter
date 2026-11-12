@@ -91,3 +91,16 @@ test('stop during audio resume cannot restart the transport', async () => {
   await expect(pending).rejects.toThrow('cancelled');
   expect(engine.playing).toBe(false);
 });
+
+test('section discovery reaches late sounds and caps extra work at 32 windows', async () => {
+  const { engine, audio } = fixture();
+  const seen: number[] = [];
+  audio.discover = async (_code, starts) => {
+    seen.push(...starts);
+    return [{ s: 'late' }];
+  };
+  await engine.play('sine', { discoverCycles: Array.from({ length: 50 }, (_, i) => i * 20) });
+  expect(seen).toHaveLength(32);
+  expect(seen.at(-1)).toBe(620);
+  expect(engine.sounds()).toContainEqual({ name: 'late', state: 'ready' });
+});
