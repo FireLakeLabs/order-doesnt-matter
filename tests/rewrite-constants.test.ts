@@ -1,13 +1,14 @@
 import { afterAll, expect, it } from 'vitest';
 import { instruments, type Doc, type RewriteLayer } from '../src/document';
+import { sameOnsets } from '../src/document/edits/source-shared';
 import { moveRewrite } from '../src/document/edits/rewrite-move';
 import { rewriteChoices } from '../src/document/edits/rewrite-add';
 import { generate } from '../src/generate';
 import { importStrudel } from '../src/import';
 import { queryEvents } from '../src/strudel/evaluate';
 
-// Event identity includes whole/part spans and fragments, not just onset values.
-// Constants introduce cycle boundaries: integer-only factors can hide a counterexample.
+// D26 compares sorted onset multisets: whole spans and complete values.
+// Keep the strict fragment comparison too: constants can split cycle boundaries.
 const cases = [
   ['fast', [[2], [0.5], [1.5]], false],
   ['slow', [[3], [0.5], [1.5]], false],
@@ -47,17 +48,25 @@ const bases = [
   'sine',
   'note("60 62").gain(".2 .6 .8")',
 ];
-const table: Record<string, string>[] = [];
-afterAll(() => console.table(table));
+const onsetTable: Record<string, string>[] = [];
+const fragmentTable: Record<string, string>[] = [];
+afterAll(() => {
+  console.log('D26 onset whole spans and complete values');
+  console.table(onsetTable);
+  console.log('Strict full events including part boundaries and non-onset fragments');
+  console.table(fragmentTable);
+});
 it('the measurement covers the complete add list', () => {
   expect(cases.map(([name]) => name)).toEqual(rewriteChoices.map(({ name }) => name));
 });
 it.each(cases)(
-  'real Strudel commutation: %s × six constant settings, eight cycles',
-  async (name, argumentsList, safe) => {
+  'D26 and strict commutation: %s × six constant settings, eight cycles',
+  async (name, argumentsList, strictSafe) => {
     const row: Record<string, string> = { rewrite: name };
+    const fragments: Record<string, string> = { rewrite: name };
     for (const [setting, value] of settings) {
       let identical = true;
+      let sameFragments = true;
       for (const args of argumentsList)
         for (const base of bases) {
           const rewrite = `${name}(${args.join(',')})`;
@@ -65,17 +74,26 @@ it.each(cases)(
           const b = await queryEvents(`${base}.${setting}(${value}).${rewrite}`, 0, 8);
           expect(a.error).toBeNull();
           expect(b.error).toBeNull();
-          // Order in a polyphonic query is immaterial; every event field still counts.
+          expect(a.opaqueValues).not.toBe(true);
+          expect(b.opaqueValues).not.toBe(true);
+          if (!sameOnsets(a, b)) {
+            identical = false;
+            console.log('D26 counterexample', { base, rewrite, setting, value, a, b });
+          }
+          // Strict diagnostic: order is immaterial; every serialized field counts.
           if (
             JSON.stringify(a.events.map((e) => JSON.stringify(e)).sort()) !==
             JSON.stringify(b.events.map((e) => JSON.stringify(e)).sort())
           )
-            identical = false;
+            sameFragments = false;
         }
       row[setting] = identical ? 'equal' : 'DIFFERENT';
-      expect(identical, `${name}/${setting}`).toBe(safe);
+      fragments[setting] = sameFragments ? 'equal' : 'DIFFERENT';
+      expect(identical, `D26 ${name}/${setting}`).toBe(true);
+      expect(sameFragments, `strict ${name}/${setting}`).toBe(strictSafe);
     }
-    table.push(row);
+    onsetTable.push(row);
+    fragmentTable.push(fragments);
   },
 );
 const load = (source: string) => importStrudel(source).doc;
@@ -85,7 +103,7 @@ const accept = (result: ReturnType<typeof moveRewrite>): Doc => {
   if ('ok' in result) throw Error(result.reason);
   return result;
 };
-it.each(cases.filter(([, , safe]) => safe))(
+it.each(cases)(
   'moves proven %s across a whole constant bag and back, preserving events and neighbours',
   async (name, argumentsList) => {
     const doc = load(
@@ -103,7 +121,7 @@ it.each(cases.filter(([, , safe]) => safe))(
     const a = await queryEvents(generate(doc), 0, 8),
       b = await queryEvents(generate(next), 0, 8);
     expect(a.error).toBeNull();
-    expect(b).toEqual(a);
+    expect(sameOnsets(a, b)).toBe(true);
   },
 );
 it('refuses patterned, signal-driven, layered, muted, unproven and source barriers and pattern edges', () => {
@@ -112,10 +130,6 @@ it('refuses patterned, signal-driven, layered, muted, unproven and source barrie
     'note(60).rev().gain(sine)',
     'note(60).rev().gain(pure(.4).slow(2))',
     'note(60).rev().gain(.4).speed(.5)',
-    'note(60).fast(2).gain(.4)',
-    'note(60).slow(1.5).gain(.4)',
-    'note(60).early(.25).gain(.4)',
-    'note(60).late(.25).gain(.4)',
     'note(60).off(.5,p=>p.rev()).gain(.4)',
     'note(60).ply("<1 2>").gain(.4)',
     'note(60).rev()',
@@ -135,14 +149,17 @@ it('refuses patterned, signal-driven, layered, muted, unproven and source barrie
   expect(moveRewrite(doc, rewrite(doc).id, -1)).toMatchObject({ ok: false });
   expect(moveRewrite(doc, 'missing', 1)).toMatchObject({ ok: false });
 });
-it('accepts a plain constant sound but keeps mini notation and unproven arguments behind barriers', () => {
-  const doc = load('note(60).rev().s("sine")');
-  const bag = layers(doc)[1];
-  if (bag.kind !== 'settings') throw Error('Expected settings');
-  // Mini notation is a pattern even when it happens to contain one step.
-  expect(moveRewrite(doc, rewrite(doc).id, 1)).toMatchObject({ ok: false });
-  bag.settings[0].value.core = { kind: 'constant', value: 'sine' };
-  expect(layers(accept(moveRewrite(doc, rewrite(doc).id, 1)))[0]).toBe(bag);
-  rewrite(doc).args = [{ kind: 'opaque', code: 'custom' }];
-  expect(moveRewrite(doc, rewrite(doc).id, 1)).toMatchObject({ ok: false });
-});
+it.each(cases)(
+  'accepts %s with a plain constant sound but keeps mini notation and unproven arguments behind barriers',
+  (name, args) => {
+    const doc = load(`note(60).${name}(${args[0].join(',')}).s("sine")`);
+    const bag = layers(doc)[1];
+    if (bag.kind !== 'settings') throw Error('Expected settings');
+    // Mini notation is a pattern even when it happens to contain one step.
+    expect(moveRewrite(doc, rewrite(doc).id, 1)).toMatchObject({ ok: false });
+    bag.settings[0].value.core = { kind: 'constant', value: 'sine' };
+    expect(layers(accept(moveRewrite(doc, rewrite(doc).id, 1)))[0]).toBe(bag);
+    rewrite(doc).args = [{ kind: 'opaque', code: 'custom' }];
+    expect(moveRewrite(doc, rewrite(doc).id, 1)).toMatchObject({ ok: false });
+  },
+);
