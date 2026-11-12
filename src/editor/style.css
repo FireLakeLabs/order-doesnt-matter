@@ -1,0 +1,108 @@
+#score-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 18px;
+  align-items: start;
+}
+#score-workspace:has(#editor:not([hidden])) {
+  grid-template-columns: minmax(0, 1fr) 300px;
+}
+#score {
+  min-width: 0;
+}
+#editor {
+  position: sticky;
+  top: 16px;
+  padding: 22px;
+  background: #182a35;
+  border: 1px solid #52717b;
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+}
+#editor[hidden] {
+  display: none;
+}
+#editor h2 {
+  font-size: 18px;
+  margin-bottom: 24px;
+}
+#editor input {
+  font: inherit;
+  color: inherit;
+  accent-color: #a3efd5;
+}
+#editor input[type='range'] {
+  width: 100%;
+  margin: 12px 0 24px;
+  min-height: 40px;
+}
+#editor label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+#editor input:not([type='range']):not([type='checkbox']) {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #52717b;
+  border-radius: 5px;
+  background: #0b141b;
+}
+#editor-status {
+  min-height: 3em;
+  font-size: 13px;
+  color: #a3efd5;
+}
+#editor[data-edit-state='pending'] {
+  border: 2px dashed #f0cb86;
+  padding: 21px;
+}
+#editor[data-edit-state='pending'] #editor-status {
+  color: #f0cb86;
+}
+#editor[data-edit-state='failed'] #editor-status {
+  color: #ffb3a8;
+}
+.sheet-cell[tabindex],
+.sheet-use-note[tabindex] {
+  cursor: pointer;
+}
+.odm-sheet [data-editor-selected='true'] {
+  outline: 3px solid #c3b0f1;
+  outline-offset: -4px;
+}
+.odm-sheet [data-edit-state='pending'] {
+  background: #594d244d !important;
+  border-bottom: 3px dashed #f0cb86;
+}
+.odm-sheet [data-edit-state='failed'] {
+  border-bottom: 3px solid #ffb3a8;
+}
+@media (max-width: 760px) {
+  #score-workspace:has(#editor:not([hidden])) {
+    grid-template-columns: minmax(0, 1fr);
+    padding-bottom: 330px;
+  }
+  #editor {
+    position: fixed;
+    z-index: 5;
+    inset: auto 0 0;
+    max-height: 55dvh;
+    overflow: auto;
+    border-radius: 16px 16px 0 0;
+    box-shadow: 0 -12px 32px #0008;
+    padding: 18px;
+  }
+  #editor[data-edit-state='pending'] {
+    padding: 17px;
+  }
+  #editor h2 {
+    margin-bottom: 12px;
+  }
+  #editor input[type='range'] {
+    margin: 0 0 10px;
+  }
+}
