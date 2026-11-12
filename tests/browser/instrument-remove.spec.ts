@@ -1,14 +1,5 @@
 import { expect } from '@playwright/test';
-import {
-  test,
-  openProgram,
-  scoreReady,
-  selectNode,
-  play,
-  swap,
-  appSignal,
-  signal,
-} from './helpers';
+import { test, openProgram, selectNode, play, swap, appSignal, signal } from './helpers';
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 
 test('Kiln: live deletion removes row, planet and a full cycle of triggers; Undo restores exactly', async ({
@@ -16,11 +7,14 @@ test('Kiln: live deletion removes row, planet and a full cycle of triggers; Undo
 }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await openProgram(page, { example: 'Kiln' });
-  // Read the bundled original from the built page; tempo only shortens observation.
-  const field = page.getByLabel('Your Strudel program');
-  await field.fill((await field.inputValue()).replace(/setcpm\([^)]*\)/, 'setcpm(240)'));
-  await page.getByRole('button', { name: 'Load', exact: true }).click();
-  await scoreReady(page);
+  // Keep the bundled score; a tempo-only history entry shortens observation.
+  await page.evaluate(() => {
+    const doc = window.odmApp.state.doc!;
+    window.odmApp.editor!.apply({
+      ...doc,
+      body: doc.body.map((n) => (n.kind === 'tempo' ? { ...n, cpm: 480 } : n)),
+    });
+  });
   await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
   const before = await page.evaluate(() => ({
     doc: window.odmApp.state.doc,

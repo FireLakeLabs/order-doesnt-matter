@@ -45,20 +45,17 @@ export default {
       actions = el('div');
     removal.className = 'editor-list-item';
     removal.setAttribute('aria-label', 'Delete instrument');
-    confirmation.hidden = true;
     actions.className = 'editor-actions';
     actions.append(cancel, confirm);
     confirmation.append(question, actions);
-    removal.append(remove, confirmation);
+    removal.append(remove);
     body.append(form, mute.label, solo.label, summary, uses, removal);
     remove.onclick = () => {
-      confirmation.hidden = false;
-      remove.hidden = true;
+      remove.replaceWith(confirmation);
       cancel.focus();
     };
     cancel.onclick = () => {
-      confirmation.hidden = true;
-      remove.hidden = false;
+      confirmation.replaceWith(remove);
       remove.focus();
     };
     confirm.onclick = () => {
