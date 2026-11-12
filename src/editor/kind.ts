@@ -7,7 +7,9 @@ export interface EditorContext {
   events?: EventResult;
   window: { fromCycle: number; toCycle: number };
   /** Replace the document. Same gesture string = one undo step and coalesced swaps. */
-  apply(next: Doc, options?: { gesture?: string }): void;
+  apply(next: Doc, options?: { gesture?: string; selection?: string }): void;
+  /** Ask about a hypothetical document over the current window, with a worker budget. */
+  ask?(doc: Doc, instrumentId: string): Promise<EventResult>;
   pending: 'none' | 'pending' | 'failed';
 }
 export interface EditorKind {

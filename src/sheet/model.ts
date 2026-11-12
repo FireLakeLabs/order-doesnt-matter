@@ -49,6 +49,7 @@ export interface Row {
   sounds: SheetSoundState[];
   cells: Cell[];
   rewrites: Chip[];
+  rewriteTarget?: string;
   useNotes: string[];
   useTargets: { nodeId: string; text: string }[];
 }
@@ -465,6 +466,7 @@ export function sheetModel(input: SheetInput): SheetModel {
       status,
       sounds,
       rewrites,
+      rewriteTarget: `${voice.pattern.id}:rewrites`,
       useNotes,
       useTargets,
       cells: ordered

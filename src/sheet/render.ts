@@ -220,6 +220,12 @@ export function mountSheet(
     });
     if (!row.absent)
       rewrites.append(row.rewrites.length ? chips : element('span', 'No rewrites', 'sheet-status'));
+    if (options.onEdit && row.rewriteTarget) {
+      const add = element('button', 'Add rewrite');
+      add.type = 'button';
+      selectable(add, row.rewriteTarget, 'Add rewrite');
+      (row.absent ? name : rewrites).append(add);
+    }
     tr.append(rewrites);
     body.append(tr);
   });
