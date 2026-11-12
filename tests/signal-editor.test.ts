@@ -186,6 +186,7 @@ it('real house worker: range → saw → two-cycle rise; every other instrument 
       const rise = results[3].events
         .filter((e) => e.part[0] < 2)
         .map((e) => (e.value as { gain: number }).gain);
+      expect(rise).toHaveLength(32);
       expect(rise.every((v, i) => i === 0 || v > rise[i - 1])).toBe(true);
       for (const result of results.slice(1)) {
         const omit = (e: (typeof result.events)[number]) =>

@@ -193,3 +193,23 @@ it('making a saved rest constant keeps its value without its pattern annotations
   const next = good(convertValues(good(toggleRest(doc, id, [0])), id, 'constant'));
   expect(settings(next)[0].value.core).toEqual({ kind: 'constant', value: 0.4 });
 });
+
+it('Kiln: values alternate cutoff 700/900; undo twice restores the original constant', async () => {
+  const { history, push, undo } = await import('../src/editor/history');
+  const original = load(readFileSync('corpus/programs/piece-kiln.strudel', 'utf8'));
+  const bass = instruments(original).find((r) => r.name === 'bass')!;
+  const setting = settings(original).find((s) => s.name === 'cutoff')!;
+  expect(setting.value.core).toMatchObject({ kind: 'constant', value: 700 });
+  const converted = good(convertValues(original, setting.id, 'values'));
+  const edited = good(setValue(converted, setting.id, [0, 1], '900'));
+  const result = await queryEventsNode(generate(edited, { only: bass.id }), 4, 6);
+  expect(result.error).toBeNull();
+  expect(result.events.length).toBeGreaterThan(0);
+  for (const e of result.events)
+    expect((e.value as { cutoff: number }).cutoff).toBe(Math.floor(e.part[0]) % 2 ? 900 : 700);
+  let h = push(push(history(original), converted, setting.id), edited, setting.id);
+  h = undo(h);
+  expect(h.present).toEqual(converted);
+  h = undo(h);
+  expect(h.present).toEqual(original);
+});

@@ -115,3 +115,24 @@ it('handwritten nodes distinguish opaque source, shape generators, sections and 
     use: expect.any(Object),
   });
 });
+
+it('real-house sheet model survives JSON with eight rows and section-local settings', async () => {
+  const doc = importStrudel(
+    readFileSync('corpus/programs/real-house-arranged.strudel', 'utf8'),
+  ).doc;
+  const events = Object.fromEntries(
+    await Promise.all(
+      instruments(doc).map(async (row) => {
+        const result = await queryEventsNode(generate(doc, { only: row.id }), 0, 28);
+        expect(result.error).toBeNull();
+        return [row.id, result];
+      }),
+    ),
+  );
+  const model = sheetModel({ doc, events, fromCycle: 0, toCycle: 28, playhead: 9, sounds: [] });
+  expect(model.rows).toHaveLength(8);
+  expect(model.rows.flatMap((row) => row.useTargets).map((t) => t.text)).toContain(
+    'in intro: lpf 600',
+  );
+  expect(JSON.parse(JSON.stringify(model))).toEqual(model);
+});

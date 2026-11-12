@@ -1,4 +1,5 @@
-import { expect, test } from '@playwright/test';
+import { test } from './helpers';
+import { expect } from '@playwright/test';
 import type { EngineEvent } from '../../src/contract';
 import type {} from '../../src/engine/harness';
 import {
@@ -32,6 +33,7 @@ for (const code of [
     const measurements = await page.evaluate(
       async ({ code }) => {
         const engine = window.odm.engine!;
+        window.odmProfileEngine(engine);
         const events = window.odm.events;
         type Swap = Extract<EngineEvent, { type: 'swapped' | 'committed' }>;
         async function acknowledged(revision: number, type: 'swapped' | 'committed') {

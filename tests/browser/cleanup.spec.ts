@@ -1,6 +1,6 @@
+import { test } from './helpers';
 import { scoreReady, play } from './helpers';
-import { expect, test } from '@playwright/test';
-import { mkdir } from 'node:fs/promises';
+import { expect } from '@playwright/test';
 import type {} from '../../src/app/main';
 
 test('sit-out rows, sticky headings, late sounds and phone toolbar', async ({ page }) => {
@@ -21,18 +21,14 @@ test('sit-out rows, sticky headings, late sounds and phone toolbar', async ({ pa
   await expect(bass).toHaveClass('sheet-sit-out');
   await expect(bass.getByRole('rowheader')).toContainText('not in this section');
   for (const cell of await bass.locator('td').all()) await expect(cell).toBeEmpty();
-  await mkdir('test-results', { recursive: true });
-  await page.screenshot({ path: 'test-results/cleanup-desktop-sit-out.png', fullPage: true });
+
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.screenshot({ path: 'test-results/cleanup-phone-sit-out.png', fullPage: true });
   const toolbar = await page
     .locator('#undo, #redo, #paste')
     .evaluateAll((nodes) => nodes.map((n) => n.getBoundingClientRect().top));
   expect(new Set(toolbar).size).toBe(1);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.screenshot({ path: 'test-results/cleanup-phone-topbar.png', fullPage: true });
   await page.setViewportSize({ width: 1280, height: 900 });
-  await page.screenshot({ path: 'test-results/cleanup-desktop-topbar.png', fullPage: true });
   await play(page);
   await expect(bass.getByRole('rowheader')).toContainText('sine: ready');
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
@@ -49,11 +45,7 @@ test('sit-out rows, sticky headings, late sounds and phone toolbar', async ({ pa
   expect(await scroll.evaluate((el) => el.scrollTop)).toBeGreaterThan(0);
   const header = scroll.getByRole('columnheader', { name: 'lpf', exact: true });
   expect(await header.evaluate((el) => getComputedStyle(el).position)).toBe('sticky');
-  await page
-    .locator('#score-workspace')
-    .screenshot({ path: 'test-results/cleanup-desktop-heading.png' });
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.screenshot({ path: 'test-results/cleanup-phone-heading.png', fullPage: true });
 });
 
 test('sounds beyond the discovery cap say not used yet only during playback', async ({ page }) => {

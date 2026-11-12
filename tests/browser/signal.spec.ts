@@ -1,10 +1,8 @@
+import { test } from './helpers';
 import { signal, openProgram, play, selectNode, waitForPending, triggerValues } from './helpers';
-import { mkdir } from 'node:fs/promises';
-import { expect, test, type Page } from '@playwright/test';
+import { expect, type Page } from '@playwright/test';
 import { instruments, walk, type Setting } from '../../src/document';
 import { describeTarget } from '../../src/document/edit';
-import { generate } from '../../src/generate';
-import { queryEventsNode } from '../../src/strudel/evaluate-node';
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 async function houseSignal(page: Page) {
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -65,60 +63,8 @@ async function shapeAndPeriod(page: Page) {
   await waitForPending(page);
   return { ...setup, period };
 }
-test('real house signal: saw period preserves 32 values and all other triggers', async ({
-  page,
-}) => {
-  const { original } = await shapeAndPeriod(page);
-  const marker = await page.evaluate(() => window.odmApp.history.length);
-  await play(page);
-  const cycle = 8;
-  await signal(
-    () =>
-      page.evaluate(
-        (c) => window.odmApp.history.filter((e) => e.type === 'trigger' && e.cycle >= c + 2).length,
-        cycle,
-      ),
-    { timeout: 10000 },
-  ).toBeGreaterThan(0);
-  const actual = await page.evaluate(
-    ({ c, marker }) =>
-      window.odmApp.history
-        .slice(marker)
-        .filter((e) => e.type === 'trigger' && e.cycle >= c && e.cycle < c + 2),
-    { c: cycle, marker },
-  );
-  const gains = actual
-    .filter((e) => e.type === 'trigger' && (e.value as { s: string }).s === 'hh')
-    .map((e) => (e.type === 'trigger' ? (e.value as { gain: number }).gain : NaN));
-  expect(gains.length).toBe(32);
-  expect(gains.every((v, i) => v >= 0.1 && v <= 0.6 && (i === 0 || v > gains[i - 1]))).toBe(true);
-  const baseline = await queryEventsNode(generate(original), cycle, cycle + 2);
-  expect(baseline.error).toBeNull();
-  const stable = (x: unknown): string =>
-    Array.isArray(x)
-      ? `[${x.map(stable)}]`
-      : x && typeof x === 'object'
-        ? `{${Object.entries(x)
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([k, v]) => `${k}:${stable(v)}`)}}`
-        : JSON.stringify(x);
-  expect(
-    actual
-      .filter((e) => e.type === 'trigger' && (e.value as { s: string }).s !== 'hh')
-      .map((e) => (e.type === 'trigger' ? stable(e.value) : ''))
-      .sort(),
-  ).toEqual(
-    baseline.events
-      .filter((e) => e.hasOnset && (e.value as { s: string }).s !== 'hh')
-      .map((e) => stable(e.value))
-      .sort(),
-  );
-  await page.getByRole('button', { name: 'Stop', exact: true }).click();
-});
 test('real house signal: undo, keyboard, drag, focus and phone', async ({ page }) => {
-  const { original, hats, target, low, high, period } = await shapeAndPeriod(page);
-  const baseline = await queryEventsNode(generate(original), 8, 10);
-  expect(baseline.error).toBeNull();
+  const { target, low, high, period } = await shapeAndPeriod(page);
   for (let i = 0; i < 3; i++) await page.getByRole('button', { name: 'Undo', exact: true }).click();
   await expect(high).toHaveValue('0.35');
   await expect(low).toHaveValue('0.1');
@@ -143,23 +89,11 @@ test('real house signal: undo, keyboard, drag, focus and phone', async ({ page }
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
   await expect(high).toHaveValue('0.35');
   await page.locator('.signal-editor summary').click();
-  await mkdir('test-results', { recursive: true });
-  await signal(() =>
-    page.evaluate(
-      (id) =>
-        window.odmApp.state.events[id]?.events
-          .filter((e) => e.part[0] >= 8 && e.part[0] < 10)
-          .map((e) => e.value),
-      hats.id,
-    ),
-  ).toEqual(
-    baseline.events.filter((e) => (e.value as { s: string }).s === 'hh').map((e) => e.value),
-  );
+
   await page.locator('#editor').evaluate((el) => el.scrollIntoView({ block: 'start' }));
   await page.locator('.signal-editor').evaluate((el) => {
     el.scrollTop = 0;
   });
-  await page.screenshot({ path: 'test-results/signal-desktop.png' });
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await expect(target).toBeFocused();
   await target.press('Enter');
@@ -171,7 +105,6 @@ test('real house signal: undo, keyboard, drag, focus and phone', async ({ page }
       h: e.getBoundingClientRect().height,
     })),
   ).toEqual({ w: 44, h: 44 });
-  await page.screenshot({ path: 'test-results/signal-phone.png' });
   await page.keyboard.press('Escape');
   await expect(target).toBeFocused();
 });

@@ -1,5 +1,6 @@
+import { test } from './helpers';
 import { installEngineSignals, signal } from './helpers';
-import { expect, test } from '@playwright/test';
+import { expect } from '@playwright/test';
 import type { EngineEvent } from '../../src/contract';
 import type {} from '../../src/engine/harness';
 
@@ -21,6 +22,7 @@ test('engine: synth PCM, live revisions, rejected edit and Stop', async ({ page 
   const measured = await page.evaluate(async () => {
     const { engine: e, events } = window.odm;
     if (!e) throw Error('engine not initialized');
+    window.odmProfileEngine(e);
     const until = (predicate: () => boolean) => window.odmUntil(e, predicate);
     const triggers = () =>
       events.filter(
@@ -115,6 +117,7 @@ for (const scenario of ['sample', 'missing', 'seek'] as const) {
     const result = await page.evaluate(async (scenario) => {
       const { engine: e, events, fixture } = window.odm;
       if (!e) throw Error('engine not initialized');
+      window.odmProfileEngine(e);
       const source =
         scenario === 'sample'
           ? `samples({fixture: ['${fixture}']}); s("fixture").fast(4)`
@@ -179,6 +182,7 @@ test('canary: web bundle registry, REPL capture, final output gain and failed sa
   await signal(() => page.evaluate(() => window.odm.error || !!window.odm.engine)).toBe(true);
   const result = await page.evaluate(async () => {
     const e = window.odm.engine!;
+    window.odmProfileEngine(e);
     await e.play('s("defaultbank")');
     const defaults = e.sounds();
     e.stop();

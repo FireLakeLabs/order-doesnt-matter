@@ -1,15 +1,9 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { expect, test } from '@playwright/test';
+import { test } from './helpers';
+import { expect } from '@playwright/test';
 import { fixtures } from '../../src/sheet/fixtures';
-import { instruments } from '../../src/document';
-import { queryEventsNode } from '../../src/strudel/evaluate-node';
-import type { Generate, ImportStrudel, SheetInput } from '../../src/contract';
-import { build } from 'vite';
 import { sheetModel } from '../../src/sheet/model';
 
-test('sheet fixtures: semantics, status labels, phone containment and screenshots', async ({
-  page,
-}) => {
+test('sheet fixtures: semantics, status labels and phone containment', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
   page.on('console', (message) => {
@@ -19,11 +13,16 @@ test('sheet fixtures: semantics, status labels, phone containment and screenshot
   page.on('response', (response) => {
     if (response.status() >= 400) errors.push(`${response.status()} ${response.url()}`);
   });
-  await mkdir('test-results/sheet', { recursive: true });
+
   for (const [name, fixture] of Object.entries(fixtures)) {
     const model = sheetModel(fixture);
     await page.setViewportSize({ width: 1440, height: 900 });
-    await page.goto(`/harness/sheet.html?fixture=${name}`);
+    // Keep the browser's JSON-fetch/mount seam while model construction is
+    // proved in Node. The other fixtures retain the ordinary harness path.
+    if (name === 'trio') {
+      await page.route('**/sheet-model.json', (route) => route.fulfill({ json: model }));
+      await page.goto('/harness/sheet.html?model=/sheet-model.json');
+    } else await page.goto(`/harness/sheet.html?fixture=${name}`);
     await expect(page.getByRole('region', { name: 'Score sheet', exact: true })).toBeVisible();
     for (const row of model.rows)
       await expect(page.getByRole('rowheader').filter({ hasText: row.name })).toBeVisible();
@@ -34,24 +33,17 @@ test('sheet fixtures: semantics, status labels, phone containment and screenshot
       await expect(
         page.getByText('Broken: Cannot query custom rewrite', { exact: true }).first(),
       ).toBeVisible();
-    await page.screenshot({ path: `test-results/sheet/${name}-desktop.png`, fullPage: true });
     await page.setViewportSize({ width: 390, height: 844 });
     expect(
       await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
     ).toBe(true);
-    await page.screenshot({ path: `test-results/sheet/${name}-phone.png`, fullPage: true });
     if (name === 'trio') {
       await page
         .getByRole('region', { name: 'Score table, scroll for more settings' })
         .evaluate((el) => {
           el.scrollLeft = el.scrollWidth;
         });
-      await page.screenshot({ path: 'test-results/sheet/trio-rewrites-phone.png', fullPage: true });
       await page.setViewportSize({ width: 1440, height: 900 });
-      await page.screenshot({
-        path: 'test-results/sheet/trio-rewrites-desktop.png',
-        fullPage: true,
-      });
     }
   }
   expect(errors).toEqual([]);
@@ -106,71 +98,5 @@ test('moving the playhead preserves table nodes, focus and scroll; constants dra
     path: 'M75,0 V36',
     hidden: true,
     mutations: [],
-  });
-});
-
-test('real-house-arranged: Node import → instruments → generate(only) → events → model JSON → built harness', async ({
-  page,
-}) => {
-  const errors: string[] = [];
-  page.on('pageerror', (error) => errors.push(error.message));
-  const source = await readFile('corpus/programs/real-house-arranged.strudel', 'utf8');
-  // Use the same browser resolver as the existing corpus bundling canary.
-  // Native Node resolves Kabelsalat's unused REPL import to its incomplete entry.
-  const bundle = await build({
-    configFile: false,
-    logLevel: 'silent',
-    build: {
-      write: false,
-      minify: false,
-      lib: { entry: new URL('../corpus/browser.ts', import.meta.url).pathname, formats: ['es'] },
-    },
-  });
-  const result = Array.isArray(bundle) ? bundle[0] : bundle;
-  if (!('output' in result)) throw Error('Unexpected bundle watcher');
-  const output = result.output.find((chunk) => chunk.type === 'chunk');
-  if (!output || output.type !== 'chunk') throw Error('Missing corpus bundle');
-  const { importStrudel, generate } = (await import(
-    `data:text/javascript;base64,${Buffer.from(output.code).toString('base64')}`
-  )) as { importStrudel: ImportStrudel; generate: Generate };
-  const doc = importStrudel(source).doc;
-  const events: SheetInput['events'] = {};
-  for (const row of instruments(doc)) {
-    events[row.id] = await queryEventsNode(generate(doc, { only: row.id }), 0, 28);
-    expect(events[row.id].error).toBeNull();
-  }
-  const model = sheetModel({ doc, events, fromCycle: 0, toCycle: 28, playhead: 9, sounds: [] });
-  await mkdir('test-results/sheet', { recursive: true });
-  const path = 'test-results/sheet/real-house-arranged-model.json';
-  await writeFile(path, JSON.stringify(model));
-  await page.route(
-    (url) => url.pathname === '/sheet-model.json',
-    (route) => route.fulfill({ path, contentType: 'application/json' }),
-  );
-  await page.setViewportSize({ width: 1440, height: 1200 });
-  await page.goto('/harness/sheet.html?model=/sheet-model.json');
-  await page.waitForSelector('tbody').catch(() => {
-    throw Error(`Sheet failed: ${errors.join('; ')}`);
-  });
-  expect(errors).toEqual([]);
-  await expect(page.getByRole('rowheader')).toHaveCount(8);
-  await expect(page.getByText('in intro: lpf 600', { exact: true })).toBeVisible();
-  await page.screenshot({
-    path: 'test-results/sheet/real-house-arranged-desktop.png',
-    fullPage: true,
-  });
-  await page.setViewportSize({ width: 390, height: 844 });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
-    true,
-  );
-  // Chromium can omit offscreen sticky-cell text in a full-page capture after
-  // resizing. Paint the full height while retaining the real phone CSS width.
-  await page.setViewportSize({
-    width: 390,
-    height: await page.evaluate(() => document.documentElement.scrollHeight),
-  });
-  await page.screenshot({
-    path: 'test-results/sheet/real-house-arranged-phone.png',
-    fullPage: true,
   });
 });
