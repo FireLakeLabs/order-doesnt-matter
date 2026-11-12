@@ -101,6 +101,19 @@ export interface Target {
 }
 /** A core has no serialized Meta id. Its selection address is scoped to its pattern. */
 export const rhythmTargetId = (pattern: Pattern) => `${pattern.id}:rhythm`;
+/** Plain setup labels shared by the sheet and its source breadcrumb. */
+export function setupSummary(code: string): string {
+  const plain = code.trim().replace(/\s+/g, ' ');
+  const samples = /^(?:await\s+)?samples\s*\(\s*(['"])(.*?)\1/.exec(plain);
+  if (samples) return `Loads sounds from ${samples[2]}`.slice(0, 60);
+  if (/^(?:await\s+)?samples\s*\(\s*\{/.test(plain)) return 'Loads sounds from a sample map';
+  const helper =
+    /^(?:async\s+)?function\s+([\w$]+)/.exec(plain) ??
+    /^(?:const|let|var)\s+([\w$]+)\s*=\s*(?:async\s+)?(?:function\b|(?:\([^)]*\)|[\w$]+)\s*=>)/.exec(
+      plain,
+    );
+  return helper ? `Defines helper: ${helper[1]}`.slice(0, 60) : plain.slice(0, 60);
+}
 export function describeTarget(doc: Doc, nodeId: string): Target {
   const argument = /^(.*):arg:(\d+)$/.exec(nodeId);
   if (argument) {
@@ -159,7 +172,9 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
       : 'unknown';
   }
   const pattern = node && 'core' in node ? (node as Pattern) : undefined;
+  const setup = node && 'kind' in node && node.kind === 'setup' && 'code' in node;
   const source =
+    setup ||
     node?.tier === 3 ||
     (node && 'kind' in node && node.kind === 'opaque') ||
     pattern?.core.kind === 'opaque';
@@ -190,8 +205,9 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
           : kind === 'source'
             ? 'Source text'
             : 'Pattern');
-  const breadcrumb =
-    kind === 'section'
+  const breadcrumb = setup
+    ? ['setup', setupSummary(String(node.code))]
+    : kind === 'section'
       ? ['Piece', selectedSection!.name]
       : [
           row?.name ?? 'Piece',
@@ -208,11 +224,13 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
     section,
     breadcrumb: breadcrumb.map((part) => part.replaceAll('$', '')),
     generatedParts: breadcrumb.map((_, i) =>
-      kind === 'section'
-        ? i === 1 && selectedSection!.nameSource === 'generated'
-        : i === 0
-          ? row?.nameSource === 'generated'
-          : !!section && i === 1 && section.nameSource === 'generated',
+      setup
+        ? false
+        : kind === 'section'
+          ? i === 1 && selectedSection!.nameSource === 'generated'
+          : i === 0
+            ? row?.nameSource === 'generated'
+            : !!section && i === 1 && section.nameSource === 'generated',
     ),
     generated: row?.nameSource === 'generated',
     control: control || label,
