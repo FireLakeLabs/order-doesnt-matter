@@ -50,13 +50,8 @@ for (const example of examples) {
   };
   get('examples').append(button);
 }
-let soundNoticeDismissed = false;
-get('dismiss-sound-notice').onclick = () => {
-  soundNoticeDismissed = true;
-  get('sound-notice').hidden = true;
-};
+get('dismiss-sound-notice').onclick = () => app.dismissSoundNotice();
 play.onclick = () => {
-  soundNoticeDismissed = false;
   void app.play();
 };
 stop.onclick = () => app.stop();
@@ -173,11 +168,7 @@ app.subscribe((state) => {
   get('tempo').textContent =
     state.cps === null ? 'Tempo —' : `${Number((state.cps * 60).toFixed(2))} cycles/min`;
   get('message').textContent = state.message;
-  get('sound-notice').hidden =
-    soundNoticeDismissed ||
-    !state.sounds.some(
-      (s) => s.state === 'missing' && s.detail?.includes('Default collections could not load'),
-    );
+  get('sound-notice').hidden = !state.soundNotice.visible;
   get('solo-banner').hidden = !state.solo;
   get('solo-banner').querySelector('span')!.textContent =
     `Solo: ${state.rows.find((r) => r.id === state.solo)?.name.replaceAll('$', '') ?? ''} —`;

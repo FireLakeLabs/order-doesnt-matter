@@ -16,6 +16,7 @@ import {
   setFollow,
   tick,
   mergeSounds,
+  observeSoundNotice,
   startCycle,
   type AppState,
 } from './state';
@@ -92,7 +93,12 @@ export function createApp() {
       if (!event.playing) editor?.clear();
       update({ ...state, playing: event.playing });
     }
-    if (event.type === 'sounds') update({ ...state, sounds: sounds() });
+    if (event.type === 'sounds')
+      update({
+        ...state,
+        sounds: sounds(),
+        soundNotice: observeSoundNotice(state.soundNotice, event.sounds),
+      });
   }
   // All engine replacements, including solo, share a serial queue.
   let swaps = Promise.resolve();
@@ -233,6 +239,9 @@ export function createApp() {
         });
     },
     play,
+    dismissSoundNotice() {
+      update({ ...state, soundNotice: { ...state.soundNotice, visible: false } });
+    },
     stop() {
       ++transportRevision;
       editor?.clear();
