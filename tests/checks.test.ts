@@ -52,3 +52,73 @@ test('Node timing includes 60 seconds and rejects excess without sleeping', () =
   expect(timingResult(50, 60_050, NODE_LIMIT_SECONDS)).toEqual({ seconds: 60, ok: true });
   expect(timingResult(50, 60_051, NODE_LIMIT_SECONDS).ok).toBe(false);
 });
+
+test('browser growth guard keeps the 20 second boundary, ranks five and excludes skips', async () => {
+  const { browserSummary, formatBrowserSummary } = await import('../scripts/browser-summary.mjs');
+  const rows = [1000, 3000, 20000, 20001, 2, 4000, 100].map((ms, i) => ({
+    title: `test ${i}`,
+    ms,
+    status: 'passed',
+  }));
+  const summary = browserSummary(
+    [...rows, { title: 'optional', ms: 99999, status: 'skipped' }],
+    70,
+  );
+  expect(summary.count).toBe(7);
+  expect(summary.secondsPerTest).toBe(10);
+  expect(summary.slowest.map((r) => r.ms)).toEqual([20001, 20000, 4000, 3000, 1000]);
+  expect(summary.over.map((r) => r.title)).toEqual(['test 3']);
+  expect(summary.ok).toBe(false);
+  expect(formatBrowserSummary(summary)).toContain('OVER SINGLE-TEST BUDGET (20 s): test 3');
+  expect(
+    browserSummary(
+      rows.filter((r) => r.ms <= 20000),
+      1,
+    ).ok,
+  ).toBe(true);
+  expect(browserSummary([], 10)).toMatchObject({ count: 0, secondsPerTest: 0, ok: true });
+});
+
+test('browser phase accounting includes poll gaps and unions nested/concurrent work', async () => {
+  const { phaseTimings } = await import('../scripts/browser-report.mjs');
+  const step = (title: string, startTime: number, duration: number, steps: unknown[] = []) => ({
+    title,
+    startTime,
+    duration,
+    steps,
+  });
+  const result = {
+    startTime: 0,
+    duration: 1000,
+    steps: [
+      step('ODM:playback', 0, 200, [step('ODM:swap', 10, 180)]),
+      step('poll toBe', 200, 500, [step('Evaluate', 200, 5), step('Evaluate', 690, 5)]),
+      step('After Hooks', 900, 100),
+    ],
+    attachments: [
+      {
+        name: 'browser-marks',
+        body: Buffer.from(
+          JSON.stringify({
+            origin: 0,
+            marks: [
+              { name: 'swap', start: 720, end: 850 },
+              { name: 'capture', start: 750, end: 800 },
+              { name: 'capture', start: 775, end: 825 },
+            ],
+          }),
+        ),
+      },
+    ],
+  };
+  expect(phaseTimings(result)).toEqual({
+    page: 0,
+    import: 0,
+    playback: 200,
+    observation: 500,
+    swap: 55,
+    capture: 75,
+    teardown: 100,
+    other: 70,
+  });
+});
