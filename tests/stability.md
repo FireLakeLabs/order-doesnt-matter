@@ -29,6 +29,10 @@ hear. Full local measurement logs are ignored under `test-results/stability/`.
   PR trigger. This is simpler than conditional duplicate root steps. Its main
   checks, tested-artifact handoff, environments, guard and roles are unchanged.
 
+- CI also exposed a null bounding box in the stale-row test: `app.load()`
+  resolves after preflight while row queries are still running. Wait for all
+  replacement row results and visibility before retaining the 44 px assertion.
+
 ## Wait inventory
 
 Each row lists the original time-sensitive waits, including optional local modes.

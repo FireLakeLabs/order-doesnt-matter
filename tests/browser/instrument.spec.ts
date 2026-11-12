@@ -1,4 +1,4 @@
-import { openProgram, play, selectNode, swap, appSignal } from './helpers';
+import { openProgram, play, selectNode, swap, appSignal, scoreReady } from './helpers';
 import { readFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
@@ -172,8 +172,11 @@ test('stale row mute cannot target another loaded piece; solo clears on load', a
   });
   expect(unchanged).toBe(true);
   await expect(page.locator('#solo-banner')).toBeHidden();
+  // app.load resolves after preflight; its row queries finish independently.
+  await scoreReady(page);
   await page.setViewportSize({ width: 390, height: 844 });
   const button = page.locator('.sheet-mute');
+  await expect(button).toBeVisible();
   expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
   await button.press('Space');
   await expect(page.locator('tbody tr')).toHaveAttribute('data-muted', 'true');
