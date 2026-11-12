@@ -73,6 +73,14 @@ test('real house: a bass edit reaches triggers and preserves every other instrum
       (e) => e.type === 'trigger' && String((e.value as { note?: unknown }).note) === '83',
     ),
   );
+  // Playback can acknowledge before the independent score worker replaces its
+  // previous result. Wait for that row's queried value before comparing bags.
+  await appSignal(page, () => {
+    const row = window.odmApp.state.rows.find((r) => r.name === 'bass')!;
+    return window.odmApp.state.events[row.id]?.events.some(
+      (e) => String((e.value as { note?: unknown }).note) === '83',
+    );
+  });
   const state = await page.evaluate(() => ({
     rows: window.odmApp.state.rows,
     events: window.odmApp.state.events,
