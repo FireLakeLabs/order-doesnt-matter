@@ -161,3 +161,11 @@ it('refuses a shared callback that uses the whole score as a setting driver', ()
     reason: expect.stringContaining('hat'),
   });
 });
+
+it('refuses a shared callback that replaces its input instead of transforming its notes', () => {
+  const doc = load('const drum=s("bd"); const hat=s("hh"); stack(drum,hat).every(2,p=>s("bd"))');
+  expect(removeInstrument(doc, instruments(doc)[0].id)).toMatchObject({
+    ok: false,
+    reason: expect.stringContaining('callback replaces'),
+  });
+});
