@@ -47,7 +47,6 @@
   color: var(--muted);
 }
 .live-instrument > span,
-.live-instrument > em,
 .live-instrument > small {
   overflow-wrap: anywhere;
 }
@@ -112,4 +111,8 @@
   .live-playing .live-dot {
     opacity: 1;
   }
+}
+
+.live-generated {
+  font-style: italic;
 }

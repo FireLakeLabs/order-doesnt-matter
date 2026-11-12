@@ -75,7 +75,7 @@ export function mountLivePanel(
     button.dataset.liveId = instrument.id;
     button.setAttribute('aria-controls', 'editor');
     const dot = node('span', '', 'live-dot'),
-      name = node(instrument.nameSource === 'generated' ? 'em' : 'span'),
+      name = node('span'),
       status = node('small');
     dot.setAttribute('aria-hidden', 'true');
     button.append(dot, name, status);
@@ -114,6 +114,7 @@ export function updateLivePanel(host: HTMLElement, model: LiveModel) {
     const line = panel.lines.get(instrument.id);
     if (!line) return;
     text(line.name, instrument.name);
+    line.name.classList.toggle('live-generated', instrument.nameSource === 'generated');
     line.name.title = instrument.nameSource === 'generated' ? 'Generated instrument name' : '';
     text(line.status, words(instrument, playing));
     line.dot.style.setProperty(

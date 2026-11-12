@@ -124,6 +124,9 @@ test('phone strip expands with 44px targets, preserves focus across frames and f
   await page.keyboard.press('Enter');
   await expect(page.locator('#editor')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.getByLabel('Instrument name', { exact: true }).fill('kick');
+  await page.getByRole('button', { name: 'Rename', exact: true }).click();
+  await appSignal(page, () => window.odmApp.state.rows[0].name === 'kick');
   await page.keyboard.press('Escape');
   await expect(line).toBeFocused();
 });

@@ -246,7 +246,7 @@ app.subscribe((state) => {
       },
     );
   }
-  const liveRows = JSON.stringify(state.rows.map((r) => [r.id, r.name, r.nameSource]));
+  const liveRows = JSON.stringify(state.rows.map((r) => r.id));
   if (previousLiveRows !== liveRows) {
     previousLiveRows = liveRows;
     get('live').hidden = !state.doc;
