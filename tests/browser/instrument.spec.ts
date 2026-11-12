@@ -71,24 +71,25 @@ test('real house: section mute checkbox follows the pinned section', async ({ pa
 async function soloBass(page: Page) {
   const ids = await house(page, 60);
   await selectNode(page, { nodeId: ids.bass });
-  await play(page);
-  await expect(page.locator('#editor')).toContainText('sawtooth: ready');
-  await swap(page, () => page.getByRole('checkbox', { name: 'Solo', exact: true }).press('Space'));
+  await page.getByRole('checkbox', { name: 'Solo', exact: true }).press('Space');
   await expect(page.locator('#solo-banner')).toHaveText('Solo: bass — Stop solo');
 }
-test('real house: solo survives keyboard name editing and undo', async ({ page }) => {
+test('real house: solo keyboard name, undo, banner and playback', async ({ page }) => {
   await soloBass(page);
   const liveName = page.getByRole('textbox', { name: 'Instrument name', exact: true });
   await liveName.fill('Solo bass');
-  await swap(page, () => liveName.press('Enter'));
+  await liveName.press('Enter');
   await expect(page.locator('#solo-banner')).toContainText('Solo: Solo bass');
-  await swap(page, () => page.getByRole('button', { name: 'Undo', exact: true }).click());
-  await page.getByRole('button', { name: 'Stop', exact: true }).click();
-  await page.getByRole('button', { name: 'drop', exact: true }).first().click();
+  await page.getByRole('button', { name: 'Undo', exact: true }).click();
+  await expect(liveName).toHaveValue('bass');
+  await expect(page.locator('#solo-banner')).toContainText('Solo: bass');
+  // Live history/transport permutations are proved through the real controller
+  // in app-history.test.ts; the browser owns keyboard wiring and one real play.
   await play(page);
-  await swap(page, () => page.getByRole('button', { name: 'Stop solo', exact: true }).click());
-  await expect(page.locator('#solo-banner')).toBeHidden();
+  await expect(page.locator('#editor')).toContainText('sawtooth: ready');
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await page.getByRole('button', { name: 'Stop solo', exact: true }).click();
+  await expect(page.locator('#solo-banner')).toBeHidden();
 });
 test('real house: keyboard name, phone editor and focus', async ({ page }) => {
   const ids = await house(page);

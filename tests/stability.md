@@ -82,8 +82,9 @@ section positions, undo histories and pending revisions make shared mutable setu
 costly to restore safely. The rewrite variants still name one behavior each, but
 only the real delivery canary starts playback; reset/degrade/order/remove exercise
 real keyboard controls and previews while stopped. This removes expensive setup
-without coupling failures to a preceding case. Instrument solo keeps its actual
-keyboard/banner/stop/restart/release path; repeated score proofs run in Node.
+without coupling failures to a preceding case. Instrument solo keeps its real
+keyboard/name/undo/banner controls and one real playback. Live name/history and
+stop/restart/release permutations run through the real app controller in Node.
 
 ## Reproduction
 
@@ -149,3 +150,12 @@ series uses the same effective configuration via `--workers=4` before and after
 this default change. Test code, assertions, incoming specs and audio width are
 unchanged during the comparison. Loaded times are reported separately from the
 ordinary local target; they must not be presented as under 45 s.
+
+The first four-worker CI command passed all 46 active Playwright checks but the
+new guard correctly rejected a 21.825 s solo UI test (94.101 s command). Its
+remaining repeated live name/undo/transport swaps now live in the existing real
+controller Node proof. The browser keeps all keyboard/name/undo/banner checks,
+one real playback, the actual ready label, Stop and the Stop-solo button. The
+20 s guard and all audio bounds are unchanged. Final comparison counts restart
+after this move. Harness constructor/readiness calls also now carry explicit
+Playwright startup marks; historical baseline constructor time remains in Other.
