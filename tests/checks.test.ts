@@ -122,3 +122,48 @@ test('browser phase accounting includes poll gaps and unions nested/concurrent w
     other: 70,
   });
 });
+
+test('shared setup is visible without adding it twice to command seconds per test', async () => {
+  const { browserSummary, formatBrowserSummary } = await import('../scripts/browser-summary.mjs');
+  const summary = browserSummary(
+    [{ title: 'shared page', status: 'passed', ms: 2000, sharedSetupMs: 1500 }],
+    5,
+  );
+  expect(summary.secondsPerTest).toBe(5);
+  expect(summary.sharedSetup).toHaveLength(1);
+  expect(formatBrowserSummary(summary)).toContain(
+    'Reported shared setup (already in wall time): 1.500 s shared page',
+  );
+});
+
+test('shared all-hook clock slots do not displace the actual test teardown timing', async () => {
+  const { phaseTimings } = await import('../scripts/browser-report.mjs');
+  const step = (title: string, startTime: number, duration: number, steps: unknown[] = []) => ({
+    title,
+    startTime,
+    duration,
+    steps,
+  });
+  const phases = phaseTimings({
+    startTime: 0,
+    duration: 1000,
+    attachments: [],
+    steps: [
+      step('Before Hooks', 0, 500, [
+        step('beforeAll hook', 0, 400, [step('Navigate to shared page', 0, 400)]),
+      ]),
+      step('ODM:swap', 500, 700),
+      step('After Hooks', 1200, 200),
+    ],
+  });
+  expect(phases).toEqual({
+    page: 0,
+    import: 0,
+    playback: 0,
+    swap: 700,
+    observation: 0,
+    capture: 0,
+    teardown: 200,
+    other: 100,
+  });
+});

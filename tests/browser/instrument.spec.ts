@@ -41,22 +41,67 @@ async function house(page: Page, cpm = 90) {
   await page.getByRole('button', { name: 'drop', exact: true }).first().click();
   return ids;
 }
-test('real house: mute and unmute kick update trigger delivery', async ({ page }) => {
-  const ids = await house(page);
-  await play(page);
-  await swap(page, () => page.getByRole('button', { name: 'Mute kick', exact: true }).click());
-  expect(await observed(page, async () => (await sinceSwap(page)).length)).toBeGreaterThan(0);
-  expect((await sinceSwap(page)).some((v) => v.s === 'bd')).toBe(false);
-  // A full negative observation may consume the drop on a busy CI runner.
-  // Rewind while muted so the positive check cannot observe the kickless breakdown.
-  await page.getByRole('button', { name: 'Stop', exact: true }).click();
-  await page.getByRole('button', { name: 'drop', exact: true }).first().click();
-  await play(page);
-  await swap(page, () => page.getByRole('button', { name: 'Unmute kick', exact: true }).click());
-  await signal(async () => (await sinceSwap(page)).some((v) => v.s === 'bd')).toBe(true);
-  await selectNode(page, { nodeId: ids.chords });
-  await expect(page.locator('#editor')).toContainText('piano: missing');
-  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+test.describe('real house: live kick controls', () => {
+  let shared: Page | undefined;
+  let ids: Record<string, string>;
+  let baseline: string;
+  test.use({
+    page: async ({ browser }, use) => {
+      void browser;
+      if (!shared) throw Error('Shared kick page was not initialized');
+      await use(shared);
+    },
+  });
+  test.beforeAll(async ({ browser }) => {
+    const started = performance.now();
+    try {
+      shared = await browser.newPage({ baseURL: process.env.ODM_URL });
+      ids = await house(shared);
+      baseline = await shared.evaluate(() => JSON.stringify(window.odmApp.state.doc));
+    } finally {
+      await test.info().attach('browser-shared-setup', {
+        body: JSON.stringify({ ms: performance.now() - started }),
+        contentType: 'application/json',
+      });
+    }
+  });
+  test.afterEach(async ({ page }) => {
+    if (await page.getByRole('button', { name: 'Stop', exact: true }).isEnabled())
+      await page.getByRole('button', { name: 'Stop', exact: true }).click();
+    await page.keyboard.press('Escape');
+    const restored = await page.evaluate(() => {
+      const app = window.odmApp;
+      while (app.editor!.canUndo) app.editor!.undo();
+      app.history.length = 0;
+      return JSON.stringify(app.state.doc);
+    });
+    expect(restored, 'shared kick page must restore its original document').toBe(baseline);
+    await appSignal(
+      page,
+      (id) => window.odmApp.state.events[id]?.events.some((e) => e.hasOnset),
+      ids.kick,
+    );
+    await page.getByRole('button', { name: 'drop', exact: true }).first().click();
+  });
+  test.afterAll(async () => {
+    await shared?.close();
+  });
+
+  test('mute stops kick delivery through a complete post-swap cycle', async ({ page }) => {
+    await play(page);
+    await swap(page, () => page.getByRole('button', { name: 'Mute kick', exact: true }).click());
+    expect(await observed(page, async () => (await sinceSwap(page)).length)).toBeGreaterThan(0);
+    expect((await sinceSwap(page)).some((v) => v.s === 'bd')).toBe(false);
+  });
+  test('unmute resumes kick delivery and displays the missing piano', async ({ page }) => {
+    await page.getByRole('button', { name: 'Mute kick', exact: true }).click();
+    await appSignal(page, (id) => window.odmApp.state.events[id]?.events.length === 0, ids.kick);
+    await play(page);
+    await swap(page, () => page.getByRole('button', { name: 'Unmute kick', exact: true }).click());
+    await signal(async () => (await sinceSwap(page)).some((v) => v.s === 'bd')).toBe(true);
+    await selectNode(page, { nodeId: ids.chords });
+    await expect(page.locator('#editor')).toContainText('piano: missing');
+  });
 });
 test('real house: section mute checkbox follows the pinned section', async ({ page }) => {
   const ids = await house(page);

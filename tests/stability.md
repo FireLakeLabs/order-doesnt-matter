@@ -76,15 +76,24 @@ exported pure geometry function, and this task does not change product code.
 
 ## Setup decisions
 
-The baseline's largest costs were full-cycle observations and repeated playback,
-not navigation. Independent tests retain their own pages: PCM isolation, pinned
-section positions, undo histories and pending revisions make shared mutable setup
-costly to restore safely. The rewrite variants still name one behavior each, but
-only the real delivery canary starts playback; reset/degrade/order/remove exercise
-real keyboard controls and previews while stopped. This removes expensive setup
-without coupling failures to a preceding case. Instrument solo keeps its real
-keyboard/name/undo/banner controls and one real playback. Live name/history and
-stop/restart/release permutations run through the real app controller in Node.
+RMS and silent-clock cases keep independent pages to isolate voices. Most UI
+checks also keep independent document/history/section state. The live kick cases
+are the exception, chosen after a four-worker CI run passed every assertion but
+the growth guard rejected their combined 21.697 s workflow (93.807 s command).
+
+Mute and unmute now have separate behavior names and share one page/piece loaded
+once in `beforeAll`. Each case stops, closes its editor, undoes its edits, verifies
+the original document, waits for restored kick rows, clears diagnostic history,
+and reselects the drop. Failure restarts the Playwright worker, so the next case
+loads its own baseline. No RMS observation shares this page.
+
+The runner prints the shared page/piece setup separately, already included in
+command wall time. Playwright excludes all-hook clock slots from per-test
+duration; phase accounting explicitly compacts those slots, with a no-sleep unit
+canary. Setup is neither hidden nor added twice. The first local four-worker
+command passed 47 active checks in 41.690 s, including 1.106 s of reported shared
+setup. The three-worker command passed in 47.726 s. The added case separates the
+two existing behaviors; no assertion was dropped.
 
 ## Reproduction
 
@@ -165,3 +174,10 @@ The incoming source capture case keeps its opt-in skip; its two active cases and
 all three section cases run unchanged. The five named standalone optional specs
 are excluded entirely. No listening, subjective visual review, deployment or
 merge is part of this evidence.
+
+## Final shared-setup protocol
+
+The final selection matrix restarts after the live-kick setup change. Its exact
+15-run loaded and initial-plus-five-rerun CI rows, selected width, and any missed
+performance target are published in the PR before handback. The fixed 20 s test
+guard, 3 s audio acknowledgements and 180 s command limit remain unchanged.

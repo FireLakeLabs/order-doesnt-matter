@@ -13,7 +13,10 @@ export function phaseTimings(result) {
     other: 0,
   };
   const spans = [];
+  const allHooks = [];
   const visit = (step, phase = 'other', priority = 0) => {
+    if (['beforeAll hook', 'afterAll hook', 'Worker Cleanup'].includes(step.title))
+      allHooks.push({ start: +step.startTime, end: +step.startTime + step.duration });
     if (phase === 'other') {
       if (step.title.startsWith('ODM:')) phase = step.title.slice(4);
       else if (step.title === 'After Hooks' || step.title === 'Worker Cleanup') phase = 'teardown';
@@ -36,12 +39,32 @@ export function phaseTimings(result) {
         priority: 100 + ['observation', 'playback', 'swap', 'capture'].indexOf(mark.name),
       });
   }
-  const start = +result.startTime,
-    end = start + result.duration;
-  const points = [...new Set([start, end, ...spans.flatMap((s) => [s.start, s.end])])]
+  const start = +result.startTime;
+  let end = start + result.duration;
+  // Playwright excludes beforeAll/afterAll slots from result.duration, although
+  // their steps share its wall-clock origin. Compact those intervals out instead
+  // of clipping away the test's actual trailing work.
+  const excluded = [];
+  for (const interval of allHooks.sort((a, b) => a.start - b.start)) {
+    const last = excluded.at(-1);
+    if (last && interval.start <= last.end) last.end = Math.max(last.end, interval.end);
+    else excluded.push({ ...interval });
+  }
+  for (const interval of excluded)
+    if (interval.start <= end && interval.end > start)
+      end += interval.end - Math.max(start, interval.start);
+  const points = [
+    ...new Set([
+      start,
+      end,
+      ...spans.flatMap((s) => [s.start, s.end]),
+      ...excluded.flatMap((s) => [s.start, s.end]),
+    ]),
+  ]
     .filter((p) => p >= start && p <= end)
     .sort((a, b) => a - b);
   for (let i = 1; i < points.length; i++) {
+    if (excluded.some((s) => s.start <= points[i - 1] && s.end >= points[i])) continue;
     const active = spans
       .filter((s) => s.start <= points[i - 1] && s.end >= points[i])
       .sort((a, b) => b.priority - a.priority);
@@ -57,6 +80,10 @@ export default class BrowserReport {
       status: result.status,
       ms: result.duration,
       phases: phaseTimings(result),
+      sharedSetupMs: (() => {
+        const body = result.attachments.find((a) => a.name === 'browser-shared-setup')?.body;
+        return body ? JSON.parse(body.toString()).ms : undefined;
+      })(),
     });
   }
   onEnd() {
