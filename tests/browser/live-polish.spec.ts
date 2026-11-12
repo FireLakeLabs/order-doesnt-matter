@@ -53,11 +53,23 @@ test('Kiln Watch view sliders work by keyboard, fit a phone and survive reload',
   expect(last).toBeLessThanOrEqual(4);
   await ahead.press('Home');
   expect(await page.evaluate(() => Math.max(...window.odmSpiral.marks.map((m) => m.turn)))).toBe(1);
+  await page.evaluate(() =>
+    Object.defineProperty(window, 'localStorage', {
+      get() {
+        throw new DOMException('Denied', 'SecurityError');
+      },
+    }),
+  );
+  await keep.press('Home');
+  await expect(keep).toHaveValue('0.1');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('input[type="range"]')).toHaveCount(0);
 });
 
 test('denied storage keeps Watch usable; reduced motion keeps a strong unclipped planet ring', async ({
   page,
 }) => {
+  test.skip(!process.env.ODM_LIVE_SHOTS, 'Screenshot and denied-storage visual review');
   await page.addInitScript(() =>
     Object.defineProperty(window, 'localStorage', {
       get() {
