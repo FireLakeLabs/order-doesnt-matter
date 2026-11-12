@@ -10,3 +10,15 @@ pr,title,opened,merged,cycle_hours,authored_lines,review_rounds,rework_commits,n
 9,Wave 2a (1/2): edit logic,2026-11-11,2026-11-11,,546,1,0,18.0,19.9
 10,Wave 2b: hosting prepared,2026-11-11,2026-11-11,,1375,1,1,17.0,20.4
 11,Wave 2a (2/2): editor panel,2026-11-11,2026-11-11,,1180,1,0,21.7,20.3
+13,Wave 3.0 (1/2): clean-up,2026-11-11,2026-11-11,,330,1,0,17.8,20.6
+14,Wave 3.0 (2/2): editor seam,2026-11-11,2026-11-11,,897,1,0,18.4,20.7
+15,Wave 3.1d: rewrite editor,2026-11-11,2026-11-11,,967,2,0,22.7,61.0
+16,Wave 3.1b: values-over-time editor,2026-11-11,2026-11-11,,1059,2,1,25.9,23.9
+17,Wave 3.1a: instrument editor,2026-11-11,2026-11-11,,796,3,2,20.7,22.3
+18,Give every Node test 30 s,2026-11-11,2026-11-11,,2,2,0,,
+19,Wave 3.1c: signal editor,2026-11-11,2026-11-11,,1038,1,0,19.3,22.1
+20,Renamed instruments survive re-import,2026-11-11,2026-11-11,,41,1,0,23.7,30.1
+21,Acknowledge swaps that make silence,2026-11-11,2026-11-11,,286,1,0,29.9,40.2
+22,Test stability and CI time,2026-11-11,2026-11-11,,1076,1,0,14.5,72.2
+23,Let rewrites move across settings that cannot care,2026-11-11,2026-11-11,,199,1,0,30.7,29.9
+24,Editor polish after Wave 3.1,2026-11-11,2026-11-11,,992,1,0,,

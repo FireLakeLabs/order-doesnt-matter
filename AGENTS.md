@@ -12,9 +12,11 @@ you play with the score directly, without making Strudel's syntax the subject.
 
 ## Current phase
 
-Phase 1, the walking skeleton: paste Strudel, hear it, see the score sheet and
-song strip, edit a constant setting. Production code lives in `src/`.
-`spikes/` is frozen reference and must not be imported; `corpus/` is evidence.
+Phase 2, the editors. The walking skeleton is live at odm.firelakelabs.com and
+every merge to `main` publishes. An editor is one file in `src/editor/kinds/`;
+a document change is one file in `src/document/edits/`. Production code lives
+in `src/`. `spikes/` is frozen reference and must not be imported; `corpus/`
+is evidence.
 
 Run `npm run check` for the Node checks and build, and `npm run test:browser`
 for the built-page browser suite.

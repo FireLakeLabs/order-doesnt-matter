@@ -18,6 +18,9 @@ A Strudel program does not describe sound flowing through boxes. It describes a
    name comes from. The exceptions: setting the same thing twice (the last one
    wins), and a modulator such as `lfo` with no named target, which attaches to
    whatever was set just before it.
+   A constant setting keeps the same notes and values wherever it sits among
+   rewrites, though Strudel may cut the unheard fragments differently; a setting
+   whose value is itself a pattern does not.
 4. **Some calls rewrite the score.** `fast`, `rev`, `off`, `every`, `jux`
    change which events exist and when. Here order does matter.
 5. **Programs are trees, not chains.** `stack`, `cat`, `arrange`, `off`, `jux`,
