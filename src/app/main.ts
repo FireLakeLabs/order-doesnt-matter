@@ -97,7 +97,12 @@ function renderEditor() {
             : undefined,
           window: { fromCycle: app.state.fromCycle, toCycle: app.state.toCycle },
           pending: entry?.status ?? 'none',
-          apply: (next, options) => app.editor?.apply(next, options, targetId ?? undefined),
+          apply: (next, options) => {
+            if (options?.selection) targetId = options.selection;
+            app.editor?.apply(next, options, targetId ?? undefined);
+            if (options?.selection) renderEditor();
+          },
+          ask: (candidate, id) => app.editor!.ask(candidate, id, fromCycle, toCycle),
         }
       : null,
     entry,
