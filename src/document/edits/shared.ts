@@ -1,10 +1,10 @@
-import { walk, type Doc, type Meta, type Path } from '../index';
+import { walk, type Doc, type DocumentNode, type Path } from '../index';
 export interface Refusal {
   ok: false;
   reason: string;
 }
-export function findWithPath(doc: Doc, id: string): { node: Meta; path: Path } | undefined {
-  let found: { node: Meta; path: Path } | undefined;
+export function findWithPath(doc: Doc, id: string): { node: DocumentNode; path: Path } | undefined {
+  let found: { node: DocumentNode; path: Path } | undefined;
   walk(doc, (node, path) => {
     if (node.id === id) found = { node, path };
   });
@@ -24,7 +24,7 @@ export function replaceAtPath(doc: Doc, path: Path, value: unknown): Doc {
   }
   return replace(doc, 0) as Doc;
 }
-export function replaceNode(doc: Doc, id: string, node: Meta): Doc | Refusal {
+export function replaceNode(doc: Doc, id: string, node: DocumentNode): Doc | Refusal {
   const found = findWithPath(doc, id);
   return found
     ? replaceAtPath(doc, found.path, node)

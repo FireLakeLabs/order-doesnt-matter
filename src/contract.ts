@@ -27,7 +27,8 @@ export interface GenerateOptions {
    */
   only?: string;
 }
-/** Fresh Strudel that plays the document (D2). Pure and synchronous. */
+/** Fresh Strudel for document v2 (D2). Metadata carries names, provenance,
+ * shared purpose, and localized instrument origins. Pure and synchronous. */
 export type Generate = (doc: Doc, options?: GenerateOptions) => string;
 
 /* ---- Asking what happens: src/strudel/evaluate.ts ---- */

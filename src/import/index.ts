@@ -2,7 +2,7 @@ import { parse, type Comment } from 'acorn';
 import type * as JS from 'estree';
 import type { ImportResult, ImportStrudel, ImportWarning } from '../contract';
 import type { Arg, Doc, GroupPart, JsonValue, Meta, Pattern, Role, Tier } from '../document';
-import { walk } from '../document';
+import { instruments, sections, walk } from '../document';
 import { parseSteps, printSteps } from './mini';
 import {
   canonicalName,
@@ -101,8 +101,11 @@ export const importStrudel: ImportStrudel = (source): ImportResult => {
     onComment: comments,
   }) as unknown as JS.Program;
   let serial = 0;
-  const doc: Doc = { version: 1, body: [] };
+  const doc: Doc = { version: 2, body: [] };
   const warnings: ImportWarning[] = [];
+  const identities = new Map<string, string>();
+  const inferPurpose = new Set<string>();
+  const origins = new Map<string, string>();
   const meta = (node: JS.Node, tier: Tier, role?: Role): Meta => ({
     id: `n${++serial}`,
     tier,
@@ -182,6 +185,8 @@ export const importStrudel: ImportStrudel = (source): ImportResult => {
     const data = metadata(node, 'pattern'),
       comment = leading(node);
     if (data) {
+      if (typeof data.identity === 'string') identities.set(data.identity, p.id);
+      if (typeof data.origin === 'string') origins.set(p.id, data.origin);
       if (typeof data.label === 'string') p.label = data.label;
       if (typeof data.comment === 'string') p.comment = data.comment;
       if (typeof data.muted === 'boolean') p.muted = data.muted;
@@ -243,9 +248,10 @@ export const importStrudel: ImportStrudel = (source): ImportResult => {
         name === 'filterWhen' &&
         node.arguments.length === 1 &&
         text(node.arguments[0]).replace(/\s/g, '') === '()=>false' &&
-        metadata(node, 'pattern')?.muted === true
+        (metadata(node, 'pattern')?.muted === true ||
+          metadata(node, 'pattern')?.originMuted === true)
       )
-        return { ...pattern(receiver, hole), muted: true };
+        return pattern(receiver, hole);
       const origin = root(receiver),
         primitive = origin.type === 'Identifier' ? definitions.get(origin.name) : origin;
       if (
@@ -364,10 +370,13 @@ export const importStrudel: ImportStrudel = (source): ImportResult => {
         )
           n = n.callee.object;
         const part: GroupPart = {
+          id: `n${++serial}`,
           pattern: pattern(n, hole),
           ...(cycles !== undefined ? { cycles } : {}),
         };
         if (data && typeof data.label === 'string') part.label = data.label;
+        if (data?.labelSource === 'author' || data?.labelSource === 'generated')
+          part.labelSource = data.labelSource;
         if (data && typeof data.muted === 'boolean') part.muted = data.muted;
         parts.push(part);
       }
@@ -425,7 +434,19 @@ export const importStrudel: ImportStrudel = (source): ImportResult => {
           statement,
         );
         p.label ??= d.id.name;
-        doc.body.push({ ...meta(statement, 1), kind: 'shared', name: d.id.name, pattern: p });
+        const data = metadata(statement, 'shared');
+        const entryMeta = meta(statement, 1);
+        if (!data) inferPurpose.add(entryMeta.id);
+        doc.body.push({
+          ...entryMeta,
+          kind: 'shared',
+          name: d.id.name,
+          nameSource: data?.nameSource === 'generated' ? 'generated' : 'author',
+          ...(data && ['instrument', 'section', 'value'].includes(String(data.purpose))
+            ? { purpose: data.purpose as 'instrument' | 'section' | 'value' }
+            : {}),
+          pattern: p,
+        });
         continue;
       }
     }
@@ -541,6 +562,37 @@ export const importStrudel: ImportStrudel = (source): ImportResult => {
           : 'Statement retained verbatim',
       );
   }
+  walk(doc, (n) => {
+    if ('core' in n) {
+      const p = n as Pattern;
+      const origin = origins.get(p.id);
+      if (origin) p.origin = identities.get(origin) ?? origin;
+    }
+  });
+  // Record only definitions proven to be instruments by score traversal.
+  const rowIds = new Set(instruments(doc).map((r) => r.pattern.id));
+  for (const n of doc.body)
+    if (
+      n.kind === 'shared' &&
+      inferPurpose.has(n.id) &&
+      n.purpose === undefined &&
+      rowIds.has(n.pattern.id)
+    )
+      n.purpose = 'instrument';
+  const sectionIds = new Set(sections(doc).map((s) => s.id));
+  const sectionPatterns = new Set<string>();
+  walk(doc, (n) => {
+    if ('pattern' in n && sectionIds.has(n.id) && n.pattern.core.kind === 'ref')
+      sectionPatterns.add(n.pattern.core.name);
+  });
+  for (const n of doc.body)
+    if (
+      n.kind === 'shared' &&
+      inferPurpose.has(n.id) &&
+      n.purpose === undefined &&
+      sectionPatterns.has(n.name)
+    )
+      n.purpose = 'section';
   walk(doc, (n) => {
     if ('kind' in n && n.kind === 'settings') {
       const layer = n as import('../document').SettingsLayer;

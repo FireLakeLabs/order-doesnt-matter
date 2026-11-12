@@ -12,7 +12,11 @@ const leaf = (id: string, sound = 'cp'): Pattern => ({
 const ref = (id: string, name: string): Pattern => ({ ...leaf(id), core: { kind: 'ref', name } });
 const group = (id: string, how: string, parts: Pattern[]): Pattern => ({
   ...leaf(id),
-  core: { kind: 'group', how, parts: parts.map((pattern) => ({ pattern, cycles: 4 })) },
+  core: {
+    kind: 'group',
+    how,
+    parts: parts.map((pattern, i) => ({ id: `${id}-part-${i}`, pattern, cycles: 4 })),
+  },
 });
 const voice = (pattern: Pattern, id = 'voice'): Voice => ({
   id,
@@ -27,10 +31,11 @@ const shared = (name: string, pattern: Pattern): Doc['body'][number] => ({
   id: `shared-${name}`,
   tier: 1,
   kind: 'shared',
+  nameSource: 'author',
   name,
   pattern,
 });
-const doc = (...body: Doc['body']): Doc => ({ version: 1, body });
+const doc = (...body: Doc['body']): Doc => ({ version: 2, body });
 
 describe('derived instruments and sections', () => {
   it('deduplicates a shared leaf, retaining every path and use-site layer', () => {
@@ -60,9 +65,9 @@ describe('derived instruments and sections', () => {
       muted: false,
     });
     expect(rows[0].uses.map((use) => use.path.map((node) => node.id))).toEqual([
-      ['voice', 'song', 'intro', 'chords'],
-      ['voice', 'song', 'drop', 'chords'],
-      ['voice', 'song', 'breakdown', 'chords'],
+      ['voice', 'song', 'song-part-0', 'intro', 'chords'],
+      ['voice', 'song', 'song-part-1', 'drop', 'chords'],
+      ['voice', 'song', 'song-part-2', 'breakdown', 'chords'],
     ]);
     expect(rows[0].uses[0].layers.map((layer) => layer.id)).toEqual(['filter']);
     expect(

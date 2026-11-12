@@ -51,7 +51,7 @@ for (const name of ['real-house-arranged', 'real-techno'])
 
 it('handwritten nodes distinguish opaque source, shape generators, sections and layered signals', () => {
   const doc: Doc = {
-    version: 1,
+    version: 2,
     body: [
       {
         id: 'voice',

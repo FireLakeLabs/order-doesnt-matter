@@ -5,7 +5,7 @@ import {
   shared,
   walk,
   type Doc,
-  type Meta,
+  type DocumentNode,
   type Pattern,
   type Setting,
   type InstrumentUse,
@@ -13,11 +13,17 @@ import {
 } from './index';
 export type Constant = number | string | boolean;
 export type { Refusal } from './edits/shared';
-const isSetting = (node?: Meta): node is Setting => !!node && 'name' in node && 'value' in node;
+const isSetting = (node?: DocumentNode): node is Setting =>
+  !!node && 'name' in node && 'value' in node;
 function contains(pattern: Pattern, id: string) {
   let found = false;
   walk(
-    { version: 1, body: [{ kind: 'shared', name: 'scan', id: 'scan', tier: 1, pattern }] },
+    {
+      version: 2,
+      body: [
+        { kind: 'shared', nameSource: 'generated', name: 'scan', id: 'scan', tier: 1, pattern },
+      ],
+    },
     (n) => {
       found ||= n.id === id;
     },
@@ -84,7 +90,7 @@ export type TargetKind =
   | 'unknown';
 export interface Target {
   kind: TargetKind;
-  node?: Meta;
+  node?: DocumentNode;
   instrumentId?: string;
   use?: InstrumentUse;
   section?: SongSection;
@@ -175,7 +181,7 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
   const setup = node && 'kind' in node && node.kind === 'setup' && 'code' in node;
   const source =
     setup ||
-    node?.tier === 3 ||
+    (node && 'tier' in node && node.tier === 3) ||
     (node && 'kind' in node && node.kind === 'opaque') ||
     pattern?.core.kind === 'opaque';
   let kind: TargetKind = 'unknown';

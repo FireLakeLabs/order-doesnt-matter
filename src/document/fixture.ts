@@ -38,7 +38,13 @@ const root = pattern({
   kind: 'group',
   how: 'arrange',
   parts: [
-    { pattern: pattern({ kind: 'ref', name: 'theme' }), cycles: 2, label: 'Intro', muted: false },
+    {
+      id: meta().id,
+      pattern: pattern({ kind: 'ref', name: 'theme' }),
+      cycles: 2,
+      label: 'Intro',
+      muted: false,
+    },
     ...(
       [
         { kind: 'signal', shape: 'irand', args: args() },
@@ -46,7 +52,7 @@ const root = pattern({
         { kind: 'generator', name: 'custom', args: args() },
         { kind: 'opaque', code: 'custom()' },
       ] satisfies Core[]
-    ).map((core) => ({ pattern: pattern(core) })),
+    ).map((core) => ({ id: meta().id, pattern: pattern(core) })),
   ],
 });
 root.layers = [
@@ -60,11 +66,11 @@ root.layers = [
 ];
 /** Synthetic contract fixture, not a program or third-party composition. */
 export const fixture: Doc = {
-  version: 1,
+  version: 2,
   body: [
     { ...meta(), kind: 'setup', code: 'const custom = 1', role: 'setup' },
     { ...meta(), kind: 'tempo', cpm: 120 },
-    { ...meta(), kind: 'shared', name: 'theme', pattern: theme },
+    { ...meta(), kind: 'shared', nameSource: 'author', name: 'theme', pattern: theme },
     {
       ...meta(),
       kind: 'voice',

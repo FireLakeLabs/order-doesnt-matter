@@ -22,13 +22,19 @@ export interface Meta {
   span?: { start: number; end: number };
 }
 export interface Doc {
-  version: 1;
+  version: 2;
   body: TopLevel[];
 }
 export type TopLevel =
   | (Meta & { kind: 'setup'; code: string })
   | (Meta & { kind: 'tempo'; cpm: number })
-  | (Meta & { kind: 'shared'; name: string; pattern: Pattern })
+  | (Meta & {
+      kind: 'shared';
+      name: string;
+      nameSource: 'author' | 'generated';
+      purpose?: 'instrument' | 'section' | 'value';
+      pattern: Pattern;
+    })
   | Voice
   | (Meta & { kind: 'transform'; name: 'all'; args: Arg[] });
 export interface Voice extends Meta {
@@ -39,6 +45,7 @@ export interface Voice extends Meta {
   pattern: Pattern;
 }
 export interface Pattern extends Meta {
+  origin?: string;
   label?: string;
   comment?: string;
   muted?: boolean;
@@ -46,6 +53,8 @@ export interface Pattern extends Meta {
   layers: Layer[];
 }
 export interface GroupPart {
+  id: string;
+  labelSource?: 'author' | 'generated';
   pattern: Pattern;
   cycles?: number;
   label?: string;
@@ -95,3 +104,6 @@ export type Arg = { name?: string } & (
   | { kind: 'callback'; body: Pattern; parameter?: string }
   | { kind: 'opaque'; code: string }
 );
+
+/** Every addressable serialized node, including a group occurrence. */
+export type DocumentNode = Meta | GroupPart;

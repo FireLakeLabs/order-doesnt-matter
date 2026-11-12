@@ -10,7 +10,7 @@ test('all-variant fixture is valid plain JSON and selectors preserve order', () 
   expect(shared(fixture, 'theme')?.label).toBe('theme');
   expect(shared(fixture, 'absent')).toBeUndefined();
   expect(tempo(fixture)).toBe(120);
-  expect(tempo({ version: 1, body: [] })).toBeUndefined();
+  expect(tempo({ version: 2, body: [] })).toBeUndefined();
 });
 
 test('walk visits every Meta exactly once at its JSON path; find uses stable ids', () => {
@@ -38,6 +38,7 @@ test('checkDoc reports duplicate ids, missing shared refs and unsupported versio
   const broken = JSON.parse(JSON.stringify(fixture)) as Doc;
   broken.body.push({
     kind: 'shared',
+    nameSource: 'author',
     id: broken.body[0].id,
     tier: 1,
     name: 'bad',
@@ -45,5 +46,5 @@ test('checkDoc reports duplicate ids, missing shared refs and unsupported versio
   });
   expect(checkDoc(broken).join('\n')).toMatch(/Duplicate id/);
   expect(checkDoc(broken).join('\n')).toMatch(/Missing shared.*missing/);
-  expect(checkDoc({ ...broken, version: 2 } as unknown as Doc).join('\n')).toMatch(/version/);
+  expect(checkDoc({ ...broken, version: 3 } as unknown as Doc).join('\n')).toMatch(/version/);
 });

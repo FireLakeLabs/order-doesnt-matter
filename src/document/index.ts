@@ -1,4 +1,5 @@
-import type { Arg, Core, Doc, Layer, Meta, Pattern, Step } from './types';
+import { instruments } from './instruments';
+import type { Arg, Core, Doc, Layer, DocumentNode, Pattern, Step } from './types';
 export type * from './types';
 export type Path = readonly (string | number)[];
 export const voices = (doc: Doc) => doc.body.filter((node) => node.kind === 'voice');
@@ -11,7 +12,7 @@ const unreachable = (node: never): never => {
 };
 
 /** Preorder traversal; paths address nodes in the serialized document. */
-export function walk(doc: Doc, visit: (node: Meta, path: Path) => void): void {
+export function walk(doc: Doc, visit: (node: DocumentNode, path: Path) => void): void {
   function args(items: Arg[], path: Path) {
     items.forEach((arg, i) => {
       const p = [...path, i];
@@ -62,7 +63,11 @@ export function walk(doc: Doc, visit: (node: Meta, path: Path) => void): void {
         c.steps.forEach(step);
         break;
       case 'group':
-        c.parts.forEach((part, i) => pattern(part.pattern, [...path, 'parts', i, 'pattern']));
+        c.parts.forEach((part, i) => {
+          const p = [...path, 'parts', i];
+          visit(part, p);
+          pattern(part.pattern, [...p, 'pattern']);
+        });
         break;
       case 'signal':
         if (c.args) args(c.args, [...path, 'args']);
@@ -123,8 +128,8 @@ export function walk(doc: Doc, visit: (node: Meta, path: Path) => void): void {
     }
   });
 }
-export function findById(doc: Doc, id: string): Meta | undefined {
-  let found: Meta | undefined;
+export function findById(doc: Doc, id: string): DocumentNode | undefined {
+  let found: DocumentNode | undefined;
   walk(doc, (node) => {
     if (node.id === id && !found) found = node;
   });
@@ -134,8 +139,25 @@ export function checkDoc(doc: Doc): string[] {
   const problems: string[] = [],
     ids = new Set<string>();
   const names = new Set(doc.body.filter((n) => n.kind === 'shared').map((n) => n.name));
-  if (doc.version !== 1) problems.push(`Unsupported document version: ${doc.version}`);
+  if (doc.version !== 2) problems.push(`Unsupported document version: ${doc.version}`);
   walk(doc, (node) => {
+    if (typeof node.id !== 'string' || !node.id) problems.push('Missing node id');
+    if (
+      'labelSource' in node &&
+      node.labelSource !== undefined &&
+      !['author', 'generated'].includes(String(node.labelSource))
+    )
+      problems.push(`Invalid labelSource: ${node.id}`);
+    if ('kind' in node && node.kind === 'shared') {
+      const entry = node as Extract<Doc['body'][number], { kind: 'shared' }>;
+      if (!['author', 'generated'].includes(entry.nameSource))
+        problems.push(`Invalid nameSource: ${node.id}`);
+      if (
+        entry.purpose !== undefined &&
+        !['instrument', 'section', 'value'].includes(entry.purpose)
+      )
+        problems.push(`Invalid purpose: ${node.id}`);
+    }
     if (ids.has(node.id)) problems.push(`Duplicate id: ${node.id}`);
     ids.add(node.id);
     if ('core' in node) {
@@ -144,8 +166,23 @@ export function checkDoc(doc: Doc): string[] {
         problems.push(`Missing shared name: ${core.name}`);
     }
   });
+  const instrumentIds = new Set(
+    instruments(doc, { origins: false })
+      .filter((r) => !r.pattern.origin)
+      .map((r) => r.pattern.id),
+  );
+  walk(doc, (node) => {
+    if ('core' in node) {
+      const p = node as Pattern;
+      if (p.origin !== undefined && (p.origin === p.id || !instrumentIds.has(p.origin)))
+        problems.push(`Invalid instrument origin: ${p.origin}`);
+    }
+  });
   return problems;
 }
-export { instruments, sections } from './instruments';
+export { instruments };
+export { sections } from './instruments';
 export type { Instrument, InstrumentUse, SongSection } from './instruments';
 export { setConstant, describeTarget } from './edit';
+
+export { migrate } from './migrate';

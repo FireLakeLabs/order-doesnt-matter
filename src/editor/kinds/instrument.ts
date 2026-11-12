@@ -72,8 +72,17 @@ export default {
         names = new Set<string>();
       walk(
         {
-          version: 1,
-          body: [{ id: 'summary', tier: 1, kind: 'shared', name: 'summary', pattern: row.pattern }],
+          version: 2,
+          body: [
+            {
+              id: 'summary',
+              tier: 1,
+              kind: 'shared',
+              nameSource: 'author',
+              name: 'summary',
+              pattern: row.pattern,
+            },
+          ],
         },
         (n) => {
           if ('name' in n && 'value' in n && ['s', 'sound'].includes(String(n.name))) {
