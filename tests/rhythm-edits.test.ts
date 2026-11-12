@@ -112,7 +112,6 @@ it('validates values, paths, counts, kinds, last-part removal and chunk parsing'
     () => restRhythm(d, target, [9]),
     () => restRhythm(d, target, []),
     () => setRhythmValue(d, target, [0, 0], 'e2'),
-    () => removeRhythm(load('c2'), id(load('c2')), [0]),
     () => removeRhythm(d, target, [-1]),
     () => moveRhythm(d, target, [0], -1),
     () => insertRhythm(d, target, [], 8, 'c2'),
@@ -251,4 +250,18 @@ it('groups can rest and return, retaining their timing; nested saved rests are r
     target = id(doc);
   const nested = ok(restRhythm(doc, target, [0, 0]));
   expect(restRhythm(nested, target, [0])).toHaveProperty('ok', false);
+});
+
+it('removing split parts collapses to the parent length, then removes a slot or leaves the only slot resting', () => {
+  const before = load('c2@3 d2');
+  freeze(before);
+  const split = ok(splitRhythm(before, id(before), [0], 2));
+  const collapsed = ok(removeRhythm(split, id(before), [0, 0]));
+  expect(printSteps(steps(collapsed))).toBe('c2@3 d2');
+  expect(printSteps(steps(ok(removeRhythm(collapsed, id(before), [0]))))).toBe('d2');
+  const only = load('[c2 d2]@3');
+  const one = ok(removeRhythm(only, id(only), [0, 0]));
+  expect(printSteps(steps(one))).toBe('d2@3');
+  expect(printSteps(steps(ok(removeRhythm(one, id(only), [0]))))).toBe('~@3');
+  expect(printSteps(steps(before))).toBe('c2@3 d2');
 });

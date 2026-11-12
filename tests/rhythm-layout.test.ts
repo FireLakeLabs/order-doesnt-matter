@@ -38,7 +38,7 @@ it('returns exact reduced fractions, paths, depths, and turn labels; source chun
   expect(boxes.find((b) => b.path.join() === '2,1')).toMatchObject({ turn: 1, active: false });
   // Every Step kind appears here. Unmodelled timing is explicitly a chunk,
   // never a fabricated note. Its actual notes belong to the worker strip.
-  const text = 'c2(3,8) {d2 e2,g2}%3 [a2|b2] c2*2 c2/2 c2?';
+  const text = '{d2 e2,g2}%3 [a2|b2] c2?';
   const chunks = layoutRhythm(parseSteps(text));
   expect(chunks.every((b) => b.opaque && b.kind !== 'value')).toBe(true);
   const result = await queryEventsNode(`note(${JSON.stringify(text)})`, 0, 4);
@@ -46,7 +46,16 @@ it('returns exact reduced fractions, paths, depths, and turn labels; source chun
   expect(result.events.length).toBeGreaterThan(0);
 });
 it('does not invent neighboring timing when source text or weighted turns hide alignment', () => {
-  for (const text of ['c2*2@3 d2', '<c2@2 d2>', '<c2!2 d2>']) {
+  for (const text of ['c2*<1 2>@3 d2', '<c2@2 d2>', '<c2!2 d2>']) {
     expect(layoutRhythm(parseSteps(text)).some((b) => b.kind === 'value')).toBe(false);
   }
+});
+
+it('literal speed marks retain their known outer weights and show timed repeats', () => {
+  const boxes = layoutRhythm(parseSteps('c2*2@3 d2'));
+  expect(boxes[0].end).toEqual([3, 4]);
+  expect(boxes[0].pulses?.map((p) => [p.from, p.to])).toEqual([
+    [0, 0.5],
+    [0.5, 1],
+  ]);
 });
