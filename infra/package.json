@@ -1,0 +1,17 @@
+{
+  "name": "odm-hosting",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": "24.22.2"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.mts",
+    "synth": "cdk synth OrderDoesntMatter --strict --quiet"
+  },
+  "devDependencies": {
+    "aws-cdk": "2.1147.0",
+    "aws-cdk-lib": "2.275.0",
+    "constructs": "10.6.0"
+  }
+}

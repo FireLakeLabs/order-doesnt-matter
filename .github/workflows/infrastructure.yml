@@ -1,0 +1,48 @@
+name: Infrastructure
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    environment: infrastructure
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: odm-production
+      cancel-in-progress: false
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: infra/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+          allowed-account-ids: '410633461462'
+      - run: node scripts/check-cdk-access.mts
+      - run: npx --no-install cdk synth OrderDoesntMatter --strict --quiet
+      - run: npx --no-install cdk diff OrderDoesntMatter --no-change-set
+      - run: npx --no-install cdk deploy OrderDoesntMatter --require-approval never --outputs-file outputs.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: odm-hosting-outputs
+          path: infra/outputs.json
+          if-no-files-found: error

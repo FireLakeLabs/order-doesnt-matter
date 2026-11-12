@@ -1,0 +1,116 @@
+name: Deploy
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      rollback_release:
+        description: Optional completed archive release ID to restore
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: odm-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    outputs:
+      artifact_id: ${{ steps.artifact.outputs.artifact-id }}
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version-file: .node-version
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            infra/package-lock.json
+      - run: npm ci
+      - run: npm run check
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser
+      - run: npm ci --prefix infra
+      - run: npm test --prefix infra
+      - run: npx --no-install cdk synth OrderDoesntMatter --strict --quiet
+        working-directory: infra
+      - name: Retain the checked build without rebuilding during publish
+        id: artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 90
+
+  configuration:
+    needs: check
+    # Naming an environment creates it if absent. The repository variable keeps this
+    # job from running, and so from creating one unrestricted, before provisioning.
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.ODM_DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    environment: production
+    outputs:
+      enabled: ${{ steps.role.outputs.enabled }}
+    steps:
+      # Environment vars are available only after this job enters the environment.
+      # An upstream job output lets the actual deployment be skipped when unset.
+      - id: role
+        env:
+          ROLE: ${{ vars.AWS_ROLE_ARN }}
+        run: |
+          if [ -n "$ROLE" ]; then
+            echo 'enabled=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'enabled=false' >> "$GITHUB_OUTPUT"
+          fi
+
+  deploy:
+    needs: [check, configuration]
+    if: github.ref == 'refs/heads/main' && needs.configuration.outputs.enabled == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    concurrency:
+      group: odm-production
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version-file: .node-version
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          artifact-ids: ${{ needs.check.outputs.artifact_id }}
+          path: dist/
+      - uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+          allowed-account-ids: '410633461462'
+      - name: Publish checked artifact or restore completed archive
+        env:
+          HOSTING_OUTPUTS: ${{ vars.HOSTING_OUTPUTS }}
+          ROLLBACK_RELEASE: ${{ inputs.rollback_release }}
+          RELEASE_ID: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          if [ -n "$ROLLBACK_RELEASE" ]; then
+            node infra/scripts/hosting.mts rollback "$ROLLBACK_RELEASE"
+          else
+            node infra/scripts/hosting.mts deploy "$RELEASE_ID" dist
+          fi
