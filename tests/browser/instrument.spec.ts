@@ -93,7 +93,7 @@ test('real house: mute, use mute, solo, undo and keyboard name; phone editor fit
   const field = page.getByRole('textbox', { name: 'Instrument name', exact: true });
   await field.fill('kick');
   await field.press('Enter');
-  await expect(page.locator('#editor [role="alert"]')).toContainText('already has that name');
+  await expect(page.locator('#editor').getByRole('alert')).toContainText('already has that name');
   await field.fill('Low end');
   await field.press('Enter');
   await expect(page.locator('#editor-breadcrumb')).toHaveText('Low end');
