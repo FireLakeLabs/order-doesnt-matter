@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import { parseSteps } from '../src/import/mini';
-import { moveSelection, rhythmZoom } from '../src/editor/kinds/rhythm';
+import { moveSelection, rhythmZoom, rhythmStripWindow } from '../src/editor/kinds/rhythm';
 it('arrows stay among siblings, enter groups and leave them', () => {
   const steps = parseSteps('c2 [d2 e2] g2');
   expect(moveSelection(steps, [0], 'ArrowRight')).toEqual([1]);
@@ -32,4 +32,15 @@ it('weighted, nested and simultaneous spans determine fit, not the number of ste
   expect(rhythmZoom(parseSteps('c2 [d2 e2] g2'), [1], 120, 'fine')).toEqual([]);
   expect(rhythmZoom(parseSteps('c2,d2'), [0], 44, 'coarse')).toEqual([]);
   expect(rhythmZoom(parseSteps('hh '.repeat(64)), [32], 1200, 'fine')).toEqual([32]);
+});
+
+it('the real-note strip shares a one-cycle zoom scale and retains longer window ranges', () => {
+  expect(rhythmStripWindow({ fromCycle: 8, toCycle: 9 }, [0.25, 0.5])).toEqual({
+    fromCycle: 8.25,
+    toCycle: 8.5,
+  });
+  expect(rhythmStripWindow({ fromCycle: 8, toCycle: 16 }, [0.25, 0.5])).toEqual({
+    fromCycle: 8,
+    toCycle: 16,
+  });
 });

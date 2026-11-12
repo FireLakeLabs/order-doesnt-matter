@@ -82,6 +82,11 @@ export function rhythmZoom(
   }
   return path;
 }
+/** A one-cycle note strip follows the editable region; longer windows stay labelled in full. */
+export function rhythmStripWindow(window: EditorContext['window'], region: number[]) {
+  const { fromCycle: from, toCycle: to } = window;
+  return to - from === 1 ? { fromCycle: from + region[0], toCycle: from + region[1] } : window;
+}
 const ordinal = (n: number) =>
   `${n}${n % 100 >= 11 && n % 100 <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th')}`;
 const partName = (path: number[]) => path.map((n) => `${ordinal(n + 1)} part`).join(' › ');
@@ -116,7 +121,8 @@ export default {
     let context = initial,
       selected = [0],
       rendered = '',
-      view = sessionStorage.getItem('odm-rhythm-view') ?? '';
+      view = sessionStorage.getItem('odm-rhythm-view') ?? '',
+      region = [0, 1];
     const root = el('div'),
       strip = el('figure'),
       controls = el('div'),
@@ -130,7 +136,7 @@ export default {
     controls.setAttribute('aria-label', 'Rhythm view');
     error.setAttribute('role', 'alert');
     error.className = 'editor-error';
-    root.append(controls, strip, structure, actions, error);
+    root.append(controls, structure, actions, error);
     body.append(root);
     const pointer = matchMedia('(pointer: coarse)');
     const steps = () => {
@@ -249,6 +255,7 @@ export default {
           view === 'Boxes'
             ? rhythmZoom(list, selected, width, pointer.matches ? 'coarse' : 'fine')
             : [];
+      region = span(boxes, zoom);
       if (zoom.length > selected.length) selected = zoom;
       if (zoom.length) {
         const overview = el('figure');
@@ -294,7 +301,8 @@ export default {
       const tree = el('div');
       tree.className = view === 'Boxes' ? 'rhythm-boxes' : 'rhythm-list';
       tree.setAttribute('aria-label', 'Rhythm parts');
-      structure.append(tree);
+      structure.append(strip, tree);
+      drawStrip();
       function part(s: Step, path: number[], parent: HTMLElement, parentSpan: number) {
         const item = el('div'),
           [a, z] = span(boxes, path);
@@ -455,9 +463,10 @@ export default {
         [...row.pattern.layers, ...row.uses.flatMap((u) => u.layers)].some(
           (l) => l.kind === 'rewrite',
         );
+      const { fromCycle: from, toCycle: to } = rhythmStripWindow(context.window, region);
       const caption = el(
         'figcaption',
-        `Real note starts${rewrites ? ' · after rewrites' : ''} · cycles ${context.window.fromCycle}–${context.window.toCycle}`,
+        `Real note starts${rewrites ? ' · after rewrites' : ''} · cycles ${from}–${to}`,
       );
       strip.replaceChildren(caption);
       if (!context.events || context.events.error) {
@@ -474,8 +483,9 @@ export default {
       svg.setAttribute('preserveAspectRatio', 'none');
       svg.setAttribute('role', 'img');
       svg.setAttribute('aria-label', 'Notes at their real spans');
-      const { fromCycle: from, toCycle: to } = context.window;
-      const notes = context.events.events.filter((e) => e.whole && e.part[0] === e.whole[0]);
+      const notes = context.events.events.filter(
+        (e) => e.whole && e.part[0] === e.whole[0] && e.whole[0] >= from && e.whole[0] < to,
+      );
       notes.slice(0, 500).forEach((e, i) => {
         const [a, z] = e.whole!,
           rect = document.createElementNS(svg.namespaceURI, 'rect'),
