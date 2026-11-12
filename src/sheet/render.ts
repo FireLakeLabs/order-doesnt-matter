@@ -43,11 +43,16 @@ export function mountSheet(
     if (!options.onEdit) return;
     node.tabIndex = 0;
     node.dataset.editorTarget = id;
+    node.dataset.nodeId = id;
     node.setAttribute('aria-controls', 'editor');
-    node.onclick = () => options.onEdit?.(id, summary, node);
+    node.onclick = (event) => {
+      event.stopPropagation();
+      options.onEdit?.(id, summary, node);
+    };
     node.onkeydown = (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
+        e.stopPropagation();
         options.onEdit?.(id, summary, node);
       }
     };
@@ -87,6 +92,7 @@ export function mountSheet(
       const button = element('button');
       button.type = 'button';
       button.dataset.section = section.nodeId;
+      button.dataset.nodeId = section.nodeId;
       button.dataset.start = String(section.start);
       button.dataset.end = String(section.start + section.cycles);
       button.setAttribute('aria-pressed', String(options.selected === section.nodeId));
@@ -109,6 +115,13 @@ export function mountSheet(
       );
       button.append(element('small', section.current ? 'Playing now' : '', 'sheet-playing'));
       item.append(button);
+      if (options.onEdit) {
+        const edit = element('button', 'Edit section', 'sheet-section-edit');
+        edit.type = 'button';
+        edit.setAttribute('aria-label', `Edit section ${section.name}`);
+        selectable(edit, section.nodeId, section.name);
+        item.append(edit);
+      }
       const membership = element('details');
       const present = section.instruments.filter(
         (instrument) => instrument.state === 'present',
@@ -150,6 +163,7 @@ export function mountSheet(
     tr.classList.toggle('sheet-sit-out', row.absent);
     const name = element('th');
     name.scope = 'row';
+    selectable(name, row.id, row.name);
     name.dataset.nodeId = row.id;
     name.append(element(row.nameSource === 'generated' ? 'em' : 'strong', row.name));
     if (row.nameSource === 'generated') {
@@ -200,6 +214,8 @@ export function mountSheet(
         chip.source ? 'sheet-source' : '',
       );
       item.dataset.nodeId = chip.nodeId;
+      item.setAttribute('role', 'button');
+      selectable(item, chip.nodeId, chip.summary);
       chips.append(item);
     });
     if (!row.absent)
