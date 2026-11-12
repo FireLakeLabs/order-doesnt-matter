@@ -20,7 +20,10 @@ test('sheet fixtures: semantics, status labels and phone containment', async ({ 
     // Keep the browser's JSON-fetch/mount seam while model construction is
     // proved in Node. The other fixtures retain the ordinary harness path.
     if (name === 'trio') {
-      await page.route('**/sheet-model.json', (route) => route.fulfill({ json: model }));
+      await page.route(
+        (url) => url.pathname === '/sheet-model.json',
+        (route) => route.fulfill({ json: model }),
+      );
       await page.goto('/harness/sheet.html?model=/sheet-model.json');
     } else await page.goto(`/harness/sheet.html?fixture=${name}`);
     await expect(page.getByRole('region', { name: 'Score sheet', exact: true })).toBeVisible();
