@@ -102,9 +102,14 @@ export interface Target {
 /** A core has no serialized Meta id. Its selection address is scoped to its pattern. */
 export const rhythmTargetId = (pattern: Pattern) => `${pattern.id}:rhythm`;
 export function describeTarget(doc: Doc, nodeId: string): Target {
+  const rewrites = nodeId.endsWith(':rewrites');
   const rhythm = nodeId.endsWith(':rhythm'),
     sourceAddress = nodeId.endsWith(':source');
-  const id = rhythm || sourceAddress ? nodeId.slice(0, -7) : nodeId;
+  const id = rewrites
+    ? nodeId.slice(0, -9)
+    : rhythm || sourceAddress
+      ? nodeId.slice(0, -7)
+      : nodeId;
   const node = findById(doc, id);
   const rows = instruments(doc);
   const definition = rows.find((r) => r.id === id || contains(r.pattern, id));
@@ -148,7 +153,8 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
     (node && 'kind' in node && node.kind === 'opaque') ||
     pattern?.core.kind === 'opaque';
   let kind: TargetKind = 'unknown';
-  if (selectedSection && !rhythm && !sourceAddress) kind = 'section';
+  if (rewrites && pattern && rows.some((r) => r.pattern.id === id)) kind = 'rewrite';
+  else if (selectedSection && !rhythm && !sourceAddress) kind = 'section';
   else if (setting) kind = editable ? 'setting-constant' : valueKind(setting.value);
   else if (row?.id === id && !rhythm && !sourceAddress) kind = 'instrument';
   else if (source || sourceAddress) kind = 'source';
@@ -163,13 +169,15 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
   else if (node && 'kind' in node && node.kind === 'rewrite') kind = 'rewrite';
   const label =
     control ||
-    (kind === 'rhythm'
-      ? 'Rhythm'
-      : kind === 'rewrite' && node && 'name' in node
-        ? String(node.name)
-        : kind === 'source'
-          ? 'Source text'
-          : 'Pattern');
+    (rewrites
+      ? 'Rewrites'
+      : kind === 'rhythm'
+        ? 'Rhythm'
+        : kind === 'rewrite' && node && 'name' in node
+          ? String(node.name)
+          : kind === 'source'
+            ? 'Source text'
+            : 'Pattern');
   const breadcrumb =
     kind === 'section'
       ? ['Piece', selectedSection!.name]
