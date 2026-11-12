@@ -122,10 +122,14 @@ export function editedPiece(state: AppState, doc: Doc): AppState {
         parts.length - 1,
       )
     ];
+  const rows = instruments(doc),
+    ids = new Set(rows.map((row) => row.id));
   const next = {
     ...state,
     doc,
-    rows: instruments(doc),
+    rows,
+    events: Object.fromEntries(Object.entries(state.events).filter(([id]) => ids.has(id))),
+    solo: state.solo && ids.has(state.solo) ? state.solo : null,
     sections: parts,
     selected: selected?.id ?? null,
   };

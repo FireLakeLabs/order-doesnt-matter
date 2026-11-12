@@ -284,3 +284,18 @@ it('handles inline duplication, leaf separation, no-op membership, and empty-pie
   expect(setSectionLength(doc, a.id, 4)).toBe(doc);
   expect(makeSections({ version: 1, body: [] })).toHaveProperty('ok', false);
 });
+it('removing a section clears vanished row results and solo without changing surviving selection', () => {
+  const doc = load('const kick=s("bd"); const hat=s("hh"); arrange([4,kick],[4,hat])'),
+    [a, b] = sections(doc),
+    [kick, hat] = instruments(doc);
+  const result = { events: [], cps: 0.5, error: null, opaqueValues: false };
+  const state = {
+    ...loadPiece(initialState(), '', { doc, warnings: [] }),
+    selected: b.id,
+    solo: kick.id,
+    events: { [kick.id]: result, [hat.id]: result },
+  };
+  const next = editedPiece(state, valid(removeSection(doc, a.id)));
+  expect(next).toMatchObject({ selected: b.id, fromCycle: 0, toCycle: 4, solo: null });
+  expect(Object.keys(next.events)).toEqual([hat.id]);
+});

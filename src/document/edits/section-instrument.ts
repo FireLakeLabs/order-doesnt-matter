@@ -42,11 +42,13 @@ export function setInstrumentInSection(doc: Doc, id: string, instrumentId: strin
     );
     const copyIds = freshIds(doc);
     function local(p: Pattern): Pattern {
+      if (!ancestry.has(p.id)) return p;
       if (p.core.kind === 'ref') {
         const target = shared(doc, p.core.name);
         if (target?.id === row!.pattern.id) return { ...p, muted: !plays };
         if (target && ancestry.has(target.id)) {
           const copy = copyPattern(doc, local(target), copyIds);
+          copy.label ??= p.core.name;
           return { ...p, core: { kind: 'group', how: 'stack', parts: [{ pattern: copy }] } };
         }
       }
