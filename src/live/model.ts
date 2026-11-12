@@ -1,3 +1,4 @@
+import { livePlayhead } from './playhead';
 import type { EventResult, SheetSoundState } from '../contract';
 import type { Instrument, SongSection } from '../document';
 
@@ -9,6 +10,8 @@ export interface LiveInput {
   solo: string | null;
   /** Absolute cycles; null when stopped. The stopped view uses fromCycle. */
   playhead: number | null;
+  /** Engine-reported output delay in seconds; unavailable means zero. */
+  outputLatency?: number;
   fromCycle: number;
   toCycle: number;
 }
@@ -148,7 +151,12 @@ const aggregates = new WeakMap<
   Map<string, { parts: Map<string, Part>; rooms: LiveRoom[] }>
 >();
 export function liveModel(input: LiveInput): LiveModel {
-  const cycle = input.playhead ?? input.fromCycle;
+  const playhead = livePlayhead(
+    input.playhead,
+    Object.values(input.events)[0]?.cps ?? 0,
+    input.outputLatency,
+  );
+  const cycle = playhead ?? input.fromCycle;
   const last = input.sections.at(-1),
     length = last ? last.start + last.cycles : 0;
   const offset = length ? Math.floor(cycle / length) * length : 0;
@@ -183,7 +191,7 @@ export function liveModel(input: LiveInput): LiveModel {
   const sounds = new Map(input.sounds.map((s) => [s.name, s.state]));
   const priorities = ['missing', 'loading', 'not-loaded', 'ready'] as const;
   return {
-    cycle: input.playhead,
+    cycle: playhead,
     rooms: aggregate.rooms,
     instruments: input.rows.map((row, colour) => {
       const index = indices.get(row.id),

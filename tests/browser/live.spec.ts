@@ -1,3 +1,4 @@
+import { liveObservationWindow } from './live-window';
 import { expect } from '@playwright/test';
 import { test, openProgram, play, appSignal } from './helpers';
 
@@ -22,26 +23,27 @@ test('Kiln Now pulses agree with predicted and triggered onsets; Stop and editor
     }),
   ).toBe(true);
   await play(page);
-  const capture = await page.evaluateHandle(() => {
-    const app = window.odmApp;
-    const from = app.engine!.now()!,
-      to = from + 2;
-    const samples: { id: string; cycle: number; frame: number }[] = [];
-    let previous = performance.now();
-    function frame() {
-      const cycle = app.engine!.now()!,
-        now = performance.now(),
-        gap = (now - previous) / 1000;
-      previous = now;
-      if (cycle >= from && cycle < to)
-        document
-          .querySelectorAll<HTMLElement>('[data-lit="true"]')
-          .forEach((n) => samples.push({ id: n.dataset.liveId!, cycle, frame: gap }));
-      if (cycle < to) requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-    return { from, to, samples };
-  });
+  const capture = await page.evaluateHandle(
+    ({ from, to }) => {
+      const app = window.odmApp;
+      const samples: { id: string; cycle: number; frame: number }[] = [];
+      let previous = performance.now();
+      function frame() {
+        const cycle = app.engine!.now()!,
+          now = performance.now(),
+          gap = (now - previous) / 1000;
+        previous = now;
+        if (cycle >= from && cycle < to)
+          document
+            .querySelectorAll<HTMLElement>('[data-lit="true"]')
+            .forEach((n) => samples.push({ id: n.dataset.liveId!, cycle, frame: gap }));
+        if (cycle < to) requestAnimationFrame(frame);
+      }
+      requestAnimationFrame(frame);
+      return { from, to, samples };
+    },
+    liveObservationWindow(await page.evaluate(() => window.odmApp.engine!.now()!)),
+  );
   await appSignal(
     page,
     (to) => window.odmApp.engine!.now()! >= to,
@@ -169,7 +171,8 @@ test('phone strip expands with 44px targets, preserves focus across frames and f
         dot.opacity === '1' &&
         dot.boxShadow === 'none' &&
         dot.transitionDuration === '0s' &&
-        getComputedStyle(line.querySelector('.live-dot')!, '::after').display === 'none';
+        getComputedStyle(line.querySelector('.live-dot')!, '::after').opacity === '1' &&
+        getComputedStyle(line.querySelector('.live-dot')!, '::after').transitionDuration === '0s';
       line.classList.remove('live-playing', 'live-lit');
       return steady;
     }),

@@ -9,6 +9,9 @@ export interface SpiralMark {
   start: number;
   from: number;
   to: number;
+  /** Only the final tail is shortened, by 2% of the whole note at most. */
+  bodyTo: number;
+  bodyEndRadius: number;
   startAngle: number;
   endAngle: number;
   radius: number;
@@ -18,18 +21,51 @@ export interface SpiralMark {
   onset: boolean;
   dense: boolean;
 }
-/** Distance of a turn's start from now. A whole playing turn stays full colour;
- * the previous turn fades over a cycle, without a discontinuity at the seam. */
-export function opacityAt(cyclesFromNow: number) {
+export interface ViewSettings {
+  keep: number;
+  upcoming: number;
+}
+export const defaultView: Readonly<ViewSettings> = { keep: 1, upcoming: 2 };
+const storageKey = 'odm-watch-view';
+type StorageRead = Pick<Storage, 'getItem'>;
+type StorageWrite = Pick<Storage, 'setItem'>;
+export function readView(storage?: StorageRead): ViewSettings {
+  try {
+    const v = JSON.parse((storage ?? localStorage).getItem(storageKey) ?? 'null');
+    if (
+      v &&
+      Number.isFinite(v.keep) &&
+      v.keep >= 0.1 &&
+      v.keep <= 2 &&
+      Number.isInteger(v.upcoming) &&
+      v.upcoming >= 1 &&
+      v.upcoming <= 4
+    )
+      return { keep: v.keep, upcoming: v.upcoming };
+  } catch {
+    /* Storage can be denied, including the property access itself. */
+  }
+  return { ...defaultView };
+}
+export function saveView(view: ViewSettings, storage?: StorageWrite) {
+  try {
+    (storage ?? localStorage).setItem(storageKey, JSON.stringify(view));
+  } catch {
+    /* optional */
+  }
+}
+/** Playing turn stays full; smoothstep fade begins after it. Upcoming turns
+ * share a 40% floor: a longer preview makes the same future turn brighter. */
+export function opacityAt(cyclesFromNow: number, view: ViewSettings = defaultView) {
   if (cyclesFromNow < -1) {
-    const x = Math.max(0, cyclesFromNow + 2);
+    const x = Math.max(0, 1 + (cyclesFromNow + 1) / view.keep);
     return x * x * (3 - 2 * x);
   }
-  return cyclesFromNow <= 0 ? 1 : Math.max(0.4, 1 - cyclesFromNow * 0.3);
+  return cyclesFromNow <= 0 ? 1 : Math.max(0.4, 1 - cyclesFromNow * (0.6 / view.upcoming));
 }
-export function laneGeometry(count: number, size: Size) {
+export function laneGeometry(count: number, size: Size, view: ViewSettings = defaultView) {
   const outer = Math.max(1, Math.min(size.width, size.height) / 2 - 24);
-  const pitch = outer / 6.5;
+  const pitch = outer / (view.keep + view.upcoming + 3.5);
   const spacing = pitch / (Math.max(1, count) + 1);
   return { core: pitch * 0.5, pitch, spacing, width: spacing * 0.65 };
 }
@@ -40,8 +76,9 @@ export function spiralMarks(
   lanes: string[],
   now: number,
   size: Size,
+  view: ViewSettings = defaultView,
 ): SpiralMark[] {
-  const g = laneGeometry(lanes.length, size),
+  const g = laneGeometry(lanes.length, size, view),
     indices = new Map(lanes.map((id, n) => [id, n]));
   const counts = new Map<string, number>();
   for (const n of notes) {
@@ -55,7 +92,10 @@ export function spiralMarks(
   function add(n: TurnNote, from: number, to: number, turn: number, id: string, binned: boolean) {
     const lane = indices.get(n.instrument);
     if (lane === undefined) return;
-    const radius = (t: number) => g.core + g.pitch * (t - now + 2) + (lane + 1) * g.spacing;
+    const radius = (t: number) =>
+      g.core + g.pitch * (t - now + view.keep + 1) + (lane + 1) * g.spacing;
+    const end = n.cycle + n.to;
+    const bodyTo = !binned && to === end ? Math.max(from, to - (n.to - n.from) * 0.02) : to;
     marks.push({
       id,
       instrument: n.instrument,
@@ -65,12 +105,14 @@ export function spiralMarks(
       start: n.cycle + n.from,
       from,
       to,
+      bodyTo,
+      bodyEndRadius: radius(bodyTo),
       startAngle: (from - now) * Math.PI * 2 - Math.PI / 2,
       endAngle: (to - now) * Math.PI * 2 - Math.PI / 2,
       radius: radius(from),
       endRadius: radius(to),
       width: g.width,
-      opacity: opacityAt(turn - now),
+      opacity: opacityAt(turn - now, view),
       onset: !binned && from === n.cycle + n.from,
       dense: binned,
     });
