@@ -1,7 +1,11 @@
 import { mkdir } from 'node:fs/promises';
 import { expect, type BrowserContext, type Page } from '@playwright/test';
 import { openProgram, scoreReady, play, appSignal, throughCycle } from './helpers';
-import { FLOOD_MESSAGE, PREFLIGHT_TIMEOUT } from '../../src/engine/playback-limits';
+import {
+  FLOOD_MESSAGE,
+  MAX_WINDOW_STARTS,
+  PREFLIGHT_TIMEOUT,
+} from '../../src/engine/playback-limits';
 import type {} from '../../src/app/main';
 
 // The existing paste tests cover an unconditional infinite loop (Play is disabled).
@@ -42,6 +46,9 @@ export async function playbackSafety(context: BrowserContext) {
     expect(
       await page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'trigger')),
     ).toEqual([]);
+    const cdp = await context.newCDPSession(running);
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
+    const errorMark = await running.evaluate(() => window.odmApp.history.length);
     const cycle = await running.evaluate(() => Math.ceil(window.odmApp.engine!.now()!));
     await shots(page, 'timeout');
     // The flood check uses the refused engine while Kiln completes its full cycle.
@@ -63,6 +70,13 @@ export async function playbackSafety(context: BrowserContext) {
     expect(
       await running.evaluate(() => window.odmApp.history.filter((e) => e.type === 'error')),
     ).toEqual([{ type: 'error', message: PREFLIGHT_TIMEOUT }]);
+    expect(
+      await running.evaluate(
+        (offset) => window.odmApp.history.slice(offset).filter((e) => e.type === 'error'),
+        errorMark,
+      ),
+    ).toEqual([]);
+    await cdp.send('Emulation.setCPUThrottlingRate', { rate: 1 });
     await running.getByRole('button', { name: 'Stop', exact: true }).click();
   } finally {
     await Promise.all([page.close(), running.close()]);
@@ -71,23 +85,35 @@ export async function playbackSafety(context: BrowserContext) {
 
 async function flood(page: Page) {
   await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
-  await page
-    .getByLabel('Your Strudel program')
-    // Same 1,024 starts/second as 2,048 at the default tempo, with a smaller score.
-    .fill('setcpm(120); s("sine*512").note(60).release(0.01).gain(0.02)');
+  await page.getByLabel('Your Strudel program').fill(
+    `note("[${Array(MAX_WINDOW_STARTS + 1)
+      .fill(60)
+      .join(',')}]").s("sine").clip(0.001).release(0.005).gain(0.0002)`,
+  );
   await page.getByRole('button', { name: 'Load', exact: true }).click();
   await scoreReady(page);
   const before = await page.evaluate(() => window.odmApp.history.length);
+  await page.evaluate((message) => {
+    const off = window.odmApp.engine!.subscribe((e) => {
+      if (e.type !== 'error' || e.message !== message) return;
+      off();
+      const start = performance.now();
+      setTimeout(() => {
+        document.getElementById('paste')!.click();
+        performance.measure('ODM:cap-click', { start, end: performance.now() });
+      }, 0);
+    });
+  }, FLOOD_MESSAGE);
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect(page.locator('#message')).toHaveText(FLOOD_MESSAGE);
-  await appSignal(
-    page,
-    () => window.odmApp.history.filter((e) => e.type === 'trigger').length >= 64,
-  );
-  const clicked = Date.now();
-  await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
+  await appSignal(page, () => performance.getEntriesByName('ODM:cap-click').length > 0);
   await expect(page.getByLabel('Your Strudel program')).toBeHidden();
-  expect(Date.now() - clicked).toBeLessThan(1000);
+  const clickMs = await page.evaluate(
+    () => performance.getEntriesByName('ODM:cap-click')[0].duration,
+  );
+  console.log('CAP RESPONSIVENESS MEASURED', { cap: MAX_WINDOW_STARTS, clickMs });
+  expect(clickMs).toBeLessThan(1000);
+  await expect(page.locator('#message')).toHaveAttribute('data-kind', 'warning');
   expect(await page.evaluate(() => window.odmApp.engine!.playing)).toBe(true);
   const result = await page.evaluate(
     (offset) => ({
@@ -99,8 +125,10 @@ async function flood(page: Page) {
     }),
     before,
   );
-  expect(result.errors).toEqual([{ type: 'error', message: FLOOD_MESSAGE }]);
-  expect(result.values.length).toBeGreaterThanOrEqual(64);
+  expect(result.errors).toEqual([
+    { type: 'error', message: FLOOD_MESSAGE, reason: 'notes-left-out' },
+  ]);
+  expect(result.values).toHaveLength(MAX_WINDOW_STARTS);
   for (const value of result.values) expect(value).toMatchObject({ note: 60, s: 'sine' });
   await shots(page, 'flood');
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
