@@ -20,6 +20,7 @@ export function createPanel(host: HTMLElement, close: () => void) {
     status = el('p'),
     body = el('div'),
     done = el('button', 'Done'),
+    source = el('button', 'Edit as source'),
     conversions = el('div'),
     conversionError = el('p');
   conversionError.setAttribute('role', 'alert');
@@ -33,6 +34,7 @@ export function createPanel(host: HTMLElement, close: () => void) {
   done.className = 'editor-done';
   header.append(heading);
   footer.append(status, done);
+  header.append(source);
   heading.id = 'editor-breadcrumb';
   status.id = 'editor-status';
   status.setAttribute('role', 'status');
@@ -50,6 +52,13 @@ export function createPanel(host: HTMLElement, close: () => void) {
       return;
     }
     const next = context.target;
+    source.hidden = next.kind === 'source';
+    source.onclick = () => {
+      context.apply(context.doc, {
+        selection: `${next.nodeId.replace(/:(rhythm|rewrites)$/, '')}:source`,
+      });
+      body.querySelector<HTMLElement>('textarea')?.focus({ preventScroll: true });
+    };
     heading.replaceChildren();
     next.breadcrumb.forEach((part, i) => {
       if (i) heading.append(document.createTextNode(' › '));
