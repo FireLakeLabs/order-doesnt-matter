@@ -4,23 +4,20 @@ Append only. A new entry that changes an old one says which one it replaces.
 Keep each entry to a few lines.
 
 - **D1 (2026-11-10) Name and home.** Order Doesn't Matter, a Fire Lake Labs
-  project, to be hosted at odm.firelakelabs.com.
+  project at odm.firelakelabs.com.
 - **D2 (2026-11-10) One-way import.** The app owns its own document. Strudel is
-  imported into it and fresh Strudel is generated to play it. Reproducing the
-  imported text is not a goal.
+  imported; fresh Strudel plays it. Imported text is not preserved.
 - **D3 (2026-11-10) Opaque stations.** Code the app does not model stays
-  visible, playable, and editable as text. It is never dropped.
+  visible, playable and text-editable; never dropped.
 - **D4 (2026-11-10) Strudel is the engine.** Sound and pattern evaluation stay
   Strudel's job.
-- **D5 (2026-11-10) Where tests run.** Import, the document, generation, and
-  "which events result" are tested in Node against real Strudel. Drawing is a
-  pure function from document to shapes, also tested in Node. Browser tests
-  cover only what needs a browser, run against a built copy on a random port,
-  and stay under three minutes in total.
+- **D5 (2026-11-10) Where tests run.** Import, document, generation and events
+  run in Node against real Strudel; pure drawing models also run in Node.
+  Browser-only checks use a built copy, a random port and a three-minute total
+  budget.
 - **D6 (2026-11-10) Small living docs.** `AGENTS.md`, `docs/model.md`,
   `docs/decisions.md`, and `docs/standards.md` are the only authoritative
-  prose. Anything code can state is generated from code. `research/` is
-  evidence, not authority.
+  prose. Generate what code can state. `research/` is evidence, not authority.
 - **D7 (2026-11-10) Phase 0 writes no production code.** Everything under
   `spikes/` is throwaway and is not imported by later phases.
 - **D8 (2026-11-11) Three views, one editor.** The score sheet with its song
@@ -77,7 +74,9 @@ Keep each entry to a few lines.
 - **D23 (2026-11-11) Edits go through one coordinator.** One swap runs at a
   time with the latest value queued; a rejected swap restores the last confirmed
   document. Measured edit-to-scheduled-sound delay: median 364 ms, worst 443 ms
-  over 20 edits on one machine. Whether that feels acceptable is the owner's call.
+  over 20 edits on one machine. On 2026-11-12, 20 Kiln edits: revision-boundary
+  median/p90/worst 473/539/588 ms; edited-instrument trigger 698/738/759 ms.
+  Whether that feels acceptable is the owner's call.
 - **D24 (2026-11-11) Editors are files.** One editor kind per file, one document
   edit per file; the panel shell is shared. Six kinds so far: constant, values
   over time, signal, rewrite, instrument, and a read-only fallback that gives
@@ -86,9 +85,9 @@ Keep each entry to a few lines.
   when new code is in effect but has no note to play, so a change that mutes
   stops being pending. Extends D9.
 - **D26 (2026-11-11) "The same notes" means note starts and their values.**
-  Comparisons that decide whether a change is safe ignore fragments that never
-  sound. Evidence: 720 program pairs; `fast`, `slow`, `early`, `late` across a
-  constant setting differ only in fragments.
+  Safety comparisons ignore fragments without starts. Evidence: 720 program
+  pairs; `fast`, `slow`, `early`, `late` across a constant setting differ only in
+  fragments.
 - **D27 (2026-11-11) One gate per pull request, both budgets enforced.** The
   Node suite fails over 60 seconds as the browser suite fails over three
   minutes. No retries, no raised timeouts: a slow test is fixed at its cause.
@@ -113,16 +112,33 @@ Keep each entry to a few lines.
   every step on a real piece and lists what it could not do. Phase 2's found
   that a section made separate kept stale copies of its instruments.
 - **D34 (2026-11-12) The sheet stays; the live views sit around it.** The score
-  sheet is always present and is where editing happens. A small Now panel beside
-  it draws the constellation; the spiral is a full-window Watch mode. The owner
-  chose this over three switchable views.
+  sheet is always present for editing, beside a small Now constellation;
+  Watch is a full-window spiral. Owner chose this over three switchable views.
 - **D35 (2026-11-12) Live views read the score, not the audio.** Who is sounding
-  is derived from the events the app already holds and the playhead
-  (`src/live/model.ts`), checked against engine triggers on a real piece. No view
-  adds load to playback.
+  comes from held events and playhead (`src/live/model.ts`), checked against
+  real-piece triggers. Views add no playback load.
 - **D36 (2026-11-12) Unknown is not quiet.** Time nobody has asked about is drawn
   as "not asked yet", never as empty; a looping arrangement's end is labelled as
   an end that repeats.
 - **D37 (2026-11-12) The constellation always fits.** No zoom levels; planets
-  are sized to the box; settings and rewrites are not drawn on planets. With many
-  instruments, names and touch fall back to the list.
+  fit the box, without settings or rewrites. Dense names and touch use List.
+- **D38 (2026-11-12) Playback is checked before it is trusted.** New code is
+  evaluated and questioned in a time-limited worker before scheduling; failed
+  swaps retain previous music. Flood limit: 512 starts per scheduler window
+  (corpus maximum 49). Four consecutive answers over 250 ms or one over two
+  seconds stop a runaway; isolated slowness warns. Arbitrary later loops remain
+  unprotected. Extends D20.
+- **D39 (2026-11-12) The edit delay is covered, not fought.** Owner: optimise
+  without heroics. Sound discovery shares one evaluation. Scheduling margins stay
+  at Strudel defaults; shortening them skipped windows in measurement. Pending
+  holds until the edited instrument's own change is scheduled.
+- **D40 (2026-11-12) Live views are corrected by the browser's reported output
+  latency**, through one function; sheet and scheduling are untouched. Measured
+  about 31 ms early without correction, 16 ms late with it; nobody measured at
+  the speaker.
+- **D41 (2026-11-12) Deleting an instrument removes it everywhere and is one
+  undo step**; refused when it would change another instrument.
+- **D42 (2026-11-12) A design review follows Phase 4.** Carried, not decided:
+  small live previews that enlarge; panel visibility; a theme picker; 3D
+  fly-through as a Watch style; whether Now follows playback or selection;
+  a way from a planet into its settings.
