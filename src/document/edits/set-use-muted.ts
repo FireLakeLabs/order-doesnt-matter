@@ -1,7 +1,7 @@
 import { instruments, sections, shared, type Pattern, type Doc } from '../index';
 import { freshIds, type Refusal } from './shared';
 import { sectionOwner, replaceParts, copyPattern, shareInlineLeaves } from './section-shared';
-/** Copy the selected occurrence's score, with canonical origins on its leaves. */
+/** Copy section structure only; instruments remain shared reference uses. */
 export function setUseMuted(
   doc: Doc,
   id: string,
@@ -36,18 +36,13 @@ export function setUseMuted(
           cyclic = true;
           return p;
         }
-        const copied = copyPattern(doc, target, fresh);
-        // Definition mute is inherited through origin, independent of use mute.
-        if (leaves.has(target.id)) copied.muted = !!p.muted;
-        const copy = local(copied, new Set(seen).add(target.id));
+        if (leaves.has(target.id)) return target.id === row!.pattern.id ? { ...p, muted } : p;
+        const copy = local(copyPattern(doc, target, fresh), new Set(seen).add(target.id));
         return {
           ...copy,
           id: p.id,
           layers: [...copy.layers, ...p.layers],
-          muted:
-            leaves.has(target.id) && target.id === row!.pattern.id
-              ? muted
-              : !!p.muted || !!copy.muted,
+          muted: !!p.muted || !!copy.muted,
         };
       }
     }

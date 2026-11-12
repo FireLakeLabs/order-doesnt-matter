@@ -254,19 +254,13 @@ test('Phase 2: ten editors, one silent video', async ({ browser, request }) => {
         await button('List').click();
         await expect(page.locator('[data-view="List"]')).toBeVisible();
         const after = await selectedBass();
-        if (JSON.stringify(after) === JSON.stringify(before)) {
-          limitations.push({
-            step: 8,
-            caption: 'LIMITATION: the selected drop’s real notes stayed unchanged.',
-            reason:
-              'After the one-drop chords mute localized this occurrence, bass Rhythm edits the shared definition. The selected drop keeps its copied rhythm: its onset/value bag is unchanged after note, split and rest edits. The sheet exposes only the shared bass Rhythm target, with no occurrence-level Rhythm control.',
-          });
-        } else expect(after.some((e) => String(e.value.note) === 'd2')).toBe(true);
+        expect(after).not.toEqual(before);
+        expect(after.some((e) => String(e.value.note) === 'd2')).toBe(true);
       },
     );
     await step(9, 'source', 'Edit a setting as source, Apply 1100, then open Setup.', async () => {
       await close();
-      await selectNode(page, { breadcrumb: ['bass', 'in drop', 'lpf'] });
+      await selectNode(page, { breadcrumb: ['bass', 'lpf'] });
       await button('Edit as source').click();
       const field = page.getByRole('textbox', { name: 'Source text', exact: true });
       const previous = await field.inputValue();

@@ -127,7 +127,7 @@ it('real house: chords mute in one shared drop keeps one row and only removes th
   expect(
     instruments(next)
       .find((r) => r.id === chords.id)!
-      .uses.some((u) => u.path.some((p) => 'origin' in p)),
+      .uses.some((u) => u.path.some((p) => 'core' in p && p.core.kind === 'ref')),
   ).toBe(true);
   const notes = (r: Awaited<ReturnType<typeof queryEventsNode>>) => {
     expect(r.error).toBeNull();
@@ -291,12 +291,16 @@ it('localized documents are import/generate idempotent apart from ids and spans'
   expect(clean(round)).toEqual(clean(local));
   expect(clean(load(generate(round)))).toEqual(clean(round));
 });
-it('source edits of a localized pattern preserve its canonical origin', async () => {
+it('source edits of a stored localized pattern preserve its canonical origin', async () => {
   const { replaceFromSource } = await import('../src/document/edits/source-node');
   const { replaceOpaque } = await import('../src/document/edits/source-opaque');
   const doc = load('const drum=s("bd"); const drop=stack(drum); arrange([2,drop],[2,drop])'),
     row = instruments(doc)[0];
-  const local = accept(setUseMuted(doc, row.id, sections(doc)[0].id, true));
+  const { copyPattern } = await import('../src/document/edits/section-shared');
+  const local = structuredClone(doc);
+  const root = voices(local)[0].pattern;
+  if (root.core.kind !== 'group') throw Error('arrange');
+  root.core.parts[0].pattern = copyPattern(local, row.pattern);
   let address = '';
   walk(local, (n) => {
     if ('core' in n && (n as { origin?: string }).origin === row.pattern.id) address = n.id;
