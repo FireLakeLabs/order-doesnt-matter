@@ -71,3 +71,10 @@ Keep each entry to a few lines.
 - **D21 (2026-11-11) Every wave contract has an end-to-end check on a real
   piece.** Wave 1's parts each passed alone while the seam between them was
   wrong for arranged pieces.
+- **D22 (2026-11-11) Hosted from `main`.** odm.firelakelabs.com is its own
+  stack; every merge to `main` publishes after its checks. Runbook:
+  `infra/README.md`.
+- **D23 (2026-11-11) Edits go through one coordinator.** One swap runs at a
+  time with the latest value queued; a rejected swap restores the last confirmed
+  document. Measured edit-to-scheduled-sound delay: median 364 ms, worst 443 ms
+  over 20 edits on one machine. Whether that feels acceptable is the owner's call.

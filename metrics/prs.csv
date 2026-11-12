@@ -6,3 +6,7 @@ pr,title,opened,merged,cycle_hours,authored_lines,review_rounds,rework_commits,n
 5,Wave 1a: import and generate,2026-11-11T23:11:36Z,2026-11-11T23:16:27Z,0.08,1623,1,0,18.8,9.8
 6,Wave 1d: instruments and sections,2026-11-11T23:32:29Z,2026-11-11T23:34:44Z,0.04,851,1,0,45.8,9.7
 7,Wave 1e: the page joined up,2026-11-11T23:52:07Z,2026-11-11T23:54:44Z,0.04,1344,1,0,19.4,21.7
+8,Record Wave 1 decisions and metrics,2026-11-11,2026-11-11,,40,2,1,17.0,19.9
+9,Wave 2a (1/2): edit logic,2026-11-11,2026-11-11,,546,1,0,18.0,19.9
+10,Wave 2b: hosting prepared,2026-11-11,2026-11-11,,1375,1,1,17.0,20.4
+11,Wave 2a (2/2): editor panel,2026-11-11,2026-11-11,,1180,1,0,21.7,20.3
