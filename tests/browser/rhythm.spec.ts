@@ -106,6 +106,12 @@ test('phone: List, arrow selection, Done and Escape return focus, no horizontal 
   await expect(page.locator('[data-view="List"]')).toBeVisible();
   await page.locator('[data-path="0"]').press('ArrowRight');
   await expect(page.locator('[data-path="1"]')).toBeFocused();
+  for (const action of ['Split in 2', 'Take turns']) {
+    await page.getByRole('button', { name: action, exact: true }).press('Enter');
+    await page.locator('[data-path="1"]').press('ArrowDown');
+    await page.getByRole('button', { name: 'Remove', exact: true }).click();
+    await expect(page.locator('[data-path="1.0"]')).toHaveCount(0);
+  }
   await page.getByRole('button', { name: 'Boxes', exact: true }).click();
   await expect(page.locator('[data-view="Boxes"]')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -163,4 +169,104 @@ test('desktop fine pointer: eight proportional boxes and edited row above the dr
     await boxes.nth(i).click();
     await expect(boxes.nth(i)).toHaveAttribute('aria-pressed', 'true');
   }
+});
+
+test('Kiln live: split removal, undo, literal marks and evenly spread drum hits', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openProgram(page, { example: 'Kiln' });
+  // Shorten scheduling waits while retaining the bundled score.
+  await page.evaluate(() => {
+    const doc = window.odmApp.state.doc!;
+    window.odmApp.editor!.apply({
+      ...doc,
+      body: doc.body.map((n) => (n.kind === 'tempo' ? { ...n, cpm: 240 } : n)),
+    });
+  });
+  await page.getByRole('button', { name: 'Section 2', exact: true }).press('Enter');
+  await openBass(page);
+  await play(page);
+  await page.getByRole('button', { name: 'Split in 2', exact: true }).press('Enter');
+  await page.locator('[data-path="0"]').press('ArrowDown');
+  await page.getByRole('button', { name: 'Remove', exact: true }).press('Enter');
+  await expect(page.locator('[data-path="0.0"]')).toHaveCount(0);
+  await page.getByRole('button', { name: 'Remove', exact: true }).press('Enter');
+  await swap(page, () => page.getByRole('button', { name: 'Undo', exact: true }).press('Enter'));
+  await waitForPending(page);
+  await page.keyboard.press('Escape');
+  const doc = await page.evaluate(() => window.odmApp.state.doc!);
+  const clap = instruments(doc).find((r) => JSON.stringify(r.pattern.core).includes('cp'))!;
+  const origin = await selectNode(page, { nodeId: `${clap.pattern.id}:rhythm` });
+  await page.getByRole('button', { name: 'List', exact: true }).press('Enter');
+  await page.locator('[data-path="0"]').press('ArrowRight');
+  await page.getByRole('button', { name: 'Spread hits evenly…', exact: true }).press('Enter');
+  await page.getByLabel('hits', { exact: true }).fill('3');
+  await swap(page, () => page.getByLabel('hits', { exact: true }).press('Enter'));
+  await expect(page.getByLabel('hits', { exact: true })).toBeFocused();
+  await expect(page.getByLabel('out of', { exact: true })).toHaveValue('8');
+  const boundary = await page.evaluate(() =>
+    Math.ceil(window.odmApp.history.filter((e) => e.type === 'swapped').at(-1)!.cycle),
+  );
+  await throughCycle(page, boundary + 1);
+  const bassStarts = await page.evaluate(
+    (c) =>
+      window.odmApp.history
+        .filter(
+          (e) =>
+            e.type === 'trigger' &&
+            e.cycle >= c &&
+            e.cycle < c + 1 &&
+            (e.value as { s?: string; gain?: number }).s === 'triangle' &&
+            (e.value as { gain?: number }).gain === 0.45,
+        )
+        .map((e) => (e.type === 'trigger' ? e.cycle - c : -1)),
+    boundary,
+  );
+  expect(bassStarts).toEqual([0, 0.25, 0.5, 0.75]);
+  expect(
+    await page.evaluate(
+      (c) =>
+        window.odmApp.history
+          .filter(
+            (e) =>
+              e.type === 'trigger' &&
+              e.cycle >= c &&
+              e.cycle < c + 1 &&
+              (e.value as { s?: string }).s === 'cp',
+          )
+          .map((e) => (e.type === 'trigger' ? e.cycle - c : -1)),
+      boundary,
+    ),
+  ).toEqual([0.25, 11 / 32, 14 / 32, 0.75]);
+  await page.getByText('Speed and length', { exact: true }).press('Enter');
+  const faster = page.getByLabel('Faster ×n', { exact: true });
+  await faster.fill('3/2');
+  await faster.press('Enter');
+  await expect(page.getByLabel('Faster ×n', { exact: true })).toHaveValue('1.5');
+  await page.getByLabel('Faster ×n', { exact: true }).press('ArrowUp');
+  await expect(page.getByLabel('Faster ×n', { exact: true })).toHaveValue('2.5');
+  await page.getByRole('button', { name: 'None for Faster ×n', exact: true }).press('Enter');
+  await expect(page.getByLabel('Faster ×n', { exact: true })).toHaveValue('1');
+  if (process.env.ODM_RHYTHM_SHOTS) {
+    await waitForPending(page);
+    await page.getByText('Speed and length', { exact: true }).press('Enter');
+    await page.getByRole('button', { name: 'Boxes', exact: true }).press('Enter');
+    for (const [name, width, height] of [
+      ['desktop', 1440, 900],
+      ['phone', 390, 844],
+    ] as const) {
+      await page.setViewportSize({ width, height });
+      await page.getByLabel('hits', { exact: true }).scrollIntoViewIfNeeded();
+      await page.screenshot({ path: `test-results/rhythm-${name}.png` });
+      await page.getByText('Speed and length', { exact: true }).press('Enter');
+      await page.getByLabel('Faster ×n', { exact: true }).scrollIntoViewIfNeeded();
+      await page.screenshot({ path: `test-results/rhythm-speed-${name}.png` });
+      await page.getByText('Speed and length', { exact: true }).press('Enter');
+    }
+  }
+  await page.getByRole('button', { name: 'Back to plain step', exact: true }).press('Enter');
+  await page.keyboard.press('Escape');
+  await expect(origin).toBeFocused();
+  await page.getByRole('button', { name: 'Stop', exact: true }).press('Enter');
 });

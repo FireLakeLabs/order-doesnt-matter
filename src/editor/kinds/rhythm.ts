@@ -6,6 +6,10 @@ import { layoutRhythm, fractionNumber, type Box } from '../../document/edits/rhy
 import { setRhythmValue } from '../../document/edits/rhythm-set';
 import { restRhythm } from '../../document/edits/rhythm-rest';
 import { splitRhythm } from '../../document/edits/rhythm-split';
+import { joinRhythm } from '../../document/edits/rhythm-join';
+import { speedRhythm } from '../../document/edits/rhythm-speed';
+import { rhythmMarks, rhythmNumber, type Mark } from '../../document/edits/rhythm-marks';
+import { euclidRhythm, euclidNumbers } from '../../document/edits/rhythm-euclid';
 import { mergeRhythm } from '../../document/edits/rhythm-merge';
 import { rhythmModifier } from '../../document/edits/rhythm-modifier';
 import { insertRhythm } from '../../document/edits/rhythm-insert';
@@ -102,7 +106,16 @@ const description = (s: Step): string => {
             ? 'takes turns, one per cycle'
             : s.kind === 'together'
               ? 'at the same time'
-              : 'source chunk';
+              : s.kind === 'euclid' && euclidNumbers(s)
+                ? `${euclidNumbers(s)!.hits} hits out of ${euclidNumbers(s)!.outOf}`
+                : s.kind === 'other' && rhythmMarks(s)
+                  ? `${description(rhythmMarks(s)!.base)} · ${rhythmMarks(s)!
+                      .ops.map(
+                        (op) =>
+                          `${{ repeat: 'repeat ×', faster: 'faster ×', slower: 'slower ÷', weight: 'length ' }[op.name]}${op.amount}`,
+                      )
+                      .join(' · ')}`
+                  : 'source chunk';
   const weight = 'weight' in s ? s.weight : undefined;
   return [
     name,
@@ -122,7 +135,8 @@ export default {
       selected = [0],
       rendered = '',
       view = sessionStorage.getItem('odm-rhythm-view') ?? '',
-      region = [0, 1];
+      region = [0, 1],
+      marksOpen = false;
     const root = el('div'),
       strip = el('figure'),
       controls = el('div'),
@@ -142,6 +156,14 @@ export default {
     const steps = () => {
       const c = sequenceOwner(context.doc, context.target.nodeId)?.core;
       return c?.kind === 'sequence' ? c.steps : [];
+    };
+    const drawing = () => {
+      const cycle = Math.floor(context.window.fromCycle);
+      return layoutRhythm(steps(), cycle).map((box) => ({
+        ...box,
+        start: [box.start[0] - cycle * box.start[1], box.start[1]] as [number, number],
+        end: [box.end[0] - cycle * box.end[1], box.end[1]] as [number, number],
+      }));
     };
     const button = (
       parent: HTMLElement,
@@ -218,12 +240,20 @@ export default {
     }
     function render() {
       const list = steps();
+      while (selected.length > 1 && !rhythmStep(list, selected)) selected = selected.slice(0, -1);
       if (!rhythmStep(list, selected)) selected = [0];
       const width = structure.clientWidth || root.clientWidth;
-      const unresolved = layoutRhythm(list).some((b) => !b.path.length);
+      const unresolved = drawing().some((b) => !b.path.length);
       if (unresolved) view = 'List';
       if (!view) view = innerWidth < 900 ? 'List' : 'Boxes';
-      const key = JSON.stringify([list, selected, view, Math.floor(width), pointer.matches]);
+      const key = JSON.stringify([
+        list,
+        selected,
+        view,
+        Math.floor(width),
+        pointer.matches,
+        context.window.fromCycle,
+      ]);
       if (key === rendered) return;
       rendered = key;
       const focus = (document.activeElement as HTMLElement)?.dataset.rhythmKey;
@@ -250,7 +280,7 @@ export default {
         structure.append(el('p', 'This sequence is available through Edit as source.'));
         return;
       }
-      const boxes = layoutRhythm(list),
+      const boxes = drawing(),
         zoom =
           view === 'Boxes'
             ? rhythmZoom(list, selected, width, pointer.matches ? 'coarse' : 'fine')
@@ -327,6 +357,27 @@ export default {
             select(moveSelection(list, path, e.key), true);
           }
         };
+        const pulses = boxes.find((box) => same(box.path, path))?.pulses;
+        if (pulses) {
+          const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          svg.setAttribute('viewBox', '0 0 1000 24');
+          svg.setAttribute('preserveAspectRatio', 'none');
+          svg.setAttribute('role', 'img');
+          svg.setAttribute('aria-label', 'Hits and gaps at their real positions');
+          for (const pulse of pulses) {
+            const rect = document.createElementNS(svg.namespaceURI, 'rect');
+            rect.setAttribute('x', String(pulse.from * 1000));
+            rect.setAttribute('width', String((pulse.to - pulse.from) * 1000));
+            rect.setAttribute('y', '2');
+            rect.setAttribute('height', '20');
+            rect.setAttribute(
+              'class',
+              pulse.value === undefined ? 'overview-rest' : 'overview-part',
+            );
+            svg.append(rect);
+          }
+          item.append(svg);
+        }
         if (isGroup(s)) {
           const children = el('div');
           children.className = s.kind === 'sub' ? 'rhythm-row' : 'rhythm-stack';
@@ -350,7 +401,111 @@ export default {
       } else list.forEach((s, i) => part(s, [i], tree, 1));
       const s = rhythmStep(list, selected)!;
       actions.append(el('h3', `Selected · ${partName(selected)}`));
+      const numeric = (
+        parent: HTMLElement,
+        label: string,
+        value: number,
+        change: (n: number) => void,
+        whole = false,
+      ) => {
+        const input = el('input');
+        input.type = 'text';
+        input.inputMode = whole ? 'numeric' : 'decimal';
+        input.value = String(value);
+        input.setAttribute('aria-label', label);
+        input.dataset.rhythmKey = label;
+        const apply = () => change(rhythmNumber(input.value));
+        input.onchange = apply;
+        input.onkeydown = (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            apply();
+          }
+          if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            change(rhythmNumber(input.value) + (e.key === 'ArrowUp' ? 1 : -1));
+          }
+        };
+        parent.append(fieldLabel(label, input));
+        button(parent, '−', `${label}-less`, () => change(value - 1)).setAttribute(
+          'aria-label',
+          `Decrease ${label}`,
+        );
+        button(parent, '+', `${label}-more`, () => change(value + 1)).setAttribute(
+          'aria-label',
+          `Increase ${label}`,
+        );
+      };
+      const marks = rhythmMarks(s);
+      if (marks) {
+        const details = el('details');
+        details.className = 'rhythm-marks';
+        details.open = marksOpen || marks.ops.length > 0;
+        details.ontoggle = () => {
+          marksOpen = details.open;
+        };
+        details.append(el('summary', 'Speed and length'));
+        for (const [name, label] of [
+          ['repeat', 'Repeat ×n'],
+          ['faster', 'Faster ×n'],
+          ['slower', 'Slower ÷n'],
+          ['weight', 'Length n parts'],
+        ] as [Mark, string][]) {
+          const group = el('div');
+          group.className = 'rhythm-action-group';
+          const current =
+            name === 'weight'
+              ? marks.weight
+              : (marks.ops.find((op) => op.name === name)?.amount ?? 1);
+          numeric(
+            group,
+            label,
+            current,
+            (n) => edit((d, id, p) => speedRhythm(d, id, p, name, n)),
+            name === 'repeat',
+          );
+          button(group, 'None', `none-${name}`, () =>
+            edit((d, id, p) => speedRhythm(d, id, p, name, null)),
+          ).setAttribute('aria-label', `None for ${label}`);
+          details.append(group);
+        }
+        actions.append(details);
+      }
+      const euclid = euclidNumbers(marks?.base ?? s);
+      if (euclid) {
+        const group = el('div');
+        group.className = 'rhythm-action-group';
+        for (const [key, label] of [
+          ['hits', 'hits'],
+          ['outOf', 'out of'],
+          ['turn', 'turn by'],
+        ] as const)
+          numeric(
+            group,
+            label,
+            euclid[key],
+            (n) => {
+              const next = { ...euclid, [key]: n };
+              edit((d, id, p) => euclidRhythm(d, id, p, next.hits, next.outOf, next.turn));
+            },
+            true,
+          );
+        button(group, 'Back to plain step', 'euclid-none', () =>
+          edit((d, id, p) => euclidRhythm(d, id, p, null)),
+        );
+        actions.insertBefore(group, actions.querySelector('.rhythm-marks'));
+      } else if (marks?.base.kind === 'value' && Object.keys(marks.base).length === 2) {
+        button(actions, 'Spread hits evenly…', 'euclid', () =>
+          edit((d, id, p) => euclidRhythm(d, id, p, 3)),
+        );
+      }
       if (!isGroup(s) && !['value', 'rest'].includes(s.kind)) {
+        if (marks || euclid) {
+          if (focus)
+            Array.from(root.querySelectorAll<HTMLElement>('[data-rhythm-key]'))
+              .find((n) => n.dataset.rhythmKey === focus)
+              ?.focus({ preventScroll: true });
+        }
         const details = el('details'),
           text = el('textarea');
         details.append(el('summary', 'Edit chunk as source'));
@@ -393,6 +548,7 @@ export default {
       more.onchange = () => edit((d, id, p) => splitRhythm(d, id, p, Number(more.value)));
       buttons.append(more);
       if (isGroup(s)) {
+        add('Join back', joinRhythm);
         add('Merge', mergeRhythm);
         const confirmation = el('details');
         confirmation.append(el('summary', 'Merge nested parts…'));
@@ -440,19 +596,7 @@ export default {
       add('Earlier', (d, id, p) => moveRhythm(d, id, p, index - 1), index === 0);
       add('Later', (d, id, p) => moveRhythm(d, id, p, index + 1), index === siblings.length - 1);
       actionGroup('Remove');
-      add('Remove', removeRhythm, siblings.length === 1);
-      if (s.kind === 'value') {
-        const repeats = el('input');
-        repeats.type = 'number';
-        repeats.min = '1';
-        repeats.step = '1';
-        repeats.value = String(s.repeat ?? 1);
-        repeats.setAttribute('aria-label', 'Repeats');
-        repeats.dataset.rhythmKey = 'repeats';
-        repeats.onchange = () =>
-          edit((d, id, p) => rhythmModifier(d, id, p, 'repeat', repeats.valueAsNumber));
-        actionGroup('Repeats').append(fieldLabel('Repeats', repeats));
-      }
+      add('Remove', removeRhythm);
       if (focus)
         Array.from(root.querySelectorAll<HTMLElement>('[data-rhythm-key]'))
           .find((n) => n.dataset.rhythmKey === focus)

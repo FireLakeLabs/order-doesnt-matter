@@ -1,5 +1,7 @@
 import type { Step } from '../types';
 import { isGroup } from './step-shared';
+import { rhythmMarks } from './rhythm-marks';
+import { rhythmPulses, type Pulse } from './rhythm-pulses';
 export type Fraction = [number, number];
 export interface Box {
   start: Fraction;
@@ -12,6 +14,7 @@ export interface Box {
   turn?: number;
   active: boolean;
   opaque?: boolean;
+  pulses?: Pulse[];
 }
 const gcd = (a: number, b: number): number => (b ? gcd(b, a % b) : Math.abs(a));
 const fraction = (n: number, d = 1): Fraction => {
@@ -43,7 +46,9 @@ const add = (a: Fraction, b: Fraction) => fraction(a[0] * b[1] + b[0] * a[1], a[
 const mul = (a: Fraction, b: Fraction) => fraction(a[0] * b[0], a[1] * b[1]);
 export const fractionNumber = (a: Fraction) => a[0] / a[1];
 const weight = (s: Step) =>
-  ('weight' in s ? s.weight : undefined) ?? (s.kind === 'value' ? s.repeat : undefined) ?? 1;
+  rhythmMarks(s)?.weight ??
+  ('weight' in s ? s.weight : s.kind === 'value' ? s.repeat : undefined) ??
+  1;
 /** One absolute cycle. Opaque chunks occupy their structural slot, without invented notes.
  * Alternatives retain all turns for editing; active marks the turn that plays.
  */
@@ -51,7 +56,7 @@ export function layoutRhythm(steps: Step[], cycle = 0): Box[] {
   // `other` can hide an outer weight; weighted alternatives can span cycles.
   // Neither is safe to give ordinary one-cycle slots from the stored tree.
   const unresolved = (s: Step): boolean =>
-    s.kind === 'other' ||
+    (s.kind === 'other' && !rhythmMarks(s)) ||
     !Number.isFinite(weight(s)) ||
     weight(s) <= 0 ||
     (isGroup(s) &&
@@ -96,8 +101,11 @@ export function layoutRhythm(steps: Step[], cycle = 0): Box[] {
     active: boolean,
     turn?: number,
   ) {
+    const pulses = ['other', 'euclid'].includes(s.kind)
+      ? rhythmPulses(s, localCycle, localCycle + 1)
+      : undefined;
     const opaque =
-      !['value', 'rest', 'sub', 'alternate', 'together'].includes(s.kind) ||
+      (!pulses && !['value', 'rest', 'sub', 'alternate', 'together'].includes(s.kind)) ||
       (s.kind === 'value' && s.chance !== undefined);
     const box: Box = {
       start,
@@ -106,6 +114,17 @@ export function layoutRhythm(steps: Step[], cycle = 0): Box[] {
       kind: opaque && s.kind === 'value' ? 'other' : s.kind,
       path,
       active,
+      ...(pulses
+        ? {
+            pulses: pulses.map((p) => ({
+              ...p,
+              start: p.start - localCycle,
+              end: p.end - localCycle,
+              from: p.from - localCycle,
+              to: p.to - localCycle,
+            })),
+          }
+        : {}),
       ...(turn === undefined ? {} : { turn }),
       ...(opaque ? { opaque: true } : {}),
     };

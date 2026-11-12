@@ -188,3 +188,18 @@
     padding-block: 2px;
   }
 }
+
+.rhythm-marks {
+  flex-basis: 100%;
+}
+.rhythm-marks > .rhythm-action-group {
+  display: inline-flex;
+  margin-block: 6px;
+}
+.rhythm-part .overview-rest {
+  fill: var(--border);
+}
+.rhythm-part .overview-part {
+  stroke: var(--canvas);
+  stroke-width: 2;
+}
