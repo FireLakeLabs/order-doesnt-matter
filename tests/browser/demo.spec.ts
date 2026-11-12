@@ -37,6 +37,15 @@ test('Phase 2: ten editors, one silent video', async ({ browser, request }) => {
   const page = await context.newPage();
   const images: string[] = [],
     captions: string[] = [];
+  const limitations: { step: number; reason: string; caption: string }[] = [];
+  const selectedBass = () =>
+    page.evaluate(() => {
+      const state = window.odmApp.state;
+      const bass = state.rows.find((r) => r.name === 'bass')!;
+      return state.events[bass.id].events
+        .filter((e) => e.hasOnset && e.part[0] >= state.fromCycle && e.part[0] < state.toCycle)
+        .map((e) => ({ span: e.whole, value: e.value as { note?: string; cutoff?: number } }));
+    });
   const editor = page.locator('#editor');
   const button = (name: string) => page.getByRole('button', { name, exact: true });
   const instrument = async (name: string) => {
@@ -72,13 +81,19 @@ test('Phase 2: ten editors, one silent video', async ({ browser, request }) => {
   async function step(n: number, name: string, text: string, action: () => Promise<void>) {
     await caption(`${n}. ${text}`);
     await action();
-    await hold(`${n}. ${text}`);
+    const issues = limitations.filter((issue) => issue.step === n);
+    const result = [text, ...issues.map((issue) => issue.caption)].join(' ');
+    await hold(`${n}. ${result}`);
     const file = `${String(n).padStart(2, '0')}-${name}.png`;
     await page.screenshot({ path: `${dir}/${file}` });
     images.push(file);
-    captions.push(`${n}. ${text}`);
+    captions.push(`${n}. ${result}`);
     await writeFile(`${dir}/captions.txt`, `${captions.join('\n')}\n`);
-    console.log(`DEMO ${n}: ${text}`);
+    console.log(`DEMO ${n}: ${result}`);
+    await writeFile(
+      `${dir}/limitations.txt`,
+      limitations.map((issue) => `${issue.step}. ${issue.reason}`).join('\n'),
+    );
   }
   try {
     await openProgram(page, {
@@ -225,6 +240,8 @@ test('Phase 2: ten editors, one silent video', async ({ browser, request }) => {
         await close();
         await selectNode(page, { breadcrumb: ['bass', 'Rhythm'] });
         await button('Boxes').click();
+        const before = await selectedBass();
+        expect(before.length).toBeGreaterThan(0);
         await exact(page.getByLabel('Note value', { exact: true }), 'd2');
         await hold('8. Bass · first note changed to d2');
         await button('Split in 2').click();
@@ -236,11 +253,20 @@ test('Phase 2: ten editors, one silent video', async ({ browser, request }) => {
         await hold('8. First part split in two · first half is a rest');
         await button('List').click();
         await expect(page.locator('[data-view="List"]')).toBeVisible();
+        const after = await selectedBass();
+        if (JSON.stringify(after) === JSON.stringify(before)) {
+          limitations.push({
+            step: 8,
+            caption: 'LIMITATION: the selected drop’s real notes stayed unchanged.',
+            reason:
+              'After the one-drop chords mute localized this occurrence, bass Rhythm edits the shared definition. The selected drop keeps its copied rhythm: its onset/value bag is unchanged after note, split and rest edits. The sheet exposes only the shared bass Rhythm target, with no occurrence-level Rhythm control.',
+          });
+        } else expect(after.some((e) => String(e.value.note) === 'd2')).toBe(true);
       },
     );
     await step(9, 'source', 'Edit a setting as source, Apply 1100, then open Setup.', async () => {
       await close();
-      await selectNode(page, { breadcrumb: ['bass', 'lpf'] });
+      await selectNode(page, { breadcrumb: ['bass', 'in drop', 'lpf'] });
       await button('Edit as source').click();
       const field = page.getByRole('textbox', { name: 'Source text', exact: true });
       const previous = await field.inputValue();
@@ -250,6 +276,9 @@ test('Phase 2: ten editors, one silent video', async ({ browser, request }) => {
       await expect(editor).toContainText('Applied.');
       await waitForPending(page);
       await hold('9. Source applied · bass filter 1100');
+      const notes = await selectedBass();
+      expect(notes.length).toBeGreaterThan(0);
+      expect(notes.some((e) => e.value.cutoff === 1100)).toBe(true);
       await close();
       await page.locator('.sheet-setup summary').click();
       await expect(page.locator('.sheet-setup')).toHaveAttribute('open', '');
@@ -268,7 +297,7 @@ test('Phase 2: ten editors, one silent video', async ({ browser, request }) => {
       await expect(button('Stop')).toBeDisabled();
     });
     console.log(
-      'DEMO: ten steps completed through the interface; no unavailable controls or refusals.',
+      `DEMO: ten step images; ${limitations.length} interface limitations (limitations.txt); no source/API bypasses.`,
     );
   } finally {
     if (!page.isClosed()) await context.close();
