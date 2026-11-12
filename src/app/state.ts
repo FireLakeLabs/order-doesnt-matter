@@ -14,6 +14,7 @@ export interface AppState {
   toCycle: number;
   events: Record<string, EventResult>;
   sounds: SheetSoundState[];
+  soundNotice: { visible: boolean; failures: string[] };
   playing: boolean;
   loadError: string;
   message: string;
@@ -32,6 +33,7 @@ export const initialState = (): AppState => ({
   toCycle: 4,
   events: {},
   sounds: [],
+  soundNotice: { visible: false, failures: [] },
   playing: false,
   loadError: '',
   message: '',
@@ -93,10 +95,36 @@ export function mergeSounds(
   names: string[],
   updates: SheetSoundState[],
 ): SheetSoundState[] {
-  const book = new Map(previous.map((s) => [s.name, s]));
-  for (const name of names) if (!book.has(name)) book.set(name, { name, state: 'not-loaded' });
-  for (const sound of updates) book.set(sound.name, sound);
-  return [...book.values()];
+  const before = new Map(previous.map((s) => [s.name, s])),
+    latest = new Map(updates.map((s) => [s.name, s]));
+  return [
+    ...new Map(
+      names.map((name) => {
+        const base = name.split(':')[0];
+        const sound: SheetSoundState = latest.get(name) ??
+          latest.get(base) ??
+          before.get(name) ??
+          before.get(base) ?? { name, state: 'not-loaded' };
+        return [sound.name, sound];
+      }),
+    ).values(),
+  ];
+}
+
+/** A repeated snapshot cannot reopen a dismissed notice. A new failed load can. */
+export function observeSoundNotice(
+  previous: AppState['soundNotice'],
+  updates: SheetSoundState[],
+): AppState['soundNotice'] {
+  const failures = updates
+    .filter(
+      (s) => s.state === 'missing' && s.detail?.includes('Default collections could not load'),
+    )
+    .map((s) => s.name);
+  return {
+    visible: previous.visible || failures.some((name) => !previous.failures.includes(name)),
+    failures,
+  };
 }
 
 /** Solo belongs to this loaded piece, outside document history. */
