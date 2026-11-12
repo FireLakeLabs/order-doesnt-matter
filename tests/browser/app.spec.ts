@@ -66,7 +66,7 @@ test('page: original arrangement → rows → measured synth PCM → pinned sect
   expect(measured.firstCycle).toBe(4);
   for (const drum of ['bd', 'hh', 'cp'])
     await expect(page.getByText(new RegExp(`${drum}: missing`)).first()).toBeVisible();
-  await expect(page.getByText(/offline or network error/).first()).toBeVisible();
+  await expect(page.getByText(/Default sounds could not load/).first()).toBeVisible();
   const mark = page.locator('.sheet-playhead').first();
   const before = await mark.getAttribute('d');
   await expect.poll(() => mark.getAttribute('d')).not.toBe(before);
