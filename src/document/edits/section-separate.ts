@@ -37,7 +37,8 @@ export function separateSection(doc: Doc, id: string) {
   // A section that is one shared instrument gets a stack of references, so
   // separating the section never copies the instrument itself.
   const content: Pattern =
-    owner.content.core.kind !== 'group' && binding?.kind === 'shared'
+    binding?.kind === 'shared' &&
+    (binding.purpose === 'instrument' || owner.content.core.kind !== 'group')
       ? {
           id: fresh('copy'),
           tier: 1,
