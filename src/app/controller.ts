@@ -65,7 +65,7 @@ export function createApp() {
       first = Math.max(0, Math.floor(cycle) - 1);
     const last = state.sections.at(-1),
       length = last ? last.start + last.cycles : 0,
-      end = length ? (Math.floor(cycle / length) + 1) * length : null;
+      end = length ? (Math.floor(Math.max(0, cycle) / length) + 1) * length : null;
     const held = watchScore === state.doc ? cachedWindow : null;
     const known: [number, number][] = [
       ...(held ? [[held.from, held.to] as [number, number]] : []),

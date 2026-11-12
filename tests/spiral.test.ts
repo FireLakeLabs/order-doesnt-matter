@@ -219,6 +219,7 @@ it('arranged boundaries say end while the next pass still follows real absolute 
   await app.load('arrange([2,s("sawtooth")],[2,s("triangle")])');
   await vi.waitFor(() => expect(Object.keys(app.state.events)).toHaveLength(2));
   app.setWatch(true);
+  expect(app.watchInput(-0.02).end).toBe(4);
   expect(app.watchInput(3.5).end).toBe(4);
   const input = app.watchInput(5);
   expect(input.end).toBe(8);

@@ -7,7 +7,10 @@ function silencedAt(input: SpiralInput, lane: number, cycle: number) {
   const row = input.rows[lane];
   if (row.muted || row.pattern.muted || (input.solo !== null && input.solo !== row.id)) return true;
   if (!row.uses.some((u) => u.muted)) return false;
-  const section = input.sections.find((s) => cycle >= s.start && cycle < s.start + s.cycles);
+  const last = input.sections.at(-1),
+    length = last ? last.start + last.cycles : 0;
+  const local = length ? Math.max(0, cycle) % length : cycle;
+  const section = input.sections.find((s) => local >= s.start && local < s.start + s.cycles);
   const uses = section ? row.uses.filter((u) => u.path.some((n) => n.id === section.id)) : row.uses;
   return uses.length > 0 && uses.every((u) => u.muted);
 }
