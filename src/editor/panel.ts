@@ -1,3 +1,4 @@
+import { instrumentEditStatus } from '../document/edits/shared';
 import type { PendingEntry } from './pending';
 import type { EditorContext, EditorKind } from './kind';
 import './style.css';
@@ -119,5 +120,7 @@ export function createPanel(host: HTMLElement, close: () => void) {
           : playing
             ? 'Playing now'
             : 'Plays on next start';
+    const ownVersion = instrumentEditStatus(context.doc);
+    if (ownVersion) status.textContent += ` · ${ownVersion}`;
   };
 }
