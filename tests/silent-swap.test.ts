@@ -25,6 +25,7 @@ it('acknowledges a current silent scheduling window once, ignoring old/stopped r
     },
     playing: () => playing,
     now: () => 4,
+    outputLatency: () => 0,
     time: () => 10,
     tap: { sampleRate: 48000, rms: async () => 0 },
   };

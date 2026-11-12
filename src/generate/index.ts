@@ -39,6 +39,7 @@ function argument(arg: Arg, hole?: string, serialization?: Serialization): strin
 }
 interface Serialization {
   identities: Set<string>;
+  instrumentTags?: Map<string, string>;
   mutedOrigins: Set<string>;
 }
 interface Isolation {
@@ -130,6 +131,8 @@ export function generatePattern(
     serialization?.identities.has(pattern.id)
   )
     code = `(${annotation('pattern', { label: pattern.label, comment: pattern.comment, muted: pattern.muted, originMuted: originMuted || undefined, origin: pattern.origin, identity: serialization?.identities.has(pattern.id) ? pattern.id : undefined })} ${code})`;
+  const instrument = serialization?.instrumentTags?.get(pattern.origin ?? pattern.id);
+  if (instrument) code += `.tag(${literal(`odm:instrument:${instrument}`)})`;
   return code;
 }
 export const generate: Generate = (doc, options = {}) => {
@@ -139,6 +142,9 @@ export const generate: Generate = (doc, options = {}) => {
   });
   const serialization: Serialization = {
     identities,
+    instrumentTags: options.instrumentTags
+      ? new Map(instruments(doc).map((r) => [r.pattern.id, r.id]))
+      : undefined,
     mutedOrigins: new Set(
       instruments(doc)
         .filter((r) => r.pattern.muted)

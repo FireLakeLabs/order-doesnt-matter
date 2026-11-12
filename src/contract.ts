@@ -26,6 +26,8 @@ export interface GenerateOptions {
    * This is how a row of the sheet gets its own events.
    */
   only?: string;
+  /** Playback-only row identity in Hap context; event values are unchanged. */
+  instrumentTags?: boolean;
 }
 /** Fresh Strudel for document v2 (D2). Metadata carries names, provenance,
  * shared purpose, and localized instrument origins. Pure and synchronous. */
@@ -62,7 +64,14 @@ export type EngineEvent =
   | { type: 'transport'; playing: boolean }
   | { type: 'sounds'; sounds: SoundState[] }
   /** A note was handed to the audio engine. `time` is audio-clock seconds. */
-  | { type: 'trigger'; value: unknown; cycle: number; time: number }
+  | {
+      type: 'trigger';
+      value: unknown;
+      cycle: number;
+      time: number;
+      revision: number;
+      instrument?: string;
+    }
   /** The first trigger scheduled from the code given to the latest `play` call. */
   | { type: 'swapped'; revision: number; cycle: number; time: number }
   /** The latest play revision was queried for a scheduler window with no onsets.
@@ -97,6 +106,8 @@ export interface Engine {
   now(): number | null;
   /** Audio-clock time in seconds. */
   audioTime(): number;
+  /** Browser-reported base + output latency, seconds; zero when unknown. */
+  outputLatency(): number;
   /** Every sound the current code uses, with its state (D12). */
   sounds(): SoundState[];
   subscribe(listener: (event: EngineEvent) => void): () => void;

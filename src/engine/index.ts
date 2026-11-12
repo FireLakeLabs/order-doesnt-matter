@@ -16,6 +16,7 @@ export interface AudioBackend {
   playing(): boolean;
   now(): number;
   time(): number;
+  outputLatency(): number;
   seek(cycle: number): void;
   tap: OutputTap;
 }
@@ -25,6 +26,7 @@ export type Dispatch = (
   cycle: number,
   time: number,
   render: () => Promise<void>,
+  instrument?: string,
 ) => Promise<void>;
 export type SilentWindow = (revision: number, cycle: number, time: number) => void;
 /** Injection keeps queue, revision and cancellation behavior testable without audio. */
@@ -60,7 +62,7 @@ export function engineWith(
   const books = new Map<number, SoundBook>();
   let book = new SoundBook(audio.check, () => {});
   connect(
-    async (revision, value, cycle, time, render) => {
+    async (revision, value, cycle, time, render, instrument) => {
       const token = epoch,
         current = books.get(revision);
       if (!enabled || !current) return;
@@ -69,7 +71,14 @@ export function engineWith(
       try {
         if (ready) await render();
         if (token !== epoch) return;
-        emit({ type: 'trigger', value, cycle, time });
+        emit({
+          type: 'trigger',
+          value,
+          cycle,
+          time,
+          revision,
+          ...(instrument ? { instrument } : {}),
+        });
         if (revisions.trigger(revision)) emit({ type: 'swapped', revision, cycle, time });
       } catch (e) {
         error(e);
@@ -162,6 +171,7 @@ export function engineWith(
     },
     now: () => (audio.playing() ? audio.now() : null),
     audioTime: audio.time,
+    outputLatency: audio.outputLatency,
     sounds: () => book.list(),
     subscribe(listener) {
       listeners.add(listener);

@@ -7,6 +7,7 @@ test('Kiln Watch view sliders work by keyboard, fit a phone and survive reload',
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openProgram(page, { example: 'Kiln' });
+  expect(await page.evaluate(() => window.odmApp.watchInput(null).outputLatency)).toBe(0);
   const watch = page.getByRole('button', { name: 'Watch', exact: true });
   await watch.click();
   await page.locator('.spiral-controls > summary').click();
@@ -141,23 +142,6 @@ test('opt-in: 100 Kiln trigger clocks versus Watch gate and Now flash, plus 300 
   await openProgram(page, { example: 'Kiln', offline: false });
   await page.getByRole('button', { name: 'Section 2', exact: true }).click();
   await play(page);
-  if (process.env.ODM_LIVE_COMPENSATED)
-    await page.evaluate(() => {
-      const context = (window as unknown as { measuredAudioContext: AudioContext })
-        .measuredAudioContext;
-      const app = window.odmApp,
-        watchInput = app.watchInput.bind(app);
-      // Simulates the requested engine accessor + shell forwarding, outside product code.
-      app.watchInput = (cycle) => ({
-        ...watchInput(cycle),
-        outputLatency: context.baseLatency + (context.outputLatency ?? 0),
-      });
-      const state = app.state;
-      Object.defineProperty(state, 'outputLatency', {
-        enumerable: true,
-        get: () => context.baseLatency + (context.outputLatency ?? 0),
-      });
-    });
   await page.getByRole('button', { name: 'Watch', exact: true }).click();
   const capture = await page.evaluateHandle(() => {
     const app = window.odmApp,
@@ -221,6 +205,7 @@ test('opt-in: 100 Kiln trigger clocks versus Watch gate and Now flash, plus 300 
     requestAnimationFrame(frame);
     return {
       rows,
+      engineLatency: engine.outputLatency(),
       baseLatency: context.baseLatency,
       outputLatency: context.outputLatency,
       sampleRate: context.sampleRate,
@@ -249,6 +234,7 @@ test('opt-in: 100 Kiln trigger clocks versus Watch gate and Now flash, plus 300 
     definition:
       'Positive = view late. Audio target = scheduled engine time + baseLatency + outputLatency, mapped to performance.now at dispatch. Browser-reported latency, not a speaker measurement.',
   };
+  expect(result.engineLatency).toBeCloseTo(result.baseLatency + (result.outputLatency ?? 0), 12);
   expect(result.rows).toHaveLength(100);
   expect(result.rows.every((r) => Number.isFinite(r.gate) && Number.isFinite(r.flash))).toBe(true);
   await page.getByRole('button', { name: 'Stop', exact: true }).last().click();
@@ -263,7 +249,7 @@ test('opt-in: 100 Kiln trigger clocks versus Watch gate and Now flash, plus 300 
   await mkdir('test-results/live-polish', { recursive: true });
   await writeFile(
     'test-results/live-polish/measurement.json',
-    JSON.stringify({ ...report, draw, compensated: !!process.env.ODM_LIVE_COMPENSATED }, null, 2),
+    JSON.stringify({ ...report, draw, compensated: true }, null, 2),
   );
   console.log(
     JSON.stringify({

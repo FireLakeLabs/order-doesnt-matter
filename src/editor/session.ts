@@ -1,4 +1,5 @@
 import { instruments, walk, type Doc, type Setting } from '../document';
+import { describeTarget } from '../document/edit';
 import { setConstant } from '../document/edits/set-constant';
 import { generate } from '../generate';
 import type { Constant } from '../document/edit';
@@ -129,8 +130,22 @@ export function createEditSession(doc: Doc, ports: Ports) {
     if (!targets.length) targets.push(...rows, 'document');
     const playing = ports.playing();
     ++token;
-    for (const target of targets)
-      p = transition(p, { type: 'edit', doc: next, target, token, playing });
+    const inventory = instruments(next);
+    for (const target of targets) {
+      const own = describeTarget(next, target).instrumentId;
+      const waiting = inventory.filter(
+        (row) => rows.includes(row.id) && (!own || row.id === own) && !row.muted,
+      );
+      p = transition(p, {
+        type: 'edit',
+        doc: next,
+        target,
+        token,
+        playing,
+        instruments: waiting.map((r) => r.id),
+        names: waiting.map((r) => r.name),
+      });
+    }
     emit();
     if (playing) {
       queued = {
@@ -174,9 +189,14 @@ export function createEditSession(doc: Doc, ports: Ports) {
       h = redo(h);
       install(h.present);
     },
-    observe(event: Extract<PendingEvent, { type: 'swapped' | 'committed' }>) {
-      p = transition(p, event);
-      emit();
+    observe(
+      event: Extract<PendingEvent, { type: 'swapped' | 'committed' | 'trigger' | 'progress' }>,
+    ) {
+      if (!Object.values(p.entries).some((e) => e.status === 'pending')) return;
+      const next = transition(p, event);
+      const changed = Object.keys(next.entries).length !== Object.keys(p.entries).length;
+      p = next;
+      if ((event.type !== 'progress' && event.type !== 'trigger') || changed) emit();
     },
     clear() {
       cancel();

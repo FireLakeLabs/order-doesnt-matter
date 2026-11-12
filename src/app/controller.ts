@@ -140,7 +140,14 @@ export function createApp() {
       }
       watchMerge = { key, events };
     }
-    return { ...state, events: watchMerge.events, playhead: now, known, end };
+    return {
+      ...state,
+      events: watchMerge.events,
+      playhead: now,
+      outputLatency: engine?.outputLatency() ?? 0,
+      known,
+      end,
+    };
   }
   const listeners = new Set<(state: AppState) => void>();
   const history: EngineEvent[] = [];
@@ -199,7 +206,8 @@ export function createApp() {
   function observe(event: EngineEvent) {
     history.push(event);
     if (history.length > 1000) history.shift();
-    if (event.type === 'swapped' || event.type === 'committed') editor?.observe(event);
+    if (event.type === 'swapped' || event.type === 'committed' || event.type === 'trigger')
+      editor?.observe(event);
     if (event.type === 'error') message(event.message, !!event.reason);
     if (event.type === 'transport') {
       if (!event.playing) editor?.clear();
@@ -219,7 +227,10 @@ export function createApp() {
       transport = transportRevision;
     const work = swaps.then(() => {
       if (piece !== epoch || transport !== transportRevision) return -1;
-      return engine!.play(generate(doc, playbackOptions(state)), options);
+      return engine!.play(
+        generate(doc, { ...playbackOptions(state), instrumentTags: true }),
+        options,
+      );
     });
     swaps = work.then(
       () => {},
@@ -385,6 +396,7 @@ export function createApp() {
     },
     frame() {
       const now = engine?.now() ?? null;
+      if (now !== null) editor?.observe({ type: 'progress', cycle: now });
       const next = tick(state, now);
       if (next !== state) {
         update(next);

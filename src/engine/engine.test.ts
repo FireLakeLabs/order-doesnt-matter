@@ -27,6 +27,7 @@ function fixture() {
     },
     playing: () => playing,
     now: () => 8,
+    outputLatency: () => 0,
     time: () => 10,
     seek: () => {},
     tap: { sampleRate: 48000, rms: async () => 0 },

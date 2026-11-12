@@ -33,6 +33,7 @@ const audio = vi.hoisted(() => {
     },
     now: () => (playing ? 8 : null),
     audioTime: () => 0,
+    outputLatency: () => 0,
     sounds: () => [],
     tap: () => ({ sampleRate: 48000, rms: async () => 0 }),
     subscribe(listener) {
@@ -76,7 +77,7 @@ it('real house controller: solo stays wired through mute/name undo, redo, Stop/r
     const assertSolo = async () => {
       await vi.advanceTimersByTimeAsync(100);
       expect(app.state.solo).toBe(bass.id);
-      expect(audio.codes.at(-1)).toBe(generate(doc(), { only: bass.id }));
+      expect(audio.codes.at(-1)).toBe(generate(doc(), { only: bass.id, instrumentTags: true }));
     };
     await assertSolo();
     edit(good(renameInstrument(doc(), bass.id, 'Solo bass')));
@@ -98,7 +99,7 @@ it('real house controller: solo stays wired through mute/name undo, redo, Stop/r
     app.solo(null);
     await vi.advanceTimersByTimeAsync(100);
     expect(app.state.solo).toBeNull();
-    expect(audio.codes.at(-1)).toBe(generate(doc()));
+    expect(audio.codes.at(-1)).toBe(generate(doc(), { instrumentTags: true }));
     await app.load('note(60).s("sine")');
     expect(app.state.solo).toBeNull();
   } finally {
