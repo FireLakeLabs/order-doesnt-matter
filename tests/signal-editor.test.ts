@@ -11,6 +11,7 @@ import { setSignalRange } from '../src/document/edits/signal-range';
 import { setSignalPeriod } from '../src/document/edits/signal-period';
 import { constantToSignal } from '../src/document/edits/signal-from-constant';
 import { signalToConstant } from '../src/document/edits/signal-to-constant';
+import signalEditor from '../src/editor/kinds/signal';
 const load = (s: string) => importStrudel(s).doc;
 const settings = (d: Doc) => {
   const result: Setting[] = [];
@@ -88,7 +89,11 @@ it('refuses missing, wrong, reused, parameterized, ambiguous and nonnumeric targ
     expect(setSignalRange(a, id, low, high)).toMatchObject({ ok: false });
   for (const period of [0, -1, Infinity, NaN])
     expect(setSignalPeriod(a, id, period)).toMatchObject({ ok: false });
-  for (const source of ['const wave=sine; s("hh").gain(wave)', 's("hh").gain(irand(3))']) {
+  for (const source of [
+    'const wave=sine; s("hh").gain(wave)',
+    's("hh").gain(irand(3))',
+    's("hh").gain(time)',
+  ]) {
     const d = load(source),
       target = settings(d).find((s) => s.name === 'gain')!.id;
     for (const edit of [
@@ -110,6 +115,7 @@ it('refuses missing, wrong, reused, parameterized, ambiguous and nonnumeric targ
     expect(
       expr.includes('range') ? setSignalRange(d, target, 0, 1) : setSignalPeriod(d, target, 4),
     ).toMatchObject({ ok: false });
+    expect(state(d, target).others.length).toBeGreaterThan(0);
   }
   const log = load('s("hh").lpf(sine.rangex(200,4000))');
   expect(
@@ -212,3 +218,19 @@ it('all supported shapes and both conversions generate real worker events withou
     expect(hats.every((e) => Number.isFinite((e.value as { gain: number }).gain))).toBe(true);
   }
 }, 15000);
+
+it('exposes both conversion offers as pure operations, including their actual returned documents', () => {
+  const a = load('s("hh*8").gain(.5)'),
+    id = settings(a)[0].id;
+  const constant = describeTarget(a, id);
+  expect(signalEditor.matches(constant)).toBe(false);
+  const offers = signalEditor.conversions(constant, a);
+  expect(offers.map((o) => o.label)).toEqual(['Drive with a signal']);
+  const b = doc(offers[0].apply());
+  const target = describeTarget(b, id);
+  expect(signalEditor.matches(target)).toBe(true);
+  const back = signalEditor.conversions(target, b);
+  expect(back.map((o) => o.label)).toEqual(['Make it one value']);
+  expect(doc(back[0].apply())).toEqual(doc(signalToConstant(b, id)));
+  expect(signalEditor.conversions(describeTarget(a, a.body[0].id), a)).toEqual([]);
+});

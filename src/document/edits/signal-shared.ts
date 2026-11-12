@@ -34,25 +34,32 @@ function layer(pattern: Pattern, names: string[], count: number) {
 export function signalState(doc: Doc, id: string) {
   const setting = signalSetting(doc, id);
   if ('ok' in setting) return setting;
-  const pattern = setting.value;
-  if (pattern.core.kind !== 'signal' || pattern.core.args?.length)
+  const pattern = setting.value,
+    core = pattern.core;
+  if (core.kind !== 'signal' || core.args?.length)
     return {
       ok: false,
       reason: 'This signal is reused or takes arguments; edit its source text',
     } as Refusal;
+  if (!signalShapes.some((shape) => shape === core.shape))
+    return { ok: false, reason: 'This signal shape needs source text to edit' } as Refusal;
   const r = layer(pattern, ['range', 'rangex'], 2),
     p = layer(pattern, ['slow', 'fast'], 1);
   const period = p.selected?.name === 'fast' ? 1 / p.numbers![0] : (p.numbers?.[0] ?? 1);
   return {
     setting,
     pattern,
-    shape: pattern.core.shape,
+    shape: core.shape,
     range: r.selected,
     speed: p.selected,
     low: r.valid ? (r.numbers?.[0] ?? 0) : null,
     high: r.valid ? (r.numbers?.[1] ?? 1) : null,
     period: p.valid && period > 0 && Number.isFinite(period) ? period : null,
-    others: pattern.layers.filter((l) => l !== r.selected && l !== p.selected),
+    others: pattern.layers.filter(
+      (l) =>
+        (l !== r.selected || !r.valid) &&
+        (l !== p.selected || !p.valid || period <= 0 || !Number.isFinite(period)),
+    ),
   };
 }
 export function signalLayer(
