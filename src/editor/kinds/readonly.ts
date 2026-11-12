@@ -20,8 +20,8 @@ export default {
           : target.displayValue;
       value.textContent = String(
         target.value ??
-          (target.kind === 'rhythm' ? target.displayValue : current) ??
-          'Current values unavailable',
+          ((target.kind === 'rhythm' ? target.displayValue : current) ||
+            'Current values unavailable'),
       );
       text.textContent =
         target.kind === 'rhythm'
