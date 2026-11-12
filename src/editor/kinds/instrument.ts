@@ -2,6 +2,7 @@ import type { EditorKind, EditorContext } from '../kind';
 import { instruments, sections, walk, type Doc, type Pattern } from '../../document';
 import { definitionMuted, setMuted } from '../../document/edits/set-muted';
 import { setUseMuted } from '../../document/edits/set-use-muted';
+import { removeInstrument } from '../../document/edits/instrument-remove';
 import { renameInstrument } from '../../document/edits/rename-instrument';
 import type { Refusal } from '../../document/edits/shared';
 import { fieldLabel, toggle } from '../presentation';
@@ -35,7 +36,44 @@ export default {
     form.append(label, save, generated, error);
     generated.className = 'editor-helper';
     uses.className = 'editor-list';
-    body.append(form, mute.label, solo.label, summary, uses);
+    const removal = el('section'),
+      remove = el('button', 'Delete instrument'),
+      confirmation = el('div'),
+      question = el('p'),
+      confirm = el('button', 'Delete everywhere'),
+      cancel = el('button', 'Keep instrument'),
+      actions = el('div');
+    removal.className = 'editor-list-item';
+    removal.setAttribute('aria-label', 'Delete instrument');
+    confirmation.hidden = true;
+    actions.className = 'editor-actions';
+    actions.append(cancel, confirm);
+    confirmation.append(question, actions);
+    removal.append(remove, confirmation);
+    body.append(form, mute.label, solo.label, summary, uses, removal);
+    remove.onclick = () => {
+      confirmation.hidden = false;
+      remove.hidden = true;
+      cancel.focus();
+    };
+    cancel.onclick = () => {
+      confirmation.hidden = true;
+      remove.hidden = false;
+      remove.focus();
+    };
+    confirm.onclick = () => {
+      const row = instruments(context.doc).find((r) => r.id === context.target.nodeId);
+      if (!row) return;
+      const next = removeInstrument(context.doc, row.id);
+      if ('ok' in next) {
+        error.textContent = next.reason;
+        return;
+      }
+      context.apply(next, {
+        selection: null,
+        announcement: `Deleted ${row.name.replaceAll('$', '')}. Undo to bring it back.`,
+      });
+    };
     function apply(next: Doc | Refusal) {
       error.textContent = 'ok' in next ? next.reason : '';
       field.setAttribute('aria-invalid', String('ok' in next));
@@ -67,6 +105,7 @@ export default {
       const parts = sections(context.doc).filter((s) =>
         row.uses.some((u) => u.path.some((n) => n.id === s.id)),
       );
+      question.textContent = `Delete ${row.name.replaceAll('$', '')}${row.nameSource === 'generated' ? ' (generated name)' : ''} everywhere? ${parts.length ? `It plays in ${parts.length} ${parts.length === 1 ? 'section' : 'sections'}.` : 'It plays across the piece.'} Undo can bring it back.`;
       const settings = new Set<string>(),
         rewrites = new Set<string>(),
         names = new Set<string>();
