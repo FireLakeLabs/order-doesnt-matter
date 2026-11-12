@@ -26,6 +26,7 @@ try {
         'node_modules/@playwright/test/cli.js',
         'test',
         ...(mode === 'ci' ? [] : [`tests/browser/${mode}.spec.ts`]),
+        ...process.argv.slice(3),
         '--output',
         `${outDir}/results`,
       ],

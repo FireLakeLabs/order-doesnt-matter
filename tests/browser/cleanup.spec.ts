@@ -1,3 +1,4 @@
+import { scoreReady, play } from './helpers';
 import { expect, test } from '@playwright/test';
 import { mkdir } from 'node:fs/promises';
 import type {} from '../../src/app/main';
@@ -12,6 +13,7 @@ test('sit-out rows, sticky headings, late sounds and phone toolbar', async ({ pa
     .getByLabel('Your Strudel program')
     .fill('const bass=note(60).s("sine").lpf(450); arrange([20,s("triangle")],[4,bass])');
   await page.getByRole('button', { name: 'Load', exact: true }).click();
+  await scoreReady(page);
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
   const bass = page
     .getByRole('row')
@@ -31,19 +33,14 @@ test('sit-out rows, sticky headings, late sounds and phone toolbar', async ({ pa
   await page.screenshot({ path: 'test-results/cleanup-phone-topbar.png', fullPage: true });
   await page.setViewportSize({ width: 1280, height: 900 });
   await page.screenshot({ path: 'test-results/cleanup-desktop-topbar.png', fullPage: true });
-  await page.getByRole('button', { name: 'Play', exact: true }).click();
+  await play(page);
   await expect(bass.getByRole('rowheader')).toContainText('sine: ready');
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
   await page.getByRole('button', { name: 'Kiln', exact: true }).click();
+  await scoreReady(page);
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Section 2', exact: true }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(
-        () => Object.keys(window.odmApp.state.events).length === window.odmApp.state.rows.length,
-      ),
-    )
-    .toBe(true);
+  await scoreReady(page);
   await bass.locator('[data-control="lpf"]').click();
   const scroll = page.getByRole('region', { name: 'Score table, scroll for more settings' });
   await scroll.evaluate((el) => {
@@ -74,8 +71,9 @@ test('sounds beyond the discovery cap say not used yet only during playback', as
   await page.getByRole('button', { name: 'Load', exact: true }).click();
   const late = page.getByRole('rowheader').filter({ hasText: 'late' });
   await expect(late).toContainText('sine: not loaded yet');
+  await scoreReady(page);
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
-  await page.getByRole('button', { name: 'Play', exact: true }).click();
+  await play(page);
   await expect(late).toContainText('sine: not used yet');
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
   await expect(late).toContainText('sine: not loaded yet');

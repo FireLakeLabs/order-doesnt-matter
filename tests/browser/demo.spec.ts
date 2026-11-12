@@ -1,3 +1,4 @@
+import { scoreReady, play, throughCycle, signal } from './helpers';
 import { readFile, mkdir, rename } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import type {} from '../../src/app/main';
@@ -40,23 +41,22 @@ test('record local arranged demo (video has no audio)', async ({ browser, reques
       .getByLabel('Your Strudel program')
       .fill(await readFile('corpus/programs/real-house-arranged.strudel', 'utf8'));
     await page.getByRole('button', { name: 'Load', exact: true }).click();
+    await scoreReady(page);
     await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
     await expect(page.getByRole('rowheader')).toHaveCount(8);
     await expect(page.getByRole('rowheader').first()).not.toContainText('Not queried');
     await page.screenshot({ path: 'test-results/demo/loaded-desktop.png', fullPage: true });
     await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
-    await page.getByRole('button', { name: 'Play', exact: true }).click();
-    await expect
-      .poll(
-        () => page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'trigger').length),
-        { timeout: 20000 },
-      )
-      .toBeGreaterThan(3);
-    await page.waitForTimeout(3200);
+    await play(page);
+    await signal(
+      () => page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'trigger').length),
+      { timeout: 20000 },
+    ).toBeGreaterThan(3);
+    await throughCycle(page, 2);
     await page.screenshot({ path: 'test-results/demo/playing-desktop.png', fullPage: true });
     await page.getByRole('button', { name: 'drop', exact: true }).first().click();
     await expect(page.locator('#window')).toHaveText('Cycles 8–16');
-    await page.waitForTimeout(700);
+    await scoreReady(page);
     await page.screenshot({ path: 'test-results/demo/selected-desktop.png', fullPage: true });
     await page.setViewportSize({ width: 390, height: 844 });
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
@@ -66,7 +66,7 @@ test('record local arranged demo (video has no audio)', async ({ browser, reques
     // table headers in Chromium, even though they paint correctly when scrolled.
     await page.screenshot({ path: 'test-results/demo/selected-phone.png' });
     await page.getByRole('rowheader').filter({ hasText: 'chords' }).scrollIntoViewIfNeeded();
-    await page.waitForTimeout(150);
+
     await page.screenshot({ path: 'test-results/demo/selected-phone-rows.png' });
     await page.getByRole('button', { name: 'Stop', exact: true }).click();
     console.log(

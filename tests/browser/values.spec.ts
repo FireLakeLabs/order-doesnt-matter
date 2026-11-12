@@ -1,9 +1,9 @@
+import { signal, openProgram, play, selectNode, waitForPending } from './helpers';
 import { mkdir } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { walk, type Setting } from '../../src/document';
 import { generate } from '../../src/generate';
 import { queryEventsNode } from '../../src/strudel/evaluate-node';
-import { openProgram, play, selectNode, waitForPending } from './helpers';
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 
 test('real techno: change room to alternating values, edit a cycle, preserve other triggers; phone and keyboard', async ({
@@ -40,13 +40,11 @@ test('real techno: change room to alternating values, edit a cycle, preserve oth
   await expect(origin).toBeFocused();
   await page.setViewportSize({ width: 1440, height: 900 });
   await play(page);
-  await expect
-    .poll(() =>
-      page.evaluate(
-        () => window.odmApp.history.filter((e) => e.type === 'trigger' && e.cycle >= 2).length,
-      ),
-    )
-    .toBeGreaterThan(0);
+  await signal(() =>
+    page.evaluate(
+      () => window.odmApp.history.filter((e) => e.type === 'trigger' && e.cycle >= 2).length,
+    ),
+  ).toBeGreaterThan(0);
   const triggers = await page.evaluate(() =>
     window.odmApp.history.filter((e) => e.type === 'trigger' && e.cycle < 2),
   );
@@ -84,13 +82,11 @@ test('Kiln: constant → values → edit second → alternating triggers → und
   await second.press('Enter');
   await play(page);
   await waitForPending(page);
-  await expect
-    .poll(() =>
-      page.evaluate(
-        () => window.odmApp.history.filter((e) => e.type === 'trigger' && e.cycle >= 6).length,
-      ),
-    )
-    .toBeGreaterThan(0);
+  await signal(() =>
+    page.evaluate(
+      () => window.odmApp.history.filter((e) => e.type === 'trigger' && e.cycle >= 6).length,
+    ),
+  ).toBeGreaterThan(0);
   const bass = await page.evaluate(() =>
     window.odmApp.history.filter(
       (e) =>

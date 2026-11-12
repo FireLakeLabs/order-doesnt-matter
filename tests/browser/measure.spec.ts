@@ -1,3 +1,4 @@
+import { scoreReady, signal } from './helpers';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import type {} from '../../src/app/main';
@@ -12,14 +13,13 @@ test('20 serial edits: input event → swapped trigger scheduled audio time', as
   );
   await page.goto('/?inspect');
   await page.getByRole('button', { name: 'Kiln', exact: true }).click();
+  await scoreReady(page);
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
   await page.getByRole('button', { name: 'Section 2', exact: true }).click();
   await page.getByRole('button', { name: 'Play', exact: true }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'swapped').length),
-    )
-    .toBeGreaterThan(0);
+  await signal(() =>
+    page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'swapped').length),
+  ).toBeGreaterThan(0);
   await page
     .getByRole('row')
     .filter({ has: page.getByRole('rowheader').filter({ hasText: 'bass' }) })

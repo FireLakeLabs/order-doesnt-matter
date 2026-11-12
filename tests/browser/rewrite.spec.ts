@@ -1,8 +1,8 @@
+import { signal, openProgram, play, selectNode, waitForPending } from './helpers';
 import { expect, test, type Page } from '@playwright/test';
 import { instruments } from '../../src/document';
 import { generate } from '../../src/generate';
 import { queryEventsNode } from '../../src/strudel/evaluate-node';
-import { openProgram, play, selectNode, waitForPending } from './helpers';
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 const editor = (page: Page) => page.locator('#editor');
 async function exact(page: Page, value: number) {
@@ -10,93 +10,104 @@ async function exact(page: Page, value: number) {
   await editor(page).getByRole('spinbutton').press('Enter');
   await waitForPending(page);
 }
-test('real house rewrite edits carry through swaps; ordered keys, previews, focus and phone', async ({
-  page,
-}) => {
-  await openProgram(page, { path: 'corpus/programs/real-house-arranged.strudel' });
-  // Accelerate transport only, retaining the real score; six full-cycle observations fit the budget.
-  await page.evaluate(() => {
-    const doc = window.odmApp.state.doc!;
-    window.odmApp.editor!.apply({
-      ...doc,
-      body: doc.body.map((n) => (n.kind === 'tempo' ? { ...n, cpm: 240 } : n)),
+for (const scenario of ['double', 'reset', 'degrade', 'order', 'restore'] as const)
+  test(`real house rewrite: ${scenario} preserves other triggers`, async ({ page }) => {
+    await openProgram(page, { path: 'corpus/programs/real-house-arranged.strudel' });
+    // Accelerate transport only, retaining the real score and event assertions.
+    await page.evaluate(() => {
+      const doc = window.odmApp.state.doc!;
+      window.odmApp.editor!.apply({
+        ...doc,
+        body: doc.body.map((n) => (n.kind === 'tempo' ? { ...n, cpm: 240 } : n)),
+      });
     });
-  });
-  const original = await page.evaluate(() => window.odmApp.state.doc!);
-  const kick = instruments(original).find((r) => r.name === 'kick')!;
-  await page.getByRole('button', { name: 'drop', exact: true }).first().click();
-  const add = await selectNode(page, { nodeId: `${kick.pattern.id}:rewrites` });
-  await expect(editor(page)).toHaveAttribute('data-editor-kind', 'rewrite');
-  await editor(page).getByRole('button', { name: 'Add fast', exact: true }).press('Enter');
-  await exact(page, 2);
-  await play(page);
-  const stable = (v: unknown): string =>
-    v && typeof v === 'object'
-      ? Array.isArray(v)
-        ? `[${v.map(stable)}]`
-        : `{${Object.entries(v)
-            .sort(([a], [b]) => a.localeCompare(b))
-            .map(([k, x]) => `${k}:${stable(x)}`)}}`
-      : JSON.stringify(v);
-  async function check(multiplier: number) {
-    const cycle = await page.evaluate(() => Math.ceil(window.odmApp.engine!.now()!) + 1);
-    await expect
-      .poll(() =>
+    const original = await page.evaluate(() => window.odmApp.state.doc!);
+    const kick = instruments(original).find((r) => r.name === 'kick')!;
+    await page.getByRole('button', { name: 'drop', exact: true }).first().click();
+    const add = await selectNode(page, { nodeId: `${kick.pattern.id}:rewrites` });
+    await expect(editor(page)).toHaveAttribute('data-editor-kind', 'rewrite');
+    await editor(page).getByRole('button', { name: 'Add fast', exact: true }).press('Enter');
+    await exact(page, 2);
+    await play(page);
+    const stable = (v: unknown): string =>
+      v && typeof v === 'object'
+        ? Array.isArray(v)
+          ? `[${v.map(stable)}]`
+          : `{${Object.entries(v)
+              .sort(([a], [b]) => a.localeCompare(b))
+              .map(([k, x]) => `${k}:${stable(x)}`)}}`
+        : JSON.stringify(v);
+    async function check(multiplier: number) {
+      const cycle = await page.evaluate(() => Math.ceil(window.odmApp.engine!.now()!) + 1);
+      await signal(() =>
         page.evaluate(
           (c) => window.odmApp.history.some((e) => e.type === 'trigger' && e.cycle >= c + 1),
           cycle,
         ),
-      )
-      .toBe(true);
-    const actual = await page.evaluate(
-      (c) =>
-        window.odmApp.history
-          .filter((e) => e.type === 'trigger' && e.cycle >= c && e.cycle < c + 1)
-          .map((e) => (e as { value: unknown }).value),
-      cycle,
-    );
-    const expected = await queryEventsNode(generate(original), cycle, cycle + 1);
-    expect(expected.error).toBeNull();
-    const kickValue = (v: unknown) => (v as { s?: string }).s === 'bd';
-    const bags = expected.events.filter((e) => e.hasOnset).map((e) => e.value);
-    expect(actual.filter(kickValue)).toHaveLength(bags.filter(kickValue).length * multiplier);
-    expect(
-      actual
-        .filter((v) => !kickValue(v))
-        .map(stable)
-        .sort(),
-    ).toEqual(
-      bags
-        .filter((v) => !kickValue(v))
-        .map(stable)
-        .sort(),
-    );
-  }
-  await check(2);
-  await exact(page, 1);
-  await check(1);
-  await expect(editor(page).getByRole('img', { name: 'Without fast' })).toBeVisible();
-  await page.getByRole('button', { name: 'Done', exact: true }).click();
-  await expect(add).toBeFocused();
-  await add.press('Space');
-  await editor(page).getByRole('button', { name: 'Add degradeBy', exact: true }).press('Enter');
-  await exact(page, 1);
-  await check(0);
-  await editor(page).getByRole('button', { name: 'Move earlier', exact: true }).press('Enter');
-  await waitForPending(page);
-  await expect(editor(page).locator('ol')).toContainText(/degradeBy[\s\S]*fast/);
-  await editor(page).getByRole('button', { name: 'Move later', exact: true }).press('Space');
-  await waitForPending(page);
-  await expect(editor(page).locator('ol')).toContainText(/fast[\s\S]*degradeBy/);
-  await editor(page).getByRole('button', { name: 'Remove rewrite', exact: true }).click();
-  await waitForPending(page);
-  await editor(page).getByRole('button', { name: 'Edit fast', exact: true }).click();
-  await editor(page).getByRole('button', { name: 'Remove rewrite', exact: true }).click();
-  await waitForPending(page);
-  await check(1);
-  await page.keyboard.press('Escape');
-  await expect(add).toBeFocused();
-  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+      ).toBe(true);
+      const actual = await page.evaluate(
+        (c) =>
+          window.odmApp.history
+            .filter((e) => e.type === 'trigger' && e.cycle >= c && e.cycle < c + 1)
+            .map((e) => (e as { value: unknown }).value),
+        cycle,
+      );
+      const expected = await queryEventsNode(generate(original), cycle, cycle + 1);
+      expect(expected.error).toBeNull();
+      const kickValue = (v: unknown) => (v as { s?: string }).s === 'bd';
+      const bags = expected.events.filter((e) => e.hasOnset).map((e) => e.value);
+      expect(actual.filter(kickValue)).toHaveLength(bags.filter(kickValue).length * multiplier);
+      expect(
+        actual
+          .filter((v) => !kickValue(v))
+          .map(stable)
+          .sort(),
+      ).toEqual(
+        bags
+          .filter((v) => !kickValue(v))
+          .map(stable)
+          .sort(),
+      );
+    }
+    if (scenario === 'double') {
+      await check(2);
+      return;
+    }
+    await exact(page, 1);
+    if (scenario === 'reset') {
+      await check(1);
+      return;
+    }
+    await expect(editor(page).getByRole('img', { name: 'Without fast' })).toBeVisible();
+    await page.getByRole('button', { name: 'Done', exact: true }).click();
+    await expect(add).toBeFocused();
+    await add.press('Space');
+    await editor(page).getByRole('button', { name: 'Add degradeBy', exact: true }).press('Enter');
+    await exact(page, 1);
+    if (scenario === 'degrade') {
+      await check(0);
+      return;
+    }
+    if (scenario === 'order') {
+      await editor(page).getByRole('button', { name: 'Move earlier', exact: true }).press('Enter');
+      await waitForPending(page);
+      await expect(editor(page).locator('ol')).toContainText(/degradeBy[\s\S]*fast/);
+      await editor(page).getByRole('button', { name: 'Move later', exact: true }).press('Space');
+      await waitForPending(page);
+      await expect(editor(page).locator('ol')).toContainText(/fast[\s\S]*degradeBy/);
+      return;
+    }
+    await editor(page).getByRole('button', { name: 'Remove rewrite', exact: true }).click();
+    await waitForPending(page);
+    await editor(page).getByRole('button', { name: 'Edit fast', exact: true }).click();
+    await editor(page).getByRole('button', { name: 'Remove rewrite', exact: true }).click();
+    await waitForPending(page);
+    await check(1);
+    await page.keyboard.press('Escape');
+    await expect(add).toBeFocused();
+    await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  });
+test('real ambient rewrite: preview, keyboard focus and phone', async ({ page }) => {
   await openProgram(page, { path: 'corpus/programs/real-ambient.strudel' });
   await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
   const doc = await page.evaluate(() => window.odmApp.state.doc!);
