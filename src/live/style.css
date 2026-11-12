@@ -1,5 +1,5 @@
 #score-workspace:not(.editing):has(#live:not([hidden])) {
-  grid-template-columns: minmax(0, 1fr) 240px;
+  grid-template-columns: minmax(0, 1fr) 300px;
 }
 #live {
   min-width: 0;
@@ -115,4 +115,187 @@
 
 .live-generated {
   font-style: italic;
+}
+
+.constellation {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  isolation: isolate;
+}
+.constellation > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.constellation path {
+  fill: #2b59635e;
+  stroke: none;
+  filter: drop-shadow(0 0 1px var(--border));
+}
+.constellation-room {
+  position: absolute;
+  font-size: 10px;
+  line-height: 12px;
+  color: var(--muted);
+  background: var(--canvas);
+  border-radius: 3px;
+  padding: 0 3px;
+  pointer-events: none;
+}
+.constellation-planet {
+  position: absolute;
+  width: var(--target);
+  height: var(--target);
+  min-height: var(--target);
+  border: 0;
+  border-radius: 50%;
+  padding: 0;
+  background: transparent;
+}
+.constellation-moving .constellation-planet {
+  transition:
+    left 180ms ease-out,
+    top 180ms ease-out;
+}
+.constellation-planet:hover {
+  background: transparent;
+}
+.constellation-planet:focus-visible {
+  z-index: 2;
+}
+.constellation-planet .live-dot {
+  position: absolute;
+  left: calc(var(--centre) - var(--radius));
+  top: calc(var(--centre) - var(--radius));
+  width: calc(2 * var(--radius));
+  height: calc(2 * var(--radius));
+  margin: 0;
+  opacity: 0.85;
+  border: 1.5px solid var(--live-colour);
+  box-shadow: none;
+}
+.constellation-planet .live-dot::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+  border: 2px solid var(--live-colour);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 250ms ease-out;
+}
+.constellation-planet.live-lit .live-dot::after {
+  opacity: 1;
+  transition: none;
+}
+.constellation-name,
+.constellation-mark {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  width: var(--name-width);
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: 11px;
+  line-height: 14px;
+  pointer-events: none;
+}
+.constellation-name {
+  top: calc(var(--centre) + 3px + var(--radius));
+}
+.constellation-mark {
+  top: calc(var(--centre) - var(--radius) - 16px);
+  width: 48px;
+  font-size: 9px;
+  color: var(--warning);
+}
+.constellation-busy .constellation-name {
+  visibility: hidden;
+}
+.constellation-busy .live-glowing .constellation-name,
+.constellation-busy .constellation-planet:is(:hover, :focus) .constellation-name {
+  visibility: visible;
+  background: var(--canvas);
+  z-index: 3;
+}
+.constellation-planet.live-hollow .live-dot {
+  background: transparent;
+}
+.constellation-planet.live-missing .live-dot {
+  border: 2px dashed var(--danger);
+}
+.constellation-planet.live-unknown .live-dot {
+  background: transparent;
+  border-style: dotted;
+}
+.constellation-planet.live-failed .live-dot {
+  border-color: var(--warning);
+}
+.constellation-description {
+  font-size: 11px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  min-height: 34px;
+  margin: 8px 0;
+}
+.constellation-touch-hint {
+  display: none;
+}
+.live-list-disclosure > summary {
+  color: var(--muted);
+  font-size: 12px;
+}
+@media (max-width: 760px) {
+  .constellation-touch-list .constellation-planet {
+    pointer-events: none;
+  }
+  .constellation-touch-list + .constellation-touch-hint {
+    display: block;
+    font-size: 12px;
+    color: var(--muted);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .constellation-moving .constellation-planet,
+  .constellation-planet .live-dot::after {
+    transition: none;
+  }
+  .constellation-planet .live-dot::after {
+    display: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .constellation-planet.live-playing .live-dot {
+    opacity: 1;
+    transition: none;
+  }
+}
+
+.constellation-name-inside .constellation-name {
+  top: calc(var(--centre) - 7px);
+  color: var(--canvas);
+  font-weight: 500;
+}
+.constellation-name-inside.constellation-has-mark .constellation-name {
+  top: calc(var(--centre) - 14px);
+}
+.constellation-mark-inside .constellation-mark {
+  top: calc(var(--centre) - 6px);
+  width: calc(2 * var(--radius) - 8px);
+  color: #671a16;
+  font-size: var(--mark-size);
+}
+.constellation-name-inside.constellation-mark-inside .constellation-mark {
+  top: calc(var(--centre) + 2px);
+}
+.constellation-planet:is(.live-hollow, .live-unknown) .constellation-name,
+.constellation-planet:is(.live-hollow, .live-unknown) .constellation-mark {
+  color: var(--text);
+}
+
+.constellation-busy .constellation-name-inside .constellation-name {
+  background: transparent;
 }

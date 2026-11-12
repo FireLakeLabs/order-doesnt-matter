@@ -18,6 +18,8 @@ export interface LiveInstrument {
   nameSource: 'author' | 'generated';
   /** Index in the sheet's row order. */
   colour: number;
+  /** Real note starts in the current section; null until its question is answered. */
+  noteStarts: number | null;
   lastOnset: number | null;
   nextOnset: number | null;
   inSection: boolean;
@@ -47,7 +49,7 @@ export interface TurnNote {
   label: string;
 }
 type Note = { cps: number; start: number; end: number; value: Record<string, unknown> };
-type Part = { room: number | null; inSection: boolean; sends: Note[] };
+type Part = { room: number | null; inSection: boolean; sends: Note[]; noteStarts: number };
 type Indexed = { notes: Note[]; names: string[]; parts: Map<string, Part> };
 const cache = new WeakMap<LiveInput['events'], Map<string, Indexed>>();
 const bag = (value: unknown): Record<string, unknown> =>
@@ -94,7 +96,7 @@ function search(notes: Note[], cycle: number, upper = false) {
 // line 485 uses it when absent. Only top-level sends are shared; FX bags stay private.
 const orbit = (note: Note) => (typeof note.value.orbit === 'number' ? note.value.orbit : 1);
 function participation(index: Indexed | undefined, from: number, to: number): Part {
-  if (!index) return { room: null, inSection: false, sends: [] };
+  if (!index) return { room: null, inSection: false, sends: [], noteStarts: 0 };
   const key = `${from}:${to}`;
   let part = index.parts.get(key);
   if (part) return part;
@@ -103,7 +105,12 @@ function participation(index: Indexed | undefined, from: number, to: number): Pa
   const counts = new Map<number, number>();
   for (const n of sends) counts.set(orbit(n), (counts.get(orbit(n)) ?? 0) + 1);
   const room = [...counts].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0]?.[0] ?? null;
-  part = { room, inSection: !!notes.length, sends: sends.filter((n) => orbit(n) === room) };
+  part = {
+    room,
+    inSection: !!notes.length,
+    noteStarts: notes.length,
+    sends: sends.filter((n) => orbit(n) === room),
+  };
   index.parts.set(key, part);
   return part;
 }
@@ -190,6 +197,8 @@ export function liveModel(input: LiveInput): LiveModel {
         name: row.name.replaceAll('$', ''),
         nameSource: row.nameSource,
         colour,
+        noteStarts:
+          input.events[row.id] && !input.events[row.id].error ? (part?.noteStarts ?? 0) : null,
         lastOnset: notes[at - 1]?.start ?? null,
         nextOnset: notes[at]?.start ?? null,
         inSection: part?.inSection ?? false,
