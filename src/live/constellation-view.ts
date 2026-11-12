@@ -1,4 +1,4 @@
-import { constellationLayout } from './constellation';
+import { constellationLayout, regionPath } from './constellation';
 import type { LiveInstrument, LiveModel, LiveRoom } from './model';
 
 export const words = (i: LiveInstrument, playing: boolean) =>
@@ -57,13 +57,12 @@ export function mountConstellation(
   // At most one room per instrument. Reserve the nodes so section changes do
   // not replace focused controls or rebuild on playback acknowledgements.
   const regions = initial.instruments.map(() => {
-    const rect = svgNode('rect');
-    rect.setAttribute('rx', '12');
-    svg.append(rect);
+    const path = svgNode('path');
+    svg.append(path);
     const label = document.createElement('span');
     label.className = 'constellation-room';
     drawing.append(label);
-    return { rect, label };
+    return { path, label };
   });
   const description = document.createElement('p');
   description.className = 'constellation-description';
@@ -107,13 +106,17 @@ export function mountConstellation(
     touchList = initial.instruments.length > 12,
     previous: number | null = null,
     model = initial;
-  const height = 300;
+  const boxHeight = () => Math.max(220, Math.min(280, width * 0.85));
   function position() {
-    const layout = constellationLayout(model, { width, height });
-    touchList = model.instruments.length > 12 || layout.planets.some((p) => p.target < 44);
+    const layout = constellationLayout(model, { width, height: boxHeight() });
+    touchList = layout.planets.some((p, n) =>
+      layout.planets
+        .slice(n + 1)
+        .some((q) => Math.hypot(p.x - q.x, p.y - q.y) < Math.max(22, p.r) + Math.max(22, q.r)),
+    );
     drawing.classList.toggle('constellation-touch-list', touchList);
-    drawing.style.height = `${height}px`;
-    svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+    drawing.style.height = `${layout.height}px`;
+    svg.setAttribute('viewBox', `0 0 ${width} ${layout.height}`);
     for (const p of layout.planets) {
       const b = planets.get(p.id)!.button;
       b.style.left = `${p.x - p.target / 2}px`;
@@ -121,21 +124,26 @@ export function mountConstellation(
       b.style.setProperty('--target', `${p.target}px`);
       b.style.setProperty('--centre', `${p.target / 2}px`);
       b.style.setProperty('--radius', `${p.r}px`);
-      b.style.setProperty('--name-width', `${p.labelWidth}px`);
+      b.style.setProperty(
+        '--mark-size',
+        `${Math.max(8, Math.min(10, Math.floor((2 * p.r - 8) / 3.7)))}px`,
+      );
+      b.style.setProperty('--name-width', `${p.inside ? p.r * 1.8 : p.labelWidth}px`);
+      b.classList.toggle('constellation-name-inside', p.inside);
+      b.classList.toggle('constellation-mark-inside', p.r >= 18);
       b.dataset.x = String(p.x);
       b.dataset.y = String(p.y);
       b.dataset.r = String(p.r);
     }
-    regions.forEach(({ rect, label }, n) => {
+    regions.forEach(({ path, label }, n) => {
       const r = layout.regions[n];
-      rect.style.display = r ? '' : 'none';
+      path.style.display = r ? '' : 'none';
       label.hidden = !r;
       if (!r) return;
-      for (const attr of ['x', 'y', 'width', 'height'] as const)
-        rect.setAttribute(attr, String(r[attr]));
+      path.setAttribute('d', regionPath(r));
       label.style.left = `${r.label.x}px`;
       label.style.top = `${r.label.y}px`;
-      label.style.width = `${r.width - 16}px`;
+      label.style.width = `${r.label.width}px`;
       text(label, roomWords(model.rooms.find((room) => room.orbit === r.orbit)!));
     });
   }
@@ -200,6 +208,7 @@ export function mountConstellation(
                   ? 'not loaded'
                   : '',
       );
+      p.button.classList.toggle('constellation-has-mark', !!p.mark.textContent);
       const label = `${i.name}${i.nameSource === 'generated' ? ' (generated name)' : ''}, ${words(i, playing)}, ${i.room === null ? 'no room' : `Room ${i.room}`}`;
       if (p.button.getAttribute('aria-label') !== label) p.button.setAttribute('aria-label', label);
       p.button.title = label;

@@ -1,5 +1,5 @@
 import { expect, it } from 'vitest';
-import { constellationLayout } from '../src/live/constellation';
+import { constellationLayout, segmentDistance } from '../src/live/constellation';
 import { liveModel, type LiveModel } from '../src/live/model';
 import { instruments } from '../src/document';
 import { importStrudel } from '../src/import';
@@ -30,7 +30,7 @@ const model = (count: number, rooms: number): LiveModel => ({
     conflict: false,
   })),
 });
-for (const count of [1, 6, 30])
+for (const count of [1, 6, 10, 30])
   for (const rooms of [0, 1, 3])
     for (const box of [
       { width: 240, height: 240 },
@@ -50,17 +50,15 @@ for (const count of [1, 6, 30])
           for (const region of layout.regions) {
             const member = m.rooms.find((r) => r.orbit === region.orbit)!.members.includes(p.id);
             if (member) {
-              expect(p.x - p.r).toBeGreaterThanOrEqual(region.x);
-              expect(p.x + p.r).toBeLessThanOrEqual(region.x + region.width);
-              expect(p.y - p.r).toBeGreaterThanOrEqual(region.y);
-              expect(p.y + p.r).toBeLessThanOrEqual(region.y + region.height);
-            } else
               expect(
-                p.x > region.x &&
-                  p.x < region.x + region.width &&
-                  p.y > region.y &&
-                  p.y < region.y + region.height,
-              ).toBe(false);
+                region.circles.some((c) => Math.hypot(c.x - p.x, c.y - p.y) + p.r <= c.r + 0.001),
+              ).toBe(true);
+            } else {
+              expect(region.circles.every((c) => Math.hypot(c.x - p.x, c.y - p.y) > c.r)).toBe(
+                true,
+              );
+              expect(region.links.every((l) => segmentDistance(p, l.from, l.to) > 6)).toBe(true);
+            }
           }
         }
         const later = constellationLayout(
@@ -80,12 +78,56 @@ for (const count of [1, 6, 30])
           layout.planets.map(({ id, x, y }) => ({ id, x, y })),
         );
       });
-it('radius reflects starts and is clamped; empty input stays empty', () => {
+it('radius reflects starts and box area; empty input stays empty', () => {
   const m = model(6, 0),
     { planets } = constellationLayout(m, { width: 358, height: 300 });
   expect(planets[0].r).toBeLessThan(planets[5].r);
-  expect(planets.every((p) => p.r >= 4 && p.r <= 11)).toBe(true);
+  for (const count of [1, 6, 10]) {
+    const box = { width: 300, height: 240 };
+    const packed = constellationLayout(model(count, 0), box);
+    expect(
+      packed.planets.reduce((sum, p) => sum + Math.PI * p.r ** 2, 0) / (box.width * box.height),
+    ).toBeGreaterThanOrEqual(0.2);
+    if (count <= 8) expect(Math.min(...packed.planets.map((p) => p.r))).toBeGreaterThanOrEqual(14);
+  }
   expect(constellationLayout(model(0, 0), { width: 240, height: 240 }).planets).toEqual([]);
+});
+it('small constellations use substantial area and reserve the halo and room headings', () => {
+  const box = { width: 300, height: 240 };
+  const measured = [];
+  for (const count of [1, 2, 3, 4, 5, 6, 7, 8, 10, 30])
+    for (const rooms of [0, 1, 3]) {
+      const layout = constellationLayout(model(count, rooms), box);
+      const area =
+        layout.planets.reduce((sum, p) => sum + Math.PI * p.r ** 2, 0) / (box.width * box.height);
+      const min = Math.min(...layout.planets.map((p) => p.r));
+      measured.push({
+        count,
+        rooms,
+        area: Number(area.toFixed(3)),
+        min: Number(min.toFixed(1)),
+        height: Number(layout.height.toFixed(1)),
+      });
+      if ([1, 6, 10].includes(count))
+        expect(area, `${count}/${rooms} occupancy`).toBeGreaterThanOrEqual(0.2);
+      if (count <= 8) expect(min).toBeGreaterThanOrEqual(14);
+      for (const p of layout.planets) {
+        expect(p.x - p.r - 6).toBeGreaterThanOrEqual(0);
+        expect(p.x + p.r + 6).toBeLessThanOrEqual(box.width);
+        expect(p.y - p.r - 6).toBeGreaterThanOrEqual(0);
+        expect(p.y + p.r + 6).toBeLessThanOrEqual(layout.height);
+      }
+      for (const region of layout.regions)
+        for (const p of layout.planets) {
+          const l = region.label;
+          const dx = p.x - Math.max(l.x, Math.min(l.x + l.width, p.x));
+          const dy = p.y - Math.max(l.y, Math.min(l.y + l.height, p.y));
+          expect(Math.hypot(dx, dy), `${count}/${rooms}: heading hits ${p.id}`).toBeGreaterThan(
+            p.r + 3,
+          );
+        }
+    }
+  console.log('Constellation geometry', JSON.stringify(measured));
 });
 it('counts real starts in the section, excludes fragments, and distinguishes unasked from quiet', () => {
   const rows = instruments(importStrudel('s("bd")').doc);
