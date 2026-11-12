@@ -28,8 +28,10 @@ for (const code of [
     );
     await page.addInitScript(installEngineSignals);
     await page.goto('/harness/engine.html');
-    await page.getByRole('button').click();
-    await signal(() => page.evaluate(() => !!window.odm.engine)).toBe(true);
+    await test.step('ODM:playback', async () => {
+      await page.getByRole('button').click();
+      await signal(() => page.evaluate(() => !!window.odm.engine)).toBe(true);
+    });
     const measurements = await page.evaluate(
       async ({ code }) => {
         const engine = window.odm.engine!;

@@ -17,8 +17,10 @@ test('engine: synth PCM, live revisions, rejected edit and Stop', async ({ page 
   );
   await page.addInitScript(installEngineSignals);
   await page.goto('/harness/engine.html');
-  await page.getByRole('button').click();
-  await signal(() => page.evaluate(() => window.odm.error || !!window.odm.engine)).toBe(true);
+  await test.step('ODM:playback', async () => {
+    await page.getByRole('button').click();
+    await signal(() => page.evaluate(() => window.odm.error || !!window.odm.engine)).toBe(true);
+  });
   const measured = await page.evaluate(async () => {
     const { engine: e, events } = window.odm;
     if (!e) throw Error('engine not initialized');
@@ -112,8 +114,10 @@ for (const scenario of ['sample', 'missing', 'seek'] as const) {
     );
     await page.addInitScript(installEngineSignals);
     await page.goto('/harness/engine.html');
-    await page.getByRole('button').click();
-    await signal(() => page.evaluate(() => window.odm.error || !!window.odm.engine)).toBe(true);
+    await test.step('ODM:playback', async () => {
+      await page.getByRole('button').click();
+      await signal(() => page.evaluate(() => window.odm.error || !!window.odm.engine)).toBe(true);
+    });
     const result = await page.evaluate(async (scenario) => {
       const { engine: e, events, fixture } = window.odm;
       if (!e) throw Error('engine not initialized');
@@ -178,8 +182,10 @@ test('canary: web bundle registry, REPL capture, final output gain and failed sa
     },
   );
   await page.route('**/absent.wav', (route) => route.fulfill({ status: 404, body: 'not a WAV' }));
-  await page.getByRole('button').click();
-  await signal(() => page.evaluate(() => window.odm.error || !!window.odm.engine)).toBe(true);
+  await test.step('ODM:playback', async () => {
+    await page.getByRole('button').click();
+    await signal(() => page.evaluate(() => window.odm.error || !!window.odm.engine)).toBe(true);
+  });
   const result = await page.evaluate(async () => {
     const e = window.odm.engine!;
     window.odmProfileEngine(e);
