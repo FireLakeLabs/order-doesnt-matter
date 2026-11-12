@@ -153,3 +153,11 @@ it('deletes stored origin copies together with their canonical leaf', () => {
   expect(JSON.stringify(next)).not.toContain(`"origin":"${row.pattern.id}"`);
   expect(generate(next)).not.toContain("'hh'");
 });
+
+it('refuses a shared callback that uses the whole score as a setting driver', () => {
+  const doc = load('const drum=s("bd"); const hat=s("hh"); stack(drum,hat).every(2,p=>p.gain(p))');
+  expect(removeInstrument(doc, instruments(doc)[0].id)).toMatchObject({
+    ok: false,
+    reason: expect.stringContaining('hat'),
+  });
+});

@@ -83,7 +83,29 @@ export function removeInstrument(doc: Doc, id: string): Doc | Refusal {
         if (pattern.core.kind === 'opaque')
           problem = 'shared source text can depend on the removed notes';
         for (const layer of pattern.layers) {
-          if (layer.kind === 'settings') continue;
+          if (layer.kind === 'settings') {
+            for (const setting of layer.settings)
+              walk(
+                {
+                  version: 2,
+                  body: [
+                    {
+                      id: 'scan',
+                      tier: 1,
+                      kind: 'shared',
+                      name: 'scan',
+                      nameSource: 'generated',
+                      pattern: setting.value,
+                    },
+                  ],
+                },
+                (node) => {
+                  if ('core' in node && ['hole', 'opaque'].includes((node as Pattern).core.kind))
+                    problem = 'a shared setting uses the whole score or source text as its driver';
+                },
+              );
+            continue;
+          }
           if (layer.kind === 'opaque') {
             problem = 'shared source text can depend on the removed notes';
             continue;
