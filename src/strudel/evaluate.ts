@@ -2,6 +2,7 @@ import * as core from '@strudel/core';
 import * as mini from '@strudel/mini';
 import * as tonal from '@strudel/tonal';
 import type { EventResult, QueryEvents } from '../contract';
+import { MAX_WINDOW_STARTS } from '../engine/playback-limits';
 import {
   installStandIns,
   outputMethods,
@@ -29,8 +30,13 @@ export function queryEventsWithBudget(
   from: number,
   to: number,
   eventBudget = 100_000,
+  playbackStarts?: number[],
+  initialCps = 0.5,
+  inspect?: (pattern: core.Pattern, cps: number) => void,
 ): Promise<EventResult> {
-  const next = tail.then(() => evaluate(code, from, to, eventBudget));
+  const next = tail.then(() =>
+    evaluate(code, from, to, eventBudget, playbackStarts, initialCps, inspect),
+  );
   tail = next.catch(() => {});
   return next;
 }
@@ -39,8 +45,11 @@ async function evaluate(
   from: number,
   to: number,
   budget: number,
+  playbackStarts?: number[],
+  initialCps = 0.5,
+  inspect?: (pattern: core.Pattern, cps: number) => void,
 ): Promise<EventResult> {
-  const result: EventResult = { events: [], cps: 0.5, error: null, opaqueValues: false };
+  const result: EventResult = { events: [], cps: initialCps, error: null, opaqueValues: false };
   let phase: 'evaluation' | 'query' = 'evaluation';
   const labels = new Map<string, core.Pattern>();
   const transforms: ((pattern: unknown) => unknown)[] = [];
@@ -124,13 +133,43 @@ async function evaluate(
     for (const f of transforms) pattern = f(pattern);
     if (!core.isPattern(pattern)) throw Error('Program did not produce a Pattern');
     phase = 'query';
-    for (let cycle = Math.floor(from); cycle < to; cycle++) {
-      const haps = query(pattern, Math.max(cycle, from), Math.min(cycle + 1, to), {
+    if (inspect) {
+      inspect(pattern, result.cps);
+      return result;
+    }
+    const ranges: [number, number][] = [];
+    const addCycles = (begin: number, end: number) => {
+      for (let cycle = Math.floor(begin); cycle < end; cycle++)
+        ranges.push([Math.max(cycle, begin), Math.min(cycle + 1, end)]);
+    };
+    if (playbackStarts) {
+      if (
+        !Number.isFinite(result.cps) ||
+        result.cps <= 0 ||
+        playbackStarts.some((n) => !Number.isFinite(n))
+      )
+        throw Error('Playback needs a positive tempo and finite section starts');
+      // Cyclist 1.2.6 cyclist.mjs:35–60 + zyklus.mjs:7–10,22–31:
+      // 50 ms windows, up to four in the initial 200 ms lookahead.
+      for (const begin of [from, ...playbackStarts])
+        for (let i = 0; i < 4; i++)
+          ranges.push([begin + i * 0.05 * result.cps, begin + (i + 1) * 0.05 * result.cps]);
+    }
+    addCycles(from, to);
+    for (const begin of playbackStarts ?? []) addCycles(begin, begin + 2);
+    for (const [begin, end] of ranges) {
+      const haps = query(pattern, begin, end, {
         _cps: result.cps,
+        ...(playbackStarts ? { cyclist: 'cyclist' } : {}),
       });
-      if (result.events.length + haps.length > budget)
+      // Preflight still executes the full question, but does not copy a flood
+      // back onto the page. Playback applies its own per-window voice limit.
+      const selected = playbackStarts
+        ? haps.filter((h) => h.hasOnset()).slice(0, MAX_WINDOW_STARTS)
+        : haps;
+      if (result.events.length + selected.length > budget)
         throw Error(`${budget} event budget exceeded`);
-      for (const hap of haps) {
+      for (const hap of selected) {
         const event = plainEvent(hap);
         result.events.push({ ...event, value: normalize(event.value) });
       }

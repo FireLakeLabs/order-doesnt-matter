@@ -1,6 +1,7 @@
 import { test } from './helpers';
 import { scoreReady, play, appSignal, signal } from './helpers';
 import { expect } from '@playwright/test';
+import { playbackSafety } from './playback-safety';
 import { instruments, sections } from '../../src/document';
 import type {} from '../../src/app/main';
 
@@ -120,19 +121,26 @@ test('page: original arrangement → rows → measured synth PCM → pinned sect
 });
 
 for (const source of ['new Pattern(()=>{while(true){}})', 'while(true){}; silence'])
-  test(`worker timeout leaves the page responsive: ${source}`, async ({ page }) => {
-    await offline(page);
-    await page.goto('/?inspect');
-    await page.getByLabel('Your Strudel program').fill(source);
-    const start = Date.now();
-    await page.getByRole('button', { name: 'Load', exact: true }).click();
-    await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
-    await expect(page.getByLabel('Your Strudel program')).toBeHidden();
-    await expect(page.locator('#message')).toContainText('timed out', { timeout: 7000 });
-    expect(Date.now() - start).toBeLessThan(7000);
-    if (source.startsWith('new'))
-      await expect(page.getByRole('rowheader').first()).toContainText('Broken: Question timed out');
-    await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
+  test(`worker timeout leaves the page responsive: ${source}`, async ({ page, context }) => {
+    await Promise.all([
+      (async () => {
+        await offline(page);
+        await page.goto('/?inspect');
+        await page.getByLabel('Your Strudel program').fill(source);
+        const start = Date.now();
+        await page.getByRole('button', { name: 'Load', exact: true }).click();
+        await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
+        await expect(page.getByLabel('Your Strudel program')).toBeHidden();
+        await expect(page.locator('#message')).toContainText('timed out', { timeout: 7000 });
+        expect(Date.now() - start).toBeLessThan(7000);
+        if (source.startsWith('new'))
+          await expect(page.getByRole('rowheader').first()).toContainText(
+            'Broken: Question timed out',
+          );
+        await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
+      })(),
+      source.startsWith('new') ? playbackSafety(context) : Promise.resolve(),
+    ]);
   });
 test('superseded results never replace a new piece', async ({ page }) => {
   await offline(page);

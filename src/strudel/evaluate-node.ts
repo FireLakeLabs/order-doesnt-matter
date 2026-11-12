@@ -4,6 +4,7 @@ import type { EventResult } from '../contract';
 export interface NodeQueryOptions {
   timeoutMs?: number;
   eventBudget?: number;
+  playbackStarts?: number[];
 }
 /** A fresh Node 24 worker per question, including imports in the wall budget.
  * Node's native type stripping loads these TS files; the hook supplies the
@@ -21,7 +22,13 @@ export function queryEventsNode(
   return new Promise((resolve) => {
     let settled = false;
     const worker = createWorker();
-    worker.postMessage({ source, from, to, budget: options.eventBudget });
+    worker.postMessage({
+      source,
+      from,
+      to,
+      budget: options.eventBudget,
+      playbackStarts: options.playbackStarts,
+    });
     const finish = (result: EventResult) => {
       if (settled) return;
       settled = true;
@@ -60,9 +67,9 @@ function createWorker() {
       }
     }});
     const evaluator = import(workerData.module);
-    parentPort.on('message', async ({source, from, to, budget}) => {
+    parentPort.on('message', async ({source, from, to, budget, playbackStarts}) => {
       const { queryEventsWithBudget } = await evaluator;
-      parentPort.postMessage(await queryEventsWithBudget(source, from, to, budget));
+      parentPort.postMessage(await queryEventsWithBudget(source, from, to, budget, playbackStarts));
     });
   `,
     {
@@ -141,6 +148,7 @@ export function createNodeQueryPool(size = 2) {
         from: job.from,
         to: job.to,
         budget: job.options.eventBudget,
+        playbackStarts: job.options.playbackStarts,
       });
     }
   }
