@@ -92,15 +92,22 @@ async function flood(page: Page) {
   );
   await page.getByRole('button', { name: 'Load', exact: true }).click();
   await scoreReady(page);
-  const before = await page.evaluate(() => window.odmApp.history.length);
   await page.evaluate((message) => {
+    const errors: unknown[] = [],
+      values: unknown[] = [];
     const off = window.odmApp.engine!.subscribe((e) => {
+      if (e.type === 'trigger') values.push(e.value);
+      if (e.type === 'error') errors.push(e);
       if (e.type !== 'error' || e.message !== message) return;
-      off();
       const start = performance.now();
       setTimeout(() => {
         document.getElementById('paste')!.click();
-        performance.measure('ODM:cap-click', { start, end: performance.now() });
+        off();
+        performance.measure('ODM:cap-click', {
+          start,
+          end: performance.now(),
+          detail: { errors, values, playing: window.odmApp.engine!.playing },
+        });
       }, 0);
     });
   }, FLOOD_MESSAGE);
@@ -108,23 +115,18 @@ async function flood(page: Page) {
   await expect(page.locator('#message')).toHaveText(FLOOD_MESSAGE);
   await appSignal(page, () => performance.getEntriesByName('ODM:cap-click').length > 0);
   await expect(page.getByLabel('Your Strudel program')).toBeHidden();
-  const clickMs = await page.evaluate(
-    () => performance.getEntriesByName('ODM:cap-click')[0].duration,
-  );
-  console.log('CAP RESPONSIVENESS MEASURED', { cap: MAX_WINDOW_STARTS, clickMs });
-  expect(clickMs).toBeLessThan(1000);
+  const result = await page.evaluate(() => {
+    const entry = performance.getEntriesByName('ODM:cap-click')[0] as PerformanceMeasure;
+    return {
+      clickMs: entry.duration,
+      ...(entry.detail as { errors: unknown[]; values: unknown[]; playing: boolean }),
+    };
+  });
+  console.log('CAP RESPONSIVENESS MEASURED', { cap: MAX_WINDOW_STARTS, clickMs: result.clickMs });
+  expect(result.clickMs).toBeLessThan(1000);
+  expect(result.playing).toBe(true);
   await expect(page.locator('#message')).toHaveAttribute('data-kind', 'warning');
   expect(await page.evaluate(() => window.odmApp.engine!.playing)).toBe(true);
-  const result = await page.evaluate(
-    (offset) => ({
-      errors: window.odmApp.history.slice(offset).filter((e) => e.type === 'error'),
-      values: window.odmApp.history
-        .slice(offset)
-        .filter((e) => e.type === 'trigger')
-        .map((e) => e.value),
-    }),
-    before,
-  );
   expect(result.errors).toEqual([
     { type: 'error', message: FLOOD_MESSAGE, reason: 'notes-left-out' },
   ]);
