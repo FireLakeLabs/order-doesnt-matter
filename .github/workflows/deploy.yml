@@ -54,7 +54,9 @@ jobs:
 
   configuration:
     needs: check
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    # Naming an environment creates it if absent. The repository variable keeps this
+    # job from running, and so from creating one unrestricted, before provisioning.
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.ODM_DEPLOY_ENABLED == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 2
     environment: production

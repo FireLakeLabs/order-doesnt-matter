@@ -40,6 +40,10 @@ role. Only trusted administrators should approve infrastructure changes on main.
 
 In GitHub Settings → Environments, create `production` and `infrastructure`.
 For both, select deployment branches/tags: **Branch → main only**, no tags.
+Only after both environments exist and are restricted to `main`, set the
+repository variable `ODM_DEPLOY_ENABLED` to `true`; until then Deploy never
+enters an environment.
+
 Set environment variable `AWS_ROLE_ARN` from `AppDeployRoleArn` (production) or
 `InfraDeployRoleArn` (infrastructure). In production also set `HOSTING_OUTPUTS`
 to the entire `outputs.json` document. These values are configuration, not secrets.
