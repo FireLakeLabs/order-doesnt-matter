@@ -155,7 +155,7 @@ it('a repeated section can mute one occurrence without changing definition ids o
     ),
   ).toBe(true);
 });
-it('standalone mute handles imported pattern mute, preserves names and refuses non-reference uses', async () => {
+it('standalone mute handles imported pattern mute and localizes inline section uses', async () => {
   const doc = load('s("bd")'),
     row = instruments(doc)[0];
   expect(setMuted(doc, row.id, false)).toBe(doc);
@@ -174,19 +174,21 @@ it('standalone mute handles imported pattern mute, preserves names and refuses n
   const named = accept(renameInstrument(doc, row.id, 'Drum'));
   expect(instruments(named)[0]).toMatchObject({ name: 'Drum', nameSource: 'author' });
   const arranged = load('arrange([2,s("bd")],[2,s("hh")])');
-  expect(
+  const local = accept(
     setUseMuted(arranged, instruments(arranged)[0].id, sections(arranged)[0].id, true),
-  ).toMatchObject({ ok: false, reason: expect.stringContaining('reference') });
+  );
+  expect(instruments(local).map((r) => r.id)).toEqual(instruments(arranged).map((r) => r.id));
+  expect(instruments(local)[0].uses[0].muted).toBe(true);
 });
 
-it('refuses a section copy that would split another instrument identity', () => {
+it('localizes a section copy without splitting another instrument identity', () => {
   const doc = load(
     'const bass=note(36); const drop=stack(bass,s("hh")); arrange([2,drop],[2,drop])',
   );
-  expect(setUseMuted(doc, instruments(doc)[0].id, sections(doc)[0].id, true)).toMatchObject({
-    ok: false,
-    reason: expect.stringContaining('cannot yet be separated'),
-  });
+  const next = accept(setUseMuted(doc, instruments(doc)[0].id, sections(doc)[0].id, true));
+  expect(instruments(next).map((r) => r.id)).toEqual(instruments(doc).map((r) => r.id));
+  expect(instruments(next)[0].uses.map((u) => u.muted)).toEqual([true, false]);
+  expect(instruments(next)[1].uses.map((u) => u.muted)).toEqual([false, false]);
 });
 
 it('definition mute remains separate from section mutes', () => {

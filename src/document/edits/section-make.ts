@@ -12,7 +12,7 @@ export function makeSections(doc: Doc) {
     core: {
       kind: 'group',
       how: 'stack',
-      parts: roots.map((v) => ({ pattern: v.pattern, muted: v.muted })),
+      parts: roots.map((v) => ({ id: fresh('part'), pattern: v.pattern, muted: v.muted })),
     },
     layers: [],
   };
@@ -23,7 +23,11 @@ export function makeSections(doc: Doc) {
     pattern: {
       id: fresh('song'),
       tier: 1 as const,
-      core: { kind: 'group' as const, how: 'arrange', parts: [{ cycles: 4, pattern: reference }] },
+      core: {
+        kind: 'group' as const,
+        how: 'arrange',
+        parts: [{ id: fresh('part'), cycles: 4, pattern: reference }],
+      },
       layers: [],
     },
   };

@@ -46,6 +46,7 @@ export function separateSection(doc: Doc, id: string) {
             how: 'stack',
             parts: [
               {
+                id: fresh('part'),
                 pattern: {
                   id: fresh('use'),
                   tier: 1,
@@ -71,7 +72,9 @@ export function separateSection(doc: Doc, id: string) {
     replaceParts(
       doc,
       owner.root,
-      owner.parts.map((p, i) => (i === owner.index ? { ...p, label: undefined, pattern } : p)),
+      owner.parts.map((p, i) =>
+        i === owner.index ? { ...p, label: undefined, labelSource: undefined, pattern } : p,
+      ),
     ),
     definition,
   );

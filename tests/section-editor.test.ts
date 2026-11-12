@@ -95,7 +95,7 @@ it('refuses invalid addresses, lengths, names, unavailable moves and last remova
   expect(addSection(load('s("bd")'))).toHaveProperty('ok', false);
   expect(makeSections(doc)).toHaveProperty('ok', false);
 });
-it('mutes both shared uses, separates one, adds references and refuses unnamed additions', async () => {
+it('mutes both shared uses, separates one, adds references including unnamed inline instruments', async () => {
   const doc = fixture(),
     [a, b, c] = sections(doc),
     kick = instruments(doc)[0];
@@ -126,9 +126,14 @@ it('mutes both shared uses, separates one, adds references and refuses unnamed a
     sections(valid(setInstrumentInSection(muted, c.id, kick.id, true)))[0].instrumentIds,
   ).toContain(kick.id);
   const inline = load('arrange([4,s("bd")],[4,s("hh")])');
-  expect(
+  const addedInline = valid(
     setInstrumentInSection(inline, sections(inline)[1].id, instruments(inline)[0].id, true),
-  ).toMatchObject({ ok: false, reason: expect.stringContaining('Give it a name first') });
+  );
+  expect(instruments(addedInline).map((r) => r.id)).toEqual(instruments(inline).map((r) => r.id));
+  expect(sections(addedInline)[1].instrumentIds).toEqual([
+    instruments(inline)[0].id,
+    instruments(inline)[1].id,
+  ]);
 });
 it('make sections retains note starts; the section order loops while its pattern keeps evolving', async () => {
   const doc = load('note("<60 61 62 63 64 65>").s("sine")'),
@@ -297,9 +302,9 @@ it('handles inline duplication, leaf separation, no-op membership, and empty-pie
   ]);
   expect(setInstrumentInSection(doc, a.id, row.id, true)).toBe(doc);
   expect(setSectionLength(doc, a.id, 4)).toBe(doc);
-  expect(makeSections({ version: 1, body: [] })).toHaveProperty('ok', false);
+  expect(makeSections({ version: 2, body: [] })).toHaveProperty('ok', false);
 });
-it('removing a section clears vanished row results and solo without changing surviving selection', () => {
+it('removing a section retains unused instrument rows, results and solo without changing surviving selection', () => {
   const doc = load('const kick=s("bd"); const hat=s("hh"); arrange([4,kick],[4,hat])'),
     [a, b] = sections(doc),
     [kick, hat] = instruments(doc);
@@ -311,8 +316,8 @@ it('removing a section clears vanished row results and solo without changing sur
     events: { [kick.id]: result, [hat.id]: result },
   };
   const next = editedPiece(state, valid(removeSection(doc, a.id)));
-  expect(next).toMatchObject({ selected: b.id, fromCycle: 0, toCycle: 4, solo: null });
-  expect(Object.keys(next.events)).toEqual([hat.id]);
+  expect(next).toMatchObject({ selected: b.id, fromCycle: 0, toCycle: 4, solo: kick.id });
+  expect(Object.keys(next.events)).toEqual([kick.id, hat.id]);
 });
 it('separating an alias retains the settings and rewrites between it and its section', async () => {
   const doc = load(
