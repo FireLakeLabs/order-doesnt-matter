@@ -4,6 +4,7 @@ import { instruments, type Doc, type Step } from '../src/document';
 import { importStrudel } from '../src/import';
 import { generate } from '../src/generate';
 import { parseSteps, printSteps } from '../src/import/mini';
+import { layoutRhythm, fractionNumber } from '../src/document/edits/rhythm-layout';
 import { sequenceOwner } from '../src/document/edits/step-shared';
 import { setRhythmValue } from '../src/document/edits/rhythm-set';
 import { restRhythm } from '../src/document/edits/rhythm-rest';
@@ -189,6 +190,35 @@ for (const [file, name] of [
         expect(old.length).toBeGreaterThan(0);
         expect(next.length).toBe(old.length);
         const key = name === 'drums' ? 's' : 'note';
+        const slow = row.pattern.layers.find((l) => l.kind === 'rewrite' && l.name === 'slow');
+        const factor =
+          slow?.kind === 'rewrite' && slow.args[0]?.kind === 'literal'
+            ? Number(slow.args[0].value)
+            : 1;
+        const intended = Array.from({ length: Math.ceil(28 / factor) }, (_, cycle) =>
+          layoutRhythm(core.steps, cycle),
+        )
+          .flat()
+          .filter((b) => b.active && b.kind === 'value' && b.path.join() === path.join());
+        const expected = old
+          .map((e) =>
+            intended.some(
+              (b) =>
+                fractionNumber(b.start) * factor === e.span[0] &&
+                fractionNumber(b.end) * factor === e.span[1] &&
+                b.value === String(e.value[key]),
+            )
+              ? {
+                  ...e,
+                  value: {
+                    ...e.value,
+                    [key]: name === 'drums' ? replacement : Number(replacement),
+                  },
+                }
+              : e,
+          )
+          .sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+        expect(next).toEqual(expected);
         const changed = next.filter(
           (e) => !old.some((o) => JSON.stringify(o) === JSON.stringify(e)),
         );
