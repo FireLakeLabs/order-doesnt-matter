@@ -2,13 +2,7 @@ import { expect, test } from '@playwright/test';
 import type { EngineEvent } from '../../src/contract';
 import type {} from '../../src/engine/harness';
 
-test.use({
-  launchOptions: {
-    args: ['--autoplay-policy=no-user-gesture-required', '--audio-buffer-size=2048'],
-  },
-});
-// A 2048-frame device buffer prevents headless device underruns under concurrent Node load.
-// Coverage still requires every PCM frame; no retry or energy threshold is relaxed.
+test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 // Trusted click plus autoplay flag: Chromium runs a real advancing headless audio clock.
 test('engine: rendered synth/sample PCM, missing files, live revisions, errors and seek', async ({
   page,

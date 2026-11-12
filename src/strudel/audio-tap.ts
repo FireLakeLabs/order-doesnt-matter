@@ -13,7 +13,11 @@ class ODMTap extends AudioWorkletProcessor {
     // Web Audio supplies zero channels for a silent input bus. Capture that
     // rendered quantum too, otherwise RMS windows crossing a voice end have gaps.
     const channels = inputs[0]?.length ? inputs[0] : [new Float32Array(outputs[0][0].length)];
-    this.port.postMessage({ frame: currentFrame, channels });
+    // Chromium can repeat currentFrame when the graph changes. Rendered
+    // quanta still arrive in order: never stamp two captures over one another.
+    const frame = Math.max(currentFrame, this.nextFrame ?? currentFrame);
+    this.nextFrame = frame + outputs[0][0].length;
+    this.port.postMessage({ frame, channels });
     return true;
   }
 }
