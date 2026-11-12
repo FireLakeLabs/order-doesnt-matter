@@ -1,8 +1,9 @@
 import { definitionMuted } from '../document/edits/set-muted';
-import { rhythmTargetId } from '../document/edit';
+import { rhythmTargetId, setupSummary } from '../document/edit';
 import type { SheetInput, SheetSoundState } from '../contract';
 import {
   shared,
+  tempo,
   instruments,
   sections,
   walk,
@@ -70,6 +71,8 @@ export interface Section {
   }[];
 }
 export interface SheetModel {
+  setup: { nodeId: string; summary: string }[];
+  tempo: string | null;
   columns: string[];
   rows: Row[];
   sections: Section[];
@@ -508,6 +511,10 @@ export function sheetModel(input: SheetInput): SheetModel {
       ? ((input.playhead - input.fromCycle) / (input.toCycle - input.fromCycle)) * 100
       : null;
   return {
+    setup: input.doc.body.flatMap((entry) =>
+      entry.kind === 'setup' ? [{ nodeId: entry.id, summary: setupSummary(entry.code) }] : [],
+    ),
+    tempo: tempo(input.doc) === undefined ? null : `${tempo(input.doc)} cycles per minute`,
     columns: ordered,
     rows,
     sections: song(input, rows),

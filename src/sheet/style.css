@@ -371,3 +371,25 @@
   margin: 8px;
   color: var(--muted);
 }
+
+.sheet-setup {
+  padding: 4px 16px;
+  border-top: 1px solid var(--sheet-line);
+  overflow-wrap: anywhere;
+}
+.sheet-setup summary {
+  cursor: pointer;
+  padding: 12px 0;
+}
+.sheet-setup ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 8px;
+}
+.sheet-setup button {
+  width: 100%;
+  min-height: 44px;
+  text-align: left;
+  margin: 2px 0;
+  font-size: inherit;
+}

@@ -76,9 +76,28 @@ export function mountSheet(
   const sectionFocus =
     focus instanceof HTMLButtonElement && host.contains(focus) ? focus.dataset.section : undefined;
   const scrollFocus = Array.from(host.querySelectorAll('.sheet-scroll')).indexOf(focus as Element);
+  const previousSetup = host.querySelector<HTMLDetailsElement>('.sheet-setup');
+  const setupFocus = focus === previousSetup?.querySelector('summary');
   const sheet = element('section', '', 'odm-sheet');
   sheet.setAttribute('aria-label', 'Score sheet');
   sheet.append(element('p', model.caption, 'sheet-caption'));
+  if (model.setup.length || model.tempo !== null) {
+    const setup = element('details', '', 'sheet-setup');
+    setup.open = previousSetup?.open ?? false;
+    setup.append(element('summary', 'Setup'));
+    if (model.tempo !== null) setup.append(element('p', model.tempo));
+    const list = element('ul');
+    model.setup.forEach((entry) => {
+      const item = element('li');
+      const button = element('button', entry.summary);
+      button.type = 'button';
+      selectable(button, entry.nodeId, entry.summary);
+      item.append(button);
+      list.append(item);
+    });
+    setup.append(list);
+    sheet.append(setup);
+  }
   if (model.sections.length) {
     const strip = element('section', '', 'sheet-song');
     strip.setAttribute('aria-label', 'Song sections');
@@ -271,6 +290,7 @@ export function mountSheet(
   scroll.append(table);
   sheet.append(scroll);
   host.replaceChildren(sheet);
+  if (setupFocus) host.querySelector<HTMLElement>('.sheet-setup summary')?.focus();
   setPlayhead(host, model.playheadX);
   host.querySelectorAll<HTMLElement>('.sheet-scroll').forEach((el, i) => {
     el.scrollLeft = scrollers[i]?.left ?? 0;
