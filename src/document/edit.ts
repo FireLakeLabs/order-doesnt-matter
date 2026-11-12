@@ -102,6 +102,17 @@ export interface Target {
 /** A core has no serialized Meta id. Its selection address is scoped to its pattern. */
 export const rhythmTargetId = (pattern: Pattern) => `${pattern.id}:rhythm`;
 export function describeTarget(doc: Doc, nodeId: string): Target {
+  const argument = /^(.*):arg:(\d+)$/.exec(nodeId);
+  if (argument) {
+    const parent = describeTarget(doc, argument[1]);
+    return {
+      ...parent,
+      nodeId,
+      kind: 'source',
+      breadcrumb: [...parent.breadcrumb, `Argument ${Number(argument[2]) + 1}`, 'Source text'],
+      generatedParts: [...parent.generatedParts, false, false],
+    };
+  }
   const rewrites = nodeId.endsWith(':rewrites');
   const rhythm = nodeId.endsWith(':rhythm'),
     sourceAddress = nodeId.endsWith(':source');
@@ -153,7 +164,8 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
     (node && 'kind' in node && node.kind === 'opaque') ||
     pattern?.core.kind === 'opaque';
   let kind: TargetKind = 'unknown';
-  if (rewrites && pattern && rows.some((r) => r.pattern.id === id)) kind = 'rewrite';
+  if (sourceAddress) kind = 'source';
+  else if (rewrites && pattern && rows.some((r) => r.pattern.id === id)) kind = 'rewrite';
   else if (selectedSection && !rhythm && !sourceAddress) kind = 'section';
   else if (setting) kind = editable ? 'setting-constant' : valueKind(setting.value);
   else if (row?.id === id && !rhythm && !sourceAddress) kind = 'instrument';
@@ -185,6 +197,7 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
           row?.name ?? 'Piece',
           ...(section ? [`in ${section.name}`] : []),
           ...(kind === 'instrument' ? [] : [label]),
+          ...(sourceAddress && label !== 'Source text' ? ['Source text'] : []),
         ];
   return {
     nodeId,
