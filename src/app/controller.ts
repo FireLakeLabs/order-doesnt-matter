@@ -1,9 +1,10 @@
-import { sections, type Doc } from '../document';
+import { sections, walk, type Doc } from '../document';
 import { createEditSession, type EditSession } from '../editor/session';
 import type { Engine, EngineEvent, EventResult } from '../contract';
 import { generate } from '../generate';
 import { importStrudel } from '../import';
 import { createEngine } from '../engine';
+import type { SpiralInput } from '../spiral';
 import { createBrowserQueries } from '../strudel/evaluate-browser';
 import {
   initialState,
@@ -34,6 +35,113 @@ export function createApp() {
     starting = false;
   const queries = createBrowserQueries(),
     preflight = createBrowserQueries();
+  const watchQueries = createBrowserQueries();
+  let watchOpen = false,
+    watchDoc: Doc | null = null,
+    watchRevision = 0,
+    watchBatch = -Infinity;
+  let watchScore: Doc | null = null;
+  let watchRanges: { from: number; to: number; events: AppState['events'] }[] = [];
+  let watchMerge: { key: unknown[]; events: AppState['events'] } | null = null;
+  function resetWatch() {
+    ++watchRevision;
+    watchQueries.cancel();
+    watchRanges = [];
+    watchMerge = null;
+    watchBatch = -Infinity;
+    watchDoc = state.doc;
+    watchScore = state.doc;
+    // A visual question may reveal muted notes; this copy never reaches playback.
+    if (state.doc && state.rows.some((r) => r.muted || r.uses.some((u) => u.muted))) {
+      watchScore = structuredClone(state.doc);
+      walk(watchScore, (node) => {
+        if ('muted' in node) node.muted = false;
+      });
+    }
+  }
+  function watchInput(now: number | null): SpiralInput {
+    if (watchDoc !== state.doc) resetWatch();
+    const cycle = now ?? state.fromCycle,
+      first = Math.max(0, Math.floor(cycle) - 1);
+    const last = state.sections.at(-1),
+      length = last ? last.start + last.cycles : 0,
+      end = length ? (Math.floor(cycle / length) + 1) * length : null;
+    const held = watchScore === state.doc ? cachedWindow : null;
+    const known: [number, number][] = [
+      ...(held ? [[held.from, held.to] as [number, number]] : []),
+      ...watchRanges.map((r) => [r.from, r.to] as [number, number]),
+    ];
+    const horizon = Math.floor(cycle) + 4;
+    const missing = Array.from(
+      { length: Math.max(0, Math.ceil(horizon - first)) },
+      (_, n) => first + n,
+    ).some((t) => !known.some(([a, b]) => a <= t && b >= t + 1));
+    if (watchOpen && state.doc && missing && (cycle < watchBatch || cycle - watchBatch >= 4)) {
+      watchBatch = cycle;
+      const revision = watchRevision,
+        doc = state.doc;
+      const to = Math.floor(cycle) + 8;
+      const gaps: [number, number][] = [];
+      for (let t = first; t < to; t++)
+        if (!known.some(([a, b]) => a <= t && b >= Math.min(t + 1, to))) {
+          if (gaps.at(-1)?.[1] === t) gaps.at(-1)![1] = Math.min(t + 1, to);
+          else gaps.push([t, Math.min(t + 1, to)]);
+        }
+      void Promise.all(
+        gaps.map(async ([from, to]) => ({
+          from,
+          to,
+          events: Object.fromEntries(
+            await Promise.all(
+              state.rows.map(async (row) => [
+                row.id,
+                await watchQueries.query(generate(watchScore!, { only: row.id }), from, to),
+              ]),
+            ),
+          ),
+        })),
+      ).then((ranges) => {
+        if (!watchOpen || revision !== watchRevision || state.doc !== doc) return;
+        watchRanges = [...watchRanges.filter((r) => r.to > first), ...ranges];
+      });
+    }
+    const key = [held, watchRanges, state.rows, first, horizon];
+    if (!watchMerge || key.some((v, n) => v !== watchMerge!.key[n])) {
+      const events: AppState['events'] = {};
+      for (const row of state.rows) {
+        const collected: EventResult['events'] = [];
+        let result: EventResult | undefined;
+        for (let turn = first; turn < Math.ceil(horizon); turn++) {
+          const range =
+            watchRanges.find((r) => r.from <= turn && r.to >= turn + 1) ??
+            (held && held.from <= turn && held.to >= turn + 1 ? held : null);
+          const answer = range?.events[row.id];
+          if (!answer) continue;
+          result = result?.error ? result : answer;
+          collected.push(
+            ...answer.events
+              .filter(
+                (e) =>
+                  e.whole &&
+                  ((e.whole[0] >= turn && e.whole[0] < turn + 1) ||
+                    (turn === first &&
+                      e.whole[0] < first &&
+                      e.whole[1] > first &&
+                      (e.part[0] === e.whole[0] || e.part[0] === range!.from))),
+              )
+              .map((e) =>
+                e.whole && e.whole[0] < first
+                  ? { ...e, part: [e.whole[0], e.part[1]] as [number, number] }
+                  : e,
+              ),
+          );
+        }
+        if (result) events[row.id] = { ...result, events: collected };
+      }
+      watchMerge = { key, events };
+    }
+    return { ...state, events: watchMerge.events, playhead: now, known, end };
+  }
   const listeners = new Set<(state: AppState) => void>();
   const history: EngineEvent[] = [];
   const update = (next: AppState) => {
@@ -168,6 +276,11 @@ export function createApp() {
       return engine;
     },
     history,
+    setWatch(open: boolean) {
+      watchOpen = open;
+      resetWatch();
+    },
+    watchInput,
     get canPlay() {
       return checked && !starting;
     },
