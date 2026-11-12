@@ -34,7 +34,7 @@ try {
       [
         'node_modules/@playwright/test/cli.js',
         'test',
-        `--project=${mode === 'ci' ? 'default' : 'optional'}`,
+        `--project=${mode === 'ci' ? 'audio' : 'optional'}`,
         ...(mode === 'ci' ? [] : [`tests/browser/${mode}.spec.ts`]),
         ...args,
         '--reporter',
