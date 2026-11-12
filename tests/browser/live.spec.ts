@@ -21,39 +21,41 @@ test('Kiln Now pulses agree with predicted and triggered onsets; Stop and editor
     }),
   ).toBe(true);
   await play(page);
-  const observed = await page.evaluate(async () => {
+  const capture = await page.evaluateHandle(() => {
     const app = window.odmApp;
     const from = Math.ceil(app.engine!.now()!),
       to = from + 2;
     const samples: { id: string; cycle: number; frame: number }[] = [];
     let previous = performance.now();
-    await new Promise<void>((resolve) => {
-      function frame() {
-        const cycle = app.engine!.now()!,
-          now = performance.now(),
-          gap = (now - previous) / 1000;
-        previous = now;
-        if (cycle >= from && cycle < to)
-          document
-            .querySelectorAll<HTMLElement>('[data-lit="true"]')
-            .forEach((n) => samples.push({ id: n.dataset.liveId!, cycle, frame: gap }));
-        if (cycle >= to) resolve();
-        else requestAnimationFrame(frame);
-      }
-      requestAnimationFrame(frame);
-    });
-    return {
-      from,
-      to,
-      samples,
-      events: app.state.events,
-      triggers: app.history.filter((e) => e.type === 'trigger'),
-      cps: app.state.cps!,
-      same:
-        document.querySelector('[data-live-id]') ===
-        (window as unknown as { liveFirst: Element }).liveFirst,
-    };
+    function frame() {
+      const cycle = app.engine!.now()!,
+        now = performance.now(),
+        gap = (now - previous) / 1000;
+      previous = now;
+      if (cycle >= from && cycle < to)
+        document
+          .querySelectorAll<HTMLElement>('[data-lit="true"]')
+          .forEach((n) => samples.push({ id: n.dataset.liveId!, cycle, frame: gap }));
+      if (cycle < to) requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+    return { from, to, samples };
   });
+  await appSignal(
+    page,
+    (to) => window.odmApp.engine!.now()! >= to,
+    await capture.evaluate((c) => c.to),
+  );
+  const observed = await capture.evaluate((data) => ({
+    ...data,
+    events: window.odmApp.state.events,
+    triggers: window.odmApp.history.filter((e) => e.type === 'trigger'),
+    cps: window.odmApp.state.cps!,
+    same:
+      document.querySelector('[data-live-id]') ===
+      (window as unknown as { liveFirst: Element }).liveFirst,
+  }));
+  await capture.dispose();
   expect(observed.same).toBe(true);
   expect(observed.samples.length).toBeGreaterThan(0);
   let matched = 0;
