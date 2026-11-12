@@ -210,6 +210,7 @@ export function installSource(
           for (const key of parentPath) parent = (parent as Record<string | number, unknown>)[key];
           const old = parent as Pattern['layers'];
           if (slot.shape === 'setting') {
+            if (layers.length === 1 && layers[0].kind !== 'settings') layers[0].id = slot.node.id;
             const settings = (
               old[index] as Extract<Pattern['layers'][number], { kind: 'settings' }>
             ).settings;

@@ -150,6 +150,14 @@ it('promotion is gated on whole onset multisets, with opaque source kept on fail
   if ('ok' in success) throw Error(success.reason);
   expect(success.promoted).toBe(true);
   expect(describeTarget(success.doc, id).value).toBe(0.2);
+  const multiple = await prepareSource(doc, id, '.fast(2).rev()', async (d) =>
+    queryEventsNode(generate(d), 0, 4),
+  );
+  if ('ok' in multiple) throw Error(multiple.reason);
+  expect(multiple.promoted).toBe(false);
+  expect(sourceFragment(multiple.doc, id)).toBe('.fast(2).rev()');
+  const single = accepted(replaceFromSource(doc, id, '.fast(2)'));
+  expect(describeTarget(single, id).kind).toBe('rewrite');
   const refusal = await prepareSource(doc, id, '.gain(');
   expect(refusal).toMatchObject({ ok: false });
   for (const ask of [

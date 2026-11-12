@@ -1,7 +1,7 @@
 import { instruments, type Doc } from '../index';
 import type { EventResult } from '../../contract';
 import { generate } from '../../generate';
-import { installSource, sameOnsets } from './source-shared';
+import { installSource, sameOnsets, sourceSlot } from './source-shared';
 import { replaceOpaque } from './source-opaque';
 /** Candidate promotion only: callers must prove event equality with the opaque edit. */
 export const replaceFromSource = (doc: Doc, id: string, code: string) =>
@@ -21,6 +21,7 @@ export async function prepareSource(
     !!ask &&
     rows.length > 0 &&
     !('ok' in candidate) &&
+    !!sourceSlot(candidate, id) &&
     JSON.stringify(rows.map((r) => r.id)) ===
       JSON.stringify(instruments(candidate).map((r) => r.id));
   let broken = '';
