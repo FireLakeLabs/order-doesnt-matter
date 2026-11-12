@@ -299,3 +299,10 @@ it('removing a section clears vanished row results and solo without changing sur
   expect(next).toMatchObject({ selected: b.id, fromCycle: 0, toCycle: 4, solo: null });
   expect(Object.keys(next.events)).toEqual([hat.id]);
 });
+it('separating an alias retains the settings and rewrites between it and its section', async () => {
+  const doc = load(
+    'const kick=s("bd"); const base=stack(kick); const drop=base.gain(.3).slow(2); arrange([4,drop],[4,drop])',
+  );
+  const next = valid(separateSection(doc, sections(doc)[0].id));
+  expect(await notes(next, 0, 8)).toEqual(await notes(doc, 0, 8));
+});
