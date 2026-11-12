@@ -148,3 +148,4 @@ export function checkDoc(doc: Doc): string[] {
 }
 export { instruments, sections } from './instruments';
 export type { Instrument, InstrumentUse, SongSection } from './instruments';
+export { setConstant, describeTarget } from './edit';
