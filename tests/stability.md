@@ -133,3 +133,19 @@ Final worker/load/CI evidence is recorded in the pull request before handback.
 
 No listening, subjective visual review, live deployment or merge. Optional online,
 recording, measurement and screenshot modes are outside the offline gate.
+
+## Final width comparison
+
+With both new editors included, the isolated three-UI-worker configuration passed
+15/15 complete browser commands under continuous `npm test` load,
+53.286–54.451 s. Its initial CI run plus five full reruns all passed (the exact
+runner timings and links are in the PR); one exceeded the 90 s performance target.
+All original timing/RMS bounds and the new 20 s test guard passed.
+
+Four UI workers plus the same one-worker audio phase measured 42.000 s on an
+ordinary local command. The full loaded/CI comparison is recorded in the PR;
+the default is now four to measure that exact configuration on CI. The loaded
+series uses the same effective configuration via `--workers=4` before and after
+this default change. Test code, assertions, incoming specs and audio width are
+unchanged during the comparison. Loaded times are reported separately from the
+ordinary local target; they must not be presented as under 45 s.
