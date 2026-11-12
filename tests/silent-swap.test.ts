@@ -53,7 +53,7 @@ it('acknowledges a current silent scheduling window once, ignoring old/stopped r
   expect(events.at(-1)).toEqual({ type: 'transport', playing: false });
 });
 it('silent acknowledgement can arrive before play resolves and confirms the pending snapshot', () => {
-  const doc = { version: 1 as const, body: [] };
+  const doc = { version: 2 as const, body: [] };
   let state = transition(pending(doc), {
     type: 'edit',
     doc,

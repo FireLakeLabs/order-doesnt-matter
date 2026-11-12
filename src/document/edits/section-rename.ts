@@ -26,7 +26,9 @@ export function renameSection(doc: Doc, id: string, input: string) {
       next,
       current.root,
       current.parts.map((p) =>
-        resolveSection(next, p.pattern).id === owner.content.id ? { ...p, label: name } : p,
+        resolveSection(next, p.pattern).id === owner.content.id
+          ? { ...p, label: name, labelSource: 'author' }
+          : p,
       ),
     );
     return next;
@@ -34,6 +36,8 @@ export function renameSection(doc: Doc, id: string, input: string) {
   return replaceParts(
     doc,
     owner.root,
-    owner.parts.map((p, i) => (i === owner.index ? { ...p, label: name } : p)),
+    owner.parts.map((p, i) =>
+      i === owner.index ? { ...p, label: name, labelSource: 'author' } : p,
+    ),
   );
 }

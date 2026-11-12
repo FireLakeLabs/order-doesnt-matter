@@ -15,7 +15,7 @@ it('setup entries keep document order, concise summaries and source selection br
     `unknownSetup(${JSON.stringify('x'.repeat(80))});`,
   ];
   const doc: Doc = {
-    version: 1,
+    version: 2,
     body: codes.map((code, i) => ({ id: `setup-${i}`, kind: 'setup', tier: 3, code })),
   };
   const summaries = [
@@ -38,9 +38,9 @@ it('setup entries keep document order, concise summaries and source selection br
   }
 });
 it('setup is absent without entries or explicit tempo; last explicit tempo is read-only cpm', () => {
-  expect(model({ version: 1, body: [] })).toMatchObject({ setup: [], tempo: null });
+  expect(model({ version: 2, body: [] })).toMatchObject({ setup: [], tempo: null });
   const doc: Doc = {
-    version: 1,
+    version: 2,
     body: [
       { id: 'first', kind: 'tempo', tier: 1, cpm: 90 },
       { id: 'last', kind: 'tempo', tier: 1, cpm: 123.5 },

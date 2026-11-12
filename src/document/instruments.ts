@@ -1,10 +1,10 @@
 import { shared, voices } from './index';
-import type { Doc, Layer, Pattern, Voice } from './types';
+import type { Doc, Layer, Pattern, Voice, GroupPart } from './types';
 
 export interface InstrumentUse {
   voiceId: string;
   /** Evaluation ancestry, including references and the definition itself. */
-  path: (Voice | Pattern)[];
+  path: (Voice | Pattern | GroupPart)[];
   /** Inner to outer; excludes the instrument definition's own layers. */
   layers: Layer[];
   muted: boolean;
@@ -52,39 +52,50 @@ function sound(p: Pattern): string | undefined {
 
 /** Leaves of group/ref traversal. Settings and rewrite arguments belong to a leaf,
  * not to separate instruments. Shared leaves deduplicate by definition identity. */
-export function instruments(doc: Doc): Instrument[] {
+export function instruments(doc: Doc, { origins = true } = {}): Instrument[] {
   const rows = new Map<string, Instrument>();
-  const sharedNames = new Map(
-    doc.body.filter((n) => n.kind === 'shared').map((n) => [n.pattern.id, n.name]),
-  );
+  const definitions = doc.body.filter((n) => n.kind === 'shared');
+  const byId = new Map<string, Pattern>();
+  // Index score patterns only: drivers and rewrite arguments are not instruments.
+  function index(p: Pattern) {
+    byId.set(p.id, p);
+    if (p.core.kind === 'group') p.core.parts.forEach((part) => index(part.pattern));
+  }
+  for (const n of doc.body) if (n.kind === 'voice' || n.kind === 'shared') index(n.pattern);
+  const sharedNames = new Map(definitions.map((n) => [n.pattern.id, n]));
   function descend(
     p: Pattern,
     voice: Voice,
-    path: (Voice | Pattern)[],
+    path: (Voice | Pattern | GroupPart)[],
     muted: boolean,
     groupName?: string,
   ) {
     const cyclic = path.some((node) => node.id === p.id);
     path = [...path, p];
     muted ||= !!p.muted;
+    const definition = sharedNames.get(p.id);
+    if (definition?.purpose === 'value') return;
+    const canonical = origins && p.origin ? byId.get(p.origin) : undefined;
     const ownName =
-      author(p.label) ??
-      author(
-        sharedNames.get(p.id)?.startsWith('__odm_instrument_') ? undefined : sharedNames.get(p.id),
-      );
-    if (!cyclic && p.core.kind === 'ref') {
+      author((canonical ?? p).label) ??
+      author(definition?.nameSource === 'author' ? definition.name : undefined);
+    if (canonical) {
+      path = [...path, canonical];
+      muted ||= !!canonical.muted;
+    }
+    if (!canonical && !cyclic && definition?.purpose !== 'instrument' && p.core.kind === 'ref') {
       const target = shared(doc, p.core.name);
       if (target) {
         descend(target, voice, path, muted, groupName);
         return;
       }
     }
-    if (!cyclic && p.core.kind === 'group') {
+    if (!canonical && !cyclic && definition?.purpose !== 'instrument' && p.core.kind === 'group') {
       for (const part of p.core.parts)
         descend(
           part.pattern,
           voice,
-          path,
+          [...path, part],
           muted || !!part.muted,
           ownName ?? groupName ?? (voice.nameSource === 'author' ? author(voice.name) : undefined),
         );
@@ -92,26 +103,32 @@ export function instruments(doc: Doc): Instrument[] {
     }
     // A bare spacer retains its arrangement duration without becoming a row.
     if (
+      definition?.purpose !== 'instrument' &&
       p.core.kind === 'generator' &&
       p.core.name === 'silence' &&
       !p.core.args.length &&
       !p.layers.length
     )
       return;
-    const id = p.id;
+    if (definition?.purpose === 'section') return;
+    const actual = canonical ?? p;
+    const id = actual.id;
     let row = rows.get(id);
     if (!row) {
-      const direct = resolve(doc, voice.pattern).id === p.id;
+      const direct = !!voice && resolve(doc, voice.pattern).id === actual.id;
+      const entry = sharedNames.get(actual.id);
       const name =
-        ownName ?? (direct && voice.nameSource === 'author' ? author(voice.name) : undefined);
+        author(actual.label) ??
+        author(entry?.nameSource === 'author' ? entry.name : undefined) ??
+        (direct && voice.nameSource === 'author' ? author(voice.name) : undefined);
       const generated =
         (direct ? author(voice.name) : undefined) ??
         (groupName && sound(p) ? `${groupName} · ${sound(p)}` : `Instrument ${rows.size + 1}`);
       row = {
         id,
         name: name ?? generated,
-        nameSource: name ? 'author' : 'generated',
-        pattern: p,
+        nameSource: entry?.nameSource ?? (name ? 'author' : 'generated'),
+        pattern: actual,
         uses: [],
         muted: false,
       };
@@ -126,13 +143,25 @@ export function instruments(doc: Doc): Instrument[] {
         .flatMap((node) => ('layers' in node ? node.layers : [])),
       muted,
     });
-    row.muted = !!p.muted || row.uses.every((use) => use.muted);
+    row.muted = !!actual.muted || row.uses.every((use) => use.muted);
   }
   for (const voice of voices(doc)) descend(voice.pattern, voice, [voice], voice.muted);
+  for (const entry of definitions) {
+    if (entry.purpose !== 'instrument' || rows.has(entry.pattern.id)) continue;
+    rows.set(entry.pattern.id, {
+      id: entry.pattern.id,
+      name: entry.pattern.label ?? entry.name,
+      nameSource: entry.nameSource,
+      pattern: entry.pattern,
+      uses: [],
+      muted: !!entry.pattern.muted,
+    });
+  }
   return [...rows.values()].map((row) => {
     // An unreused standalone pattern retains its existing voice id. Shared
     // identity takes precedence when the definition occurs in several voices.
     if (
+      !row.uses.some((u) => u.path.some((n) => 'origin' in n)) &&
       row.uses.length === 1 &&
       row.uses[0].path.every((node) => !('core' in node) || node.core.kind !== 'group')
     )
@@ -151,28 +180,32 @@ export function sections(doc: Doc): SongSection[] {
   const rows = instruments(doc);
   let start = 0;
   return root.core.parts.map((part, index) => {
+    const definition =
+      part.pattern.core.kind === 'ref'
+        ? doc.body.findLast(
+            (n) => n.kind === 'shared' && n.name === (part.pattern.core as { name: string }).name,
+          )
+        : undefined;
     const name =
-      author(part.label) ??
-      (part.pattern.core.kind === 'ref'
-        ? (author(resolve(doc, part.pattern).label) ?? author(part.pattern.core.name))
-        : undefined) ??
+      part.label ??
+      (definition?.kind === 'shared' ? (definition.pattern.label ?? definition.name) : undefined) ??
       author(part.pattern.label);
     const section: SongSection = {
-      id: part.pattern.id,
+      id: part.id,
       name: name ?? `Section ${index + 1}`,
       nameSource:
-        !part.label &&
-        part.pattern.core.kind === 'ref' &&
-        /^__odm_section_\d+$/.test(part.pattern.core.name)
-          ? 'generated'
-          : name
-            ? 'author'
-            : 'generated',
+        part.label !== undefined
+          ? (part.labelSource ?? 'author')
+          : definition?.kind === 'shared'
+            ? definition.nameSource
+            : name
+              ? 'author'
+              : 'generated',
       start,
       cycles: part.cycles ?? 1,
       instrumentIds: rows
         .filter((row) =>
-          row.uses.some((use) => !use.muted && use.path.some((node) => node === part.pattern)),
+          row.uses.some((use) => !use.muted && use.path.some((node) => node === part)),
         )
         .map((row) => row.id),
     };

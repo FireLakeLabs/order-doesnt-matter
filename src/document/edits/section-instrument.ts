@@ -16,11 +16,16 @@ export function setInstrumentInSection(doc: Doc, id: string, instrumentId: strin
   let row = instruments(doc).find((r) => r.id === instrumentId);
   if (!owner) return refuse();
   if (!row) return refuse('This instrument no longer exists');
-  const uses = row.uses.filter((u) => u.path.some((n) => n.id === id));
+  let uses = row.uses.filter((u) => u.path.some((n) => n.id === id));
   if (plays && definitionMuted(doc, instrumentId))
     return refuse('This instrument is muted everywhere. Open its instrument editor to unmute it');
+  if (uses.length && uses.some((u) => !u.muted) === plays) return doc;
+  if (!uses.length && !plays) return doc;
+  doc = shareInlineLeaves(doc, id);
+  owner = sectionOwner(doc, id)!;
+  row = instruments(doc).find((r) => r.id === instrumentId)!;
+  uses = row.uses.filter((u) => u.path.some((n) => n.id === id));
   if (uses.length) {
-    if (uses.some((u) => !u.muted) === plays) return doc;
     // The section itself can be a single leaf; its occurrence is the mute boundary.
     if (owner.content.id === row.pattern.id) {
       return replaceParts(
@@ -56,7 +61,10 @@ export function setInstrumentInSection(doc: Doc, id: string, instrumentId: strin
         if (target && ancestry.has(target.id)) {
           const copy = copyPattern(doc, local(target), copyIds);
           copy.label ??= p.core.name;
-          return { ...p, core: { kind: 'group', how: 'stack', parts: [{ pattern: copy }] } };
+          return {
+            ...p,
+            core: { kind: 'group', how: 'stack', parts: [{ id: copyIds('part'), pattern: copy }] },
+          };
         }
       }
       if (p.core.kind === 'group')
@@ -67,34 +75,17 @@ export function setInstrumentInSection(doc: Doc, id: string, instrumentId: strin
             parts: p.core.parts.map((part) => ({ ...part, pattern: local(part.pattern) })),
           },
         };
-      return p.id === row!.pattern.id ? { ...p, muted: !plays } : p;
+      return (p.origin ?? p.id) === row!.pattern.id ? { ...p, muted: !plays } : p;
     }
     return replaceAtPath(doc, findWithPath(doc, owner.content.id)!.path, local(owner.content));
   }
   if (!plays) return doc;
   let definition = doc.body.find((n) => n.kind === 'shared' && n.pattern.id === row!.pattern.id);
   if (definition?.kind !== 'shared') {
-    if (row.nameSource !== 'author')
-      return refuse('This instrument is used inline. Give it a name first');
     doc = shareInlineLeaves(doc, row.pattern.id);
     definition = doc.body.find((n) => n.kind === 'shared' && n.pattern.id === row!.pattern.id);
-    if (definition?.kind !== 'shared') {
-      // A bare section has used its pattern id as the occurrence id. Keep that
-      // occurrence address; the newly shared leaf necessarily gets a fresh id.
-      const fresh = freshIds(doc),
-        name = `__odm_instrument_${fresh('leaf')}`;
-      const pattern = { ...row.pattern, id: fresh('leaf') };
-      definition = { id: fresh('definition'), tier: 1, kind: 'shared', name, pattern };
-      doc = insertDefinition(
-        replaceAtPath(doc, findWithPath(doc, row.pattern.id)!.path, {
-          id: row.pattern.id,
-          tier: 1,
-          core: { kind: 'ref', name },
-          layers: [],
-        }),
-        definition,
-      );
-    }
+    if (definition?.kind !== 'shared')
+      return refuse('This instrument could not be promoted to a shared definition');
     owner = sectionOwner(doc, id)!;
   }
   const fresh = freshIds(doc),
@@ -116,7 +107,14 @@ export function setInstrumentInSection(doc: Doc, id: string, instrumentId: strin
     const stack: Pattern = {
       id: fresh('stack'),
       tier: 1,
-      core: { kind: 'group', how: 'stack', parts: [{ pattern: first }, { pattern: reference }] },
+      core: {
+        kind: 'group',
+        how: 'stack',
+        parts: [
+          { id: fresh('part'), pattern: first },
+          { id: fresh('part'), pattern: reference },
+        ],
+      },
       layers: [],
     };
     const added = newSection(doc, undefined, stack);
@@ -128,7 +126,8 @@ export function setInstrumentInSection(doc: Doc, id: string, instrumentId: strin
         resolveSection(doc, part.pattern).id === content.id
           ? {
               ...part,
-              label: section.nameSource === 'author' ? section.name : part.label,
+              label: section.name,
+              labelSource: section.nameSource,
               pattern: {
                 ...part.pattern,
                 core: added.reference.core,
@@ -142,6 +141,9 @@ export function setInstrumentInSection(doc: Doc, id: string, instrumentId: strin
   }
   return replaceAtPath(doc, findWithPath(doc, content.id)!.path, {
     ...content,
-    core: { ...content.core, parts: [...content.core.parts, { pattern: reference }] },
+    core: {
+      ...content.core,
+      parts: [...content.core.parts, { id: fresh('part'), pattern: reference }],
+    },
   });
 }

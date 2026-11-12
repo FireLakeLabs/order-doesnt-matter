@@ -76,6 +76,7 @@ describe('score sheet model', () => {
       id: 'driver',
       tier: 1,
       kind: 'shared',
+      nameSource: 'author',
       name: 'drift',
       pattern: { id: 'shared-drift', tier: 1, core: { kind: 'signal', shape: 'sine' }, layers: [] },
     });

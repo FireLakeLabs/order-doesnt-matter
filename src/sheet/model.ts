@@ -115,7 +115,19 @@ function signal(doc: SheetInput['doc'], p: Pattern): boolean {
     if (seen.has(p.id)) return;
     seen.add(p.id);
     walk(
-      { version: 1, body: [{ id: 'scan', tier: 1, kind: 'shared', name: 'scan', pattern: p }] },
+      {
+        version: 2,
+        body: [
+          {
+            id: 'scan',
+            tier: 1,
+            kind: 'shared',
+            nameSource: 'generated',
+            name: 'scan',
+            pattern: p,
+          },
+        ],
+      },
       (node) => {
         if (!('core' in node)) return;
         const core = (node as Pattern).core;
@@ -441,18 +453,25 @@ export function sheetModel(input: SheetInput): SheetModel {
           (!u.muted || definitionMuted(input.doc, voice.id)),
       );
     const broken = result?.error?.message ?? null;
+    const nowhere =
+      !voice.uses.length ||
+      (songSections.length > 0 &&
+        songSections.every((s) => !s.instrumentIds.includes(voice.id)) &&
+        !definitionMuted(input.doc, voice.id));
     const status =
       broken !== null
         ? `Broken: ${broken}`
-        : absent
-          ? 'not in this section'
-          : !result
-            ? 'Not queried'
-            : voice.muted || voice.pattern.muted
-              ? 'Muted'
-              : !events.length
-                ? 'No events in this window'
-                : `${events.length} event${events.length === 1 ? '' : 's'}`;
+        : nowhere
+          ? 'plays in no section'
+          : absent
+            ? 'not in this section'
+            : !result
+              ? 'Not queried'
+              : voice.muted || voice.pattern.muted
+                ? 'Muted'
+                : !events.length
+                  ? 'No events in this window'
+                  : `${events.length} event${events.length === 1 ? '' : 's'}`;
     const names = [
       ...new Set(
         (result?.error ? [] : (result?.events ?? [])).flatMap((e) =>

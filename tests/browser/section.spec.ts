@@ -77,7 +77,7 @@ test('real house: section checklist stops kick triggers and keeps the other rows
   const kick = await page.evaluate(
     () => window.odmApp.state.rows.find((r) => r.name === 'kick')!.id,
   );
-  await expect(page.locator(`tr[data-node-id="${kick}"]`)).toContainText('not in this section');
+  await expect(page.locator(`tr[data-node-id="${kick}"]`)).toContainText('plays in no section');
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
 });
 test('make sections confirms the loop; strip plus opens an empty section checklist', async ({

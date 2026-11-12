@@ -74,7 +74,8 @@ export function sourceSlot(doc: Doc, address: string) {
     'core' in node ||
     ('pattern' in node && 'kind' in node && ['voice', 'shared'].includes(String(node.kind)))
   ) {
-    const p = 'core' in node ? (node as Pattern) : (node as Meta & { pattern: Pattern }).pattern;
+    const p =
+      'core' in node ? (node as Pattern) : (node as unknown as Meta & { pattern: Pattern }).pattern;
     if (!('core' in node)) path = [...path, 'pattern'];
     shape = 'pattern';
     code = generatePattern(p, hole);
@@ -104,7 +105,7 @@ export function sourceSlot(doc: Doc, address: string) {
       hole,
     ).slice((hole ?? 'p').length);
   } else {
-    code = generate({ version: 1, body: [node as Doc['body'][number]] });
+    code = generate({ version: 2, body: [node as Doc['body'][number]] });
   }
   return { node, path, shape, code, hole, core: coreOnly };
 }
@@ -128,7 +129,7 @@ export function parseFragment(doc: Doc, code: string, layer: boolean, hole?: str
     `${generate(doc)}\n${declaration}\n$: (${expression}\n);`,
   ).doc.body.at(-1);
   if (fallback?.kind !== 'voice') throw Error('Use one expression in this place.');
-  walk({ version: 1, body: [fallback] }, (node) => {
+  walk({ version: 2, body: [fallback] }, (node) => {
     if ('core' in node) {
       const p = node as Pattern;
       if (p.core.kind === 'ref' && p.core.name === hole) p.core = { kind: 'opaque', code: hole };
@@ -138,10 +139,13 @@ export function parseFragment(doc: Doc, code: string, layer: boolean, hole?: str
 }
 export function adopt<T>(doc: Doc, value: T, fresh = freshIds(doc)): T {
   const next = structuredClone(value);
+  const ids = new Map<string, string>();
   function visit(n: unknown) {
     if (!n || typeof n !== 'object') return;
-    if ('id' in n && 'tier' in n) {
-      (n as Meta).id = fresh();
+    if ('id' in n && ('tier' in n || 'pattern' in n)) {
+      const id = fresh();
+      ids.set(String(n.id), id);
+      (n as Meta).id = id;
       delete (n as Meta).span;
     }
     Object.entries(n).forEach(([key, value]) => {
@@ -150,6 +154,16 @@ export function adopt<T>(doc: Doc, value: T, fresh = freshIds(doc)): T {
     });
   }
   visit(next);
+  function origins(n: unknown): void {
+    if (!n || typeof n !== 'object') return;
+    if ('core' in n && 'origin' in n && typeof n.origin === 'string' && ids.has(n.origin))
+      n.origin = ids.get(n.origin)!;
+    for (const [key, child] of Object.entries(n)) {
+      if (key === 'value' && 'kind' in n && ['literal', 'data'].includes(String(n.kind))) continue;
+      origins(child);
+    }
+  }
+  origins(next);
   return next;
 }
 export function installSource(
@@ -249,7 +263,7 @@ export function installSource(
           understood ? adopt(doc, arg.args[0], fresh) : { kind: 'opaque', code },
         );
       } else {
-        const p = understood
+        const p: Pattern = understood
           ? adopt(doc, parsed, fresh)
           : {
               ...('core' in slot.node
@@ -260,6 +274,11 @@ export function installSource(
               core: { kind: 'opaque' as const, code },
               layers: [],
             };
+        if ('core' in slot.node) {
+          const old = slot.node as Pattern;
+          if (old.origin) p.origin = old.origin;
+          if (old.muted !== undefined) p.muted = old.muted;
+        }
         p.id =
           'core' in slot.node
             ? slot.node.id

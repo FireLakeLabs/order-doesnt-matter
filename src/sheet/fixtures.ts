@@ -43,7 +43,7 @@ const result = (events: EventResult['events']): EventResult => ({
   opaqueValues: false,
 });
 const input = (body: TopLevel[], events: SheetInput['events'], toCycle = 1): SheetInput => ({
-  doc: { version: 1, body },
+  doc: { version: 2, body },
   events,
   fromCycle: 0,
   toCycle,
@@ -136,6 +136,7 @@ export const arrange = input(
       id: `shared-${v.id}`,
       tier: 1 as const,
       kind: 'shared' as const,
+      nameSource: 'author' as const,
       name: v.name,
       pattern: { ...v.pattern, id: v.id },
     })),
@@ -143,12 +144,14 @@ export const arrange = input(
       kind: 'group',
       how: 'arrange',
       parts: ['Opening', 'Build', 'Space', 'Return'].map((label, index) => ({
+        id: `section-part-${index}`,
         label,
         cycles: [2, 1, 3, 2][index],
         pattern: pattern(`section-${index}`, {
           kind: 'group',
           how: 'stack',
           parts: [pulse, spark].map((v) => ({
+            id: `member-${index}-${v.id}`,
             muted: v.id === 'spark' && index === 2,
             pattern: pattern(`${v.id}-use-${index}`, { kind: 'ref', name: v.name }),
           })),
