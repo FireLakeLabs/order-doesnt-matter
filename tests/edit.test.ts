@@ -41,6 +41,7 @@ it('refuses missing, non-setting, patterned, layered, signal and source targets 
   expect(setConstant(doc, doc.body[0].id, 1)).toMatchObject({ ok: false });
   for (const s of settings(doc)) expect(setConstant(doc, s.id, 1)).toMatchObject({ ok: false });
   expect(describeTarget(doc, settings(doc)[0].id).reason).toBe('driven by a signal');
+  expect(describeTarget(doc, settings(doc)[0].id).displayValue).toBe('400 to 2000');
   expect(describeTarget(doc, settings(doc)[1].id).reason).toBe('a pattern of values');
   expect(describeTarget(doc, settings(doc).at(-1)!.id).reason).toBe('source text');
   const simple = load('// comment is not a name\n$: note(60).gain(.5)');

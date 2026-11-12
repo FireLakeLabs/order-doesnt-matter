@@ -38,12 +38,40 @@ function reason(doc: Doc, pattern: Pattern, seen = new Set<string>()): string {
   }
   return 'a pattern of values';
 }
+/** Text for read-only targets comes from the document, including signal bounds. */
+function displayValue(doc: Doc, p: Pattern, seen = new Set<string>()): string {
+  if (seen.has(p.id)) return 'reused pattern';
+  seen.add(p.id);
+  const c = p.core;
+  if (c.kind === 'constant') return String(c.value);
+  if (c.kind === 'sequence') return c.notation;
+  if (c.kind === 'data') return JSON.stringify(c.value);
+  if (c.kind === 'opaque') return c.code;
+  if (c.kind === 'ref') {
+    const shared = doc.body.findLast((n) => n.kind === 'shared' && n.name === c.name);
+    return shared?.kind === 'shared' ? displayValue(doc, shared.pattern, seen) : c.name;
+  }
+  if (c.kind === 'signal') {
+    const range = p.layers.find(
+      (l) => l.kind === 'rewrite' && ['range', 'rangex'].includes(l.name),
+    );
+    if (
+      range?.kind === 'rewrite' &&
+      range.args.length === 2 &&
+      range.args.every((a) => a.kind === 'literal')
+    )
+      return range.args.map((a) => (a.kind === 'literal' ? String(a.value) : '')).join(' to ');
+    return c.shape;
+  }
+  return c.kind === 'generator' ? c.name : 'a pattern of values';
+}
 export interface Target {
   nodeId: string;
   breadcrumb: string[];
   generated: boolean;
   control: string;
   value: Constant | null;
+  displayValue: string;
   editable: boolean;
   reason: string;
 }
@@ -74,6 +102,7 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
     generated: row?.nameSource === 'generated',
     control,
     value,
+    displayValue: setting ? displayValue(doc, setting.value) : '',
     editable,
     reason: editable ? '' : setting ? reason(doc, setting.value) : 'source text',
   };
