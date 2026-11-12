@@ -19,14 +19,19 @@ export function createPanel(host: HTMLElement, close: () => void) {
   const heading = el('h2'),
     status = el('p'),
     body = el('div'),
-    done = el('button', 'Done');
+    done = el('button', 'Done'),
+    conversions = el('div'),
+    conversionError = el('p');
+  conversionError.setAttribute('role', 'alert');
+  // An empty alert is still an alert to assistive technology; hide it until it says something.
+  conversionError.hidden = true;
   heading.id = 'editor-breadcrumb';
   status.id = 'editor-status';
   status.setAttribute('role', 'status');
   done.onclick = close;
   host.setAttribute('aria-labelledby', heading.id);
   host.setAttribute('role', 'region');
-  host.append(heading, body, status, done);
+  host.append(heading, body, conversions, conversionError, status, done);
   return (context: EditorContext | null, entry: PendingEntry | undefined, playing: boolean) => {
     host.hidden = !context;
     if (!context) {
@@ -56,6 +61,33 @@ export function createPanel(host: HTMLElement, close: () => void) {
       host.dataset.editorKind = kind.id;
       mounted = kind.mount(body, context);
     } else mounted!.update(context);
+    const offers = kinds.flatMap((kind) => kind.conversions?.(next, context.doc) ?? []);
+    // Keep focus during status/event refreshes; handlers always use the latest offers.
+    const labels = JSON.stringify(offers.map((offer) => offer.label));
+    if (conversions.dataset.labels !== labels) {
+      conversions.dataset.labels = labels;
+      conversions.replaceChildren();
+      conversionError.textContent = '';
+      conversionError.hidden = true;
+      if (offers.length) conversions.append(el('p', 'Change to…'));
+      offers.forEach((offer, index) => {
+        const button = el('button', offer.label);
+        button.dataset.conversion = String(index);
+        conversions.append(button);
+      });
+    }
+    conversions.onclick = (event) => {
+      const button = (event.target as HTMLElement).closest<HTMLButtonElement>('[data-conversion]');
+      if (!button) return;
+      const result = offers[Number(button.dataset.conversion)].apply();
+      if ('ok' in result) {
+        conversionError.textContent = result.reason;
+        conversionError.hidden = false;
+      } else {
+        context.apply(result);
+        body.querySelector<HTMLElement>('input,select,button')?.focus({ preventScroll: true });
+      }
+    };
     host.dataset.editState = entry?.status ?? '';
     status.textContent =
       entry?.status === 'failed'
