@@ -23,8 +23,15 @@ export function setInstrumentInSection(doc: Doc, id: string, instrumentId: strin
     if (uses.some((u) => !u.muted) === plays) return doc;
     // The section itself can be a single leaf; its occurrence is the mute boundary.
     if (owner.content.id === row.pattern.id) {
-      const found = findWithPath(doc, id)!;
-      return replaceAtPath(doc, found.path, { ...owner.part.pattern, muted: !plays });
+      return replaceParts(
+        doc,
+        owner.root,
+        owner.parts.map((part) =>
+          resolveSection(doc, part.pattern).id === owner!.content.id
+            ? { ...part, pattern: { ...part.pattern, muted: !plays } }
+            : part,
+        ),
+      );
     }
     const nestedGroups = uses
       .flatMap((u) => u.path.slice(u.path.findIndex((p) => p.id === owner!.content.id) + 1, -1))

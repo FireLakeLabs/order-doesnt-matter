@@ -280,6 +280,21 @@ it('handles inline duplication, leaf separation, no-op membership, and empty-pie
   const separate = valid(separateSection(doc, a.id));
   expect(await notes(separate, 0, 8)).toEqual(await notes(doc, 0, 8));
   expect(instruments(separate).map((r) => r.id)).toEqual([row.id]);
+  expect(
+    sections(valid(setInstrumentInSection(doc, a.id, row.id, false))).map((s) => s.instrumentIds),
+  ).toEqual([[], []]);
+  const labelled = structuredClone(inline);
+  const first = labelled.body.find((n) => n.kind === 'voice')!;
+  if (first.kind === 'voice' && first.pattern.core.kind === 'group')
+    first.pattern.core.parts[0].pattern.label = 'Verse';
+  expect(
+    sections(valid(duplicateSection(labelled, sections(labelled)[0].id)))
+      .slice(0, 2)
+      .map((s) => [s.name, s.nameSource]),
+  ).toEqual([
+    ['Verse', 'author'],
+    ['Verse', 'author'],
+  ]);
   expect(setInstrumentInSection(doc, a.id, row.id, true)).toBe(doc);
   expect(setSectionLength(doc, a.id, 4)).toBe(doc);
   expect(makeSections({ version: 1, body: [] })).toHaveProperty('ok', false);
