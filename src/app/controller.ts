@@ -85,7 +85,7 @@ export function createApp() {
   function observe(event: EngineEvent) {
     history.push(event);
     if (history.length > 1000) history.shift();
-    if (event.type === 'swapped') editor?.observe(event);
+    if (event.type === 'swapped' || event.type === 'committed') editor?.observe(event);
     if (event.type === 'error') message(event.message);
     if (event.type === 'transport') {
       if (!event.playing) editor?.clear();

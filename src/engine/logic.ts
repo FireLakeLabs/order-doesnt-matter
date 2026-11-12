@@ -11,8 +11,15 @@ export function soundName(value: unknown): string {
 export class Revision {
   private current = 0;
   private reported = 0;
+  private committed = 0;
   next() {
     return ++this.current;
+  }
+  commit(revision: number) {
+    if (revision !== this.current || revision === this.reported || revision === this.committed)
+      return false;
+    this.committed = revision;
+    return true;
   }
   trigger(revision: number) {
     if (revision !== this.current || revision === this.reported) return false;

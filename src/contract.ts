@@ -64,6 +64,10 @@ export type EngineEvent =
   | { type: 'trigger'; value: unknown; cycle: number; time: number }
   /** The first trigger scheduled from the code given to the latest `play` call. */
   | { type: 'swapped'; revision: number; cycle: number; time: number }
+  /** The latest play revision was queried for a scheduler window with no onsets.
+   * `cycle` and audio-clock `time` mark that window's start, not permanent silence.
+   * A later first trigger may still report `swapped` for the same revision. */
+  | { type: 'committed'; revision: number; cycle: number; time: number }
   | { type: 'error'; message: string };
 
 /** Measured output, for checks. Nothing here says how anything sounds. */
@@ -75,7 +79,7 @@ export interface OutputTap {
 export interface Engine {
   /**
    * Plays generated Strudel. Called while playing, it swaps without stopping and
-   * resolves with the revision number later reported by `swapped`.
+   * resolves with the revision number later reported by `swapped` or `committed`.
    */
   play(
     code: string,

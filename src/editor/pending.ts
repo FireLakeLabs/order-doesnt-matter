@@ -25,10 +25,11 @@ export type PendingEvent =
   | { type: 'edit'; doc: Doc; target: string; token: number; playing: boolean }
   | { type: 'sent'; doc: Doc; token: number; revision: number }
   | { type: 'swapped'; revision: number }
+  | { type: 'committed'; revision: number }
   | { type: 'failed'; token: number; reason: string }
   | { type: 'clear' }
   | { type: 'load'; doc: Doc };
-/** Revisions are bound after play resolves; swapped may arrive first. A new edit
+/** Revisions are bound after play resolves; either acknowledgement may arrive first. A new edit
  * has no revision yet, so an older swap cannot accidentally clear its marker. */
 export function transition(p: Pending, event: PendingEvent): Pending {
   if (event.type === 'load') return pending(event.doc);

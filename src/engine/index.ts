@@ -25,10 +25,11 @@ export type Dispatch = (
   time: number,
   render: () => Promise<void>,
 ) => Promise<void>;
+export type SilentWindow = (revision: number, cycle: number, time: number) => void;
 /** Injection keeps queue, revision and cancellation behavior testable without audio. */
 export function engineWith(
   audio: AudioBackend,
-  connect: (dispatch: Dispatch, error: (e: unknown) => void) => void,
+  connect: (dispatch: Dispatch, error: (e: unknown) => void, silent: SilentWindow) => void,
 ): Engine {
   const listeners = new Set<(e: EngineEvent) => void>(),
     revisions = new Revision();
@@ -42,22 +43,29 @@ export function engineWith(
     enabled = false;
   const books = new Map<number, SoundBook>();
   let book = new SoundBook(audio.check, () => {});
-  connect(async (revision, value, cycle, time, render) => {
-    const token = epoch,
-      current = books.get(revision);
-    if (!enabled || !current) return;
-    const ready = await current.observe(value);
-    if (token !== epoch || !enabled) return;
-    try {
-      if (ready) await render();
-      if (token !== epoch) return;
-      emit({ type: 'trigger', value, cycle, time });
-      if (revisions.trigger(revision)) emit({ type: 'swapped', revision, cycle, time });
-    } catch (e) {
-      error(e);
-      throw e;
-    }
-  }, error);
+  connect(
+    async (revision, value, cycle, time, render) => {
+      const token = epoch,
+        current = books.get(revision);
+      if (!enabled || !current) return;
+      const ready = await current.observe(value);
+      if (token !== epoch || !enabled) return;
+      try {
+        if (ready) await render();
+        if (token !== epoch) return;
+        emit({ type: 'trigger', value, cycle, time });
+        if (revisions.trigger(revision)) emit({ type: 'swapped', revision, cycle, time });
+      } catch (e) {
+        error(e);
+        throw e;
+      }
+    },
+    error,
+    (revision, cycle, time) => {
+      if (enabled && books.has(revision) && revisions.commit(revision))
+        emit({ type: 'committed', revision, cycle, time });
+    },
+  );
   return {
     play(code, options = {}) {
       const token = epoch;
