@@ -34,3 +34,6 @@ pr,title,opened,merged,cycle_hours,authored_lines,review_rounds,rework_commits,n
 34,Document shape 2,2026-11-12,2026-11-12,,1163,1,0,17.3,53.5
 35,Give the rhythm editor room,2026-11-12,2026-11-12,,,1,0,,51.2
 36,Phase 2 demo,2026-11-12,2026-11-12,,,1,0,18.5,51.1
+39,Shared live data and the Now panel,2026-11-12,2026-11-12,0.4,932,1,0,22.9,53.4
+40,Constellation in the Now panel,2026-11-12,2026-11-12,1.0,1083,2,1,24.0,58.5
+41,Watch mode: the spiral,2026-11-12,2026-11-12,0.2,1131,1,0,23.4,56.5
