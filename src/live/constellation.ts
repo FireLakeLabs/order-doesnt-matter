@@ -129,7 +129,7 @@ export function constellationLayout(model: LiveModel, box: { width: number; heig
       .filter((room) => room.members.length)
       .map((room) => {
         const members = centres.filter((p) => p.room === room.orbit);
-        const circles = members.map((p) => ({ x: p.x, y: p.y, r: radius + 7 }));
+        const circles = members.map((p) => ({ x: p.x, y: p.y, r: radius + 5 }));
         const links = members.slice(1).map((p, n) => ({
           from: p,
           to: members.slice(0, n + 1).toSorted((a, b) => distance(p, a) - distance(p, b))[0],

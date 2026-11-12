@@ -61,6 +61,11 @@ for (const count of [1, 6, 10, 30])
             }
           }
         }
+        for (const [index, region] of layout.regions.entries())
+          for (const other of layout.regions.slice(index + 1))
+            for (const a of region.circles)
+              for (const b of other.circles)
+                expect(Math.hypot(a.x - b.x, a.y - b.y)).toBeGreaterThan(a.r + b.r);
         const later = constellationLayout(
           {
             ...m,
