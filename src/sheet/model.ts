@@ -48,6 +48,7 @@ export interface Row {
   cells: Cell[];
   rewrites: Chip[];
   useNotes: string[];
+  useTargets: { nodeId: string; text: string }[];
 }
 export interface Section {
   nodeId: string;
@@ -305,6 +306,28 @@ export function sheetModel(input: SheetInput): SheetModel {
         }),
       ),
     ];
+    const useTargets = [
+      ...new Map(
+        voice.uses
+          .flatMap((use) => {
+            const section = songSections.find((s) => use.path.some((n) => n.id === s.id));
+            return use.layers.flatMap((layer) =>
+              layer.kind === 'settings'
+                ? layer.settings.map((setting) => ({
+                    nodeId: setting.id,
+                    text: `in ${section?.name ?? 'piece'}: ${layerNote({ ...layer, settings: [setting] })}`,
+                  }))
+                : [
+                    {
+                      nodeId: layer.id,
+                      text: `in ${section?.name ?? 'piece'}: ${layerNote(layer)}`,
+                    },
+                  ],
+            );
+          })
+          .map((note) => [note.nodeId, note]),
+      ).values(),
+    ];
     const rewrites: Chip[] = [];
     function gather(p: Pattern, seen = new Set<string>()) {
       const settings = new Map<
@@ -381,14 +404,15 @@ export function sheetModel(input: SheetInput): SheetModel {
         if (!settings.has(name)) settings.set(name, { nodeId: voice.pattern.id, driven: false });
       }),
     );
-    return { voice, result, events, settings, rewrites, useNotes };
+    return { voice, result, events, settings, rewrites, useNotes, useTargets };
   });
   const ordered = [
     'rhythm',
     ...['note', 'n', 'freq', 's'].filter((name) => columns.has(name)),
     ...[...columns].filter((name) => !['note', 'n', 'freq', 's'].includes(name)),
   ];
-  const rows: Row[] = sources.map(({ voice, result, events, settings, rewrites, useNotes }) => {
+  const rows: Row[] = sources.map((source) => {
+    const { voice, result, events, settings, rewrites, useNotes, useTargets } = source;
     const broken = result?.error?.message ?? null;
     const status =
       broken !== null
@@ -425,6 +449,7 @@ export function sheetModel(input: SheetInput): SheetModel {
       sounds,
       rewrites,
       useNotes,
+      useTargets,
       cells: ordered.map((name) =>
         makeCell(
           name,

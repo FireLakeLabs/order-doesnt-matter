@@ -33,13 +33,38 @@ function drawing(cell: Cell) {
 export function mountSheet(
   host: HTMLElement,
   model: SheetModel,
-  options: { selected?: string | null; onSelect?(id: string): void } = {},
+  options: {
+    selected?: string | null;
+    onSelect?(id: string): void;
+    onEdit?(id: string, summary: string, origin: HTMLElement): void;
+  } = {},
 ): void {
+  function selectable(node: HTMLElement, id: string, summary: string) {
+    if (!options.onEdit) return;
+    node.tabIndex = 0;
+    node.dataset.editorTarget = id;
+    node.setAttribute('aria-controls', 'editor');
+    node.onclick = () => options.onEdit?.(id, summary, node);
+    node.onkeydown = (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        options.onEdit?.(id, summary, node);
+      }
+    };
+  }
   const scrollers = Array.from(host.querySelectorAll<HTMLElement>('.sheet-scroll')).map((el) => ({
     left: el.scrollLeft,
     top: el.scrollTop,
   }));
   const focus = document.activeElement;
+  const targetFocus =
+    focus instanceof HTMLElement && host.contains(focus)
+      ? {
+          id: focus.dataset.editorTarget,
+          control: focus.dataset.control,
+          row: focus.closest<HTMLElement>('tr')?.dataset.nodeId,
+        }
+      : undefined;
   const sectionFocus =
     focus instanceof HTMLButtonElement && host.contains(focus) ? focus.dataset.section : undefined;
   const scrollFocus = Array.from(host.querySelectorAll('.sheet-scroll')).indexOf(focus as Element);
@@ -142,11 +167,21 @@ export function mountSheet(
         ),
       ),
     );
-    row.useNotes.forEach((note) => name.append(element('small', note, 'sheet-use-note')));
+    if (options.onEdit)
+      row.useTargets.forEach((note) => {
+        const n = element('small', note.text, 'sheet-use-note');
+        n.dataset.nodeId = note.nodeId;
+        n.setAttribute('role', 'button');
+        selectable(n, note.nodeId, note.text);
+        name.append(n);
+      });
+    else row.useNotes.forEach((note) => name.append(element('small', note, 'sheet-use-note')));
     tr.append(name);
     row.cells.forEach((cell) => {
       const td = element('td', '', `sheet-cell sheet-${cell.kind}`);
       td.dataset.nodeId = cell.nodeId;
+      td.dataset.control = cell.name;
+      if (cell.kind !== 'unused') selectable(td, cell.nodeId, cell.label);
       td.setAttribute('aria-label', cell.summary);
       td.title = cell.summary;
       td.append(element('span', cell.label));
@@ -180,6 +215,15 @@ export function mountSheet(
     el.scrollTop = scrollers[i]?.top ?? 0;
     if (i === scrollFocus) el.focus({ preventScroll: true });
   });
+  if (targetFocus)
+    Array.from(host.querySelectorAll<HTMLElement>('[data-editor-target]'))
+      .find(
+        (n) =>
+          n.dataset.editorTarget === targetFocus.id &&
+          n.dataset.control === targetFocus.control &&
+          n.closest<HTMLElement>('tr')?.dataset.nodeId === targetFocus.row,
+      )
+      ?.focus({ preventScroll: true });
   if (sectionFocus)
     Array.from(host.querySelectorAll<HTMLButtonElement>('[data-section]'))
       .find((button) => button.dataset.section === sectionFocus)
