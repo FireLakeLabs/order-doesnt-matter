@@ -114,6 +114,15 @@ test('phone: List, arrow selection, Done and Escape return focus, no horizontal 
   }
   await page.getByRole('button', { name: 'Boxes', exact: true }).click();
   await expect(page.locator('[data-view="Boxes"]')).toBeVisible();
+  await page.getByText('Speed and length', { exact: true }).press('Enter');
+  const faster = page.getByLabel('Faster ×n', { exact: true });
+  await faster.fill('3/2');
+  await faster.press('Enter');
+  await expect(page.getByLabel('Faster ×n', { exact: true })).toHaveValue('1.5');
+  await page.getByLabel('Faster ×n', { exact: true }).press('ArrowUp');
+  await expect(page.getByLabel('Faster ×n', { exact: true })).toHaveValue('2.5');
+  await page.getByRole('button', { name: 'None for Faster ×n', exact: true }).press('Enter');
+  await expect(page.getByLabel('Faster ×n', { exact: true })).toHaveValue('1');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   expect(
     await page
@@ -239,18 +248,8 @@ test('Kiln live: split removal, undo, literal marks and evenly spread drum hits'
       boundary,
     ),
   ).toEqual([0.25, 11 / 32, 14 / 32, 0.75]);
-  await page.getByText('Speed and length', { exact: true }).press('Enter');
-  const faster = page.getByLabel('Faster ×n', { exact: true });
-  await faster.fill('3/2');
-  await faster.press('Enter');
-  await expect(page.getByLabel('Faster ×n', { exact: true })).toHaveValue('1.5');
-  await page.getByLabel('Faster ×n', { exact: true }).press('ArrowUp');
-  await expect(page.getByLabel('Faster ×n', { exact: true })).toHaveValue('2.5');
-  await page.getByRole('button', { name: 'None for Faster ×n', exact: true }).press('Enter');
-  await expect(page.getByLabel('Faster ×n', { exact: true })).toHaveValue('1');
   if (process.env.ODM_RHYTHM_SHOTS) {
     await waitForPending(page);
-    await page.getByText('Speed and length', { exact: true }).press('Enter');
     await page.getByRole('button', { name: 'Boxes', exact: true }).press('Enter');
     for (const [name, width, height] of [
       ['desktop', 1440, 900],
