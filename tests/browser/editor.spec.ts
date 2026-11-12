@@ -1,5 +1,13 @@
 import { test } from './helpers';
-import { scoreReady, play, waitForPending, signal } from './helpers';
+import {
+  scoreReady,
+  play,
+  waitForPending,
+  signal,
+  sharedProgram,
+  selectNode,
+  appSignal,
+} from './helpers';
 import { expect, type Page } from '@playwright/test';
 import type {} from '../../src/app/main';
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
@@ -31,70 +39,125 @@ async function setValue(page: Page, value: number) {
         ?.getAttribute('data-edit-state'),
     };
   });
-  expect(seen).toEqual({ panel: 'Changing — not playing yet', cell: 'pending' });
-}
-test('constant editor: pending → swapped → trigger values → undo; readonly, focus and phone', async ({
-  page,
-}) => {
-  await open(page);
-  await page.getByRole('button', { name: 'Kiln', exact: true }).click();
-  await scoreReady(page);
-  await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
-  await page.getByRole('button', { name: 'Section 2', exact: true }).click();
-  await play(page);
-  const target = cell(page, 'bass', 'lpf');
-  await target.click();
-  await expect(page.locator('#editor-breadcrumb')).toHaveText('bass › lpf');
-  const old = Number(await page.getByRole('spinbutton').inputValue());
-  await setValue(page, 900);
-  await waitForPending(page);
-  await expect(page.locator('#editor-status')).toHaveText('Playing now');
-  await signal(() =>
-    page.evaluate(
-      () =>
-        window.odmApp.history.filter(
-          (e) => e.type === 'trigger' && (e.value as { cutoff?: number }).cutoff === 900,
-        ).length,
-    ),
-  ).toBeGreaterThan(0);
-  const marker = await page.evaluate(() => window.odmApp.history.length);
-  await page.getByRole('button', { name: 'Undo', exact: true }).click();
-  await expect(page.getByRole('spinbutton')).toHaveValue(String(old));
-  await signal(() =>
-    page.evaluate(
-      ({ old, marker }) =>
-        window.odmApp.history
-          .slice(marker)
-          .filter((e) => e.type === 'trigger' && (e.value as { cutoff?: number }).cutoff === old)
-          .length,
-      { old, marker },
-    ),
-  ).toBeGreaterThan(0);
-  await page.evaluate(() => {
-    const engine = window.odmApp.engine!,
-      original = engine.play;
-    engine.play = () => {
-      engine.play = original;
-      return Promise.reject(Error('injected swap refusal'));
-    };
+  expect(seen).toEqual({
+    panel: "Changing… you will hear it on bass's next note",
+    cell: 'pending',
   });
-  await setValue(page, 1000);
-  await expect(page.locator('#editor-status')).toContainText(
-    'Change failed: injected swap refusal',
-  );
-  await expect(page.getByRole('spinbutton')).toHaveValue(String(old));
-  await expect(target).toHaveAttribute('data-edit-state', 'failed');
-  await expect(target).toContainText(String(old));
-  await page.keyboard.press('Escape');
-  await expect(page.locator('#editor')).toBeHidden();
-  await expect(target).toBeFocused();
-  await target.press('Space');
-  await page.setViewportSize({ width: 390, height: 844 });
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.getByRole('button', { name: 'Done', exact: true }).click();
-  await cell(page, 'lead', 'note').press('Enter');
-  await expect(page.locator('#editor')).toContainText('Edit this rhythm');
-  await expect(page.getByRole('slider')).toHaveCount(0);
+}
+test.describe('Kiln settings with shared setup', () => {
+  sharedProgram(async (page) => {
+    await open(page);
+    await page.getByRole('button', { name: 'Kiln', exact: true }).click();
+    await scoreReady(page);
+  });
+  test('constant editor: pending → swapped → trigger values → undo; readonly, focus and phone', async ({
+    page,
+  }) => {
+    await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
+    await page.getByRole('button', { name: 'Section 2', exact: true }).click();
+    await play(page);
+    const target = cell(page, 'bass', 'lpf');
+    await target.click();
+    await expect(page.locator('#editor-breadcrumb')).toHaveText('bass › lpf');
+    const old = Number(await page.getByRole('spinbutton').inputValue());
+    await setValue(page, 900);
+    await waitForPending(page);
+    await expect(page.locator('#editor-status')).toHaveText('Changed');
+    await signal(() =>
+      page.evaluate(
+        () =>
+          window.odmApp.history.filter(
+            (e) => e.type === 'trigger' && (e.value as { cutoff?: number }).cutoff === 900,
+          ).length,
+      ),
+    ).toBeGreaterThan(0);
+    const marker = await page.evaluate(() => window.odmApp.history.length);
+    await page.getByRole('button', { name: 'Undo', exact: true }).click();
+    await expect(page.getByRole('spinbutton')).toHaveValue(String(old));
+    await signal(() =>
+      page.evaluate(
+        ({ old, marker }) =>
+          window.odmApp.history
+            .slice(marker)
+            .filter((e) => e.type === 'trigger' && (e.value as { cutoff?: number }).cutoff === old)
+            .length,
+        { old, marker },
+      ),
+    ).toBeGreaterThan(0);
+    await page.evaluate(() => {
+      const engine = window.odmApp.engine!,
+        original = engine.play;
+      engine.play = () => {
+        engine.play = original;
+        return Promise.reject(Error('injected swap refusal'));
+      };
+    });
+    await setValue(page, 1000);
+    await expect(page.locator('#editor-status')).toContainText(
+      'Change failed: injected swap refusal',
+    );
+    await expect(page.getByRole('spinbutton')).toHaveValue(String(old));
+    await expect(target).toHaveAttribute('data-edit-state', 'failed');
+    await expect(target).toContainText(String(old));
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#editor')).toBeHidden();
+    await expect(target).toBeFocused();
+    await target.press('Space');
+    await page.setViewportSize({ width: 390, height: 844 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.getByRole('button', { name: 'Done', exact: true }).click();
+    await cell(page, 'lead', 'note').press('Enter');
+    await expect(page.locator('#editor')).toContainText('Edit this rhythm');
+    await expect(page.getByRole('slider')).toHaveCount(0);
+  });
+  test('Kiln: sparse lead stays pending past busy new-revision notes until its own changed trigger', async ({
+    page,
+  }) => {
+    await page.getByRole('button', { name: 'Section 3', exact: true }).click();
+    await selectNode(page, { breadcrumb: ['lead', 'gain'] });
+    await play(page);
+    const capture = await page.evaluateHandle(() => {
+      const app = window.odmApp;
+      const lead = app.state.rows.find((r) => r.name === 'lead')!.id;
+      const revision = app.history.findLast((e) => e.type === 'swapped')!.revision + 1;
+      const seen: { instrument?: string; value: unknown; pending: boolean; status: string }[] = [];
+      const off = app.engine!.subscribe((e) => {
+        if (e.type !== 'trigger' || e.revision !== revision) return;
+        seen.push({
+          instrument: e.instrument,
+          value: e.value,
+          pending: Object.values(app.editor!.state.entries).some((e) => e.status === 'pending'),
+          status: document.getElementById('editor-status')!.textContent!,
+        });
+      });
+      return { seen, lead, off };
+    });
+    const field = page.locator('#editor').getByRole('spinbutton');
+    await field.fill('0.27');
+    await field.press('Enter');
+    await expect(page.locator('#editor-status')).toHaveText(
+      "Changing… you will hear it on lead's next note",
+    );
+    await appSignal(
+      page,
+      () => !Object.values(window.odmApp.editor!.state.entries).some((e) => e.status === 'pending'),
+    );
+    const observed = await capture.evaluate((c) => {
+      c.off();
+      return { seen: c.seen, lead: c.lead };
+    });
+    await capture.dispose();
+    expect(observed.seen[0].instrument).not.toBe(observed.lead);
+    expect(observed.seen[0].pending).toBe(true);
+    expect(observed.seen[0].status).toContain("lead's next note");
+    const own = observed.seen.find((e) => e.instrument === observed.lead)!;
+    expect(own.value).toMatchObject({ gain: 0.27 });
+    expect(own.pending).toBe(false);
+    await expect(page.locator('#editor-status')).toHaveText('Changed');
+    await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  });
 });
 test('section-local setting is distinct; signal stays read-only; arrow keys and undo shortcuts', async ({
   page,
