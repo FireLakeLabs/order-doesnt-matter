@@ -12,7 +12,7 @@ const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text = '') => {
 };
 // These calls already have a purpose-built rewrite editor.
 const purposeBuilt = new Set(
-  'fast slow early late rev ply euclid euclidRot degradeBy sometimes sometimesBy often rarely every firstOf off jux segment'.split(
+  'fast slow early late rev palindrome ply euclid euclidRot degradeBy sometimes sometimesBy often rarely every firstOf off jux segment'.split(
     ' ',
   ),
 );
@@ -20,7 +20,8 @@ export default {
   id: 'generic',
   priority: 20,
   matches: (t) =>
-    t.kind === 'unknown' ||
+    // `piece:` addresses are actions with their own editor (add or make sections), not calls.
+    (t.kind === 'unknown' && !t.nodeId.startsWith('piece:')) ||
     (t.kind === 'rewrite' &&
       !!t.node &&
       'name' in t.node &&
