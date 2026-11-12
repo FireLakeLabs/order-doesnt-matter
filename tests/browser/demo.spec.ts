@@ -627,6 +627,7 @@ test('Phase 3: eight live-view checks on the real house piece, one silent video'
           ),
         );
         await page.keyboard.press('Escape');
+        await page.locator('#live').scrollIntoViewIfNeeded();
       },
     );
     await step(
@@ -639,6 +640,7 @@ test('Phase 3: eight live-view checks on the real house piece, one silent video'
         );
         await swap(page, () => button('Mute kick').click());
         await waitForPending(page);
+        await planet(id).scrollIntoViewIfNeeded();
         await expect(planet(id)).toHaveClass(/live-hollow/);
         await expect(planet(id)).toHaveAccessibleName(/muted/);
         const boundary = await page.evaluate(() => {
