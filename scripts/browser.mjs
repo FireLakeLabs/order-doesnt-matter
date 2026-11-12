@@ -4,7 +4,7 @@ import { browserSummary, formatBrowserSummary } from './browser-summary.mjs';
 import { timingResult, BROWSER_LIMIT_SECONDS } from './timing.mjs';
 const start = performance.now();
 const mode = process.argv[2] ?? 'ci';
-if (!['ci', 'online', 'demo', 'measure', 'edit-demo', 'shots'].includes(mode))
+if (!['ci', 'online', 'demo', 'measure', 'edit-demo'].includes(mode))
   throw Error('Unknown browser mode');
 // ODM_BROWSER_LIMIT_SECONDS is a lower-only override for exercising the failure path.
 const limit = Number(process.env.ODM_BROWSER_LIMIT_SECONDS ?? BROWSER_LIMIT_SECONDS);

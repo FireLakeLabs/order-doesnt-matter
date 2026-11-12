@@ -186,3 +186,19 @@ The shared-setup three-worker load series passed 15/15 (52.927–53.712 s).
 Four-worker local and CI selection runs use the same test code, assertions and
 serial audio phase, with only UI width changed. The candidate default is four;
 its final eligibility and all CI reruns are recorded in the PR.
+
+## Selected width
+
+Three UI workers followed by one audio worker is the selected default: the
+shared-setup design passed 15/15 loaded commands (52.927–53.712 s) and six CI
+attempts including five full reruns (74.517–94.363 s read from runner logs).
+Four UI workers passed 15/15 locally (46.040–49.800 s), but its third CI attempt
+failed the unchanged source editor's `Applied.` assertion and the 20 s guard
+reported a 20.313 s signal test. It is ineligible even if later planned reruns
+pass. The failure stays in the matrix; no assertions or thresholds were relaxed.
+
+The ordinary four-worker candidate measured 42.276 s; the selected three-worker
+configuration previously measured 47.726 s. The under-45-second local target and
+under-90-second CI target are not reliably met. Remaining time includes real
+worker-deadline checks, UI input and actual playback/PCM/silent acknowledgements.
+The PR contains the final default-command measurement and every matrix row.

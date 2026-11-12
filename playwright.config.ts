@@ -3,8 +3,8 @@ const optional = /\/(demo|edit-demo|shots|measure|online)\.spec\.ts$/;
 const audio = /\/(engine|silent-swap)\.spec\.ts$/;
 export default defineConfig({
   testDir: './tests/browser',
-  // UI width is measured at 3/4; audio clocks get a separate uncontended phase.
-  workers: 4,
+  // Three UI workers passed the load/CI matrix; audio clocks run afterward.
+  workers: 3,
   use: { browserName: 'chromium', baseURL: process.env.ODM_URL },
   reporter: 'line',
   projects: [
