@@ -334,7 +334,9 @@ export default {
           s.steps.forEach((child, i) => {
             if (s.kind === 'alternate') {
               const row = el('div');
-              row.append(el('small', `turn ${i + 1}`));
+              const turn = el('small', `turn ${i + 1}`);
+              turn.title = `turn ${i + 1}`;
+              row.append(turn);
               children.append(row);
               part(child, [...path, i], row, z - a);
             } else part(child, [...path, i], children, z - a);
