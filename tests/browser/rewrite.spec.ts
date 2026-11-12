@@ -31,21 +31,26 @@ for (const scenario of ['double', 'reset', 'degrade', 'order', 'restore'] as con
       await play(page);
       // Browser delivery canary only. Exact spans and unaffected instruments are
       // proved by rewrite-editor.test.ts against the real Strudel worker.
+      // First playback may begin inside a cycle. Keep #22's future complete
+      // cycle so a late first scheduler tick cannot truncate the observation.
+      const cycle = await page.evaluate(() => Math.ceil(window.odmApp.engine!.now()!) + 1);
       await signal(() =>
-        page.evaluate(() =>
-          window.odmApp.history.some((e) => e.type === 'trigger' && e.cycle >= 9),
+        page.evaluate(
+          (c) => window.odmApp.history.some((e) => e.type === 'trigger' && e.cycle >= c + 1),
+          cycle,
         ),
       ).toBe(true);
       expect(
         await page.evaluate(
-          () =>
+          (c) =>
             window.odmApp.history.filter(
               (e) =>
                 e.type === 'trigger' &&
-                e.cycle >= 8 &&
-                e.cycle < 9 &&
+                e.cycle >= c &&
+                e.cycle < c + 1 &&
                 (e.value as { s?: string }).s === 'bd',
             ).length,
+          cycle,
         ),
       ).toBe(8);
       await page.getByRole('button', { name: 'Stop', exact: true }).click();
