@@ -2,6 +2,7 @@ import type { EventResult, ImportResult, SheetSoundState } from '../contract';
 import { instruments, sections, type Doc, type Instrument, type SongSection } from '../document';
 
 export interface AppState {
+  solo: string | null;
   source: string;
   doc: Doc | null;
   rows: Instrument[];
@@ -19,6 +20,7 @@ export interface AppState {
   cps: number | null;
 }
 export const initialState = (): AppState => ({
+  solo: null,
   source: '',
   doc: null,
   rows: [],
@@ -96,3 +98,12 @@ export function mergeSounds(
   for (const sound of updates) book.set(sound.name, sound);
   return [...book.values()];
 }
+
+/** Solo belongs to this loaded piece, outside document history. */
+export function setSolo(state: AppState, id: string | null): AppState {
+  return id === state.solo || (id !== null && !state.rows.some((r) => r.id === id))
+    ? state
+    : { ...state, solo: id };
+}
+export const playbackOptions = (state: Pick<AppState, 'solo'>) =>
+  state.solo ? { only: state.solo } : {};
