@@ -79,6 +79,7 @@ play.onclick = () => {
 stop.onclick = () => app.stop();
 get('stop-solo').onclick = () => app.solo(null);
 follow.onclick = () => app.follow(!app.state.follow);
+let editNotice: { doc: unknown; text: string } | undefined;
 let targetId: string | null = null,
   selectedSession: typeof app.editor;
 let origin: { id: string; control?: string; row?: string } | null = null;
@@ -126,9 +127,19 @@ function renderEditor() {
           window: { fromCycle: app.state.fromCycle, toCycle: app.state.toCycle },
           pending: entry?.status ?? 'none',
           apply: (next, options) => {
-            if (options?.selection) targetId = options.selection;
+            const oldRows = app.state.rows;
+            const oldIndex = oldRows.findIndex((r) => r.id === targetId);
+            if (options?.selection !== undefined) targetId = options.selection ?? null;
+            if (options?.announcement) editNotice = { doc: next, text: options.announcement };
             app.editor?.apply(next, options, targetId ?? undefined);
-            if (options?.selection) renderEditor();
+            if (options?.selection !== undefined) renderEditor();
+            if (options?.selection === null) {
+              const neighbour =
+                app.state.rows[Math.min(Math.max(oldIndex, 0), app.state.rows.length - 1)];
+              Array.from(score.querySelectorAll<HTMLElement>('th[data-editor-target]'))
+                .find((n) => n.dataset.editorTarget === neighbour?.id)
+                ?.focus({ preventScroll: true });
+            }
           },
           ask: (candidate, id) => app.editor!.ask(candidate, id, fromCycle, toCycle),
         }
@@ -222,7 +233,8 @@ app.subscribe((state) => {
   stop.disabled = !state.playing && !state.message.includes('Preparing');
   get('tempo').textContent =
     state.cps === null ? 'Tempo —' : `${Number((state.cps * 60).toFixed(2))} cycles/min`;
-  get('message').textContent = state.message;
+  get('message').textContent =
+    state.message || (editNotice?.doc === state.doc ? editNotice.text : '');
   get('sound-notice').hidden = !state.soundNotice.visible;
   get('solo-banner').hidden = !state.solo;
   get('solo-banner').querySelector('span')!.textContent =
