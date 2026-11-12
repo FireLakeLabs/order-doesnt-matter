@@ -1,8 +1,17 @@
-import { setConstant, walk, type Doc, type Setting } from '../document';
+import { instruments, walk, type Doc, type Setting } from '../document';
+import { setConstant } from '../document/edits/set-constant';
+import { generate } from '../generate';
 import type { Constant } from '../document/edit';
 import { history, push, undo, redo } from './history';
 import { pending, transition, type Pending, type PendingEvent } from './pending';
 export const SWAP_THROTTLE_MS = 100;
+/** Generation is the dependency graph: setup, references and use-site edits all count. */
+export function changedInstruments(before: Doc, next: Doc): string[] {
+  const old = new Map(instruments(before).map((r) => [r.id, generate(before, { only: r.id })]));
+  return instruments(next)
+    .filter((r) => old.get(r.id) !== generate(next, { only: r.id }))
+    .map((r) => r.id);
+}
 interface Ports {
   playing(): boolean;
   play(doc: Doc): Promise<number>;
@@ -79,7 +88,7 @@ export function createEditSession(doc: Doc, ports: Ports) {
       }
       emit();
       if (before !== p.doc) {
-        ports.refresh(p.doc, [...values(before).keys()]);
+        ports.refresh(p.doc, changedInstruments(before, p.doc));
         // A previous successful commit may still be ahead of the audio clock.
         // Reinstall the confirmed document so restored cells and playback agree.
         const recoveryEpoch = epoch,
@@ -107,12 +116,15 @@ export function createEditSession(doc: Doc, ports: Ports) {
       schedule();
     }
   }
-  function apply(next: Doc) {
+  function install(next: Doc, selected?: string) {
+    if (next === p.doc) return;
+    const rows = changedInstruments(p.doc, next);
     const before = values(p.doc),
       targets = [...values(next)]
-        .filter(([id, s]) => s.value !== before.get(id)?.value)
+        .filter(([id, s]) => JSON.stringify(s.value) !== JSON.stringify(before.get(id)?.value))
         .map(([id]) => id);
-    if (!targets.length) return;
+    if (selected && !targets.includes(selected)) targets.push(selected);
+    if (!targets.length) targets.push(...rows, 'document');
     const playing = ports.playing();
     ++token;
     for (const target of targets)
@@ -122,10 +134,10 @@ export function createEditSession(doc: Doc, ports: Ports) {
       queued = {
         doc: next,
         token,
-        targets: [...new Set([...(queued?.targets ?? []), ...targets])],
+        targets: [...new Set([...(queued?.targets ?? []), ...rows])],
       };
       schedule();
-    } else ports.refresh(next, targets);
+    } else ports.refresh(next, rows);
   }
   return {
     get state() {
@@ -137,19 +149,24 @@ export function createEditSession(doc: Doc, ports: Ports) {
     get canRedo() {
       return !!h.future.length;
     },
+    apply(next: Doc, options: { gesture?: string } = {}, target?: string) {
+      if (next === p.doc) return;
+      h = push(h, next, 'document', options.gesture);
+      install(next, target);
+    },
     edit(id: string, value: Constant, gesture?: string) {
       const next = setConstant(p.doc, id, value);
       if ('ok' in next || next === p.doc) return;
       h = push(h, next, id, gesture);
-      apply(next);
+      install(next, id);
     },
     undo() {
       h = undo(h);
-      apply(h.present);
+      install(h.present);
     },
     redo() {
       h = redo(h);
-      apply(h.present);
+      install(h.present);
     },
     observe(event: Extract<PendingEvent, { type: 'swapped' }>) {
       p = transition(p, event);
