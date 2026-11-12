@@ -72,16 +72,22 @@ function closeEditor() {
 }
 const renderPanel = createPanel(get('editor'), closeEditor);
 function renderEditor() {
-  const { doc, playing } = app.state;
+  const { doc, playing, fromCycle, toCycle } = app.state;
   const target = doc && targetId ? describeTarget(doc, targetId) : null;
   get('score-workspace').classList.toggle('editing', !!target);
   const entry = targetId ? app.editor?.state.entries[targetId] : undefined;
+  const events = target?.instrumentId ? app.state.events[target.instrumentId] : undefined;
   renderPanel(
     target && doc
       ? {
           doc,
           target,
-          events: target.instrumentId ? app.state.events[target.instrumentId] : undefined,
+          events: events
+            ? {
+                ...events,
+                events: events.events.filter((e) => e.part[0] < toCycle && e.part[1] > fromCycle),
+              }
+            : undefined,
           window: { fromCycle: app.state.fromCycle, toCycle: app.state.toCycle },
           pending: entry?.status ?? 'none',
           apply: (next, options) => app.editor?.apply(next, options, targetId ?? undefined),
@@ -112,7 +118,7 @@ function renderEditor() {
   }
   get<HTMLButtonElement>('undo').disabled = !app.editor?.canUndo;
   get<HTMLButtonElement>('redo').disabled = !app.editor?.canRedo;
-  // Keep the single setting editor as the only editing surface.
+  // Keep the selected editor as the only editing surface.
   get<HTMLTextAreaElement>('source').disabled = !!targetId;
   get<HTMLButtonElement>('load').disabled = !!targetId;
   for (const b of Array.from(get('examples').querySelectorAll('button'))) b.disabled = !!targetId;

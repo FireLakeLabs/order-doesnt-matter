@@ -202,7 +202,9 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
         ? displayValue(doc, setting.value)
         : pattern
           ? displayValue(doc, pattern)
-          : '',
+          : node && 'code' in node
+            ? String(node.code)
+            : '',
     editable,
     reason: editable
       ? ''
