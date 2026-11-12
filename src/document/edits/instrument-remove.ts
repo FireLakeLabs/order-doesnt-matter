@@ -80,8 +80,10 @@ export function removeInstrument(doc: Doc, id: string): Doc | Refusal {
       // Only distributive score rewrites are safe across removed siblings.
       // Check callback bodies too: every(..., p => p.arp(...)) is not safe.
       function inspect(pattern: Pattern, callback = false) {
-        if (callback && pattern.core.kind !== 'hole')
+        if (callback && pattern.core.kind !== 'hole') {
           problem = 'a shared callback replaces the whole score rather than transforming its notes';
+          return;
+        }
         if (pattern.core.kind === 'opaque')
           problem = 'shared source text can depend on the removed notes';
         for (const layer of pattern.layers) {

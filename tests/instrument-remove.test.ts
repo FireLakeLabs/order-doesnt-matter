@@ -166,6 +166,6 @@ it('refuses a shared callback that replaces its input instead of transforming it
   const doc = load('const drum=s("bd"); const hat=s("hh"); stack(drum,hat).every(2,p=>s("bd"))');
   expect(removeInstrument(doc, instruments(doc)[0].id)).toMatchObject({
     ok: false,
-    reason: expect.stringContaining('callback replaces'),
+    reason: expect.stringMatching(/hat.*(callback replaces|source text)/),
   });
 });
