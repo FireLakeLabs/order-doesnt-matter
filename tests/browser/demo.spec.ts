@@ -858,3 +858,13 @@ test('Phase 3: eight live-view checks on the real house piece, one silent video'
     );
   }
 });
+
+test('Phase 4: gaps and fixes on the real arranged house piece, one silent video', async ({
+  browser,
+}) => {
+  test.skip(process.env.ODM_BROWSER_MODE !== 'demo', 'Opt-in only: npm run demo');
+  test.skip(!!process.env.CI, 'Local music and uncommitted recordings only');
+  test.setTimeout(120000); // Same recording budget as the earlier phases; outside the normal suite.
+  const { phaseFour } = await import('./phase-four');
+  await phaseFour(browser);
+});
