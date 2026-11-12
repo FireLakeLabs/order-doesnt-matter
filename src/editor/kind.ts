@@ -20,6 +20,7 @@ export interface EditorContext {
 }
 export interface EditorKind {
   id: string;
+  layout?: 'side' | 'wide';
   /** Higher wins when several match. The read-only fallback is 0. */
   priority: number;
   matches(target: Target): boolean;
