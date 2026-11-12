@@ -67,3 +67,20 @@ it('bounds concurrency, releases capacity on success, crash and construction fai
   });
   expect(await broken.query('', 0, 1)).toMatchObject({ error: { message: 'unavailable' } });
 });
+
+it('preflight uses the same deadline and passes all discovery starts in one isolated question', async () => {
+  vi.useFakeTimers();
+  const w = fake(),
+    q = createBrowserQueries(() => w);
+  const pending = q.preflight('runaway', 8, [0, 40], 2);
+  expect(w.postMessage).toHaveBeenCalledWith({
+    code: 'runaway',
+    from: 8,
+    to: 24,
+    playbackStarts: [0, 40],
+    initialCps: 2,
+  });
+  await vi.advanceTimersByTimeAsync(QUERY_BUDGET_MS);
+  expect(await pending).toMatchObject({ error: { phase: 'timeout' } });
+  expect(w.terminate).toHaveBeenCalledOnce();
+});

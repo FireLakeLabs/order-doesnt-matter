@@ -1,8 +1,15 @@
 import type { EventResult, QueryEvents } from '../contract';
 
 export const QUERY_BUDGET_MS = 5_000;
+export interface Question {
+  code: string;
+  from: number;
+  to: number;
+  playbackStarts?: number[];
+  initialCps?: number;
+}
 export interface QuestionWorker {
-  postMessage(value: { code: string; from: number; to: number }): void;
+  postMessage(value: Question): void;
   terminate(): void;
   onmessage: ((event: { data: EventResult }) => void) | null;
   onerror: ((event: { message: string }) => void) | null;
@@ -23,13 +30,19 @@ export function createBrowserQueries(
       type: 'module',
     }) as unknown as QuestionWorker,
   { size = 2, budgetMs = QUERY_BUDGET_MS } = {},
-): { query: QueryEvents; cancel(): void } {
+): {
+  query: QueryEvents;
+  preflight(
+    code: string,
+    from: number,
+    starts: number[],
+    initialCps?: number,
+  ): Promise<EventResult>;
+  cancel(): void;
+} {
   if (!Number.isInteger(size) || size < 1 || !Number.isFinite(budgetMs) || budgetMs <= 0)
     throw Error('Expected positive worker pool size and budget');
-  interface Job {
-    code: string;
-    from: number;
-    to: number;
+  interface Job extends Question {
     resolve(result: EventResult): void;
   }
   const queue: Job[] = [],
@@ -54,13 +67,24 @@ export function createBrowserQueries(
         worker = factory();
         worker.onmessage = (event) => finish(event.data);
         worker.onerror = (event) => finish(failure('evaluation', event.message));
-        worker.postMessage({ code: job.code, from: job.from, to: job.to });
+        worker.postMessage({
+          code: job.code,
+          from: job.from,
+          to: job.to,
+          playbackStarts: job.playbackStarts,
+          initialCps: job.initialCps,
+        });
       } catch (error) {
         finish(failure('evaluation', error instanceof Error ? error.message : String(error)));
       }
     }
   }
   return {
+    preflight: (code, from, starts, initialCps) =>
+      new Promise((resolve) => {
+        queue.push({ code, from, to: from + 16, playbackStarts: starts, initialCps, resolve });
+        pump();
+      }),
     query: (code, from, to) =>
       new Promise((resolve) => {
         queue.push({ code, from, to, resolve });

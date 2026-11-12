@@ -1,5 +1,6 @@
 import type { CreateEngine, Engine, EngineEvent, OutputTap } from '../contract';
 import { message, Revision, SoundBook } from './logic';
+import { PlaybackOverrun, PREFLIGHT_TIMEOUT } from './playback-limits';
 
 export interface AudioBackend {
   prepare(
@@ -7,7 +8,7 @@ export interface AudioBackend {
     from: number,
     revision: number,
   ): Promise<{ values: unknown[]; commit(): Promise<void> }>;
-  discover?(code: string, starts: number[]): Promise<unknown[]>;
+  preflight(code: string, from: number, starts: number[]): Promise<unknown[]>;
   check(value: unknown): Promise<void>;
   key?(value: unknown): string;
   resume(): Promise<void>;
@@ -36,7 +37,14 @@ export function engineWith(
   const emit = (event: EngineEvent) => {
     for (const listener of listeners) listener(event);
   };
-  const error = (e: unknown) => emit({ type: 'error', message: message(e) });
+  const error = (e: unknown) => {
+    if (e instanceof PlaybackOverrun) {
+      // A first tick may run inside clock.start(), before Strudel sets started.
+      // Wait until that stack unwinds; the guard already drops all further haps.
+      queueMicrotask(stop);
+    }
+    emit({ type: 'error', message: message(e) });
+  };
   let queue = Promise.resolve(),
     epoch = 0,
     active = 0,
@@ -66,6 +74,13 @@ export function engineWith(
         emit({ type: 'committed', revision, cycle, time });
     },
   );
+  function stop() {
+    enabled = false;
+    epoch++;
+    audio.stop();
+    books.clear();
+    emit({ type: 'transport', playing: false });
+  }
   return {
     play(code, options = {}) {
       const token = epoch;
@@ -75,15 +90,15 @@ export function engineWith(
             throw Error('Start cycle must be finite');
           await audio.resume();
           if (token !== epoch) throw Error('Playback cancelled by stop');
-          const revision = active + 1;
-          const candidate = await audio.prepare(
+          const from = options.fromCycle ?? (audio.playing() ? Math.max(0, audio.now()) : 0);
+          const discovered = await audio.preflight(
             code,
-            options.fromCycle ?? (audio.playing() ? Math.max(0, audio.now()) : 0),
-            revision,
+            from,
+            (options.discoverCycles ?? []).slice(0, 32),
           );
-          // At most 64 additional cycles: two at each of the first 32 sections.
-          const discovered =
-            (await audio.discover?.(code, (options.discoverCycles ?? []).slice(0, 32))) ?? [];
+          if (token !== epoch) throw Error('Playback cancelled by stop');
+          const revision = active + 1;
+          const candidate = await audio.prepare(code, from, revision);
           const next = new SoundBook(
             audio.check,
             () => {
@@ -133,13 +148,7 @@ export function engineWith(
       );
       return work;
     },
-    stop() {
-      enabled = false;
-      epoch++;
-      audio.stop();
-      books.clear();
-      emit({ type: 'transport', playing: false });
-    },
+    stop,
     get playing() {
       return audio.playing();
     },
@@ -163,13 +172,15 @@ export const createEngine: CreateEngine = async () => {
   return engineWith(
     {
       ...audio,
-      async discover(code, starts) {
-        const results = await Promise.all(
-          starts.map((from) => queries.query(code, from, from + 2)),
-        );
-        return results.flatMap((r) =>
-          r.error ? [] : r.events.filter((e) => e.hasOnset).map((e) => e.value),
-        );
+      async preflight(code, from, starts) {
+        const result = await queries.preflight(code, from, starts, audio.cps());
+        if (result.error)
+          throw Error(
+            result.error.phase === 'timeout'
+              ? PREFLIGHT_TIMEOUT
+              : 'This program could not be checked, so it was not played.',
+          );
+        return result.events.map((e) => e.value);
       },
     },
     audio.connect,

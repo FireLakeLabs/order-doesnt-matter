@@ -10,6 +10,7 @@ it('acknowledges a current silent scheduling window once, ignoring old/stopped r
   let trigger!: Dispatch;
   let playing = false;
   const audio: AudioBackend = {
+    preflight: async () => [],
     prepare: async () => ({
       values: [],
       commit: async () => {
@@ -79,7 +80,8 @@ it('guard reports onset-free windows including fragments, but never reports a fa
   const pattern = guarded(source, failed, tag, empty);
   pattern.query(state);
   expect(empty).toHaveBeenCalledWith(state);
-  expect(tag.mock.calls[0][0]).toBe(fragment);
+  // Fragments are removed before Cyclist's output loop; they still acknowledge silence.
+  expect(tag).not.toHaveBeenCalled();
   empty.mockClear();
   source.query = () => {
     throw Error('broken question');

@@ -256,7 +256,11 @@ export function createApp() {
         discoverCycles: state.sections.map((s) => s.start),
       });
       if (piece === epoch && transport === transportRevision)
-        update({ ...state, message: '', sounds: sounds() });
+        update({
+          ...state,
+          message: state.message === 'Preparing sounds…' ? '' : state.message,
+          sounds: sounds(),
+        });
     } catch (error) {
       message(error);
     } finally {

@@ -22,6 +22,7 @@ function backend() {
   let playing = false,
     dispatch!: Dispatch;
   const audio: AudioBackend = {
+    preflight: async () => [],
     async prepare(code, _from, revision) {
       const result = await queryEventsNode(code, 0, 4);
       if (result.error) throw Error(result.error.message);

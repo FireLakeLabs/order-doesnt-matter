@@ -11,7 +11,7 @@ import {
   getSuperdoughAudioController,
 } from '@strudel/web';
 import { silence } from '@strudel/core';
-import { playheadCycle, seekTo, query } from './index';
+import { playheadCycle, seekTo } from './index';
 import type { Hap, Pattern } from './index';
 import type { AudioBackend, Dispatch, SilentWindow } from '../engine';
 import { soundName } from '../engine/logic';
@@ -45,7 +45,8 @@ async function defaults() {
   return unavailable;
 }
 export async function createAudio(): Promise<
-  AudioBackend & {
+  Omit<AudioBackend, 'preflight'> & {
+    cps(): number;
     connect(dispatch: Dispatch, error: (e: unknown) => void, silent: SilentWindow): void;
   }
 > {
@@ -82,7 +83,7 @@ export async function createAudio(): Promise<
       dispatch = output;
       failed = error;
     },
-    async prepare(code, from, revision) {
+    async prepare(code, _from, revision) {
       let candidate: Pattern | undefined;
       const oldCps = repl.scheduler.cps;
       // Depends on REPL editPattern running before setPattern, and evaluate(false)
@@ -102,9 +103,6 @@ export async function createAudio(): Promise<
       }
       if (!candidate) throw Error('Strudel evaluation produced no pattern');
       const pattern = candidate;
-      const values = query(pattern, from, from + 16, { _cps: cps, cyclist: 'cyclist' })
-        .filter((h) => h.hasOnset())
-        .map((h) => h.value);
       const wrapped = guarded(
         pattern,
         failed,
@@ -115,7 +113,7 @@ export async function createAudio(): Promise<
         },
       );
       return {
-        values,
+        values: [],
         async commit() {
           const previous = installed,
             wasPlaying = repl.scheduler.started;
@@ -185,6 +183,7 @@ export async function createAudio(): Promise<
     playing: () => repl.scheduler.started,
     now: () => playheadCycle(repl.scheduler),
     time: () => context.currentTime,
+    cps: () => repl.scheduler.cps,
     seek: (cycle) => {
       // The accessor validates phase anchors; Cyclist initializes one only on its first tick.
       repl.scheduler.seconds_at_cps_change ??= context.currentTime;
