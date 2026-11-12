@@ -45,3 +45,8 @@ it('returns exact reduced fractions, paths, depths, and turn labels; source chun
   expect(result.error).toBeNull();
   expect(result.events.length).toBeGreaterThan(0);
 });
+it('does not invent neighboring timing when source text or weighted turns hide alignment', () => {
+  for (const text of ['c2*2@3 d2', '<c2@2 d2>', '<c2!2 d2>']) {
+    expect(layoutRhythm(parseSteps(text)).some((b) => b.kind === 'value')).toBe(false);
+  }
+});

@@ -48,6 +48,27 @@ const weight = (s: Step) =>
  * Alternatives retain all turns for editing; active marks the turn that plays.
  */
 export function layoutRhythm(steps: Step[], cycle = 0): Box[] {
+  // `other` can hide an outer weight; weighted alternatives can span cycles.
+  // Neither is safe to give ordinary one-cycle slots from the stored tree.
+  const unresolved = (s: Step): boolean =>
+    s.kind === 'other' ||
+    !Number.isFinite(weight(s)) ||
+    weight(s) <= 0 ||
+    (isGroup(s) &&
+      ((s.kind === 'alternate' && s.steps.some((c) => weight(c) !== 1)) ||
+        s.steps.some(unresolved)));
+  if (steps.some(unresolved))
+    return [
+      {
+        start: [cycle, 1],
+        end: [cycle + 1, 1],
+        depth: -1,
+        kind: 'other',
+        path: [],
+        active: true,
+        opaque: true,
+      },
+    ];
   const boxes: Box[] = [];
   function list(
     items: Step[],
