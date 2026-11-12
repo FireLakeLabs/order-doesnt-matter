@@ -1,3 +1,4 @@
+import { liveObservationWindow } from './browser/live-window';
 import { readFileSync } from 'node:fs';
 import { expect, it } from 'vitest';
 import { instruments, sections } from '../src/document';
@@ -219,4 +220,32 @@ it('1,000 frame models for 30 instruments and 2,000 events take less than 100 ms
   const ms = performance.now() - start;
   console.log(`liveModel 1,000 frames: ${ms.toFixed(2)} ms`);
   expect(ms).toBeLessThan(100);
+});
+
+it('count-in/zero/first-positive observation never pairs a flash with an excluded onset', () => {
+  const edge = 0.00654761904761907;
+  const i = input();
+  i.events[rows[0].id] = result([event(0, 0.25), event(1, 1.25)]);
+  const tolerance = (0.15 + 1 / 60) * 0.55; // unchanged browser tolerance
+  for (const [origin, expectedFrom] of [
+    [-0.01, 0],
+    [0, 0],
+    [edge, 1],
+  ]) {
+    const { from, to } = liveObservationWindow(origin);
+    expect([from, to]).toEqual([expectedFrom, expectedFrom + 2]);
+    for (const sample of [edge, 1 + edge]) {
+      const onset = liveModel({ ...i, playhead: sample }).instruments[0].lastOnset!;
+      expect(onset).toBe(Math.floor(sample)); // the product correctly reports onset zero
+      if (sample < from || sample >= to) continue;
+      const predicted = i.events[rows[0].id].events.find(
+        (e) =>
+          e.whole &&
+          e.whole[0] >= from &&
+          e.whole[0] < to &&
+          Math.abs(e.whole[0] - sample) <= tolerance,
+      );
+      expect(predicted, `origin ${origin}, flash ${sample}, onset ${onset}`).toBeDefined();
+    }
+  }
 });
