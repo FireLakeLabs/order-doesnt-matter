@@ -85,3 +85,32 @@ export function rms(chunks: PCM[], rate: number, from: number, to: number): numb
   if (!frames || frames !== end - begin) throw Error('RMS window was not fully captured');
   return Math.sqrt(energy / (frames * 2));
 }
+
+/** Audio-clock progress can precede worklet message delivery. Await the actual
+ * contiguous capture, not just its latest timestamp. Never substitute silence. */
+export async function capturedRms(
+  chunks: PCM[],
+  rate: number,
+  from: number,
+  to: number,
+  timeout = 11000,
+): Promise<number> {
+  if (!Number.isFinite(from) || !Number.isFinite(to) || from < 0 || to <= from)
+    throw Error('Invalid RMS window');
+  const begin = Math.ceil(from * rate),
+    end = Math.ceil(to * rate);
+  const deadline = performance.now() + timeout;
+  while (true) {
+    let covered = begin;
+    for (const chunk of chunks) {
+      if (chunk.frame > covered) break;
+      covered = Math.max(covered, chunk.frame + chunk.channels[0].length);
+      if (covered >= end) return rms(chunks, rate, from, to);
+    }
+    if (performance.now() >= deadline)
+      throw Error(
+        `Timed out waiting for output tap frames ${begin}–${end}; captured through ${covered}. Audio may be suspended or capture expired.`,
+      );
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+}
