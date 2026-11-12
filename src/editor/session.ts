@@ -4,6 +4,7 @@ import { generate } from '../generate';
 import type { Constant } from '../document/edit';
 import { history, push, undo, redo } from './history';
 import { pending, transition, type Pending, type PendingEvent } from './pending';
+import { createBrowserQueries } from '../strudel/evaluate-browser';
 export const SWAP_THROTTLE_MS = 100;
 /** Generation is the dependency graph: setup, references and use-site edits all count. */
 export function changedInstruments(before: Doc, next: Doc): string[] {
@@ -28,6 +29,7 @@ function values(doc: Doc) {
 /** Coordinates immutable documents with an injected engine. One running swap and
  * one latest candidate bound the queue; the trailing candidate always gets sent. */
 export function createEditSession(doc: Doc, ports: Ports) {
+  const questions = createBrowserQueries();
   let h = history(doc),
     p = pending(doc),
     token = 0,
@@ -140,6 +142,10 @@ export function createEditSession(doc: Doc, ports: Ports) {
     } else ports.refresh(next, rows);
   }
   return {
+    ask(candidate: Doc, instrumentId: string, from: number, to: number) {
+      questions.cancel();
+      return questions.query(generate(candidate, { only: instrumentId }), from, to);
+    },
     get state() {
       return p;
     },
@@ -177,7 +183,10 @@ export function createEditSession(doc: Doc, ports: Ports) {
       p = transition(p, { type: 'clear' });
       emit();
     },
-    dispose: cancel,
+    dispose() {
+      cancel();
+      questions.cancel();
+    },
   };
 }
 export type EditSession = ReturnType<typeof createEditSession>;
