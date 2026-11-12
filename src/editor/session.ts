@@ -174,7 +174,7 @@ export function createEditSession(doc: Doc, ports: Ports) {
       h = redo(h);
       install(h.present);
     },
-    observe(event: Extract<PendingEvent, { type: 'swapped' }>) {
+    observe(event: Extract<PendingEvent, { type: 'swapped' | 'committed' }>) {
       p = transition(p, event);
       emit();
     },

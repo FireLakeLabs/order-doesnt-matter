@@ -13,10 +13,10 @@ import {
 import { silence } from '@strudel/core';
 import { playheadCycle, seekTo, query } from './index';
 import type { Hap, Pattern } from './index';
-import type { AudioBackend, Dispatch } from '../engine';
+import type { AudioBackend, Dispatch, SilentWindow } from '../engine';
 import { soundName } from '../engine/logic';
 import { createTap } from './audio-tap';
-import { guarded } from './audio-pattern';
+import { guarded, schedulingBoundary } from './audio-pattern';
 
 export const defaultCollections = [
   ...['tidal-drum-machines', 'piano', 'Dirt-Samples', 'EmuSP12', 'vcsl', 'mridangam'].map(
@@ -45,9 +45,12 @@ async function defaults() {
   return unavailable;
 }
 export async function createAudio(): Promise<
-  AudioBackend & { connect(dispatch: Dispatch, error: (e: unknown) => void): void }
+  AudioBackend & {
+    connect(dispatch: Dispatch, error: (e: unknown) => void, silent: SilentWindow): void;
+  }
 > {
   let dispatch: Dispatch = async () => {},
+    silent: SilentWindow = () => {},
     failed: (error: unknown) => void = () => {};
   const revisions = new WeakMap<Hap, number>();
   let committing: Promise<void>[] | undefined;
@@ -74,7 +77,8 @@ export async function createAudio(): Promise<
   // Depends on Superdough's private final gain, downstream of all orbit effects.
   const tap = await createTap(context, getSuperdoughAudioController().output.destinationGain);
   return {
-    connect(output, error) {
+    connect(output, error, empty) {
+      silent = empty;
       dispatch = output;
       failed = error;
     },
@@ -101,7 +105,15 @@ export async function createAudio(): Promise<
       const values = query(pattern, from, from + 16, { _cps: cps, cyclist: 'cyclist' })
         .filter((h) => h.hasOnset())
         .map((h) => h.value);
-      const wrapped = guarded(pattern, failed, (hap) => revisions.set(hap, revision));
+      const wrapped = guarded(
+        pattern,
+        failed,
+        (hap) => revisions.set(hap, revision),
+        (state) => {
+          const { cycle, time } = schedulingBoundary(repl.scheduler, state);
+          silent(revision, cycle, time);
+        },
+      );
       return {
         values,
         async commit() {
