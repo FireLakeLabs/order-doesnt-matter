@@ -1,5 +1,6 @@
 // Reproducible local measurements. Logs/JSON live in ignored test-results/.
-// Each command stops at the first failure; it never retries a failed test/run.
+// Browser/Node stress stops at the first failure; the matrix records all three
+// planned runs per worker count. Neither mode retries an individual test.
 import { spawn } from 'node:child_process';
 import { mkdirSync, openSync, closeSync, readFileSync, writeFileSync } from 'node:fs';
 const mode = process.argv[2];
@@ -51,8 +52,8 @@ for (const workers of configurations) {
     console.log(JSON.stringify(row));
     if (code) {
       process.exitCode = 1;
-      break;
+      if (mode !== 'matrix') break;
     }
   }
-  if (process.exitCode) break;
+  if (process.exitCode && mode !== 'matrix') break;
 }

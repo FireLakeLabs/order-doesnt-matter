@@ -78,6 +78,9 @@ for (const scenario of ['double', 'reset', 'degrade', 'order', 'restore'] as con
       await check(1);
       return;
     }
+    await signal(() => editor(page).getByRole('img', { name: 'Without fast' }).isVisible()).toBe(
+      true,
+    );
     await expect(editor(page).getByRole('img', { name: 'Without fast' })).toBeVisible();
     await page.getByRole('button', { name: 'Done', exact: true }).click();
     await expect(add).toBeFocused();
@@ -118,6 +121,9 @@ test('real ambient rewrite: preview, keyboard focus and phone', async ({ page })
   const chip = await selectNode(page, { nodeId: layer.id });
   await exact(page, 3);
   await page.setViewportSize({ width: 1440, height: 900 });
+  await signal(() => editor(page).getByRole('img', { name: 'Without slow' }).isVisible()).toBe(
+    true,
+  );
   await expect(editor(page).getByRole('img', { name: 'Without slow' })).toBeVisible();
   await editor(page).evaluate((node) => node.scrollIntoView({ block: 'start' }));
   await page.screenshot({ path: 'test-results/rewrite-desktop.png' });

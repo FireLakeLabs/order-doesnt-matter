@@ -67,8 +67,8 @@ Use Node `.node-version`, `npm ci`, and installed Playwright Chromium.
 - `node scripts/stability.mjs browser`: fifteen consecutive browser suites; run
   `npm test` continuously in another shell for the entire measurement.
 
-Every repeated-run command stops at its first failure and writes durations and
-exit codes to `test-results/stability/<mode>/runs.json`. Browser JSON reports
+The browser/Node stress commands stop at their first failure; the matrix records
+all three planned runs per worker count. Each writes durations and exit codes to `test-results/stability/<mode>/runs.json`. Browser JSON reports
 include per-test durations. No failed run is retried by the runner.
 
 ## Assertions changed
