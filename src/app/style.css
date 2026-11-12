@@ -185,3 +185,14 @@ footer {
     justify-self: end;
   }
 }
+
+#solo-banner {
+  padding: 8px 12px;
+  border: 1px solid #f0cb86;
+  border-radius: 6px;
+  color: #f0cb86;
+  overflow-wrap: anywhere;
+}
+#solo-banner button {
+  min-height: 44px;
+}

@@ -12,9 +12,9 @@ test('real house: instrument, rewrite, signal, section, rhythm and constant shar
   const bass = instruments(doc).find((r) => r.name === 'bass')!;
   await selectNode(page, { nodeId: bass.id });
   await expect(page.locator('#editor-breadcrumb')).toHaveText('bass');
-  await expect(page.locator('#editor')).toHaveAttribute('data-editor-kind', 'readonly');
+  await expect(page.locator('#editor')).toHaveAttribute('data-editor-kind', 'instrument');
   expect(describeTarget(doc, bass.id).kind).toBe('instrument');
-  await expect(page.locator('#editor')).toContainText('instrument editing');
+  await expect(page.getByRole('button', { name: 'Mute everywhere', exact: true })).toBeVisible();
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   const chip = page.locator('.sheet-chips [data-editor-target]').first();
   await chip.press('Enter');

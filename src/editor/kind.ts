@@ -1,7 +1,13 @@
 import type { Doc } from '../document';
 import type { Target } from '../document/edit';
-import type { EventResult } from '../contract';
+import type { EventResult, SheetSoundState } from '../contract';
 export interface EditorContext {
+  /** Optional app controls; document editors can also be mounted independently. */
+  instrument?: {
+    sounds: SheetSoundState[];
+    solo: string | null;
+    setSolo(id: string | null): void;
+  };
   doc: Doc;
   target: Target;
   events?: EventResult;

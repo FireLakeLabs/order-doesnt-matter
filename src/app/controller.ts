@@ -7,6 +7,8 @@ import { createEngine } from '../engine';
 import { createBrowserQueries } from '../strudel/evaluate-browser';
 import {
   initialState,
+  setSolo,
+  playbackOptions,
   loadPiece,
   loadFailure,
   selectSection,
@@ -91,6 +93,21 @@ export function createApp() {
     }
     if (event.type === 'sounds') update({ ...state, sounds: sounds() });
   }
+  // All engine replacements, including solo, share a serial queue.
+  let swaps = Promise.resolve();
+  function replacePlayback(doc: Doc, options: Parameters<Engine['play']>[1] = {}) {
+    const piece = epoch,
+      transport = transportRevision;
+    const work = swaps.then(() => {
+      if (piece !== epoch || transport !== transportRevision) return -1;
+      return engine!.play(generate(doc, playbackOptions(state)), options);
+    });
+    swaps = work.then(
+      () => {},
+      () => {},
+    );
+    return work;
+  }
   async function play() {
     if (!state.doc || !checked || starting) return;
     const piece = epoch,
@@ -100,7 +117,11 @@ export function createApp() {
     try {
       // Check the actual seek window too before the engine evaluates on the page.
       const fromCycle = startCycle(state);
-      const result = await preflight.query(generate(state.doc!), fromCycle, fromCycle + 16);
+      const result = await preflight.query(
+        generate(state.doc!, playbackOptions(state)),
+        fromCycle,
+        fromCycle + 16,
+      );
       if (piece !== epoch || transport !== transportRevision) return;
       if (result.error) throw Error(result.error.message);
       engine ??= await createEngine();
@@ -115,7 +136,7 @@ export function createApp() {
         update(next);
         void askWindow();
       }
-      await engine.play(generate(state.doc!), {
+      await replacePlayback(state.doc!, {
         fromCycle,
         discoverCycles: state.sections.map((s) => s.start),
       });
@@ -160,8 +181,7 @@ export function createApp() {
       dirtyRows.clear();
       editor = createEditSession(imported.doc, {
         playing: () => !!engine?.playing,
-        play: (doc) =>
-          engine!.play(generate(doc), { discoverCycles: sections(doc).map((s) => s.start) }),
+        play: (doc) => replacePlayback(doc, { discoverCycles: sections(doc).map((s) => s.start) }),
         changed: (pending) =>
           update({
             ...state,
@@ -196,13 +216,26 @@ export function createApp() {
       });
       if (checked && engine?.playing) {
         try {
-          await engine.play(generate(imported.doc), {
+          await replacePlayback(imported.doc, {
             discoverCycles: sections(imported.doc).map((s) => s.start),
           });
         } catch (error) {
           message(error);
         }
       }
+    },
+    solo(id: string | null) {
+      const next = setSolo(state, id);
+      if (next === state) return;
+      const previous = state.solo,
+        piece = epoch;
+      update(next);
+      if (engine?.playing && state.doc)
+        void replacePlayback(state.doc).catch((error) => {
+          if (piece !== epoch || state.solo !== id) return;
+          update(setSolo(state, previous));
+          message(error);
+        });
     },
     play,
     stop() {
