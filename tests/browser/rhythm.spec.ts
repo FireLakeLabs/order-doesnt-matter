@@ -120,3 +120,39 @@ test('phone: List, arrow selection, Done and Escape return focus, no horizontal 
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await expect(origin).toBeFocused();
 });
+test('desktop fine pointer: eight proportional boxes and edited row above the drawer', async ({
+  page,
+}) => {
+  test.setTimeout(3000);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await openProgram(page, { source: 'note("c2 d2@2 e2 f2 g2 a2 b2 c3").s("sine")' });
+  await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
+  await selectNode(page, { breadcrumb: ['Instrument 1', 'Rhythm'] });
+  expect(await page.evaluate(() => matchMedia('(pointer: coarse)').matches)).toBe(false);
+  const boxes = page.locator('.rhythm-boxes [data-path]');
+  await expect(boxes).toHaveCount(8);
+  const geometry = await page.evaluate(() => {
+    const bar = document.querySelector('.rhythm-boxes')!.getBoundingClientRect();
+    return {
+      width: bar.width,
+      parts: Array.from(document.querySelectorAll('.rhythm-boxes [data-path]')).map(
+        (n) => n.getBoundingClientRect().width,
+      ),
+      row: document
+        .querySelector('[data-editor-selected="true"]')!
+        .closest('tr')!
+        .getBoundingClientRect()
+        .toJSON(),
+      drawer: document.querySelector('#editor')!.getBoundingClientRect().toJSON(),
+    };
+  });
+  geometry.parts.forEach((width, i) =>
+    expect(Math.abs(width - (geometry.width * (i === 1 ? 2 : 1)) / 9)).toBeLessThanOrEqual(1),
+  );
+  expect(geometry.row.top).toBeGreaterThanOrEqual(0);
+  expect(geometry.row.bottom).toBeLessThanOrEqual(geometry.drawer.top);
+  for (let i = 0; i < 8; i++) {
+    await boxes.nth(i).click();
+    await expect(boxes.nth(i)).toHaveAttribute('aria-pressed', 'true');
+  }
+});

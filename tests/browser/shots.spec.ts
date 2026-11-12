@@ -240,7 +240,7 @@ for (const stage of stages)
       await page.screenshot({ path: `${dir}/unchanged-rewrite-390.png` });
     });
     if (stage === 'after')
-      for (const piece of ['real bass', 'dense hat'])
+      for (const piece of ['real bass', 'nested turns', 'dense hat'])
         for (const size of [
           { width: 1440, height: 900 },
           { width: 390, height: 844 },
@@ -251,9 +251,11 @@ for (const stage of stages)
               page,
               piece === 'real bass'
                 ? { path: 'corpus/programs/real-house-arranged.strudel' }
-                : {
-                    source: `s("${Array.from({ length: 16 }, () => 'hh').join(' ')} [hh [~ hh] <hh [hh hh]>]")`,
-                  },
+                : piece === 'nested turns'
+                  ? { source: 'note("c2 [~ c2] g1@2 <a1 [a1 g1]>")' }
+                  : {
+                      source: `s("${Array.from({ length: 16 }, () => 'hh').join(' ')} [hh [~ hh] <hh [hh hh]>]")`,
+                    },
             );
             if (piece === 'real bass')
               await page.getByRole('button', { name: 'drop', exact: true }).first().click();
@@ -267,9 +269,6 @@ for (const stage of stages)
               await page.getByRole('button', { name: 'List', exact: true }).click();
               await page.locator('[data-path="16"]').click();
             }
-            await page
-              .locator('#score-workspace')
-              .evaluate((n) => n.scrollIntoView({ block: 'start' }));
             const dir = 'test-results/rhythm';
             await mkdir(dir, { recursive: true });
             for (const view of ['Boxes', 'List']) {
@@ -279,8 +278,7 @@ for (const stage of stages)
               expect(
                 await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
               ).toBe(true);
-              if (piece === 'dense hat')
-                await page.locator('[data-path="16"]').scrollIntoViewIfNeeded();
+
               await page.screenshot({
                 path: `${dir}/${piece.replaceAll(' ', '-')}-${view.toLowerCase()}-${size.width}.png`,
               });
