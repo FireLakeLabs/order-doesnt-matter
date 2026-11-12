@@ -95,3 +95,20 @@ Keep each entry to a few lines.
 - **D28 (2026-11-11) Parallel pull requests are checked together before the
   last one merges.** Wave 3.1's four editors each passed alone and three
   failed once combined.
+- **D29 (2026-11-12) Document version 2.** Every group member has its own id,
+  shared patterns say what they are for and whether the author named them, and
+  a localized copy points at the instrument it came from. `migrate` brings
+  version 1 forward. Extends D15 and D17.
+- **D30 (2026-11-12) An editor may ask for room.** A kind declares `wide` to
+  dock along the bottom at full width; the rhythm editor does. Boxes are at
+  least 20 px with a mouse and 44 px with touch.
+- **D31 (2026-11-12) Rhythm has two views of one structure.** Boxes, where each
+  part is as wide as its real time, and List. Timing the stored structure
+  cannot establish is never drawn as boxes; the real notes are shown instead.
+  Implements D11.
+- **D32 (2026-11-12) Text is always available.** Every editor offers "Edit as
+  source"; what is typed is re-imported in place and becomes an ordinary
+  editable setting when the notes come out the same. Implements D3.
+- **D33 (2026-11-12) The demo is a check.** Each phase's recorded demo asserts
+  every step on a real piece and lists what it could not do. Phase 2's found
+  that a section made separate kept stale copies of its instruments.
