@@ -237,7 +237,10 @@ export default {
         );
         form.append(
           actions,
-          el('small', 'Moves stay between settings, source text and pattern boundaries.'),
+          el(
+            'small',
+            'Only proven rewrites cross plain constant settings. Other settings can change the rhythm; source text and pattern boundaries stay barriers.',
+          ),
         );
       }
       function ordered(title: string, layers: Layer[]) {
