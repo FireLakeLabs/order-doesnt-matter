@@ -2,15 +2,19 @@ import type { Doc, RewriteLayer, SettingsLayer } from '../types';
 import { replaceAtPath, type Refusal } from './shared';
 import { rewriteOwner } from './rewrite-shared';
 
-// Measured against pinned Strudel in tests/rewrite-constants.test.ts. Even a
-// constant control can split event fragments at cycle boundaries: fast/slow and
-// early/late do not commute. This list deliberately excludes unmeasured controls.
+// D26, measured against pinned Strudel in tests/rewrite-constants.test.ts:
+// onset whole spans and complete values commute; unheard fragments may differ.
+// This list deliberately excludes unmeasured controls and patterned arguments.
 const provenSettings = new Set(['cutoff', 'gain', 'pan', 'room', 's', 'n']);
 const provenRewrites: Record<string, number> = {
+  fast: 1,
+  slow: 1,
   rev: 0,
   palindrome: 0,
   ply: 1,
   degradeBy: 1,
+  early: 1,
+  late: 1,
   euclid: 2,
   segment: 1,
 };

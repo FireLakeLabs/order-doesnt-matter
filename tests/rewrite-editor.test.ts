@@ -63,13 +63,13 @@ it('moves rewrites only, respects settings/source barriers and removes exactly o
   expect(good(removeRewrite(d, fast.id))).not.toBe(d);
   expect(layers(d)).toContain(fast);
   for (const [id, direction] of [
-    [fast.id, -1],
     [slow.id, 1],
     [ply.id, -1],
     ['missing', 1],
   ] as const)
     expect(moveRewrite(d, id, direction)).toMatchObject({ ok: false });
-  // rev commutes with this plain constant gain; the blanket barrier is obsolete.
+  // D26: both fast and rev preserve onset spans and values across constant gain.
+  expect(layers(good(moveRewrite(d, fast.id, -1)))[0]).toBe(fast);
   expect(layers(good(moveRewrite(d, rev.id, 1)))[3]).toBe(rev);
   expect(removeRewrite(d, 'missing')).toMatchObject({ ok: false });
   expect(removeRewrite(d, instruments(d)[0].pattern.id)).toMatchObject({ ok: false });
