@@ -108,19 +108,19 @@ export function mountConstellation(
     model = initial;
   const boxHeight = () => Math.max(220, Math.min(280, width * 0.85));
   function position() {
-    const layout = constellationLayout(model, { width, height: boxHeight() });
+    const layout = constellationLayout(model, { width: width - 8, height: boxHeight() - 8 });
     touchList = layout.planets.some((p, n) =>
       layout.planets
         .slice(n + 1)
         .some((q) => Math.hypot(p.x - q.x, p.y - q.y) < Math.max(22, p.r) + Math.max(22, q.r)),
     );
     drawing.classList.toggle('constellation-touch-list', touchList);
-    drawing.style.height = `${layout.height}px`;
-    svg.setAttribute('viewBox', `0 0 ${width} ${layout.height}`);
+    drawing.style.height = `${layout.height + 8}px`;
+    svg.setAttribute('viewBox', `0 0 ${width} ${layout.height + 8}`);
     for (const p of layout.planets) {
       const b = planets.get(p.id)!.button;
-      b.style.left = `${p.x - p.target / 2}px`;
-      b.style.top = `${p.y - p.target / 2}px`;
+      b.style.left = `${p.x + 4 - p.target / 2}px`;
+      b.style.top = `${p.y + 4 - p.target / 2}px`;
       b.style.setProperty('--target', `${p.target}px`);
       b.style.setProperty('--centre', `${p.target / 2}px`);
       b.style.setProperty('--radius', `${p.r}px`);
@@ -131,8 +131,8 @@ export function mountConstellation(
       b.style.setProperty('--name-width', `${p.inside ? p.r * 1.8 : p.labelWidth}px`);
       b.classList.toggle('constellation-name-inside', p.inside);
       b.classList.toggle('constellation-mark-inside', p.r >= 18);
-      b.dataset.x = String(p.x);
-      b.dataset.y = String(p.y);
+      b.dataset.x = String(p.x + 4);
+      b.dataset.y = String(p.y + 4);
       b.dataset.r = String(p.r);
     }
     regions.forEach(({ path, label }, n) => {
@@ -141,8 +141,9 @@ export function mountConstellation(
       label.hidden = !r;
       if (!r) return;
       path.setAttribute('d', regionPath(r));
-      label.style.left = `${r.label.x}px`;
-      label.style.top = `${r.label.y}px`;
+      path.setAttribute('transform', 'translate(4 4)');
+      label.style.left = `${r.label.x + 4}px`;
+      label.style.top = `${r.label.y + 4}px`;
       label.style.width = `${r.label.width}px`;
       text(label, roomWords(model.rooms.find((room) => room.orbit === r.orbit)!));
     });
@@ -181,7 +182,7 @@ export function mountConstellation(
         (previous === null
           ? i.lastOnset === 0
           : model.cycle! >= previous && i.lastOnset > previous);
-      if (lit) p.until = now + 250;
+      if (lit) p.until = now + 400;
       p.button.classList.toggle('live-lit', lit);
       p.button.classList.toggle('live-glowing', playing && now < p.until);
       p.button.classList.toggle('live-playing', playing && i.inSection && !i.silenced && !i.error);

@@ -1,6 +1,14 @@
+import { livePlayhead } from '../src/live/playhead';
 import { readFileSync } from 'node:fs';
 import { expect, it, vi } from 'vitest';
-import { spiralMarks, opacityAt, laneGeometry } from '../src/spiral/model';
+import {
+  spiralMarks,
+  opacityAt,
+  laneGeometry,
+  defaultView,
+  readView,
+  saveView,
+} from '../src/spiral/model';
 import { liveModel, turnNotes, type TurnNote, type LiveInput } from '../src/live/model';
 import { importStrudel } from '../src/import';
 import { instruments, sections } from '../src/document';
@@ -248,4 +256,89 @@ it('the brief negative scheduling origin cannot pin the first future turn out of
   app.watchInput(-0.02);
   expect(turnNotes(app.watchInput(1.5), 3, 4)).toHaveLength(8);
   app.setWatch(false);
+});
+
+it('abutting equal notes have separate heads and at most a 2% tail gap, at every size', () => {
+  for (const size of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 844 },
+  ]) {
+    const repeated = spiralMarks([note(0, 0.5), note(0.5, 1)], lanes, 0, size);
+    expect(repeated.filter((m) => m.onset)).toHaveLength(2);
+    expect(repeated[0].bodyTo).toBeLessThan(repeated[1].from);
+    for (const m of repeated) {
+      expect(m.to - m.bodyTo).toBeCloseTo((m.to - m.from) * 0.02);
+      expect(m.bodyEndRadius).toBeLessThan(m.endRadius);
+    }
+    const sustained = spiralMarks([note(0, 2)], lanes, 0, size);
+    expect(sustained.filter((m) => m.onset)).toHaveLength(1);
+    expect(sustained[0].bodyTo).toBe(1); // no gap at an artificial turn seam
+    expect(sustained[1].bodyTo).toBe(1.96);
+  }
+});
+it('view defaults reproduce the old opacity and geometry, with continuous adjustable fading', () => {
+  expect(defaultView).toEqual({ keep: 1, upcoming: 2 });
+  for (const keep of [0.1, 1, 2])
+    for (const upcoming of [1, 2, 3, 4]) {
+      const view = { keep, upcoming };
+      for (let d = -4; d < 5; d += 0.001) {
+        expect(Math.abs(opacityAt(d, view) - opacityAt(d + 0.001, view))).toBeLessThan(0.016);
+        if (d >= -1 && d <= 0) expect(opacityAt(d, view)).toBe(1);
+      }
+      expect(opacityAt(-1 - keep, view)).toBe(0);
+      expect(opacityAt(upcoming, view)).toBeCloseTo(0.4);
+    }
+  for (const d of [-3, -1.75, -1, 0, 0.5, 1, 2, 3]) {
+    const x = Math.max(0, d + 2);
+    const old = d < -1 ? x * x * (3 - 2 * x) : d <= 0 ? 1 : Math.max(0.4, 1 - d * 0.3);
+    expect(opacityAt(d)).toBe(old);
+  }
+  expect(laneGeometry(2, size).pitch).toBe((900 / 2 - 24) / 6.5);
+  const expanded = laneGeometry(2, size, { keep: 2, upcoming: 4 });
+  expect(expanded.pitch * 9.5).toBeCloseTo(426);
+});
+it('view preferences survive storage and tolerate denied, missing and malformed storage', () => {
+  let value: string | null = null;
+  const storage = {
+    getItem: () => value,
+    setItem: (_: string, next: string) => {
+      value = next;
+    },
+  };
+  expect(readView(storage)).toEqual(defaultView);
+  saveView({ keep: 2, upcoming: 4 }, storage);
+  expect(readView(storage)).toEqual({ keep: 2, upcoming: 4 });
+  for (value of ['null', '{}', 'broken', '{"keep":0,"upcoming":9}', '{"keep":1,"upcoming":2.5}'])
+    expect(readView(storage)).toEqual(defaultView);
+  const denied = {
+    getItem: () => {
+      throw Error('denied');
+    },
+    setItem: () => {
+      throw Error('denied');
+    },
+  };
+  expect(readView(denied)).toEqual(defaultView);
+  expect(() => saveView(defaultView, denied)).not.toThrow();
+});
+
+it('one live playhead correction uses reported seconds and tempo, preserving stopped and unavailable clocks', () => {
+  expect(livePlayhead(4, 0.55, 0.0426666667)).toBeCloseTo(3.9765333333);
+  expect(livePlayhead(null, 0.55, 0.04)).toBeNull();
+  expect(livePlayhead(4, 0.55)).toBe(4);
+  expect(livePlayhead(4, 0.55, NaN)).toBe(4);
+  expect(livePlayhead(4, 0.55, -1)).toBe(4);
+  const input: LiveInput = {
+    rows: [],
+    sections: [],
+    events: { a: { cps: 0.55, events: [], error: null, opaqueValues: false } },
+    sounds: [],
+    solo: null,
+    playhead: 4,
+    fromCycle: 0,
+    toCycle: 8,
+    outputLatency: 0.04,
+  };
+  expect(liveModel(input).cycle).toBeCloseTo(3.978);
+  expect(input.playhead).toBe(4);
 });
