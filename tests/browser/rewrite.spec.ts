@@ -75,7 +75,7 @@ test('real house rewrite edits carry through swaps; ordered keys, previews, focu
   await check(2);
   await exact(page, 1);
   await check(1);
-  await expect(editor(page).getByRole('img', { name: 'Without this rewrite' })).toBeVisible();
+  await expect(editor(page).getByRole('img', { name: 'Without fast' })).toBeVisible();
   await page.getByRole('button', { name: 'Done', exact: true }).click();
   await expect(add).toBeFocused();
   await add.press('Space');
@@ -107,7 +107,7 @@ test('real house rewrite edits carry through swaps; ordered keys, previews, focu
   const chip = await selectNode(page, { nodeId: layer.id });
   await exact(page, 3);
   await page.setViewportSize({ width: 1440, height: 900 });
-  await expect(editor(page).getByRole('img', { name: 'Without this rewrite' })).toBeVisible();
+  await expect(editor(page).getByRole('img', { name: 'Without slow' })).toBeVisible();
   await editor(page).evaluate((node) => node.scrollIntoView({ block: 'start' }));
   await page.screenshot({ path: 'test-results/rewrite-desktop.png' });
   await page.setViewportSize({ width: 390, height: 844 });

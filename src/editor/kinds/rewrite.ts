@@ -8,6 +8,7 @@ import { moveRewrite } from '../../document/edits/rewrite-move';
 import { removeRewrite } from '../../document/edits/rewrite-remove';
 import { rewriteOwner } from '../../document/edits/rewrite-shared';
 import type { EventResult } from '../../contract';
+import { fieldLabel } from '../presentation';
 import './rewrite.css';
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text = '') => {
   const node = document.createElement(tag);
@@ -96,6 +97,9 @@ export default {
       previewKey = '',
       request = 0,
       destroyed = false;
+    let withoutResult: EventResult | undefined;
+    const comparison = el('p');
+    comparison.className = 'editor-helper';
     const root = el('div'),
       form = el('div'),
       previews = el('div'),
@@ -130,16 +134,9 @@ export default {
         form.append(el('p', 'This instrument no longer exists.'));
         return;
       }
-      form.append(el('p', 'An ordered rewrite changes which notes exist and when. Order matters.'));
+
       if (layer) {
-        form.append(
-          el('h3', layer.name),
-          el(
-            'p',
-            descriptions[layer.name] ??
-              'Changes the score with this named rewrite; inspect its arguments below.',
-          ),
-        );
+        form.append(el('p', descriptions[layer.name] ?? 'This rewrite changes the score.'));
         layer.args.forEach((arg, index) => {
           const name = names[layer.name]?.[index] ?? `Argument ${index + 1}`,
             value = editable(arg);
@@ -160,8 +157,8 @@ export default {
             form.append(el('p', `${name} · read-only`), el('pre', source));
             return;
           }
-          const label = el('label', name),
-            field = el('input');
+          const field = el('input'),
+            label = fieldLabel(name, field);
           field.type = typeof value === 'number' ? 'number' : 'text';
           field.step = 'any';
           field.value = String(value);
@@ -188,7 +185,7 @@ export default {
               change();
             }
           };
-          label.append(field);
+
           form.append(label);
           // A proportion has a defined range; arbitrary time factors have no invented slider limits.
           if (layer.name === 'degradeBy' && typeof value === 'number') {
@@ -217,7 +214,7 @@ export default {
           }
         });
         const actions = el('div');
-        actions.className = 'rewrite-actions';
+        actions.className = 'editor-actions';
         for (const [text, direction] of [
           ['Move earlier', -1],
           ['Move later', 1],
@@ -235,13 +232,7 @@ export default {
             apply(removeRewrite(context.doc, layer.id), `${row.pattern.id}:rewrites`),
           ),
         );
-        form.append(
-          actions,
-          el(
-            'small',
-            'Only proven rewrites cross plain constant settings. Other settings can change the rhythm; source text and pattern boundaries stay barriers.',
-          ),
-        );
+        form.append(actions);
       }
       function ordered(title: string, layers: Layer[]) {
         const list = el('ol');
@@ -257,7 +248,7 @@ export default {
         });
         if (list.children.length) form.append(el('h4', title), list);
       }
-      ordered('Instrument rewrites, in order', row.pattern.layers);
+      ordered('Rewrites · in order', row.pattern.layers);
       const seen = new Set<string>();
       for (const use of row.uses) {
         const extra = use.layers.filter((l) => l.kind === 'rewrite' && !seen.has(l.id));
@@ -322,7 +313,9 @@ export default {
       if (key !== previewKey) {
         previewKey = key;
         const version = ++request;
-        previews.replaceChildren(strip('With this rewrite', next.events, next));
+        withoutResult = undefined;
+        comparison.textContent = '';
+        previews.replaceChildren(strip(`With ${layer.name}`, next.events, next), comparison);
         if (next.ask && next.target.instrumentId) {
           const without = removeRewrite(next.doc, layer.id);
           if (!('ok' in without)) {
@@ -332,7 +325,9 @@ export default {
               .ask(without, next.target.instrumentId)
               .then((result) => {
                 if (destroyed || version !== request) return;
-                waiting.replaceWith(strip('Without this rewrite', result, context));
+                withoutResult = result;
+                waiting.replaceWith(strip(`Without ${layer.name}`, result, context));
+                compare();
               })
               .catch((e) => {
                 if (!destroyed && version === request) waiting.textContent = `Broken: ${String(e)}`;
@@ -344,9 +339,28 @@ export default {
           );
       } else {
         previews
-          .querySelector('figure:last-child')
-          ?.replaceWith(strip('With this rewrite', next.events, next));
+          .querySelector('figure:last-of-type')
+          ?.replaceWith(strip(`With ${layer.name}`, next.events, next));
       }
+      compare();
+    }
+    function compare() {
+      const spans = (result: EventResult) =>
+        JSON.stringify(
+          result.events
+            .filter(
+              (e) => e.part[0] < context.window.toCycle && e.part[1] > context.window.fromCycle,
+            )
+            .map((e) => [e.whole ?? e.part, e.value]),
+        );
+      comparison.textContent =
+        withoutResult &&
+        !withoutResult.error &&
+        context.events &&
+        !context.events.error &&
+        spans(withoutResult) === spans(context.events)
+          ? 'Both show the same notes in this window.'
+          : '';
     }
     update(initial);
     return {

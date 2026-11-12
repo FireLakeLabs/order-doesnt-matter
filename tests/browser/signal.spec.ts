@@ -30,8 +30,8 @@ test('real house signal: bounds, shape, period, trigger values, undo, keyboard a
   await expect(page.locator('#editor-breadcrumb')).toHaveText(
     'percussion · hh › gain (generated name)',
   );
-  const low = page.getByLabel('Low bound · ×', { exact: true }),
-    high = page.getByLabel('High bound · ×', { exact: true });
+  const low = page.getByLabel('Low bound', { exact: true }),
+    high = page.getByLabel('High bound', { exact: true });
   await expect(low).toHaveValue('0.1');
   await expect(high).toHaveValue('0.35');
   await expect(
@@ -118,7 +118,7 @@ test('real house signal: bounds, shape, period, trigger values, undo, keyboard a
   await period.press('Enter');
   await expect(period).toHaveValue('0.5');
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
-  const handle = page.getByRole('button', { name: 'Drag high bound', exact: true });
+  const handle = page.getByRole('slider', { name: 'High bound slider', exact: true });
   await handle.press('ArrowRight');
   await expect(high).toHaveValue('0.36');
   await page.getByRole('button', { name: 'Undo', exact: true }).click();

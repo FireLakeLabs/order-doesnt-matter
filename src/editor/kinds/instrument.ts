@@ -4,7 +4,7 @@ import { definitionMuted, setMuted } from '../../document/edits/set-muted';
 import { setUseMuted } from '../../document/edits/set-use-muted';
 import { renameInstrument } from '../../document/edits/rename-instrument';
 import type { Refusal } from '../../document/edits/shared';
-import './instrument.css';
+import { fieldLabel, toggle } from '../presentation';
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text = '') => {
   const n = document.createElement(tag);
   n.textContent = text;
@@ -19,21 +19,23 @@ export default {
       previousName = '',
       sectionKey = '';
     const form = el('form'),
-      label = el('label', 'Instrument name'),
-      field = el('input');
+      field = el('input'),
+      label = fieldLabel('Instrument name', field);
     field.setAttribute('aria-label', 'Instrument name');
     const save = el('button', 'Rename'),
       error = el('p'),
-      summary = el('p');
-    const mute = el('button', 'Mute everywhere'),
-      solo = el('button', 'Solo');
+      summary = el('div');
+    const mute = toggle('Mute everywhere'),
+      solo = toggle('Solo');
     const uses = el('div'),
       generated = el('small');
     body.classList.add('instrument-editor');
     error.setAttribute('role', 'alert');
-    label.append(field);
+
     form.append(label, save, generated, error);
-    body.append(form, mute, solo, summary, uses);
+    generated.className = 'editor-helper';
+    uses.className = 'editor-list';
+    body.append(form, mute.label, solo.label, summary, uses);
     function apply(next: Doc | Refusal) {
       error.textContent = 'ok' in next ? next.reason : '';
       field.setAttribute('aria-invalid', String('ok' in next));
@@ -43,12 +45,11 @@ export default {
       event.preventDefault();
       apply(renameInstrument(context.doc, context.target.nodeId, field.value));
     };
-    mute.type = solo.type = 'button';
-    mute.onclick = () => {
+    mute.input.onchange = () => {
       const row = instruments(context.doc).find((r) => r.id === context.target.nodeId)!;
       apply(setMuted(context.doc, row.id, !definitionMuted(context.doc, row.id)));
     };
-    solo.onclick = () =>
+    solo.input.onchange = () =>
       context.instrument?.setSolo(
         context.instrument.solo === context.target.nodeId ? null : context.target.nodeId,
       );
@@ -60,9 +61,9 @@ export default {
       previousName = row.name;
       generated.textContent =
         row.nameSource === 'generated' ? 'Generated name — rename it to make it yours' : '';
-      mute.setAttribute('aria-pressed', String(definitionMuted(context.doc, row.id)));
-      solo.setAttribute('aria-pressed', String(context.instrument?.solo === row.id));
-      solo.disabled = !context.instrument;
+      mute.input.checked = definitionMuted(context.doc, row.id);
+      solo.input.checked = context.instrument?.solo === row.id;
+      solo.input.disabled = !context.instrument;
       const parts = sections(context.doc).filter((s) =>
         row.uses.some((u) => u.path.some((n) => n.id === s.id)),
       );
@@ -116,7 +117,18 @@ export default {
         );
         return `${name}: ${!sound || sound.state === 'not-loaded' ? 'not loaded yet' : sound.state}${sound?.detail ? ` — ${sound.detail}` : ''}`;
       });
-      summary.textContent = `${sounds.join('; ') || 'Sound not queried'}. ${parts.length ? `Plays in ${parts.filter((s) => s.instrumentIds.includes(row.id)).length} of ${parts.length} sections` : 'Plays across the piece'}. ${settings.size} settings · ${rewrites.size} rewrites.`;
+      summary.replaceChildren();
+      sounds.forEach((text) => {
+        const item = el('p', text);
+        item.className = text.includes(': missing') ? 'editor-error' : 'editor-helper';
+        summary.append(item);
+      });
+      summary.append(
+        el(
+          'span',
+          `${parts.length ? `${parts.filter((s) => s.instrumentIds.includes(row.id)).length} sections` : 'Across the piece'} · ${settings.size} settings · ${rewrites.size} rewrites`,
+        ),
+      );
       const key = JSON.stringify(parts.map((s) => [s.id, s.name]));
       if (key !== sectionKey) {
         sectionKey = key;
@@ -124,29 +136,21 @@ export default {
         if (parts.length > 1)
           parts.forEach((part) => {
             const repeated = parts.filter((s) => s.name === part.name).length > 1;
-            const button = el(
-              'button',
+            const control = toggle(
               `Plays in ${part.name.replaceAll('$', '')}${repeated ? ` · cycles ${part.start}–${part.start + part.cycles}` : ''}`,
             );
-            button.type = 'button';
+            const button = control.input;
             button.dataset.useSection = part.id;
-            button.onclick = () =>
-              apply(
-                setUseMuted(
-                  context.doc,
-                  row.id,
-                  part.id,
-                  button.getAttribute('aria-pressed') === 'true',
-                ),
-              );
-            uses.append(button);
+            button.onchange = () =>
+              apply(setUseMuted(context.doc, row.id, part.id, !button.checked));
+            uses.append(control.label);
           });
       }
-      uses.querySelectorAll<HTMLButtonElement>('button').forEach((button) => {
+      uses.querySelectorAll<HTMLInputElement>('input').forEach((button) => {
         const local = row.uses.filter((u) =>
           u.path.some((n) => n.id === button.dataset.useSection),
         );
-        button.setAttribute('aria-pressed', String(local.some((u) => !u.muted)));
+        button.checked = local.some((u) => !u.muted);
       });
     }
     update(initial);

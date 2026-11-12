@@ -18,7 +18,7 @@ test('real techno: change room to alternating values, edit a cycle, preserve oth
   });
   const origin = await selectNode(page, { nodeId: setting!.id });
   await page.getByRole('button', { name: 'Change over time', exact: true }).press('Enter');
-  const input = page.getByRole('spinbutton', { name: 'Value 1.2 (×)', exact: true });
+  const input = page.getByRole('spinbutton', { name: 'Value 2', exact: true });
   await input.fill('0.987');
   await input.press('Enter');
   await expect(page.locator('#editor')).toHaveAttribute('data-editor-kind', 'values');
@@ -79,7 +79,7 @@ test('Kiln: constant → values → edit second → alternating triggers → und
   await page.getByRole('button', { name: 'Section 2', exact: true }).click();
   await selectNode(page, { breadcrumb: ['bass', 'lpf'] });
   await page.getByRole('button', { name: 'Change over time', exact: true }).click();
-  const second = page.getByRole('spinbutton', { name: 'Value 1.2 (Hz)', exact: true });
+  const second = page.getByRole('spinbutton', { name: 'Value 2 (Hz)', exact: true });
   await second.fill('900');
   await second.press('Enter');
   await play(page);
@@ -130,9 +130,9 @@ test('nested values keep their spans; groups, rests, modifiers, chunk parse refu
     events.map((e) => ({ x: (e.part[0] / 4) * 1000, width: ((e.part[1] - e.part[0]) / 4) * 1000 })),
   );
   await page
-    .getByRole('combobox', { name: 'Group 2 timing', exact: true })
+    .getByRole('combobox', { name: 'Group at value 2 timing', exact: true })
     .selectOption('alternate');
-  const field = page.getByRole('spinbutton', { name: 'Value 2.1 (×)', exact: true });
+  const field = page.getByRole('spinbutton', { name: '2nd value, 1st cycle', exact: true });
   await field.fill('.6');
   await field.press('Enter');
   await page.getByRole('button', { name: 'Switch off', exact: true }).nth(1).click();

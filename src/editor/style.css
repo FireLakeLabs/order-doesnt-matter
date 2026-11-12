@@ -1,11 +1,13 @@
+@import '../app/style.css';
+
 #score-workspace {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: 18px;
+  gap: 16px;
   align-items: start;
 }
 #score-workspace:has(#editor:not([hidden])) {
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr) 336px;
 }
 #score {
   min-width: 0;
@@ -13,96 +15,246 @@
 #editor {
   position: sticky;
   top: 16px;
-  padding: 22px;
-  background: #182a35;
-  border: 1px solid #52717b;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  max-height: calc(100dvh - 32px);
+  min-width: 0;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
   border-radius: 12px;
   overflow-wrap: anywhere;
+  font-size: 14px;
+  line-height: 1.5;
 }
-#editor[hidden] {
+#editor[hidden],
+#editor [hidden] {
   display: none;
 }
+#editor > header,
+#editor > footer {
+  padding: 16px;
+}
+#editor > header {
+  border-bottom: 1px solid var(--line);
+}
 #editor h2 {
-  font-size: 18px;
-  margin-bottom: 24px;
+  font-size: 17px;
+  margin: 0;
 }
-#editor input {
+#editor h3,
+#editor h4,
+#editor legend {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+#editor h3,
+#editor h4 {
+  margin: 16px 0 8px;
+}
+.editor-body {
+  min-height: 0;
+  overflow: auto;
+  padding: 16px;
+  scrollbar-gutter: stable;
+  scroll-padding: 8px;
+}
+#editor p {
+  margin: 0 0 12px;
+}
+#editor small,
+.editor-helper,
+#editor figcaption {
+  font-size: 13px;
+  color: var(--muted);
+}
+#editor button,
+#editor input,
+#editor select,
+#editor textarea,
+#editor summary {
+  min-height: 44px;
   font: inherit;
-  color: inherit;
-  accent-color: #a3efd5;
 }
-#editor input[type='range'] {
-  width: 100%;
-  margin: 12px 0 24px;
-  min-height: 40px;
-}
-#editor label {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 10px;
+#editor button {
+  padding: 8px 12px;
   font-size: 13px;
 }
-#editor input:not([type='range']):not([type='checkbox']) {
+#editor input,
+#editor select,
+#editor textarea {
+  color: var(--text);
+  accent-color: var(--accent);
+}
+#editor input:not([type='range']):not([type='checkbox']),
+#editor select,
+#editor textarea {
   width: 100%;
   min-width: 0;
-  padding: 10px;
-  border: 1px solid #52717b;
-  border-radius: 5px;
-  background: #0b141b;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--canvas);
+}
+#editor label {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 13px;
+}
+.editor-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.editor-unit {
+  flex: none;
+  color: var(--muted);
+}
+#editor input[type='range'] {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 0 0 12px;
+  cursor: ew-resize;
+  touch-action: pan-y;
+}
+#editor summary {
+  display: list-item;
+  padding: 10px 0;
+  cursor: pointer;
+}
+#editor fieldset {
+  min-width: 0;
+  margin: 12px 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+#editor .editor-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 8px 10px;
+  margin: 0 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+#editor .editor-toggle input {
+  flex: none;
+  min-height: 0;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+}
+#editor .editor-toggle:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--toggle-on);
+}
+.editor-toggle-state {
+  margin-left: auto;
+  color: var(--muted);
+}
+.editor-toggle-state::before {
+  content: 'Off';
+}
+input:checked ~ .editor-toggle-state::before {
+  content: 'On';
+  color: var(--accent);
+}
+.editor-actions,
+.editor-conversions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+.editor-conversions h3 {
+  flex-basis: 100%;
+  margin: 0 !important;
+}
+#editor [role='alert'],
+#editor .editor-error {
+  color: var(--danger);
+}
+#editor [role='alert']:empty {
+  display: none;
+}
+#editor > footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid var(--line);
 }
 #editor-status {
-  min-height: 3em;
+  flex: 1;
+  margin: 0 !important;
   font-size: 13px;
-  color: #a3efd5;
+  color: var(--accent);
 }
 #editor[data-edit-state='pending'] {
-  border: 2px dashed #f0cb86;
-  padding: 21px;
+  border-style: dashed;
+  border-color: var(--warning);
 }
 #editor[data-edit-state='pending'] #editor-status {
-  color: #f0cb86;
+  color: var(--warning);
 }
 #editor[data-edit-state='failed'] #editor-status {
-  color: #ffb3a8;
+  color: var(--danger);
 }
 .sheet-cell[tabindex],
 .sheet-use-note[tabindex] {
   cursor: pointer;
 }
 .odm-sheet [data-editor-selected='true'] {
-  outline: 3px solid #c3b0f1;
+  outline: 3px solid var(--selection);
   outline-offset: -4px;
 }
 .odm-sheet [data-edit-state='pending'] {
   background: #594d244d !important;
-  border-bottom: 3px dashed #f0cb86;
+  border-bottom: 3px dashed var(--warning);
 }
 .odm-sheet [data-edit-state='failed'] {
-  border-bottom: 3px solid #ffb3a8;
+  border-bottom: 3px solid var(--danger);
 }
 @media (max-width: 760px) {
   #score-workspace:has(#editor:not([hidden])) {
     grid-template-columns: minmax(0, 1fr);
-    padding-bottom: 330px;
+    padding-bottom: 60dvh;
   }
   #editor {
     position: fixed;
     z-index: 5;
     inset: auto 0 0;
-    max-height: 55dvh;
-    overflow: auto;
+    max-height: 60dvh;
     border-radius: 16px 16px 0 0;
     box-shadow: 0 -12px 32px #0008;
-    padding: 18px;
   }
-  #editor[data-edit-state='pending'] {
-    padding: 17px;
+  #editor > header,
+  #editor > footer {
+    padding: 12px 16px;
   }
-  #editor h2 {
-    margin-bottom: 12px;
-  }
-  #editor input[type='range'] {
-    margin: 0 0 10px;
-  }
+}
+
+#editor form {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+#editor form label {
+  margin: 0;
+}
+#editor form small:empty {
+  display: none;
+}
+.editor-list-item {
+  border-top: 1px solid var(--line);
+  padding: 12px 0;
+}
+.editor-list-item .editor-actions button {
+  flex: 1;
 }
