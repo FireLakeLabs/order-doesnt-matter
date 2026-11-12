@@ -58,6 +58,16 @@ budget. A signal that never arrives fails the enclosing test; it is never quiet.
 | `signal.spec.ts`     | carrying gain poll, 10 s two-cycle poll, result-values poll; many changes in one test                              | independent bound/period/undo cases; pending, trigger-cycle and queried-value signals                                                                                                                        |
 | `values.spec.ts`     | default 5 s cycle polls following Play; pending after edits                                                        | playback/pending helpers and completed cycle in trigger history                                                                                                                                              |
 
+The later rebase onto the merged editor polish also brings two browser files:
+
+- `silent-swap.spec.ts`: replace the 10 ms acknowledgement loop with the engine
+  subscription helper and the 300 ms sleep with a captured audio-clock window.
+  Each silent program has its own setup. Keep the original 3000 ms bounds for
+  initial, silent, and resumed acknowledgements, now as explicit measurements.
+- `shots.spec.ts`: its opt-in capture tests wait for the queried comparison
+  figures through the helper. The existing named 120 s capture limit and opt-in
+  conditions come from main; this change adds neither skips nor timeout raises.
+
 The engine transport's 5 ms interval samples `playing` during a swap. It is a
 measurement, not a readiness wait. PCM RMS waits for complete captured frames.
 
