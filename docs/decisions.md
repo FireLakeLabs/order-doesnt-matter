@@ -112,3 +112,17 @@ Keep each entry to a few lines.
 - **D33 (2026-11-12) The demo is a check.** Each phase's recorded demo asserts
   every step on a real piece and lists what it could not do. Phase 2's found
   that a section made separate kept stale copies of its instruments.
+- **D34 (2026-11-12) The sheet stays; the live views sit around it.** The score
+  sheet is always present and is where editing happens. A small Now panel beside
+  it draws the constellation; the spiral is a full-window Watch mode. The owner
+  chose this over three switchable views.
+- **D35 (2026-11-12) Live views read the score, not the audio.** Who is sounding
+  is derived from the events the app already holds and the playhead
+  (`src/live/model.ts`), checked against engine triggers on a real piece. No view
+  adds load to playback.
+- **D36 (2026-11-12) Unknown is not quiet.** Time nobody has asked about is drawn
+  as "not asked yet", never as empty; a looping arrangement's end is labelled as
+  an end that repeats.
+- **D37 (2026-11-12) The constellation always fits.** No zoom levels; planets
+  are sized to the box; settings and rewrites are not drawn on planets. With many
+  instruments, names and touch fall back to the list.
