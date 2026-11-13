@@ -233,3 +233,72 @@ footer {
 #sound-notice span {
   flex: 1;
 }
+
+.about-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+a {
+  color: var(--accent);
+}
+#about {
+  color: var(--accent);
+  background: none;
+  border: 0;
+  padding: 0 4px;
+  min-height: 30px;
+  text-decoration: underline;
+}
+.icon-link {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--button);
+  color: var(--text);
+}
+.icon-link:hover {
+  background: var(--hover);
+}
+.icon-link svg,
+.icon-link img {
+  display: block;
+  width: 17px;
+  height: 17px;
+}
+.about-dialog {
+  max-width: min(560px, calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  background: var(--panel);
+}
+.about-dialog::backdrop {
+  background: #000a;
+}
+.about-dialog small {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--muted);
+}
+.about-dialog form {
+  text-align: right;
+}
+@media (max-width: 600px) {
+  .about-links {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+  #about,
+  .icon-link {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}

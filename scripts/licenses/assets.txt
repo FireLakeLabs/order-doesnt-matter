@@ -1,0 +1,12 @@
+GitHub mark: Primer Octicons mark-github-16, v19.15.3 (MIT).
+https://github.com/primer/octicons/blob/v19.15.3/icons/mark-github-16.svg
+Unmodified path, displayed monochrome using currentColor.
+
+Strudel logo (AGPL-3.0-or-later), used to link to Strudel.
+https://codeberg.org/uzu/strudel/raw/commit/0cb6341299229f739b5090be93528bb4f170d855/website/public/logo.svg
+Commit: 0cb6341299229f739b5090be93528bb4f170d855
+Stored byte-for-byte as src/app/assets/strudel.svg.
+No separate logo terms were found in the upstream repository.
+
+@tonaljs/progression omits LICENSE in its npm tarball. MIT text from the parent Tonal distribution, @tonaljs/tonal@4.10.0:
+https://www.npmjs.com/package/@tonaljs/tonal/v/4.10.0

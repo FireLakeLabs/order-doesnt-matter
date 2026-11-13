@@ -7,6 +7,7 @@ import { examples } from './examples';
 import { sheetModel, mountSheet, setPlayhead, setCurrentSection } from '../sheet';
 import { liveModel, mountLivePanel, updateLivePanel } from '../live';
 import { createSpiral } from '../spiral';
+import { aboutControls, mountAbout } from './about';
 import './style.css';
 
 const app = createApp();
@@ -16,7 +17,7 @@ document.body.innerHTML = `
     <output id="tempo" aria-label="Tempo">Tempo —</output>
     <button id="undo" disabled>Undo</button><button id="redo" disabled>Redo</button>
     <button id="paste" aria-expanded="true" aria-controls="paste-panel">Paste Strudel</button>
-  </div><p id="solo-banner" hidden><span></span> <button id="stop-solo">Stop solo</button></p><p id="message" role="status"></p><div id="sound-notice" hidden><span role="status">Default sounds could not load. Check your connection, then press Play again.</span><button id="dismiss-sound-notice" aria-label="Dismiss sound notice">Dismiss</button></div></header>
+  ${aboutControls}</div><p id="solo-banner" hidden><span></span> <button id="stop-solo">Stop solo</button></p><p id="message" role="status"></p><div id="sound-notice" hidden><span role="status">Default sounds could not load. Check your connection, then press Play again.</span><button id="dismiss-sound-notice" aria-label="Dismiss sound notice">Dismiss</button></div></header>
   <main>
     <section id="paste-panel" aria-label="Paste Strudel">
       <label for="source">Your Strudel program</label>
@@ -28,6 +29,7 @@ document.body.innerHTML = `
     <div class="score-toolbar"><h2>The score</h2><button id="follow" aria-pressed="true">Follow</button><button id="watch" disabled>Watch</button><output id="window"></output></div>
     <div id="score-workspace"><div id="score"><p class="welcome">Paste a Strudel program or choose an original to see its score. Press Play when you're ready.</p></div><aside id="live" aria-label="Now" hidden></aside><aside id="editor" hidden></aside></div>
   </main><footer>Read the score. Follow the cycles.</footer>`;
+const aboutDialog = mountAbout();
 const get = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id)! as T;
 const source = get<HTMLTextAreaElement>('source'),
   score = get('score');
@@ -202,7 +204,7 @@ function openEditor(id: string, cell: HTMLElement) {
 get('undo').onclick = () => app.editor?.undo();
 get('redo').onclick = () => app.editor?.redo();
 document.addEventListener('keydown', (event) => {
-  if (watchDialog.open) return;
+  if (watchDialog.open || aboutDialog.open) return;
   if (event.key === 'Escape' && targetId) {
     event.preventDefault();
     closeEditor();
