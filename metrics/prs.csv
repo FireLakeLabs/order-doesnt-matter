@@ -43,3 +43,4 @@ pr,title,opened,merged,cycle_hours,authored_lines,review_rounds,rework_commits,n
 45,"Polish Watch notes, view controls and Now visibility; measure live sync",2026-11-12T19:16:13Z,2026-11-12T19:33:41Z,0.29,866,1,,26.374,60.967
 46,Fix rhythm removal and add speed and Euclid controls,2026-11-12T19:21:59Z,2026-11-12T19:41:54Z,0.33,878,1,,26.583,60.531
 47,"Finish Phase 4: live sync, instrument-aware pending and asserted demo",2026-11-12T20:40:16Z,2026-11-12T20:52:32Z,0.20,1932,1,,28.341,61.427
+50,Add Strudel licence notices and versioned source links,2026-11-13T15:20:58Z,,,327,0,0,29.395,62.187
