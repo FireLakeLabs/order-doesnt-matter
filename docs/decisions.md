@@ -142,3 +142,5 @@ Keep each entry to a few lines.
   small live previews that enlarge; panel visibility; a theme picker; 3D
   fly-through as a Watch style; whether Now follows playback or selection;
   a way from a planet into its settings.
+- **D43 (2026-11-12) Own code MIT; the hosted app meets Strudel's AGPL** by
+  public source and an in-app notice.
