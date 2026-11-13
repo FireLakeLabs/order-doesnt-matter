@@ -29,3 +29,6 @@ spikes/demos/out/
 *switch-angel*
 
 .browser-build-*/
+
+# Local data left by the transcription tool, now maintained in Ghost Notes.
+/tools/audio-to-midi/
