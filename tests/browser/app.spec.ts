@@ -4,6 +4,7 @@ import { expect } from '@playwright/test';
 import { playbackSafety } from './playback-safety';
 import { instruments, sections } from '../../src/document';
 import type {} from '../../src/app/main';
+import { deployedCommit } from '../../scripts/licenses';
 
 const offline = async (page: import('@playwright/test').Page) =>
   page.route(
@@ -16,6 +17,28 @@ test('page: original arrangement → rows → measured synth PCM → pinned sect
 }) => {
   await offline(page);
   await page.goto('/?inspect');
+  await expect(page.getByRole('link', { name: 'Source on GitHub', exact: true })).toHaveAttribute(
+    'href',
+    'https://github.com/FireLakeLabs/order-doesnt-matter',
+  );
+  await expect(page.getByRole('link', { name: 'Strudel', exact: true })).toHaveAttribute(
+    'href',
+    'https://strudel.cc',
+  );
+  await page.getByRole('button', { name: 'About', exact: true }).click();
+  const about = page.getByRole('dialog', { name: "About Order Doesn't Matter" });
+  await expect(about).toBeVisible();
+  await expect(about.getByRole('link', { name: 'Source for this version' })).toHaveAttribute(
+    'href',
+    `https://github.com/FireLakeLabs/order-doesnt-matter/tree/${deployedCommit() ?? 'main'}`,
+  );
+  const licences = await page.request.get('/licenses.txt');
+  expect(licences.ok()).toBe(true);
+  expect(await licences.text()).toContain('GNU AFFERO GENERAL PUBLIC LICENSE');
+  await page.keyboard.press('Escape');
+  await expect(about).toBeHidden();
+  await expect(page.getByRole('button', { name: 'About', exact: true })).toBeFocused();
+
   await page.getByRole('button', { name: 'Kiln', exact: true }).click();
   await scoreReady(page);
   await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();

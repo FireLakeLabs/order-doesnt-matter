@@ -73,9 +73,3 @@ nothing first.
 
 - Any change to AWS or DNS needs a fresh go-ahead from the owner; the original
   approval covered first setup only.
-- **Strudel licence notice (D43).** Our code is MIT, but the built app bundles
-  `@strudel/*` and `superdough` (AGPL-3.0-or-later) and serves them to every
-  visitor, which counts as distributing them. Add a visible line or About link
-  saying the app uses Strudel under AGPL-3.0-or-later, with a link to this
-  repository's source for the deployed commit. The public repository already
-  covers the source requirement.

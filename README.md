@@ -11,3 +11,10 @@ Status: Phase 1, the walking skeleton (paste Strudel, hear it, see the score she
 and song strip, edit a constant setting). Wave 0 provides the foundations; those
 flows follow in Wave 1. Production code lives in `src/`; `spikes/` is frozen
 reference and must not be imported. Start with [the model](docs/model.md).
+
+## Licence
+
+Our own source is [MIT licensed](LICENSE). The built app includes Strudel and
+other AGPL-3.0-or-later code, so the app as distributed is under AGPL terms.
+Open **About** for the source of the deployed version and the full licence texts
+and third-party notices, also served at `/licenses.txt`.
