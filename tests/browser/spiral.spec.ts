@@ -86,14 +86,31 @@ test.describe('Kiln Watch with shared setup', () => {
         }),
       ).toBe(true);
     }
-    const turn = Math.floor(observed.now);
-    expect(observed.marks.some((m) => m.turn === turn - 1 && m.opacity > 0 && m.opacity < 1)).toBe(
+    // At an engine-cycle boundary the latency-corrected view can still be in
+    // the preceding turn, while watchInput has already advanced its history.
+    // Capture fade assertions together, inside a turn, rather than racing it.
+    const fadeHandle = await page.waitForFunction(
+      () => {
+        const now = window.odmSpiral.cycle;
+        const fraction = now - Math.floor(now);
+        return fraction > 0.25 && fraction < 0.75
+          ? { now, marks: window.odmSpiral.marks.map(({ turn, opacity }) => ({ turn, opacity })) }
+          : null;
+      },
+      undefined,
+      { timeout: 0 },
+    );
+    const fade = await fadeHandle.jsonValue();
+    await fadeHandle.dispose();
+    if (!fade) throw new Error('No spiral frame captured');
+    const turn = Math.floor(fade.now);
+    expect(fade.marks.some((m) => m.turn === turn - 1 && m.opacity > 0 && m.opacity < 1)).toBe(
       true,
     );
     for (const ahead of [1, 2])
       expect(
-        observed.marks.filter((m) => m.turn === turn + ahead).every((m) => m.opacity >= 0.4) &&
-          observed.marks.some((m) => m.turn === turn + ahead),
+        fade.marks.filter((m) => m.turn === turn + ahead).every((m) => m.opacity >= 0.4) &&
+          fade.marks.some((m) => m.turn === turn + ahead),
       ).toBe(true);
     expect(
       await page.locator('#spiral canvas').evaluate((canvas: HTMLCanvasElement) => {

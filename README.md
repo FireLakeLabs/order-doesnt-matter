@@ -12,6 +12,13 @@ and song strip, edit a constant setting). Wave 0 provides the foundations; those
 flows follow in Wave 1. Production code lives in `src/`; `spikes/` is frozen
 reference and must not be imported. Start with [the model](docs/model.md).
 
+## Transcribing recordings
+
+The local transcription tool moved to
+[Ghost Notes](https://github.com/FireLakeLabs/ghost-notes/tree/main/tools/audio-to-midi).
+Its README covers installation, versioned song folders and the personal-use-only
+drum weights. Existing local output and Python environments remain yours.
+
 ## Licence
 
 Our own source is [MIT licensed](LICENSE). The built app includes Strudel and
