@@ -3,7 +3,6 @@ import { signal, openProgram, play, selectNode, waitForPending, triggerValues } 
 import { expect } from '@playwright/test';
 import { instruments } from '../../src/document';
 import { describeTarget } from '../../src/document/edit';
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 
 test('real house: instrument, rewrite, signal, section, rhythm and constant share one editor', async ({
   page,
