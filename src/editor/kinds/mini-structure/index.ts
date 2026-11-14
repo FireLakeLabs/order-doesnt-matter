@@ -122,7 +122,7 @@ export function miniStructure(context: () => EditorContext, base: MiniPath) {
     root.append(
       el(
         'p',
-        'Structural List · timing is shown by the queried strip. Arrows select parts; down enters, up leaves.',
+        'Parts · note timing is shown in the strip. Arrows move; down enters a group, up leaves.',
       ),
       tree,
       actions,
@@ -239,7 +239,7 @@ export function miniStructure(context: () => EditorContext, base: MiniPath) {
       actions.append(
         el(
           'p',
-          'Hits, out of and rotation are independent numeric subtrees. Negative hits leave positions empty before rotation.',
+          'Hits, out of and rotation can each change over time. Negative hits leave positions empty before rotation.',
         ),
       );
       if (!s.rotation)
@@ -295,7 +295,7 @@ export function miniStructure(context: () => EditorContext, base: MiniPath) {
         actions.append(row);
         if (typeof m.amount === 'object')
           row.append(
-            el('p', `Mark ${i + 1} · ${markNames[m.name]} · select its rate subtree above`),
+            el('p', `Mark ${i + 1} · ${markNames[m.name]} · select its rate in the list above`),
           );
         else
           field(

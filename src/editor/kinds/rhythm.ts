@@ -114,12 +114,12 @@ const description = (s: Step): string => {
                   : `${spread.hits} hits out of ${spread.outOf}`
                 : structuralMini(s)
                   ? s.kind === 'polymeter'
-                    ? 'different lane lengths · structural List'
+                    ? 'different lane lengths · List'
                     : s.kind === 'choose'
-                      ? 'time-addressed candidates · structural List'
+                      ? 'time-addressed candidates · List'
                       : s.kind === 'euclid'
-                        ? 'changing evenly spread hits · structural List'
-                        : 'ordered outer marks · structural List'
+                        ? 'changing evenly spread hits · List'
+                        : 'ordered outer marks · List'
                   : s.kind === 'other' && rhythmMarks(s)
                     ? `${description(rhythmMarks(s)!.base)} · ${rhythmMarks(s)!
                         .ops.map(
@@ -255,8 +255,7 @@ export default {
       while (selected.length > 1 && !rhythmStep(list, selected)) selected = selected.slice(0, -1);
       if (!rhythmStep(list, selected)) selected = [0];
       const width = structure.clientWidth || root.clientWidth;
-      const unresolved =
-        drawing().some((b) => !b.path.length) || list.some(structuralMini) || mini.size > 0;
+      const unresolved = drawing().some((b) => !b.path.length) || list.some(structuralMini);
       if (unresolved) view = 'List';
       if (!view) view = innerWidth < 900 ? 'List' : 'Boxes';
       const key = JSON.stringify([
@@ -430,7 +429,7 @@ export default {
         part(s, zoom, tree, z - a);
       } else list.forEach((s, i) => part(s, [i], tree, 1));
       const s = rhythmStep(list, selected)!;
-      if (structuralMini(s) || mini.has(selected.join('.'))) {
+      if (view === 'List' && (structuralMini(s) || mini.has(selected.join('.')))) {
         if (miniFocus)
           Array.from(root.querySelectorAll<HTMLElement>('[data-mini-key]'))
             .find((n) => n.dataset.miniKey === miniFocus)

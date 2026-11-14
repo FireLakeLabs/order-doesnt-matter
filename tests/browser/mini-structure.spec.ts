@@ -13,7 +13,6 @@ const source = readFileSync('corpus/programs/piece-kiln.strudel', 'utf8').replac
 );
 const pool = createNodeQueryPool(2);
 test.afterAll(() => pool.close());
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 const part = (page: Page, path: (string | number)[]) =>
   page.locator(`[data-mini-key='${JSON.stringify(path)}']`);
 async function open(page: Page) {
@@ -289,4 +288,25 @@ test('values reuse the structural List; unproven per-cycle and legacy forms keep
   await selectNode(page, { breadcrumb: ['Instrument 1', 'Rhythm'] });
   await expect(page.locator('.mini-structure')).toHaveCount(0);
   await expect(page.getByText('Edit chunk as source', { exact: true })).toBeVisible();
+});
+
+test('a structural choice replaced by an ordinary note restores Boxes and its value controls', async ({
+  page,
+}) => {
+  await openProgram(page, { source: 'note("[c4|d4]").s("sine")' });
+  await selectNode(page, { breadcrumb: ['Instrument 1', 'Rhythm'] });
+  const original = await page.evaluate(() => window.odmApp.state.doc);
+  await page.getByText('Edit selected part as text', { exact: true }).click();
+  await page.getByLabel('Part 1 mini source', { exact: true }).fill('c4');
+  await page.getByRole('button', { name: 'Save mini text', exact: true }).click();
+  await waitForPending(page);
+  const boxes = page.getByRole('button', { name: 'Boxes', exact: true });
+  await expect(boxes).toBeEnabled();
+  await boxes.click();
+  await expect(page.getByLabel('Note value', { exact: true })).toHaveValue('c4');
+  await page.getByRole('button', { name: 'Undo', exact: true }).click();
+  await waitForPending(page);
+  expect(await page.evaluate(() => window.odmApp.state.doc)).toEqual(original);
+  await expect(boxes).toBeDisabled();
+  await expect(page.locator('.mini-structure')).toContainText('No candidate has a fixed time slot');
 });
