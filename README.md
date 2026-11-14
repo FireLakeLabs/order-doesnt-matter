@@ -7,10 +7,11 @@ The name is the lesson that started it: in Strudel, `.lpf(800).gain(0.5)` and
 written, not sound passing through boxes. (Sometimes order does matter. The app
 shows you when.)
 
-Status: Phase 1, the walking skeleton (paste Strudel, hear it, see the score sheet
-and song strip, edit a constant setting). Wave 0 provides the foundations; those
-flows follow in Wave 1. Production code lives in `src/`; `spikes/` is frozen
-reference and must not be imported. Start with [the model](docs/model.md).
+Status: Phase 4 is built: score and section editing, undo/redo, the Now
+constellation and Watch spiral. An [interface design review](research/design-review/review.md)
+is proposing the next layout; its mockup does not change the app. Outstanding work
+is in [the backlog](docs/backlog.md). Production code lives in `src/`; `spikes/`
+is frozen reference and must not be imported. Start with [the model](docs/model.md).
 
 ## Transcribing recordings
 

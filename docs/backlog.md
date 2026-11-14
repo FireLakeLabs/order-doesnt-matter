@@ -11,6 +11,10 @@ An overall design review of the interface (D42). The owner's words: the design
 is "fine, but a little jumbled." Start it with a plan and mockups; build
 nothing first.
 
+The [2026-11-14 review and interactive mockup](../research/design-review/review.md)
+are proposals for that discussion. Layout, live context and retention choices
+remain open; implementation is a later wave.
+
 ## For the design review
 
 - **Live views as previews that enlarge.** Now and Watch start small and can be
@@ -27,12 +31,19 @@ nothing first.
 - **Planets are barely readable** at panel size, and the **room outline is too
   faint** on a busy piece despite a high measured contrast.
 - **Watch bands are plain**; short notes on a busy piece are thin.
-- **Long names are cut short** under planets and in the legend.
+- **Long names are cut short** under planets. The earlier Watch legend report
+  was not reproduced with 14 long names in the 2026-11-14 review.
 - **Many instruments on a phone** fall back to the list for touch.
+- **Now List focus return:** closing an editor opened from List focuses the
+  instrument's planet instead of the initiating List button.
 - Phase 0 notes never revisited: the system inset is small; a comment line was
   once used as a breadcrumb name; the "Add to" heading wording.
 
 ## Editors
+
+- **Keeping work:** no document save/export or reload recovery. The paste box
+  retains imported text after visual edits; loading it again replaces those edits
+  and their history. Retention and safe replacement need a design decision.
 
 - **Still edited as text:** polymeter, random choice, speed or evenly-spread
   values that are themselves patterns, repeated outer speed marks, negative
@@ -60,6 +71,10 @@ nothing first.
   aim; median about 1 ms). The owner saw no stutter.
 
 ## Tests and process
+
+- **Dependency maintenance:** review the development-tool advisories reported by
+  `npm audit` (Vite, Vitest and lint dependencies). The production-only audit on
+  2026-11-14 reported none. Updates belong in a separate checked change.
 
 - **CI browser time** is about 104 s of a 180 s limit and has reached 128 s
   under load. A requested 10 s saving was not found. Trim before adding more.
