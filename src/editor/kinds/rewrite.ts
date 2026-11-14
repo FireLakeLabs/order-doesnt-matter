@@ -1,12 +1,12 @@
 import type { EditorContext, EditorKind } from '../kind';
-import type { Arg, Doc, Layer } from '../../document';
-import { instruments, sections } from '../../document';
+import type { Arg, Doc, Layer, Pattern } from '../../document';
+import { findById, instruments, sections } from '../../document';
 import { generatePattern } from '../../generate';
 import { addRewrite, rewriteChoices } from '../../document/edits/rewrite-add';
 import { setRewriteArgument } from '../../document/edits/rewrite-argument';
 import { moveRewrite } from '../../document/edits/rewrite-move';
 import { removeRewrite } from '../../document/edits/rewrite-remove';
-import { rewriteOwner } from '../../document/edits/rewrite-shared';
+import { callbackBranches, callbackTrail, rewriteOwner } from '../../document/edits/rewrite-shared';
 import type { EventResult } from '../../contract';
 import { fieldLabel } from '../presentation';
 import './rewrite.css';
@@ -20,6 +20,10 @@ const descriptions: Record<string, string> = {
   off: 'Add a shifted copy of the score, changed by the callback.',
   every: 'Change the score with the callback every chosen number of cycles.',
   jux: 'Split the score left and right, changing one side with the callback.',
+  sometimes: 'Apply a time-addressed random change; querying the same time gives the same score.',
+  when: 'Apply the change where the predicate is true. The predicate stays as source.',
+  superimpose: 'Keep the original score and add the changed copy.',
+  layer: 'Combine independent callback branches in their stored order.',
   euclidRot: 'Distribute pulses across steps, then rotate their positions.',
 };
 const names: Record<string, string[]> = {
@@ -35,6 +39,9 @@ const names: Record<string, string[]> = {
   off: ['Shift in cycles', 'Changed copy'],
   every: ['Every how many cycles', 'Change'],
   jux: ['Change'],
+  sometimes: ['Change'],
+  when: ['Predicate', 'Change'],
+  superimpose: ['Added copy'],
 };
 function editable(arg: Arg): number | string | undefined {
   if (arg.kind === 'literal' && (typeof arg.value === 'number' || typeof arg.value === 'string'))
@@ -121,40 +128,84 @@ export default {
       gesture?: string,
     ) {
       error.textContent = 'ok' in next ? next.reason : '';
-      if (!('ok' in next)) context.apply(next, { selection, gesture });
+      if (!('ok' in next)) {
+        context.apply(next, { selection, gesture });
+        if (selection)
+          body.querySelector<HTMLElement>('input,button,textarea')?.focus({ preventScroll: true });
+      }
     }
     function render() {
       const active = document.activeElement as HTMLElement | null,
         focusKey = active?.dataset.rewriteKey;
       form.replaceChildren();
       const owner = rewriteOwner(context.doc, context.target.nodeId),
-        layer = owner?.layer;
+        layer = owner?.layer,
+        branch = callbackTrail(
+          context.doc,
+          owner?.pattern.id ?? context.target.nodeId.replace(/:rewrites$/, ''),
+        ).at(-1),
+        branchPattern = branch?.supported ? branch.body : undefined;
       const row = instruments(context.doc).find((r) => r.id === context.target.instrumentId);
       if (!row) {
         form.append(el('p', 'This instrument no longer exists.'));
         return;
       }
+      const listPattern = branchPattern ?? row.pattern;
 
+      if (branchPattern && branch) {
+        const scope = el('div'),
+          navigation = el('div');
+        scope.className = 'rewrite-branch';
+        navigation.className = 'editor-actions';
+        scope.append(
+          el('h3', `${branch.parent.name} · ${branch.role} · ${branch.parameter}`),
+          el(
+            'p',
+            'Only the changes inside this callback are edited here. Shared definitions change at every use.',
+          ),
+        );
+        navigation.append(
+          button(`Back to ${branch.parent.name}`, 'parent', () =>
+            apply(context.doc, branch.parent.id),
+          ),
+          button('Callback rewrites', 'branch', () =>
+            apply(context.doc, `${branch.body.id}:rewrites`),
+          ),
+        );
+        scope.append(navigation);
+        form.append(scope);
+      }
       if (layer) {
         form.append(el('p', descriptions[layer.name] ?? 'This rewrite changes the score.'));
         layer.args.forEach((arg, index) => {
           const name = names[layer.name]?.[index] ?? `Argument ${index + 1}`,
-            value = editable(arg);
+            value = layer.name === 'when' && index === 0 ? undefined : editable(arg);
           if (value === undefined) {
-            const source =
-              arg.kind === 'callback'
-                ? `Changes in order: ${
-                    arg.body.layers
-                      .filter((l) => l.kind === 'rewrite')
-                      .map((l) => l.name)
-                      .join(', ') || 'a nested pattern'
-                  }. Edited as source for now.`
-                : arg.kind === 'opaque'
+            const branch = callbackBranches(context.doc).find(
+              (b) => b.parent.id === layer.id && b.index === index,
+            );
+            if (branch?.supported) {
+              form.append(
+                button(`Open ${branch.role} · ${branch.parameter}`, `callback-${index}`, () =>
+                  apply(context.doc, `${branch.body.id}:rewrites`),
+                ),
+              );
+            } else {
+              const source =
+                arg.kind === 'opaque'
                   ? arg.code
                   : arg.kind === 'pattern'
                     ? generatePattern(arg.pattern)
-                    : JSON.stringify(arg.value);
-            form.append(el('p', `${name} · read-only`), el('pre', source));
+                    : arg.kind === 'callback'
+                      ? 'This callback shape is not supported by branch controls.'
+                      : JSON.stringify(arg.value);
+              form.append(el('p', `${name} · read-only`), el('pre', source));
+            }
+            form.append(
+              button(`Edit ${name} as source`, `source-${index}`, () =>
+                apply(context.doc, `${layer.id}:arg:${index}`),
+              ),
+            );
             return;
           }
           const field = el('input'),
@@ -229,7 +280,7 @@ export default {
         }
         actions.append(
           button('Remove rewrite', 'remove', () =>
-            apply(removeRewrite(context.doc, layer.id), `${row.pattern.id}:rewrites`),
+            apply(removeRewrite(context.doc, layer.id), `${listPattern.id}:rewrites`),
           ),
         );
         form.append(actions);
@@ -238,7 +289,22 @@ export default {
         const list = el('ol');
         list.setAttribute('aria-label', title);
         layers.forEach((l) => {
-          if (l.kind !== 'rewrite') return;
+          if (l.kind !== 'rewrite') {
+            if (branchPattern) {
+              const item = el(
+                'li',
+                l.kind === 'settings'
+                  ? `Settings retained · ${l.settings.map((s) => s.name).join(', ')}`
+                  : 'Source text · order barrier',
+              );
+              if (l.kind === 'opaque')
+                item.append(
+                  button('Edit retained source', l.id, () => apply(context.doc, `${l.id}:source`)),
+                );
+              list.append(item);
+            }
+            return;
+          }
           const item = el('li'),
             b = button(l.name, l.id, () => apply(context.doc, l.id));
           b.setAttribute('aria-label', `Edit ${l.name}`);
@@ -248,27 +314,28 @@ export default {
         });
         if (list.children.length) form.append(el('h4', title), list);
       }
-      ordered('Rewrites · in order', row.pattern.layers);
+      ordered(
+        branchPattern ? 'Callback rewrites · in order' : 'Rewrites · in order',
+        listPattern.layers,
+      );
       const seen = new Set<string>();
-      for (const use of row.uses) {
+      for (const use of branchPattern ? [] : row.uses) {
         const extra = use.layers.filter((l) => l.kind === 'rewrite' && !seen.has(l.id));
         extra.forEach((l) => seen.add(l.id));
         const section = sections(context.doc).find((s) => use.path.some((p) => p.id === s.id));
         ordered(`After instrument rewrites · ${section?.name ?? 'piece'}`, extra);
       }
-      if (owner && owner.pattern !== row.pattern && !seen.has(owner.layer.id))
+      if (!branchPattern && owner && owner.pattern !== row.pattern && !seen.has(owner.layer.id))
         ordered('Inside this argument, in order', owner.pattern.layers);
       if (!layer) {
         form.append(el('h3', 'Add rewrite'));
         for (const choice of rewriteChoices) {
           const b = button(`Add ${choice.name}`, `add-${choice.name}`, () => {
-            const next = addRewrite(context.doc, row.pattern.id, choice.name);
+            const next = addRewrite(context.doc, listPattern.id, choice.name);
             const id =
               'ok' in next
                 ? undefined
-                : instruments(next)
-                    .find((r) => r.id === row.id)!
-                    .pattern.layers.at(-1)!.id;
+                : (findById(next, listPattern.id) as Pattern).layers.at(-1)!.id;
             apply(next, id);
           });
           const label = el('div');
@@ -277,16 +344,25 @@ export default {
           form.append(label);
         }
       }
-      if (focusKey)
-        Array.from(form.querySelectorAll<HTMLElement>('[data-rewrite-key]'))
-          .find((n) => n.dataset.rewriteKey === focusKey)
-          ?.focus({ preventScroll: true });
+      if (focusKey) {
+        const previous = Array.from(form.querySelectorAll<HTMLElement>('[data-rewrite-key]')).find(
+          (n) => n.dataset.rewriteKey === focusKey,
+        );
+        const target = previous?.matches(':disabled')
+          ? form.querySelector<HTMLElement>('[aria-current]')
+          : previous;
+        target?.focus({ preventScroll: true });
+      }
     }
     function update(next: EditorContext) {
       context = next;
       const layer = rewriteOwner(next.doc, next.target.nodeId)?.layer;
       const row = instruments(next.doc).find((r) => r.id === next.target.instrumentId);
       const keyForForm = JSON.stringify([
+        next.target.nodeId,
+        callbackTrail(next.doc, layer?.id ?? next.target.nodeId.replace(/:rewrites$/, '')).map(
+          (b) => [b.body.id, b.body.layers.map((l) => l.id)],
+        ),
         row?.pattern.layers.map((l) => l.id),
         row?.uses.map((u) => u.layers.map((l) => l.id)),
         layer?.args.map((a) => [a.kind, typeof editable(a)]),
@@ -305,11 +381,13 @@ export default {
       }
       rendered = next.doc;
       if (!layer) {
+        ++request;
+        previewKey = '';
         previews.replaceChildren();
         return;
       }
       // Document and window key the preview, so status ticks cannot launch more workers.
-      const key = JSON.stringify([next.doc, next.window]);
+      const key = JSON.stringify([next.doc, next.window, layer.id]);
       if (key !== previewKey) {
         previewKey = key;
         const version = ++request;

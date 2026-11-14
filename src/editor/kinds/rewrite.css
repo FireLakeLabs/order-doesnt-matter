@@ -37,3 +37,13 @@
 .rewrite-editor figure:first-of-type rect {
   fill: var(--selection);
 }
+.rewrite-branch {
+  border-inline-start: 2px solid var(--selection);
+  padding-inline-start: 12px;
+  margin-bottom: 16px;
+}
+.rewrite-editor button {
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}

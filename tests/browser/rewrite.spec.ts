@@ -151,7 +151,7 @@ test('real ambient rewrite: preview, keyboard focus and phone', async ({ page })
   await expect(chip).toBeFocused();
 });
 
-test('pattern parsing refuses invalid text; callback/source stay read-only and slider drag undoes once', async ({
+test('pattern parsing refuses invalid text; callback navigation and slider drag undoes once', async ({
   page,
 }) => {
   await openProgram(page, {
@@ -168,7 +168,9 @@ test('pattern parsing refuses invalid text; callback/source stay read-only and s
   await field.press('Enter');
   await expect(chip).toContainText('<2 4>');
   await editor(page).getByRole('button', { name: 'Edit off', exact: true }).click();
-  await expect(editor(page)).toContainText('Edited as source for now');
+  await expect(
+    editor(page).getByRole('button', { name: 'Open Shifted copy · p', exact: true }),
+  ).toBeVisible();
   await expect(editor(page).getByRole('spinbutton')).toHaveCount(1);
   await editor(page).getByRole('button', { name: 'Edit degradeBy', exact: true }).click();
   const slider = editor(page).getByRole('slider');
