@@ -10,7 +10,6 @@ import {
 } from './helpers';
 import { expect, type Page } from '@playwright/test';
 import type {} from '../../src/app/main';
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 async function open(page: Page) {
   await page.route(
     (url) => url.protocol === 'https:',

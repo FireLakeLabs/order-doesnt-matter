@@ -1,8 +1,6 @@
 import { expect } from '@playwright/test';
 import { test, openProgram, play, waitForPending } from './helpers';
 
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
-
 test('Kiln: planet to cutoff, Undo, rhythm and rewrites retain exact origin and playback context', async ({
   page,
 }) => {

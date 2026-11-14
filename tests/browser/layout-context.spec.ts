@@ -1,8 +1,6 @@
 import { expect } from '@playwright/test';
 import { test, openProgram, sharedProgram, selectNode, play, waitForPending } from './helpers';
 
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
-
 test.describe('Kiln in-page workspace', () => {
   sharedProgram((page) => openProgram(page, { example: 'Kiln' }));
 
