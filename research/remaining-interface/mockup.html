@@ -1,0 +1,578 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Remaining interface · simulation</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --foreground: #e9f0ed;
+        --muted-foreground: #b5c4bf;
+        --card: #172421;
+        --secondary: #243731;
+        --border: #718c80;
+        --ring: #a8e2be;
+        --primary: #a8e2be;
+        --primary-foreground: #14231c;
+        --chart-1: #a8e2be;
+        --chart-2: #f0c98c;
+        --radius: 12px;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: transparent;
+      }
+      #proposal {
+        font: 14px/1.5 var(--font-sans, system-ui);
+        color: var(--foreground);
+        max-width: 1160px;
+        margin: auto;
+      }
+      #proposal * {
+        box-sizing: border-box;
+        min-width: 0;
+      }
+      #proposal[data-theme='paper'] {
+        --foreground: #212d46;
+        --muted-foreground: #495976;
+        --card: #fcf8ef;
+        --secondary: #ece4d5;
+        --border: #716c7e;
+        --ring: #4053b6;
+        --primary: #4053b6;
+        --primary-foreground: #fff;
+        --chart-1: #4053b6;
+        --chart-2: #92491b;
+      }
+      #proposal[data-theme='night'] {
+        --foreground: #eef1ff;
+        --muted-foreground: #bac5e0;
+        --card: #151b32;
+        --secondary: #26304f;
+        --border: #7c8cb5;
+        --ring: #c3b8ff;
+        --primary: #c3b8ff;
+        --primary-foreground: #201939;
+        --chart-1: #c3b8ff;
+        --chart-2: #81d5ed;
+      }
+      #proposal button,
+      #proposal input,
+      #proposal select,
+      #proposal textarea,
+      #proposal summary {
+        font: inherit;
+        min-height: 44px;
+      }
+      #proposal button,
+      #proposal input,
+      #proposal select,
+      #proposal textarea {
+        color: inherit;
+        background: var(--secondary);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        padding: 8px 10px;
+        max-width: 100%;
+      }
+      #proposal button,
+      #proposal summary {
+        cursor: pointer;
+      }
+      #proposal button[aria-pressed='true'] {
+        background: var(--primary);
+        color: var(--primary-foreground);
+      }
+      #proposal button:disabled {
+        opacity: 0.55;
+        cursor: default;
+      }
+      #proposal :focus-visible {
+        outline: 3px solid var(--ring);
+        outline-offset: 2px;
+      }
+      #proposal h1,
+      #proposal h2,
+      #proposal h3,
+      #proposal p {
+        margin: 0 0 8px;
+      }
+      #proposal h1 {
+        font-size: 20px;
+      }
+      #proposal h2 {
+        font-size: 17px;
+      }
+      #proposal h3 {
+        font-size: 14px;
+      }
+      #proposal small,
+      #proposal .quiet {
+        color: var(--muted-foreground);
+      }
+      #proposal .tools {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin: 8px 0 12px;
+      }
+      #proposal label {
+        display: grid;
+        gap: 4px;
+      }
+      #proposal .shell {
+        container: study / inline-size;
+      }
+      #proposal[data-phone='true'] .shell {
+        max-width: 390px;
+        margin: auto;
+      }
+      #proposal .panel {
+        background: var(--card);
+        padding: 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin-bottom: 12px;
+      }
+      #proposal .workspace {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 12px;
+      }
+      #proposal .heading {
+        display: flex;
+        gap: 8px;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+      #proposal .list {
+        display: grid;
+        gap: 4px;
+      }
+      #proposal .instrument {
+        display: block;
+        text-align: left;
+        width: 100%;
+        overflow-wrap: anywhere;
+      }
+      #proposal .instrument small {
+        display: block;
+        color: inherit;
+      }
+      #proposal .room-key {
+        border-left: 3px solid var(--chart-1);
+        padding: 5px 10px;
+        margin: 6px 0;
+      }
+      #proposal .room-key.second {
+        border-left: 3px dashed var(--chart-2);
+      }
+      #proposal .drawing {
+        position: relative;
+        height: 184px;
+      }
+      #proposal svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+      #proposal .planet {
+        position: absolute;
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        padding: 0;
+        background: var(--secondary);
+      }
+      #proposal .planet small {
+        color: inherit;
+      }
+      #proposal .enlarged .drawing {
+        height: 290px;
+      }
+      #proposal .watch-stage {
+        height: 190px;
+      }
+      #proposal .enlarged .watch-stage {
+        height: 360px;
+      }
+      #proposal .preview.enlarged {
+        grid-column: 1 / -1;
+      }
+      #proposal .score-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 8px;
+        border-top: 1px solid var(--border);
+        padding: 8px 0;
+      }
+      #proposal .score-row span {
+        overflow-wrap: anywhere;
+      }
+      #proposal .watch-legend {
+        columns: 2;
+        padding-left: 22px;
+        overflow-wrap: anywhere;
+      }
+      #proposal .editor {
+        scroll-margin-top: 12px;
+      }
+      #proposal .editor h2,
+      #proposal pre {
+        overflow-wrap: anywhere;
+        white-space: pre-wrap;
+      }
+      #proposal .editor input {
+        width: 180px;
+      }
+      #proposal textarea {
+        width: 100%;
+        min-height: 110px;
+      }
+      #proposal .branch {
+        border-left: 2px solid var(--chart-1);
+        padding: 8px 12px;
+        margin: 10px 0;
+      }
+      #proposal .note-strip {
+        height: 48px;
+        color: var(--chart-1);
+      }
+      #proposal [hidden] {
+        display: none !important;
+      }
+      @container study (max-width:650px) {
+        #proposal .workspace {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        #proposal .panel {
+          padding: 12px;
+        }
+        #proposal .planet {
+          display: none;
+        }
+        #proposal .watch-legend {
+          columns: 1;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        #proposal * {
+          animation: none !important;
+          transition: none !important;
+          scroll-behavior: auto !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main id="proposal" data-theme="fern">
+      <p class="quiet">
+        Interactive proposal · every note, edit and playback state is simulated. No audio, storage
+        or engine.
+      </p>
+      <div class="tools">
+        <button id="phone" aria-pressed="false">390px layout</button
+        ><label
+          >Palette<select id="theme">
+            <option value="fern">Fern · proposed default</option>
+            <option value="paper">Paper · warm light</option>
+            <option value="night">Night · violet / ice</option>
+          </select></label
+        ><small>Palette preference is an owner choice.</small>
+      </div>
+      <div class="shell">
+        <header class="panel">
+          <h1>Kiln study · original illustrative data</h1>
+          <div class="tools">
+            <button id="play" aria-pressed="false">Simulate Play</button
+            ><span id="playing">Playback stopped · previews paused</span>
+          </div>
+          <p>Editing: Build · cycles 4–12 (pinned)</p>
+        </header>
+        <section class="panel" aria-label="Score">
+          <h2>Score · Build</h2>
+          <div id="score"></div>
+          <small>Remaining rows omitted here; all 14 names are available in Now's List.</small>
+        </section>
+        <div class="workspace">
+          <section id="now" class="panel preview" aria-label="Now">
+            <div class="heading">
+              <h2>Now · playback context</h2>
+              <button data-expand="now" aria-expanded="false">Enlarge Now</button>
+            </div>
+            <p class="quiet">Room memberships in the playback window · not a signal path</p>
+            <div class="drawing" id="planets"></div>
+            <div class="room-key">Room 1 · shared reverb · solid outline</div>
+            <div class="room-key second">
+              Room 2 · shared delay · dashed outline · settings differ; outcome unpredictable
+            </div>
+            <details id="list" open>
+              <summary>List · 14 instruments · full names</summary>
+              <div class="list" id="names"></div>
+              <details>
+                <summary>10 more instruments</summary>
+                <div class="list" id="more-names"></div>
+              </details>
+            </details>
+            <small
+              >On dense phones, use List. Numbers identify the same instrument in the drawing and
+              Watch legend. Membership is sampled, not permanent.</small
+            >
+          </section>
+          <section id="watch" class="panel preview" aria-label="Watch">
+            <div class="heading">
+              <h2>Watch</h2>
+              <button data-expand="watch" aria-expanded="false">Enlarge Watch</button>
+            </div>
+            <div class="tools">
+              <label
+                >Watch style<select id="style">
+                  <option value="ring">Ring · default</option>
+                  <option value="flight">Fly-through · optional study</option>
+                </select></label
+              ><label><input id="reduce" type="checkbox" /> Simulate reduced motion</label>
+            </div>
+            <div class="watch-stage" id="watch-art"></div>
+            <p id="motion" class="quiet"></p>
+            <p class="quiet">
+              Bright head = exact onset. Body = scored duration. No minimum time length. Dense bins
+              must stay labeled.
+            </p>
+            <details>
+              <summary>Watch legend · full names</summary>
+              <ol class="watch-legend" id="legend"></ol>
+            </details>
+          </section>
+        </div>
+        <section class="panel editor" id="editor" hidden aria-label="Single editor"></section>
+        <details class="panel">
+          <summary>Setup and selected context · proposed scope</summary>
+          <p>Setup remains source-editable. A comment is not a useful setup name.</p>
+          <p>
+            Selected context uses existing section use, sound state, setting/rewrite counts and
+            queried room memberships. No separate system inset or processing diagram.
+          </p>
+        </details>
+        <p class="panel" id="notice" role="status">
+          Choose a planet (desktop) or a full-name List entry, then Settings, Rhythm or Rewrites.
+          Escape / Done returns to that exact origin.
+        </p>
+      </div>
+    </main>
+    <script>
+      (() => {
+        const $ = (id) => document.getElementById(id),
+          root = $('proposal');
+        const names = [
+          'Bass · warm triangle with slowly opening cutoff',
+          'Pad · long evening chords and bright reflections',
+          'Hats · scattered metallic accents along the kiln wall',
+          'Lead · small sparks above the cooling chamber',
+          ...Array.from(
+            { length: 10 },
+            (_, i) =>
+              `Percussion ${i + 5} · ${i === 9 ? 'UnbrokenInstrumentNameForNarrowScreenInspection' : 'handmade ceramic accents and irregular shadows'}`,
+          ),
+        ];
+        const rooms = (i) => (i === 0 ? 'Rooms 1 + 2' : i < 7 ? 'Room 1' : 'Room 2');
+        let row = 0,
+          origin = null,
+          active = false,
+          kind = 'Instrument',
+          playing = false,
+          rate = 2,
+          pitch = 'a2',
+          cutoff = 700,
+          swapped = false,
+          muted = false;
+        const notice = (text) => ($('notice').textContent = text);
+        const entry = (i, place) =>
+          `<button class="instrument" id="${place}-${i}" data-row="${i}" aria-controls="editor">${i + 1}. ${names[i]}<small>${rooms(i)} · ${i === 0 ? 'two memberships' : i === 2 ? 'muted' : 'ready'}</small></button>`;
+        $('names').innerHTML = names
+          .slice(0, 4)
+          .map((_, i) => entry(i, 'list'))
+          .join('');
+        $('more-names').innerHTML = names
+          .slice(4)
+          .map((_, i) => entry(i + 4, 'list'))
+          .join('');
+        $('score').innerHTML = names
+          .slice(0, 3)
+          .map(
+            (n, i) =>
+              `<div class="score-row"><span>${n}</span><button data-row="${i}" id="score-${i}">Instrument</button></div>`,
+          )
+          .join('');
+        $('legend').innerHTML = names.map((n) => `<li>${n}</li>`).join('');
+        $('planets').innerHTML =
+          `<svg preserveAspectRatio="none" viewBox="0 0 420 180" role="img" aria-label="Illustrative rooms overlap at instrument 1; 14 numbered instruments"><rect x="5" y="5" width="405" height="78" rx="30" fill="none" stroke="var(--chart-1)" stroke-width="2.5"/><path d="M5 14 H55 V95 H410 V174 H5 Z" fill="none" stroke="var(--chart-2)" stroke-width="2.5" stroke-dasharray="7 5"/>${names.map((_, i) => `<circle cx="${30 + (i % 7) * 59}" cy="${42 + Math.floor(i / 7) * 85}" r="17" fill="var(--secondary)" stroke="var(--foreground)"/><text x="${30 + (i % 7) * 59}" y="${47 + Math.floor(i / 7) * 85}" fill="var(--foreground)" text-anchor="middle" font-size="13">${i + 1}</text>`).join('')}</svg>${names.map((n, i) => `<button class="planet" data-row="${i}" id="planet-${i}" style="left:calc(${(30 + (i % 7) * 59) / 4.2}% - 22px);top:calc(${(42 + Math.floor(i / 7) * 85) / 1.8}% - 22px)" aria-label="${n}, ${rooms(i)}">${i + 1}</button>`).join('')}`;
+        function watch() {
+          const reduced =
+              $('reduce').checked || matchMedia('(prefers-reduced-motion: reduce)').matches,
+            flight = $('style').value === 'flight';
+          $('motion').textContent = flight
+            ? reduced
+              ? 'Reduced motion: stationary depth diagram; no camera travel.'
+              : 'Optional depth study: frozen frame here; production camera would travel only during playback.'
+            : 'Ring stays default. Reduced motion keeps the field still and moves only the time gate.';
+          const marks = Array.from({ length: 14 }, (_, i) => {
+            const r = 26 + i * 5,
+              a = i * 0.72 - 1.57,
+              b = a + (i % 3 === 0 ? 0.018 : 0.36),
+              x = 160 + Math.cos(a) * r,
+              y = 130 + Math.sin(a) * r;
+            return `<path d="M${x} ${y} A${r} ${r} 0 0 1 ${160 + Math.cos(b) * r} ${130 + Math.sin(b) * r}" fill="none" stroke="var(--chart-${(i % 2) + 1})" stroke-width="3"/><path d="M${160 + Math.cos(a) * (r - 3)} ${130 + Math.sin(a) * (r - 3)}L${160 + Math.cos(a) * (r + 3)} ${130 + Math.sin(a) * (r + 3)}" stroke="var(--foreground)" stroke-width="1.5"/>`;
+          }).join('');
+          $('watch-art').innerHTML =
+            `<svg viewBox="0 0 320 260" role="img" aria-label="${flight ? 'Stationary perspective study' : 'Ring study with short scored spans and onset heads'}"><g ${flight ? 'transform="translate(0 58) scale(1 .55)"' : ''}>${[40, 70, 100].map((r) => `<circle cx="160" cy="130" r="${r}" fill="none" stroke="var(--border)" stroke-dasharray="2 6"/>`).join('')}${marks}</g><path d="M160 14V106" stroke="var(--foreground)" stroke-width="2"/><text x="170" y="22" fill="var(--foreground)" font-size="13">now</text></svg>`;
+        }
+        function close() {
+          active = false;
+          $('editor').hidden = true;
+          document.querySelectorAll('[data-row]').forEach((b) => (b.disabled = false));
+          origin?.focus();
+        }
+        function show(next) {
+          kind = next;
+          const e = $('editor');
+          e.hidden = false;
+          const button = (label, view) => `<button data-view="${view}">${label}</button>`;
+          const content =
+            kind === 'Instrument'
+              ? `<p>${rooms(row)} · ready · 4 sections · 6 settings · 2 rewrites</p><p class="quiet">Context summarizes the document and queried window; it is not a voice-processing inset.</p><div class="tools">${button('Settings', 'Settings')}${button('Rhythm', 'Rhythm')}${button('Rewrites', 'Rewrites')}${row === 0 ? button('Delete instrument…', 'Delete') : ''}</div>`
+              : kind === 'Settings'
+                ? `<p>Only settings in use · shared definition unless marked section-local</p><div class="tools"><label>Cutoff · Hz<input id="cutoff" type="number" value="${cutoff}"></label><button id="apply-cutoff">Apply setting</button></div>`
+                : kind === 'Rhythm'
+                  ? `<p>Advanced form · different lane lengths</p><pre>{fs2 ${pitch} cs3, e3 ~}%4</pre><p class="quiet">Structural List, not equal-time boxes. Illustrative notes below are not a query result.</p><div class="branch"><h3>Lane 1 · 3 parts</h3><label>Second part<input id="pitch" value="${pitch}"></label><button id="apply-pitch">Apply part</button></div><p>Lane 2 · e3, rest · 2 parts</p><div class="note-strip"><svg viewBox="0 0 320 48" role="img" aria-label="Illustrative unequal spans, not fixed steps"><path d="M0 12H38 M78 12H105 M176 30H248 M274 12H316" stroke="currentColor" stroke-width="6"/></svg></div>`
+                  : kind === 'Rewrites'
+                    ? `<p>Every 3 cycles · changed branch only</p><pre>.every(3, p =&gt; p.${swapped ? 'fast(' + rate + ').rev()' : 'rev().fast(' + rate + ')'})</pre><div class="branch"><h3>Callback · changes in order</h3><ol>${(swapped ? ['Faster ×' + rate, 'Reverse'] : ['Reverse', 'Faster ×' + rate]).map((x) => `<li>${x}</li>`).join('')}</ol><div class="tools"><label>Time factor<input id="rate" type="number" min="0.1" step="0.1" value="${rate}"></label><button id="apply-rate">Apply factor</button><button id="move">Move last rewrite earlier</button></div></div><p class="quiet">Only this callback changes. This example can coincide in one window; order is still retained. No claim of arbitrary callback support.</p>`
+                    : kind === 'Delete'
+                      ? `<h3>Deletion blocked · ${names[row]}</h3><p>Pad uses this shared pattern as its cutoff driver. Removing it would change Pad. The document stays intact.</p><div class="tools">${button('Go to Pad’s dependent setting', 'Dependency')}<button id="mute">${muted ? 'Muted everywhere (simulated)' : 'Mute everywhere instead'}</button>${button('Inspect shared source', 'Source')}${button('Keep instrument', 'Instrument')}</div><p class="quiet">Unknown shared rewrites also block deletion. No force-delete action. A safe delete would still confirm all uses and remain one undo step.</p>`
+                      : kind === 'Dependency'
+                        ? `<h3>Pad › Cutoff › shared Bass driver</h3><p>Inspect the dependency before changing it. Navigation alone does not detach it.</p>${button('Inspect shared source', 'Source')}${button('Back to deletion explanation', 'Delete')}`
+                        : `<p>Shared source · inspect / edit with the existing source workflow</p><textarea aria-label="Source text">${kind === 'Source' ? "const bass = note('fs2 a2 cs3').s('triangle');" : ''}</textarea><button data-sim="Source Apply is simulated. Production must reimport, query and retain opaque code on unproven promotion.">Simulate Apply source</button>`;
+          e.innerHTML = `<div class="heading"><h2 id="crumb">${kind === 'Dependency' ? names[1] + ' › Cutoff › shared Bass driver' : names[row] + ' › ' + kind}</h2><button id="done">Done</button></div><div class="tools">${kind === 'Instrument' ? '' : button('Instrument', 'Instrument')}${button('Edit as source', 'Source')}</div>${content}`;
+          e.querySelectorAll('[data-view]').forEach(
+            (b) => (b.onclick = () => show(b.dataset.view)),
+          );
+          $('done').onclick = close;
+          if ($('apply-pitch'))
+            $('apply-pitch').onclick = () => {
+              const value = $('pitch').value.trim();
+              if (!/^[a-g][sfb]?-?\d$/.test(value)) {
+                notice('Use one illustrative note such as b2; previous part kept.');
+                return;
+              }
+              pitch = value;
+              show('Rhythm');
+              $('pitch').focus();
+              notice('Simulated part applied; note strip stays illustrative, not queried.');
+            };
+          if ($('apply-cutoff'))
+            $('apply-cutoff').onclick = () => {
+              const value = Number($('cutoff').value);
+              if (!Number.isFinite(value) || value <= 0) {
+                notice('Use a positive finite cutoff; previous value kept.');
+                return;
+              }
+              cutoff = value;
+              show('Settings');
+              $('cutoff').focus();
+              notice(
+                'Simulated cutoff applied. Production must preserve pending / commit / Undo semantics.',
+              );
+            };
+          if ($('move'))
+            $('move').onclick = () => {
+              swapped = !swapped;
+              show('Rewrites');
+              $('move').focus();
+              notice(
+                'Simulated callback reorder. Branch order is explicit; no processing path implied.',
+              );
+            };
+          if ($('apply-rate'))
+            $('apply-rate').onclick = () => {
+              const n = Number($('rate').value);
+              if (!Number.isFinite(n) || n <= 0) {
+                notice('Use a positive finite factor; previous value kept.');
+                return;
+              }
+              rate = n;
+              show('Rewrites');
+              $('rate').focus();
+              notice('Simulated branch argument edit.');
+            };
+          if ($('mute'))
+            $('mute').onclick = () => {
+              muted = !muted;
+              show('Delete');
+              $('mute').focus();
+              notice('Simulated mute; instrument and dependency retained.');
+            };
+          e.querySelector('button').focus({ preventScroll: true });
+          e.scrollIntoView({ block: 'nearest' });
+        }
+        root.addEventListener('click', (e) => {
+          const b = e.target.closest('button');
+          if (!b || b.disabled) return;
+          if (b.hasAttribute('data-row')) {
+            row = Number(b.dataset.row);
+            origin = b;
+            active = true;
+            document.querySelectorAll('[data-row]').forEach((n) => (n.disabled = true));
+            show('Instrument');
+          }
+          if (b.dataset.sim) notice(b.dataset.sim);
+          if (b.dataset.expand) {
+            const p = $(b.dataset.expand),
+              expanded = p.classList.toggle('enlarged');
+            b.textContent = expanded
+              ? 'Return to previews'
+              : `Enlarge ${b.dataset.expand === 'now' ? 'Now' : 'Watch'}`;
+            b.setAttribute('aria-expanded', String(expanded));
+            b.focus();
+          }
+        });
+        root.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            if (active && $('editor').contains(document.activeElement)) {
+              e.preventDefault();
+              close();
+            } else {
+              const p = document.activeElement.closest?.('.enlarged');
+              if (p) {
+                e.preventDefault();
+                p.querySelector('[data-expand]').click();
+              } else if (active) {
+                e.preventDefault();
+                close();
+              }
+            }
+          }
+        });
+        $('phone').onclick = () => {
+          const phone = root.dataset.phone !== 'true';
+          root.dataset.phone = String(phone);
+          $('phone').setAttribute('aria-pressed', String(phone));
+        };
+        $('theme').onchange = () => (root.dataset.theme = $('theme').value);
+        $('play').onclick = () => {
+          playing = !playing;
+          $('play').setAttribute('aria-pressed', String(playing));
+          $('playing').textContent = playing
+            ? 'Playing Intro · cycle 2 (simulated)'
+            : 'Playback stopped · previews paused';
+          notice('Simulated transport; editing remains pinned to Build.');
+        };
+        $('style').onchange = $('reduce').onchange = watch;
+        watch();
+      })();
+    </script>
+  </body>
+</html>
