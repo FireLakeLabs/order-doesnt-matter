@@ -86,12 +86,12 @@ try {
   const result = timingResult(start, performance.now(), limit);
   const message = `Browser suite: ${result.seconds.toFixed(3)} s / ${limit} s — ${result.ok ? 'within budget' : 'OVER BUDGET'}`;
   if (rows) {
-    const summary = browserSummary(rows, result.seconds);
+    const summary = browserSummary(rows, result.seconds, mode);
     const report = formatBrowserSummary(summary);
     console.log(report);
     if (process.env.GITHUB_STEP_SUMMARY)
       appendFileSync(process.env.GITHUB_STEP_SUMMARY, `\n\`\`\`text\n${report}\n\`\`\`\n`);
-    if (mode === 'ci' && !summary.ok) process.exitCode = 1;
+    if (!summary.ok) process.exitCode = 1;
   }
   console.log(message);
   if (process.env.GITHUB_STEP_SUMMARY)

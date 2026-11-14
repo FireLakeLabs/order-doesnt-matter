@@ -90,13 +90,18 @@ export async function scoreReady(page: Page) {
 }
 export async function swap(page: Page, action: () => Promise<unknown>) {
   return test.step('ODM:swap', async () => {
-    const before = await page.evaluate(
-      () => window.odmApp.history.filter((e) => e.type === 'swapped').length,
+    const before = await page.evaluate(() =>
+      Math.max(
+        0,
+        ...window.odmApp.history.filter((e) => e.type === 'swapped').map((e) => e.revision),
+      ),
     );
     await action();
     await appSignal(
       page,
-      (count) => window.odmApp.history.filter((e) => e.type === 'swapped').length > count,
+      // History is capped: an older swap can disappear while this one arrives.
+      (revision) =>
+        window.odmApp.history.some((e) => e.type === 'swapped' && e.revision > revision),
       before,
     );
   });
