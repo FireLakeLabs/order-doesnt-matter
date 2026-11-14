@@ -19,6 +19,7 @@ import { wrapRhythm } from '../../document/edits/rhythm-wrap';
 import { replaceRhythmChunk } from '../../document/edits/rhythm-chunk';
 import { printSteps } from '../../import/mini';
 import { fieldLabel } from '../presentation';
+import { miniStructure, structuralMini } from './mini-structure';
 import './rhythm.css';
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text = '') => {
   const node = document.createElement(tag);
@@ -111,14 +112,22 @@ const description = (s: Step): string => {
                 ? spread.hits < 0
                   ? `leave ${-spread.hits} of ${spread.outOf} positions empty`
                   : `${spread.hits} hits out of ${spread.outOf}`
-                : s.kind === 'other' && rhythmMarks(s)
-                  ? `${description(rhythmMarks(s)!.base)} · ${rhythmMarks(s)!
-                      .ops.map(
-                        (op) =>
-                          `${{ repeat: 'repeat ×', faster: 'faster ×', slower: 'slower ÷', weight: 'length ' }[op.name]}${op.name === 'weight' ? rhythmMarks(s)!.weight : op.amount}`,
-                      )
-                      .join(' · ')}`
-                  : 'source chunk';
+                : structuralMini(s)
+                  ? s.kind === 'polymeter'
+                    ? 'different lane lengths · structural List'
+                    : s.kind === 'choose'
+                      ? 'time-addressed candidates · structural List'
+                      : s.kind === 'euclid'
+                        ? 'changing evenly spread hits · structural List'
+                        : 'ordered outer marks · structural List'
+                  : s.kind === 'other' && rhythmMarks(s)
+                    ? `${description(rhythmMarks(s)!.base)} · ${rhythmMarks(s)!
+                        .ops.map(
+                          (op) =>
+                            `${{ repeat: 'repeat ×', faster: 'faster ×', slower: 'slower ÷', weight: 'length ' }[op.name]}${op.name === 'weight' ? rhythmMarks(s)!.weight : op.amount}`,
+                        )
+                        .join(' · ')}`
+                    : 'source chunk';
   const weight = 'weight' in s ? s.weight : undefined;
   return [
     name,
@@ -154,6 +163,7 @@ export default {
     error.className = 'editor-error';
     root.append(controls, structure, actions, error);
     body.append(root);
+    const mini = new Map<string, ReturnType<typeof miniStructure>>();
     const pointer = matchMedia('(pointer: coarse)');
     const steps = () => {
       const c = sequenceOwner(context.doc, context.target.nodeId)?.core;
@@ -245,7 +255,8 @@ export default {
       while (selected.length > 1 && !rhythmStep(list, selected)) selected = selected.slice(0, -1);
       if (!rhythmStep(list, selected)) selected = [0];
       const width = structure.clientWidth || root.clientWidth;
-      const unresolved = drawing().some((b) => !b.path.length);
+      const unresolved =
+        drawing().some((b) => !b.path.length) || list.some(structuralMini) || mini.size > 0;
       if (unresolved) view = 'List';
       if (!view) view = innerWidth < 900 ? 'List' : 'Boxes';
       const key = JSON.stringify([
@@ -259,6 +270,7 @@ export default {
       if (key === rendered) return;
       rendered = key;
       const focus = (document.activeElement as HTMLElement)?.dataset.rhythmKey;
+      const miniFocus = (document.activeElement as HTMLElement)?.dataset.miniKey;
       const marksOpen = root.querySelector<HTMLDetailsElement>('.rhythm-marks')?.open;
       controls.replaceChildren();
       for (const label of ['Boxes', 'List']) {
@@ -360,6 +372,21 @@ export default {
             select(moveSelection(list, path, e.key), true);
           }
         };
+        if (view === 'List' && (structuralMini(s) || mini.has(path.join('.')))) {
+          if (!same(selected, path)) return;
+          const id = path.join('.');
+          let editor = mini.get(id);
+          if (!editor) {
+            editor = miniStructure(
+              () => context,
+              path.flatMap((n, i) => (i ? ['steps', n] : [n])),
+            );
+            mini.set(id, editor);
+          }
+          item.append(editor.root);
+          editor.update();
+          return;
+        }
         const pulses = boxes.find((box) => same(box.path, path))?.pulses;
         if (pulses) {
           const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -403,6 +430,13 @@ export default {
         part(s, zoom, tree, z - a);
       } else list.forEach((s, i) => part(s, [i], tree, 1));
       const s = rhythmStep(list, selected)!;
+      if (structuralMini(s) || mini.has(selected.join('.'))) {
+        if (miniFocus)
+          Array.from(root.querySelectorAll<HTMLElement>('[data-mini-key]'))
+            .find((n) => n.dataset.miniKey === miniFocus)
+            ?.focus({ preventScroll: true });
+        return;
+      }
       actions.append(el('h3', `Selected · ${partName(selected)}`));
       const numeric = (
         parent: HTMLElement,
