@@ -73,6 +73,9 @@ test('phone entry 14: settings navigation and enlarged Now preserve the full-nam
   await page.locator('.live-panel > summary').click();
   const list = page.locator('.live-list-disclosure');
   if (!(await list.evaluate((n) => n.hasAttribute('open')))) await list.locator('summary').click();
+  const more = page.locator('.live-list-more');
+  if ((await more.isVisible()) && (await more.getAttribute('aria-expanded')) === 'false')
+    await more.press('Enter');
   const origin = page.locator('[data-list-id]').nth(13);
   await expect(origin).toBeVisible();
   const held = await origin.evaluateHandle((n) => ({ origin: n, doc: window.odmApp.state.doc }));
