@@ -14,6 +14,12 @@ import {
 import type {} from '../../src/app/main';
 
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
+test.beforeEach(() => {
+  test.info().annotations.push({
+    type: 'recording-budget',
+    description: 'Optional demo viewing and capture, outside the acceptance gate',
+  });
+});
 test('Phase 2: ten editors, one silent video', async ({ browser, request }) => {
   test.skip(process.env.ODM_BROWSER_MODE !== 'demo', 'Opt-in only: npm run demo');
   test.skip(!!process.env.CI, 'Local music and uncommitted recordings only');

@@ -1,10 +1,18 @@
 import { test } from './helpers';
 import { installEngineSignals, signal } from './helpers';
 import { expect } from '@playwright/test';
+import { playbackSafety } from './playback-safety';
 import type { EngineEvent } from '../../src/contract';
 import type {} from '../../src/engine/harness';
 
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
+// The multi-page, throttled audio-clock proof belongs with the serialized audio
+// checks, rather than competing with three UI workers and a paste-timeout test.
+test('scheduler preflight retains Kiln, rejects a runaway and caps flooded notes', async ({
+  context,
+}) => {
+  await playbackSafety(context);
+});
 // Trusted click plus autoplay flag: Chromium runs a real advancing headless audio clock.
 test('engine: synth PCM, live revisions, rejected edit and Stop', async ({ page }) => {
   const defaults: string[] = [];

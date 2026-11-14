@@ -1,5 +1,5 @@
 import { test } from './helpers';
-import { signal, openProgram, play, selectNode, waitForPending } from './helpers';
+import { signal, openProgram, play, selectNode, waitForPending, sharedProgram } from './helpers';
 import { expect, type Page } from '@playwright/test';
 import { instruments } from '../../src/document';
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
@@ -9,89 +9,95 @@ async function exact(page: Page, value: number) {
   await editor(page).getByRole('spinbutton').press('Enter');
   await waitForPending(page);
 }
-for (const scenario of ['double', 'reset', 'degrade', 'order', 'restore'] as const)
-  test(`real house rewrite: ${scenario} keyboard editing and preview`, async ({ page }) => {
-    await openProgram(page, { path: 'corpus/programs/real-house-arranged.strudel' });
-    // Accelerate transport only, retaining the real score and event assertions.
-    await page.evaluate(() => {
-      const doc = window.odmApp.state.doc!;
-      window.odmApp.editor!.apply({
-        ...doc,
-        body: doc.body.map((n) => (n.kind === 'tempo' ? { ...n, cpm: 240 } : n)),
+test.describe('real house rewrites with shared setup', () => {
+  sharedProgram((page) =>
+    openProgram(page, { path: 'corpus/programs/real-house-arranged.strudel' }),
+  );
+  for (const scenario of ['double', 'reset', 'degrade', 'order', 'restore'] as const)
+    test(`real house rewrite: ${scenario} keyboard editing and preview`, async ({ page }) => {
+      // Accelerate transport only, retaining the real score and event assertions.
+      await page.evaluate(() => {
+        const doc = window.odmApp.state.doc!;
+        window.odmApp.editor!.apply({
+          ...doc,
+          body: doc.body.map((n) => (n.kind === 'tempo' ? { ...n, cpm: 240 } : n)),
+        });
       });
+      const original = await page.evaluate(() => window.odmApp.state.doc!);
+      const kick = instruments(original).find((r) => r.name === 'kick')!;
+      await page.getByRole('button', { name: 'drop', exact: true }).first().click();
+      const add = await selectNode(page, { nodeId: `${kick.pattern.id}:rewrites` });
+      await expect(editor(page)).toHaveAttribute('data-editor-kind', 'rewrite');
+      await editor(page).getByRole('button', { name: 'Add fast', exact: true }).press('Enter');
+      await exact(page, 2);
+      if (scenario === 'double') {
+        await play(page);
+        // Browser delivery canary only. Exact spans and unaffected instruments are
+        // proved by rewrite-editor.test.ts against the real Strudel worker.
+        // First playback may begin inside a cycle. Keep #22's future complete
+        // cycle so a late first scheduler tick cannot truncate the observation.
+        const cycle = await page.evaluate(() => Math.ceil(window.odmApp.engine!.now()!) + 1);
+        await signal(() =>
+          page.evaluate(
+            (c) => window.odmApp.history.some((e) => e.type === 'trigger' && e.cycle >= c + 1),
+            cycle,
+          ),
+        ).toBe(true);
+        expect(
+          await page.evaluate(
+            (c) =>
+              window.odmApp.history.filter(
+                (e) =>
+                  e.type === 'trigger' &&
+                  e.cycle >= c &&
+                  e.cycle < c + 1 &&
+                  (e.value as { s?: string }).s === 'bd',
+              ).length,
+            cycle,
+          ),
+        ).toBe(8);
+        await page.getByRole('button', { name: 'Stop', exact: true }).click();
+        return;
+      }
+      await exact(page, 1);
+      if (scenario === 'reset') {
+        await expect(editor(page).getByRole('spinbutton')).toHaveValue('1');
+        return;
+      }
+      await signal(() => editor(page).getByRole('img', { name: 'Without fast' }).isVisible()).toBe(
+        true,
+      );
+      await expect(editor(page).getByRole('img', { name: 'Without fast' })).toBeVisible();
+      await page.getByRole('button', { name: 'Done', exact: true }).click();
+      await expect(add).toBeFocused();
+      await add.press('Space');
+      await editor(page).getByRole('button', { name: 'Add degradeBy', exact: true }).press('Enter');
+      await exact(page, 1);
+      if (scenario === 'degrade') {
+        await expect(editor(page).getByRole('spinbutton')).toHaveValue('1');
+        return;
+      }
+      if (scenario === 'order') {
+        await editor(page)
+          .getByRole('button', { name: 'Move earlier', exact: true })
+          .press('Enter');
+        await waitForPending(page);
+        await expect(editor(page).locator('ol')).toContainText(/degradeBy[\s\S]*fast/);
+        await editor(page).getByRole('button', { name: 'Move later', exact: true }).press('Space');
+        await waitForPending(page);
+        await expect(editor(page).locator('ol')).toContainText(/fast[\s\S]*degradeBy/);
+        return;
+      }
+      await editor(page).getByRole('button', { name: 'Remove rewrite', exact: true }).click();
+      await waitForPending(page);
+      await editor(page).getByRole('button', { name: 'Edit fast', exact: true }).click();
+      await editor(page).getByRole('button', { name: 'Remove rewrite', exact: true }).click();
+      await waitForPending(page);
+      await expect(editor(page).locator('ol li')).toHaveCount(0);
+      await page.keyboard.press('Escape');
+      await expect(add).toBeFocused();
     });
-    const original = await page.evaluate(() => window.odmApp.state.doc!);
-    const kick = instruments(original).find((r) => r.name === 'kick')!;
-    await page.getByRole('button', { name: 'drop', exact: true }).first().click();
-    const add = await selectNode(page, { nodeId: `${kick.pattern.id}:rewrites` });
-    await expect(editor(page)).toHaveAttribute('data-editor-kind', 'rewrite');
-    await editor(page).getByRole('button', { name: 'Add fast', exact: true }).press('Enter');
-    await exact(page, 2);
-    if (scenario === 'double') {
-      await play(page);
-      // Browser delivery canary only. Exact spans and unaffected instruments are
-      // proved by rewrite-editor.test.ts against the real Strudel worker.
-      // First playback may begin inside a cycle. Keep #22's future complete
-      // cycle so a late first scheduler tick cannot truncate the observation.
-      const cycle = await page.evaluate(() => Math.ceil(window.odmApp.engine!.now()!) + 1);
-      await signal(() =>
-        page.evaluate(
-          (c) => window.odmApp.history.some((e) => e.type === 'trigger' && e.cycle >= c + 1),
-          cycle,
-        ),
-      ).toBe(true);
-      expect(
-        await page.evaluate(
-          (c) =>
-            window.odmApp.history.filter(
-              (e) =>
-                e.type === 'trigger' &&
-                e.cycle >= c &&
-                e.cycle < c + 1 &&
-                (e.value as { s?: string }).s === 'bd',
-            ).length,
-          cycle,
-        ),
-      ).toBe(8);
-      await page.getByRole('button', { name: 'Stop', exact: true }).click();
-      return;
-    }
-    await exact(page, 1);
-    if (scenario === 'reset') {
-      await expect(editor(page).getByRole('spinbutton')).toHaveValue('1');
-      return;
-    }
-    await signal(() => editor(page).getByRole('img', { name: 'Without fast' }).isVisible()).toBe(
-      true,
-    );
-    await expect(editor(page).getByRole('img', { name: 'Without fast' })).toBeVisible();
-    await page.getByRole('button', { name: 'Done', exact: true }).click();
-    await expect(add).toBeFocused();
-    await add.press('Space');
-    await editor(page).getByRole('button', { name: 'Add degradeBy', exact: true }).press('Enter');
-    await exact(page, 1);
-    if (scenario === 'degrade') {
-      await expect(editor(page).getByRole('spinbutton')).toHaveValue('1');
-      return;
-    }
-    if (scenario === 'order') {
-      await editor(page).getByRole('button', { name: 'Move earlier', exact: true }).press('Enter');
-      await waitForPending(page);
-      await expect(editor(page).locator('ol')).toContainText(/degradeBy[\s\S]*fast/);
-      await editor(page).getByRole('button', { name: 'Move later', exact: true }).press('Space');
-      await waitForPending(page);
-      await expect(editor(page).locator('ol')).toContainText(/fast[\s\S]*degradeBy/);
-      return;
-    }
-    await editor(page).getByRole('button', { name: 'Remove rewrite', exact: true }).click();
-    await waitForPending(page);
-    await editor(page).getByRole('button', { name: 'Edit fast', exact: true }).click();
-    await editor(page).getByRole('button', { name: 'Remove rewrite', exact: true }).click();
-    await waitForPending(page);
-    await expect(editor(page).locator('ol li')).toHaveCount(0);
-    await page.keyboard.press('Escape');
-    await expect(add).toBeFocused();
-  });
+});
 test('real ambient rewrite: preview, keyboard focus and phone', async ({ page }) => {
   await openProgram(page, { path: 'corpus/programs/real-ambient.strudel' });
   await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();

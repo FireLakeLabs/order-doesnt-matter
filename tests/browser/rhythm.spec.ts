@@ -216,6 +216,11 @@ test('Kiln live: split removal, undo, literal marks and evenly spread drum hits'
   await waitForPending(page);
   await expect(page.getByLabel('hits', { exact: true })).toBeFocused();
   await expect(page.getByLabel('out of', { exact: true })).toHaveValue('8');
+  // At this deliberately fast tempo, editing can reach a later section under
+  // load. Restart the edited piece at the selected bass section for observation.
+  await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await page.evaluate(() => (window.odmApp.history.length = 0));
+  await play(page);
   const boundary = await page.evaluate(() =>
     Math.ceil(
       Math.max(
@@ -228,6 +233,26 @@ test('Kiln live: split removal, undo, literal marks and evenly spread drum hits'
   // Trigger callbacks await rendering and can arrive out of timestamp order.
   // A future drum callback alone does not finish the bass observation window.
   await appSignal(page, (cycle) => window.odmApp.engine!.now()! >= cycle, boundary + 1);
+  // Rendering callbacks can finish after the audio clock crosses the boundary.
+  await appSignal(
+    page,
+    (c) => {
+      const events = window.odmApp.history.filter(
+        (e) => e.type === 'trigger' && e.cycle >= c && e.cycle < c + 1,
+      );
+      return (
+        events.filter(
+          (e) =>
+            e.type === 'trigger' &&
+            (e.value as { s?: string; gain?: number }).s === 'triangle' &&
+            (e.value as { gain?: number }).gain === 0.45,
+        ).length >= 4 &&
+        events.filter((e) => e.type === 'trigger' && (e.value as { s?: string }).s === 'cp')
+          .length >= 4
+      );
+    },
+    boundary,
+  );
   const bassStarts = await page.evaluate(
     (c) =>
       window.odmApp.history
@@ -239,7 +264,8 @@ test('Kiln live: split removal, undo, literal marks and evenly spread drum hits'
             (e.value as { s?: string; gain?: number }).s === 'triangle' &&
             (e.value as { gain?: number }).gain === 0.45,
         )
-        .map((e) => (e.type === 'trigger' ? e.cycle - c : -1)),
+        .map((e) => (e.type === 'trigger' ? e.cycle - c : -1))
+        .sort((a, b) => a - b),
     boundary,
   );
   expect(bassStarts).toEqual([0, 0.25, 0.5, 0.75]);
@@ -254,7 +280,8 @@ test('Kiln live: split removal, undo, literal marks and evenly spread drum hits'
               e.cycle < c + 1 &&
               (e.value as { s?: string }).s === 'cp',
           )
-          .map((e) => (e.type === 'trigger' ? e.cycle - c : -1)),
+          .map((e) => (e.type === 'trigger' ? e.cycle - c : -1))
+          .sort((a, b) => a - b),
       boundary,
     ),
   ).toEqual([0.25, 11 / 32, 14 / 32, 0.75]);
