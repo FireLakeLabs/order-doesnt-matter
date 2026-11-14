@@ -80,6 +80,18 @@ breadcrumb. Nothing else is editable while it is open.
 - Nothing in the interface may suggest that a setting processes the sound that
   came before it.
 
+## Chosen next interface (2026-11-14)
+
+Owner-selected direction, awaiting implementation:
+
+- One editor stays in the page, with live previews available. Replaces D34's
+  panel placement.
+- Now and Watch follow actual playback. The score can stay pinned; explicit
+  labels distinguish playing and editing.
+- First retention features: local document recovery, a portable document
+  download, and fresh generated Strudel export. Recovery limits, replacement
+  confirmation and storage-failure feedback still need specification.
+
 ## Not yet settled
 
 - How a room shows a conflict whose outcome cannot be predicted.

@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Order Doesn't Matter · design proposal</title>
+<style>
+  html, body { margin: 0; padding: 0; background: transparent; }
+  #odm-proposal { color: var(--foreground, #e5e9e8); font: 14px/1.45 var(--font-sans, system-ui); }
+  #odm-proposal * { box-sizing: border-box; }
+  #odm-proposal button, #odm-proposal input, #odm-proposal textarea, #odm-proposal select { font: inherit; }
+  #odm-proposal button { min-height: 44px; padding: 9px 12px; border: 1px solid var(--border, #46535d); border-radius: 8px; background: var(--secondary, #242d35); color: inherit; cursor: pointer; }
+  #odm-proposal button:hover { background: var(--accent, #34414a); }
+  #odm-proposal button:disabled { opacity: .5; cursor: default; }
+  #odm-proposal button[aria-pressed="true"], #odm-proposal .primary { background: var(--primary, #e2e8e5); color: var(--primary-foreground, #17201f); border-color: transparent; }
+  #odm-proposal :focus-visible { outline: 3px solid var(--ring, #a5ceb6); outline-offset: 3px; }
+  #odm-proposal p, #odm-proposal h1, #odm-proposal h2, #odm-proposal h3 { margin: 0; }
+  #odm-proposal h1 { font-size: 19px; font-weight: 500; letter-spacing: -.5px; }
+  #odm-proposal h2 { font-size: 16px; font-weight: 500; }
+  #odm-proposal h3 { font-size: 14px; font-weight: 500; }
+  #odm-proposal small, #odm-proposal .quiet { color: var(--foreground, #e5e9e8); opacity: .72; font-size: 12px; }
+  #odm-proposal .review-controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+  #odm-proposal .review-controls p { flex: 1 1 280px; }
+  #odm-proposal .shell { container: instrument / inline-size; background: var(--card, #151c23); border: 1px solid var(--border, #46535d); border-radius: 14px; max-width: 1100px; margin: auto; overflow: clip; }
+  #odm-proposal[data-device="phone"] .shell { max-width: 390px; }
+  #odm-proposal .top, #odm-proposal .piece, #odm-proposal .workspace, #odm-proposal .context, #odm-proposal .sections { padding: 16px; }
+  #odm-proposal .top, #odm-proposal .piece, #odm-proposal .context { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; border-bottom: 1px solid var(--border, #46535d); }
+  #odm-proposal .top h1 { flex: 1 1 210px; }
+  #odm-proposal .piece > div { flex: 1 1 150px; }
+  #odm-proposal .piece strong { font-size: 18px; font-weight: 500; }
+  #odm-proposal .piece small { display: block; }
+  #odm-proposal .transport { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  #odm-proposal .sections { display: grid; grid-template-columns: 1fr 2fr 1fr; gap: 6px; padding-bottom: 10px; }
+  #odm-proposal .section { text-align: left; }
+  #odm-proposal .section span { display: block; font-size: 12px; opacity: .8; }
+  #odm-proposal .context { padding-top: 0; gap: 8px 18px; font-size: 12px; }
+  #odm-proposal .context strong { font-weight: 500; }
+  #odm-proposal .context button { margin-left: auto; }
+  #odm-proposal .workspace { display: grid; grid-template-columns: minmax(0, 1fr) 210px; gap: 20px; }
+  #odm-proposal .score { grid-column: 1; grid-row: 1; }
+  #odm-proposal .previews { grid-column: 2; grid-row: 1; }
+  #odm-proposal .workspace > .editor { grid-column: 1 / -1; border-radius: 10px; }
+  #odm-proposal .workspace:has(#expanded:not([hidden])) .score { grid-column: 1 / -1; }
+  #odm-proposal .score, #odm-proposal .previews, #odm-proposal .instrument-row > * { min-width: 0; }
+  #odm-proposal .score-heading, #odm-proposal .preview-heading, #odm-proposal .editor-heading { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 10px; }
+  #odm-proposal .column-head, #odm-proposal .instrument-row { display: grid; grid-template-columns: minmax(100px, 1.2fr) minmax(100px, 1fr) minmax(70px, .8fr); gap: 8px; align-items: center; }
+  #odm-proposal .column-head { color: var(--muted-foreground, #a6b3bb); font-size: 12px; padding: 5px 0; }
+  #odm-proposal .instrument-row { padding: 12px 0; border-top: 1px solid var(--border, #46535d); }
+  #odm-proposal .instrument-name { text-align: left; overflow-wrap: anywhere; }
+  #odm-proposal .instrument-name small { display: block; }
+  #odm-proposal .rhythm-cell { display: block; width: 100%; padding: 8px; }
+  #odm-proposal .rhythm-cell svg { display: block; width: 100%; height: 20px; color: var(--chart-1, #a5ceb6); }
+  #odm-proposal .rhythm-cell span { display: block; font-size: 12px; margin-top: 4px; }
+  #odm-proposal .setting-cell { width: 100%; }
+  #odm-proposal .preview { background: var(--secondary, #242d35); border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+  #odm-proposal .preview-heading { margin-bottom: 4px; }
+  #odm-proposal .preview-heading button { padding: 8px; }
+  #odm-proposal .preview svg { width: 100%; display: block; height: 125px; color: var(--chart-1, #a5ceb6); }
+  #odm-proposal .preview .names { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 4px; font-size: 12px; }
+  #odm-proposal .names span { overflow-wrap: anywhere; }
+  #odm-proposal .editor, #odm-proposal .disclosure { border-top: 1px solid var(--border, #46535d); padding: 16px; }
+  #odm-proposal .editor { background: var(--popover, #1d2830); }
+  #odm-proposal .editor-heading h2 { overflow-wrap: anywhere; }
+  #odm-proposal .editor-tools, #odm-proposal .editor-fields, #odm-proposal .save-actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: end; }
+  #odm-proposal .editor-fields { margin: 16px 0; }
+  #odm-proposal label { display: grid; gap: 6px; }
+  #odm-proposal input, #odm-proposal select, #odm-proposal textarea { min-height: 44px; min-width: 0; max-width: 100%; border: 1px solid var(--border, #46535d); border-radius: 7px; background: var(--background, #10171d); color: inherit; padding: 9px; }
+  #odm-proposal input[type="number"] { width: 120px; }
+  #odm-proposal textarea { width: 100%; resize: vertical; min-height: 100px; }
+  #odm-proposal .lane { display: block; width: 100%; height: 54px; margin: 12px 0; color: var(--chart-1, #a5ceb6); }
+  #odm-proposal .rhythm-parts { display: flex; gap: 6px; margin: 12px 0; align-items: stretch; }
+  #odm-proposal .rhythm-parts button { flex: var(--duration); min-width: 44px; min-height: 64px; padding: 5px; }
+  #odm-proposal .expanded { grid-column: 1 / -1; }
+  #odm-proposal .expanded .preview svg { height: 210px; }
+  #odm-proposal .live-list { display: grid; gap: 6px; margin-top: 10px; }
+  #odm-proposal .live-list button { text-align: left; overflow-wrap: anywhere; }
+  #odm-proposal .foot { padding: 12px 16px; border-top: 1px solid var(--border, #46535d); font-size: 12px; color: var(--muted-foreground, #a6b3bb); }
+  #odm-proposal [hidden] { display: none !important; }
+  @container instrument (max-width: 600px) {
+    #odm-proposal .workspace { grid-template-columns: 1fr; gap: 12px; }
+    #odm-proposal .score, #odm-proposal .previews, #odm-proposal .workspace > .editor { grid-column: auto; grid-row: auto; }
+    #odm-proposal .top, #odm-proposal .piece, #odm-proposal .workspace, #odm-proposal .sections { padding: 12px; }
+    #odm-proposal .top h1 { font-size: 17px; flex-basis: 100%; }
+    #odm-proposal .column-head { display: none; }
+    #odm-proposal .instrument-row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+    #odm-proposal .instrument-name { grid-column: 1 / -1; }
+    #odm-proposal .previews { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    #odm-proposal .preview { padding: 10px; margin-bottom: 0; }
+    #odm-proposal .preview-heading { flex-wrap: wrap; }
+    #odm-proposal .preview svg { height: 100px; }
+    #odm-proposal .context { padding: 0 12px 12px; }
+    #odm-proposal .context button { margin-left: 0; }
+    #odm-proposal .sections { gap: 4px; }
+    #odm-proposal .section { padding: 8px; }
+    #odm-proposal .expanded { grid-column: auto; }
+  }
+</style>
+</head>
+<body>
+<div id="odm-proposal" data-device="desktop">
+  <div class="review-controls" aria-label="Mockup viewport">
+    <p class="quiet">Design proposal · illustrative score · all playback, edits and saving are simulated.</p>
+    <button type="button" data-device="desktop" aria-pressed="true">Desktop</button><button type="button" data-device="phone" aria-pressed="false">Phone</button>
+  </div>
+  <div class="shell">
+    <header class="top"><h1>Order Doesn't Matter</h1><button type="button" id="import-toggle" aria-expanded="false">Import another piece</button><button type="button" id="keep-toggle" aria-expanded="false">Keep work</button></header>
+    <section class="disclosure" id="import-panel" hidden aria-label="Import another piece">
+      <label>New Strudel program<textarea spellcheck="false" placeholder='s("bd*2, hh*4")'></textarea></label>
+      <p class="quiet">Your current piece stays open until you choose to replace it.</p><button type="button" id="replace">Review replacement</button>
+    </section>
+    <section class="disclosure" id="keep-panel" hidden aria-label="Keep work proposal">
+      <h2>Keep this version</h2><p class="quiet">Proposed: recover the latest document on this device; download a portable copy.</p>
+      <div class="save-actions"><button type="button" data-notice="Proposal: download the current document as JSON.">Download document</button><button type="button" data-notice="Proposal: download fresh Strudel generated from the current document.">Export Strudel</button></div>
+    </section>
+    <div class="piece"><div><strong>Layout study</strong><small id="recovery">Recovery on this device · proposed</small></div><div class="transport"><button type="button" id="play" class="primary" aria-pressed="false">Play</button><span>90 cycles/min</span><button type="button" id="undo" disabled>Undo</button></div></div>
+    <nav class="sections" aria-label="Song sections"><button type="button" class="section" data-section="Intro" aria-pressed="false">Intro<span>0–4 cycles</span></button><button type="button" class="section" data-section="Build" aria-pressed="true">Build<span>4–12 cycles</span></button><button type="button" class="section" data-section="Outro" aria-pressed="false">Outro<span>12–16 cycles</span></button></nav>
+    <div class="context"><span>Editing <strong id="selected-section">Build · cycles 4–12</strong></span><span id="play-context">Playback stopped · previews paused</span><button type="button" id="follow" aria-pressed="false">Follow playback</button></div>
+    <div class="workspace">
+      <section class="score" aria-label="Score sheet">
+        <div class="score-heading"><h2>The score</h2><span class="quiet" id="score-hint">Choose one thing to edit</span></div>
+        <div class="column-head" aria-hidden="true"><span>Instrument</span><span>Rhythm · actual spans</span><span>Setting</span></div>
+        <div id="rows"></div>
+      </section>
+      <section class="editor" id="editor" hidden aria-label="Selected editor"></section>
+      <aside class="previews" aria-label="Live previews">
+        <section class="preview"><div class="preview-heading"><h3>Now</h3><button type="button" data-expand="now" aria-label="Enlarge Now">Enlarge</button></div><p class="quiet" data-now-context>Last playback · Intro</p><div id="now-small"></div><p class="quiet">Room 1 · shared sends</p></section>
+        <section class="preview"><div class="preview-heading"><h3>Watch</h3><button type="button" data-expand="watch" aria-label="Enlarge Watch">Enlarge</button></div><p class="quiet" data-watch-context>Last playback · cycle 2</p><div id="watch-small"></div><p class="quiet">One turn per cycle</p></section>
+      </aside>
+      <section id="expanded" class="expanded" hidden aria-label="Enlarged live view"></section>
+    </div>
+    <footer class="foot" id="notice" role="status" aria-live="polite">Proposal: Now and Watch always describe playback; the sheet can stay pinned elsewhere.</footer>
+  </div>
+</div>
+<script>
+(() => {
+  const root = document.getElementById('odm-proposal');
+  const get = id => root.querySelector('#' + id);
+  const names = ['Kick', 'Bass · warm saw', 'Hats · scattered metallic accents', 'Chords · late evening light'];
+  let selected = 'Build', playing = false, following = false, editing = null, lastTarget = null, fallbackTarget = null, undo = null;
+  const values = [.8, 700, .3, .5];
+  const notice = text => { get('notice').textContent = text; };
+  const notes = (offset = 0) => `<svg viewBox="0 0 200 20" role="img" aria-label="Illustrative unequal note spans"><g fill="currentColor">${[[0, 28], [46, 14], [91, 37], [164, 21]].map(([x, w]) => `<rect x="${(x + offset) % 170}" y="6" width="${w}" height="8" rx="2"/>`).join('')}</g></svg>`;
+  const now = `<svg viewBox="0 0 210 150" role="img" aria-label="Three instruments share Room 1"><rect x="12" y="12" width="186" height="126" rx="45" fill="none" stroke="currentColor" stroke-opacity=".65" stroke-width="2"/><g fill="currentColor" fill-opacity=".18" stroke="currentColor"><circle cx="65" cy="60" r="22"/><circle cx="145" cy="64" r="27"/><circle cx="101" cy="115" r="15"/></g><g fill="var(--foreground, #e5e9e8)" font-family="system-ui" font-size="12" text-anchor="middle"><text x="65" y="64">Kick</text><text x="145" y="68">Bass</text><text x="101" y="119">Hats</text></g></svg>`;
+  const watch = `<svg viewBox="0 0 210 150" role="img" aria-label="Illustrative note spans around a cycle gate"><g fill="none" stroke="currentColor" stroke-width="8" stroke-linecap="round"><circle cx="105" cy="76" r="52" opacity=".15"/><path d="M105 24 A52 52 0 0 1 154 59 M155 91 A52 52 0 0 1 113 127 M66 111 A52 52 0 0 1 58 54"/><path d="M105 40 A36 36 0 0 1 141 76 M105 112 A36 36 0 0 1 70 84" opacity=".65"/></g><path d="M105 10V60" stroke="var(--foreground, #e5e9e8)" stroke-width="2"/><text x="115" y="16" fill="var(--foreground, #e5e9e8)" font-family="system-ui" font-size="12">now</text></svg>`;
+  get('now-small').innerHTML = now; get('watch-small').innerHTML = watch;
+  const settingText = i => i === 1 ? `Cutoff · ${values[i]} Hz` : `Gain · ${values[i]}`;
+  get('rows').innerHTML = names.map((name, i) => `
+    <div class="instrument-row">
+      <button type="button" class="instrument-name edit-target" data-edit="instrument" data-row="${i}">${name}<small>${i === 3 ? 'Sits out in Intro' : 'Ready · Room 1'}</small></button>
+      <button type="button" class="rhythm-cell edit-target" data-edit="rhythm" data-row="${i}" aria-label="Edit ${name} rhythm">${notes(i * 3)}<span>Edit rhythm</span></button>
+      <button type="button" class="setting-cell edit-target" data-edit="setting" data-row="${i}">${settingText(i)}</button>
+    </div>`).join('');
+  function context() {
+    const cycle = selected === 'Intro' ? '0–4' : selected === 'Build' ? '4–12' : '12–16';
+    get('selected-section').textContent = `${selected} · cycles ${cycle}`;
+    get('play-context').textContent = playing ? 'Playing Intro · cycle 2' : 'Playback stopped · previews paused';
+    root.querySelector('[data-now-context]').textContent = `${playing ? 'Playback' : 'Last playback'} · Intro`;
+    root.querySelector('[data-watch-context]').textContent = `${playing ? 'Playback' : 'Last playback'} · cycle 2`;
+    get('play').textContent = playing ? 'Stop' : 'Play'; get('play').setAttribute('aria-pressed', String(playing));
+    get('follow').setAttribute('aria-pressed', String(following));
+    root.querySelectorAll('[data-section]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.section === selected)));
+  }
+  function closeEditor() {
+    editing = null; get('editor').hidden = true;
+    root.querySelectorAll('.edit-target, [data-section]').forEach(b => b.disabled = false);
+    get('score-hint').textContent = 'Choose one thing to edit';
+    (lastTarget?.isConnected && lastTarget.checkVisibility() ? lastTarget : fallbackTarget)?.focus();
+  }
+  function openEditor(kind, row, origin) {
+    editing = kind;
+    lastTarget = origin;
+    fallbackTarget = root.querySelector(`.score [data-edit="instrument"][data-row="${row}"]`);
+    const editor = get('editor'); editor.hidden = false;
+    root.querySelectorAll('.edit-target, [data-section]').forEach(b => b.disabled = true);
+    get('score-hint').textContent = 'One editor open · score stays visible';
+    const title = `${names[row]} › ${kind === 'setting' ? (row === 1 ? 'Cutoff' : 'Gain') : kind === 'rhythm' ? 'Rhythm' : 'Instrument'}`;
+    const fields = kind === 'setting' ? `
+      <div class="editor-fields"><label>${row === 1 ? 'Cutoff · Hz' : 'Gain'}
+        <input id="value" data-row="${row}" type="number" value="${values[row]}" step="${row === 1 ? 50 : .1}"></label>
+        <span class="quiet">Shared setting · affects every use</span></div>
+      <svg class="lane" viewBox="0 0 600 54" preserveAspectRatio="none" role="img" aria-label="Constant setting over the selected section">
+        <path d="M0 28H600" fill="none" stroke="currentColor" stroke-width="3"/></svg>` : kind === 'rhythm' ? `
+      <p class="quiet">Illustrative nested phrase · widths follow duration</p>
+      <div class="rhythm-parts" aria-label="Rhythm structure">
+        <button type="button" data-part="0" style="--duration:2" aria-pressed="true"><span data-pitch>c3</span><br><small>½ cycle</small></button>
+        <button type="button" data-part="1" style="--duration:1" aria-pressed="false"><span data-pitch>~</span><br><small>¼</small></button>
+        <button type="button" data-part="2" style="--duration:1" aria-pressed="false"><span data-pitch>g3</span><br><small>¼</small></button></div>
+      <div class="editor-fields">
+        <button type="button" id="make-rest">Make rest</button>
+        <button type="button" data-notice="Simulated: split the selected duration into two children.">Split</button>
+        <label>Speed<input type="number" value="1" min=".25" step=".25"></label></div>` : `
+      <p class="quiet">Find this instrument's settings</p><div class="editor-fields">
+        <button type="button" id="open-setting">${row === 1 ? 'Cutoff' : 'Gain'}</button>
+        <button type="button" id="open-rhythm">Rhythm</button>
+        <button type="button" data-notice="Simulated: solo this instrument.">Solo</button></div>`;
+    editor.innerHTML = `<div class="editor-heading"><h2>${title}</h2><button type="button" id="done">Done</button></div>${fields}<div class="editor-tools"><button type="button" data-notice="Proposal: edit this selected node as source in this same editor.">Edit as source</button><span class="quiet">Done returns to the score</span></div>`;
+    get('done').onclick = closeEditor;
+    get('value')?.addEventListener('change', e => {
+      undo = {row, value: values[row]}; values[row] = Number(e.target.value);
+      root.querySelector(`.setting-cell[data-row="${row}"]`).textContent = settingText(row);
+      get('undo').disabled = false;
+      notice('Simulated edit · would remain pending until this instrument’s change is scheduled.');
+    });
+    if (get('open-setting')) get('open-setting').onclick = () => openEditor('setting', row, origin);
+    if (get('open-rhythm')) get('open-rhythm').onclick = () => openEditor('rhythm', row, origin);
+    const parts = [...editor.querySelectorAll('[data-part]')];
+    let selectedPart = parts[0];
+    parts.forEach(part => { part.onclick = () => {
+      selectedPart = part;
+      parts.forEach(other => other.setAttribute('aria-pressed', String(other === part)));
+      notice(`Selected rhythm part ${Number(part.dataset.part) + 1} · illustrative structure.`);
+    }; });
+    if (get('make-rest')) get('make-rest').onclick = () => {
+      selectedPart.querySelector('[data-pitch]').textContent = '~';
+      notice('Simulated edit · selected rhythm part is now a rest.');
+    };
+    editor.querySelector('input,button')?.focus({preventScroll:true});
+    editor.scrollIntoView({block:'nearest'});
+  }
+  root.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b || b.disabled) return;
+    if (b.dataset.device) { root.dataset.device = b.dataset.device; root.querySelectorAll('[data-device]').forEach(n => { if (n.tagName === 'BUTTON') n.setAttribute('aria-pressed', String(n.dataset.device === root.dataset.device)); }); }
+    if (b.dataset.edit) openEditor(b.dataset.edit, Number(b.dataset.row), b);
+    if (b.dataset.section) { selected = b.dataset.section; following = false; context(); }
+    if (b.dataset.notice) notice(b.dataset.notice);
+    if (b.dataset.expand) {
+      const expanded = b.dataset.expand; get('expanded').hidden = false; root.querySelector('.previews').hidden = true;
+      const legend = names.map((name, i) => expanded === 'now'
+        ? `<button type="button" class="edit-target" data-edit="instrument" data-row="${i}" ${editing ? 'disabled' : ''}>${name} · settings</button>`
+        : `<div>${name}</div>`).join('');
+      get('expanded').innerHTML = `<section class="preview"><div class="preview-heading">
+        <h2>${expanded === 'now' ? 'Now' : 'Watch'} · playback in Intro</h2>
+        <button type="button" id="shrink">Return to previews</button></div>
+        ${expanded === 'now' ? now : watch}<div class="live-list">${legend}</div></section>`;
+      get('shrink').onclick = () => { get('expanded').hidden = true; root.querySelector('.previews').hidden = false; b.focus(); };
+      get('shrink').focus({preventScroll:true});
+    }
+  });
+  get('play').onclick = () => { playing = !playing; if (following && playing) selected = 'Intro'; context(); notice('Simulated transport · no audio or advancing clock.'); };
+  get('follow').onclick = () => { following = !following; if (following && playing) selected = 'Intro'; context(); };
+  get('undo').onclick = () => {
+    if (!undo) return;
+    values[undo.row] = undo.value;
+    root.querySelector(`.setting-cell[data-row="${undo.row}"]`).textContent = settingText(undo.row);
+    if (get('value')?.dataset.row === String(undo.row)) get('value').value = undo.value;
+    get('undo').disabled = true; undo = null;
+    (get('value') ?? lastTarget)?.focus({preventScroll:true});
+    notice('Simulated undo · restored the previous setting.');
+  };
+  for (const name of ['import', 'keep']) get(name + '-toggle').onclick = () => { const p = get(name + '-panel'); p.hidden = !p.hidden; get(name + '-toggle').setAttribute('aria-expanded', String(!p.hidden)); };
+  get('replace').onclick = () => notice('Proposal: offer Keep current work or Replace piece before importing; this mockup keeps Layout study open.');
+  root.addEventListener('keydown', e => { if (e.key === 'Escape' && editing) { e.preventDefault(); closeEditor(); } });
+  context();
+})();
+</script>
+</body>
+</html>
