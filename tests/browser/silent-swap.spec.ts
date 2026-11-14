@@ -11,7 +11,6 @@ import {
   waitForPending,
 } from './helpers';
 
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 const BOUND_MS = 3000;
 for (const code of [
   'silence',

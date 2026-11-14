@@ -10,7 +10,6 @@ const offline = async (page: import('@playwright/test').Page) =>
     (url) => url.protocol === 'https:',
     (route) => route.abort('internetdisconnected'),
   );
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 test('page: original arrangement → rows → measured synth PCM → pinned section → Stop → failed paste', async ({
   page,
 }) => {

@@ -11,7 +11,6 @@ import {
 import { expect, type Page } from '@playwright/test';
 import { instruments, walk, type Setting } from '../../src/document';
 import { describeTarget } from '../../src/document/edit';
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 async function houseSignal(page: Page) {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.getByRole('button', { name: 'drop', exact: true }).first().click();
