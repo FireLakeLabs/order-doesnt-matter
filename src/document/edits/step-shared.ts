@@ -202,6 +202,16 @@ export function editMiniStep(
       }
       if (child.role === 'lane' && next.kind !== 'sub')
         return refuse('Keep this lane as a sequence');
+      // Outer annotations belong to the occurrence list. Putting them on its
+      // subject would flatten them during printing and can change aggregate weight.
+      if (
+        (s.kind === 'other' || s.kind === 'euclid') &&
+        child.role === 'subject' &&
+        ('weight' in next ||
+          (next.kind === 'value' && (next.repeat !== undefined || next.chance !== undefined)) ||
+          (next.kind === 'other' && next.expression))
+      )
+        return refuse('Edit outer annotations by mark occurrence; previous values kept');
       const result = copy(s, 0) as Step;
       if (
         (s.kind === 'euclid' && child.role !== 'subject') ||
