@@ -57,3 +57,44 @@ test('browser deadline closes descendant writers before cleanup', async () => {
     await closed;
   }
 }, 3_000);
+
+test.skipIf(process.platform === 'win32')(
+  'parent cancellation stops its detached browser run',
+  async () => {
+    const helper = new URL('../scripts/browser-process.mjs', import.meta.url).href;
+    const fixture = `
+    import {spawn} from 'node:child_process';
+    import * as runner from ${JSON.stringify(helper)};
+    const child=spawn(process.execPath,['-e',"console.log('ready');setInterval(()=>{},1000)"],{
+      detached:true,stdio:['ignore','pipe','pipe']
+    });
+    const off=runner.forwardBrowserSignals?.(child);
+    child.once('close',()=>off?.());
+    child.stdout.once('data',()=>console.log(child.pid));
+  `;
+    const parent = spawn(process.execPath, ['--input-type=module', '-e', fixture], {
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+    const closed = once(parent, 'close');
+    let pid: number | undefined;
+    try {
+      const [ready] = await once(parent.stdout, 'data');
+      pid = Number(String(ready).trim());
+      expect(pid).toBeGreaterThan(0);
+      parent.kill('SIGTERM');
+      const [code, signal] = await closed;
+      let alive = true;
+      try {
+        process.kill(pid!, 0);
+      } catch {
+        alive = false;
+      }
+      expect({ code, signal, alive }).toEqual({ code: 143, signal: null, alive: false });
+    } finally {
+      if (pid) killBrowserRun({ pid });
+      if (parent.exitCode === null && parent.signalCode === null) parent.kill('SIGKILL');
+      await closed;
+    }
+  },
+  3_000,
+);
