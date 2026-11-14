@@ -19,31 +19,40 @@ export class ExecutionBudget {
   private deadline = 0;
   private active = false;
   private failure?: ExecutionLimit;
+  private turn?: ReturnType<typeof setTimeout>;
+  private yielded = false;
   constructor(private now = () => performance.now()) {}
   begin() {
     this.active = true;
     this.deadline = this.now() + HARD_QUERY_MS;
     this.check();
+    this.watchTurn();
   }
   end() {
     this.active = false;
+    clearTimeout(this.turn);
   }
   check() {
     if (this.failure) throw this.failure;
+    if (this.active && this.yielded) {
+      this.deadline = this.now() + HARD_QUERY_MS;
+      this.watchTurn();
+    }
     if (this.active && this.now() > this.deadline) {
       this.failure = new ExecutionLimit();
       throw this.failure;
     }
   }
-  // Await time is not synchronous execution. Resume a fresh segment only after
-  // the operand resolves; loops in the operand still use the current deadline.
+  // Only a yield to the event loop permits a fresh segment. Awaiting an already
+  // resolved promise only queues a microtask and can otherwise starve the page.
   resumed<T>(value: T): T {
-    this.checkFailure();
-    this.deadline = this.now() + HARD_QUERY_MS;
+    this.check();
     return value;
   }
-  private checkFailure() {
-    if (this.failure) throw this.failure;
+  private watchTurn() {
+    clearTimeout(this.turn);
+    this.yielded = false;
+    this.turn = setTimeout(() => (this.yielded = true), 0);
   }
   run<T>(work: () => T): T {
     this.begin();

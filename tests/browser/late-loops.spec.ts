@@ -4,9 +4,10 @@ import type {} from '../../src/app/main';
 
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 
-// Original fixtures. Both pass the worker's preflight unchanged. The second
+// Original fixtures pass the worker's preflight unchanged. The last
 // diverges only after its four narrow scheduler windows, despite 16 broad cycles.
 const topLevel = "if(typeof window !== 'undefined') {while(true){}}; s('sine')";
+const microtasks = "if(typeof window !== 'undefined') {while(true){await 0;}}; s('sine')";
 const lateQuery = `new Pattern(state => {
   if(state.controls.cyclist && Number(state.span.begin) >= 0.1 &&
      Number(state.span.end) - Number(state.span.begin) < 0.1) {while(true){}}
@@ -18,16 +19,18 @@ test('late authored loops: failed evaluation retains Kiln; late query stops and 
 }, info) => {
   await openProgram(page, { example: 'Kiln' });
   await play(page);
-  const rejected = await page.evaluate(async (source) => {
-    try {
-      await window.odmApp.engine!.play(source);
-      return false;
-    } catch {
-      return true;
-    }
-  }, topLevel);
-  expect(rejected).toBe(true);
-  await expect(page.locator('#message')).toHaveText('This program exceeded its execution limit.');
+  for (const source of [topLevel, microtasks]) {
+    const rejected = await page.evaluate(async (source) => {
+      try {
+        await window.odmApp.engine!.play(source);
+        return false;
+      } catch {
+        return true;
+      }
+    }, source);
+    expect(rejected).toBe(true);
+    await expect(page.locator('#message')).toHaveText('This program exceeded its execution limit.');
+  }
   expect(await page.evaluate(() => window.odmApp.engine!.playing)).toBe(true);
   const mark = await page.evaluate(() => window.odmApp.history.length);
   await appSignal(
@@ -56,6 +59,7 @@ test('late authored loops: failed evaluation retains Kiln; late query stops and 
   expect(clickMs).toBeLessThan(1000);
   const errors = await page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'error'));
   expect(errors).toEqual([
+    { type: 'error', message: 'This program exceeded its execution limit.' },
     { type: 'error', message: 'This program exceeded its execution limit.' },
     {
       type: 'error',

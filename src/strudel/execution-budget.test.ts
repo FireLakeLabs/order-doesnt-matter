@@ -58,14 +58,30 @@ test('blocks, labels, continue, concise arrows, getters, generators and directiv
 
 test('await resumes a fresh synchronous segment without changing the awaited value', async () => {
   let clock = 0;
-  Object.assign(globalThis, { __odmWait: async () => ((clock += HARD_QUERY_MS * 3), 42) });
+  Object.assign(globalThis, {
+    __odmLater: (callback: (value: number) => void) =>
+      setTimeout(() => {
+        clock += HARD_QUERY_MS * 3;
+        callback(42);
+      }, 0),
+  });
   try {
-    expect(await evaluate('const n=await __odmWait(); n', new ExecutionBudget(() => clock))).toBe(
-      42,
-    );
+    expect(
+      await evaluate(
+        'const n=await new Promise(resolve=>__odmLater(value=>resolve(value))); n',
+        new ExecutionBudget(() => clock),
+      ),
+    ).toBe(42);
   } finally {
-    Reflect.deleteProperty(globalThis, '__odmWait');
+    Reflect.deleteProperty(globalThis, '__odmLater');
   }
+});
+
+test('immediately resolved awaits cannot continually renew the execution deadline', async () => {
+  let clock = 0;
+  await expect(
+    evaluate('for(let i=0;i<10000;i++){await 0;} 42', new ExecutionBudget(() => clock++)),
+  ).rejects.toBeInstanceOf(ExecutionLimit);
 });
 
 test.each([
