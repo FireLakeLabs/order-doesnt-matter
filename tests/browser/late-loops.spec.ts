@@ -2,7 +2,6 @@ import { expect } from '@playwright/test';
 import { test, openProgram, play, appSignal } from './helpers';
 import type {} from '../../src/app/main';
 
-
 // Original fixtures pass the worker's preflight unchanged. The last
 // diverges only after its four narrow scheduler windows, despite 16 broad cycles.
 const topLevel = "if(typeof window !== 'undefined') {while(true){}}; s('sine')";
