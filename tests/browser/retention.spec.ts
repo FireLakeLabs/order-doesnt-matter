@@ -2,7 +2,6 @@ import { readFile } from 'node:fs/promises';
 import { expect } from '@playwright/test';
 import { test, openProgram, scoreReady, selectNode, play, signal, appSignal } from './helpers';
 import { RECOVERY_KEY } from '../../src/app/retention';
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 
 async function download(page: import('@playwright/test').Page, button: string) {
   const pending = page.waitForEvent('download');
