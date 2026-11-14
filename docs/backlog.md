@@ -83,3 +83,15 @@ they remain a separately authorized wave.
 
 - Any change to AWS or DNS needs a fresh go-ahead from the owner; the original
   approval covered first setup only.
+
+## Last implementation wave
+
+- **Guided tour — implement last.** After the other outstanding work is complete
+  and the interface has settled, build an optional, replayable Driver.js practice
+  tour. Cover loading, playback, score editing and Undo, sections/Follow,
+  Now/Watch, and the shipped recovery/download/export controls. Preserve the
+  visitor's own work and recovery state. The
+  [specification](../research/guided-tour-spec.md) defines the proposed flow,
+  integration and acceptance checks. Review its mockup before implementation;
+  this backlog entry does not start the work. Owner requested this order on
+  2026-11-14.

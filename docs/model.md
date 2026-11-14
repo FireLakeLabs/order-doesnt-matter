@@ -91,6 +91,8 @@ Layout and live context are implemented; retention awaits a separate wave:
 - First retention features: local document recovery, a portable document
   download, and fresh generated Strudel export. Recovery limits, replacement
   confirmation and storage-failure feedback still need specification.
+- A Driver.js guided tour is implemented last, after the other outstanding work.
+  Its [specification](../research/guided-tour-spec.md) awaits that final wave.
 
 ## Not yet settled
 

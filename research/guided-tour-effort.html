@@ -1,0 +1,38 @@
+<section id="guided-tour-effort" data-viz-composition>
+  <p class="text-small">Planning estimates, not measurements: Driver.js 2–4 engineer-days; custom 4–8. Same 6–8 step tour, including styling, state integration and keyboard/mobile checks.</p>
+  <div data-viz-container></div>
+  <script type="application/json" data-viz-chart>
+    {
+      "id": "guided-tour-effort",
+      "title": "Estimated effort for a guided tour",
+      "description": "Planning estimates, not measurements. Same 6–8 step interactive tour, including styling, app-state integration and keyboard/mobile checks. Ranges are engineering judgments, not statistical intervals.",
+      "height": 230,
+      "spec": {
+        "type": "horizontalBar",
+        "x": "estimate",
+        "y": "approach",
+        "xLabel": "Engineer-days · planning estimate",
+        "xDomain": [0, 8],
+        "showValues": true,
+        "showLegend": false,
+        "uncertainty": {
+          "lower": "low",
+          "upper": "high",
+          "style": "bars",
+          "label": "Planning range"
+        }
+      },
+      "columns": ["approach", "estimate", "low", "high"],
+      "rows": [
+        ["Driver.js", 3, 2, 4],
+        ["Custom tour", 6, 4, 8]
+      ]
+    }
+  </script>
+</section>
+<script type="module">
+  import { mountChart } from "https://persistent.oaistatic.com/plugins/visualize/charts/1.2.3/element.js";
+  const root = document.getElementById("guided-tour-effort");
+  const config = JSON.parse(root.querySelector("[data-viz-chart]").textContent);
+  mountChart(root.querySelector("[data-viz-container]"), config);
+</script>
