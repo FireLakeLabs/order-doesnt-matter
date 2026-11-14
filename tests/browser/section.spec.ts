@@ -1,7 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { appSignal, openProgram, play, scoreReady, swap, sharedProgram } from './helpers';
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 
 test.describe('real house sections with shared setup', () => {
   sharedProgram(async (page) =>
