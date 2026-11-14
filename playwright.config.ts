@@ -4,7 +4,7 @@ const audio = /\/(engine|silent-swap)\.spec\.ts$/;
 export default defineConfig({
   testDir: './tests/browser',
   // Bound concurrent score-worker queries; audio clocks run afterward.
-  workers: 2,
+  workers: 3,
   use: { browserName: 'chromium', baseURL: process.env.ODM_URL },
   reporter: 'line',
   projects: [
