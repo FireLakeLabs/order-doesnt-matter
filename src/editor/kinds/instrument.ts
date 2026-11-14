@@ -4,6 +4,7 @@ import { definitionMuted, setMuted } from '../../document/edits/set-muted';
 import { setUseMuted } from '../../document/edits/set-use-muted';
 import { removeInstrument } from '../../document/edits/instrument-remove';
 import { renameInstrument } from '../../document/edits/rename-instrument';
+import { instrumentTargets } from '../../document/edit';
 import type { Refusal } from '../../document/edits/shared';
 import { fieldLabel, toggle } from '../presentation';
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text = '') => {
@@ -18,7 +19,8 @@ export default {
   mount(body, initial) {
     let context = initial,
       previousName = '',
-      sectionKey = '';
+      sectionKey = '',
+      navigationKey = '';
     const form = el('form'),
       field = el('input'),
       label = fieldLabel('Instrument name', field);
@@ -28,6 +30,15 @@ export default {
       summary = el('div');
     const mute = toggle('Mute everywhere'),
       solo = toggle('Solo');
+    const navigation = el('nav');
+    navigation.className = 'editor-actions';
+    navigation.setAttribute('aria-label', 'Instrument settings and rewrites');
+    function navigate(selection: string) {
+      context.apply(context.doc, { selection });
+      body
+        .querySelector<HTMLElement>('input,select,textarea,button')
+        ?.focus({ preventScroll: true });
+    }
     const uses = el('div'),
       generated = el('small');
     body.classList.add('instrument-editor');
@@ -42,14 +53,19 @@ export default {
       question = el('p'),
       confirm = el('button', 'Delete everywhere'),
       cancel = el('button', 'Keep instrument'),
-      actions = el('div');
+      actions = el('div'),
+      refusal = el('p'),
+      dependencies = el('div');
+    refusal.setAttribute('role', 'alert');
+    refusal.hidden = true;
+    dependencies.className = 'editor-actions';
     removal.className = 'editor-list-item';
     removal.setAttribute('aria-label', 'Delete instrument');
     actions.className = 'editor-actions';
     actions.append(cancel, confirm);
-    confirmation.append(question, actions);
+    confirmation.append(question, refusal, dependencies, actions);
     removal.append(remove);
-    body.append(form, mute.label, solo.label, summary, uses, removal);
+    body.append(form, mute.label, solo.label, summary, navigation, uses, removal);
     remove.onclick = () => {
       remove.replaceWith(confirmation);
       cancel.focus();
@@ -63,7 +79,17 @@ export default {
       if (!row) return;
       const next = removeInstrument(context.doc, row.id);
       if ('ok' in next) {
-        error.textContent = next.reason;
+        refusal.hidden = false;
+        refusal.textContent = next.reason;
+        dependencies.replaceChildren();
+        for (const dependent of next.dependents ?? []) {
+          const button = el('button', `Go to ${dependent.name}`);
+          button.onclick = () => navigate(dependent.targetId);
+          dependencies.append(button);
+        }
+        const source = el('button', 'Inspect instrument source');
+        source.onclick = () => navigate(`${row.id}:source`);
+        dependencies.append(source);
         return;
       }
       context.apply(next, {
@@ -174,6 +200,17 @@ export default {
           `${parts.length ? `${parts.filter((s) => s.instrumentIds.includes(row.id)).length} sections` : 'Across the piece'} · ${settings.size} settings · ${rewrites.size} rewrites`,
         ),
       );
+      const targets = instrumentTargets(context.doc, row.id);
+      const targetKey = JSON.stringify(targets);
+      if (targetKey !== navigationKey) {
+        navigationKey = targetKey;
+        navigation.replaceChildren();
+        for (const target of targets) {
+          const button = el('button', target.text);
+          button.onclick = () => navigate(target.nodeId);
+          navigation.append(button);
+        }
+      }
       const key = JSON.stringify(parts.map((s) => [s.id, s.name]));
       if (key !== sectionKey) {
         sectionKey = key;
