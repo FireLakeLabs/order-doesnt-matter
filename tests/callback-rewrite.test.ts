@@ -194,3 +194,25 @@ it('source is independent per argument, malformed text refuses, unknown function
   expect(sourceFragment(repaired.doc, `${when.id}:arg:0`)).toBe('customPredicate');
   expect(callbackBranches(repaired.doc)[0].parameter).toBe('voice');
 });
+
+it('editing a use-site callback keeps the canonical definition and other sections unchanged', async () => {
+  const doc = load(
+    'const bass=note("fs2 a2").s("triangle"); const drum=s("bd"); arrange([1,stack(bass.every(2,p=>p.fast(2)),drum)],[1,stack(bass,drum)])',
+  );
+  const branch = callbackBranches(doc)[0];
+  const fast = branch.body.layers[0];
+  const bass = instruments(doc).find((r) => r.name === 'bass')!;
+  expect(describeTarget(doc, fast.id).section?.start).toBe(0);
+  const changed = good(setRewriteArgument(doc, fast.id, 0, 3));
+  expect(instruments(changed).find((r) => r.id === bass.id)!.pattern).toBe(bass.pattern);
+  for (const [from, to, affected] of [
+    [0, 1, true],
+    [1, 2, false],
+    [3, 4, false],
+  ] as const) {
+    const before = await notes(generate(doc), from, to);
+    const after = await notes(generate(changed), from, to);
+    if (affected) expect(after).not.toEqual(before);
+    else expect(after).toEqual(before);
+  }
+});
