@@ -3,7 +3,7 @@ import { expect, test } from 'vitest';
 import { discoveryIdentity } from './discovery';
 import { generate } from './index';
 import { importStrudel } from '../import';
-import { walk, type Doc, type Setting, type Step } from '../document';
+import { walk, type Doc, type Pattern, type Setting, type Step } from '../document';
 import { setConstant } from '../document/edits/set-constant';
 import { replaceFromSource } from '../document/edits/source-node';
 import { queryEvents, queryEventsWithBudget } from '../strudel/evaluate';
@@ -134,7 +134,10 @@ test('structured mini expressions cannot inherit admission from stale literal no
   expect(discoveryIdentity(doc)).toBeDefined();
   let mini: Step | undefined;
   walk(doc, (node) => {
-    if ('core' in node && node.core.kind === 'sequence') mini = node.core.steps[0];
+    if ('core' in node) {
+      const { core } = node as Pattern;
+      if (core.kind === 'sequence') mini = core.steps[0];
+    }
   });
   expect(mini?.kind).toBe('other');
   Object.assign(mini!, {
