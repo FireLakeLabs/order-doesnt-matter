@@ -89,3 +89,12 @@ height; the unbroken last name wrapped within its row. This was a temporary
 initial-disclosure override for inspection; the artifact defaults to four rows.
 Source canaries are opt-in baseline evidence, intentionally outside normal CI;
 the Setup expectation should change when its production fix ships.
+
+Parent follow-up: the owner selected **Paper** as the default. The mockup and
+implementation brief now record that choice; Fern and Night remain available.
+The parent repaired the malformed choice-notation table, independently reran the
+two scoped source-evidence checks (passed), inspected the Paper preview, and kept
+prototype controls on a palette-coloured panel so they remain legible in the
+transparent chat frame. Checkbox labels retain a 44px target. These are research
+artifact changes, not production theme implementation. Shared tooling/browser
+stability is now supplied by PR #56, the explicit base for this proposal PR.

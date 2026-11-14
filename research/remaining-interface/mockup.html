@@ -82,6 +82,19 @@
       #proposal summary {
         cursor: pointer;
       }
+      #proposal label:has(input[type='checkbox']) {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 44px;
+      }
+      #proposal input[type='checkbox'] {
+        width: 20px;
+        height: 20px;
+        min-height: 20px;
+        padding: 0;
+        accent-color: var(--primary);
+      }
       #proposal button[aria-pressed='true'] {
         background: var(--primary);
         color: var(--primary-foreground);
@@ -270,21 +283,23 @@
     </style>
   </head>
   <body>
-    <main id="proposal" data-theme="fern">
-      <p class="quiet">
-        Interactive proposal · every note, edit and playback state is simulated. No audio, storage
-        or engine.
-      </p>
-      <div class="tools">
-        <button id="phone" aria-pressed="false">390px layout</button
-        ><label
-          >Palette<select id="theme">
-            <option value="fern">Fern · proposed default</option>
-            <option value="paper">Paper · warm light</option>
-            <option value="night">Night · violet / ice</option>
-          </select></label
-        ><small>Palette preference is an owner choice.</small>
-      </div>
+    <main id="proposal" data-theme="paper">
+      <section class="panel" aria-label="Prototype controls">
+        <p class="quiet">
+          Interactive proposal · every note, edit and playback state is simulated. No audio, storage
+          or engine.
+        </p>
+        <div class="tools">
+          <button id="phone" aria-pressed="false">390px layout</button
+          ><label
+            >Palette<select id="theme">
+              <option value="fern">Fern · deep green</option>
+              <option value="paper" selected>Paper · chosen default</option>
+              <option value="night">Night · violet / ice</option>
+            </select></label
+          ><small>Paper is the owner’s chosen default; all three themes remain available.</small>
+        </div>
+      </section>
       <div class="shell">
         <header class="panel">
           <h1>Kiln study · original illustrative data</h1>

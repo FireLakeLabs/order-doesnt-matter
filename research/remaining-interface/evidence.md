@@ -96,8 +96,8 @@ layout, conflict protection, camera performance or listening claim follows.
   reproduces in current source; repair label only. Literal Add-to absent; archive
   old wording concern. System inset absent; default to existing context summary;
   new display requires a purpose from owner.”
-- Record phone List four-row disclosure, Fern palette, stroke styling and optional
-  Watch fly-through as recommendations, not decisions or measured preferences.
+- Record Paper as the owner-selected default. Phone List four-row disclosure,
+  stroke styling and optional Watch fly-through remain recommendations.
 - Keep mini forms/callbacks and dependency-guided refusal open, using the brief's
   sequence and semantic canaries. Keep Setup screenshot review open for production.
 - Do not alter model/decisions for this research-only package. No lesson proposed:
