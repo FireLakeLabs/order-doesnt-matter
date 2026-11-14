@@ -149,6 +149,18 @@ for (const [title, index, path, label, value, before, after] of [
     await page.setViewportSize({ width: 390, height: 667 });
     await input.scrollIntoViewIfNeeded();
     await expect(input).toBeVisible();
+    await appSignal(
+      page,
+      (selected) => {
+        const entry = Array.from(document.querySelectorAll<HTMLElement>('[data-mini-key]')).find(
+          (n) => n.dataset.miniKey === selected,
+        )!;
+        const tree = entry.closest('.mini-tree')!.getBoundingClientRect(),
+          row = entry.getBoundingClientRect();
+        return row.top >= tree.top - 1 && row.bottom <= tree.bottom + 1;
+      },
+      JSON.stringify(path),
+    );
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
       true,
     );

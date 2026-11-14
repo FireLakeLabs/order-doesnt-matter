@@ -58,6 +58,18 @@ export function miniStructure(context: () => EditorContext, base: MiniPath) {
   root.className = 'mini-structure';
   let selected = base,
     signature = '';
+  function revealSelection() {
+    const tree = root.querySelector<HTMLElement>('.mini-tree');
+    const selectedButton = Array.from(root.querySelectorAll<HTMLElement>('[data-mini-key]')).find(
+      (n) => n.dataset.miniKey === key(selected),
+    );
+    if (tree && selectedButton) {
+      const bounds = tree.getBoundingClientRect(),
+        item = selectedButton.getBoundingClientRect();
+      tree.scrollTop +=
+        Math.min(0, item.top - bounds.top) + Math.max(0, item.bottom - bounds.bottom);
+    }
+  }
   function update() {
     const ctx = context(),
       core = sequenceOwner(ctx.doc, ctx.target.nodeId)?.core;
@@ -86,7 +98,10 @@ export function miniStructure(context: () => EditorContext, base: MiniPath) {
     );
     if (!nodes.some((n) => key(n.path) === key(selected))) selected = base;
     const next = JSON.stringify([top, selected]);
-    if (signature === next) return;
+    if (signature === next) {
+      revealSelection();
+      return;
+    }
     signature = next;
     const focus = root.contains(document.activeElement)
       ? (document.activeElement as HTMLElement).dataset.miniKey
@@ -194,15 +209,7 @@ export function miniStructure(context: () => EditorContext, base: MiniPath) {
       };
     }
     tree.scrollTop = treeScroll;
-    const selectedButton = Array.from(tree.querySelectorAll<HTMLElement>('[data-mini-key]')).find(
-      (n) => n.dataset.miniKey === key(selected),
-    );
-    if (selectedButton) {
-      const bounds = tree.getBoundingClientRect(),
-        item = selectedButton.getBoundingClientRect();
-      tree.scrollTop +=
-        Math.min(0, item.top - bounds.top) + Math.max(0, item.bottom - bounds.bottom);
-    }
+    revealSelection();
     const own = nodes.find((n) => key(n.path) === key(selected))!,
       s = own.step;
     actions.append(el('h3', `Selected · ${own.label}`));
