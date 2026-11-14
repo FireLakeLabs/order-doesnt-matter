@@ -97,7 +97,7 @@ export default {
       previewKey = '',
       request = 0,
       destroyed = false;
-    let withoutResult: EventResult | undefined;
+    let withoutResult: EventResult | undefined, withResult: EventResult | undefined;
     const comparison = el('p');
     comparison.className = 'editor-helper';
     const root = el('div'),
@@ -314,6 +314,7 @@ export default {
         previewKey = key;
         const version = ++request;
         withoutResult = undefined;
+        withResult = next.events;
         comparison.textContent = '';
         previews.replaceChildren(strip(`With ${layer.name}`, next.events, next), comparison);
         if (next.ask && next.target.instrumentId) {
@@ -337,10 +338,15 @@ export default {
           previews.prepend(
             el('p', 'The comparison is unavailable here; showing the current score only.'),
           );
-      } else {
+      } else if (withResult !== next.events) {
+        withResult = next.events;
+        // Keep the figure attached while a late score answer updates its marks;
+        // scroll/focus operations may already be using this element.
         previews
           .querySelector('figure:last-of-type')
-          ?.replaceWith(strip(`With ${layer.name}`, next.events, next));
+          ?.replaceChildren(
+            ...Array.from(strip(`With ${layer.name}`, next.events, next).childNodes),
+          );
       }
       compare();
     }

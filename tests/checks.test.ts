@@ -31,6 +31,8 @@ test('boundary fixtures reject imports and fixed ports; allow the seam and OS po
   for (const code of [
     'port: N',
     '--port N',
+    '--portN',
+    '--port=N',
     'http://localhost:N',
     'listen(N)',
     '"port": N',
@@ -38,6 +40,8 @@ test('boundary fixtures reject imports and fixed ports; allow the seam and OS po
   ].map((s) => s.replace('N', '44'.repeat(2))))
     expect(boundaryProblems('scripts/bad.mjs', code), code).not.toEqual([]);
   expect(boundaryProblems('vite.config.ts', 'port: 0')).toEqual([]);
+  for (const separator of [' ', '=', ''])
+    expect(boundaryProblems('package.json', `vite --port${separator}${0}`)).not.toEqual([]);
 });
 
 test('browser timing includes the boundary and fails above it without sleeping', () => {
@@ -166,4 +170,29 @@ test('shared all-hook clock slots do not displace the actual test teardown timin
     teardown: 200,
     other: 100,
   });
+});
+
+test('recording exceptions are explicit and never excuse a slow acceptance test', async () => {
+  const { browserSummary, formatBrowserSummary } = await import('../scripts/browser-summary.mjs');
+  const row = { title: 'demo', status: 'passed', ms: 20001, budgetException: 'Viewing hold' };
+  const demo = browserSummary([row], 21, 'demo');
+  expect(demo.ok).toBe(true);
+  expect(demo.over).toHaveLength(1);
+  expect(formatBrowserSummary(demo)).toContain('OPTIONAL RECORDING EXCEPTION');
+  expect(browserSummary([row], 21).ok).toBe(false);
+  expect(browserSummary([row], 21, 'online').ok).toBe(false);
+  expect(browserSummary([{ ...row, budgetException: undefined }], 21, 'demo').ok).toBe(false);
+});
+
+test('all seven Strudel and superdough manifest and lock pins remain exact', async () => {
+  const { readFileSync } = await import('node:fs');
+  const manifest = JSON.parse(readFileSync('package.json', 'utf8'));
+  const lock = JSON.parse(readFileSync('package-lock.json', 'utf8'));
+  for (const name of ['core', 'mini', 'tonal', 'transpiler', 'web', 'webaudio', 'superdough']) {
+    const pkg = name === 'superdough' ? name : `@strudel/${name}`;
+    const version = ['web', 'webaudio', 'superdough'].includes(name) ? '1.3.0' : '1.2.6';
+    expect(manifest.dependencies[pkg]).toBe(version);
+    expect(lock.packages[''].dependencies[pkg]).toBe(version);
+    expect(lock.packages[`node_modules/${pkg}`].version).toBe(version);
+  }
 });

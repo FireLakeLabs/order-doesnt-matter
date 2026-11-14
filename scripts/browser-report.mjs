@@ -79,6 +79,9 @@ export default class BrowserReport {
       title: test.titlePath().filter(Boolean).join(' > '),
       status: result.status,
       ms: result.duration,
+      budgetException: test.location.file.endsWith('/demo.spec.ts')
+        ? test.annotations.find((a) => a.type === 'recording-budget')?.description
+        : undefined,
       phases: phaseTimings(result),
       sharedSetupMs: (() => {
         const body = result.attachments.find((a) => a.name === 'browser-shared-setup')?.body;
