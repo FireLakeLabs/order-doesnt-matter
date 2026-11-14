@@ -3,7 +3,7 @@ import { expect, test } from 'vitest';
 import { discoveryIdentity } from './discovery';
 import { generate } from './index';
 import { importStrudel } from '../import';
-import { walk, type Doc, type Setting } from '../document';
+import { walk, type Doc, type Setting, type Step } from '../document';
 import { setConstant } from '../document/edits/set-constant';
 import { replaceFromSource } from '../document/edits/source-node';
 import { queryEvents, queryEventsWithBudget } from '../strudel/evaluate';
@@ -127,4 +127,21 @@ test('loaded JSON cannot introduce executable names or unproven timing through a
   if (tempo.kind !== 'tempo') throw Error('Expected tempo');
   tempo.cpm = 'globalThis.effect++' as unknown as number;
   expect(discoveryIdentity(badTempo)).toBeUndefined();
+});
+
+test('structured mini expressions cannot inherit admission from stale literal notation', () => {
+  const doc = importStrudel('s("bd*4").gain(.4)').doc;
+  expect(discoveryIdentity(doc)).toBeDefined();
+  let mini: Step | undefined;
+  walk(doc, (node) => {
+    if ('core' in node && node.core.kind === 'sequence') mini = node.core.steps[0];
+  });
+  expect(mini?.kind).toBe('other');
+  Object.assign(mini!, {
+    expression: {
+      step: { kind: 'value', value: '^external' },
+      marks: [{ name: 'faster', amount: { kind: 'value', value: '4' } }],
+    },
+  });
+  expect(discoveryIdentity(doc)).toBeUndefined();
 });

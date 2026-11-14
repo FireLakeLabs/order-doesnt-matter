@@ -4,6 +4,22 @@ const controls = new Set('s note n bank gain cutoff lpf pan release room delay'.
 const groups = new Set(['stack', 'arrange']);
 const rates = new Set(['fast', 'slow', 'ply']);
 const atom = (s: string) => /^[a-zA-Z0-9_]+$/.test(s);
+function literalSpeed(s: Extract<Step, { kind: 'other' }>): boolean {
+  const match = /^([a-zA-Z0-9_]+)\*([1-9]\d*)$/.exec(s.notation);
+  if (!match) return false;
+  // Structural editors generate from expression rather than legacy notation.
+  // Admit only the canonical AST for this same fixed literal grammar. Extra or
+  // reordered metadata conservatively misses, including on older checkouts.
+  return (
+    !('expression' in s) ||
+    s.expression === undefined ||
+    JSON.stringify(s.expression) ===
+      JSON.stringify({
+        step: { kind: 'value', value: match[1] },
+        marks: [{ name: 'faster', amount: { kind: 'value', value: match[2] } }],
+      })
+  );
+}
 function steps(items: Step[]): boolean {
   return items.every((s) => {
     if (
@@ -29,7 +45,7 @@ function steps(items: Step[]): boolean {
       case 'other':
         // The base importer stores Kiln's literal bd*4/hh*16 as other.
         // Admit only this fixed mini token + positive integer speed grammar.
-        return /^[a-zA-Z0-9_]+\*[1-9]\d*$/.test(s.notation);
+        return literalSpeed(s);
       default:
         return false;
     }
