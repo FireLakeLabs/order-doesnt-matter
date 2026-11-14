@@ -2,7 +2,6 @@ import { mkdir } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { openProgram, play, selectNode, signal, waitForPending, triggerValues } from './helpers';
 import { instruments } from '../../src/document';
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 
 test('source applies once, confirms trigger values, preserves refused text and reverts', async ({
   page,

@@ -1,8 +1,15 @@
 import { test } from './helpers';
-import { signal, openProgram, play, selectNode, waitForPending, sharedProgram } from './helpers';
+import {
+  signal,
+  openProgram,
+  play,
+  selectNode,
+  waitForPending,
+  sharedProgram,
+  appSignal,
+} from './helpers';
 import { expect, type Page } from '@playwright/test';
 import { instruments } from '../../src/document';
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 const editor = (page: Page) => page.locator('#editor');
 async function exact(page: Page, value: number) {
   await editor(page).getByRole('spinbutton').fill(String(value));
@@ -43,19 +50,38 @@ test.describe('real house rewrites with shared setup', () => {
             cycle,
           ),
         ).toBe(true);
-        expect(
-          await page.evaluate(
-            (c) =>
-              window.odmApp.history.filter(
+        // Rendering can deliver a later instrument's callback before the last
+        // kick callbacks. Cross the audio boundary AND finish this instrument's
+        // observation; a future callback alone does not close the window.
+        await appSignal(
+          page,
+          (c) =>
+            window.odmApp.engine!.now()! >= c + 1 &&
+            window.odmApp.history.filter(
+              (e) =>
+                e.type === 'trigger' &&
+                e.cycle >= c &&
+                e.cycle < c + 1 &&
+                (e.value as { s?: string }).s === 'bd',
+            ).length >= 8,
+          cycle,
+        );
+        const starts = await page.evaluate(
+          (c) =>
+            window.odmApp.history
+              .filter(
                 (e) =>
                   e.type === 'trigger' &&
                   e.cycle >= c &&
                   e.cycle < c + 1 &&
                   (e.value as { s?: string }).s === 'bd',
-              ).length,
-            cycle,
-          ),
-        ).toBe(8);
+              )
+              .map((e) => ('cycle' in e ? e.cycle - c : -1))
+              .sort((a, b) => a - b),
+          cycle,
+        );
+        expect(starts).toHaveLength(8);
+        expect(starts).toEqual([0, 1 / 8, 1 / 4, 3 / 8, 1 / 2, 5 / 8, 3 / 4, 7 / 8]);
         await page.getByRole('button', { name: 'Stop', exact: true }).click();
         return;
       }

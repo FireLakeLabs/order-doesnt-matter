@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, appendFileSync, readFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { browserSummary, formatBrowserSummary } from './browser-summary.mjs';
 import { timingResult, BROWSER_LIMIT_SECONDS } from './timing.mjs';
@@ -20,14 +20,27 @@ for (let i = 0; i < args.length; i++) {
   else if (args[i].startsWith('--reporter=')) reporters = args.splice(i--, 1)[0].slice(11);
 }
 const reportPath = `${outDir}/timings.json`;
+const phases = {};
+let phaseStart = start;
+function phase(name) {
+  const now = performance.now();
+  phases[name] = (now - phaseStart) / 1000;
+  phaseStart = now;
+  const body = JSON.stringify({ phases, wallSeconds: (now - start) / 1000 }, null, 2) + '\n';
+  writeFileSync(`${outDir}/command.json`, body);
+  if (process.env.ODM_PROFILE_PATH)
+    writeFileSync(`${process.env.ODM_PROFILE_PATH}.command.json`, body);
+}
 let server;
 try {
   const { build, preview } = await import('vite');
   await build({ build: { outDir } });
+  phase('build');
   server = await preview({
     build: { outDir },
     preview: { host: '127.0.0.1', port: 0, open: false },
   });
+  phase('serve');
   const address = server.httpServer.address();
   const code = await new Promise((resolve, reject) => {
     const child = spawn(
@@ -54,6 +67,8 @@ try {
         },
       },
     );
+    for (const stream of [child.stdout, child.stderr])
+      stream.on('data', (chunk) => appendFileSync(`${outDir}/browser.log`, chunk));
     child.stdout.pipe(process.stdout, { end: false });
     child.stderr.pipe(process.stderr, { end: false });
     const offSignals = forwardBrowserSignals(child);
@@ -74,6 +89,7 @@ try {
       resolve(code ?? 1);
     });
   });
+  phase('tests');
   if (code) process.exitCode ||= 1;
 } catch (error) {
   console.error(error);
@@ -83,6 +99,7 @@ try {
     await new Promise((resolve, reject) =>
       server.httpServer.close((error) => (error ? reject(error) : resolve())),
     );
+  phase('shutdown');
   let rows;
   try {
     rows = JSON.parse(readFileSync(reportPath, 'utf8'));
@@ -106,6 +123,7 @@ try {
       process.exitCode = 1;
     }
   }
+  console.log(`Browser phases (seconds): ${JSON.stringify(phases)}`);
   const result = timingResult(start, performance.now(), limit);
   const message = `Browser suite: ${result.seconds.toFixed(3)} s / ${limit} s — ${result.ok ? 'within budget' : 'OVER BUDGET'}`;
   if (rows) {
