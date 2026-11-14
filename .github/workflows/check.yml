@@ -25,6 +25,14 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:browser
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failure-evidence
+          path: .browser-build-*/
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
       - run: npm ci --prefix infra
       - run: npm test --prefix infra
       - run: npx --no-install cdk synth OrderDoesntMatter --strict --quiet

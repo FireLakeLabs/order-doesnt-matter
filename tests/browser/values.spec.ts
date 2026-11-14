@@ -2,7 +2,6 @@ import { test } from './helpers';
 import { signal, openProgram, play, selectNode } from './helpers';
 import { expect } from '@playwright/test';
 import { walk, type Setting } from '../../src/document';
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 
 test('real techno: change room to alternating values, edit a cycle, deliver the changed value; phone and keyboard', async ({
   page,
