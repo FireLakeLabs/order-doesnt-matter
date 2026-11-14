@@ -10,6 +10,7 @@ import {
 } from './helpers';
 import { expect, type Page } from '@playwright/test';
 import { instruments } from '../../src/document';
+import { futureInstrumentCycle } from '../observation-window';
 const editor = (page: Page) => page.locator('#editor');
 async function exact(page: Page, value: number) {
   await editor(page).getByRole('spinbutton').fill(String(value));
@@ -41,9 +42,18 @@ test.describe('real house rewrites with shared setup', () => {
         await play(page);
         // Browser delivery canary only. Exact spans and unaffected instruments are
         // proved by rewrite-editor.test.ts against the real Strudel worker.
-        // First playback may begin inside a cycle. Keep #22's future complete
-        // cycle so a late first scheduler tick cannot truncate the observation.
-        const cycle = await page.evaluate(() => Math.ceil(window.odmApp.engine!.now()!) + 1);
+        // Choose one future complete cycle before examining callbacks. A delayed
+        // acknowledgement can pass the drop; breakdown/intro have no kick.
+        const target = await page.evaluate(() => ({
+          now: window.odmApp.engine!.now()!,
+          sections: window.odmApp.state.sections,
+          revision: window.odmApp.history.filter((e) => e.type === 'swapped').at(-1)!.revision,
+        }));
+        const cycle = futureInstrumentCycle(target.sections, kick.id, target.now);
+        await test.info().attach('planned-kick-window', {
+          body: JSON.stringify({ ...target, instrument: kick.id, cycle }),
+          contentType: 'application/json',
+        });
         await signal(() =>
           page.evaluate(
             (c) => window.odmApp.history.some((e) => e.type === 'trigger' && e.cycle >= c + 1),
