@@ -123,8 +123,11 @@ test.describe('real house controls with shared setup', () => {
     );
     for (const button of await page.locator('#editor button').all())
       expect((await button.boundingBox())!.height).toBeGreaterThanOrEqual(44);
-    await expect(page.getByRole('button', { name: 'Done', exact: true })).toBeInViewport();
-    await page.getByRole('button', { name: 'Done', exact: true }).click();
+    const done = page.getByRole('button', { name: 'Done', exact: true });
+    // The in-page editor uses page scrolling rather than a fixed drawer footer.
+    await done.scrollIntoViewIfNeeded();
+    await expect(done).toBeInViewport();
+    await done.click();
     const header = page.locator(`th[data-editor-target="${ids.bass}"]`);
     await expect(header).toBeFocused();
     await header.press('Enter');

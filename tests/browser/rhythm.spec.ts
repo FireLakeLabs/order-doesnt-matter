@@ -212,12 +212,22 @@ test('Kiln live: split removal, undo, literal marks and evenly spread drum hits'
   await page.getByRole('button', { name: 'Spread hits evenly…', exact: true }).press('Enter');
   await page.getByLabel('hits', { exact: true }).fill('3');
   await swap(page, () => page.getByLabel('hits', { exact: true }).press('Enter'));
+  // A swap can acknowledge an earlier queued edit; wait for this gesture too.
+  await waitForPending(page);
   await expect(page.getByLabel('hits', { exact: true })).toBeFocused();
   await expect(page.getByLabel('out of', { exact: true })).toHaveValue('8');
   const boundary = await page.evaluate(() =>
-    Math.ceil(window.odmApp.history.filter((e) => e.type === 'swapped').at(-1)!.cycle),
+    Math.ceil(
+      Math.max(
+        window.odmApp.engine!.now()!,
+        window.odmApp.history.filter((e) => e.type === 'swapped').at(-1)!.cycle,
+      ),
+    ),
   );
   await throughCycle(page, boundary + 1);
+  // Trigger callbacks await rendering and can arrive out of timestamp order.
+  // A future drum callback alone does not finish the bass observation window.
+  await appSignal(page, (cycle) => window.odmApp.engine!.now()! >= cycle, boundary + 1);
   const bassStarts = await page.evaluate(
     (c) =>
       window.odmApp.history

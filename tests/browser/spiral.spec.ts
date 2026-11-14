@@ -155,29 +155,35 @@ test.describe('Kiln Watch with shared setup', () => {
         return JSON.stringify(before) === JSON.stringify(view.marks.map((m) => m.startAngle));
       }),
     ).toBe(true);
-    await dialog.getByRole('button', { name: 'Play', exact: true }).click();
+    await page.locator('#play').click();
     await appSignal(page, () => window.odmApp.state.playing && window.odmApp.state.message === '');
-    await dialog.getByRole('button', { name: 'Stop', exact: true }).click();
+    await page.locator('#stop').click();
     expect(await page.evaluate(() => window.odmApp.engine!.playing)).toBe(false);
     await dialog.getByRole('button', { name: 'Close', exact: true }).click();
     await expect(page.getByRole('button', { name: 'Watch', exact: true })).toBeFocused();
   });
 });
-test('Watch shows unasked time distinctly and cancels its outstanding batch on close', async ({
+test('Watch shows unasked time distinctly and keeps the same preview when shrunk', async ({
   page,
 }) => {
   await openProgram(page, { source: 's("sawtooth*8")' });
+  const canvas = await page.locator('#spiral canvas').elementHandle();
   await page.getByRole('button', { name: 'Watch', exact: true }).click();
   const result = await page.evaluate(() => {
     const app = window.odmApp;
-    window.odmSpiral.update(app.watchInput(4));
+    window.odmSpiral.update(app.watchInput(64));
     return {
       text: document.querySelector('.spiral-status')!.textContent,
-      known: app.watchInput(4).known,
+      known: app.watchInput(64).known,
     };
   });
   expect(result.text).toBe('Striped stretches: not asked yet');
-  expect(result.known).toEqual([[0, 4]]);
+  expect(result.known.some(([from, to]) => from <= 64 && to > 64)).toBe(false);
   await page.keyboard.press('Escape');
-  expect(await page.evaluate(() => window.odmApp.watchInput(4).known)).toEqual([[0, 4]]);
+  await expect(page.locator('#watch-preview #spiral canvas')).toBeVisible();
+  await expect(page.locator('#preview-expanded')).not.toBeVisible();
+  expect(await canvas!.evaluate((node) => node === document.querySelector('#spiral canvas'))).toBe(
+    true,
+  );
+  await canvas!.dispose();
 });

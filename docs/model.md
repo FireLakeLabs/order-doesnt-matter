@@ -82,7 +82,7 @@ breadcrumb. Nothing else is editable while it is open.
 
 ## Chosen next interface (2026-11-14)
 
-Owner-selected direction, awaiting implementation:
+Layout and live context are implemented; retention awaits a separate wave:
 
 - One editor stays in the page, with live previews available. Replaces D34's
   panel placement.

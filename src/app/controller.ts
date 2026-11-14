@@ -299,6 +299,7 @@ export function createApp() {
     },
     history,
     setWatch(open: boolean) {
+      if (watchOpen === open) return;
       watchOpen = open;
       resetWatch();
     },

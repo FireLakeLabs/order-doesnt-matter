@@ -106,7 +106,12 @@ export function mountConstellation(
     touchList = initial.instruments.length > 12,
     previous: number | null = null,
     model = initial;
-  const boxHeight = () => Math.max(220, Math.min(280, width * 0.85));
+  const boxHeight = () => {
+    const expanded = parseFloat(
+      getComputedStyle(drawing).getPropertyValue('--constellation-height-limit'),
+    );
+    return Math.max(220, expanded || Math.min(280, width * 0.85));
+  };
   function position() {
     const layout = constellationLayout(model, { width: width - 8, height: boxHeight() - 8 });
     touchList = layout.planets.some((p, n) =>

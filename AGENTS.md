@@ -14,8 +14,9 @@ you play with the score directly, without making Strudel's syntax the subject.
 
 ## Current phase
 
-Phase 4 (gaps and fixes) is built; next is an overall design review of the
-interface. Now (`src/live/`) and Watch (`src/spiral/`) share the pure model
+Phase 4 and the reviewed in-page editor layout are built. Now and Watch are
+previews that enlarge; playing and editing contexts have separate labels.
+Retention/export is a later wave. Now (`src/live/`) and Watch (`src/spiral/`) share the pure model
 in `src/live/model.ts`. The app is live at odm.firelakelabs.com
 and every merge to `main` publishes. An editor is one file in `src/editor/kinds/`;
 a document change is one file in `src/document/edits/`. Production code lives
