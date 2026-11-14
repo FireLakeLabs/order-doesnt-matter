@@ -5,7 +5,13 @@ export default defineConfig({
   testDir: './tests/browser',
   // Bound concurrent score-worker queries; audio clocks run afterward.
   workers: 3,
-  use: { browserName: 'chromium', baseURL: process.env.ODM_URL },
+  use: {
+    browserName: 'chromium',
+    baseURL: process.env.ODM_URL,
+    // Per-file object overrides create distinct worker identities even when
+    // their values match. Share this launch; each test still gets its own context.
+    launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] },
+  },
   reporter: 'line',
   projects: [
     { name: 'default', testIgnore: [optional, audio] },

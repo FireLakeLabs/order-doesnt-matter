@@ -1,6 +1,5 @@
 import { expect } from '@playwright/test';
 import { test, openProgram, selectNode, play, swap, appSignal, signal } from './helpers';
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 
 test('Kiln: live deletion removes row, planet and a full cycle of triggers; Undo restores exactly', async ({
   page,

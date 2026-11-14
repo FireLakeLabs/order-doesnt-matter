@@ -5,7 +5,6 @@ import { playbackSafety } from './playback-safety';
 import type { EngineEvent } from '../../src/contract';
 import type {} from '../../src/engine/harness';
 
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 // The multi-page, throttled audio-clock proof belongs with the serialized audio
 // checks, rather than competing with three UI workers and a paste-timeout test.
 test('scheduler preflight retains Kiln, rejects a runaway and caps flooded notes', async ({
