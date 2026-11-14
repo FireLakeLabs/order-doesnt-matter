@@ -1,8 +1,9 @@
 # Interface design review · wave 1
 
-Authorized on 2026-11-14 after the Phase 4 status review. This is evidence and a
-proposal, not a new product decision. D42 and the backlog define the starting
-point; the owner chooses the implementation direction after seeing the mockups.
+Authorized on 2026-11-14 after the Phase 4 status review. D42 and the backlog
+defined the starting point. After seeing the mockup, the owner selected the
+[next interface direction](../../docs/model.md#chosen-next-interface-2026-11-14).
+The mockup remains illustrative; implementation is a separate wave.
 
 ## Scope and finish line
 
@@ -22,7 +23,7 @@ question in this wave. The mockups do not play or save a real document.
 - Workflow reviewer: read-only analysis of source and existing evidence; report
   findings and source locations to the orchestrator. No file changes.
 - Designer: `mockups.html` only. Build proposed states from D42 and the backlog;
-  identify assumptions. Final owner decisions remain unresolved.
+  identify assumptions. Owner choices are recorded in the model after review.
 
 Read `AGENTS.md` and all six documents it names before working. Use the pinned
 Node and npm. Keep Strudel behind its seam, spikes frozen, and third-party music

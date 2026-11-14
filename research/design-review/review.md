@@ -1,6 +1,7 @@
 # Interface review · 2026-11-14
 
-Proposal for the owner, following D42. Nothing here changes a product decision.
+Review following D42. The owner has selected the
+[next interface direction](../../docs/model.md#chosen-next-interface-2026-11-14).
 Open [the interactive mockup](mockups.html) and use Desktop/Phone, the score's
 setting/rhythm buttons, and Enlarge on either live preview. All behavior there is
 simulated. [The wave brief](brief.md) records scope and acceptance.
@@ -20,19 +21,19 @@ simulated. [The wave brief](brief.md) records scope and acceptance.
    were reachable by scrolling, not permanently inaccessible. The proposal places
    one editor in normal document flow, preserving score context and live access.
    Tradeoff: longer phone pages; reaching the selected editor needs deliberate
-   scroll/focus handling. Sticky/resizable alternatives remain an owner choice.
+   scroll/focus handling. The owner chose the in-page editor for implementation.
 3. **Name editing and playback separately.** Selecting a section pins the sheet;
    Now derives its section from the playback clock ([state](../../src/app/state.ts),
    [live model](../../src/live/model.ts)). This is source-verified behavior. The
-   proposal labels both contexts and keeps live views tied to playback. Choosing
-   that behavior remains with the owner.
+   proposal labels both contexts and keeps live views tied to playback, as the
+   owner has now chosen.
 4. **Protect work before replacing it.** A visual lpf change from 700 to 900 left
    `.lpf(700)` in the paste box. Load reads that box and replaces the edit session
    ([load](../../src/app/controller.ts), [paste](../../src/app/main.ts)). There is
    no document persistence or export UI. The proposal separates import from the
    active document and shows local recovery, JSON download and generated-Strudel
-   export. None is implemented. Recovery policy and replacement confirmation need
-   a decision, including how to report storage failure.
+   export. The owner chose these first retention features; none is implemented.
+   Recovery policy, replacement confirmation and storage-failure UX need specification.
 5. **Make names and return paths reliable.** A synthetic 14-instrument, two-room
    score on the phone used full-name List buttons, each 55 px tall. Planet labels
    were too compressed to identify the long names visually. Watch's legend wrapped
@@ -44,15 +45,16 @@ simulated. [The wave brief](brief.md) records scope and acceptance.
 
 ## Backlog disposition
 
-Every interface-review item remains open unless the owner chooses a treatment.
+The model records the three owner choices. Their implementation and the other
+interface-review items below remain outstanding.
 
 | Backlog item | Proposed treatment or remaining evidence |
 | --- | --- |
-| Small live previews that enlarge | Both previews in the mockup enlarge without replacing the score. An enlargement can be restored while the editor remains open. This is a candidate revision to D34, not an adopted replacement. |
+| Small live previews that enlarge | Both previews in the chosen layout enlarge without replacing the score. An enlargement can be restored while the editor remains open. The model records the change to D34's placement; implementation is pending. |
 | Panel visibility; rhythm controls | Preserve small live previews during editing. Normal-flow editor avoids nested clipped controls; test a long score and keyboard return before implementation. |
 | Theme picker | Defer palette and theme mechanics until hierarchy is chosen. Mockup colours are provisional; no selected theme. |
 | 3D fly-through | Retain as a possible optional Watch style. Frozen spike evidence still finds the ring clearer; no 3D implementation in this wave. |
-| Now follows playback or selection | Show both context labels. Recommend playback for live views; leave the owner choice open. |
+| Now follows playback or selection | Owner chose playback for live views with explicit playing/editing labels. Implementation is pending. |
 | Planet → instrument settings | Enlarged Now offers full-name instrument buttons; its one editor offers setting/rhythm navigation. Keep settings off the planet drawing (D37). |
 | Planet and room readability | Larger preview has explicit room wording and full-name access. Dense/contradictory room settings still need a detailed visual design; no claim that the mockup solves unpredictable conflicts. |
 | Plain Watch bands; thin short notes | Mockup preserves unequal event spans and a gate. Production already has onset heads. Defer stroke/contrast/density tuning to a focused Watch study. |
@@ -62,19 +64,17 @@ Every interface-review item remains open unless the owner chooses a treatment.
 | Comment used as breadcrumb | Setup now has `setupSummary`; its fallback still uses the first 60 source characters. Investigate a concrete current example before calling this fixed or defective. |
 | “Add to” wording | Not found in current production source. Historical note needs a current example before work is scheduled. |
 
-## Choices to make before implementation
+## Owner choices and remaining work
 
-- Accept a normal-flow editor with persistent previews, or request a sticky or
-  resizable editor variation. Choose this before changing layout.
-- Keep Now/Watch tied to playback with explicit context labels, or request a
-  selected-section preview with a distinct name and appearance.
-- Decide whether local recovery, portable JSON and generated-Strudel export are
-  the intended first retention features; define replacement/storage-failure UX.
+The owner selected the in-page editor, playback-based live views with explicit
+context labels, and local recovery/document download/Strudel export. The model is
+the authoritative record. Detailed recovery limits, replacement confirmation,
+storage-failure feedback, and focus/scroll behavior remain implementation-brief work.
 
-After those choices, propose a separately authorized implementation wave with
-specific files and real-piece acceptance checks. Dependency maintenance and the
-later-loop playback limitation remain separate backlog work. No merge is part of
-this wave. No new durable product decision has been appended.
+The [next implementation brief](implementation-brief.md) specifies files and
+real-piece acceptance checks; it awaits separate authorization. Dependency
+maintenance and the later-loop playback limitation remain separate backlog work.
+No merge is part of this wave.
 
 ## Evidence and limits
 

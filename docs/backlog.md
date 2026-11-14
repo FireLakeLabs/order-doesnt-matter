@@ -7,13 +7,12 @@ ships.
 
 ## Next agreed step
 
-An overall design review of the interface (D42). The owner's words: the design
-is "fine, but a little jumbled." Start it with a plan and mockups; build
-nothing first.
-
-The [2026-11-14 review and interactive mockup](../research/design-review/review.md)
-are proposals for that discussion. Layout, live context and retention choices
-remain open; implementation is a later wave.
+The [2026-11-14 interface review and interactive mockup](../research/design-review/review.md)
+complete the plan-and-mockup step in D42. The owner selected the
+[next interface direction](model.md#chosen-next-interface-2026-11-14).
+Implementation is a later, separately authorized wave; no production changes
+have shipped from this review. The [next implementation brief](../research/design-review/implementation-brief.md)
+is ready for that authorization.
 
 ## For the design review
 
@@ -24,8 +23,8 @@ remain open; implementation is a later wave.
 - **Theme picker.** The owner dislikes the current colours; not urgent.
 - **3D fly-through as a Watch style.** Built in `spikes/spiral`, judged less
   readable than the ring, but the owner would be sorry to lose it.
-- **Should Now follow playback or the selected section?** Today it follows
-  playback, so it disagrees with a pinned sheet while playing.
+- **Playing/editing context labels:** implement the chosen playback-based live
+  context alongside the sheet's independently pinned section.
 - **A way from a planet into that instrument's settings.** A planet opens the
   instrument editor only; settings are reached through the sheet.
 - **Planets are barely readable** at panel size, and the **room outline is too
@@ -43,7 +42,8 @@ remain open; implementation is a later wave.
 
 - **Keeping work:** no document save/export or reload recovery. The paste box
   retains imported text after visual edits; loading it again replaces those edits
-  and their history. Retention and safe replacement need a design decision.
+  and their history. The first retention features are chosen in the model;
+  recovery limits and safe replacement still need specification and implementation.
 
 - **Still edited as text:** polymeter, random choice, speed or evenly-spread
   values that are themselves patterns, repeated outer speed marks, negative

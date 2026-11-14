@@ -9,7 +9,7 @@ shows you when.)
 
 Status: Phase 4 is built: score and section editing, undo/redo, the Now
 constellation and Watch spiral. An [interface design review](research/design-review/review.md)
-is proposing the next layout; its mockup does not change the app. Outstanding work
+records the chosen next direction; its mockup does not change the app. Outstanding work
 is in [the backlog](docs/backlog.md). Production code lives in `src/`; `spikes/`
 is frozen reference and must not be imported. Start with [the model](docs/model.md).
 
