@@ -12,9 +12,8 @@ export function euclidNumbers(s: Step) {
     turn = s.rotation ? number(s.rotation) : 0;
   if (
     ![hits, outOf, turn].every(Number.isSafeInteger) ||
-    hits < 0 ||
     outOf < 1 ||
-    hits > outOf ||
+    Math.abs(hits) > outOf ||
     outOf > 1024
   )
     return;
@@ -31,12 +30,11 @@ export function euclidRhythm(
   if (
     hits !== null &&
     (![hits, outOf, turn].every(Number.isSafeInteger) ||
-      hits < 0 ||
       outOf < 1 ||
-      hits > outOf ||
+      Math.abs(hits) > outOf ||
       outOf > 1024)
   )
-    return refuse('Use whole numbers: hits from 0 to out of, out of from 1 to 1024');
+    return refuse('Use whole numbers: absolute hits at most out of, out of from 1 to 1024');
   return editStep(doc, id, path, (step) => {
     const marks = rhythmMarks(step),
       s = marks?.base ?? step;

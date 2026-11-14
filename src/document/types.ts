@@ -79,7 +79,16 @@ export type Step =
   | { kind: 'euclid'; step: Step; pulses: Step; steps: Step; rotation?: Step }
   | { kind: 'polymeter'; steps: Step[]; per?: Step }
   | { kind: 'choose'; steps: Step[] }
-  | { kind: 'other'; notation: string };
+  | { kind: 'other'; notation: string; expression?: MiniExpression };
+/** Ordered written occurrences; unlike the PEG's aggregated weight/reps.
+ * `other` keeps existing editors on source until the structural UI is built. */
+export interface MiniExpression {
+  step: Step;
+  marks: MiniMark[];
+}
+export type MiniMark =
+  | { name: 'faster' | 'slower'; amount: Step }
+  | { name: 'repeat' | 'weight' | 'chance'; amount?: number };
 export type Layer = SettingsLayer | RewriteLayer | OpaqueLayer;
 export interface SettingsLayer extends Meta {
   kind: 'settings';
