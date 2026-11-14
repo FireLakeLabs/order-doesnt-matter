@@ -8,7 +8,11 @@ export interface AudioBackend {
     from: number,
     revision: number,
   ): Promise<{ values: unknown[]; commit(): Promise<void> }>;
-  preflight(code: string, from: number, starts: number[]): Promise<unknown[]>;
+  preflight(
+    code: string,
+    from: number,
+    starts: number[],
+  ): Promise<{ values: unknown[]; discoveryValues: unknown[] }>;
   check(value: unknown): Promise<void>;
   key?(value: unknown): string;
   resume(): Promise<void>;
@@ -29,17 +33,30 @@ export type Dispatch = (
   instrument?: string,
 ) => Promise<void>;
 export type SilentWindow = (revision: number, cycle: number, time: number) => void;
+// Audio engines share Strudel's page registry. Unmodelled evaluation can mutate
+// it permanently; new engines do not make it pure again. Reload does.
+const pageRegistry = { epoch: 0, trusted: true };
 /** Injection keeps queue, revision and cancellation behavior testable without audio. */
 export function engineWith(
   audio: AudioBackend,
   connect: (dispatch: Dispatch, error: (e: unknown) => void, silent: SilentWindow) => void,
+  registry = { epoch: 0, trusted: true },
 ): Engine {
+  let inventory:
+    | { scope: object; identity: string; starts: string; values: unknown[]; registry: number }
+    | undefined;
+  let discoveryRevision = 0;
+  const clearInventory = () => {
+    inventory = undefined;
+    discoveryRevision++;
+  };
   const listeners = new Set<(e: EngineEvent) => void>(),
     revisions = new Revision();
   const emit = (event: EngineEvent) => {
     for (const listener of listeners) listener(event);
   };
   const error = (e: unknown) => {
+    clearInventory();
     if (e instanceof PlaybackOverrun) {
       overrun = { epoch, error: e };
       // A first tick may run inside clock.start(), before Strudel sets started.
@@ -92,6 +109,7 @@ export function engineWith(
     },
   );
   function stop() {
+    clearInventory();
     enabled = false;
     epoch++;
     audio.stop();
@@ -108,13 +126,34 @@ export function engineWith(
           await audio.resume();
           if (token !== epoch) throw cancelled(token);
           const from = options.fromCycle ?? (audio.playing() ? Math.max(0, audio.now()) : 0);
-          const discovered = await audio.preflight(
-            code,
-            from,
-            (options.discoverCycles ?? []).slice(0, 32),
-          );
+          const proof = options.discovery,
+            starts = (options.discoverCycles ?? []).slice(0, 32),
+            startKey = JSON.stringify(starts),
+            generation = discoveryRevision,
+            registryEpoch = registry.epoch;
+          const reuse =
+            proof &&
+            registry.trusted &&
+            inventory?.scope === proof.scope &&
+            inventory.identity === proof.identity &&
+            inventory.starts === startKey &&
+            inventory.registry === registryEpoch
+              ? inventory.values
+              : [];
+          const discovered = await audio.preflight(code, from, reuse.length ? [] : starts);
           if (token !== epoch) throw cancelled(token);
+          const staleInventory = () =>
+            reuse.length &&
+            (generation !== discoveryRevision ||
+              registry.epoch !== registryEpoch ||
+              !registry.trusted);
+          if (staleInventory())
+            throw Error('Section inventory changed during playback preparation');
           const revision = active + 1;
+          if (!proof) {
+            registry.trusted = false;
+            registry.epoch++;
+          }
           const candidate = await audio.prepare(code, from, revision);
           const next = new SoundBook(
             audio.check,
@@ -127,11 +166,17 @@ export function engineWith(
           book = next;
           emit({ type: 'sounds', sounds: [] });
           await Promise.all(
-            [...candidate.values, ...discovered].map((value) => next.observe(value)),
+            [...candidate.values, ...discovered.values, ...reuse].map((value) =>
+              next.observe(value),
+            ),
           );
           if (token !== epoch) {
             book = previous;
             throw cancelled(token);
+          }
+          if (staleInventory()) {
+            book = previous;
+            throw Error('Section inventory changed during playback preparation');
           }
           const wasPlaying = audio.playing();
           if (options.fromCycle !== undefined && wasPlaying) audio.stop();
@@ -153,6 +198,19 @@ export function engineWith(
           // Keep the immediately preceding book for notes already in the scheduler horizon.
           for (const key of books.keys()) if (key < active - 1) books.delete(key);
           if (!wasPlaying) emit({ type: 'transport', playing: true });
+          if (
+            proof &&
+            registry.trusted &&
+            registry.epoch === registryEpoch &&
+            generation === discoveryRevision
+          )
+            inventory = {
+              ...proof,
+              starts: startKey,
+              values: reuse.length ? reuse : discovered.discoveryValues,
+              registry: registryEpoch,
+            };
+          else clearInventory();
           return revision;
         } catch (e) {
           if (e !== overrun?.error) error(e);
@@ -183,8 +241,10 @@ export function engineWith(
   };
 }
 export const createEngine: CreateEngine = async () => {
+  pageRegistry.epoch++;
   const { createAudio } = await import('../strudel/audio');
   const audio = await createAudio();
+  pageRegistry.epoch++;
   const { createBrowserQueries } = await import('../strudel/evaluate-browser');
   const queries = createBrowserQueries();
   return engineWith(
@@ -198,9 +258,13 @@ export const createEngine: CreateEngine = async () => {
               ? PREFLIGHT_TIMEOUT
               : 'This program could not be checked, so it was not played.',
           );
-        return result.events.map((e) => e.value);
+        return {
+          values: result.events.map((e) => e.value),
+          discoveryValues: result.discoveryValues ?? [],
+        };
       },
     },
     audio.connect,
+    pageRegistry,
   );
 };

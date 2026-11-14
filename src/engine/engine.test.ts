@@ -9,7 +9,7 @@ function fixture() {
     dispatch!: Dispatch,
     fail!: (error: unknown) => void;
   const audio: AudioBackend = {
-    preflight: async () => [],
+    preflight: async () => ({ values: [], discoveryValues: [] }),
     async prepare(code, _from, rev) {
       if (code === 'broken') throw Error('syntax error');
       return {
@@ -103,7 +103,7 @@ test('section discovery reaches late sounds and caps extra work at 32 windows', 
   const seen: number[] = [];
   audio.preflight = async (_code, _from, starts) => {
     seen.push(...starts);
-    return [{ s: 'late' }];
+    return { values: [{ s: 'late' }], discoveryValues: [{ s: 'late' }] };
   };
   await engine.play('sine', { discoverCycles: Array.from({ length: 50 }, (_, i) => i * 20) });
   expect(seen).toHaveLength(32);
@@ -125,7 +125,7 @@ test('preflight failure never prepares or changes first Play or the running revi
   await expect(engine.play('runaway')).rejects.toThrow('so it was not played');
   expect(engine.playing).toBe(false);
   expect(preparations).toBe(0);
-  audio.preflight = async () => [];
+  audio.preflight = async () => ({ values: [], discoveryValues: [] });
   await engine.play('sine');
   const sounds = engine.sounds();
   audio.preflight = async () => {
@@ -159,7 +159,7 @@ test('a returned late query stops at the next opportunity and suppresses later t
 
 test('Stop during worker preflight prevents evaluation, seeking and commit', async () => {
   const { engine, audio } = fixture();
-  let finish!: (values: unknown[]) => void;
+  let finish!: (values: { values: unknown[]; discoveryValues: unknown[] }) => void;
   audio.preflight = () =>
     new Promise((resolve) => {
       finish = resolve;
@@ -172,7 +172,7 @@ test('Stop during worker preflight prevents evaluation, seeking and commit', asy
   const pending = engine.play('sine');
   for (let i = 0; i < 20 && !finish; i++) await Promise.resolve();
   engine.stop();
-  finish([]);
+  finish({ values: [], discoveryValues: [] });
   await expect(pending).rejects.toThrow('cancelled');
   expect(prepared).toBe(false);
   expect(engine.playing).toBe(false);

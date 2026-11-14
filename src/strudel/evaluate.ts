@@ -137,10 +137,11 @@ async function evaluate(
       inspect(pattern, result.cps);
       return result;
     }
-    const ranges: [number, number][] = [];
-    const addCycles = (begin: number, end: number) => {
+    const ranges: [number, number, boolean?][] = [];
+    if (playbackStarts) result.discoveryValues = [];
+    const addCycles = (begin: number, end: number, discovery = false) => {
       for (let cycle = Math.floor(begin); cycle < end; cycle++)
-        ranges.push([Math.max(cycle, begin), Math.min(cycle + 1, end)]);
+        ranges.push([Math.max(cycle, begin), Math.min(cycle + 1, end), discovery]);
     };
     if (playbackStarts) {
       if (
@@ -151,13 +152,13 @@ async function evaluate(
         throw Error('Playback needs a positive tempo and finite section starts');
       // Cyclist 1.2.6 cyclist.mjs:35–60 + zyklus.mjs:7–10,22–31:
       // 50 ms windows, up to four in the initial 200 ms lookahead.
-      for (const begin of [from, ...playbackStarts])
+      for (const [n, begin] of [from, ...playbackStarts].entries())
         for (let i = 0; i < 4; i++)
-          ranges.push([begin + i * 0.05 * result.cps, begin + (i + 1) * 0.05 * result.cps]);
+          ranges.push([begin + i * 0.05 * result.cps, begin + (i + 1) * 0.05 * result.cps, n > 0]);
     }
     addCycles(from, to);
-    for (const begin of playbackStarts ?? []) addCycles(begin, begin + 2);
-    for (const [begin, end] of ranges) {
+    for (const begin of playbackStarts ?? []) addCycles(begin, begin + 2, true);
+    for (const [begin, end, discovery] of ranges) {
       const haps = query(pattern, begin, end, {
         _cps: result.cps,
         ...(playbackStarts ? { cyclist: 'cyclist' } : {}),
@@ -171,7 +172,9 @@ async function evaluate(
         throw Error(`${budget} event budget exceeded`);
       for (const hap of selected) {
         const event = plainEvent(hap);
-        result.events.push({ ...event, value: normalize(event.value) });
+        const value = normalize(event.value);
+        result.events.push({ ...event, value });
+        if (discovery) result.discoveryValues!.push(value);
       }
     }
   } catch (error) {
