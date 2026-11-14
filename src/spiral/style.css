@@ -173,3 +173,13 @@ main.spiral-dialog[open] {
   margin: 0;
   accent-color: var(--accent);
 }
+
+.spiral-controls select {
+  min-height: 44px;
+  min-width: 0;
+  width: 100%;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}

@@ -24,6 +24,8 @@ export interface SpiralMark {
 export interface ViewSettings {
   keep: number;
   upcoming: number;
+  /** Absent in older preferences; Ring remains the default. */
+  style?: 'ring' | 'fly-through';
 }
 export const defaultView: Readonly<ViewSettings> = { keep: 1, upcoming: 2 };
 const storageKey = 'odm-watch-view';
@@ -41,7 +43,11 @@ export function readView(storage?: StorageRead): ViewSettings {
       v.upcoming >= 1 &&
       v.upcoming <= 4
     )
-      return { keep: v.keep, upcoming: v.upcoming };
+      return {
+        keep: v.keep,
+        upcoming: v.upcoming,
+        ...(v.style === 'ring' || v.style === 'fly-through' ? { style: v.style } : {}),
+      };
   } catch {
     /* Storage can be denied, including the property access itself. */
   }
