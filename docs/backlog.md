@@ -1,30 +1,23 @@
 # Backlog
 
-Everything known to be outstanding, in one place. Nothing here is decided or
-scheduled; [decisions](decisions.md) holds what is settled. Written 2026-11-12
+Everything known to be outstanding, in one place. The [model](model.md) and
+[decisions](decisions.md) record what is settled. Written 2026-11-12
 at the end of Phase 4, when work paused. Add to it; delete an item when it
 ships.
 
 ## Next agreed step
 
-The [2026-11-14 interface review and interactive mockup](../research/design-review/review.md)
-complete the plan-and-mockup step in D42. The owner selected the
-[next interface direction](model.md#chosen-next-interface-2026-11-14).
-Implementation is a later, separately authorized wave; no production changes
-have shipped from this review. The [next implementation brief](../research/design-review/implementation-brief.md)
-is ready for that authorization.
+The [reviewed layout/context wave](../research/design-review/implementation-brief.md)
+is implemented: one in-page editor, small/enlarging live previews, explicit
+playing/editing labels, and exact List focus return. Local recovery, document
+download and generated-Strudel export are the chosen next retention features;
+they remain a separately authorized wave.
 
 ## For the design review
 
-- **Live views as previews that enlarge.** Now and Watch start small and can be
-  made bigger, instead of a fixed column and a full-window mode.
-- **Which panels show when.** The Now panel hides while an editor is open; the
-  rhythm drawer cuts off its lowest controls until scrolled.
 - **Theme picker.** The owner dislikes the current colours; not urgent.
 - **3D fly-through as a Watch style.** Built in `spikes/spiral`, judged less
   readable than the ring, but the owner would be sorry to lose it.
-- **Playing/editing context labels:** implement the chosen playback-based live
-  context alongside the sheet's independently pinned section.
 - **A way from a planet into that instrument's settings.** A planet opens the
   instrument editor only; settings are reached through the sheet.
 - **Planets are barely readable** at panel size, and the **room outline is too
@@ -33,8 +26,6 @@ is ready for that authorization.
 - **Long names are cut short** under planets. The earlier Watch legend report
   was not reproduced with 14 long names in the 2026-11-14 review.
 - **Many instruments on a phone** fall back to the list for touch.
-- **Now List focus return:** closing an editor opened from List focuses the
-  instrument's planet instead of the initiating List button.
 - Phase 0 notes never revisited: the system inset is small; a comment line was
   once used as a breadcrumb name; the "Add to" heading wording.
 
@@ -71,6 +62,10 @@ is ready for that authorization.
   aim; median about 1 ms). The owner saw no stutter.
 
 ## Tests and process
+
+- **Dev-server port:** Vite's CLI `--port 0` selected its default port during
+  the interface wave. The checks used an OS-allocated port instead; repair the
+  development launcher in a separate change.
 
 - **Dependency maintenance:** review the development-tool advisories reported by
   `npm audit` (Vite, Vitest and lint dependencies). The production-only audit on

@@ -2,6 +2,9 @@
 
 Review following D42. The owner has selected the
 [next interface direction](../../docs/model.md#chosen-next-interface-2026-11-14).
+The layout/context wave is now implemented; findings below describe the pre-change
+interface. Retention remains a later wave. Final original-Kiln captures are in
+[`metrics/in-page-editing/`](../../metrics/in-page-editing/).
 Open [the interactive mockup](mockups.html) and use Desktop/Phone, the score's
 setting/rhythm buttons, and Enlarge on either live preview. All behavior there is
 simulated. [The wave brief](brief.md) records scope and acceptance.

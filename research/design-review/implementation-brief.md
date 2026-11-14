@@ -1,6 +1,6 @@
 # Proposed next wave · in-page editing and live context
 
-Status: ready for owner authorization; no implementation has started. Direction
+Status: authorized and implemented on 2026-11-14; acceptance results are in the PR. Direction
 comes from [the model](../../docs/model.md#chosen-next-interface-2026-11-14).
 Use the [mockup](mockups.html) for hierarchy and interaction, not as a new engine
 or document implementation. Preserve existing editing semantics.
@@ -19,7 +19,7 @@ Recovery, document download and generated-Strudel export are the chosen first
 retention features, for a separately authorized wave. Themes, 3D, new editors,
 audio scheduling, dependency updates and hosting are outside this scope.
 
-## Ownership after authorization
+## Implementation ownership
 
 - Orchestrator owns `src/app/main.ts`, `src/app/controller.ts`,
   `src/app/style.css` and shared integration tests. It preserves one engine,
@@ -33,7 +33,16 @@ audio scheduling, dependency updates and hosting are outside this scope.
 
 Give delegates `AGENTS.md`, its six linked docs, this brief and explicit file
 ownership. They do not change shared files, commit, push, merge or add delegates.
-Launch no work until the owner authorizes this wave.
+This wave is authorized. Retention remains outside this wave.
+
+Shell contract: `#score-workspace` contains `#score`, `#editor`, `#live-previews`
+and a nonmodal, in-page `#preview-expanded` dialog. The previews are
+`#now-preview` (containing the existing `#live`) and `#watch-preview` (containing
+the existing `#spiral`). `#now-enlarge` and `#watch` enlarge the respective preview;
+`#preview-close` returns it to its original slot and restores focus. Enlargement
+moves the same node; it does not recreate the view or close the editor.
+`#editing-context`, `#window` and `#playback-context` label the two contexts.
+Transport stays at `#play`/`#stop`; preview enlargement is not modal.
 
 ## Acceptance and known failures
 

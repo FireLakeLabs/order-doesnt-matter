@@ -92,6 +92,7 @@ test.describe('real house signal with shared setup', () => {
     await handle.press('ArrowRight');
     await expect(high).toHaveValue('0.36');
     await page.getByRole('button', { name: 'Undo', exact: true }).click();
+    await handle.scrollIntoViewIfNeeded();
     const box = await handle.boundingBox();
     await page.mouse.move(box!.x + 22, box!.y + 22);
     await page.mouse.down();

@@ -139,7 +139,7 @@ test('Kiln Now pulses agree with predicted and triggered onsets; Stop and editor
   await expect(page.locator('.constellation-planet.live-absent').first()).toBeVisible();
   await lines.first().click();
   await expect(page.locator('#editor')).toBeVisible();
-  await expect(page.locator('#live')).toBeHidden();
+  await expect(page.locator('#live')).toBeVisible();
   await page.keyboard.press('Escape');
   await expect(lines.first()).toBeFocused();
 });

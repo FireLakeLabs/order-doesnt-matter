@@ -6,7 +6,9 @@ import { createApp } from './controller';
 import { examples } from './examples';
 import { sheetModel, mountSheet, setPlayhead, setCurrentSection } from '../sheet';
 import { liveModel, mountLivePanel, updateLivePanel } from '../live';
-import { createSpiral } from '../spiral';
+import { livePlayhead } from '../live/playhead';
+import { contextLabels } from './context';
+import { createPreviews, previewMarkup } from './previews';
 import { aboutControls, mountAbout } from './about';
 import './style.css';
 
@@ -26,8 +28,9 @@ document.body.innerHTML = `
       <p id="load-error" role="alert"></p>
     </section>
     <details id="notes" hidden><summary>Notes</summary><ul></ul></details>
-    <div class="score-toolbar"><h2>The score</h2><button id="follow" aria-pressed="true">Follow</button><button id="watch" disabled>Watch</button><output id="window"></output></div>
-    <div id="score-workspace"><div id="score"><p class="welcome">Paste a Strudel program or choose an original to see its score. Press Play when you're ready.</p></div><aside id="live" aria-label="Now" hidden></aside><aside id="editor" hidden></aside></div>
+    <div class="score-toolbar"><h2>The score</h2><span id="editing-context"></span><output id="window"></output><button id="follow" aria-pressed="true">Follow</button></div>
+    <p id="playback-context" aria-live="polite"></p>
+    <div id="score-workspace"><div id="score"><p class="welcome">Paste a Strudel program or choose an original to see its score. Press Play when you're ready.</p></div><aside id="editor" hidden></aside>${previewMarkup}</div>
   </main><footer>Read the score. Follow the cycles.</footer>`;
 const aboutDialog = mountAbout();
 const get = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id)! as T;
@@ -37,26 +40,8 @@ const paste = get<HTMLButtonElement>('paste'),
   panel = get('paste-panel');
 const play = get<HTMLButtonElement>('play'),
   stop = get<HTMLButtonElement>('stop');
-const watch = get<HTMLButtonElement>('watch');
-const watchDialog = document.createElement('dialog');
-watchDialog.className = 'spiral-dialog';
-watchDialog.setAttribute('aria-labelledby', 'watch-title');
-watchDialog.innerHTML = `<div class="spiral-toolbar"><h2 id="watch-title">Watch</h2><button id="watch-play">Play</button><button id="watch-stop">Stop</button><button id="watch-close">Close</button></div><p class="spiral-message" role="status"></p><div id="spiral"></div>`;
-document.body.append(watchDialog);
-const spiral = createSpiral(get('spiral'));
-watch.onclick = () => {
-  app.setWatch(true);
-  watchDialog.showModal();
-  spiral.update(app.watchInput(app.engine?.now() ?? null));
-  get('watch-close').focus();
-};
-get('watch-close').onclick = () => watchDialog.close();
-watchDialog.addEventListener('close', () => {
-  app.setWatch(false);
-  watch.focus({ preventScroll: true });
-});
-get('watch-play').onclick = () => void app.play();
-get('watch-stop').onclick = () => app.stop();
+const previews = createPreviews(),
+  spiral = previews.spiral;
 const follow = get<HTMLButtonElement>('follow');
 paste.onclick = () => {
   panel.hidden = !panel.hidden;
@@ -86,7 +71,7 @@ let editNotice: { doc: unknown; text: string } | undefined;
 let targetId: string | null = null,
   selectedSession: typeof app.editor;
 let origin: { id: string; control?: string; row?: string } | null = null;
-let liveOrigin: string | null = null;
+let liveOrigin: HTMLElement | null = null;
 function originCell() {
   return Array.from(score.querySelectorAll<HTMLElement>('[data-editor-target]')).find(
     (n) =>
@@ -98,11 +83,7 @@ function originCell() {
 function closeEditor() {
   targetId = null;
   renderEditor();
-  (
-    Array.from(get('live').querySelectorAll<HTMLElement>('[data-live-id]')).find(
-      (n) => n.dataset.liveId === liveOrigin,
-    ) ?? originCell()
-  )?.focus();
+  (liveOrigin?.isConnected ? liveOrigin : originCell())?.focus();
 }
 const renderPanel = createPanel(get('editor'), closeEditor);
 function renderEditor() {
@@ -172,7 +153,6 @@ function renderEditor() {
   }
   get<HTMLButtonElement>('undo').disabled = !app.editor?.canUndo;
   get<HTMLButtonElement>('redo').disabled = !app.editor?.canRedo;
-  fitEditor();
   // Keep the selected editor as the only editing surface.
   get<HTMLTextAreaElement>('source').disabled = !!targetId;
   get<HTMLButtonElement>('load').disabled = !!targetId;
@@ -184,27 +164,22 @@ function openEditor(id: string, cell: HTMLElement) {
   origin = {
     id,
     control: cell.dataset.control,
-    row: cell.dataset.liveId ?? cell.closest<HTMLElement>('tr')?.dataset.nodeId,
+    row:
+      cell.dataset.liveId ?? cell.dataset.listId ?? cell.closest<HTMLElement>('tr')?.dataset.nodeId,
   };
   targetId = id;
   renderEditor();
-  originCell()?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-  if (matchMedia('(max-width: 760px)').matches)
-    score
-      .querySelector<HTMLElement>('[data-section][aria-pressed="true"]')
-      ?.scrollIntoView({ block: 'start', inline: 'nearest' });
-  else if (get('editor').dataset.layout === 'wide') revealEditedRow();
-  else {
-    const editor = get('editor');
-    if (editor.getBoundingClientRect().top < 16)
-      window.scrollBy(0, editor.getBoundingClientRect().top - 16);
-  }
+  get('editor').scrollIntoView({ block: 'nearest' });
   get('editor').querySelector<HTMLElement>('input,button')?.focus({ preventScroll: true });
 }
 get('undo').onclick = () => app.editor?.undo();
 get('redo').onclick = () => app.editor?.redo();
 document.addEventListener('keydown', (event) => {
-  if (watchDialog.open || aboutDialog.open) return;
+  if (aboutDialog.open) return;
+  if (event.key === 'Escape' && previews.escape()) {
+    event.preventDefault();
+    return;
+  }
   if (event.key === 'Escape' && targetId) {
     event.preventDefault();
     closeEditor();
@@ -227,14 +202,10 @@ app.subscribe((state) => {
     targetId = null;
     selectedSession = app.editor;
   }
-  watch.disabled = !state.doc;
-  get<HTMLButtonElement>('watch-play').disabled = !app.canPlay || state.playing;
-  get<HTMLButtonElement>('watch-stop').disabled =
-    !state.playing && !state.message.includes('Preparing');
-  watchDialog.querySelector('.spiral-message')!.textContent = state.message;
-  watchDialog.querySelector<HTMLElement>('.spiral-message')!.dataset.kind = app.warning
-    ? 'warning'
-    : 'error';
+  get('live-previews').hidden = !state.doc;
+  app.setWatch(!!state.doc && !document.hidden);
+  get('watch-message').textContent = state.message;
+  get('watch-message').dataset.kind = app.warning ? 'warning' : 'error';
   play.disabled = !app.canPlay || state.playing;
   stop.disabled = !state.playing && !state.message.includes('Preparing');
   get('tempo').textContent =
@@ -295,7 +266,6 @@ app.subscribe((state) => {
   const liveRows = JSON.stringify(state.rows.map((r) => r.id));
   if (previousLiveRows !== liveRows) {
     previousLiveRows = liveRows;
-    get('live').hidden = !state.doc;
     mountLivePanel(
       get('live'),
       liveModel({
@@ -306,11 +276,12 @@ app.subscribe((state) => {
       {
         onEdit: (id, line) => {
           if (targetId) return;
-          liveOrigin = id;
+          liveOrigin = line;
           openEditor(id, line);
         },
       },
     );
+    get('live').querySelector('h2')!.id = 'now-title';
   }
   updateLivePanel(
     get('live'),
@@ -322,28 +293,9 @@ app.subscribe((state) => {
   );
   renderEditor();
 });
-function revealEditedRow() {
-  const row = originCell()?.closest('tr');
-  if (!row) return;
-  const drawerTop = get('editor').getBoundingClientRect().top;
-  const rect = row.getBoundingClientRect();
-  if (rect.bottom > drawerTop - 12) window.scrollBy(0, rect.bottom - drawerTop + 12);
-  else if (rect.top < 12) window.scrollBy(0, rect.top - 12);
-}
-function fitEditor() {
-  const editor = get('editor');
-  const height =
-    editor.hidden || editor.dataset.layout === 'wide' || matchMedia('(max-width: 760px)').matches
-      ? ''
-      : `${Math.max(160, innerHeight - Math.max(16, editor.getBoundingClientRect().top) - 16)}px`;
-  if (editor.style.maxHeight !== height) editor.style.maxHeight = height;
-}
-window.addEventListener('scroll', fitEditor, { passive: true });
-window.addEventListener('resize', () => {
-  fitEditor();
-  if (!get('editor').hidden && get('editor').dataset.layout === 'wide' && innerWidth >= 900)
-    revealEditedRow();
-});
+document.addEventListener('visibilitychange', () =>
+  app.setWatch(!!app.state.doc && !document.hidden),
+);
 function frame() {
   const now = app.frame(),
     { fromCycle, toCycle, sections } = app.state;
@@ -351,7 +303,19 @@ function frame() {
     get('live'),
     liveModel({ ...app.state, playhead: now, outputLatency: app.engine?.outputLatency() ?? 0 }),
   );
-  if (watchDialog.open) spiral.update(app.watchInput(now));
+  if (app.state.doc && !document.hidden) spiral.update(app.watchInput(now));
+  const labels = contextLabels(
+    sections,
+    fromCycle,
+    livePlayhead(now, app.state.cps ?? 0, app.engine?.outputLatency() ?? 0),
+  );
+  for (const [id, value] of [
+    ['editing-context', labels.editing],
+    ['playback-context', labels.playback],
+  ]) {
+    const text = app.state.doc ? value : '';
+    if (get(id).textContent !== text) get(id).textContent = text;
+  }
   setPlayhead(score, now === null ? null : ((now - fromCycle) / (toCycle - fromCycle)) * 100);
   const last = sections.at(-1);
   setCurrentSection(score, now, last ? last.start + last.cycles : 0);

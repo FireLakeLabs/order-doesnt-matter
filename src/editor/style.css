@@ -2,22 +2,23 @@
 
 #score-workspace {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1fr) 300px;
   gap: 16px;
   align-items: start;
 }
-#score-workspace:has(#editor:not([hidden])) {
-  grid-template-columns: minmax(0, 1fr) 336px;
+#score-workspace:not(:has(#live-previews:not([hidden]))) {
+  grid-template-columns: minmax(0, 1fr);
 }
 #score {
+  grid-column: 1;
+  grid-row: 1;
   min-width: 0;
 }
 #editor {
-  position: sticky;
-  top: 16px;
+  grid-column: 1;
+  grid-row: 2;
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
-  max-height: calc(100dvh - 32px);
+  grid-template-rows: auto auto auto;
   min-width: 0;
   color: var(--text);
   background: var(--panel);
@@ -54,11 +55,8 @@
   margin: 16px 0 8px;
 }
 .editor-body {
-  min-height: 0;
-  overflow: auto;
+  min-width: 0;
   padding: 16px;
-  scrollbar-gutter: stable;
-  scroll-padding: 8px;
 }
 #editor p {
   margin: 0 0 12px;
@@ -221,19 +219,12 @@ input:checked ~ .editor-toggle-state::before {
 .odm-sheet [data-edit-state='failed'] {
   border-bottom: 3px solid var(--danger);
 }
-@media (max-width: 760px) {
-  #score-workspace:has(#editor:not([hidden])) {
+@media (max-width: 1000px) {
+  #score-workspace {
     grid-template-columns: minmax(0, 1fr);
-    padding-bottom: 60dvh;
   }
-  #editor {
-    position: fixed;
-    z-index: 5;
-    inset: auto 0 0;
-    max-height: 60dvh;
-    border-radius: 16px 16px 0 0;
-    box-shadow: 0 -12px 32px #0008;
-  }
+}
+@media (max-width: 760px) {
   #editor > header,
   #editor > footer {
     padding: 12px 16px;
@@ -259,37 +250,38 @@ input:checked ~ .editor-toggle-state::before {
   flex: 1;
 }
 
-/* A wide editor occupies the score's width and leaves the sheet above scrollable. */
-#score-workspace:has(#editor[data-layout='wide']:not([hidden])) {
-  grid-template-columns: minmax(0, 1fr);
-  padding-bottom: 60dvh;
-}
-#editor[data-layout='wide'] {
-  position: fixed;
-  z-index: 5;
-  inset: auto 0 0;
-  height: 60dvh;
-  max-height: 60dvh;
-  border-radius: 16px 16px 0 0;
-  box-shadow: 0 -12px 32px #0008;
-}
 #editor[data-layout='wide'] > header,
 #editor[data-layout='wide'] > footer {
   padding: 10px 16px;
 }
 @media (min-width: 900px) {
-  #score-workspace:has(#editor[data-layout='wide']:not([hidden])) {
-    padding-bottom: 40dvh;
-  }
-  #editor[data-layout='wide'] {
-    inset-inline: clamp(10px, 3vw, 42px);
-    height: 40dvh;
-    max-height: 40dvh;
-  }
   #editor[data-layout='wide'] > header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
   }
+}
+
+#preview-expanded {
+  grid-column: 1 / -1;
+  position: static;
+  inset: auto;
+  width: 100%;
+  max-width: none;
+  min-width: 0;
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  background: var(--panel);
+}
+#preview-expanded[open] {
+  display: grid;
+  gap: 12px;
+}
+#preview-close {
+  justify-self: end;
+  min-height: 44px;
 }

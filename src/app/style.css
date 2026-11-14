@@ -149,7 +149,22 @@ textarea {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
-  margin: 24px 0 12px;
+  margin: 24px 0 4px;
+}
+.score-toolbar h2 {
+  margin-right: 0;
+}
+#editing-context,
+#playback-context {
+  font-size: 13px;
+  color: var(--muted);
+}
+#playback-context {
+  margin: 0 0 12px;
+  overflow-wrap: anywhere;
+}
+#watch-message:empty {
+  display: none;
 }
 h2 {
   font-size: 16px;
@@ -157,6 +172,7 @@ h2 {
   font-weight: 500;
 }
 #follow {
+  margin-left: auto;
   font-size: 12px;
   padding: 5px 12px;
 }

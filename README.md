@@ -8,8 +8,8 @@ written, not sound passing through boxes. (Sometimes order does matter. The app
 shows you when.)
 
 Status: Phase 4 is built: score and section editing, undo/redo, the Now
-constellation and Watch spiral. An [interface design review](research/design-review/review.md)
-records the chosen next direction; its mockup does not change the app. Outstanding work
+constellation and Watch spiral. The [reviewed interface](research/design-review/review.md)
+now has an in-page editor, enlarging live previews and separate playing/editing labels. Outstanding work
 is in [the backlog](docs/backlog.md). Production code lives in `src/`; `spikes/`
 is frozen reference and must not be imported. Start with [the model](docs/model.md).
 
