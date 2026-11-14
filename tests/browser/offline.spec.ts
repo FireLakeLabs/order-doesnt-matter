@@ -28,6 +28,13 @@ test('offline pages and workers retain HTTP cache policy and abort every HTTPS r
     await blockHttps(page);
     await blockHttps(page);
     await page.goto('/?inspect');
+    const script = (await page.locator('script[type="module"][src]').getAttribute('src'))!;
+    const asset = await page.request.get(script);
+    expect(asset.headers()['cache-control']).toBe('public,max-age=31536000,immutable');
+    for (const path of ['/', '/assets/not-built.js']) {
+      const document = await page.request.get(path);
+      expect(document.headers()['cache-control']).not.toContain('immutable');
+    }
     const result = await page.evaluate(async (origin) => {
       const asset = async () => (await fetch(`${origin}/asset`)).text();
       const values = [await asset(), await asset()];
