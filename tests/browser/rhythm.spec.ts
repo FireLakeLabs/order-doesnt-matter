@@ -10,7 +10,6 @@ import {
   throughCycle,
 } from './helpers';
 import { instruments } from '../../src/document';
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 async function openBass(page: import('@playwright/test').Page) {
   const doc = await page.evaluate(() => window.odmApp.state.doc!);
   const bass = instruments(doc).find((r) => r.name === 'bass')!;

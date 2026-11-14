@@ -81,6 +81,8 @@ export default class BrowserReport {
     this.rows.push({
       title: test.titlePath().filter(Boolean).join(' > '),
       status: result.status,
+      worker: result.workerIndex,
+      start: result.startTime,
       ms: result.duration,
       budgetException: test.location.file.endsWith('/demo.spec.ts')
         ? test.annotations.find((a) => a.type === 'recording-budget')?.description
