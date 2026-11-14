@@ -50,6 +50,11 @@ export async function openProgram(
       await page.getByRole('button', { name: 'Load', exact: true }).click();
     }
     if (input.example || input.path || input.source) {
+      // Setup explicitly chooses its requested piece, including in sibling tabs
+      // that share the parent's recovery snapshot.
+      const replacement = page.getByRole('dialog', { name: 'Replace current work?' });
+      if (await replacement.isVisible())
+        await replacement.getByRole('button', { name: 'Replace', exact: true }).click();
       await scoreReady(page);
       await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
     }

@@ -10,17 +10,20 @@ import { livePlayhead } from '../live/playhead';
 import { contextLabels } from './context';
 import { createPreviews, previewMarkup } from './previews';
 import { aboutControls, mountAbout } from './about';
+import { keepMarkup, mountKeep } from './keep';
 import './style.css';
 
-const app = createApp();
+const app = createApp({ confirmReplacement: () => keep.confirmReplacement() });
 document.body.innerHTML = `
   <header class="topbar"><h1>Order Doesn't Matter</h1><div class="transport">
     <button id="play" disabled>Play</button><button id="stop" disabled>Stop</button>
     <output id="tempo" aria-label="Tempo">Tempo —</output>
     <button id="undo" disabled>Undo</button><button id="redo" disabled>Redo</button>
     <button id="paste" aria-expanded="true" aria-controls="paste-panel">Paste Strudel</button>
+  <button id="keep" aria-expanded="false" aria-controls="keep-panel">Keep work</button>
   ${aboutControls}</div><p id="solo-banner" hidden><span></span> <button id="stop-solo">Stop solo</button></p><p id="message" role="status"></p><div id="sound-notice" hidden><span role="status">Default sounds could not load. Check your connection, then press Play again.</span><button id="dismiss-sound-notice" aria-label="Dismiss sound notice">Dismiss</button></div></header>
   <main>
+    ${keepMarkup}
     <section id="paste-panel" aria-label="Paste Strudel">
       <label for="source">Your Strudel program</label>
       <textarea id="source" spellcheck="false" placeholder='s("bd*2, hh*4, ~ cp")' aria-describedby="load-error"></textarea>
@@ -33,6 +36,7 @@ document.body.innerHTML = `
     <div id="score-workspace"><div id="score"><p class="welcome">Paste a Strudel program or choose an original to see its score. Press Play when you're ready.</p></div><aside id="editor" hidden></aside>${previewMarkup}</div>
   </main><footer>Read the score. Follow the cycles.</footer>`;
 const aboutDialog = mountAbout();
+const keep = mountKeep(app);
 const get = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id)! as T;
 const source = get<HTMLTextAreaElement>('source'),
   score = get('score');
@@ -157,6 +161,7 @@ function renderEditor() {
   get<HTMLTextAreaElement>('source').disabled = !!targetId;
   get<HTMLButtonElement>('load').disabled = !!targetId;
   for (const b of Array.from(get('examples').querySelectorAll('button'))) b.disabled = !!targetId;
+  for (const id of ['open-document', 'recover']) get<HTMLButtonElement>(id).disabled = !!targetId;
   for (const b of Array.from(score.querySelectorAll<HTMLButtonElement>('.sheet-mute')))
     b.disabled = !!targetId;
 }
@@ -175,7 +180,7 @@ function openEditor(id: string, cell: HTMLElement) {
 get('undo').onclick = () => app.editor?.undo();
 get('redo').onclick = () => app.editor?.redo();
 document.addEventListener('keydown', (event) => {
-  if (aboutDialog.open) return;
+  if (aboutDialog.open || keep.dialog.open) return;
   if (event.key === 'Escape' && previews.escape()) {
     event.preventDefault();
     return;
@@ -201,6 +206,7 @@ app.subscribe((state) => {
   if (app.editor !== selectedSession) {
     targetId = null;
     selectedSession = app.editor;
+    if (!state.source) source.value = '';
   }
   get('live-previews').hidden = !state.doc;
   app.setWatch(!!state.doc && !document.hidden);

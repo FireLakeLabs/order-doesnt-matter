@@ -318,3 +318,18 @@ a {
     min-height: 44px;
   }
 }
+
+#keep-panel {
+  padding: 16px;
+  margin-bottom: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+  overflow-wrap: anywhere;
+}
+#keep-panel p {
+  max-width: 70ch;
+}
+#recovery-status {
+  color: var(--warning);
+}
