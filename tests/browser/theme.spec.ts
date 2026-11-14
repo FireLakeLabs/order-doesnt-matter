@@ -202,27 +202,25 @@ test('three palettes keep measured text/control contrast and dense numbered Watc
       if (geometry.has(sizeKey)) {
         const previous = geometry.get(sizeKey) as typeof result.before;
         expect(result.before).toHaveLength(previous.length);
-        for (const [n, mark] of result.before.entries()) {
-          for (const key of ['startAngle', 'endAngle', 'radius', 'endRadius'] as const)
-            expect(mark[key]).toBeCloseTo(previous[n][key], 10);
-          const { start, from, to, bodyTo, onset, dense } = mark;
-          expect({ start, from, to, bodyTo, onset, dense }).toEqual({
-            start: previous[n].start,
-            from: previous[n].from,
-            to: previous[n].to,
-            bodyTo: previous[n].bodyTo,
-            onset: previous[n].onset,
-            dense: previous[n].dense,
-          });
-        }
+        // Compare the complete drawing at once, retaining exact scored spans
+        // and the same ten-digit tolerance for derived canvas coordinates.
+        expect(result.before).toEqual(
+          previous.map((mark) => ({
+            ...mark,
+            startAngle: expect.closeTo(mark.startAngle, 10),
+            endAngle: expect.closeTo(mark.endAngle, 10),
+            radius: expect.closeTo(mark.radius, 10),
+            endRadius: expect.closeTo(mark.endRadius, 10),
+          })),
+        );
       } else geometry.set(sizeKey, result.before);
       expect(result.before.some((m) => m.dense)).toBe(true);
       expect(result.before.some((m) => m.onset && m.to - m.from < 0.002)).toBe(true);
       expect(result.fits).toBe(true);
       const legend = page.locator('.spiral-legend li');
       await expect(legend).toHaveCount(14);
-      for (const [n, name] of names.entries())
-        await expect(legend.nth(n)).toContainText(`${n + 1}. ${name}`);
+      // Read all lanes together rather than crossing the browser boundary per label.
+      await expect(legend).toContainText(names.map((name, n) => `${n + 1}. ${name}`));
       await legend.last().scrollIntoViewIfNeeded();
       if (process.env.ODM_THEME_SHOTS)
         await page.locator('#watch-preview').screenshot({
