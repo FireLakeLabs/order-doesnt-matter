@@ -1,3 +1,4 @@
+import { blockHttps } from './offline';
 import { readFile } from 'node:fs/promises';
 import { expect, test as base, type Page } from '@playwright/test';
 import { describeTarget } from '../../src/document/edit';
@@ -35,11 +36,7 @@ export async function openProgram(
   page: Page,
   input: { example?: string; path?: string; source?: string; offline?: boolean } = {},
 ) {
-  if (input.offline !== false)
-    await page.route(
-      (url) => url.protocol === 'https:',
-      (route) => route.abort('internetdisconnected'),
-    );
+  if (input.offline !== false) await blockHttps(page);
   await page.goto('/?inspect');
   await test.step('ODM:import', async () => {
     if (input.example) await page.getByRole('button', { name: input.example, exact: true }).click();
@@ -85,13 +82,18 @@ export async function scoreReady(page: Page) {
 }
 export async function swap(page: Page, action: () => Promise<unknown>) {
   return test.step('ODM:swap', async () => {
-    const before = await page.evaluate(
-      () => window.odmApp.history.filter((e) => e.type === 'swapped').length,
+    const before = await page.evaluate(() =>
+      Math.max(
+        0,
+        ...window.odmApp.history.filter((e) => e.type === 'swapped').map((e) => e.revision),
+      ),
     );
     await action();
     await appSignal(
       page,
-      (count) => window.odmApp.history.filter((e) => e.type === 'swapped').length > count,
+      // History is capped: an older swap can disappear while this one arrives.
+      (revision) =>
+        window.odmApp.history.some((e) => e.type === 'swapped' && e.revision > revision),
       before,
     );
   });
@@ -227,7 +229,15 @@ export function signal<T>(read: () => T | Promise<T>, options: { timeout?: numbe
  * A failed case restarts Playwright's worker, so later cases get a fresh setup. */
 export function sharedProgram<T>(setup: (page: Page) => Promise<T>) {
   let page: Page | undefined, value: T;
-  let baseline: { doc: string; events: string; selected: string | null; pasteHidden: boolean };
+  let baseline: {
+    doc: string;
+    events: string;
+    selected: string | null;
+    fromCycle: number;
+    toCycle: number;
+    follow: boolean;
+    pasteHidden: boolean;
+  };
   test.use({
     page: async ({ browser }, use) => {
       void browser;
@@ -244,6 +254,9 @@ export function sharedProgram<T>(setup: (page: Page) => Promise<T>) {
         doc: JSON.stringify(window.odmApp.state.doc),
         events: JSON.stringify(window.odmApp.state.events),
         selected: window.odmApp.state.selected,
+        fromCycle: window.odmApp.state.fromCycle,
+        toCycle: window.odmApp.state.toCycle,
+        follow: window.odmApp.state.follow,
         pasteHidden: document.getElementById('paste-panel')!.hidden,
       }));
     } finally {
@@ -256,20 +269,45 @@ export function sharedProgram<T>(setup: (page: Page) => Promise<T>) {
   test.afterEach(async ({ page }) => {
     await page.keyboard.press('Escape');
     if (await page.locator('#editor').isVisible()) await page.keyboard.press('Escape');
-    const restored = await page.evaluate((selected) => {
+    const context = {
+      selected: baseline.selected,
+      fromCycle: baseline.fromCycle,
+      toCycle: baseline.toCycle,
+      follow: baseline.follow,
+    };
+    const restored = await page.evaluate((original) => {
       const app = window.odmApp;
       app.stop();
       app.solo(null);
       while (app.editor!.canUndo) app.editor!.undo();
-      if (selected) app.select(selected);
+      // Re-selecting an unchanged section cancels the Undo row question and,
+      // before its answer arrives, starts every instrument again. Preserve that
+      // in-flight proof when the score context already matches the baseline.
+      if (
+        original.selected &&
+        (app.state.selected !== original.selected ||
+          app.state.fromCycle !== original.fromCycle ||
+          app.state.toCycle !== original.toCycle)
+      )
+        app.select(original.selected);
+      if (app.state.follow !== original.follow) app.follow(original.follow);
       app.history.length = 0;
       return JSON.stringify(app.state.doc);
-    }, baseline.selected);
+    }, context);
     expect(restored, 'shared piece must restore its exact original document').toBe(baseline.doc);
     await appSignal(
       page,
-      (events) => JSON.stringify(window.odmApp.state.events) === events,
-      baseline.events,
+      ({ events, context }) => {
+        const state = window.odmApp.state;
+        return (
+          JSON.stringify(state.events) === events &&
+          state.selected === context.selected &&
+          state.fromCycle === context.fromCycle &&
+          state.toCycle === context.toCycle &&
+          state.follow === context.follow
+        );
+      },
+      { events: baseline.events, context },
     );
     if (
       (await page.locator('#paste-panel').evaluate((n: HTMLElement) => n.hidden)) !==

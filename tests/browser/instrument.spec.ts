@@ -11,7 +11,6 @@ import {
 } from './helpers';
 import { readFile } from 'node:fs/promises';
 import { expect, type Page } from '@playwright/test';
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 async function observed<T>(page: Page, fn: () => Promise<T>) {
   await appSignal(page, () => {
     const h = window.odmApp.history;

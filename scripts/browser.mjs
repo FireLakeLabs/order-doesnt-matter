@@ -1,7 +1,9 @@
-import { mkdtempSync, rmSync, appendFileSync, readFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { browserSummary, formatBrowserSummary } from './browser-summary.mjs';
 import { timingResult, BROWSER_LIMIT_SECONDS } from './timing.mjs';
+import { forwardBrowserSignals, killBrowserRun } from './browser-process.mjs';
+import { cacheBuiltAssets } from './browser-assets.mjs';
 const start = performance.now();
 const mode = process.argv[2] ?? 'ci';
 if (!['ci', 'online', 'demo', 'measure', 'edit-demo'].includes(mode))
@@ -19,14 +21,28 @@ for (let i = 0; i < args.length; i++) {
   else if (args[i].startsWith('--reporter=')) reporters = args.splice(i--, 1)[0].slice(11);
 }
 const reportPath = `${outDir}/timings.json`;
+const phases = {};
+let phaseStart = start;
+function phase(name) {
+  const now = performance.now();
+  phases[name] = (now - phaseStart) / 1000;
+  phaseStart = now;
+  const body = JSON.stringify({ phases, wallSeconds: (now - start) / 1000 }, null, 2) + '\n';
+  writeFileSync(`${outDir}/command.json`, body);
+  if (process.env.ODM_PROFILE_PATH)
+    writeFileSync(`${process.env.ODM_PROFILE_PATH}.command.json`, body);
+}
 let server;
 try {
   const { build, preview } = await import('vite');
   await build({ build: { outDir } });
+  phase('build');
   server = await preview({
+    plugins: [cacheBuiltAssets(outDir)],
     build: { outDir },
     preview: { host: '127.0.0.1', port: 0, open: false },
   });
+  phase('serve');
   const address = server.httpServer.address();
   const code = await new Promise((resolve, reject) => {
     const child = spawn(
@@ -43,7 +59,8 @@ try {
         `${outDir}/results`,
       ],
       {
-        stdio: 'inherit',
+        detached: process.platform !== 'win32',
+        stdio: ['ignore', 'pipe', 'pipe'],
         env: {
           ...process.env,
           ODM_BROWSER_MODE: mode,
@@ -52,21 +69,30 @@ try {
         },
       },
     );
+    for (const stream of [child.stdout, child.stderr])
+      stream.on('data', (chunk) => appendFileSync(`${outDir}/browser.log`, chunk));
+    child.stdout.pipe(process.stdout, { end: false });
+    child.stderr.pipe(process.stderr, { end: false });
+    const offSignals = forwardBrowserSignals(child);
     const remaining = Math.max(0, limit * 1000 - (performance.now() - start));
     const timer = setTimeout(() => {
       console.error('Browser process exceeded wall budget');
-      child.kill('SIGKILL');
+      killBrowserRun(child);
     }, remaining);
     child.once('error', (error) => {
       clearTimeout(timer);
+      offSignals();
       reject(error);
     });
-    child.once('exit', (code) => {
+    // close also waits for inherited worker output pipes to close.
+    child.once('close', (code) => {
       clearTimeout(timer);
+      offSignals();
       resolve(code ?? 1);
     });
   });
-  if (code) process.exitCode = 1;
+  phase('tests');
+  if (code) process.exitCode ||= 1;
 } catch (error) {
   console.error(error);
   process.exitCode = 1;
@@ -75,6 +101,7 @@ try {
     await new Promise((resolve, reject) =>
       server.httpServer.close((error) => (error ? reject(error) : resolve())),
     );
+  phase('shutdown');
   let rows;
   try {
     rows = JSON.parse(readFileSync(reportPath, 'utf8'));
@@ -82,16 +109,32 @@ try {
     console.error('Missing browser timing report', error);
     process.exitCode = 1;
   }
-  rmSync(outDir, { recursive: true, force: true });
+  // Detect reporting guards before deleting evidence, then measure the complete
+  // command below including successful cleanup.
+  if (
+    (rows && !browserSummary(rows, 0, mode).ok) ||
+    !timingResult(start, performance.now(), limit).ok
+  )
+    process.exitCode ||= 1;
+  if (process.exitCode) console.error(`Failed browser run retained: ${outDir}`);
+  else {
+    try {
+      rmSync(outDir, { recursive: true, force: true });
+    } catch (error) {
+      console.error('Browser cleanup failed', error);
+      process.exitCode = 1;
+    }
+  }
+  console.log(`Browser phases (seconds): ${JSON.stringify(phases)}`);
   const result = timingResult(start, performance.now(), limit);
   const message = `Browser suite: ${result.seconds.toFixed(3)} s / ${limit} s — ${result.ok ? 'within budget' : 'OVER BUDGET'}`;
   if (rows) {
-    const summary = browserSummary(rows, result.seconds);
+    const summary = browserSummary(rows, result.seconds, mode);
     const report = formatBrowserSummary(summary);
     console.log(report);
     if (process.env.GITHUB_STEP_SUMMARY)
       appendFileSync(process.env.GITHUB_STEP_SUMMARY, `\n\`\`\`text\n${report}\n\`\`\`\n`);
-    if (mode === 'ci' && !summary.ok) process.exitCode = 1;
+    if (!summary.ok) process.exitCode = 1;
   }
   console.log(message);
   if (process.env.GITHUB_STEP_SUMMARY)

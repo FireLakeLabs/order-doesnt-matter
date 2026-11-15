@@ -1,3 +1,4 @@
+import { blockHttps } from './offline';
 import { test } from './helpers';
 import {
   scoreReady,
@@ -10,12 +11,8 @@ import {
 } from './helpers';
 import { expect, type Page } from '@playwright/test';
 import type {} from '../../src/app/main';
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 async function open(page: Page) {
-  await page.route(
-    (url) => url.protocol === 'https:',
-    (route) => route.abort('internetdisconnected'),
-  );
+  await blockHttps(page);
   await page.goto('/?inspect');
 }
 const row = (page: Page, name: string) =>

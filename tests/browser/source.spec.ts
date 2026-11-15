@@ -2,7 +2,6 @@ import { mkdir } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { openProgram, play, selectNode, signal, waitForPending, triggerValues } from './helpers';
 import { instruments } from '../../src/document';
-test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 
 test('source applies once, confirms trigger values, preserves refused text and reverts', async ({
   page,
@@ -16,6 +15,11 @@ test('source applies once, confirms trigger values, preserves refused text and r
   const old = await field.inputValue();
   await field.fill(old.replace(/\d+(?:\.\d+)?/, '900'));
   await page.getByRole('button', { name: 'Apply', exact: true }).click();
+  // Apply asks separate score questions; wait on its completion signal within
+  // the existing test deadline before asserting the resulting message.
+  await signal(() => page.getByRole('button', { name: 'Apply', exact: true }).isEnabled()).toBe(
+    true,
+  );
   await expect(page.locator('#editor')).toContainText('Applied.');
   await waitForPending(page);
   await signal(async () =>

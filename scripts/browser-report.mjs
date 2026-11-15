@@ -1,6 +1,6 @@
 // One clock for Playwright steps and browser performance marks, counted once.
 import { dirname } from 'node:path';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { mkdirSync, writeFileSync, renameSync } from 'node:fs';
 export function phaseTimings(result) {
   const phases = {
     page: 0,
@@ -74,24 +74,39 @@ export function phaseTimings(result) {
 }
 export default class BrowserReport {
   rows = [];
+  onBegin() {
+    this.checkpoint();
+  }
   onTestEnd(test, result) {
     this.rows.push({
       title: test.titlePath().filter(Boolean).join(' > '),
       status: result.status,
+      worker: result.workerIndex,
+      start: result.startTime,
       ms: result.duration,
+      budgetException: test.location.file.endsWith('/demo.spec.ts')
+        ? test.annotations.find((a) => a.type === 'recording-budget')?.description
+        : undefined,
       phases: phaseTimings(result),
       sharedSetupMs: (() => {
         const body = result.attachments.find((a) => a.name === 'browser-shared-setup')?.body;
         return body ? JSON.parse(body.toString()).ms : undefined;
       })(),
     });
+    this.checkpoint();
   }
   onEnd() {
+    this.checkpoint();
+  }
+  checkpoint() {
     for (const path of [process.env.ODM_REPORT_PATH, process.env.ODM_PROFILE_PATH].filter(
       Boolean,
     )) {
       mkdirSync(dirname(path), { recursive: true });
-      writeFileSync(path, JSON.stringify(this.rows, null, 2) + '\n');
+      // A killed runner must leave the last complete report, not lose all
+      // accounting because onEnd never ran (or leave half-written JSON).
+      writeFileSync(`${path}.tmp`, JSON.stringify(this.rows, null, 2) + '\n');
+      renameSync(`${path}.tmp`, path);
     }
   }
 }

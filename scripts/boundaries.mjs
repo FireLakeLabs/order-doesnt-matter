@@ -24,11 +24,13 @@ export function boundaryProblems(path, code) {
   visit(source);
   if (
     /^(scripts|tests|\.github)\/|config\.|^package\.json$/.test(path) &&
-    /\bport["']?\s*[:=]\s*[1-9]\d*|\bPORT\s*=\s*[1-9]\d*|--port(?:=|\s+)[1-9]\d*|https?:\/\/[^\s/"'`]+:[1-9]\d*|\blisten\(\s*[1-9]\d*/.test(
+    /\bport["']?\s*[:=]\s*[1-9]\d*|\bPORT\s*=\s*[1-9]\d*|--port(?:=|\s*)[1-9]\d*|https?:\/\/[^\s/"'`]+:[1-9]\d*|\blisten\s*\(\s*[1-9]\d*/.test(
       code,
     )
   )
     problems.push('Fixed port: ask the OS with port 0');
+  if (/\bvite\b[^\n]*--port(?:=|\s*)0\b/.test(code))
+    problems.push('Vite CLI port 0 selects its default; use scripts/dev.mjs');
   return problems;
 }
 const excluded = new Set([
