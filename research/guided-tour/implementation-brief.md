@@ -1,5 +1,9 @@
 # Guided practice: implementation handoff
 
+Design approved by the owner on 2026-11-15. This records the research baseline;
+the tour is now implemented. See the parent implementation acceptance in
+`verification.md` for current evidence and limits.
+
 Research against parent `56983ed`; no production tour or dependency added.
 Review `mockup.html` before implementation. Open Prototype controls to select a
 390×844 / 390×667 device or the empty-entry fixture; Fit window uses the available
