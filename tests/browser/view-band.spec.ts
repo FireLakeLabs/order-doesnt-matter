@@ -18,19 +18,22 @@ async function frames(page: Page, count = 3) {
   }, count);
 }
 async function select(page: Page, name: string) {
-  const tile = page.getByRole('button', { name, exact: true });
-  if (!(await tile.first().isVisible()))
-    await page.getByRole('button', { name: 'Views', exact: true }).click();
-  await tile.filter({ visible: true }).click();
+  const stage = page.locator('[data-region="stage-a"]');
+  await stage.getByRole('button', { name: 'Views', exact: true }).click();
+  await stage.getByRole('button', { name: `${name} on Stage A`, exact: true }).click();
+  await expect(stage.getByRole('heading', { name, exact: true })).toBeVisible();
+  await expect(stage.locator('canvas')).toHaveCount(1);
 }
 async function load(page: Page, file: string) {
   await page.getByRole('button', { name: 'Paste', exact: true }).click();
-  await page
-    .getByLabel('Strudel program')
-    .fill(await readFile(`corpus/programs/${file}.strudel`, 'utf8'));
+  const source = await readFile(`corpus/programs/${file}.strudel`, 'utf8');
+  await page.getByLabel('Strudel program').fill(source);
   await page.getByRole('button', { name: 'Import program', exact: true }).click();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
-  await expect(page.locator('.view-host')).toHaveAttribute('data-score-ready', 'true');
+  await page.waitForFunction(
+    (source) => window.odmStudio.app.state.source === source && window.odmStudio.app.canPlay,
+    source,
+  );
+  await expect(page.locator('[data-region="stage-a"] canvas')).toHaveCount(1);
   await frames(page);
 }
 const hash = (page: Page) =>
@@ -74,7 +77,7 @@ test('The band: real score, reversible motion, five themes, frame cost and lifet
     };
   });
   await page.setViewportSize({ width: 2560, height: 1440 });
-  await page.goto('/studio.html?inspect');
+  await page.goto('/studio.html?inspect&a=band&b=&theme=arcade');
   await page.waitForFunction(() => window.odmStudio.app.canPlay);
   await load(page, 'real-dubstep-arranged');
   await page.waitForFunction(() =>
@@ -99,7 +102,6 @@ test('The band: real score, reversible motion, five themes, frame cost and lifet
       };
     };
   });
-  await select(page, 'The band silly');
   const canvas = page.locator('[data-region="stage-a"] canvas');
   await expect(canvas).toHaveCount(1);
   await page.getByRole('button', { name: 'Play', exact: true }).click();
@@ -115,19 +117,21 @@ test('The band: real score, reversible motion, five themes, frame cost and lifet
   await frames(page);
   expect(await hash(page)).toBe(stopped);
   const listeners = await page.evaluate(() => window.bandListeners);
+  await page.setViewportSize({ width: 1920, height: 1080 });
   for (let i = 0; i < 2; i++) {
-    await select(page, 'Test card diagnostic');
-    await select(page, 'The band silly');
+    await select(page, 'Test card');
+    await select(page, 'The band');
     await expect(canvas).toHaveCount(1);
   }
   expect(await page.evaluate(() => window.bandListeners)).toBe(listeners);
+  await page.setViewportSize({ width: 2560, height: 1440 });
   // Freeze score time without touching the engine; the host still builds the real song frame.
   await page.evaluate(() => {
     const original = window.odmStudio.getPlayhead.bind(window.odmStudio);
     window.odmStudio.getPlayhead = () => window.bandClock ?? original();
     window.bandClock = 10.4;
   });
-  await expect(page.locator('.view-status')).toHaveText('');
+  await expect(page.locator('[data-region="stage-a"] .view-status')).toHaveText('');
   await mkdir(shots, { recursive: true });
   // The host reserves a header in Stage A; set the drawable area to the requested exact size.
   await page.addStyleTag({
@@ -139,6 +143,7 @@ test('The band: real score, reversible motion, five themes, frame cost and lifet
   const metrics: Record<string, unknown> = {};
   for (const theme of ['arcade', 'phosphor', 'pocket', 'riso', 'sunset']) {
     await page.getByRole('button', { name: `Theme ${theme}`, exact: true }).click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
     await page.evaluate(() => document.fonts.ready);
     await frames(page);
     await canvas.screenshot({ path: `${shots}/${theme}-1300x760.png` });
