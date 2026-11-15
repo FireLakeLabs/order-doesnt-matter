@@ -1,6 +1,6 @@
 import type { ViewDefinition, ViewFrame, ViewHandle } from '../views/types';
 
-/** Own async mounts, including a mount that resolves after its host was removed. */
+/** Own async mounts, including partial failures and mounts resolving after removal. */
 export function mountView(
   load: () => Promise<ViewDefinition>,
   element: HTMLElement,
@@ -10,34 +10,52 @@ export function mountView(
   const isDisposed = () => disposed;
   let handle: ViewHandle | undefined;
   let definition: ViewDefinition | undefined;
-  void load()
+  const release = () => {
+    const mounted = handle;
+    handle = undefined;
+    mounted?.dispose();
+  };
+  const fail = (error: unknown) => {
+    if (disposed) return;
+    disposed = true;
+    try {
+      release();
+    } catch {
+      /* Keep the original drawing failure visible. */
+    }
+    element.replaceChildren();
+    failed(error);
+  };
+  void Promise.resolve()
+    .then(load)
     .then(async (view) => {
-      if (isDisposed()) return;
+      if (disposed) return;
       definition = view;
       const mounted = await view.mount(element);
       if (isDisposed()) mounted.dispose();
       else handle = mounted;
     })
-    .catch((error: unknown) => {
-      if (!disposed) failed(error);
-    });
+    .catch(fail);
   return {
     get definition() {
       return definition;
     },
     frame(frame: ViewFrame) {
+      if (disposed) return;
       try {
         handle?.frame(frame);
       } catch (error) {
-        this.dispose();
-        failed(error);
+        fail(error);
       }
     },
     dispose() {
+      if (disposed) return;
       disposed = true;
-      const mounted = handle;
-      handle = undefined;
-      mounted?.dispose();
+      try {
+        release();
+      } catch (error) {
+        failed(error);
+      }
     },
   };
 }
