@@ -1,98 +1,79 @@
 # Backlog
 
 Everything known to be outstanding, in one place. The [model](model.md) and
-[decisions](decisions.md) record what is settled. Written 2026-11-12
-at the end of Phase 4, when work paused. Add to it; delete an item when it
-ships.
+[decisions](decisions.md) record what is settled. Updated 2026-11-15 against the
+integrated remaining-work branch. Implemented packages in PRs #56–67 are reviewed
+and pass CI; they remain unmerged. Implementation status does not imply deployment.
 
-## Next agreed step
+## Finish the current wave
 
-The [reviewed layout/context wave](../research/design-review/implementation-brief.md)
-is implemented: one in-page editor, small/enlarging live previews, explicit
-playing/editing labels, and exact List focus return. Local recovery, document
-download and generated-Strudel export are the chosen next retention features;
-they remain a separately authorized wave.
+- **Release approval.** The reviewed feature stack remains open and unmerged.
+  Every merge to main publishes; final merge/release needs owner authorization.
+- **Final combined acceptance.** The combined implementation including guided
+  practice passed 668 Node tests and 119 browser tests, with three existing skips,
+  in 216.887 s under the owner-approved limits in [standards](standards.md).
+  Current tour-head CI and release verification remain. Full evidence is in the
+  [wave record](../research/remaining-work/plan.md).
 
-## For the design review
+## Editor and retention boundaries
 
-- **Theme picker.** The owner dislikes the current colours; not urgent.
-- **3D fly-through as a Watch style.** Built in `spikes/spiral`, judged less
-  readable than the ring, but the owner would be sorry to lose it.
-- **A way from a planet into that instrument's settings.** A planet opens the
-  instrument editor only; settings are reached through the sheet.
-- **Planets are barely readable** at panel size, and the **room outline is too
-  faint** on a busy piece despite a high measured contrast.
-- **Watch bands are plain**; short notes on a busy piece are thin.
-- **Long names are cut short** under planets. The earlier Watch legend report
-  was not reproduced with 14 long names in the 2026-11-14 review.
-- **Many instruments on a phone** fall back to the list for touch.
-- Phase 0 notes never revisited: the system inset is small; a comment line was
-  once used as a breadcrumb name; the "Add to" heading wording.
-
-## Editors
-
-- **Keeping work:** no document save/export or reload recovery. The paste box
-  retains imported text after visual edits; loading it again replaces those edits
-  and their history. The first retention features are chosen in the model;
-  recovery limits and safe replacement still need specification and implementation.
-
-- **Still edited as text:** polymeter, random choice, speed or evenly-spread
-  values that are themselves patterns, repeated outer speed marks, negative
-  evenly-spread hits.
-- **Callback rewrites** (`off`, `every`, `jux` and the like) are read-only or
-  edited as source.
-- **An instrument that sends to two rooms** is shown only in the one it uses
-  most.
-- **Delete instrument is refused** when another instrument depends on it or a
-  shared rewrite's safety is unknown; there is no guided way through.
-- The Setup area's screenshots were never reviewed by the lead.
+- **Source fallbacks:** patterned per-cycle counts, legacy/opaque mini chunks and
+  unproven forms remain source-editable. Supported structural Lists retain real
+  event spans and precise paths.
+- **Callbacks:** arbitrary JavaScript, other callback methods and variadic
+  `superimpose` remain source-first. Supported branches have navigation and edits.
+- **Dependent deletion:** unsafe removal remains refused. Verified dependents are
+  navigable; unknown dependencies retain source/mute guidance.
+- **Recovery:** one latest browser-managed document, latest writer wins across
+  tabs, browser clearing can remove it, and Undo/transport are not persisted.
+  Portable JSON and generated Strudel are available; broader persistence is future
+  scope rather than a claim of the current recovery feature.
 
 ## Playback and timing
 
-- **A program that behaves at first and loops forever later** can still freeze
-  the page (D38). The page cannot interrupt itself mid-question.
-- **Edit delay.** The cheap saving is done (D39). Not done, by choice:
-  shortening Strudel's scheduling margins. If revisited, expose them through
-  the seam and test under deliberate load, counting skipped windows.
-- **Section discovery still runs on every edit**; most edits cannot change
-  which sounds a piece needs.
-- **Sync was never measured at the speaker**, only against the browser's
-  reported output delay (D40).
-- **Watch drawing has occasional slow frames** (7–20 ms worst against a 4 ms
-  aim; median about 1 ms). The owner saw no stutter.
+- **Arbitrary page execution:** cooperative checkpoints protect authored
+  evaluation/query loops and functions, with approximately two seconds of possible
+  blocking. Native calls, indirect/generated execution, hostile side effects,
+  trigger callbacks and out-of-scope async work still need an off-page boundary.
+- **Discovery admission:** constant numeric gain/cutoff edits reuse section
+  inventory for a restricted pure generated subset. Unsupported programs still
+  rediscover; broaden only with asset-selection and lifecycle canaries.
+- **Edit delay:** scheduling margins stay at Strudel defaults (D39). Revisit only
+  with deliberate-load measurements that count skipped windows.
+- **Speaker sync:** only the browser's reported output delay was measured (D40).
+  Physical output measurement remains owner evidence.
+- **Watch headroom:** frame-submission measurements are machine-dependent, and
+  perspective overlaps can obscure individual notes. GPU completion and motion
+  readability are not established by screenshots or submission timing.
 
 ## Tests and process
 
-- **Dev-server port:** Vite's CLI `--port 0` selected its default port during
-  the interface wave. The checks used an OS-allocated port instead; repair the
-  development launcher in a separate change.
+- **Lint advisories:** seven moderate minimatch/typescript-eslint chain entries
+  remain without an established compatible remedy. The last recorded
+  production-only audit reported none; dependency changes need fresh checks.
+- **PR size:** contracts, proof and rearrangement have exceeded the 400-line aim.
+  Keep features separate and report actual authored size and verification limits.
 
-- **Dependency maintenance:** review the development-tool advisories reported by
-  `npm audit` (Vite, Vitest and lint dependencies). The production-only audit on
-  2026-11-14 reported none. Updates belong in a separate checked change.
+## Design questions
 
-- **Combined browser acceptance:** the expanded suite was cut off at 180 s.
-  The owner approved 300 s total and 25 s per completed case on 2026-11-15.
-  Record a complete combined run under those limits; retain timing evidence.
-- **Two demo tests exceed the per-test guard**; they run outside the
-  normal suite.
-- **Pull requests run 500–1,900 lines** against a 400-line aim.
-- `metrics/prs.csv`: cycle time measures open-to-merge only; rework-commit
-  counts are blank for PRs 42–47.
+- Whether heard length should be drawn, and what evidence would support it.
+- What a new system display would explain beyond the current context; omit it
+  until it has an agreed purpose.
 
 ## Hosting
 
-- Any change to AWS or DNS needs a fresh go-ahead from the owner; the original
-  approval covered first setup only.
+Any AWS or DNS change needs a fresh owner go-ahead; the original approval covered
+first setup only.
 
 ## Last implementation wave
 
-- **Guided tour — implement last.** After the other outstanding work is complete
-  and the interface has settled, build an optional, replayable Driver.js practice
-  tour. Cover loading, playback, score editing and Undo, sections/Follow,
-  Now/Watch, and the shipped recovery/download/export controls. Preserve the
-  visitor's own work and recovery state. The
-  [specification](../research/guided-tour-spec.md) defines the proposed flow,
-  integration and acceptance checks. Review its mockup before implementation;
-  this backlog entry does not start the work. Owner requested this order on
-  2026-11-14.
+**Guided tour — implement last.** The owner approved the
+[desktop/phone mockup](../research/guided-tour/mockup.html) on 2026-11-15.
+The optional, replayable Driver.js practice flow is implemented through actual loading,
+playback, editing/Undo, sections/Follow, Now/Watch and Keep work controls.
+Preserve the original session, drafts and recovery state; practice must never
+replace the visitor's saved work. Follow the
+[specification](../research/guided-tour-spec.md) and
+[source-grounded brief](../research/guided-tour/implementation-brief.md).
+Session preservation and cancellation preceded visible tour integration. Final-head CI and release approval remain; manual screen-reader and
+real mobile-keyboard behavior are unverified.

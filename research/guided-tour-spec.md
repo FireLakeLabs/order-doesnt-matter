@@ -1,14 +1,15 @@
 # Guided tour specification
 
-Specified 2026-11-14. **Deferred: implement last, after the other outstanding
-work in the [backlog](../docs/backlog.md).** Reconcile this specification with
-the finished interface before implementation. The owner has requested planning
-and backlog tracking; this document does not start implementation.
+Specified 2026-11-14 as the final implementation wave. The owner authorized the
+remaining work and approved the desktop/phone mockup on 2026-11-15. Guided
+practice is now implemented; final-head CI and release approval remain. The
+[backlog](../docs/backlog.md) and [verification](guided-tour/verification.md) record
+remaining work and measured limits.
 
 The settled direction is recorded in [the model](../docs/model.md): use
 Driver.js for presentation and navigation, with application-owned lessons and
 state transitions. The interaction details below are the proposed implementation
-baseline. Review a desktop/phone mockup with the owner before building the UI.
+baseline. The required desktop/phone design review is complete.
 
 ## Result and scope
 
@@ -135,6 +136,7 @@ These are integration leads, not proof that our finished flow is accessible.
   announcements and reduced motion. Visually review desktop at 1440×900 and
   phones at 390×844 and 390×667, including enlargement and scrolling.
 - Run `npm run check` and `npm run test:browser` with the pinned Node/npm, free
-  ports and existing 60 s/180 s budgets. Add focused coverage within those
-  budgets; do not raise timeouts or add retries. Measure browser assertions
+  ports, the 60 s Node budget and owner-approved 25 s per-case/300 s browser
+  budgets. Add focused coverage within those limits; do not add retries or raise
+  them further. Measure browser assertions
   separately from visual review and report any unverified accessibility behavior.

@@ -250,7 +250,9 @@ export default {
       };
       parent.append(fieldLabel(sound ? 'Sound' : 'Note', input), options);
     }
+    let suspended = false;
     function render() {
+      if (suspended) return;
       const list = steps();
       while (selected.length > 1 && !rhythmStep(list, selected)) selected = selected.slice(0, -1);
       if (!rhythmStep(list, selected)) selected = [0];
@@ -709,6 +711,9 @@ export default {
     update(initial);
     return {
       update,
+      suspend(value: boolean) {
+        suspended = value;
+      },
       destroy() {
         observer.disconnect();
         pointer.removeEventListener('change', render);

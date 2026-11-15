@@ -15,6 +15,13 @@ const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text = '') => {
   return n;
 };
 export function createPanel(host: HTMLElement, close: () => void) {
+  let held: EditorContext | undefined;
+  host.addEventListener('pointerdown', () => {
+    held = undefined;
+  });
+  host.addEventListener('input', () => {
+    held = undefined;
+  });
   let id = '',
     active: EditorKind | undefined;
   let mounted: ReturnType<EditorKind['mount']> | undefined;
@@ -44,7 +51,12 @@ export function createPanel(host: HTMLElement, close: () => void) {
   host.setAttribute('aria-labelledby', heading.id);
   host.setAttribute('role', 'region');
   host.append(header, body, footer);
-  return (context: EditorContext | null, entry: PendingEntry | undefined, playing: boolean) => {
+  let latest: EditorContext | undefined;
+  const render = (
+    context: EditorContext | null,
+    entry: PendingEntry | undefined,
+    playing: boolean,
+  ) => {
     host.hidden = !context;
     if (!context) {
       mounted?.destroy();
@@ -96,7 +108,17 @@ export function createPanel(host: HTMLElement, close: () => void) {
       active = kind;
       host.dataset.editorKind = kind.id;
       mounted = kind.mount(body, context);
-    } else mounted!.update(context);
+    } else if (
+      !held ||
+      held.doc !== context.doc ||
+      held.target.nodeId !== context.target.nodeId ||
+      held.window.fromCycle !== context.window.fromCycle ||
+      held.window.toCycle !== context.window.toCycle
+    ) {
+      held = undefined;
+      mounted!.update(context);
+    }
+    latest = context;
     const offers = kinds.flatMap((kind) => kind.conversions?.(next, context.doc) ?? []);
     // Keep focus during status/event refreshes; handlers always use the latest offers.
     const labels = JSON.stringify(offers.map((offer) => offer.label));
@@ -140,4 +162,10 @@ export function createPanel(host: HTMLElement, close: () => void) {
     const ownVersion = instrumentEditStatus(context.doc);
     if (ownVersion) status.textContent += ` · ${ownVersion}`;
   };
+  return Object.assign(render, {
+    freeze(value: boolean) {
+      if (value) held = latest;
+      mounted?.suspend?.(value);
+    },
+  });
 }

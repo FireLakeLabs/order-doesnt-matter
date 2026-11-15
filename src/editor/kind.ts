@@ -19,6 +19,8 @@ export interface EditorContext {
   ): void;
   /** Ask about a hypothetical document over the current window, with a worker budget. */
   ask?(doc: Doc, instrumentId: string): Promise<EventResult>;
+  /** Outcome-bearing submitted form work; includes validation and application. */
+  submit?(work: () => Promise<boolean>): Promise<boolean>;
   pending: 'none' | 'pending' | 'failed';
 }
 export interface EditorKind {
@@ -32,5 +34,5 @@ export interface EditorKind {
   mount(
     body: HTMLElement,
     context: EditorContext,
-  ): { update(context: EditorContext): void; destroy(): void };
+  ): { update(context: EditorContext): void; suspend?(value: boolean): void; destroy(): void };
 }

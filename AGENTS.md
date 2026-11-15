@@ -14,10 +14,16 @@ you play with the score directly, without making Strudel's syntax the subject.
 
 ## Current phase
 
-Phase 4 and the reviewed in-page editor layout are built. Now and Watch are
-previews that enlarge; playing and editing contexts have separate labels.
-Retention/export is a later wave. Now (`src/live/`) and Watch (`src/spiral/`) share the pure model
-in `src/live/model.ts`. The app is live at odm.firelakelabs.com
+The in-page layout, retention/export, structural editors and live-view
+improvements are built. Now and Watch enlarge; playing and editing contexts
+have separate labels. Paper is the default theme. The final implementation wave
+is guided practice: for tour work, read the
+[specification](research/guided-tour-spec.md) and
+[approved mockup brief](research/guided-tour/implementation-brief.md).
+Preserve the visitor's session and recovery state through practice.
+
+Now (`src/live/`) and Watch (`src/spiral/`) share `src/live/model.ts`.
+The app is live at odm.firelakelabs.com
 and every merge to `main` publishes. An editor is one file in `src/editor/kinds/`;
 a document change is one file in `src/document/edits/`. Production code lives
 in `src/`. `spikes/` is frozen reference and must not be imported; `corpus/`

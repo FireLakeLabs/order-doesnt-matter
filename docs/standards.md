@@ -35,6 +35,15 @@ Kabelsalat's Node entry omits a required export; vitest inlines those dependenci
 Cyclist phase access requires its first tick: an uninitialized phase throws.
 Seek sets the origin while stopped; live seeking belongs to the engine.
 
+Implementation extensions to D38/D39 (2026-11-15): cooperative checkpoints cover
+authored loops/functions during evaluation and queries. Failed evaluation retains
+the installed pattern; a later query overrun stops transport. Native/indirect code,
+hostile side effects, trigger callbacks and out-of-scope async work remain outside
+that protection. An off-page execution boundary is still needed for arbitrary code.
+Constant gain/cutoff edits reuse extra section inventory only for an admitted pure
+generated subset; unsupported programs rediscover. Every replacement retains
+current-window preflight, audio preparation, asset checks and default margins.
+
 Document paths use property names and array indices from the serialized root.
 Selectors keep body order; `shared` returns the last matching pattern and `tempo`
 the last cpm value. Validation checks shared-name existence, not JavaScript scope.

@@ -12,6 +12,7 @@ import { createPreviews, previewMarkup } from './previews';
 import { aboutControls, mountAbout } from './about';
 import { keepMarkup, mountKeep } from './keep';
 import './style.css';
+import { mountTour } from './tour';
 import { mountTheme } from './theme';
 
 const app = createApp({ confirmReplacement: () => keep.confirmReplacement() });
@@ -22,6 +23,7 @@ document.body.innerHTML = `
     <button id="undo" disabled>Undo</button><button id="redo" disabled>Redo</button>
     <button id="paste" aria-expanded="true" aria-controls="paste-panel">Paste Strudel</button>
   <button id="keep" aria-expanded="false" aria-controls="keep-panel">Keep work</button>
+  <button id="take-tour" data-take-tour>Help → Take a tour</button>
   ${aboutControls}</div><p id="solo-banner" hidden><span></span> <button id="stop-solo">Stop solo</button></p><p id="message" role="status"></p><div id="sound-notice" hidden><span role="status">Default sounds could not load. Check your connection, then press Play again.</span><button id="dismiss-sound-notice" aria-label="Dismiss sound notice">Dismiss</button></div></header>
   <main>
     ${keepMarkup}
@@ -34,13 +36,13 @@ document.body.innerHTML = `
     <details id="notes" hidden><summary>Notes</summary><ul></ul></details>
     <div class="score-toolbar"><h2>The score</h2><span id="editing-context"></span><output id="window"></output><button id="follow" aria-pressed="true">Follow</button></div>
     <p id="playback-context" aria-live="polite"></p>
-    <div id="score-workspace"><div id="score"><p class="welcome">Paste a Strudel program or choose an original to see its score. Press Play when you're ready.</p></div><aside id="editor" hidden></aside>${previewMarkup}</div>
+    <div id="score-workspace"><div id="score"><p class="welcome">Paste a Strudel program or choose an original to see its score. Press Play when you're ready. <button data-take-tour>Take a tour</button></p></div><aside id="editor" hidden></aside>${previewMarkup}</div>
   </main><footer>Read the score. Follow the cycles.</footer>`;
 mountTheme(document.querySelector('.transport')!);
 const aboutDialog = mountAbout();
 const keep = mountKeep(app);
 const get = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id)! as T;
-const source = get<HTMLTextAreaElement>('source'),
+let source = get<HTMLTextAreaElement>('source'),
   score = get('score');
 const paste = get<HTMLButtonElement>('paste'),
   panel = get('paste-panel');
@@ -91,8 +93,11 @@ function closeEditor() {
   renderEditor();
   (liveOrigin?.isConnected ? liveOrigin : originCell())?.focus();
 }
-const renderPanel = createPanel(get('editor'), closeEditor);
+let renderPanel = createPanel(get('editor'), closeEditor);
+let entryLocked = false;
 function renderEditor() {
+  if (entryLocked) return;
+  const owner = app.editor;
   const { doc, playing, fromCycle, toCycle } = app.state;
   const target = doc && targetId ? describeTarget(doc, targetId) : null;
   get('score-workspace').classList.toggle('editing', !!target);
@@ -116,7 +121,9 @@ function renderEditor() {
             : undefined,
           window: { fromCycle: app.state.fromCycle, toCycle: app.state.toCycle },
           pending: entry?.status ?? 'none',
+          submit: (work) => owner!.submit(work),
           apply: (next, options) => {
+            if (app.editor !== owner) return;
             const oldRows = app.state.rows;
             const oldIndex = oldRows.findIndex((r) => r.id === targetId);
             if (options?.selection !== undefined) targetId = options.selection ?? null;
@@ -131,7 +138,7 @@ function renderEditor() {
                 ?.focus({ preventScroll: true });
             }
           },
-          ask: (candidate, id) => app.editor!.ask(candidate, id, fromCycle, toCycle),
+          ask: (candidate, id) => owner!.ask(candidate, id, fromCycle, toCycle),
         }
       : null,
     entry,
@@ -201,6 +208,107 @@ document.addEventListener('keydown', (event) => {
     else app.editor?.undo();
   }
 });
+// Entry fences blur commits before moving focus. Park the actual mounted kind,
+// including its closures, errors, selection and scroll; never serialize a form.
+get('editor').addEventListener(
+  'change',
+  (event) => {
+    if (entryLocked) {
+      event.stopImmediatePropagation();
+    }
+  },
+  true,
+);
+function parkOriginal() {
+  renderPanel.freeze(true);
+  const liveState = {
+    panels: ['.live-panel', '.live-list-disclosure'].map((selector) => ({
+      selector,
+      open: get('live').querySelector<HTMLDetailsElement>(selector)?.open,
+    })),
+    more: get('live').querySelector('.live-list-more')?.getAttribute('aria-expanded'),
+    origin: liveOrigin?.dataset.listId
+      ? `[data-list-id="${CSS.escape(liveOrigin.dataset.listId)}"]`
+      : liveOrigin?.dataset.liveId
+        ? `[data-live-id="${CSS.escape(liveOrigin.dataset.liveId)}"]`
+        : null,
+  };
+  const saved = {
+    source,
+    score,
+    renderPanel,
+    targetId,
+    origin,
+    liveOrigin,
+    selectedSession,
+    previousSheet,
+    previousNotes,
+    editNotice,
+    editor: get('editor'),
+    pasteHidden: panel.hidden,
+    keepHidden: get('keep-panel').hidden,
+    scroll: [window.scrollX, window.scrollY],
+  };
+  for (const id of ['source', 'score', 'editor'] as const) {
+    const node = saved[id],
+      replacement = document.createElement(node.tagName);
+    for (const attr of Array.from(node.attributes)) replacement.setAttribute(attr.name, attr.value);
+    replacement.id = id;
+    if (id === 'editor') replacement.hidden = true;
+    node.replaceWith(replacement);
+  }
+  source = get<HTMLTextAreaElement>('source');
+  score = get('score');
+  renderPanel = createPanel(get('editor'), closeEditor);
+  targetId = null;
+  origin = null;
+  liveOrigin = null;
+  selectedSession = null;
+  previousSheet = [];
+  previousNotes = undefined;
+  editNotice = undefined;
+  panel.hidden = false;
+  get('keep-panel').hidden = true;
+  entryLocked = false;
+  return () => {
+    renderPanel(null, undefined, false);
+    for (const id of ['source', 'score', 'editor'] as const) get(id).replaceWith(saved[id]);
+    ({
+      source,
+      score,
+      renderPanel,
+      targetId,
+      origin,
+      liveOrigin,
+      selectedSession,
+      previousSheet,
+      previousNotes,
+      editNotice,
+    } = saved);
+    panel.hidden = saved.pasteHidden;
+    get('keep-panel').hidden = saved.keepHidden;
+    paste.setAttribute('aria-expanded', String(!panel.hidden));
+    get('keep').setAttribute('aria-expanded', String(!get('keep-panel').hidden));
+    renderPanel.freeze(false);
+    previousSheet = [...previousSheet];
+    if (previousSheet.length) previousSheet[6] = false;
+    window.scrollTo(...(saved.scroll as [number, number]));
+    const activation = app.activation;
+    // The following controller update can rebuild Now for the restored score.
+    // Restore its disclosure and semantic origin after that synchronous render.
+    queueMicrotask(() => {
+      if (app.practice || app.activation !== activation) return;
+      for (const { selector, open } of liveState.panels) {
+        const panel = get('live').querySelector<HTMLDetailsElement>(selector);
+        if (panel && open !== undefined) panel.open = open;
+      }
+      const more = get('live').querySelector<HTMLButtonElement>('.live-list-more');
+      if (more && liveState.more && more.getAttribute('aria-expanded') !== liveState.more)
+        more.click();
+      if (liveState.origin) liveOrigin = get('live').querySelector<HTMLElement>(liveState.origin);
+    });
+  };
+}
 let previousLiveRows = '';
 let previousNotes: unknown;
 let previousSheet: unknown[] = [];
@@ -271,6 +379,10 @@ app.subscribe((state) => {
       },
     );
   }
+  if (!state.doc && previousSheet.length) {
+    score.innerHTML = `<p class="welcome">Paste a Strudel program or choose an original to see its score. Press Play when you're ready. <button data-take-tour>Take a tour</button></p>`;
+    previousSheet = [];
+  }
   const liveRows = JSON.stringify(state.rows.map((r) => r.id));
   if (previousLiveRows !== liveRows) {
     previousLiveRows = liveRows;
@@ -300,6 +412,19 @@ app.subscribe((state) => {
     }),
   );
   renderEditor();
+});
+mountTour(app, {
+  lock: (value) => {
+    entryLocked = value;
+    renderPanel.freeze(value);
+    if (!value) renderEditor();
+  },
+  park: parkOriginal,
+  closeDialogs: () => {
+    if (aboutDialog.open) aboutDialog.close();
+    if (keep.dialog.open) keep.dialog.close();
+  },
+  previews,
 });
 document.addEventListener('visibilitychange', () =>
   app.setWatch(!!app.state.doc && !document.hidden),

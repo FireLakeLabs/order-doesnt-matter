@@ -66,6 +66,51 @@ it('failed swap restores last confirmed document and visibly fails', async () =>
   expect(s.state.entries[id].status).toBe('failed');
   s.dispose();
 });
+it('Stop retains a submitted document and settles a cancelled replacement without a hidden failure', async () => {
+  const { doc, id } = setup();
+  let reject!: (error: Error) => void,
+    playing = true;
+  const s = createEditSession(doc, {
+    playing: () => playing,
+    play: () => new Promise((_resolve, fail) => (reject = fail)),
+    changed: () => {},
+    refresh: () => {},
+  });
+  s.edit(id, 0.9);
+  const submitted = s.state.doc;
+  playing = false;
+  s.stopped();
+  reject(Error('Playback cancelled by stop'));
+  expect(await s.settle()).toBe(true);
+  expect(s.state.doc).toBe(submitted);
+  expect(s.state.entries).toEqual({});
+  s.undo();
+  expect(s.state.doc).toBe(doc);
+  s.dispose();
+});
+it('disposing a queued session wakes a settlement barrier', async () => {
+  vi.useFakeTimers();
+  try {
+    const { doc, id } = setup();
+    const s = createEditSession(doc, {
+      playing: () => true,
+      play: async () => 1,
+      changed: () => {},
+      refresh: () => {},
+    });
+    s.edit(id, 0.6);
+    await vi.advanceTimersByTimeAsync(0);
+    s.edit(id, 0.7);
+    let settled = false;
+    const barrier = s.settle().then(() => (settled = true));
+    s.dispose();
+    await vi.advanceTimersByTimeAsync(0);
+    expect(settled).toBe(true);
+    await barrier;
+  } finally {
+    vi.useRealTimers();
+  }
+});
 it('stopped edit is immediate and undo/redo work without scheduling playback', () => {
   const { doc, id } = setup(),
     play = vi.fn(),

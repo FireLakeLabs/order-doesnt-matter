@@ -179,3 +179,164 @@ it('startup protects the saved owner snapshot until Recover or an approved delib
   expect(setItem).toHaveBeenCalledOnce();
   app.editor?.dispose();
 });
+
+it('practice retains identities, both history directions, pin/solo and recovery without adopting a candidate', async () => {
+  const storage = new Map<string, string>();
+  const retention = createRetention({
+    storage: () => ({
+      getItem: (key) => storage.get(key) ?? null,
+      setItem: (key, value) => {
+        storage.set(key, value);
+      },
+    }),
+  });
+  const app = createApp({ retention });
+  await app.load(kiln);
+  const session = app.editor!,
+    original = app.state.doc!;
+  const changed = renameInstrument(original, app.state.rows[0].id, 'Visitor');
+  if ('ok' in changed) throw Error(changed.reason);
+  session.apply(changed);
+  session.undo();
+  session.redo();
+  session.undo();
+  app.select(app.state.sections[1].id);
+  app.solo(app.state.rows[0].id);
+  const state = app.state,
+    stored = storage.get(RECOVERY_KEY),
+    notice = retention.notice;
+  await app.play();
+  expect(await app.beginPractice(new AbortController().signal)).toBe(true);
+  expect(app.engine).toBe(audio.engine);
+  expect(app.state.doc).toBeNull();
+  await app.load(kiln);
+  app.editor!.apply(changed);
+  app.downloadDocument();
+  app.exportStrudel();
+  expect(storage.get(RECOVERY_KEY)).toBe(stored);
+  app.endPractice();
+  app.endPractice();
+  expect(app.editor).toBe(session);
+  expect(app.state.doc).toBe(original);
+  expect(app.state.selected).toBe(state.selected);
+  expect(app.state.solo).toBe(state.solo);
+  expect(app.state.follow).toBe(false);
+  expect(app.state.playing).toBe(false);
+  expect(session.canRedo).toBe(true);
+  session.redo();
+  expect(app.state.doc).toBe(changed);
+  expect(app.retention).toBe(retention);
+  expect(retention.notice).toBe(notice);
+  session.dispose();
+  const candidate = createRetention({
+    storage: () => ({ getItem: () => documentJSON(original), setItem: vi.fn() }),
+  });
+  const empty = createApp({ retention: candidate });
+  const before = candidate.candidate;
+  expect(await empty.beginPractice(new AbortController().signal)).toBe(true);
+  await empty.load(kiln);
+  empty.endPractice();
+  expect(empty.state.doc).toBeNull();
+  expect(candidate.candidate).toBe(before);
+});
+
+it('preparation drains submitted validation and swaps, can cancel, and refuses a failed outcome', async () => {
+  const app = createApp({ retention: createRetention({ persistent: false }) });
+  await app.load(kiln);
+  let release!: (ok: boolean) => void;
+  const validation = app.editor!.submit(
+    () =>
+      new Promise<boolean>((resolve) => {
+        release = resolve;
+      }),
+  );
+  const cancel = new AbortController();
+  const entering = app.beginPractice(cancel.signal);
+  cancel.abort();
+  release(true);
+  await validation;
+  expect(await entering).toBe(false);
+  expect(app.practice).toBe(false);
+  await app.editor!.submit(async () => false);
+  expect(await app.beginPractice(new AbortController().signal)).toBe(false);
+  expect(app.state.doc).not.toBeNull();
+  app.editor?.dispose();
+});
+
+it('entry drains queued edits without waiting for their sparse display trigger, and keeps a failed rollback', async () => {
+  const app = createApp({ retention: createRetention({ persistent: false }) });
+  await app.load(kiln);
+  await app.play();
+  const editor = app.editor!,
+    doc = app.state.doc!,
+    id = app.state.rows[0].id;
+  const change = (name: string) => {
+    const next = renameInstrument(app.state.doc!, id, name);
+    if ('ok' in next) throw Error(next.reason);
+    editor.apply(next);
+    return next;
+  };
+  audio.pauseNext();
+  change('First');
+  const last = change('Latest');
+  const entering = app.beginPractice(new AbortController().signal);
+  expect(app.practice).toBe(false);
+  audio.release();
+  expect(await entering).toBe(true);
+  app.endPractice();
+  expect(app.editor).toBe(editor);
+  expect(app.state.doc).toBe(last);
+  await app.play();
+  audio.rejectNext();
+  change('Reject');
+  expect(await app.beginPractice(new AbortController().signal)).toBe(false);
+  expect(app.state.doc).toBe(last);
+  expect(app.editor).toBe(editor);
+  expect(Object.values(editor.state.entries).some((entry) => entry.status === 'failed')).toBe(true);
+  expect(app.state.doc).not.toBe(doc);
+  app.stop();
+  editor.dispose();
+});
+
+it('a cancelled practice replacement cannot publish its late error into the restored session', async () => {
+  const app = createApp({ retention: createRetention({ persistent: false }) });
+  await app.load(kiln);
+  const original = app.state.doc,
+    editor = app.editor;
+  expect(await app.beginPractice(new AbortController().signal)).toBe(true);
+  await app.load(kiln);
+  await app.play();
+  audio.pauseNext();
+  const count = audio.codes.length;
+  const loading = app.load('s("sine")');
+  await vi.waitFor(() => expect(audio.codes.length).toBeGreaterThan(count));
+  app.endPractice();
+  audio.rejectNext();
+  audio.release();
+  await loading;
+  expect(app.state.doc).toBe(original);
+  expect(app.editor).toBe(editor);
+  expect(app.state.loadError).toBe('');
+  expect(app.state.message).toBe('');
+  expect(app.state.playing).toBe(false);
+  editor?.dispose();
+});
+
+it('an observed practice playback failure does not block the restored session from entering again', async () => {
+  const app = createApp({ retention: createRetention({ persistent: false }) });
+  await app.load(kiln);
+  const original = app.state.doc,
+    editor = app.editor;
+  expect(await app.beginPractice(new AbortController().signal)).toBe(true);
+  await app.load(kiln);
+  audio.rejectNext();
+  await app.play();
+  expect(app.state.message).toContain('Rejected swap');
+  app.endPractice();
+  expect(app.state.doc).toBe(original);
+  expect(app.state.message).toBe('');
+  expect(await app.beginPractice(new AbortController().signal)).toBe(true);
+  app.endPractice();
+  expect(app.editor).toBe(editor);
+  editor?.dispose();
+});

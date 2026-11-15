@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Guided practice · design prototype</title>
+<style>
+:root { color-scheme:light; --text:#212d46; --muted:#495976; --canvas:#fcf8ef; --panel:#fcf8ef; --button:#ece4d5; --border:#716c7e; --accent:#4053b6; --accent-text:#fff; --selection:#65409a; --warning:#92491b; --line:color-mix(in srgb,var(--border) 55%,var(--panel)); font:15px/1.5 system-ui,sans-serif; color:var(--text); }
+* { box-sizing:border-box; } body { margin:0; } [hidden] { display:none!important; }
+button,input,select,textarea { font:inherit; } button,select { min-height:44px; border:1px solid var(--border); border-radius:6px; padding:8px 12px; background:var(--button); color:var(--text); cursor:pointer; }
+button:hover { background:color-mix(in srgb,var(--accent) 12%,var(--button)); } button:disabled { opacity:.5; cursor:default; }
+:focus-visible { outline:3px solid var(--accent); outline-offset:3px; } button.primary { background:var(--accent); color:var(--accent-text); }
+h1 { font-size:26px; line-height:1.2; letter-spacing:-.7px; margin:0 0 14px; font-weight:600; } h2 { font-size:17px; font-weight:500; margin:0; } p { margin:8px 0; } small,.muted { color:var(--muted); font-size:13px; }
+.review { display:flex; align-items:center; flex-wrap:wrap; gap:8px 16px; padding:8px 0; } .review summary { min-height:44px; cursor:pointer; } .review label { display:flex; align-items:center; gap:8px; } .review small { flex:1; }
+#device { container-type:inline-size; width:var(--width,100%); max-width:100%; margin:auto; height:var(--height,820px); background:var(--canvas); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+#layout { height:100%; display:grid; grid-template-columns:minmax(0,1fr); } #layout.practicing { grid-template-columns:minmax(0,1fr) 320px; }
+#application { display:flex; flex-direction:column; min-width:0; min-height:0; position:relative; }
+.topbar { padding:18px 24px 12px; border-bottom:1px solid var(--line); flex:none; }
+.transport,.actions,.score-toolbar,.preview-toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+#tempo { margin-right:auto; font-size:13px; color:var(--muted); } .utility { display:flex; align-items:center; gap:8px; margin-top:8px; } .utility .muted { margin-right:auto; }
+#main { overflow:auto; padding:18px 24px; min-height:0; flex:1; scroll-padding:12px; } .box { padding:14px; border:1px solid var(--line); border-radius:10px; margin-bottom:14px; }
+#source { width:100%; min-height:70px; background:var(--canvas); border:1px solid var(--border); padding:10px; border-radius:5px; color:var(--text); resize:vertical; }
+.score-toolbar { margin:16px 0 4px; } #follow { margin-left:auto; } [aria-pressed=true] { color:var(--accent); border-color:var(--accent); } #context { margin:0 0 12px; }
+#workspace { display:grid; grid-template-columns:minmax(0,1fr) 230px; gap:16px; align-items:start; } #score { min-width:0; } .sections { display:flex; gap:6px; overflow:auto; padding:5px; margin:4px -5px 12px; } .sections button { flex:1; white-space:nowrap; } .sections small { display:block; }
+.sheet-scroll { overflow:auto; padding:4px; margin:-4px; } table { border-collapse:collapse; width:100%; min-width:620px; font-size:13px; } th,td { text-align:left; padding:8px; border:1px solid var(--line); } th { background:var(--button); font-weight:500; } td button { width:100%; background:transparent; min-width:66px; } .notes { position:relative; display:block; width:140px; height:28px; border-bottom:1px solid var(--border); } .notes i { position:absolute; top:12px; height:4px; background:var(--accent); border-radius:1px; }
+#editor { margin-top:16px; } #editor header { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px; } #editor label { display:block; } #exact { min-height:44px; width:130px; font-size:16px; padding:8px; color:var(--text); background:var(--canvas); border:1px solid var(--border); border-radius:6px; } #cutoff { width:100%; min-height:44px; accent-color:var(--accent); }
+#previews { display:grid; gap:12px; } .preview-toolbar { justify-content:space-between; } .now-list { display:flex; flex-wrap:wrap; gap:8px; padding:16px 0; } .now-list span { padding:6px; border-bottom:3px solid var(--accent); } .rings { display:block; width:100%; height:110px; color:var(--accent); } .rings circle { fill:none; stroke:currentColor; stroke-width:2; } .rings path { fill:none; stroke:var(--text); stroke-width:3; }
+#guide { padding:18px; border-left:1px solid var(--border); display:flex; flex-direction:column; gap:12px; min-height:0; } .guide-top { display:flex; justify-content:space-between; align-items:center; gap:8px; } #instructions { overflow:auto; flex:1; min-height:0; } #instructions h2 { font-size:21px; line-height:1.25; } #guide-actions { display:flex; gap:8px; justify-content:space-between; } #skip { width:100%; margin-bottom:8px; } #step-count { color:var(--muted); font-size:13px; }
+.target { outline:3px solid var(--selection); outline-offset:3px; scroll-margin:12px; } .practice { font-weight:600; color:var(--selection); } #result { border-left:3px solid var(--accent); padding-left:12px; }
+dialog { color:var(--text); background:var(--canvas); border:1px solid var(--border); border-radius:10px; padding:20px; max-width:min(520px,calc(100% - 24px)); max-height:calc(100% - 24px); overflow:auto; } dialog::backdrop { background:#0008; } #enlarged { position:absolute; margin:12px; inset:var(--header-height,190px) 0 0; width:auto; height:calc(100% - var(--header-height,190px) - 24px); min-height:0; max-width:none; max-height:none; z-index:2; } #enlarged .rings { height:200px; } #enlarged .preview-toolbar { margin-bottom:14px; position:sticky; top:-20px; background:var(--canvas); }
+@container (max-width:1050px) { #workspace { grid-template-columns:minmax(0,1fr); } #previews { grid-template-columns:1fr 1fr; } }
+@container (max-width:650px) {
+ #layout.practicing { grid-template-columns:1fr; grid-template-rows:minmax(0,1fr) auto; } .topbar { padding:12px; } h1 { font-size:22px; margin-bottom:10px; }
+ .transport { display:grid; grid-template-columns:auto auto minmax(0,1fr); } #tempo { text-align:right; margin:0; } .utility { margin-top:6px; } #main { padding:12px; } #guide { border-left:0; border-top:1px solid var(--border); padding:12px; gap:8px; max-height:300px; } #instructions { max-height:120px; } #instructions h2 { font-size:18px; } #instructions p { margin-bottom:0; } #guide-actions { gap:12px; } #previews { grid-template-columns:1fr; } .sections button { flex:none; } .utility .muted { font-size:12px; } .review { font-size:13px; } #enlarged { padding:8px; } #enlarged .preview-toolbar { top:-8px; margin-bottom:0; } #enlarged .now-list { padding:0; } #enlarged .rings { height:120px; }
+}
+@media (prefers-reduced-motion:reduce) { * { scroll-behavior:auto!important; } }
+</style>
+</head>
+<body>
+<details class="review" aria-label="Prototype controls"><summary>Design prototype · simulated actions, no audio or saved work</summary><div class="actions">
+ <label>Size <select id="size"><option value="fit">Fit window</option><option value="1440,900">Desktop 1440 × 900</option><option value="390,844">Phone 390 × 844</option><option value="390,667">Phone 390 × 667</option></select></label>
+ <label>Entry <select id="entry-kind"><option value="own">Existing work</option><option value="empty">Empty welcome</option></select></label>
+</div></details>
+<section id="device" aria-label="Practice tour prototype">
+<div id="layout">
+ <div id="application">
+  <header class="topbar">
+   <h1>Order Doesn't Matter</h1>
+   <div class="transport"><button id="play" class="primary">Play</button><button id="stop" disabled>Stop</button><output id="tempo">33 cycles/min</output><button id="undo">Undo</button><button id="redo">Redo</button><button id="paste">Paste Strudel</button></div>
+   <div class="utility"><span class="muted">Theme: Paper</span><button id="keep">Keep work</button><button id="help">Help → Take a tour</button></div>
+  </header>
+  <main id="main">
+   <p id="result" role="status" hidden></p>
+   <section id="paste-panel" class="box" aria-label="Paste Strudel">
+    <label for="source">Your Strudel program</label><textarea id="source" spellcheck="false">Pasted text not loaded — design fixture</textarea>
+    <div class="actions"><button id="load">Load</button><span class="muted">Try an original:</span><button id="kiln">Kiln</button><button id="lichen">Lichen</button></div>
+   </section>
+   <section id="keep-panel" class="box" hidden aria-label="Keep work">
+    <h2>Keep this version</h2><p>Recovery keeps one latest document in this browser on this device. It can be cleared by your browser; download a portable copy too.</p>
+    <p id="recovery-status">Latest document kept on this device. Download a copy for safekeeping.</p>
+    <div class="actions"><button id="download-document">Download document</button><button id="export-strudel">Export Strudel</button><button id="open-document">Open document</button></div>
+    <small id="download-note" hidden>Optional: practice Kiln only. Downloads are simulated here.</small>
+   </section>
+   <section id="welcome" class="box" hidden><p>Paste a Strudel program or choose an original to see its score. Press Play when you're ready.</p><button id="welcome-tour">Take a tour</button></section>
+   <div id="piece">
+    <div class="score-toolbar"><h2>The score</h2><small id="editing">Editing Section 2</small><button id="follow" aria-pressed="false">Follow</button></div>
+    <p id="context" class="muted">Playback paused · preview Section 2 · cycles 4–12</p>
+    <div id="workspace">
+     <section id="score" aria-label="Score sheet">
+      <h2>Song strip</h2><div class="sections" aria-label="Song sections">
+       <button data-section="1">Section 1<small>cycles 0–4</small></button><button data-section="2" aria-pressed="true">Section 2<small>cycles 4–12</small></button><button data-section="3">Section 3<small>cycles 12–28</small></button><button data-section="4">Section 4<small>cycles 28–32</small></button>
+      </div>
+      <div class="sheet-scroll" tabindex="0" aria-label="Score table, scroll for more settings"><table><caption>Illustrated excerpt · Kiln Section 2</caption><thead><tr><th>Instrument</th><th>Rhythm</th><th>gain</th><th>pan</th><th>lpf</th><th>release</th></tr></thead><tbody id="rows"></tbody></table></div>
+      <section id="editor" class="box" aria-label="In-page editor">
+       <header><h2>bass › lpf</h2><button id="edit-source">Edit as source</button></header>
+       <label for="exact">Exact value <input id="exact" type="number" value="850"> Hz</label><input id="cutoff" type="range" min="20" max="20000" value="900" aria-label="bass › lpf">
+       <div class="actions"><small id="edit-status">Plays on next start</small><button id="done">Done</button></div>
+      </section>
+     </section>
+     <aside id="previews" aria-label="Live previews">
+      <section class="box" id="now"><div class="preview-toolbar"><h2>Now</h2><button id="now-enlarge">Enlarge Now</button></div><small>Playback paused</small><div class="now-list"><span>bd</span><span>hh</span><span>cp</span><span>bass</span></div><small>Instrument overview · settings in the score</small></section>
+      <section class="box" id="watch"><div class="preview-toolbar"><h2>Watch</h2><button id="watch-enlarge" aria-label="Enlarge Watch">Enlarge</button></div><small>Playback paused</small><svg class="rings" viewBox="0 0 220 110" aria-label="Illustration of Watch cycles"><circle cx="110" cy="55" r="20"/><circle cx="110" cy="55" r="35"/><circle cx="110" cy="55" r="50"/><path d="M110 55V5"/></svg><small>Read-only cycles · illustration</small></section>
+     </aside>
+    </div>
+   </div>
+  </main>
+  <dialog id="enlarged" aria-labelledby="preview-title"><div class="preview-toolbar"><h2 id="preview-title">Now</h2><button id="preview-close">Close</button></div><div id="preview-content"></div></dialog>
+ </div>
+ <aside id="guide" hidden aria-labelledby="lesson-title">
+  <div class="guide-top"><span class="practice">Practice</span><button id="end">End tour</button></div>
+  <div id="instructions" tabindex="0" aria-live="polite" aria-atomic="true"><span id="step-count"></span><h2 id="lesson-title"></h2><p id="lesson-copy"></p></div>
+  <div><button id="skip" hidden>Continue without playback</button><div id="guide-actions"><button id="back">Back</button><button id="next" class="primary">Next</button></div></div>
+ </aside>
+</div>
+</section>
+<dialog id="entry" aria-labelledby="entry-title"><h2 id="entry-title">Practice on an original?</h2><p>Use Kiln, an original example. Practice changes will be discarded.</p><p id="entry-copy">Your work, Undo and Redo, and unfinished input will be put aside. Starting stops playback. Returning keeps it stopped.</p><div class="actions"><button id="start" class="primary">Start practice</button><button id="cancel">Cancel</button></div></dialog>
+<script>
+// A visual rehearsal only: no Strudel, Driver.js, storage, engine, imports or downloads.
+const $ = (id) => document.getElementById(id);
+let furthest=0;
+let practice=false, step=0, loaded=true, playing=false, section=2, following=false, value=900;
+let changed=false, pinned=false, nowSeen=false, watchSeen=false, enlarged=null, initiator=null;
+let original=null;
+const lessons=[
+ ['Load a piece','Choose Kiln. An original or pasted Strudel becomes a score. You do not need to read the code.','kiln'],
+ ['Play and stop','Press Play to start. Stop stays above the score. Tempo is in cycles per minute. You can also continue stopped.','play'],
+ ['Read the score','Choose Section 2 for the bass. Rows are instruments; columns are settings. Marks show real note spans, not a step grid.','section-2'],
+ ['Change a setting','Open bass lpf (cutoff) and change its value. One editor stays in the page. Rhythm has its own editor; Edit as source is always available.','bass-lpf'],
+ ['Undo','Press Done to close the editor, then Undo to restore 700 Hz. Back only revisits guidance; it does not reverse edits.','done'],
+ ['Sections and Follow','Choose Section 3, then Follow. Editing can stay pinned while Now and Watch follow playback. When stopped, Follow waits for playback.','section-3'],
+ ['Now and Watch','Enlarge Now, then Close. repeat with Watch. Now shows instruments; Watch shows cycles. Both pause when stopped.','now-enlarge'],
+ ['Keep your work','Recovery is one latest document on this browser and device. Download document keeps a portable copy; Export Strudel generates fresh code. Open document replaces work after confirmation.','keep-panel']
+];
+function notes(count,offset=0,width=90/count) { return '<span class="notes" aria-hidden="true">'+Array.from({length:count},(_,i)=>`<i style="left:${offset+i*100/count}%;width:${width}%"></i>`).join('')+'</span>'; }
+function rows() {
+ $('rows').innerHTML=[['bd',4,'—','—'],['hh',16,'.22','.65'],['cp',2,'.5','—'],['bass',4,'.45','—']].map(([name,n,gain,pan])=>`<tr><th scope="row">${name}</th><td><button aria-label="${name} rhythm">${notes(n,name==='cp'?25:0,name==='cp'?22.5:90/n)}</button></td><td>${gain}</td><td>${pan}</td><td>${name==='bass'?`<button id="bass-lpf">${value} Hz</button>`:'—'}</td><td>${name==='bass'?'.12':'—'}</td></tr>`).join('');
+ $('bass-lpf').onclick=()=>{ $('editor').hidden=false; if(practice&&step===3) highlight('exact'); $('exact').focus(); };
+}
+function transport() {
+ $('play').disabled=!loaded||playing; $('stop').disabled=!playing;
+ $('context').textContent=`${playing?'Playing Section 1 · cycles 0–4':'Playback paused · preview Section '+section+' · cycles '+({1:'0–4',2:'4–12',3:'12–28',4:'28–32'}[section])}`;
+ for(const el of document.querySelectorAll('#previews > section > small:first-of-type')) el.textContent=playing?'Following playback':'Playback paused';
+}
+function select(n) { section=n; following=false; $('editing').textContent='Editing Section '+n; $('follow').setAttribute('aria-pressed','false'); for(const b of document.querySelectorAll('[data-section]')) b.setAttribute('aria-pressed',String(+b.dataset.section===n)); transport(); }
+function highlight(id) {
+ document.querySelectorAll('.target').forEach(el=>el.classList.remove('target'));
+ const el=id.startsWith('section-')?document.querySelector(`[data-section="${id.slice(8)}"]`):$(id);
+ if(el) { el.classList.add('target'); el.scrollIntoView({block:'nearest',inline:'nearest'}); }
+}
+function showLesson() {
+ const [title,copy,target]=lessons[step]; $('lesson-title').textContent=title; $('lesson-copy').textContent=copy; $('step-count').textContent=`${step+1} of 8`; $('back').disabled=step===0;
+ $('next').textContent=step===7?'Finish practice':'Next'; $('next').disabled=step!==7&&step>=furthest;
+ $('skip').hidden=step!==1;
+ if(step===7) { $('keep-panel').hidden=false; $('download-note').hidden=false; $('recovery-status').textContent='Practice is not saved to your recovery.'; $('download-document').textContent='Download practice document'; $('export-strudel').textContent='Export practice Strudel'; }
+ highlight(step===7?'download-document':step===4?($('editor').hidden?'undo':'done'):step===5&&pinned?'follow':step===6&&nowSeen?'watch-enlarge':target);
+ if(step===6) $('lesson-copy').textContent=nowSeen?'Enlarge Watch, then Close. It shows scored cycles, not recorded audio. Settings live in the score.':copy;
+ $('end').focus({preventScroll:true});
+}
+function advance() { if(!practice||step>=7)return; step++; furthest=Math.max(furthest,step); showLesson(); }
+function requestEntry(el) { initiator=el; $('entry-copy').textContent=$('entry-kind').value==='own'?'Your work, Undo and Redo, and unfinished input will be put aside. Starting stops playback. Returning keeps it stopped.':'You will return to the empty welcome screen. Playback starts only when you press Play.'; $('entry').showModal(); $('start').focus(); }
+for(const id of ['help','welcome-tour']) $(id).onclick=()=>requestEntry($(id));
+$('cancel').onclick=()=>{ $('entry').close(); initiator.focus(); };
+$('entry').addEventListener('cancel',e=>{e.preventDefault();$('cancel').click();});
+$('start').onclick=()=>{
+ original={loaded,section,following,value,source:$('source').value,draft:$('exact').value,editor:!$('editor').hidden};
+ $('entry').close(); practice=true; step=0; furthest=0; loaded=false; playing=false; changed=false; pinned=false; nowSeen=watchSeen=false;
+ $('piece').hidden=true; $('welcome').hidden=true; $('result').hidden=true; $('editor').hidden=true; $('paste-panel').hidden=false; $('keep-panel').hidden=true; $('source').value=''; $('layout').classList.add('practicing'); $('guide').hidden=false; transport(); showLesson();
+};
+function finish() {
+ if(!practice)return; practice=false; closePreview(false); playing=false;
+ ({loaded,section,following,value}=original); $('source').value=original.source; $('exact').value=original.draft; $('editor').hidden=!original.editor; $('cutoff').value=value;
+ $('guide').hidden=true; $('layout').classList.remove('practicing'); $('keep-panel').hidden=true; $('paste-panel').hidden=false; $('piece').hidden=!loaded; $('welcome').hidden=loaded;
+ document.querySelectorAll('.target').forEach(el=>el.classList.remove('target')); rows(); const savedFollow=following; select(section); following=savedFollow; $('follow').setAttribute('aria-pressed',String(following)); transport();
+ $('result').hidden=false; $('result').textContent=loaded?'Back to your work · playback stopped. Your unfinished field input is shown below.':'Back to the empty welcome · playback stopped.';
+ initiator.focus({preventScroll:true});
+}
+$('end').onclick=finish; $('back').onclick=()=>{if(step>0){step--;showLesson();}};
+$('next').onclick=()=>{if(step===7)finish();else if(step<furthest)advance();};
+$('kiln').onclick=()=>{if(!practice)return; loaded=true; value=700; $('exact').value='700'; $('cutoff').value=700; $('piece').hidden=false; $('paste-panel').hidden=true; rows(); select(1); transport(); if(step===0)advance();};
+$('play').onclick=()=>{playing=true;transport();if(practice&&step===1)advance();};
+$('stop').onclick=()=>{playing=false;transport();};
+$('skip').onclick=()=>{playing=false;transport();advance();};
+for(const b of document.querySelectorAll('[data-section]')) b.onclick=()=>{select(+b.dataset.section);if(practice&&step===2&&section===2)advance();else if(practice&&step===5&&section===3){pinned=true;highlight('follow');}};
+function edit(next) { if(!Number.isFinite(next))return; value=next; changed=value!==700; $('cutoff').value=value; rows(); $('edit-status').textContent=playing?'Changing… waiting for the change to be scheduled':'Plays on next start'; if(practice&&step===3&&changed)advance(); }
+$('exact').onchange=()=>edit($('exact').valueAsNumber); $('cutoff').oninput=()=>{ $('exact').value=$('cutoff').value;edit(+$('cutoff').value); };
+$('done').onclick=()=>{$('editor').hidden=true;if(practice&&step===4)highlight('undo');};
+$('undo').onclick=()=>{if(practice&&step===4&&$('editor').hidden&&changed){value=700;changed=false;rows();$('exact').value='700';advance();}};
+$('follow').onclick=()=>{following=!following;$('follow').setAttribute('aria-pressed',String(following));if(practice&&step===5&&pinned&&following)advance();};
+function openPreview(kind) { $('application').style.setProperty('--header-height',document.querySelector('.topbar').offsetHeight+'px'); enlarged=kind; $('preview-title').textContent=kind==='now'?'Now':'Watch'; $('preview-content').innerHTML=$(kind).querySelector(kind==='now'?'.now-list':'.rings').outerHTML+'<p>Playback '+(playing?'following the current section':'paused')+'</p>'; $('enlarged').show();$('preview-close').focus(); }
+function closePreview(restore=true) { if(!enlarged)return; const kind=enlarged; enlarged=null; $('enlarged').close(); if(restore)$(kind+'-enlarge').focus(); if(practice&&step===6){if(kind==='now')nowSeen=true;else watchSeen=true;if(nowSeen&&watchSeen)advance();else showLesson();} }
+$('now-enlarge').onclick=()=>openPreview('now'); $('watch-enlarge').onclick=()=>openPreview('watch'); $('preview-close').onclick=()=>closePreview();
+$('paste').onclick=()=>{$('paste-panel').hidden=!$('paste-panel').hidden;}; $('keep').onclick=()=>{$('keep-panel').hidden=!$('keep-panel').hidden;};
+for(const id of ['download-document','export-strudel']) $(id).onclick=()=>{if(practice){$('download-note').textContent='Prototype only: no file created. Production uses the real practice export.';}};
+// Simulated routing only. The brief defines real Escape ownership and restoration seams.
+document.addEventListener('keydown',e=>{if(e.key!=='Escape'||$('entry').open)return;if(practice){e.preventDefault();e.stopImmediatePropagation();finish();}else if(enlarged){e.preventDefault();closePreview();}},true);
+$('entry-kind').onchange=()=>{if(practice)finish(); loaded=$('entry-kind').value==='own'; $('piece').hidden=!loaded; $('welcome').hidden=loaded; $('editor').hidden=!loaded; $('result').hidden=true;transport();};
+function resize() { const size=$('size').value; const [w,h]=size==='fit'?[null,Math.max(340,window.innerHeight-document.querySelector('.review').offsetHeight-8)]:size.split(',').map(Number); $('device').style.setProperty('--width',w?w+'px':'100%'); $('device').style.setProperty('--height',h+'px'); }
+document.querySelector('.review').addEventListener('toggle',resize); $('size').onchange=resize; window.addEventListener('resize',()=>{if($('size').value==='fit')resize();});
+rows(); transport(); resize();
+</script>
+</body>
+</html>

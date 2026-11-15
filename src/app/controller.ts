@@ -30,7 +30,18 @@ export function createApp(
     confirmReplacement?: () => Promise<boolean>;
   } = {},
 ) {
-  const retention = options.retention ?? createRetention();
+  let retention = options.retention ?? createRetention();
+  let practice = false,
+    preparing = false;
+  const work = new Set<Promise<unknown>>();
+  function track<T>(task: Promise<T>): Promise<T> {
+    work.add(task);
+    void task.finally(() => work.delete(task)).catch(() => {});
+    return task;
+  }
+  let engineActivation = -1,
+    playbackFailed = false;
+  let engineCreation: Promise<Engine> | undefined;
   let loadRevision = 0,
     restoredDocument = false,
     loading = 0;
@@ -183,7 +194,8 @@ export function createApp(
     );
     return mergeSounds(state.sounds, names, engine?.sounds() ?? []);
   }
-  async function askWindow(affected?: string[]) {
+  const askWindow = (affected?: string[]) => track(questionWindow(affected));
+  async function questionWindow(affected?: string[]) {
     queries.cancel();
     const revision = ++windowRevision,
       piece = epoch;
@@ -219,11 +231,12 @@ export function createApp(
   function observe(event: EngineEvent) {
     history.push(event);
     if (history.length > 1000) history.shift();
+    if (switching || engineActivation !== epoch) return;
     if (event.type === 'swapped' || event.type === 'committed' || event.type === 'trigger')
       editor?.observe(event);
     if (event.type === 'error') message(event.message, !!event.reason);
     if (event.type === 'transport') {
-      if (!event.playing) editor?.clear();
+      if (!event.playing) editor?.stopped();
       update({ ...state, playing: event.playing });
     }
     if (event.type === 'sounds')
@@ -235,6 +248,7 @@ export function createApp(
   }
   // All engine replacements, including solo, share a serial queue.
   let swaps = Promise.resolve();
+  let switching = false;
   function replacePlayback(
     doc: Doc,
     options: Parameters<Engine['play']>[1] = {},
@@ -246,6 +260,7 @@ export function createApp(
     const work = swaps.then(async () => {
       if (piece !== epoch || transport !== transportRevision || current?.() === false) return -1;
       const identity = discoveryIdentity(doc);
+      engineActivation = piece;
       const revision = await engine!.play(
         generate(doc, { ...(whole ? {} : playbackOptions(state)), instrumentTags: true }),
         {
@@ -256,6 +271,10 @@ export function createApp(
             : undefined,
         },
       );
+      if (piece !== epoch || transport !== transportRevision) {
+        engine?.stop();
+        return -1;
+      }
       if (current?.() === false) {
         // A newer edit/load during engine preparation owns the score. Restore it
         // inside this queue slot, before another replacement can run.
@@ -274,11 +293,13 @@ export function createApp(
     );
     return work;
   }
-  async function play() {
+  const play = () => track(startPlayback());
+  async function startPlayback() {
     if (!state.doc || !checked || starting || loading) return;
     const piece = epoch,
       transport = ++transportRevision;
     starting = true;
+    playbackFailed = false;
     discoveryScope = {};
     update({ ...state, message: 'Preparing sounds…' });
     try {
@@ -291,7 +312,10 @@ export function createApp(
       );
       if (piece !== epoch || transport !== transportRevision) return;
       if (result.error) throw Error(result.error.message);
-      engine ??= await createEngine();
+      engine ??= await (engineCreation ??= createEngine().catch((error) => {
+        engineCreation = undefined;
+        throw error;
+      }));
       // Subscribe once, including when Stop was pressed during initialization.
       if (!subscribed) {
         engine.subscribe(observe);
@@ -314,14 +338,21 @@ export function createApp(
           sounds: sounds(),
         });
     } catch (error) {
-      message(error);
+      if (piece === epoch && transport === transportRevision) {
+        playbackFailed = true;
+        message(error);
+      }
     } finally {
-      starting = false;
-      update({ ...state });
+      if (piece === epoch && transport === transportRevision) {
+        starting = false;
+        update({ ...state });
+      }
     }
   }
   let subscribed = false;
-  async function loadDocument(
+  const loadDocument = (...args: Parameters<typeof installDocument>) =>
+    track(installDocument(...args));
+  async function installDocument(
     value: unknown,
     source = '',
     warnings: ImportWarning[] = [],
@@ -342,6 +373,7 @@ export function createApp(
         editor?.canUndo ||
         editor?.canRedo ||
         (retention.candidate && documentJSON(doc) !== documentJSON(retention.candidate))) &&
+      !practice &&
       options.confirmReplacement &&
       !(await options.confirmReplacement())
     )
@@ -371,6 +403,7 @@ export function createApp(
             );
             if (revision < 0) return;
           } catch (error) {
+            if (request !== loadRevision) return;
             update({ ...state, loadError: String(error) });
             return;
           }
@@ -383,18 +416,22 @@ export function createApp(
       }
       editor?.dispose();
       dirtyRows.clear();
-      editor = createEditSession(doc, {
+      const ownEditor = createEditSession(doc, {
         playing: () => !!engine?.playing,
         play: (doc) => replacePlayback(doc, { discoverCycles: sections(doc).map((s) => s.start) }),
-        changed: (pending) => update(editedPiece(state, pending.doc)),
+        changed: (pending) => {
+          if (editor === ownEditor) update(editedPiece(state, pending.doc));
+        },
         refresh: (_doc: Doc, ids: string[]) => {
-          if (!ids.length) return;
+          if (editor !== ownEditor || !ids.length) return;
           cachedWindow = null;
           ids.forEach((id) => dirtyRows.add(id));
           void askWindow([...dirtyRows]);
         },
       });
+      editor = ownEditor;
       const piece = ++epoch;
+      if (engine?.playing) engineActivation = piece;
       discoveryScope = {};
       checked = false;
       cachedWindow = null;
@@ -402,7 +439,7 @@ export function createApp(
       restoredDocument = restore;
       retention.adopt();
       update({ ...loadPiece(state, source, { doc, warnings }), message: 'Asking the score…' });
-      void askWindow();
+      const answers = askWindow();
       result ??= await preflight.query(generate(doc), 0, 16);
       if (piece !== epoch) return;
       checked = !result.error;
@@ -411,12 +448,39 @@ export function createApp(
         cps: result.error ? null : result.cps,
         message: result.error ? `Could not play this piece: ${result.error.message}` : '',
       });
+      await answers;
     } finally {
       if (loading === request) {
         loading = 0;
         update({ ...state });
       }
     }
+  }
+  let original: {
+    state: AppState;
+    editor: EditSession | null;
+    retention: typeof retention;
+    cachedWindow: { from: number; to: number; events: AppState['events'] } | null;
+    checked: boolean;
+    restoredDocument: boolean;
+    playbackNotice: string | undefined;
+    playbackFailed: boolean;
+  } | null = null;
+  function invalidate() {
+    switching = true;
+    ++epoch;
+    ++loadRevision;
+    ++transportRevision;
+    ++windowRevision;
+    queries.cancel();
+    preflight.cancel();
+    resetWatch();
+    starting = false;
+    loading = 0;
+    engine?.stop();
+    discoveryScope = {};
+    dirtyRows.clear();
+    switching = false;
   }
   return {
     get warning() {
@@ -446,7 +510,87 @@ export function createApp(
       listener(state);
       return () => listeners.delete(listener);
     },
-    retention,
+    get retention() {
+      return retention;
+    },
+    get activation() {
+      return epoch;
+    },
+    get practice() {
+      return practice;
+    },
+    get preparing() {
+      return preparing;
+    },
+    /** Wait for submitted work, including validation, queued swaps and score answers.
+     * Cancellation leaves the original active; display-pending sparse notes do not block. */
+    async beginPractice(signal: AbortSignal, park: () => void = () => {}) {
+      if (practice || preparing) return false;
+      preparing = true;
+      try {
+        do {
+          await editor?.settle();
+          await Promise.allSettled([...work, swaps]);
+          if (signal.aborted) return false;
+        } while (work.size);
+        if (
+          signal.aborted ||
+          !(await (editor?.settle() ?? Promise.resolve(true))) ||
+          playbackFailed ||
+          state.loadError ||
+          (state.doc && (!checked || Object.values(state.events).some((e) => e.error)))
+        )
+          return false;
+        park();
+        original = {
+          state,
+          editor,
+          retention,
+          cachedWindow,
+          checked,
+          restoredDocument,
+          playbackNotice,
+          playbackFailed,
+        };
+        editor?.suspend(true);
+        invalidate();
+        practice = true;
+        retention = createRetention({ persistent: false });
+        editor = null;
+        state = initialState();
+        checked = false;
+        restoredDocument = false;
+        cachedWindow = null;
+        playbackNotice = undefined;
+        playbackFailed = false;
+        update(state);
+        return true;
+      } finally {
+        preparing = false;
+      }
+    },
+    endPractice(restore: () => void = () => {}) {
+      if (!practice || !original) return;
+      invalidate();
+      editor?.dispose();
+      ({
+        state,
+        editor,
+        retention,
+        cachedWindow,
+        checked,
+        restoredDocument,
+        playbackNotice,
+        playbackFailed,
+      } = original);
+      original = null;
+      practice = false;
+      restore();
+      editor?.suspend(false);
+      // Stop never clears original history or adds an edit.
+      state = { ...state, playing: false };
+      update(state);
+    },
     loadDocument,
     async openDocument(text: string) {
       try {
@@ -480,11 +624,14 @@ export function createApp(
         piece = epoch;
       update(next);
       if (engine?.playing && state.doc)
-        void replacePlayback(state.doc).catch((error) => {
-          if (piece !== epoch || state.solo !== id) return;
-          update(setSolo(state, previous));
-          message(error);
-        });
+        void track(
+          replacePlayback(state.doc).catch((error) => {
+            if (piece !== epoch || state.solo !== id) return;
+            playbackFailed = true;
+            update(setSolo(state, previous));
+            message(error);
+          }),
+        );
     },
     play,
     dismissSoundNotice() {
@@ -493,8 +640,10 @@ export function createApp(
     stop() {
       discoveryScope = {};
       ++transportRevision;
-      editor?.clear();
+      starting = false;
+      playbackFailed = false;
       engine?.stop();
+      editor?.stopped();
       update({ ...state, playing: false, message: '' });
     },
     select(id: string) {

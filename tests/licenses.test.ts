@@ -44,3 +44,11 @@ test('published web prebundle retains its embedded versions and worklet notices'
   expect(text).not.toContain('webmidi@');
   expect(text).not.toContain('vitest@');
 });
+
+test('reviewed Driver runtime is exact, typed, and carries its complete MIT notice', () => {
+  const text = generateLicenses([resolve('node_modules/driver.js/dist/driver.js.mjs')]);
+  expect(text).toContain('driver.js@1.10.2 — MIT');
+  expect(text).toContain('Copyright (c) Kamran Ahmed');
+  expect(text).toContain('The above copyright notice and this permission notice shall be included');
+  expect(text).toContain('THE SOFTWARE IS PROVIDED "AS IS"');
+});
