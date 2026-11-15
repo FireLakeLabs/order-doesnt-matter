@@ -312,9 +312,11 @@ test('links override persisted layout; optional storage and a dense rail remain 
       .getByRole('group', { name: 'Trails', exact: true })
       .getByRole('button', { name: 'long', exact: true }),
   ).toHaveAttribute('aria-pressed', 'true');
+  const saved = await page.evaluate(() => localStorage.getItem('odm-studio-layout'));
   await page.goto('/studio.html?inspect&a=test-card&b=&theme=phosphor');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'phosphor');
   await expect(page.locator('canvas')).toHaveCount(1);
+  expect(await page.evaluate(() => localStorage.getItem('odm-studio-layout'))).toBe(saved);
   await page.addInitScript(() =>
     Object.defineProperty(window, 'localStorage', {
       get() {
@@ -379,4 +381,35 @@ test('a test-only registered failure is visible, retries, and leaves the other s
   await frames(page, 8);
   expect(await pixels(page)).not.toBe(before);
   await expect(page.getByRole('button', { name: 'Pause', exact: true })).toBeEnabled();
+});
+
+test('a host frame failure stays in its stage while the other stage keeps drawing', async ({
+  page,
+  context,
+}) => {
+  await assets(context);
+  await page.goto('/studio.html?inspect&a=test-card&b=test-card');
+  await page.waitForFunction(() => window.odmStudio.app.canPlay);
+  await expect(page.locator('canvas')).toHaveCount(2);
+  await page.getByRole('button', { name: 'Play', exact: true }).click();
+  await page.waitForFunction(() => window.odmStudio.app.state.playing);
+  await page.evaluate(() => {
+    let once = true;
+    Object.assign(window.odmStudio, {
+      getCps() {
+        if (once) {
+          once = false;
+          throw Error('Deliberate host frame failure');
+        }
+        return 0.5;
+      },
+    });
+  });
+  await expect(page.locator('[data-region="stage-a"]').getByRole('alert')).toContainText(
+    'Deliberate host frame failure',
+  );
+  const before = await pixels(page, 'b');
+  await frames(page, 8);
+  expect(await pixels(page, 'b')).not.toBe(before);
+  await expect(page.locator('[data-region="stage-b"]').getByRole('alert')).toHaveCount(0);
 });

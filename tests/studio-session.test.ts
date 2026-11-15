@@ -2,6 +2,7 @@ import { expect, test, vi } from 'vitest';
 import {
   createSession,
   layoutKey,
+  muteEdit,
   parseLayout,
   soloEdit,
   soloedInstrument,
@@ -87,5 +88,29 @@ test('solo is one document candidate and restores prior mutes, including switche
     true,
   ]);
   expect(soloedInstrument(muted)).toBeNull();
+  expect(soloedInstrument(solo)).toBe(rows[0].id);
+});
+
+test('a mute during solo restores the baseline and ends solo without losing original mutes', () => {
+  const original = importStrudel('stack(s("bd"), s("sd"), s("hh"))').doc;
+  const rows = instruments(original);
+  const baseline = setMuted(original, rows[2].id, true);
+  if ('ok' in baseline) throw Error(baseline.reason);
+  const solo = soloEdit(baseline, rows[0].id);
+  const unmutedOther = muteEdit(solo, rows[1].id);
+  expect(soloedInstrument(unmutedOther)).toBeNull();
+  expect(instruments(unmutedOther).map((row) => row.muted)).toEqual([false, false, true]);
+  const again = soloEdit(unmutedOther, rows[0].id);
+  expect(instruments(soloEdit(again, rows[0].id)).map((row) => row.muted)).toEqual([
+    false,
+    false,
+    true,
+  ]);
+  expect(instruments(muteEdit(solo, rows[0].id)).map((row) => row.muted)).toEqual([
+    true,
+    false,
+    true,
+  ]);
+  // Undo returns the exact prior version, including its solo marker and baseline.
   expect(soloedInstrument(solo)).toBe(rows[0].id);
 });

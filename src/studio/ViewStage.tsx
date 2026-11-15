@@ -50,6 +50,10 @@ function Drawing({
     let active = true,
       broken = false;
     let size = { width: container.clientWidth, height: container.clientHeight };
+    const failed = (reason: unknown) => {
+      broken = true;
+      if (active) setError(reason instanceof Error ? reason.message : String(reason));
+    };
     const mounted = mountView(
       async () => {
         if (!entry) throw Error(`Unknown view: ${viewId}`);
@@ -58,10 +62,7 @@ function Drawing({
         return definition;
       },
       owned,
-      (reason) => {
-        broken = true;
-        if (active) setError(reason instanceof Error ? reason.message : String(reason));
-      },
+      failed,
     );
     const observer = new ResizeObserver(([entry]) => {
       size = { width: entry.contentRect.width, height: entry.contentRect.height };
@@ -69,31 +70,37 @@ function Drawing({
     observer.observe(container);
     const unsubscribe = clock.subscribe((now) => {
       if (broken || !mounted.definition || size.width <= 0 || size.height <= 0) return;
-      const { theme, lookAhead, trails } = options.current;
-      const state = runtime.app.state;
-      cache.request(state, neededRange(mounted.definition.span, now, lookAhead, state.sections));
-      const ready = String(
-        state.rows.length > 0 &&
-          state.rows.every((row) => Object.hasOwn(cache.score.events, row.id)),
-      );
-      if (container.dataset.scoreReady !== ready) container.dataset.scoreReady = ready;
-      mounted.frame(
-        buildFrame({
-          state,
-          score: cache.score,
-          notes: cache.notes,
-          now,
-          cps: transport.getCps?.() ?? state.cps ?? 0.5,
-          theme,
-          lookAhead,
-          trails,
-          ...size,
-          dpr: window.devicePixelRatio,
-        }),
-      );
-      const message = cache.error || (ready === 'false' ? 'Asking the score…' : '');
-      if (status.current && status.current.textContent !== message)
-        status.current.textContent = message;
+      try {
+        const { theme, lookAhead, trails } = options.current;
+        const state = runtime.app.state;
+        cache.request(state, neededRange(mounted.definition.span, now, lookAhead, state.sections));
+        const ready = String(
+          state.rows.length > 0 &&
+            state.rows.every((row) => Object.hasOwn(cache.score.events, row.id)),
+        );
+        if (container.dataset.scoreReady !== ready) container.dataset.scoreReady = ready;
+        mounted.frame(
+          buildFrame({
+            state,
+            score: cache.score,
+            notes: cache.notes,
+            now,
+            cps: transport.getCps?.() ?? state.cps ?? 0.5,
+            theme,
+            lookAhead,
+            trails,
+            ...size,
+            dpr: window.devicePixelRatio,
+          }),
+        );
+        const message = cache.error || (ready === 'false' ? 'Asking the score…' : '');
+        if (status.current && status.current.textContent !== message)
+          status.current.textContent = message;
+      } catch (reason) {
+        mounted.dispose();
+        owned.replaceChildren();
+        failed(reason);
+      }
     });
     return () => {
       active = false;

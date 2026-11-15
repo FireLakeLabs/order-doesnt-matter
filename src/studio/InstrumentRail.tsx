@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import { definitionMuted, setMuted } from '../document/edits/set-muted';
+import { definitionMuted } from '../document/edits/set-muted';
 import type { Instrument } from '../document';
 import { createBrowserQueries } from '../strudel/evaluate-browser';
 import type { ViewTheme } from '../views/types';
@@ -11,7 +11,7 @@ import { neededRange, noteLevel, playingSplit } from './frame';
 import { createScoreCache } from './score-cache';
 import type { createFrameClock } from './clock';
 import { runtime } from './runtime';
-import { session, soloEdit, soloedInstrument } from './session';
+import { session, muteEdit, soloEdit, soloedInstrument } from './session';
 import type { AppState } from '../app/state';
 
 export function InstrumentRail({
@@ -74,8 +74,7 @@ export function InstrumentRail({
   const mute = (row: Instrument) => {
     const doc = runtime.app.state.doc;
     if (!doc) return;
-    const next = setMuted(doc, row.id, !definitionMuted(doc, row.id));
-    if (!('ok' in next)) runtime.app.editor?.apply(next, {}, row.id);
+    runtime.app.editor?.apply(muteEdit(doc, row.id), {}, row.id);
   };
   const isolate = (row: Instrument) => {
     const doc = runtime.app.state.doc;
@@ -145,6 +144,7 @@ export function InstrumentRail({
                         aria-pressed={muted}
                         title="Mute · modifier-click to solo"
                         onClick={(event) => {
+                          event.stopPropagation();
                           if (event.shiftKey || event.altKey || event.ctrlKey || event.metaKey)
                             isolate(row);
                           else mute(row);
@@ -158,7 +158,8 @@ export function InstrumentRail({
                         size="sm"
                         aria-label={`Solo ${names[index]}`}
                         aria-pressed={solo === row.id}
-                        onClick={() => {
+                        onClick={(event) => {
+                          event.stopPropagation();
                           isolate(row);
                         }}
                       >

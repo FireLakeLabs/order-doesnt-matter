@@ -102,9 +102,7 @@ export function browserSession(ids: readonly string[]) {
   } catch {
     /* Storage is optional. */
   }
-  const session = createSession(parseLayout(stored, window.location.search, ids), storage);
-  session.layout({});
-  return session;
+  return createSession(parseLayout(stored, window.location.search, ids), storage);
 }
 
 // The document remains the source of mute state. Metadata follows exact history
@@ -129,6 +127,14 @@ export function soloEdit(doc: Doc, id: string): Doc {
   }
   if (previous?.id !== id && next !== doc) solos.set(next, { id, mutes });
   return next;
+}
+/** A direct mute ends solo and restores its original mutes before the requested change. */
+export function muteEdit(doc: Doc, id: string): Doc {
+  const muted = definitionMuted(doc, id);
+  const solo = soloedInstrument(doc);
+  const restored = solo ? soloEdit(doc, solo) : doc;
+  const next = setMuted(restored, id, !muted);
+  return 'ok' in next ? doc : next;
 }
 export const session =
   typeof window === 'undefined'

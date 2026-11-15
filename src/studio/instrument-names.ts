@@ -34,7 +34,7 @@ function sound(row: Instrument, doc: Doc, seen = new Set<string>()): string | un
   for (const layer of [...pattern.layers, ...(row.uses.at(0)?.layers ?? [])])
     if (layer.kind === 'settings')
       for (const setting of layer.settings)
-        if (['s', 'sound'].includes(setting.name)) name = literal(setting.value, doc);
+        if (['s', 'sound'].includes(setting.name)) name = literal(setting.value, doc) ?? name;
   return name;
 }
 /** Document identity owns names and suffixes, including rows resting in every sampled window. */

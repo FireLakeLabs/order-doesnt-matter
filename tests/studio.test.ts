@@ -357,3 +357,8 @@ test('author names reserve their exact spelling before generated numeric suffixe
   const s = loadPiece(initialState(), '', importStrudel('const bd = s("bd"); stack(s("bd"), bd)'));
   expect(instrumentInventory(s).names).toEqual(['bd 2', 'bd']);
 });
+
+test('a dynamic sound setting retains the earlier written sound as its naming fallback', () => {
+  const s = loadPiece(initialState(), '', importStrudel('s("bd").s(sine)'));
+  expect(instrumentInventory(s).sounds).toEqual(['bd']);
+});
