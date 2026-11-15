@@ -1,15 +1,20 @@
 import { instruments, sections, shared, walk, type Arg, type Doc, type Pattern } from '../index';
 import type { Refusal } from './shared';
+import { at } from '../content';
+import { describeTarget } from '../edit';
 
 /** Remove a score leaf everywhere. Sequential groups keep silent timing slots;
  * parallel groups lose empty branches. Drivers and callbacks are never rewritten. */
 export function removeInstrument(doc: Doc, id: string): Doc | Refusal {
   const rows = instruments(doc),
     row = rows.find((r) => r.id === id);
-  if (!row) return { ok: false, reason: 'This instrument no longer exists' };
+  if (!row)
+    return { ok: false, category: 'missing-target', reason: 'This instrument no longer exists' };
   if (rows.length === 1)
     return {
       ok: false,
+      category: 'only-instrument',
+      dependents: [],
       reason:
         'This is the only instrument. Add another instrument before deleting it, or mute it instead.',
     };
@@ -161,12 +166,32 @@ export function removeInstrument(doc: Doc, id: string): Doc | Refusal {
   };
   // A name may also feed a surviving instrument's settings or callback. Refuse
   // rather than silently altering that instrument or leaving a dangling name.
-  let dependency = '';
-  walk(next, (node) => {
+  const dependents = new Map<string, NonNullable<Refusal['dependents']>[number]>();
+  let dependency = false,
+    unproven = false;
+  walk(next, (node, path) => {
     if ('core' in node) {
       const p = node as Pattern;
-      if (p.core.kind === 'ref' && changedNames.has(p.core.name) && !scoreRefs.has(p.id))
-        dependency = p.id;
+      if (p.core.kind === 'ref' && changedNames.has(p.core.name) && !scoreRefs.has(p.id)) {
+        dependency = true;
+        // A modeled reference is evidence; source substring matches below are not.
+        const ancestors = path.map((_, i) => at(next, path.slice(0, i + 1))).reverse();
+        const owner = ancestors.find(
+          (n): n is { id: string } =>
+            !!n &&
+            typeof n === 'object' &&
+            'id' in n &&
+            (('name' in n && 'value' in n) || ('kind' in n && n.kind === 'rewrite')),
+        );
+        const target = owner && describeTarget(doc, owner.id);
+        if (target?.instrumentId && target.instrumentId !== row.id)
+          dependents.set(owner!.id, {
+            targetId: owner!.id,
+            instrumentId: target.instrumentId,
+            name: target.breadcrumb.join(' › '),
+          });
+        else unproven = true;
+      }
     }
     // Opaque arguments are not addressable walk nodes. Check source only:
     // labels and generated names can legitimately contain a shared name.
@@ -189,22 +214,16 @@ export function removeInstrument(doc: Doc, id: string): Doc | Refusal {
         ),
       )
     )
-      dependency = node.id;
+      dependency = unproven = true;
   });
   if (dependency || problem) {
-    const affected = rows
-      .filter((r) => r !== row)
-      .find(
-        (r) =>
-          r.uses.some((u) => u.path.some((p) => p.id === dependency)) ||
-          JSON.stringify(r.pattern).includes(`"${dependency}"`),
-      );
-    const names = (affected ? [affected] : rows.filter((r) => r !== row))
-      .map((r) => r.name.replaceAll('$', ''))
-      .join(', ');
+    const verified = [...dependents.values()];
+    const uncertain = unproven || !!problem;
     return {
       ok: false,
-      reason: `Cannot delete ${row.name.replaceAll('$', '')}: ${names} ${dependency ? 'depends on it in a setting or source text' : `would change because ${problem}`}. Edit that shared part as source first, or mute this instrument instead.`,
+      category: uncertain ? 'unproven-dependency' : 'known-dependency',
+      dependents: verified,
+      reason: `Cannot delete ${row.name.replaceAll('$', '')}: ${verified.length ? `${verified.map((d) => d.name).join(', ')} depends on it in a setting or rewrite. ` : ''}${uncertain ? `${problem ? `Deletion is unproven because ${problem}. ` : ''}Dependencies cannot be determined safely. ` : ''}Edit that shared part as source first, or mute this instrument instead.`,
     };
   }
   return next;

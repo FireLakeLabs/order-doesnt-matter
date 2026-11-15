@@ -3,6 +3,7 @@ import { expect, it } from 'vitest';
 import { checkDoc, instruments, sections, type Doc } from '../src/document';
 import { importStrudel } from '../src/import';
 import { generate } from '../src/generate';
+import { describeTarget } from '../src/document/edit';
 import { removeInstrument } from '../src/document/edits/instrument-remove';
 import { setUseMuted } from '../src/document/edits/set-use-muted';
 import { copyPattern, sectionOwner, replaceParts } from '../src/document/edits/section-shared';
@@ -113,7 +114,9 @@ it('refuses whole-pattern rewrites on a shared ancestor, including callback bodi
     );
     expect(removeInstrument(doc, instruments(doc)[0].id)).toMatchObject({
       ok: false,
-      reason: expect.stringMatching(/hat.*arp/),
+      category: 'unproven-dependency',
+      dependents: [],
+      reason: expect.stringMatching(/arp/),
     });
   }
 });
@@ -121,7 +124,9 @@ it('refuses references hidden in opaque source and leaves standalone neighbours 
   const dependent = load('const drum=s("bd"); const hat=s("hh").gain(()=>drum); stack(drum,hat)');
   expect(removeInstrument(dependent, instruments(dependent)[0].id)).toMatchObject({
     ok: false,
-    reason: expect.stringContaining('hat'),
+    category: 'unproven-dependency',
+    dependents: [],
+    reason: expect.stringContaining('Dependencies cannot be determined safely'),
   });
   const doc = load('drum: s("bd"); hat: s("hh")');
   const rows = instruments(doc),
@@ -158,7 +163,9 @@ it('refuses a shared callback that uses the whole score as a setting driver', ()
   const doc = load('const drum=s("bd"); const hat=s("hh"); stack(drum,hat).every(2,p=>p.gain(p))');
   expect(removeInstrument(doc, instruments(doc)[0].id)).toMatchObject({
     ok: false,
-    reason: expect.stringContaining('hat'),
+    category: 'unproven-dependency',
+    dependents: [],
+    reason: expect.stringContaining('Dependencies cannot be determined safely'),
   });
 });
 
@@ -166,6 +173,31 @@ it('refuses a shared callback that replaces its input instead of transforming it
   const doc = load('const drum=s("bd"); const hat=s("hh"); stack(drum,hat).every(2,p=>s("bd"))');
   expect(removeInstrument(doc, instruments(doc)[0].id)).toMatchObject({
     ok: false,
-    reason: expect.stringMatching(/hat.*(callback replaces|source text)/),
+    category: 'unproven-dependency',
+    dependents: [],
+    reason: expect.stringMatching(/callback replaces|source text/),
   });
+});
+
+it('reports every verified dependent setting target, excluding unrelated instruments', async () => {
+  const doc = load(
+    'const drum=s("bd"); const hat=s("hh").gain(drum).pan(drum); const bell=s("cp"); stack(drum,hat,bell)',
+  );
+  const original = structuredClone(doc);
+  const result = removeInstrument(doc, instruments(doc)[0].id);
+  expect(result).toMatchObject({ ok: false, category: 'known-dependency' });
+  if (!('ok' in result)) throw Error('Expected refusal');
+  expect(result.dependents).toHaveLength(2);
+  expect(result.dependents!.map((d) => describeTarget(doc, d.targetId).control)).toEqual([
+    'gain',
+    'pan',
+  ]);
+  for (const dependent of result.dependents!) {
+    expect(dependent.instrumentId).toBe(instruments(doc)[1].id);
+    expect(dependent.name).toMatch(/^hat › (gain|pan)$/);
+  }
+  expect(result.reason).not.toContain('bell');
+  expect(doc).toEqual(original);
+  const answer = await queryEventsNode(generate(doc), 0, 2);
+  expect(answer.error).toBeNull();
 });

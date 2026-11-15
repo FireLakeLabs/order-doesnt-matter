@@ -61,16 +61,32 @@ export function createPanel(host: HTMLElement, close: () => void) {
       });
       body.querySelector<HTMLElement>('textarea')?.focus({ preventScroll: true });
     };
-    heading.replaceChildren();
-    next.breadcrumb.forEach((part, i) => {
-      if (i) heading.append(document.createTextNode(' › '));
-      heading.append(el(next.generatedParts[i] ? 'em' : 'span', part));
-    });
-    if (next.generatedParts.some(Boolean)) {
-      const alt = el('span', ' (generated name)');
-      alt.className = 'sheet-sr-only';
-      heading.append(alt);
+    const headingKey = JSON.stringify([next.nodeId, next.breadcrumb, next.generatedParts]);
+    if (heading.dataset.target !== headingKey) {
+      heading.dataset.target = headingKey;
+      heading.replaceChildren();
+      next.breadcrumb.forEach((part, i) => {
+        if (i) heading.append(document.createTextNode(' › '));
+        const label = el(next.generatedParts[i] ? 'em' : 'span', part);
+        if (i === 0 && next.instrumentId && next.kind !== 'instrument') {
+          const back = el('button');
+          back.setAttribute('aria-label', `Back to ${part}`);
+          back.append(label);
+          heading.append(back);
+        } else heading.append(label);
+      });
+      if (next.generatedParts.some(Boolean)) {
+        const alt = el('span', ' (generated name)');
+        alt.className = 'sheet-sr-only';
+        heading.append(alt);
+      }
     }
+    const back = heading.querySelector('button');
+    if (back)
+      back.onclick = () => {
+        context.apply(context.doc, { selection: next.instrumentId });
+        body.querySelector<HTMLElement>('input,button')?.focus({ preventScroll: true });
+      };
     const kind = kinds.find((kind) => kind.matches(next))!;
     host.dataset.layout = kind.layout ?? 'side';
     if (id !== next.nodeId || active !== kind) {

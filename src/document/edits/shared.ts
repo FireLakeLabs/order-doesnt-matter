@@ -10,6 +10,9 @@ import {
 export interface Refusal {
   ok: false;
   reason: string;
+  /** Deletion guidance is evidence, never permission to bypass a refusal. */
+  category?: 'missing-target' | 'only-instrument' | 'known-dependency' | 'unproven-dependency';
+  dependents?: { targetId: string; instrumentId: string; name: string }[];
 }
 export function findWithPath(doc: Doc, id: string): { node: DocumentNode; path: Path } | undefined {
   let found: { node: DocumentNode; path: Path } | undefined;
