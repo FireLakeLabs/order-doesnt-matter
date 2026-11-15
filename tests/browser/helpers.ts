@@ -1,3 +1,4 @@
+import { blockHttps } from './offline';
 import { readFile } from 'node:fs/promises';
 import { expect, test as base, type Page } from '@playwright/test';
 import { describeTarget } from '../../src/document/edit';
@@ -35,11 +36,7 @@ export async function openProgram(
   page: Page,
   input: { example?: string; path?: string; source?: string; offline?: boolean } = {},
 ) {
-  if (input.offline !== false)
-    await page.route(
-      (url) => url.protocol === 'https:',
-      (route) => route.abort('internetdisconnected'),
-    );
+  if (input.offline !== false) await blockHttps(page);
   await page.goto('/?inspect');
   await test.step('ODM:import', async () => {
     if (input.example) await page.getByRole('button', { name: input.example, exact: true }).click();
