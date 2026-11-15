@@ -12,8 +12,6 @@ import { mountView } from './view-lifecycle';
 import { ViewShelf, viewDragType } from './ViewShelf';
 import type { Layout, Stage } from './session';
 
-// The transport wave adds this method; preserve the foundations fallback until then.
-const transport: typeof runtime & { getCps?: () => number } = runtime;
 
 function Drawing({
   viewId,
@@ -85,7 +83,7 @@ function Drawing({
             score: cache.score,
             notes: cache.notes,
             now,
-            cps: transport.getCps?.() ?? state.cps ?? 0.5,
+            cps: runtime.getCps(),
             theme,
             lookAhead,
             trails,
