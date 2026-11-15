@@ -24,6 +24,7 @@ async function select(page: Page, name: string) {
   const previous = await page.locator('[data-region="stage-a"] canvas').elementHandle();
   await page.getByRole('button', { name: 'Views', exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name }).click();
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   if (previous) {
     await page.waitForFunction((canvas) => !canvas.isConnected, previous);
     await previous.dispose();
@@ -34,6 +35,8 @@ async function select(page: Page, name: string) {
     undefined,
     { timeout: 0 },
   );
+  if (name === 'Loom whole song')
+    await page.waitForFunction(() => (window.loomProbe.latest?.notes.length ?? 0) > 0);
 }
 async function load(page: Page, path: string) {
   await page.evaluate(
@@ -110,6 +113,7 @@ test('Loom: real arrangement, cache cost, five themes, lifecycle, no-section and
     const original = definition.mount;
     window.loomProbe = { definition, original };
     definition.mount = async (element) => {
+      window.loomProbe.latest = undefined;
       const handle = await original(element);
       return {
         frame(frame) {
