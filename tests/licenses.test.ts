@@ -52,3 +52,23 @@ test('reviewed Driver runtime is exact, typed, and carries its complete MIT noti
   expect(text).toContain('The above copyright notice and this permission notice shall be included');
   expect(text).toContain('THE SOFTWARE IS PROVIDED "AS IS"');
 });
+
+test('Studio runtime, copied controls and all bundled fonts retain licence notices', () => {
+  const fonts = ['space-grotesk', 'jetbrains-mono', 'bricolage-grotesque', 'vt323', 'silkscreen'];
+  const text = generateLicenses([
+    ...fonts.map((font) => resolve(`node_modules/@fontsource/${font}/package.json`)),
+    resolve('node_modules/react/index.js'),
+    resolve('node_modules/react-dom/client.js'),
+    resolve('node_modules/@radix-ui/react-dialog/dist/index.mjs'),
+    resolve('node_modules/lucide-react/dist/esm/lucide-react.js'),
+    resolve('node_modules/react-remove-scroll-bar/dist/es2015/index.js'),
+  ]);
+  for (const font of fonts) expect(text).toContain(`@fontsource/${font}@5.3.0 — OFL-1.1`);
+  expect(text).toContain('SIL OPEN FONT LICENSE');
+  expect(text).toContain('react@19.3.1 — MIT');
+  expect(text).toContain('react-dom@19.3.1 — MIT');
+  expect(text).toContain('@radix-ui/react-dialog@1.3.1 — MIT');
+  expect(text).toContain('lucide-react@1.73.0 — ISC');
+  expect(text).toContain('react-remove-scroll-bar@2.3.8 — MIT');
+  expect(text).toContain('shadcn');
+});

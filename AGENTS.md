@@ -5,6 +5,7 @@ you play with the score directly, without making Strudel's syntax the subject.
 
 ## Read first
 
+- [Studio design](research/redesign/design.md): the redesign specification.
 - [The model](docs/model.md): how Strudel works and how we draw it. One page.
 - [Decisions](docs/decisions.md): what is settled.
 - [Standards](docs/standards.md): test rules, boundaries, and ownership.

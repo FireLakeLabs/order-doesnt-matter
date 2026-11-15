@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Constellation</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#9EF0D0}a:hover{color:#C6F7E6}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ib{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:10px;background:transparent;color:#9FB2BE;cursor:pointer;padding:0;flex:none}
+.ib:hover{background:#16212C;color:#E6EEF2}
+.tab{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:10px;color:#9FB2BE;text-decoration:none;font-size:13px;font-weight:500}
+.tab:hover{color:#E6EEF2}
+.tab.on{background:#16212C;color:#E6EEF2}
+.sec{display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;height:44px;padding:6px 10px;box-sizing:border-box;border:1px solid #1B2733;border-radius:8px;background:#111922;color:#9FB2BE;font:inherit;cursor:pointer;text-align:left}
+.sec.on{border-color:#9EF0D0;background:#132029;color:#E6EEF2}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.rg{fill:none}
+.nm{text-anchor:middle;font-family:Inter,sans-serif;font-size:13px;font-weight:500;fill:#E6EEF2}
+.mn{font-family:'JetBrains Mono',monospace;font-size:11px;fill:#9FB2BE}
+.orb{fill:none;stroke:#1F2D3A;stroke-width:1}
+.moon{fill:#0A0F14;stroke-width:1.5}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; background: #0A0F14; color: #E6EEF2; font-family: Inter, system-ui, sans-serif; font-size: 13px; display: flex; flex-direction: column; overflow: hidden">
+
+<header style="height: 60px; flex: none; display: flex; align-items: center; gap: 12px; padding: 0 12px 0 16px; border-bottom: 1px solid #1B2733; box-sizing: border-box">
+<div style="display: flex; align-items: center; gap: 10px; width: 220px">
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #9EF0D0"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle><path d="M12 1v6"></path></svg>
+<span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 15px">Order Doesn't Matter</span>
+</div>
+<div style="display: flex; align-items: center; gap: 4px">
+<button aria-label="Pause" style="width: 44px; height: 44px; border-radius: 50%; border: 0; background: #9EF0D0; color: #0A0F14; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"></path></svg></button>
+<button class="ib" aria-label="Stop"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"></rect></svg></button>
+<div style="display: flex; align-items: baseline; gap: 6px; margin-left: 8px; font-family: 'JetBrains Mono', monospace">
+<span style="font-size: 15px">140</span><span style="font-size: 11px; color: #8194A1">bpm</span>
+<span style="font-size: 15px; margin-left: 12px">11</span><span style="font-size: 11px; color: #8194A1">/ 28 bars</span>
+</div>
+</div>
+<nav aria-label="Views" style="display: flex; gap: 4px; margin: 0 auto; padding: 3px; border: 1px solid #1B2733; border-radius: 13px">
+<a class="tab on" href="Main.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle></svg>Stage</a>
+<a class="tab" href="Score.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7M14 6h7M3 12h4M10 12h11M3 18h10M17 18h4"></path></svg>Score</a>
+</nav>
+<div style="display: flex; align-items: center; width: 320px; justify-content: flex-end">
+<button class="ib" aria-label="Undo"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-3"></path></svg></button>
+<button class="ib" aria-label="Redo"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"></path><path d="M20 9H10a6 6 0 0 0 0 12h3"></path></svg></button>
+<span style="width: 1px; height: 24px; background: #1B2733; margin: 0 6px"></span>
+<button class="ib" aria-label="Paste or open Strudel"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"></path></svg></button>
+<button class="ib" aria-label="Keep work"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"></path></svg></button>
+<button class="ib" aria-label="Help and tour"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"></path></svg></button>
+<button class="ib" aria-label="Theme"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"></path></svg></button>
+</div>
+</header>
+
+<div style="position: relative; height: 64px; flex: none; padding: 10px 16px; box-sizing: border-box; display: flex; gap: 4px; border-bottom: 1px solid #1B2733">
+<button class="sec" style="flex: 4 1 0"><span style="font-weight: 600">intro</span><span><span class="dot" style="background: #8EE6C2"></span> <span class="dot" style="background: #E8A0D8"></span> <span class="dot" style="background: #9DB7C9"></span></span></button>
+<button class="sec" style="flex: 4 1 0"><span style="font-weight: 600">build</span><span><span class="dot" style="background: #8EE6C2"></span> <span class="dot" style="background: #F2A27C"></span> <span class="dot" style="background: #D6C08A"></span> <span class="dot" style="background: #C9A0F0"></span></span></button>
+<button class="sec on" style="flex: 8 1 0" aria-pressed="true"><span style="font-weight: 600">drop</span><span><span class="dot" style="background: #A99CFF"></span> <span class="dot" style="background: #FFB38A"></span> <span class="dot" style="background: #7CC8F2"></span> <span class="dot" style="background: #6FD3C7"></span> <span class="dot" style="background: #6FA0FF"></span> <span class="dot" style="background: #F0D878"></span></span></button>
+<button class="sec" style="flex: 4 1 0"><span style="font-weight: 600">breakdown</span><span><span class="dot" style="background: #8EE6C2"></span> <span class="dot" style="background: #E8A0D8"></span> <span class="dot" style="background: #B8E08A"></span></span></button>
+<button class="sec" style="flex: 8 1 0"><span style="font-weight: 600">drop</span><span><span class="dot" style="background: #A99CFF"></span> <span class="dot" style="background: #FFB38A"></span> <span class="dot" style="background: #7CC8F2"></span> <span class="dot" style="background: #6FD3C7"></span> <span class="dot" style="background: #6FA0FF"></span> <span class="dot" style="background: #F0D878"></span></span></button>
+<div aria-hidden="true" style="position: absolute; left: 37.4%; top: 4px; bottom: 4px; width: 2px; background: #FFFFFF; border-radius: 1px; box-shadow: 0 0 10px rgba(255,255,255,.7)"></div>
+</div>
+
+<section aria-label="Constellation" style="flex: 1; position: relative; min-height: 0">
+<svg width="1440" height="776" role="img" aria-label="Constellation: six instruments as discs, three of them sounding now, with their settings as moons and a shared room drawn as a tinted region" style="display: block">
+<ellipse cx="860" cy="330" rx="330" ry="210" style="fill: rgba(158,240,208,.05); stroke: #2F4A4A; stroke-width: 1; stroke-dasharray: 3 6"></ellipse>
+<text x="860" y="108" class="mn" style="text-anchor: middle; fill: #9EF0D0">Room 1 · reverb, two senders disagree on its size</text>
+
+<g transform="translate(960 330)">
+<circle class="orb" r="104"></circle>
+<circle r="84" style="fill: none; stroke: #F0D878; stroke-width: 1; opacity: .18"></circle>
+<circle r="70" style="fill: none; stroke: #F0D878; stroke-width: 2; opacity: .4"></circle>
+<circle r="58" style="fill: rgba(240,216,120,.16); stroke: #F0D878; stroke-width: 2"></circle>
+<circle class="rg" r="38" pathLength="100" transform="rotate(-90)" style="stroke: #F0D878; stroke-width: 12; stroke-dasharray: 32.4 .93"></circle>
+<circle r="6" style="fill: #F0D878"></circle>
+<text y="128" class="nm">wobbleBass</text>
+<circle class="moon" cx="80" cy="-67" r="10" style="stroke: #F0D878; fill: #F0D878"></circle><text x="96" y="-63" class="mn" style="fill: #F0D878">cutoff, sweeping</text>
+<circle class="moon" cx="98" cy="36" r="8" style="stroke: #F0D878"></circle><text x="112" y="40" class="mn">res 11</text>
+<circle class="moon" cx="18" cy="102" r="8" style="stroke: #F0D878"></circle><text x="32" y="106" class="mn">drive .65</text>
+<circle class="moon" cx="-98" cy="-36" r="8" style="stroke: #F0D878"></circle><text x="-112" y="-46" class="mn" style="text-anchor: end">high-pass 110</text>
+</g>
+
+<g transform="translate(690 300)">
+<circle class="orb" r="62"></circle>
+<circle r="40" style="fill: rgba(255,179,138,.12); stroke: #FFB38A; stroke-width: 1.5"></circle>
+<circle class="rg" r="26" pathLength="100" transform="rotate(-90)" style="stroke: #FFB38A; stroke-width: 8; stroke-dasharray: 5 95; stroke-dashoffset: -50"></circle>
+<circle r="4" style="fill: #FFB38A"></circle>
+<text y="84" class="nm">snare</text>
+<circle class="moon" cx="31" cy="-54" r="7" style="stroke: #FFB38A"></circle><text x="44" y="-56" class="mn">drive .35</text>
+<circle class="moon" cx="-62" cy="0" r="7" style="stroke: #FFB38A"></circle><text x="-74" y="4" class="mn" style="text-anchor: end">room .45</text>
+</g>
+
+<g transform="translate(400 250)">
+<circle class="orb" r="70"></circle>
+<circle r="46" style="fill: rgba(169,156,255,.12); stroke: #A99CFF; stroke-width: 1.5"></circle>
+<circle class="rg" r="30" pathLength="100" transform="rotate(-90)" style="stroke: #A99CFF; stroke-width: 10; stroke-dasharray: 5 95"></circle>
+<circle r="4" style="fill: #A99CFF"></circle>
+<text y="92" class="nm">kick</text>
+<circle class="moon" cx="61" cy="-35" r="7" style="stroke: #A99CFF"></circle><text x="74" y="-37" class="mn">drive .45</text>
+</g>
+
+<g transform="translate(300 480)">
+<circle class="orb" r="50"></circle>
+<circle r="42" style="fill: none; stroke: #7CC8F2; stroke-width: 2; opacity: .4"></circle>
+<circle r="30" style="fill: rgba(124,200,242,.16); stroke: #7CC8F2; stroke-width: 2"></circle>
+<circle class="rg" r="19" pathLength="100" transform="rotate(-90)" style="stroke: #7CC8F2; stroke-width: 7; stroke-dasharray: 2.5 10"></circle>
+<circle r="3" style="fill: #7CC8F2"></circle>
+<text y="72" class="nm">hats</text>
+<circle class="moon" cx="43" cy="-25" r="7" style="stroke: #7CC8F2; fill: #7CC8F2"></circle><text x="56" y="-27" class="mn" style="fill: #7CC8F2">level, drifting</text>
+</g>
+
+<g transform="translate(520 540)">
+<circle class="orb" r="42"></circle>
+<circle r="24" style="fill: rgba(111,211,199,.12); stroke: #6FD3C7; stroke-width: 1.5"></circle>
+<circle class="rg" r="15" pathLength="100" transform="rotate(-90)" style="stroke: #6FD3C7; stroke-width: 6; stroke-dasharray: 5 45; stroke-dashoffset: -25"></circle>
+<text y="64" class="nm">open hat</text>
+<circle class="moon" cx="39" cy="-14" r="6" style="stroke: #6FD3C7"></circle><text x="51" y="-12" class="mn">level .4</text>
+</g>
+
+<g transform="translate(780 640)">
+<circle class="orb" r="76"></circle>
+<circle r="66" style="fill: none; stroke: #6FA0FF; stroke-width: 2; opacity: .4"></circle>
+<circle r="52" style="fill: rgba(111,160,255,.16); stroke: #6FA0FF; stroke-width: 2"></circle>
+<circle class="rg" r="34" pathLength="100" transform="rotate(-90)" style="stroke: #6FA0FF; stroke-width: 11; stroke-dasharray: 99.3 .7"></circle>
+<circle r="5" style="fill: #6FA0FF"></circle>
+<text y="98" class="nm">subBass</text>
+<circle class="moon" cx="75" cy="-13" r="7" style="stroke: #6FA0FF"></circle><text x="88" y="-9" class="mn">level .95</text>
+</g>
+
+<text x="1290" y="470" class="mn" style="fill: #8194A1">Resting in this section</text>
+<circle cx="1296" cy="498" r="5" style="fill: none; stroke: #8EE6C2; stroke-width: 1.5"></circle><text x="1312" y="502" class="mn">darkPad</text>
+<circle cx="1296" cy="526" r="5" style="fill: none; stroke: #E8A0D8; stroke-width: 1.5"></circle><text x="1312" y="530" class="mn">vocalAtmos</text>
+<circle cx="1296" cy="554" r="5" style="fill: none; stroke: #9DB7C9; stroke-width: 1.5"></circle><text x="1312" y="558" class="mn">intro hats</text>
+<circle cx="1296" cy="582" r="5" style="fill: none; stroke: #F2A27C; stroke-width: 1.5"></circle><text x="1312" y="586" class="mn">snare roll</text>
+<circle cx="1296" cy="610" r="5" style="fill: none; stroke: #D6C08A; stroke-width: 1.5"></circle><text x="1312" y="614" class="mn">riser</text>
+<circle cx="1296" cy="638" r="5" style="fill: none; stroke: #C9A0F0; stroke-width: 1.5"></circle><text x="1312" y="642" class="mn">preDropVocal</text>
+<circle cx="1296" cy="666" r="5" style="fill: none; stroke: #B8E08A; stroke-width: 1.5"></circle><text x="1312" y="670" class="mn">triangle</text>
+</svg>
+
+<nav aria-label="Live view style" style="position: absolute; left: 16px; top: 16px; display: flex; flex-direction: column; gap: 2px; padding: 3px; border: 1px solid #1B2733; border-radius: 13px; background: #0D141B">
+<a class="tab" href="Main.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle></svg>Ring</a>
+<a class="tab" href="Tunnel.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="13" cy="11" r="5"></circle><circle cx="14" cy="10" r="1.5"></circle></svg>Fly-through</a>
+<a class="tab" href="Coil.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12c0-7 3-7 3 0s3 7 3 0 3-7 3 0 3 7 3 0 3-7 3 0 3 7 3 0"></path></svg>Coil</a>
+<a class="tab on" href="Now.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-30 12 12)"></ellipse></svg>Constellation</a>
+</nav>
+<a class="ib" href="Main.dc.html" aria-label="Back to the stage layout" style="position: absolute; right: 12px; top: 12px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"></path></svg></a>
+<div style="position: absolute; left: 16px; bottom: 16px; font-size: 12px; color: #9FB2BE; line-height: 1.6">The ring inside each disc is its rhythm this bar.<br>Moons are the settings in use. A filled moon is moving.</div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

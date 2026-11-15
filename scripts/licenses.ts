@@ -31,6 +31,13 @@ export function packageNotice(directory: string) {
     return `${meta.name}@${meta.version} — MIT\n${vendored('tonal-MIT.txt')}`;
   if (!files.length && meta.name === 'chord-voicings' && meta.version === '0.0.1')
     return `${meta.name}@${meta.version} — ISC\n${vendored('chord-voicings-ISC.txt')}`;
+  if (
+    !files.length &&
+    meta.name === 'react-remove-scroll-bar' &&
+    meta.version === '2.3.8' &&
+    meta.license === 'MIT'
+  )
+    return `${meta.name}@${meta.version} — MIT\n${vendored('react-remove-scroll-bar-MIT.txt')}`;
   if (!meta.license || !files.length) throw Error(`Missing licence text: ${meta.name}`);
   return `${meta.name}@${meta.version} — ${meta.license}\n${files
     .sort()
@@ -72,6 +79,7 @@ export function generateLicenses(moduleIds: Iterable<string>) {
       `Order Doesn't Matter — MIT\n${read(resolve('LICENSE'))}`,
       vendored('assets.txt'),
       vendored('Octicons.txt'),
+      vendored('shadcn-MIT.txt'),
       `AGPL-3.0 full text\n${vendored('AGPL-3.0.txt')}`,
       ...notices.sort(),
     ].join('\n\n============================================================\n\n') + '\n'
@@ -100,6 +108,16 @@ export function licencePlugins() {
       },
       generateBundle(_, bundle) {
         collect(bundle);
+        for (const packageName of ['tailwindcss', 'tw-animate-css'])
+          modules.add(resolve(`node_modules/${packageName}/package.json`));
+        for (const font of [
+          'space-grotesk',
+          'jetbrains-mono',
+          'bricolage-grotesque',
+          'vt323',
+          'silkscreen',
+        ])
+          modules.add(resolve(`node_modules/@fontsource/${font}/package.json`));
         this.emitFile({
           type: 'asset',
           fileName: 'licenses.txt',

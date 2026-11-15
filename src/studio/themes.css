@@ -1,0 +1,81 @@
+[data-theme='arcade'] {
+  --ground: #07060d;
+  --panel: #12101f;
+  --line: #2a2545;
+  --text: #f4f1ff;
+  --muted: #a49ec4;
+  --accent: #ffd23f;
+  --font-display: 'Space Grotesk';
+  --font-mono: 'JetBrains Mono';
+  --radius: 10px;
+  --control-shadow: 0 0 12px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+[data-theme='sunset'] {
+  --ground: #1a0b2e;
+  --panel: #2a1247;
+  --line: #4a2470;
+  --text: #ffe9f3;
+  --muted: #d4a9d8;
+  --accent: #ff9a56;
+  --font-display: 'Bricolage Grotesque';
+  --font-mono: 'JetBrains Mono';
+  --radius: 12px;
+  --control-shadow: 0 0 12px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+[data-theme='phosphor'] {
+  --ground: #020a04;
+  --panel: #06180b;
+  --line: #0f3a1c;
+  --text: #b8ffc8;
+  --muted: #5fbf7a;
+  --accent: #00ff66;
+  --font-display: 'VT323';
+  --font-mono: 'VT323';
+  --radius: 0px;
+  --control-shadow: 0 0 12px color-mix(in srgb, var(--accent) 18%, transparent);
+}
+[data-theme='riso'] {
+  --ground: #f6f0e4;
+  --panel: #eae1cf;
+  --line: #1d1b2f;
+  --text: #1d1b2f;
+  --muted: #4a4760;
+  --accent: #ff4f7b;
+  --font-display: 'Bricolage Grotesque';
+  --font-mono: 'JetBrains Mono';
+  --radius: 4px;
+  --control-shadow: none;
+}
+[data-theme='pocket'] {
+  --ground: #c9db8e;
+  --panel: #b4c97a;
+  --line: #2f5d3a;
+  --text: #0f2a1d;
+  --muted: #2f5d3a;
+  --accent: #0f2a1d;
+  --font-display: 'Silkscreen';
+  --font-mono: 'Silkscreen';
+  --radius: 0px;
+  --control-shadow: none;
+}
+/* Shared shadcn aliases also reach Radix portals under the themed html root. */
+html[data-theme] {
+  --background: var(--ground);
+  --foreground: var(--text);
+  --primary: var(--accent);
+  --primary-foreground: var(--ground);
+  --secondary: var(--panel);
+  --secondary-foreground: var(--text);
+  --muted-foreground: var(--muted);
+  --accent-foreground: var(--ground);
+  --popover: var(--panel);
+  --popover-foreground: var(--text);
+  --border: var(--line);
+  --input: var(--line);
+  --ring: var(--accent);
+  --destructive: var(--accent);
+  --destructive-foreground: var(--ground);
+  background: var(--ground);
+  color: var(--text);
+  font-family: var(--font-display), sans-serif;
+}

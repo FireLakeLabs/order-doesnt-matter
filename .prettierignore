@@ -1,6 +1,8 @@
 spikes/
 corpus/
-research/
+research/*
+!research/redesign/
+research/redesign/mockups/
 node_modules/
 dist/
 package-lock.json

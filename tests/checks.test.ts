@@ -181,3 +181,25 @@ test('all seven Strudel and superdough manifest and lock pins remain exact', asy
     expect(lock.packages[`node_modules/${pkg}`].version).toBe(version);
   }
 });
+
+test('views import only sibling contracts or three; logic directories stay framework-free', () => {
+  for (const name of ['react', '../engine', '../document', '../studio/runtime', '../lib/utils'])
+    expect(boundaryProblems('src/views/bad.view.ts', `import '${name}'`)).toContain(
+      'Views may import only views and three',
+    );
+  for (const name of ['./types', './nested/helper', 'three', 'three/addons/Thing.js'])
+    expect(boundaryProblems('src/views/good.view.ts', `import '${name}'`)).toEqual([]);
+  expect(boundaryProblems('src/views/nested/a.ts', "import '../../engine'")).not.toEqual([]);
+  for (const directory of ['document', 'import', 'generate', 'engine', 'strudel'])
+    for (const name of [
+      'react',
+      'react/jsx-runtime',
+      'react-dom/client',
+      '../studio/store',
+      '../components/ui/button',
+      '../views/types',
+    ])
+      expect(boundaryProblems(`src/${directory}/bad.ts`, `import '${name}'`)).toContain(
+        'Logic directories must stay framework-free',
+      );
+});

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rain</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#9EF0D0}a:hover{color:#C6F7E6}
+.col{flex:1;position:relative;border-left:1px solid #16212C}
+.n{position:absolute;border-radius:6px}
+.lab{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;color:#9FB2BE}
+.lab span{width:10px;height:10px;border-radius:50%}
+.rip{position:absolute;border-radius:50%;border:1.5px solid;transform:translate(-50%,-50%)}
+</style>
+</helmet>
+<div style="width: 960px; height: 640px; box-sizing: border-box; background: #0A0F14; color: #E6EEF2; font-family: Inter, system-ui, sans-serif; font-size: 13px; position: relative; overflow: hidden">
+
+<div style="position: absolute; left: 60px; top: 0; width: 840px; height: 520px; display: flex; transform: perspective(1000px) rotateX(42deg); transform-origin: 50% 100%; border-right: 1px solid #16212C">
+
+<div class="col">
+<div class="n" style="left: 20px; right: 20px; bottom: 132px; height: 16px; background: #A99CFF"></div>
+<div class="n" style="left: 20px; right: 20px; bottom: 352px; height: 16px; background: #A99CFF"></div>
+</div>
+<div class="col">
+<div class="n" style="left: 20px; right: 20px; bottom: 22px; height: 16px; background: #FFB38A; box-shadow: 0 0 18px #FFB38A"></div>
+<div class="n" style="left: 20px; right: 20px; bottom: 242px; height: 16px; background: #FFB38A"></div>
+<div class="n" style="left: 20px; right: 20px; bottom: 462px; height: 16px; background: #FFB38A"></div>
+</div>
+<div class="col">
+<div class="n" style="left: 44px; right: 44px; top: 0; bottom: 0; border-radius: 0; background: repeating-linear-gradient(0deg, transparent 0 20.5px, #7CC8F2 0 27.5px)"></div>
+</div>
+<div class="col">
+<div class="n" style="left: 32px; right: 32px; top: 0; bottom: 0; border-radius: 0; background: repeating-linear-gradient(0deg, transparent 0 77px, #6FD3C7 0 89px, transparent 0 110px)"></div>
+</div>
+<div class="col">
+<div class="n" style="left: 40px; width: 44px; bottom: 0; height: 130px; background: #6FA0FF; box-shadow: 0 0 22px #6FA0FF"></div>
+<div class="n" style="left: 62px; width: 44px; bottom: 134px; height: 106px; background: #6FA0FF"></div>
+<div class="n" style="left: 88px; width: 44px; bottom: 244px; height: 106px; background: #6FA0FF"></div>
+<div class="n" style="left: 10px; width: 44px; bottom: 354px; height: 166px; background: #6FA0FF"></div>
+</div>
+<div class="col">
+<div class="n" style="left: 40px; width: 44px; bottom: 0; height: 130px; background: repeating-linear-gradient(0deg, #F0D878 0 36.6px, #8A7C45 0 73.3px); box-shadow: 0 0 22px #F0D878"></div>
+<div class="n" style="left: 62px; width: 44px; bottom: 134px; height: 106px; background: repeating-linear-gradient(0deg, #F0D878 0 13.75px, #8A7C45 0 27.5px)"></div>
+<div class="n" style="left: 88px; width: 44px; bottom: 244px; height: 106px; background: repeating-linear-gradient(0deg, #F0D878 0 13.75px, #8A7C45 0 27.5px)"></div>
+<div class="n" style="left: 10px; width: 44px; bottom: 354px; height: 166px; background: repeating-linear-gradient(0deg, #F0D878 0 55px, #8A7C45 0 110px)"></div>
+</div>
+
+<div aria-hidden="true" style="position: absolute; left: 0; right: 0; top: 0; height: 200px; background: linear-gradient(#0A0F14, rgba(10,15,20,0))"></div>
+</div>
+
+<div aria-hidden="true" style="position: absolute; left: 40px; right: 40px; top: 519px; height: 3px; border-radius: 2px; background: #FFFFFF; box-shadow: 0 0 16px rgba(255,255,255,.8)"></div>
+<div class="rip" style="left: 410px; top: 520px; width: 96px; height: 22px; border-color: #7CC8F2; opacity: .7"></div>
+<div class="rip" style="left: 690px; top: 520px; width: 110px; height: 26px; border-color: #6FA0FF; opacity: .8"></div>
+<div class="rip" style="left: 690px; top: 520px; width: 170px; height: 40px; border-color: #6FA0FF; opacity: .35"></div>
+<div class="rip" style="left: 830px; top: 520px; width: 110px; height: 26px; border-color: #F0D878; opacity: .8"></div>
+<div class="rip" style="left: 830px; top: 520px; width: 170px; height: 40px; border-color: #F0D878; opacity: .35"></div>
+
+<div style="position: absolute; left: 60px; width: 840px; top: 556px; display: flex">
+<div class="lab"><span style="background: #A99CFF"></span>kick</div>
+<div class="lab"><span style="background: #FFB38A"></span>snare</div>
+<div class="lab" style="color: #E6EEF2"><span style="background: #7CC8F2; box-shadow: 0 0 10px #7CC8F2"></span>hats</div>
+<div class="lab"><span style="background: #6FD3C7"></span>open hat</div>
+<div class="lab" style="color: #E6EEF2"><span style="background: #6FA0FF; box-shadow: 0 0 10px #6FA0FF"></span>subBass</div>
+<div class="lab" style="color: #E6EEF2"><span style="background: #F0D878; box-shadow: 0 0 10px #F0D878"></span>wobbleBass</div>
+</div>
+
+<div style="position: absolute; left: 20px; top: 16px; line-height: 1.5">
+<div style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 18px">Rain</div>
+<div style="font-size: 12px; color: #9FB2BE">Notes fall to the line and land when they sound.</div>
+</div>
+<div style="position: absolute; right: 20px; top: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #9FB2BE">bar 11 · two bars in view</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":640}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Fly-through</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#9EF0D0}a:hover{color:#C6F7E6}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ib{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:10px;background:transparent;color:#9FB2BE;cursor:pointer;padding:0;flex:none}
+.ib:hover{background:#16212C;color:#E6EEF2}
+.tab{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:10px;color:#9FB2BE;text-decoration:none;font-size:13px;font-weight:500}
+.tab:hover{color:#E6EEF2}
+.tab.on{background:#16212C;color:#E6EEF2}
+.sec{display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;height:44px;padding:6px 10px;box-sizing:border-box;border:1px solid #1B2733;border-radius:8px;background:#111922;color:#9FB2BE;font:inherit;cursor:pointer;text-align:left}
+.sec.on{border-color:#9EF0D0;background:#132029;color:#E6EEF2}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.rg{fill:none}
+.k{stroke:#A99CFF;stroke-width:14;stroke-dasharray:5 95}
+.s{stroke:#FFB38A;stroke-width:14;stroke-dasharray:5 95;stroke-dashoffset:-50}
+.h{stroke:#7CC8F2;stroke-width:14;stroke-dasharray:2.5 10}
+.o{stroke:#6FD3C7;stroke-width:14;stroke-dasharray:5 45;stroke-dashoffset:-25}
+.b{stroke:#6FA0FF;stroke-width:18}
+.w{stroke:#F0D878;stroke-width:22}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; background: #0A0F14; color: #E6EEF2; font-family: Inter, system-ui, sans-serif; font-size: 13px; display: flex; flex-direction: column; overflow: hidden">
+
+<header style="height: 60px; flex: none; display: flex; align-items: center; gap: 12px; padding: 0 12px 0 16px; border-bottom: 1px solid #1B2733; box-sizing: border-box">
+<div style="display: flex; align-items: center; gap: 10px; width: 220px">
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #9EF0D0"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle><path d="M12 1v6"></path></svg>
+<span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 15px">Order Doesn't Matter</span>
+</div>
+<div style="display: flex; align-items: center; gap: 4px">
+<button aria-label="Pause" style="width: 44px; height: 44px; border-radius: 50%; border: 0; background: #9EF0D0; color: #0A0F14; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"></path></svg></button>
+<button class="ib" aria-label="Stop"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"></rect></svg></button>
+<div style="display: flex; align-items: baseline; gap: 6px; margin-left: 8px; font-family: 'JetBrains Mono', monospace">
+<span style="font-size: 15px">140</span><span style="font-size: 11px; color: #8194A1">bpm</span>
+<span style="font-size: 15px; margin-left: 12px">11</span><span style="font-size: 11px; color: #8194A1">/ 28 bars</span>
+</div>
+</div>
+<nav aria-label="Views" style="display: flex; gap: 4px; margin: 0 auto; padding: 3px; border: 1px solid #1B2733; border-radius: 13px">
+<a class="tab on" href="Main.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle></svg>Stage</a>
+<a class="tab" href="Score.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7M14 6h7M3 12h4M10 12h11M3 18h10M17 18h4"></path></svg>Score</a>
+</nav>
+<div style="display: flex; align-items: center; width: 320px; justify-content: flex-end">
+<button class="ib" aria-label="Undo"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-3"></path></svg></button>
+<button class="ib" aria-label="Redo"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"></path><path d="M20 9H10a6 6 0 0 0 0 12h3"></path></svg></button>
+<span style="width: 1px; height: 24px; background: #1B2733; margin: 0 6px"></span>
+<button class="ib" aria-label="Paste or open Strudel"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"></path></svg></button>
+<button class="ib" aria-label="Keep work"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"></path></svg></button>
+<button class="ib" aria-label="Help and tour"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"></path></svg></button>
+<button class="ib" aria-label="Theme"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"></path></svg></button>
+</div>
+</header>
+
+<div style="position: relative; height: 64px; flex: none; padding: 10px 16px; box-sizing: border-box; display: flex; gap: 4px; border-bottom: 1px solid #1B2733">
+<button class="sec" style="flex: 4 1 0"><span style="font-weight: 600">intro</span><span><span class="dot" style="background: #8EE6C2"></span> <span class="dot" style="background: #E8A0D8"></span> <span class="dot" style="background: #9DB7C9"></span></span></button>
+<button class="sec" style="flex: 4 1 0"><span style="font-weight: 600">build</span><span><span class="dot" style="background: #8EE6C2"></span> <span class="dot" style="background: #F2A27C"></span> <span class="dot" style="background: #D6C08A"></span> <span class="dot" style="background: #C9A0F0"></span></span></button>
+<button class="sec on" style="flex: 8 1 0" aria-pressed="true"><span style="font-weight: 600">drop</span><span><span class="dot" style="background: #A99CFF"></span> <span class="dot" style="background: #FFB38A"></span> <span class="dot" style="background: #7CC8F2"></span> <span class="dot" style="background: #6FD3C7"></span> <span class="dot" style="background: #6FA0FF"></span> <span class="dot" style="background: #F0D878"></span></span></button>
+<button class="sec" style="flex: 4 1 0"><span style="font-weight: 600">breakdown</span><span><span class="dot" style="background: #8EE6C2"></span> <span class="dot" style="background: #E8A0D8"></span> <span class="dot" style="background: #B8E08A"></span></span></button>
+<button class="sec" style="flex: 8 1 0"><span style="font-weight: 600">drop</span><span><span class="dot" style="background: #A99CFF"></span> <span class="dot" style="background: #FFB38A"></span> <span class="dot" style="background: #7CC8F2"></span> <span class="dot" style="background: #6FD3C7"></span> <span class="dot" style="background: #6FA0FF"></span> <span class="dot" style="background: #F0D878"></span></span></button>
+<div aria-hidden="true" style="position: absolute; left: 37.4%; top: 4px; bottom: 4px; width: 2px; background: #FFFFFF; border-radius: 1px; box-shadow: 0 0 10px rgba(255,255,255,.7)"></div>
+</div>
+
+<section aria-label="Fly-through" style="flex: 1; position: relative; min-height: 0">
+<svg width="1440" height="776" role="img" aria-label="Fly-through: the current bar is the nearest ring; six more bars recede ahead, the farthest being the start of the breakdown" style="display: block; filter: drop-shadow(0 0 8px rgba(158,240,208,.28))">
+
+<g transform="translate(761 364) rotate(-234) scale(.069)" style="opacity: .5">
+<circle class="rg" r="340" pathLength="100" style="stroke: #8EE6C2; stroke-width: 30; stroke-dasharray: 99 1"></circle>
+<circle class="rg" r="298" pathLength="100" style="stroke: #E8A0D8; stroke-width: 24; stroke-dasharray: 99 1"></circle>
+<circle class="rg" r="258" pathLength="100" style="stroke: #B8E08A; stroke-width: 24; stroke-dasharray: 12.5 12.5"></circle>
+</g>
+<g transform="translate(759 365) rotate(-234) scale(.107)" style="opacity: .5">
+<circle class="rg k" r="246" pathLength="100"></circle><circle class="rg s" r="264" pathLength="100"></circle><circle class="rg h" r="282" pathLength="100"></circle><circle class="rg o" r="300" pathLength="100"></circle>
+<circle class="rg b" r="322" pathLength="100" style="stroke-dasharray: 49.3 .7"></circle><circle class="rg w" r="348" pathLength="100" style="stroke-dasharray: 11.5 1"></circle>
+</g>
+<g transform="translate(756 367) rotate(-234) scale(.168)" style="opacity: .58">
+<circle class="rg k" r="246" pathLength="100"></circle><circle class="rg s" r="264" pathLength="100"></circle><circle class="rg h" r="282" pathLength="100"></circle><circle class="rg o" r="300" pathLength="100"></circle>
+<circle class="rg b" r="322" pathLength="100" style="stroke-dasharray: 99.3 .7"></circle><circle class="rg w" r="348" pathLength="100" style="stroke-dasharray: 32.33 1"></circle>
+</g>
+<g transform="translate(751 370) rotate(-234) scale(.262)" style="opacity: .66">
+<circle class="rg k" r="246" pathLength="100"></circle><circle class="rg s" r="264" pathLength="100"></circle><circle class="rg h" r="282" pathLength="100"></circle><circle class="rg o" r="300" pathLength="100"></circle>
+<circle class="rg b" r="322" pathLength="100" style="stroke-dasharray: 99.3 .7"></circle><circle class="rg w" r="348" pathLength="100" style="stroke-dasharray: 24 1"></circle>
+</g>
+<g transform="translate(744 374) rotate(-234) scale(.41)" style="opacity: .76">
+<circle class="rg k" r="246" pathLength="100"></circle><circle class="rg s" r="264" pathLength="100"></circle><circle class="rg h" r="282" pathLength="100"></circle><circle class="rg o" r="300" pathLength="100"></circle>
+<circle class="rg b" r="322" pathLength="100" style="stroke-dasharray: 99.3 .7"></circle><circle class="rg w" r="348" pathLength="100" style="stroke-dasharray: 49 1"></circle>
+</g>
+<g transform="translate(734 380) rotate(-234) scale(.64)" style="opacity: .88">
+<circle class="rg k" r="246" pathLength="100"></circle><circle class="rg s" r="264" pathLength="100"></circle><circle class="rg h" r="282" pathLength="100"></circle><circle class="rg o" r="300" pathLength="100"></circle>
+<circle class="rg b" r="322" pathLength="100" style="stroke-dasharray: 49.3 .7"></circle><circle class="rg w" r="348" pathLength="100" style="stroke-dasharray: 11.5 1"></circle>
+</g>
+<g transform="translate(720 388) rotate(-234)">
+<circle class="rg k" r="246" pathLength="100"></circle><circle class="rg s" r="264" pathLength="100"></circle><circle class="rg h" r="282" pathLength="100"></circle><circle class="rg o" r="300" pathLength="100"></circle>
+<circle class="rg b" r="322" pathLength="100" style="stroke-dasharray: 99.3 .7"></circle><circle class="rg w" r="348" pathLength="100" style="stroke-dasharray: 32.33 1"></circle>
+<circle class="rg" r="299" pathLength="100" style="stroke: rgba(10,15,20,.7); stroke-width: 124; stroke-dasharray: 40 60"></circle>
+<circle class="rg" r="364" style="stroke: #E6EEF2; stroke-width: 1.5; opacity: .5"></circle>
+</g>
+
+<line x1="720" y1="8" x2="720" y2="150" style="stroke: #FFFFFF; stroke-width: 2"></line>
+<circle cx="720" cy="8" r="4" style="fill: #FFFFFF"></circle>
+<text x="1010" y="270" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #9FB2BE">12</text>
+<text x="934" y="300" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #9FB2BE">13</text>
+<text x="884" y="322" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #9FB2BE">14</text>
+</svg>
+
+<div style="position: absolute; left: 736px; top: 14px; display: flex; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 12px">
+<span style="padding: 3px 8px; border-radius: 6px; background: #111922; color: #7CC8F2">hats</span>
+<span style="padding: 3px 8px; border-radius: 6px; background: #111922; color: #6FA0FF">sub eb1</span>
+<span style="padding: 3px 8px; border-radius: 6px; background: #111922; color: #F0D878">wobble eb2 ×3</span>
+</div>
+<nav aria-label="Live view style" style="position: absolute; left: 16px; top: 16px; display: flex; flex-direction: column; gap: 2px; padding: 3px; border: 1px solid #1B2733; border-radius: 13px; background: #0D141B">
+<a class="tab" href="Main.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle></svg>Ring</a>
+<a class="tab on" href="Tunnel.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="13" cy="11" r="5"></circle><circle cx="14" cy="10" r="1.5"></circle></svg>Fly-through</a>
+<a class="tab" href="Coil.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12c0-7 3-7 3 0s3 7 3 0 3-7 3 0 3 7 3 0 3-7 3 0 3 7 3 0"></path></svg>Coil</a>
+<a class="tab" href="Now.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><ellipse cx="12" cy="12" rx="10" ry="4.5" transform="rotate(-30 12 12)"></ellipse></svg>Constellation</a>
+</nav>
+<a class="ib" href="Main.dc.html" aria-label="Back to the stage layout" style="position: absolute; right: 12px; top: 12px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5"></path></svg></a>
+
+<div style="position: absolute; left: 16px; bottom: 16px; padding: 12px 14px; border: 1px solid #1B2733; border-radius: 12px; background: #0D141B; line-height: 1.5">
+<div style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 15px">Breakdown in 6 bars</div>
+<div style="font-size: 12px; color: #9FB2BE"><span class="dot" style="background: #8EE6C2"></span> darkPad&nbsp; <span class="dot" style="background: #E8A0D8"></span> vocalAtmos&nbsp; <span class="dot" style="background: #B8E08A"></span> triangle come in. The drums stop.</div>
+</div>
+<div role="group" aria-label="Bars ahead" style="position: absolute; right: 16px; bottom: 16px; display: flex; align-items: center; gap: 4px; padding: 3px; border: 1px solid #1B2733; border-radius: 13px; background: #0D141B">
+<button class="ib" aria-label="Fewer bars ahead"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14"></path></svg></button>
+<span style="font-family: 'JetBrains Mono', monospace; padding: 0 6px">6 bars ahead</span>
+<button class="ib" aria-label="More bars ahead"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></button>
+</div>
+</section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

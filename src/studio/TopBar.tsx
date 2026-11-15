@@ -1,0 +1,185 @@
+import { useState } from 'react';
+import { Pause, Play, Square, ClipboardPaste } from 'lucide-react';
+import { Button } from '../components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../components/ui/dialog';
+import type { StudioSnapshot } from './store';
+import { runtime } from './runtime';
+import { themeNames, resolveTheme } from './themes';
+
+declare const __BUILD_SHA__: string | null;
+const repository = 'https://github.com/FireLakeLabs/order-doesnt-matter';
+const strudelSource = (name: string, version: string) =>
+  `https://codeberg.org/uzu/strudel/src/tag/${encodeURIComponent(`${name === 'superdough' ? name : `@strudel/${name}`}@${version}`)}`;
+export function TopBar({
+  snapshot,
+  theme,
+  setTheme,
+}: {
+  snapshot: StudioSnapshot;
+  theme: string;
+  setTheme: (name: string) => void;
+}) {
+  const { state, canPlay } = snapshot;
+  const [source, setSource] = useState('');
+  const [pasteOpen, setPasteOpen] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const load = async () => {
+    setImporting(true);
+    try {
+      await runtime.load(source);
+      if (!runtime.app.state.loadError) setPasteOpen(false);
+    } finally {
+      setImporting(false);
+    }
+  };
+  return (
+    <header className="top-bar" data-region="top-bar">
+      <h1>
+        ORDER DOESN’T MATTER <span>STUDIO</span>
+      </h1>
+      <div className="transport">
+        <Button
+          className="play-button"
+          disabled={!canPlay}
+          onClick={() => {
+            if (state.playing) runtime.pause();
+            else void runtime.play();
+          }}
+        >
+          {state.playing ? <Pause /> : <Play />}
+          {state.playing ? 'Pause' : 'Play'}
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label="Stop"
+          onClick={() => {
+            runtime.stop();
+          }}
+        >
+          <Square />
+        </Button>
+      </div>
+      <output className="tempo">
+        {Math.round((state.cps ?? 0.5) * 240)} <small>BPM</small>
+      </output>
+      <Dialog open={pasteOpen} onOpenChange={setPasteOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline">
+            <ClipboardPaste />
+            Paste
+          </Button>
+        </DialogTrigger>
+        <DialogContent className="paste-dialog">
+          <DialogHeader>
+            <DialogTitle>Paste Strudel</DialogTitle>
+            <DialogDescription>Import a program as a Studio score.</DialogDescription>
+          </DialogHeader>
+          <textarea
+            aria-label="Strudel program"
+            value={source}
+            onChange={(event) => {
+              setSource(event.target.value);
+            }}
+            spellCheck={false}
+          />
+          <Button
+            disabled={importing || !source.trim()}
+            onClick={() => {
+              void load();
+            }}
+          >
+            {importing ? 'Importing…' : 'Import program'}
+          </Button>
+          <p role="status">{state.loadError}</p>
+        </DialogContent>
+      </Dialog>
+      <span className="top-message" role="status">
+        {state.loadError || state.message}
+      </span>
+      <div className="theme-swatches" aria-label="Themes">
+        {themeNames.map((name) => (
+          <button
+            key={name}
+            title={name}
+            aria-label={`Theme ${name}`}
+            aria-pressed={theme === name}
+            style={{ background: resolveTheme(name).accent }}
+            onClick={() => {
+              setTheme(name);
+            }}
+          />
+        ))}
+      </div>
+      <nav className="source-links">
+        <a href={repository} target="_blank" rel="noopener">
+          Our source
+        </a>
+        <a href={strudelSource('web', '1.3.0')} target="_blank" rel="noopener">
+          Strudel 1.3.0 source
+        </a>
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="link">About / AGPL</Button>
+          </DialogTrigger>
+          <DialogContent className="about-notice">
+            <DialogHeader>
+              <DialogTitle>About Order Doesn't Matter</DialogTitle>
+              <DialogDescription>
+                A visual instrument for Strudel. Read and edit a program’s score, and follow its
+                cycles.
+              </DialogDescription>
+            </DialogHeader>
+            <p>
+              Made by Fire Lake Labs. Our own source code is MIT licensed. This app includes Strudel
+              and other software under AGPL-3.0-or-later and other licences. The app as distributed
+              is provided under the AGPL terms. You may use, share and modify it under those terms.
+              It comes with no warranty.
+            </p>
+            <p>
+              <a
+                href={`${repository}/tree/${__BUILD_SHA__ ?? 'main'}`}
+                target="_blank"
+                rel="noopener"
+              >
+                Source for this version
+              </a>
+            </p>
+            <small>
+              {__BUILD_SHA__
+                ? `Commit ${__BUILD_SHA__}`
+                : 'Build commit unavailable; this link opens the main branch.'}
+            </small>
+            <a href="/licenses.txt" target="_blank" rel="noopener">
+              Full licence texts and third-party notices
+            </a>
+            <p>Strudel’s corresponding source for our pinned versions:</p>
+            <ul>
+              {['core', 'mini', 'tonal', 'transpiler', 'web', 'webaudio', 'superdough'].map(
+                (name) => {
+                  const version = ['web', 'webaudio', 'superdough'].includes(name)
+                    ? '1.3.0'
+                    : '1.2.6';
+                  return (
+                    <li key={name}>
+                      <a href={strudelSource(name, version)} target="_blank" rel="noopener">
+                        {name === 'superdough' ? name : `@strudel/${name}`}@{version}
+                      </a>
+                    </li>
+                  );
+                },
+              )}
+            </ul>
+          </DialogContent>
+        </Dialog>
+      </nav>
+    </header>
+  );
+}
