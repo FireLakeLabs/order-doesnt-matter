@@ -212,3 +212,83 @@ test('an overrun on the initial tick keeps its stop message and emits it once', 
     { type: 'error', message: new PlaybackOverrun().message },
   ]);
 });
+
+test('running seek preflights the destination; a rejected seek retains the installed transport', async () => {
+  const { engine, audio, events, trigger } = fixture();
+  const destinations: number[] = [];
+  audio.preflight = async (_code, from) => {
+    destinations.push(from);
+    if (from === 32) throw Error('destination rejected');
+    return { values: [], discoveryValues: [] };
+  };
+  let hushed = 0;
+  audio.silence = () => {
+    hushed++;
+  };
+  await engine.play('sine');
+  await engine.seek(16);
+  await trigger();
+  expect(destinations).toEqual([0, 16]);
+  expect(hushed).toBe(1);
+  expect(engine.playing).toBe(true);
+  await expect(engine.seek(32)).rejects.toThrow('destination rejected');
+  expect(engine.playing).toBe(true);
+  await trigger();
+  expect(events.filter((e) => e.type === 'trigger').map((e) => e.revision)).toEqual([2, 2]);
+  expect(events.filter((e) => e.type === 'transport')).toEqual([
+    { type: 'transport', playing: true },
+  ]);
+  engine.stop();
+});
+
+test('speed stays outside source, and loop configuration uses a checked destination and clears in place', async () => {
+  const { engine, audio } = fixture();
+  const calls: unknown[] = [];
+  audio.setSpeed = (speed) => {
+    calls.push(['speed', speed]);
+  };
+  audio.setLoop = (loop) => {
+    calls.push(['loop', loop]);
+  };
+  audio.seek = (cycle) => {
+    calls.push(['seek', cycle]);
+  };
+  await engine.play('written tempo');
+  engine.setSpeed(0.5);
+  await engine.setLoop({ from: 8, to: 10 });
+  await engine.seek(10);
+  await engine.setLoop(null);
+  expect(calls).toContainEqual(['speed', 0.5]);
+  expect(calls.filter((call) => Array.isArray(call) && call[0] === 'seek')).toEqual([
+    ['seek', 0],
+    ['seek', 8],
+    ['seek', 8],
+    ['seek', 8],
+  ]);
+  expect(calls.at(-2)).toEqual(['loop', null]);
+  engine.stop();
+});
+
+test('a seek waits for in-flight edits and cannot reinstall the earlier source', async () => {
+  const { engine, audio } = fixture();
+  await engine.play('first');
+  const prepare = audio.prepare;
+  const codes: string[] = [];
+  let finish!: () => void;
+  audio.prepare = async (...args) => {
+    codes.push(args[0]);
+    if (args[0] === 'second')
+      await new Promise<void>((resolve) => {
+        finish = resolve;
+      });
+    return prepare(...args);
+  };
+  const edit = engine.play('second');
+  for (let i = 0; i < 20 && !finish; i++) await Promise.resolve();
+  const seek = engine.seek(16);
+  const later = engine.play('third');
+  finish();
+  await Promise.all([edit, seek, later]);
+  expect(codes).toEqual(['second', 'third', 'third']);
+  engine.stop();
+});

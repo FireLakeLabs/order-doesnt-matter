@@ -89,7 +89,19 @@ export interface OutputTap {
   rms(fromTime: number, toTime: number): Promise<number>;
   sampleRate: number;
 }
+export type PlaybackSpeed = 0.25 | 0.5 | 0.75 | 1;
+export interface CycleLoop {
+  from: number;
+  to: number;
+}
 export interface Engine {
+  /** Transport state only: never changes generated code or the document. */
+  setSpeed(speed: PlaybackSpeed): void;
+  setLoop(loop: CycleLoop | null): Promise<void>;
+  /** A running seek preflights the destination and continues the installed piece. */
+  seek(cycle: number): Promise<void>;
+  /** Discard already scheduled audio, used for Studio scrubbing and discontinuities. */
+  silence(): void;
   /**
    * Plays generated Strudel. Called while playing, it swaps without stopping and
    * resolves with the revision number later reported by `swapped` or `committed`.
@@ -98,6 +110,9 @@ export interface Engine {
     code: string,
     options?: {
       fromCycle?: number;
+      loop?: CycleLoop | null;
+      /** Studio discontinuities discard queued voices; ordinary Play keeps legacy tails. */
+      discardScheduledAudio?: boolean;
       /** Section starts: discover two cycles at each of the first 32 (64 extra cycles). */
       discoverCycles?: number[];
       /** Trusted generator admission, scoped to one document/transport epoch.
