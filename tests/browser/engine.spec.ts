@@ -1,3 +1,4 @@
+import { blockHttps } from './offline';
 import { test } from './helpers';
 import { installEngineSignals, signal } from './helpers';
 import { expect } from '@playwright/test';
@@ -115,10 +116,7 @@ test('engine: synth PCM, live revisions, rejected edit and Stop', async ({ page 
 
 for (const scenario of ['sample', 'missing', 'seek'] as const) {
   test(`engine: isolated ${scenario}`, async ({ page }) => {
-    await page.route(
-      (url) => url.protocol === 'https:',
-      (route) => route.abort('internetdisconnected'),
-    );
+    await blockHttps(page);
     await page.addInitScript(installEngineSignals);
     await page.goto('/harness/engine.html');
     await test.step('ODM:playback', async () => {

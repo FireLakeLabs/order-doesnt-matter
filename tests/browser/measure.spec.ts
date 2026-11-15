@@ -1,3 +1,4 @@
+import { blockHttps } from './offline';
 import { scoreReady, signal } from './helpers';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
@@ -7,10 +8,7 @@ test('20 serial edits: input event → swapped trigger scheduled audio time', as
   browser,
 }) => {
   test.skip(process.env.ODM_BROWSER_MODE !== 'measure', 'Local measurement: npm run measure:edit');
-  await page.route(
-    (url) => url.protocol === 'https:',
-    (route) => route.abort('internetdisconnected'),
-  );
+  await blockHttps(page);
   await page.goto('/?inspect');
   await page.getByRole('button', { name: 'Kiln', exact: true }).click();
   await scoreReady(page);
