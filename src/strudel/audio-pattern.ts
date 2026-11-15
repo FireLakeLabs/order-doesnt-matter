@@ -1,5 +1,6 @@
 import { Pattern } from '@strudel/core';
 import type { Hap, State, Scheduler } from './index';
+import { ExecutionLimit, type ExecutionBudget } from './execution-budget';
 import {
   MAX_WINDOW_STARTS,
   PlaybackNotice,
@@ -13,6 +14,7 @@ export function guarded(
   failed: (error: unknown) => void,
   tag: (hap: Hap) => void,
   silent?: (state: State) => void,
+  execution?: ExecutionBudget,
 ): Pattern {
   const budget = new QueryBudget();
   let flooded = false,
@@ -28,8 +30,13 @@ export function guarded(
     };
     let haps: Hap[];
     try {
-      haps = pattern.query(state);
+      haps = execution ? execution.run(() => pattern.query(state)) : pattern.query(state);
     } catch (error) {
+      if (error instanceof ExecutionLimit) {
+        halted = true;
+        failed(new PlaybackOverrun());
+        return [];
+      }
       if (answered()) failed(error);
       return [];
     }

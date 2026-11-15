@@ -18,6 +18,7 @@ import { soundName } from '../engine/logic';
 import { createTap } from './audio-tap';
 import { instrumentIdentity } from './instrument-identity';
 import { guarded, schedulingBoundary } from './audio-pattern';
+import { boundedSource, ExecutionBudget } from './execution-budget';
 
 export const defaultCollections = [
   ...['tidal-drum-machines', 'piano', 'Dirt-Samples', 'EmuSP12', 'vcsl', 'mridangam'].map(
@@ -90,6 +91,9 @@ export async function createAudio({
     async prepare(code, _from, revision) {
       let candidate: Pattern | undefined;
       const oldCps = repl.scheduler.cps;
+      const execution = new ExecutionBudget();
+      const binding = `__odmBudget_${crypto.randomUUID()}`;
+      const source = boundedSource(code, binding);
       // Depends on REPL editPattern running before setPattern, and evaluate(false)
       // retaining a running transport. Capture the result while reinstalling the old pattern.
       capture = (p) => {
@@ -97,11 +101,16 @@ export async function createAudio({
         return installed;
       };
       let cps: number;
+      Object.defineProperty(globalThis, binding, { value: execution, configurable: true });
       try {
-        await repl.evaluate(code, false);
+        execution.begin();
+        await repl.evaluate(source, false);
+        execution.check();
         if (repl.state.error) throw repl.state.error;
         cps = repl.scheduler.cps;
       } finally {
+        execution.end();
+        Reflect.deleteProperty(globalThis, binding);
         capture = undefined;
         repl.setCps(oldCps);
       }
@@ -116,6 +125,7 @@ export async function createAudio({
           const { cycle, time } = schedulingBoundary(repl.scheduler, state);
           silent(revision, cycle, time);
         },
+        execution,
       );
       return {
         values: [],
