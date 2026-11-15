@@ -187,6 +187,11 @@ export function drawBand(c: CanvasRenderingContext2D, frame: ViewFrame, parts: M
     }
   }
   c.fillStyle = theme.line;
+  if (cast.some((p) => !p.backstage && p.floor < h * 0.6)) {
+    c.globalAlpha = 0.5;
+    c.fillRect(w * 0.025, h * 0.49, w * 0.95, 2);
+    c.globalAlpha = 1;
+  }
   c.fillRect(w * 0.025, h * 0.72, w * 0.95, 3);
   c.fillStyle = theme.panel;
   c.fillRect(0, h * 0.84, w, h * 0.16);

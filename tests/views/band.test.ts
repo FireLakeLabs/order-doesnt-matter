@@ -71,7 +71,8 @@ test('weighted squash, hop and pitch stretch reverse exactly with the playhead',
   poses({ ...f, now: 10 }, parts);
   expect(poses(f, parts)).toEqual(original);
   const hats = Array.from({ length: 8 }, (_, i) => note(i / 8, (i + 1) / 8));
-  expect(poses(frame(hats, 1, 0.0625), analyse(hats))[0].hop).toBeGreaterThan(20);
+  const hopping = poses(frame(hats, 1, 0.0625), analyse(hats))[0];
+  expect(hopping.hop / hopping.height).toBeCloseTo(0.3);
   const melody = [note(0, 1, { note: 60 }), note(1, 2, { note: 84 })];
   const melodic = analyse(melody);
   expect(poses(frame(melody, 1, 1.5), melodic)[0].height).toBeGreaterThan(
@@ -156,4 +157,54 @@ test('section membership and entrances also work on later song iterations', () =
   ).toBe(true);
   const start = poses({ ...f, now: 2 }, parts)[0];
   expect(start.floor).toBeCloseTo(760 * 0.925);
+});
+
+test('four hits per cycle stay heavy beside eight twitchy hits', () => {
+  const notes = [
+    ...Array.from({ length: 4 }, (_, i) => note(i / 4, (i + 1) / 4)),
+    ...Array.from({ length: 8 }, (_, i) => ({ ...note(i / 8, (i + 1) / 8), instrument: 'b' })),
+  ];
+  const parts = analyse(notes);
+  expect(parts.get('a')!.body).toBe('heavy');
+  expect(parts.get('b')!.body).toBe('twitchy');
+});
+test('layered onsets and different pitches cannot fabricate moving-setting evidence', () => {
+  expect(
+    analyse([note(0, 1, { note: 60, pan: 0 }), note(0, 1, { note: 60, pan: 1 })]).get('a')!.body,
+  ).toBe('melody');
+  expect(
+    analyse([note(0, 1, { note: 24, gain: 0.5 }), note(0, 1, { note: 24, gain: 1 })]).get('a')!
+      .body,
+  ).toBe('low');
+  expect(
+    analyse([note(0, 1, { note: 60, lpf: 400 }), note(0, 1, { note: 64, lpf: 800 }, false)]).get(
+      'a',
+    )!.body,
+  ).toBe('melody');
+});
+test('ripple rate belongs to a held span and does not grow with song length', () => {
+  const held = (start: number, length = 1) => [
+    note(start, start + length, { note: 60, lpf: 400 }),
+    note(start, start + length, { note: 60, lpf: 800 }, false),
+    note(start, start + length, { note: 60, lpf: 400 }, false),
+    note(start, start + length, { note: 60, lpf: 800 }, false),
+  ];
+  const single = analyse(held(0)).get('a')!;
+  const song = analyse(Array.from({ length: 32 }, (_, i) => held(i)).flat()).get('a')!;
+  expect(single.body).toBe('jelly');
+  expect(single.ripple).toBe(3);
+  expect(song.ripple).toBe(single.ripple);
+  expect(analyse(held(0, 2)).get('a')!.ripple).toBe(1.5);
+});
+test('old held spans do not invent previous-section participation at an entrance', () => {
+  const notes = [note(0, 3)];
+  const f = {
+    ...frame(notes, 1, 2),
+    sections: [
+      { name: 'first', from: 0, to: 1 },
+      { name: 'rest', from: 1, to: 2 },
+      { name: 'return', from: 2, to: 3 },
+    ],
+  };
+  expect(poses(f, analyse(notes))[0].floor).toBeCloseTo(760 * 0.925);
 });

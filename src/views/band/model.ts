@@ -60,36 +60,41 @@ export function analyse(notes: ViewNote[]): Map<string, Part> {
     // Count occupied cycles rather than silence in other sections diluting density.
     const cycles = new Set(starts.map((n) => Math.floor(n.start))).size;
     const density = starts.length / Math.max(1, cycles);
-    let changes = 0;
-    let sampleSpan = 0;
+    const movingSpans = new Map<string, { changes: number; duration: number }>();
     for (let i = 1; i < group.length; i++) {
       const a = group[i - 1],
         b = group[i];
       // Only fragments of the SAME held span establish motion within a note.
-      if (a.start !== b.start || a.end !== b.end) continue;
+      if (b.hasOnset || a.start !== b.start || a.end !== b.end || pitch(a.value) !== pitch(b.value))
+        continue;
       for (const key of ['lpf', 'cutoff', 'gain', 'pan']) {
         if (
           typeof a.value[key] === 'number' &&
           typeof b.value[key] === 'number' &&
           a.value[key] !== b.value[key]
         ) {
-          changes++;
-          sampleSpan = Math.max(sampleSpan, b.end - b.start);
+          const key = `${String(b.start)}:${String(b.end)}:${String(pitch(b.value))}`;
+          const span = movingSpans.get(key) ?? { changes: 0, duration: b.end - b.start };
+          span.changes++;
+          movingSpans.set(key, span);
           break;
         }
       }
     }
+    let ripple = 0;
+    for (const span of movingSpans.values())
+      if (span.duration > 0) ripple = Math.max(ripple, span.changes / span.duration);
     const minPitch = pitches.length ? pitches.reduce((a, b) => Math.min(a, b)) : 48;
     const maxPitch = pitches.length ? pitches.reduce((a, b) => Math.max(a, b)) : 72;
     const body: Body =
-      duration >= 0.4 && changes > 0
+      duration >= 0.4 && ripple > 0
         ? 'jelly'
         : duration >= 0.4 && pitches.length > 0 && minPitch < 40
           ? 'low'
           : pitches.length > 0
             ? 'melody'
             : duration <= 0.26
-              ? density <= 2.5
+              ? density <= 4
                 ? 'heavy'
                 : 'twitchy'
               : 'plain';
@@ -98,7 +103,7 @@ export function analyse(notes: ViewNote[]): Map<string, Part> {
       body,
       minPitch,
       maxPitch,
-      ripple: changes / Math.max(1, sampleSpan),
+      ripple,
     });
   }
   return parts;
@@ -136,7 +141,9 @@ function sectionMember(frame: ViewFrame, part: Part | undefined, time: number, f
   const shift = length > 0 ? Math.floor((frame.from - section.from) / length) * length : 0;
   const from = section.from + shift + (section.to + shift <= frame.from ? length : 0);
   return (
-    part?.notes.some((n) => n.start < from + section.to - section.from && n.end > from) ?? false
+    part?.notes.some(
+      (n) => n.hasOnset && n.start >= from && n.start < from + section.to - section.from,
+    ) ?? false
   );
 }
 function slots(frame: ViewFrame, parts: Map<string, Part>, time: number, current = false) {
@@ -232,7 +239,7 @@ export function poses(frame: ViewFrame, parts: Map<string, Part>): Pose[] {
     const height = size * dims[1] * scaleY;
     const hop =
       body === 'twitchy' && latest?.hasOnset && active
-        ? size * 0.3 * Math.sin(Math.PI * clamp(age / 0.125))
+        ? height * 0.3 * Math.sin(Math.PI * clamp(age / 0.125))
         : 0;
     const floor = before.y + (slot.y - before.y) * ease;
     const walking = slot.backstage !== before.backstage && transition < 1;
