@@ -1,5 +1,6 @@
 import { parse } from 'acorn';
 import type * as JS from 'estree';
+import { callbackBranches, callbackTrail } from './edits/rewrite-shared';
 import {
   findById,
   instruments,
@@ -218,7 +219,13 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
     pattern?.core.kind === 'opaque';
   let kind: TargetKind = 'unknown';
   if (sourceAddress) kind = 'source';
-  else if (rewrites && pattern && rows.some((r) => r.pattern.id === id)) kind = 'rewrite';
+  else if (
+    rewrites &&
+    pattern &&
+    (rows.some((r) => r.pattern.id === id) ||
+      callbackBranches(doc).some((b) => b.body.id === id && b.supported))
+  )
+    kind = 'rewrite';
   else if (selectedSection && !rhythm && !sourceAddress) kind = 'section';
   else if (setting) kind = editable ? 'setting-constant' : valueKind(setting.value);
   else if (row?.id === id && !rhythm && !sourceAddress) kind = 'instrument';
@@ -243,16 +250,25 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
           : kind === 'source'
             ? 'Source text'
             : 'Pattern');
-  const breadcrumb = setup
-    ? ['setup', setupSummary(String(node.code))]
-    : kind === 'section'
-      ? ['Piece', selectedSection!.name]
-      : [
-          row?.name ?? 'Piece',
-          ...(section ? [`in ${section.name}`] : []),
-          ...(kind === 'instrument' ? [] : [label]),
-          ...(sourceAddress && label !== 'Source text' ? ['Source text'] : []),
-        ];
+  const trail = callbackTrail(doc, id);
+  const breadcrumb = (
+    setup
+      ? ['setup', setupSummary(String(node.code))]
+      : kind === 'section'
+        ? ['Piece', selectedSection!.name]
+        : [
+            row?.name ?? 'Piece',
+            ...(section ? [`in ${section.name}`] : []),
+            ...(kind === 'instrument' ? [] : [label]),
+            ...(sourceAddress && label !== 'Source text' ? ['Source text'] : []),
+          ]
+  ).map((part) => part.replaceAll('$', ''));
+  if (!setup && kind !== 'section')
+    breadcrumb.splice(
+      1 + (section ? 1 : 0),
+      0,
+      ...trail.flatMap((b) => [b.parent.name, `${b.role} · ${b.parameter}`]),
+    );
   return {
     nodeId,
     node,
@@ -260,7 +276,7 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
     instrumentId: kind === 'section' ? undefined : row?.id,
     use: kind === 'section' ? undefined : use,
     section,
-    breadcrumb: breadcrumb.map((part) => part.replaceAll('$', '')),
+    breadcrumb,
     generatedParts: breadcrumb.map((_, i) =>
       setup
         ? false
