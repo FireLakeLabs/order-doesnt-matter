@@ -45,9 +45,9 @@ test('boundary fixtures reject imports and fixed ports; allow the seam and OS po
 });
 
 test('browser timing includes the boundary and fails above it without sleeping', () => {
-  expect(BROWSER_LIMIT_SECONDS).toBe(180);
-  expect(timingResult(0, 180_000)).toMatchObject({ seconds: 180, ok: true });
-  expect(timingResult(0, 180_001)).toMatchObject({ ok: false });
+  expect(BROWSER_LIMIT_SECONDS).toBe(300);
+  expect(timingResult(0, 300_000)).toMatchObject({ seconds: 300, ok: true });
+  expect(timingResult(0, 300_001)).toMatchObject({ ok: false });
   expect(timingResult(10, 20, 0)).toMatchObject({ ok: false });
 });
 
@@ -57,9 +57,12 @@ test('Node timing includes 60 seconds and rejects excess without sleeping', () =
   expect(timingResult(50, 60_051, NODE_LIMIT_SECONDS).ok).toBe(false);
 });
 
-test('browser growth guard keeps the 20 second boundary, ranks five and excludes skips', async () => {
-  const { browserSummary, formatBrowserSummary } = await import('../scripts/browser-summary.mjs');
-  const rows = [1000, 3000, 20000, 20001, 2, 4000, 100].map((ms, i) => ({
+test('browser growth guard keeps the 25 second boundary, ranks five and excludes skips', async () => {
+  const { browserSummary, formatBrowserSummary, SINGLE_TEST_LIMIT_MS } = await import(
+    '../scripts/browser-summary.mjs'
+  );
+  expect(SINGLE_TEST_LIMIT_MS).toBe(25_000);
+  const rows = [1000, 3000, 25000, 25001, 20001, 4000, 100].map((ms, i) => ({
     title: `test ${i}`,
     ms,
     status: 'passed',
@@ -70,13 +73,13 @@ test('browser growth guard keeps the 20 second boundary, ranks five and excludes
   );
   expect(summary.count).toBe(7);
   expect(summary.secondsPerTest).toBe(10);
-  expect(summary.slowest.map((r) => r.ms)).toEqual([20001, 20000, 4000, 3000, 1000]);
+  expect(summary.slowest.map((r) => r.ms)).toEqual([25001, 25000, 20001, 4000, 3000]);
   expect(summary.over.map((r) => r.title)).toEqual(['test 3']);
   expect(summary.ok).toBe(false);
-  expect(formatBrowserSummary(summary)).toContain('OVER SINGLE-TEST BUDGET (20 s): test 3');
+  expect(formatBrowserSummary(summary)).toContain('OVER SINGLE-TEST BUDGET (25 s): test 3');
   expect(
     browserSummary(
-      rows.filter((r) => r.ms <= 20000),
+      rows.filter((r) => r.ms <= 25000),
       1,
     ).ok,
   ).toBe(true);
@@ -174,14 +177,14 @@ test('shared all-hook clock slots do not displace the actual test teardown timin
 
 test('recording exceptions are explicit and never excuse a slow acceptance test', async () => {
   const { browserSummary, formatBrowserSummary } = await import('../scripts/browser-summary.mjs');
-  const row = { title: 'demo', status: 'passed', ms: 20001, budgetException: 'Viewing hold' };
-  const demo = browserSummary([row], 21, 'demo');
+  const row = { title: 'demo', status: 'passed', ms: 25001, budgetException: 'Viewing hold' };
+  const demo = browserSummary([row], 26, 'demo');
   expect(demo.ok).toBe(true);
   expect(demo.over).toHaveLength(1);
   expect(formatBrowserSummary(demo)).toContain('OPTIONAL RECORDING EXCEPTION');
-  expect(browserSummary([row], 21).ok).toBe(false);
-  expect(browserSummary([row], 21, 'online').ok).toBe(false);
-  expect(browserSummary([{ ...row, budgetException: undefined }], 21, 'demo').ok).toBe(false);
+  expect(browserSummary([row], 26).ok).toBe(false);
+  expect(browserSummary([row], 26, 'online').ok).toBe(false);
+  expect(browserSummary([{ ...row, budgetException: undefined }], 26, 'demo').ok).toBe(false);
 });
 
 test('all seven Strudel and superdough manifest and lock pins remain exact', async () => {
