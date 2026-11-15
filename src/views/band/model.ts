@@ -73,10 +73,10 @@ export function analyse(notes: ViewNote[]): Map<string, Part> {
           typeof b.value[key] === 'number' &&
           a.value[key] !== b.value[key]
         ) {
-          const key = `${String(b.start)}:${String(b.end)}:${String(pitch(b.value))}`;
-          const span = movingSpans.get(key) ?? { changes: 0, duration: b.end - b.start };
+          const spanKey = `${String(b.start)}:${String(b.end)}:${String(pitch(b.value))}`;
+          const span = movingSpans.get(spanKey) ?? { changes: 0, duration: b.end - b.start };
           span.changes++;
-          movingSpans.set(key, span);
+          movingSpans.set(spanKey, span);
           break;
         }
       }
