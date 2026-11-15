@@ -1,3 +1,4 @@
+import { blockHttps } from './offline';
 import { test } from './helpers';
 import { scoreReady, play, appSignal, signal } from './helpers';
 import { expect } from '@playwright/test';
@@ -5,15 +6,10 @@ import { instruments, sections } from '../../src/document';
 import type {} from '../../src/app/main';
 import { deployedCommit } from '../../scripts/licenses';
 
-const offline = async (page: import('@playwright/test').Page) =>
-  page.route(
-    (url) => url.protocol === 'https:',
-    (route) => route.abort('internetdisconnected'),
-  );
 test('page: original arrangement → rows → measured synth PCM → pinned section → Stop → failed paste', async ({
   page,
 }) => {
-  await offline(page);
+  await blockHttps(page);
   await page.goto('/?inspect');
   await expect(page.getByRole('link', { name: 'Source on GitHub', exact: true })).toHaveAttribute(
     'href',
@@ -143,7 +139,7 @@ test('page: original arrangement → rows → measured synth PCM → pinned sect
 
 for (const source of ['new Pattern(()=>{while(true){}})', 'while(true){}; silence'])
   test(`worker timeout leaves the page responsive: ${source}`, async ({ page }) => {
-    await offline(page);
+    await blockHttps(page);
     await page.goto('/?inspect');
     await page.getByLabel('Your Strudel program').fill(source);
     const start = Date.now();
@@ -157,7 +153,7 @@ for (const source of ['new Pattern(()=>{while(true){}})', 'while(true){}; silenc
     await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
   });
 test('superseded results never replace a new piece', async ({ page }) => {
-  await offline(page);
+  await blockHttps(page);
   await page.goto('/?inspect');
   await page.getByLabel('Your Strudel program').fill('new Pattern(()=>{while(true){}})');
   await page.getByRole('button', { name: 'Load', exact: true }).click();
@@ -169,7 +165,7 @@ test('superseded results never replace a new piece', async ({ page }) => {
 });
 
 test('engine errors appear in the top bar', async ({ page }) => {
-  await offline(page);
+  await blockHttps(page);
   await page.goto('/?inspect');
   await page.getByLabel('Your Strudel program').fill('note("not_a_note").s("sine")');
   await page.getByRole('button', { name: 'Load', exact: true }).click();
