@@ -10,7 +10,7 @@ it('acknowledges a current silent scheduling window once, ignoring old/stopped r
   let trigger!: Dispatch;
   let playing = false;
   const audio: AudioBackend = {
-    preflight: async () => [],
+    preflight: async () => ({ values: [], discoveryValues: [] }),
     prepare: async () => ({
       values: [],
       commit: async () => {

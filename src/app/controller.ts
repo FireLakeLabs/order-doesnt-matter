@@ -2,6 +2,7 @@ import { migrate, sections, walk, type Doc } from '../document';
 import { createEditSession, type EditSession } from '../editor/session';
 import type { Engine, EngineEvent, EventResult, ImportWarning } from '../contract';
 import { generate } from '../generate';
+import { discoveryIdentity } from '../generate/discovery';
 import { importStrudel } from '../import';
 import { createEngine } from '../engine';
 import { createRetention, documentJSON, readDocument } from './retention';
@@ -36,6 +37,7 @@ export function createApp(
   let state = initialState(),
     engine: Engine | null = null;
   let editor: EditSession | null = null;
+  let discoveryScope = {};
   const dirtyRows = new Set<string>();
   let epoch = 0,
     windowRevision = 0,
@@ -243,9 +245,16 @@ export function createApp(
       transport = transportRevision;
     const work = swaps.then(async () => {
       if (piece !== epoch || transport !== transportRevision || current?.() === false) return -1;
+      const identity = discoveryIdentity(doc);
       const revision = await engine!.play(
         generate(doc, { ...(whole ? {} : playbackOptions(state)), instrumentTags: true }),
-        options,
+        {
+          discoverCycles: sections(doc).map((s) => s.start),
+          ...options,
+          discovery: identity
+            ? { scope: discoveryScope, identity: `${whole ? '' : (state.solo ?? '')}:${identity}` }
+            : undefined,
+        },
       );
       if (current?.() === false) {
         // A newer edit/load during engine preparation owns the score. Restore it
@@ -253,6 +262,7 @@ export function createApp(
         if (state.doc && engine?.playing && piece === epoch && transport === transportRevision)
           await engine.play(
             generate(state.doc, { ...playbackOptions(state), instrumentTags: true }),
+            { discoverCycles: sections(state.doc).map((s) => s.start) },
           );
         return -1;
       }
@@ -269,6 +279,7 @@ export function createApp(
     const piece = epoch,
       transport = ++transportRevision;
     starting = true;
+    discoveryScope = {};
     update({ ...state, message: 'Preparing sounds…' });
     try {
       // Check the actual seek window too before the engine evaluates on the page.
@@ -337,6 +348,7 @@ export function createApp(
       return;
     if (request !== loadRevision || state.doc !== before) return;
     loading = request;
+    discoveryScope = {};
     update({ ...state, loadError: '' });
     try {
       // Stage replacements before touching the existing session, history or transport.
@@ -383,6 +395,7 @@ export function createApp(
         },
       });
       const piece = ++epoch;
+      discoveryScope = {};
       checked = false;
       cachedWindow = null;
       queries.cancel();
@@ -462,6 +475,7 @@ export function createApp(
     solo(id: string | null) {
       const next = setSolo(state, id);
       if (next === state) return;
+      discoveryScope = {};
       const previous = state.solo,
         piece = epoch;
       update(next);
@@ -477,6 +491,7 @@ export function createApp(
       update({ ...state, soundNotice: { ...state.soundNotice, visible: false } });
     },
     stop() {
+      discoveryScope = {};
       ++transportRevision;
       editor?.clear();
       engine?.stop();

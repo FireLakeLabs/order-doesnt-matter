@@ -41,6 +41,8 @@ export interface EventResult {
   cps: number;
   /** Broken is not quiet: a failed question is an error, never an empty list. */
   error: null | { message: string; phase: 'evaluation' | 'query' | 'timeout' };
+  /** Worker preflight only: values from extra section windows, separate from the current window. */
+  discoveryValues?: unknown[];
   /** True when an event value held a function or cycle the comparison cannot see into. */
   opaqueValues: boolean;
 }
@@ -98,6 +100,9 @@ export interface Engine {
       fromCycle?: number;
       /** Section starts: discover two cycles at each of the first 32 (64 extra cycles). */
       discoverCycles?: number[];
+      /** Trusted generator admission, scoped to one document/transport epoch.
+       * Reuses only extra inventory queries; safety and audio evaluation still run. */
+      discovery?: { scope: object; identity: string };
     },
   ): Promise<number>;
   stop(): void;

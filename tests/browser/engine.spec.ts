@@ -1,4 +1,5 @@
 import { blockHttps } from './offline';
+import { kilnDiscovery, assetDiscovery, opaqueDiscovery } from './discovery';
 import { test } from './helpers';
 import { installEngineSignals, signal } from './helpers';
 import { expect } from '@playwright/test';
@@ -224,4 +225,20 @@ test('canary: web bundle registry, REPL capture, final output gain and failed sa
   expect(result.rejected).toBe(true);
   expect(result.playing).toBe(false);
   expect(result.errors.length).toBeGreaterThan(0);
+});
+
+test('discovery: Kiln cutoff and Undo save section windows with correct triggers', async ({
+  page,
+}) => {
+  await kilnDiscovery(page);
+});
+test('discovery: late assets survive reuse and selectors or failed swaps invalidate', async ({
+  page,
+}) => {
+  await assetDiscovery(page);
+});
+test('discovery: opaque setup retains registration and evaluation side effects', async ({
+  page,
+}) => {
+  await opaqueDiscovery(page);
 });
