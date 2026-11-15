@@ -1,6 +1,7 @@
 import { defineConfig } from '@playwright/test';
 const optional = /\/(demo|edit-demo|shots|measure|online)\.spec\.ts$/;
 const audio = /\/(engine|silent-swap)\.spec\.ts$/;
+const delivery = /@audio-delivery/;
 export default defineConfig({
   testDir: './tests/browser',
   // Bound concurrent score-worker queries; audio clocks run afterward.
@@ -14,8 +15,14 @@ export default defineConfig({
   },
   reporter: 'line',
   projects: [
-    { name: 'default', testIgnore: [optional, audio] },
-    { name: 'audio', testMatch: audio, workers: 1, dependencies: ['default'] },
+    { name: 'default', testIgnore: [optional, audio], grepInvert: delivery },
+    {
+      name: 'audio',
+      testMatch: [audio, /\/rewrite\.spec\.ts$/],
+      grep: [/(engine|silent-swap)\.spec\.ts/, delivery],
+      workers: 1,
+      dependencies: ['default'],
+    },
     { name: 'optional', testMatch: optional },
   ],
 });
