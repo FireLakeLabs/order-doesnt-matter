@@ -1,3 +1,4 @@
+import { blockHttps } from './offline';
 import { test } from './helpers';
 import { expect } from '@playwright/test';
 import type { EngineEvent } from '../../src/contract';
@@ -21,10 +22,7 @@ for (const code of [
   test(`canary: silent boundary for ${code}; sounding revisions swap on a trigger`, async ({
     page,
   }) => {
-    await page.route(
-      (url) => url.protocol === 'https:',
-      (route) => route.abort('internetdisconnected'),
-    );
+    await blockHttps(page);
     await page.addInitScript(installEngineSignals);
     await page.goto('/harness/engine.html');
     await test.step('ODM:playback', async () => {
