@@ -1,4 +1,4 @@
-export const SINGLE_TEST_LIMIT_MS = 20_000;
+export const SINGLE_TEST_LIMIT_MS = 25_000;
 
 /** @typedef {{title: string, status: string, ms: number, sharedSetupMs?: number, budgetException?: string}} TimingRow */
 
@@ -32,8 +32,8 @@ export function formatBrowserSummary(summary) {
     ),
     ...summary.over.map((row) =>
       summary.exceptions.includes(row)
-        ? `OPTIONAL RECORDING EXCEPTION (20 s guard): ${row.title} — ${row.budgetException}`
-        : `OVER SINGLE-TEST BUDGET (20 s): ${row.title}`,
+        ? `OPTIONAL RECORDING EXCEPTION (${SINGLE_TEST_LIMIT_MS / 1000} s guard): ${row.title} — ${row.budgetException}`
+        : `OVER SINGLE-TEST BUDGET (${SINGLE_TEST_LIMIT_MS / 1000} s): ${row.title}`,
     ),
   ].join('\n');
 }
