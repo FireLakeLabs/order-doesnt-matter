@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Scope</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#00FF66}a:hover{color:#9DFFB8}
+.kn{width:54px;height:54px;border-radius:50%;background:#2B2B2B;border:3px solid #111;position:relative}
+.kn:after{content:"";position:absolute;left:50%;top:6px;width:3px;height:16px;margin-left:-1.5px;background:#D8D8D8}
+.kl{font-size:16px;color:#B5B5B5;text-align:center;margin-top:4px}
+.sb{flex:1;background:#00FF66;box-shadow:0 0 8px #00FF66}
+</style>
+</helmet>
+<div style="width: 960px; height: 640px; box-sizing: border-box; background: #3A3A38; color: #B8FFC8; font-family: 'VT323', monospace; font-size: 20px; position: relative; overflow: hidden; padding: 24px; display: flex; gap: 24px">
+
+<div style="flex: 1; position: relative; border-radius: 28px; background: #020A04; border: 6px solid #151515; overflow: hidden">
+<div style="position: absolute; inset: 0; background: repeating-linear-gradient(90deg, #0F3A1C 0 1px, transparent 0 72px), repeating-linear-gradient(0deg, #0F3A1C 0 1px, transparent 0 72px)"></div>
+<svg width="760" height="580" style="position: absolute; left: 0; top: 0; filter: drop-shadow(0 0 6px #00FF66)">
+<path d="M20 250 l52 -34 l8 34 l52 -70 l8 70 l52 -110 l8 110 l52 -70 l8 70 l52 -34 l8 34 l52 -70 l8 70 l52 -110 l8 110 l52 -70 l8 70 l52 -34 l8 34 l52 -70 l8 70 l52 -110 l8 110 l52 -70 l8 70" style="fill: none; stroke: #00FF66; stroke-width: 3; stroke-linejoin: round"></path>
+<path d="M20 250 q30 60 60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0 t60 0" style="fill: none; stroke: #9DFFB8; stroke-width: 2; opacity: .55"></path>
+</svg>
+<div style="position: absolute; left: 20px; right: 20px; bottom: 20px; height: 150px; display: flex; align-items: flex-end; gap: 6px">
+<i class="sb" style="height: 96%"></i><i class="sb" style="height: 88%"></i><i class="sb" style="height: 70%"></i><i class="sb" style="height: 82%"></i><i class="sb" style="height: 55%"></i><i class="sb" style="height: 62%"></i><i class="sb" style="height: 40%"></i><i class="sb" style="height: 48%"></i><i class="sb" style="height: 30%"></i><i class="sb" style="height: 36%"></i><i class="sb" style="height: 22%"></i><i class="sb" style="height: 28%"></i><i class="sb" style="height: 14%"></i><i class="sb" style="height: 34%"></i><i class="sb" style="height: 18%"></i><i class="sb" style="height: 10%"></i><i class="sb" style="height: 26%"></i><i class="sb" style="height: 8%"></i><i class="sb" style="height: 6%"></i><i class="sb" style="height: 12%"></i><i class="sb" style="height: 4%"></i><i class="sb" style="height: 3%"></i><i class="sb" style="height: 5%"></i><i class="sb" style="height: 2%"></i>
+</div>
+<div style="position: absolute; left: 24px; top: 16px; font-size: 24px">SCOPE <span style="color: #5FBF7A">CH1 OUT · 5ms/DIV</span></div>
+<div style="position: absolute; right: 24px; top: 16px; font-size: 24px; color: #FFB000">TRIG'D</div>
+<div style="position: absolute; left: 24px; bottom: 176px; color: #5FBF7A">SPECTRUM 20Hz – 20kHz</div>
+<div style="position: absolute; inset: 0; background: repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 2px, transparent 0 4px); pointer-events: none"></div>
+</div>
+
+<div style="width: 130px; display: flex; flex-direction: column; align-items: center; gap: 18px; padding-top: 10px">
+<div style="font-size: 22px; color: #E8E8E8; text-align: center; line-height: 1">ODM<br>SC-140</div>
+<div><div class="kn" style="transform: rotate(-40deg)"></div><div class="kl">TIME</div></div>
+<div><div class="kn" style="transform: rotate(60deg)"></div><div class="kl">GAIN</div></div>
+<div><div class="kn" style="transform: rotate(10deg)"></div><div class="kl">GLOW</div></div>
+<div><div class="kn" style="transform: rotate(-90deg)"></div><div class="kl">TRIG</div></div>
+<div style="display: flex; align-items: center; gap: 8px; font-size: 18px; color: #B5B5B5"><span style="width: 12px; height: 12px; border-radius: 50%; background: #FF3B30; box-shadow: 0 0 10px #FF3B30"></span>PWR</div>
+<div style="font-size: 15px; color: #B5B5B5; text-align: center; line-height: 1.2">The one view drawn from the sound, not the score.</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":640}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

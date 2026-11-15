@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Studio</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE58A}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ib{width:36px;height:36px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:9px;background:transparent;color:#A49EC4;cursor:pointer;padding:0;flex:none}
+.ib:hover{background:#1B1830;color:#F4F1FF}
+.seg{display:flex;gap:2px;padding:3px;border:1px solid #2A2545;border-radius:11px}
+.seg button{height:30px;min-width:38px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:#A49EC4;font:inherit;font-family:'JetBrains Mono',monospace;font-size:13px;cursor:pointer}
+.seg button.on{background:#FFD23F;color:#07060D;font-weight:500}
+.mono{font-family:'JetBrains Mono',monospace}
+.h{font-family:'Space Grotesk',sans-serif;font-weight:600}
+.cap{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.pg{flex:1;height:32px;border:1px solid #2A2545;border-radius:8px;background:#12101F;color:#A49EC4;font:inherit;font-size:12px;text-align:left;padding:0 10px;cursor:pointer}
+.pg.on{border-color:#FFD23F;color:#F4F1FF;background:#1B1830}
+.rg{fill:none}
+.inst{display:flex;align-items:center;gap:12px;height:64px;padding:0 10px 0 20px}
+.inst .d{width:14px;height:14px;border-radius:50%;flex:none}
+.inst .m{width:70px;height:6px;border-radius:3px;background:#1B1830;overflow:hidden}
+.inst .m i{display:block;height:100%}
+.vt{display:flex;align-items:center;gap:10px;height:72px;padding:0 10px;border:1px solid #2A2545;border-radius:12px;background:#12101F;color:#F4F1FF;font:inherit;text-align:left;cursor:pointer}
+.vt.on{border-color:#FFD23F}
+.vt b{display:block;font-weight:600;font-size:14px}
+.vt span{display:block;font-size:11px;color:#A49EC4}
+.vt i{width:44px;height:44px;border-radius:8px;flex:none}
+.m-ring{background:repeating-radial-gradient(circle,#FF4D8D 0 3px,#07060D 0 6px,#3DDCFF 0 9px,#07060D 0 12px)}
+.m-v{background:repeating-linear-gradient(90deg,#3DDCFF 0 4px,#07060D 0 9px,#FFD23F 0 13px,#07060D 0 18px)}
+.m-h{background:repeating-linear-gradient(0deg,#5BFF8F 0 4px,#07060D 0 9px,#FF4D8D 0 13px,#07060D 0 18px)}
+.m-px{background:conic-gradient(#FFD23F 25%,#07060D 0 50%,#B388FF 0 75%,#07060D 0) 0 0/22px 22px}
+.row{display:flex;border-bottom:1px solid #1B1830}
+.nm{width:300px;flex:none;display:flex;align-items:center;gap:12px;padding:0 12px 0 20px;box-sizing:border-box;border-right:1px solid #2A2545}
+.ln{width:1700px;flex:none;position:relative;background:repeating-linear-gradient(90deg,#2A2545 0 1px,transparent 0 425px),repeating-linear-gradient(90deg,#17142A 0 1px,transparent 0 106.25px)}
+.gate{-webkit-mask:linear-gradient(90deg,#000 0 21px,#0000 0 53px,#000 0 74px,#0000 0 80px,#000 0 101px,#0000 0 133px,#000 0 154px,#0000 0 159px,#000 0 180px,#0000 0 186px,#000 0 207px,#0000 0 239px,#000 0 260px,#0000 0 266px,#000 0 287px,#0000 0 319px,#000 0 340px,#0000 0 372px,#000 0 393px,#0000 0 398px,#000 0 419px,#0000 0 425px,#000 0 446px,#0000 0 452px,#000 0 473px,#0000 0 505px,#000 0 526px,#0000 0 531px,#000 0 552px,#0000 0 558px,#000 0 579px,#0000 0 611px,#000 0 632px,#0000 0 664px,#000 0 685px,#0000 0 691px,#000 0 712px,#0000 0 744px,#000 0 765px,#0000 0 770px,#000 0 791px,#0000 0 823px,#000 0 844px,#0000 0) 0 0/850px 100% repeat-x;mask:linear-gradient(90deg,#000 0 21px,#0000 0 53px,#000 0 74px,#0000 0 80px,#000 0 101px,#0000 0 133px,#000 0 154px,#0000 0 159px,#000 0 180px,#0000 0 186px,#000 0 207px,#0000 0 239px,#000 0 260px,#0000 0 266px,#000 0 287px,#0000 0 319px,#000 0 340px,#0000 0 372px,#000 0 393px,#0000 0 398px,#000 0 419px,#0000 0 425px,#000 0 446px,#0000 0 452px,#000 0 473px,#0000 0 505px,#000 0 526px,#0000 0 531px,#000 0 552px,#0000 0 558px,#000 0 579px,#0000 0 611px,#000 0 632px,#0000 0 664px,#000 0 685px,#0000 0 691px,#000 0 712px,#0000 0 744px,#000 0 765px,#0000 0 770px,#000 0 791px,#0000 0 823px,#000 0 844px,#0000 0) 0 0/850px 100% repeat-x}
+.v{position:absolute;left:0;right:0;display:flex}
+.v span{height:14px;border-radius:3px;margin-right:2px}
+.chip{display:inline-flex;align-items:center;height:24px;padding:0 9px;border-radius:12px;background:#1B1830;color:#A49EC4;font-family:'JetBrains Mono',monospace;font-size:11px}
+.tile{padding:12px;border:1px solid #2A2545;border-radius:12px;background:#12101F;color:#F4F1FF;font:inherit;text-align:left;cursor:pointer}
+.tile b{display:block;font-size:12px;font-weight:500;color:#A49EC4}
+.tile span{display:block;font-family:'JetBrains Mono',monospace;font-size:17px;margin-top:4px}
+.tile small{display:block;font-size:11px;color:#A49EC4;margin-top:2px}
+.step{display:inline-flex;align-items:center;gap:10px;height:48px;padding:0 14px;border:1px solid #FF8A3D;border-radius:12px;background:#22140F;color:#F4F1FF;font:inherit;cursor:pointer}
+.step i{width:22px;height:22px;border-radius:50%;background:#FF8A3D;color:#07060D;font-style:normal;font-weight:700;font-size:12px;display:inline-flex;align-items:center;justify-content:center}
+.pl{text-anchor:middle;font-family:Inter,sans-serif;font-size:14px;font-weight:600;fill:#F4F1FF}
+.ml{font-family:'JetBrains Mono',monospace;font-size:11px;fill:#A49EC4}
+.orb{fill:none;stroke:#2A2545;stroke-width:1}
+.mo{fill:#07060D;stroke-width:1.5}
+</style>
+</helmet>
+<div style="width: 2560px; height: 1440px; box-sizing: border-box; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif; font-size: 14px; display: flex; flex-direction: column; overflow: hidden">
+
+<header style="height: 52px; flex: none; display: flex; align-items: center; gap: 14px; padding: 0 12px 0 20px; border-bottom: 1px solid #2A2545; box-sizing: border-box">
+<span class="h" style="font-size: 16px; width: 280px"><span style="color: #FF4D8D">Order</span> <span style="color: #FFD23F">Doesn't</span> <span style="color: #3DDCFF">Matter</span></span>
+<button class="ib" aria-label="Pause" style="background: #FFD23F; color: #07060D; border-radius: 50%"><svg class="i" viewBox="0 0 24 24"><path d="M8 5v14M16 5v14"></path></svg></button>
+<button class="ib" aria-label="Stop"><svg class="i" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="1.5"></rect></svg></button>
+<button class="ib" aria-label="Step back one beat"><svg class="i" viewBox="0 0 24 24"><path d="M6 5v14M19 5 9 12l10 7z"></path></svg></button>
+<button class="ib" aria-label="Step forward one beat"><svg class="i" viewBox="0 0 24 24"><path d="M18 5v14M5 5l10 7-10 7z"></path></svg></button>
+<button class="ib" aria-label="Loop the marked bars" style="color: #FFD23F; background: #1B1830"><svg class="i" viewBox="0 0 24 24"><path d="M17 2l4 4-4 4"></path><path d="M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4"></path><path d="M21 13v2a3 3 0 0 1-3 3H3"></path></svg></button>
+<span class="cap" style="margin-left: 10px">Speed</span>
+<div class="seg" role="group" aria-label="Speed"><button>¼</button><button class="on">½</button><button>¾</button><button>1×</button></div>
+<span class="mono" style="font-size: 15px">70 <span style="font-size: 11px; color: #A49EC4">bpm · written at 140</span></span>
+<span class="mono" style="font-size: 15px; margin-left: 12px">6.40 <span style="font-size: 11px; color: #A49EC4">cycle</span></span>
+<span style="flex: 1"></span>
+<button class="ib" aria-label="Undo"><svg class="i" viewBox="0 0 24 24"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-3"></path></svg></button>
+<button class="ib" aria-label="Redo"><svg class="i" viewBox="0 0 24 24"><path d="m15 14 5-5-5-5"></path><path d="M20 9H10a6 6 0 0 0 0 12h3"></path></svg></button>
+<button class="ib" aria-label="Paste or open Strudel"><svg class="i" viewBox="0 0 24 24"><path d="M9 4h6v3H9zM9 5H6v16h12V5h-3"></path></svg></button>
+<button class="ib" aria-label="Keep work"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"></path></svg></button>
+<button class="ib" aria-label="Help and tour"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"></path></svg></button>
+<div role="group" aria-label="Theme" style="display: flex; gap: 6px; padding: 0 10px; border-left: 1px solid #2A2545; border-right: 1px solid #2A2545; height: 28px; align-items: center">
+<button aria-label="Arcade theme" style="width: 20px; height: 20px; border-radius: 50%; border: 2px solid #F4F1FF; background: conic-gradient(#FF4D8D 33%, #FFD23F 0 66%, #3DDCFF 0); padding: 0; cursor: pointer"></button>
+<button aria-label="Sunset theme" style="width: 20px; height: 20px; border-radius: 50%; border: 0; background: conic-gradient(#FF5E99 33%, #FF9A56 0 66%, #2A1247 0); padding: 0; cursor: pointer"></button>
+<button aria-label="Phosphor theme" style="width: 20px; height: 20px; border-radius: 50%; border: 0; background: conic-gradient(#00FF66 50%, #03260F 0); padding: 0; cursor: pointer"></button>
+<button aria-label="Riso theme" style="width: 20px; height: 20px; border-radius: 50%; border: 0; background: conic-gradient(#FF4F7B 33%, #2F5BEA 0 66%, #F6F0E4 0); padding: 0; cursor: pointer"></button>
+<button aria-label="Pocket theme" style="width: 20px; height: 20px; border-radius: 50%; border: 0; background: conic-gradient(#D7E8A0 33%, #86B049 0 66%, #2F5D3A 0); padding: 0; cursor: pointer"></button>
+</div>
+<a href="https://github.com/FireLakeLabs/order-doesnt-matter" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; text-decoration: none"><svg class="i" viewBox="0 0 24 24"><circle cx="6" cy="5" r="2.5"></circle><circle cx="6" cy="19" r="2.5"></circle><circle cx="18" cy="8" r="2.5"></circle><path d="M6 7.5v9M18 10.5c0 4-12 2-12 6"></path></svg>Our source</a>
+<a href="https://codeberg.org/uzu/strudel" style="display: inline-flex; align-items: center; gap: 6px; font-size: 13px; text-decoration: none"><svg class="i" viewBox="0 0 24 24"><path d="M12 3c5 2 5 7 0 9s-5 7 0 9"></path><path d="M12 3c-5 2-5 7 0 9s5 7 0 9"></path></svg>Strudel 1.2.6 source</a>
+<a href="#about" style="font-size: 13px; text-decoration: none; margin-right: 8px">About · AGPL</a>
+</header>
+
+<div style="height: 56px; flex: none; display: flex; align-items: center; gap: 6px; padding: 0 20px; border-bottom: 1px solid #2A2545; position: relative">
+<button class="pg">1 – 4</button><button class="pg on">5 – 8</button><button class="pg">9 – 12</button><button class="pg">13 – 16</button><button class="pg" style="opacity: .7">17 – 20</button><button class="pg" style="opacity: .45">21 – 24 · it keeps going</button>
+<div style="position: absolute; left: 440px; width: 210px; top: 6px; bottom: 6px; border: 2px solid #FFD23F; border-radius: 10px; background: rgba(255,210,63,.1)"></div>
+<span class="mono" style="position: absolute; left: 448px; top: -1px; font-size: 10px; color: #FFD23F; background: #07060D; padding: 0 4px">loop 5 – 6</span>
+<div style="position: absolute; left: 586px; top: 0; bottom: 0; width: 2px; background: #FFFFFF; box-shadow: 0 0 12px #fff"></div>
+<div style="position: absolute; left: 574px; top: 16px; width: 26px; height: 26px; border-radius: 50%; background: #FFFFFF; cursor: grab; box-shadow: 0 0 16px rgba(255,255,255,.8)"></div>
+<span style="position: absolute; left: 612px; top: 20px; font-size: 12px; color: #F4F1FF; background: #07060D; padding: 0 6px">drag to scrub · the views follow your hand</span>
+</div>
+
+<div style="height: 760px; flex: none; display: flex; border-bottom: 1px solid #2A2545">
+
+<aside style="width: 300px; flex: none; border-right: 1px solid #2A2545; padding-top: 12px; box-sizing: border-box">
+<div class="cap" style="padding: 0 20px 6px">4 instruments</div>
+<div class="inst"><span class="d" style="background: #FF4D8D"></span><span style="flex: 1"><b style="font-weight: 600">kick</b><br><span style="font-size: 12px; color: #A49EC4">bd:2</span></span><span class="m"><i style="width: 15%; background: #FF4D8D"></i></span><button class="ib" aria-label="Mute"><svg class="i" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"></path><path d="M17 9a4 4 0 0 1 0 6"></path></svg></button></div>
+<div class="inst" style="background: #1B1830"><span class="d" style="background: #FFD23F; box-shadow: 0 0 12px #FFD23F"></span><span style="flex: 1"><b style="font-weight: 600">saw bass</b><br><span style="font-size: 12px; color: #A49EC4">supersaw · 9 things on it</span></span><span class="m"><i style="width: 85%; background: #FFD23F"></i></span><button class="ib" aria-label="Mute"><svg class="i" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"></path><path d="M17 9a4 4 0 0 1 0 6"></path></svg></button></div>
+<div class="inst"><span class="d" style="background: #3DDCFF; box-shadow: 0 0 12px #3DDCFF"></span><span style="flex: 1"><b style="font-weight: 600">saw lead</b><br><span style="font-size: 12px; color: #A49EC4">supersaw · 8 things on it</span></span><span class="m"><i style="width: 60%; background: #3DDCFF"></i></span><button class="ib" aria-label="Mute"><svg class="i" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"></path><path d="M17 9a4 4 0 0 1 0 6"></path></svg></button></div>
+<div class="inst"><span class="d" style="background: #5BFF8F"></span><span style="flex: 1"><b style="font-weight: 600">pulse</b><br><span style="font-size: 12px; color: #A49EC4">pulse · 4 things on it</span></span><span class="m"><i style="width: 30%; background: #5BFF8F"></i></span><button class="ib" aria-label="Mute"><svg class="i" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"></path><path d="M17 9a4 4 0 0 1 0 6"></path></svg></button></div>
+<div class="cap" style="padding: 24px 20px 8px">Look</div>
+<div style="padding: 0 20px; display: flex; flex-direction: column; gap: 12px; font-size: 13px">
+<div><div style="display: flex; justify-content: space-between"><span>Window</span><span class="mono" style="color: #FFD23F">2 cycles on screen</span></div><div class="seg" style="margin-top: 6px"><button>1</button><button class="on">2</button><button>4</button><button>8</button></div></div>
+<div><div style="display: flex; justify-content: space-between"><span>Trails</span><span class="mono" style="color: #FFD23F">long</span></div><div class="seg" style="margin-top: 6px"><button>off</button><button>short</button><button class="on">long</button></div></div>
+<div style="color: #A49EC4; font-size: 12px; line-height: 1.5">Speed slows the music. Window and Trails only slow the picture.</div>
+</div>
+</aside>
+
+<section style="width: 1300px; flex: none; position: relative; border-right: 1px solid #2A2545">
+<svg width="1300" height="760" style="display: block; filter: drop-shadow(0 0 10px rgba(255,210,63,.3))">
+<g transform="translate(650 385) rotate(-234)">
+<circle class="rg" r="336" pathLength="100" style="stroke: #4A4470; stroke-width: 10; stroke-dasharray: .3 5.95"></circle>
+<circle class="rg" r="146" pathLength="100" style="stroke: #FF4D8D; stroke-width: 36; stroke-dasharray: 3.2 21.8"></circle>
+<circle class="rg" r="196" pathLength="100" style="stroke: #FFD23F; stroke-width: 44; stroke-dasharray: 5 1.25 5 7.5 5 1.25 5 1.25 5 7.5 5 7.5 5 1.25 5 7.5 5 1.25 5 7.5 5 1.25"></circle>
+<circle class="rg" r="250" pathLength="100" style="stroke: #3DDCFF; stroke-width: 44; stroke-dasharray: 5 1.25 5 7.5 5 1.25 5 1.25 5 7.5 5 7.5 5 1.25 5 7.5 5 1.25 5 7.5 5 1.25"></circle>
+<circle class="rg" r="300" pathLength="100" style="stroke: #5BFF8F; stroke-width: 30; stroke-dasharray: 1.6 4.65"></circle>
+<circle class="rg" r="222" pathLength="100" style="stroke: rgba(7,6,13,.66); stroke-width: 200; stroke-dasharray: 60 40; stroke-dashoffset: -40"></circle>
+</g>
+<line x1="650" y1="20" x2="650" y2="258" style="stroke: #FFFFFF; stroke-width: 3"></line>
+<circle cx="650" cy="20" r="6" style="fill: #FFFFFF"></circle>
+<text x="650" y="392" style="text-anchor: middle; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 84px; fill: #F4F1FF">6</text>
+<text x="650" y="424" style="text-anchor: middle; font-size: 14px; fill: #A49EC4">cycle · half speed</text>
+</svg>
+<div style="position: absolute; left: 20px; top: 16px"><div class="h" style="font-size: 20px">Ring</div><div style="font-size: 12px; color: #A49EC4">one turn is one cycle</div></div>
+<div style="position: absolute; left: 672px; top: 18px; display: flex; gap: 6px" class="mono"><span class="chip" style="color: #FFD23F">saw bass</span><span class="chip" style="color: #3DDCFF">saw lead</span><span class="chip" style="color: #5BFF8F">pulse</span></div>
+<button class="ib" aria-label="Fill the window" style="position: absolute; right: 12px; top: 12px"><svg class="i" viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg></button>
+</section>
+
+<section style="width: 560px; flex: none; position: relative; border-right: 1px solid #2A2545">
+<svg width="560" height="760" style="display: block">
+<ellipse cx="290" cy="330" rx="200" ry="170" style="fill: rgba(255,210,63,.05); stroke: #5A4F1F; stroke-dasharray: 3 6"></ellipse><text x="290" y="150" class="ml" style="text-anchor: middle; fill: #FFD23F">Room 2</text>
+<ellipse cx="190" cy="600" rx="160" ry="110" style="fill: rgba(61,220,255,.05); stroke: #1F4A5A; stroke-dasharray: 3 6"></ellipse><text x="60" y="500" class="ml" style="fill: #3DDCFF">Room 3 · echo</text>
+<ellipse cx="455" cy="640" rx="90" ry="80" style="fill: rgba(91,255,143,.05); stroke: #1F5A33; stroke-dasharray: 3 6"></ellipse><text x="455" y="746" class="ml" style="text-anchor: middle; fill: #5BFF8F">Room 4</text>
+<g transform="translate(100 90)"><circle r="30" style="fill: rgba(255,77,141,.15); stroke: #FF4D8D; stroke-width: 2"></circle><circle class="rg" r="18" pathLength="100" transform="rotate(-90)" style="stroke: #FF4D8D; stroke-width: 8; stroke-dasharray: 3.2 21.8"></circle><text y="52" class="pl">kick</text></g>
+<g transform="translate(290 330)">
+<circle class="orb" r="104"></circle><circle r="76" style="fill: none; stroke: #FFD23F; stroke-width: 2; opacity: .4"></circle>
+<circle r="62" style="fill: rgba(255,210,63,.15); stroke: #FFD23F; stroke-width: 2"></circle>
+<circle class="rg" r="42" pathLength="100" transform="rotate(-90)" style="stroke: #FFD23F; stroke-width: 12; stroke-dasharray: 5 1.25 5 7.5 5 1.25 5 1.25 5 7.5 5 7.5 5 1.25 5 7.5 5 1.25 5 7.5 5 1.25"></circle>
+<rect x="-9" y="-29" width="18" height="18" rx="4" style="fill: #FF8A3D"></rect><text x="0" y="-16" style="text-anchor: middle; font-size: 11px; font-weight: 700; fill: #07060D">1</text>
+<rect x="-9" y="11" width="18" height="18" rx="4" style="fill: #FF8A3D"></rect><text x="0" y="24" style="text-anchor: middle; font-size: 11px; font-weight: 700; fill: #07060D">2</text>
+<text y="132" class="pl">saw bass</text>
+<circle class="mo" cx="0" cy="-104" r="8" style="stroke: #FFD23F"></circle><text x="0" y="-120" class="ml" style="text-anchor: middle">notes</text>
+<circle class="mo" cx="81" cy="-65" r="8" style="stroke: #FFD23F"></circle><text x="95" y="-66" class="ml">G minor</text>
+<circle class="mo" cx="101" cy="23" r="8" style="stroke: #FFD23F"></circle><text x="115" y="27" class="ml">cutoff</text>
+<circle class="mo" cx="46" cy="93" r="8" style="stroke: #FFD23F"></circle><text x="60" y="100" class="ml">filter env 2</text>
+<circle class="mo" cx="-46" cy="93" r="8" style="stroke: #FFD23F"></circle><text x="-60" y="100" class="ml" style="text-anchor: end">level 1.4</text>
+<circle class="mo" cx="-101" cy="23" r="8" style="stroke: #FFD23F"></circle><text x="-115" y="27" class="ml" style="text-anchor: end">supersaw</text>
+</g>
+<g transform="translate(190 600)">
+<circle class="orb" r="84"></circle><circle r="50" style="fill: rgba(61,220,255,.15); stroke: #3DDCFF; stroke-width: 2"></circle>
+<circle class="rg" r="34" pathLength="100" transform="rotate(-90)" style="stroke: #3DDCFF; stroke-width: 10; stroke-dasharray: 5 1.25 5 7.5 5 1.25 5 1.25 5 7.5 5 7.5 5 1.25 5 7.5 5 1.25 5 7.5 5 1.25"></circle>
+<rect x="-8" y="-8" width="16" height="16" rx="4" style="fill: #FF8A3D"></rect><text x="0" y="4" style="text-anchor: middle; font-size: 11px; font-weight: 700; fill: #07060D">1</text>
+<text y="112" class="pl">saw lead</text>
+<circle class="mo" cx="0" cy="-84" r="7" style="stroke: #3DDCFF"></circle><text x="12" y="-88" class="ml">echo .4</text>
+<circle class="mo" cx="80" cy="-26" r="7" style="stroke: #3DDCFF; fill: #3DDCFF"></circle><text x="92" y="-22" class="ml" style="fill: #3DDCFF">pan, random</text>
+<circle class="mo" cx="-80" cy="-26" r="7" style="stroke: #3DDCFF"></circle><text x="-92" y="-22" class="ml" style="text-anchor: end">cutoff</text>
+</g>
+<g transform="translate(455 640)">
+<circle class="orb" r="54"></circle><circle r="28" style="fill: rgba(91,255,143,.15); stroke: #5BFF8F; stroke-width: 2"></circle>
+<circle class="rg" r="18" pathLength="100" transform="rotate(-90)" style="stroke: #5BFF8F; stroke-width: 7; stroke-dasharray: 1.6 4.65"></circle>
+<text y="-66" class="pl">pulse</text>
+<circle class="mo" cx="-47" cy="-27" r="7" style="stroke: #5BFF8F; fill: #5BFF8F"></circle><text x="-58" y="-36" class="ml" style="text-anchor: end; fill: #5BFF8F">fm, rising</text>
+<circle class="mo" cx="47" cy="-27" r="7" style="stroke: #5BFF8F"></circle>
+</g>
+</svg>
+<div style="position: absolute; left: 20px; top: 16px"><div class="h" style="font-size: 20px">Constellation</div><div style="font-size: 12px; color: #A49EC4">numbered squares are rewrites, in order</div></div>
+</section>
+
+<aside style="flex: 1; padding: 14px 16px; box-sizing: border-box">
+<div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 10px"><span class="h" style="font-size: 20px">Views</span><span style="font-size: 12px; color: #A49EC4">drag one onto either stage</span></div>
+<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+<button class="vt on"><i class="m-ring"></i><span><b>Ring</b><span>now</span></span></button>
+<button class="vt"><i class="m-ring"></i><span><b>Fly-through</b><span>what's coming</span></span></button>
+<button class="vt"><i class="m-v"></i><span><b>Coil</b><span>whole song</span></span></button>
+<button class="vt on"><i class="m-ring"></i><span><b>Constellation</b><span>settings, rooms</span></span></button>
+<button class="vt"><i class="m-v"></i><span><b>Rain</b><span>what's coming</span></span></button>
+<button class="vt"><i class="m-h"></i><span><b>Loom</b><span>whole song</span></span></button>
+<button class="vt"><i class="m-h"></i><span><b>Ridges</b><span>moving settings</span></span></button>
+<button class="vt"><i class="m-px"></i><span><b>Tracker</b><span>retro</span></span></button>
+<button class="vt"><i class="m-px"></i><span><b>Runner</b><span>game</span></span></button>
+<button class="vt"><i class="m-h"></i><span><b>Night drive</b><span>retro</span></span></button>
+<button class="vt"><i class="m-px"></i><span><b>The band</b><span>silly</span></span></button>
+<button class="vt"><i class="m-v"></i><span><b>Scope</b><span>from the sound</span></span></button>
+<button class="vt"><i class="m-h"></i><span><b>Piano roll</b><span>Strudel classic</span></span></button>
+<button class="vt"><i class="m-px"></i><span><b>Punchcard</b><span>Strudel classic</span></span></button>
+<button class="vt" style="border-style: dashed; background: transparent; color: #A49EC4; justify-content: center; grid-column: span 2; height: 44px">+ a view is one file</button>
+</div>
+</aside>
+</div>
+
+<div style="flex: 1; display: flex; min-height: 0">
+<section style="width: 2000px; flex: none; position: relative">
+<div class="row" style="height: 32px"><div class="nm cap">Score · cycles 5 – 8</div><div class="ln mono" style="display: grid; grid-template-columns: repeat(4, 425px); align-items: center; font-size: 12px; color: #A49EC4"><span style="padding-left: 8px">5</span><span style="padding-left: 8px; color: #F4F1FF">6</span><span style="padding-left: 8px">7</span><span style="padding-left: 8px">8</span></div></div>
+
+<div class="row" style="height: 64px"><div class="nm"><span style="width: 12px; height: 12px; border-radius: 50%; background: #FF4D8D"></span><b style="font-weight: 600; flex: 1">kick</b><span class="chip">bd:2</span></div><div class="ln"><div style="position: absolute; left: 0; right: 0; top: 20px; height: 24px; background: repeating-linear-gradient(90deg, #FF4D8D 0 16px, transparent 0 106.25px)"></div></div></div>
+
+<div class="row" style="height: 150px; background: #12101F"><div class="nm" style="flex-wrap: wrap; align-content: center; row-gap: 8px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #FFD23F"></span><b style="font-weight: 600; flex: 1">saw bass</b><span class="chip" style="color: #FF8A3D">2 rewrites</span><span class="chip">7 settings</span><span style="flex-basis: 100%; font-size: 12px; color: #A49EC4; padding-left: 24px">two voices, an octave apart</span></div>
+<div class="ln"><div class="gate" style="position: absolute; inset: 0">
+<div class="v" style="top: 50px"><span style="width: 423px; background: #FFD23F"></span><span style="width: 210px; background: #FFD23F"></span><span style="width: 211px; background: #FFD23F; transform: translateY(-8px)"></span><span style="width: 423px; background: #FFD23F; transform: translateY(-16px)"></span><span style="width: 210px; background: #FFD23F; transform: translateY(-16px)"></span><span style="width: 211px; background: #FFD23F; transform: translateY(-24px)"></span></div>
+<div class="v" style="top: 102px"><span style="width: 423px; background: #A88A2A"></span><span style="width: 210px; background: #A88A2A"></span><span style="width: 211px; background: #A88A2A; transform: translateY(-8px)"></span><span style="width: 423px; background: #A88A2A; transform: translateY(-16px)"></span><span style="width: 210px; background: #A88A2A; transform: translateY(-16px)"></span><span style="width: 211px; background: #A88A2A; transform: translateY(-24px)"></span></div>
+</div></div></div>
+
+<div class="row" style="height: 170px"><div class="nm" style="flex-wrap: wrap; align-content: center; row-gap: 8px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #3DDCFF"></span><b style="font-weight: 600; flex: 1">saw lead</b><span class="chip" style="color: #FF8A3D">1 rewrite</span><span class="chip">7 settings</span><span style="flex-basis: 100%; font-size: 12px; color: #A49EC4; padding-left: 24px">two voices · pan is random</span></div>
+<div class="ln"><div class="gate" style="position: absolute; inset: 0">
+<div class="v" style="top: 60px"><span style="width: 104px; background: #3DDCFF; transform: translateY(-20px)"></span><span style="width: 157px; background: #3DDCFF; transform: translateY(8px)"></span><span style="width: 158px; background: #3DDCFF; transform: translateY(-20px)"></span><span style="width: 104px; background: #3DDCFF; transform: translateY(-16px)"></span><span style="width: 78px; background: #3DDCFF; transform: translateY(4px)"></span><span style="width: 77px; background: #3DDCFF; transform: translateY(-8px)"></span><span style="width: 158px; background: #3DDCFF; transform: translateY(-4px)"></span><span style="width: 104px; background: #3DDCFF"></span><span style="width: 157px; background: #3DDCFF; transform: translateY(28px)"></span><span style="width: 158px; background: #3DDCFF; transform: translateY(-4px)"></span><span style="width: 104px; background: #3DDCFF"></span><span style="width: 78px; background: #3DDCFF; transform: translateY(20px)"></span><span style="width: 77px; background: #3DDCFF; transform: translateY(8px)"></span><span style="width: 158px; background: #3DDCFF; transform: translateY(-8px)"></span></div>
+<div class="v" style="top: 116px"><span style="width: 104px; background: #2A8AA0; transform: translateY(-20px)"></span><span style="width: 157px; background: #2A8AA0; transform: translateY(8px)"></span><span style="width: 158px; background: #2A8AA0; transform: translateY(-20px)"></span><span style="width: 104px; background: #2A8AA0; transform: translateY(-16px)"></span><span style="width: 78px; background: #2A8AA0; transform: translateY(4px)"></span><span style="width: 77px; background: #2A8AA0; transform: translateY(-8px)"></span><span style="width: 158px; background: #2A8AA0; transform: translateY(-4px)"></span><span style="width: 104px; background: #2A8AA0"></span><span style="width: 157px; background: #2A8AA0; transform: translateY(28px)"></span><span style="width: 158px; background: #2A8AA0; transform: translateY(-4px)"></span><span style="width: 104px; background: #2A8AA0"></span><span style="width: 78px; background: #2A8AA0; transform: translateY(20px)"></span><span style="width: 77px; background: #2A8AA0; transform: translateY(8px)"></span><span style="width: 158px; background: #2A8AA0; transform: translateY(-8px)"></span></div>
+</div></div></div>
+
+<div class="row" style="height: 96px"><div class="nm" style="flex-wrap: wrap; align-content: center; row-gap: 8px"><span style="width: 12px; height: 12px; border-radius: 50%; background: #5BFF8F"></span><b style="font-weight: 600; flex: 1">pulse</b><span class="chip">4 settings</span><span style="flex-basis: 100%; font-size: 12px; color: #A49EC4; padding-left: 24px">fm keeps rising and never repeats</span></div>
+<div class="ln"><div style="position: absolute; left: 0; right: 0; top: 14px; height: 20px; background: repeating-linear-gradient(90deg, #5BFF8F 0 7px, transparent 0 26.5625px)"></div><svg width="1700" height="96" style="position: absolute; left: 0; top: 0"><path d="M0 88 L1700 46" style="fill: none; stroke: #5BFF8F; stroke-width: 2; stroke-dasharray: 2 5"></path><text x="1580" y="40" class="ml" style="fill: #5BFF8F">fm → still climbing</text></svg></div></div>
+
+<div style="position: absolute; left: 300px; top: 32px; width: 850px; height: 480px; background: rgba(255,210,63,.05); border-left: 2px solid #FFD23F; border-right: 2px solid #FFD23F; pointer-events: none"></div>
+<div style="position: absolute; left: 895px; top: 0; height: 512px; width: 2px; background: #FFFFFF; box-shadow: 0 0 12px #fff"></div>
+<div style="position: absolute; left: 20px; bottom: 14px; font-size: 12px; color: #A49EC4">The gate pattern here is illustrative: the real one comes from Strudel's seeded random and would be drawn from its actual notes.</div>
+</section>
+
+<aside style="flex: 1; border-left: 1px solid #2A2545; padding: 14px 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 12px">
+<div style="display: flex; align-items: center; gap: 10px"><span style="width: 14px; height: 14px; border-radius: 50%; background: #FFD23F"></span><span class="h" style="font-size: 20px; flex: 1">saw bass</span><button class="ib" aria-label="Edit as source"><svg class="i" viewBox="0 0 24 24"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"></path></svg></button></div>
+<div><div class="cap" style="color: #FF8A3D; margin-bottom: 6px">Order matters · rewrites run in this order</div>
+<div style="display: flex; align-items: center; gap: 8px"><button class="step"><i>1</i><span><b style="font-weight: 600">trancegate</b> <span class="mono" style="font-size: 12px; color: #A49EC4">density · seed · length</span></span></button><svg class="i" viewBox="0 0 24 24" style="color: #FF8A3D"><path d="M5 12h14m-5-5 5 5-5 5"></path></svg><button class="step"><i>2</i><span><b style="font-weight: 600">16 steps</b> <span class="mono" style="font-size: 12px; color: #A49EC4">seg</span></span></button></div></div>
+<div><div class="cap" style="margin-bottom: 6px">Order doesn't matter · settings</div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+<button class="tile" style="grid-column: span 2"><b>Notes</b><span>1 1 1 2 3 3 3 4</span><small>two per cycle, −14 and −21</small></button>
+<button class="tile"><b>Scale</b><span>G minor</span></button>
+<button class="tile"><b>Sound</b><span>supersaw</span></button>
+<button class="tile" style="border-color: #B388FF"><b style="color: #B388FF">Cutoff · yours</b><span>.539</span><small>rlpf → 1750 Hz</small></button>
+<button class="tile"><b>Filter env</b><span>2</span></button>
+<button class="tile"><b>Level</b><span>1.4</span></button>
+<button class="tile" style="border-color: #B388FF"><b style="color: #B388FF">Room · yours</b><span>2</span><small>o → orbit</small></button>
+</div></div>
+<div><div class="cap" style="color: #B388FF; margin-bottom: 6px">Words this piece made up</div>
+<div style="display: flex; gap: 6px; flex-wrap: wrap"><span class="chip" style="color: #B388FF">rlpf</span><span class="chip" style="color: #B388FF">rhpf</span><span class="chip" style="color: #B388FF">o</span><span class="chip" style="color: #B388FF">trancegate</span><span style="font-size: 12px; color: #A49EC4; align-self: center">click one to read its definition</span></div></div>
+</aside>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":2560,"height":1440}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

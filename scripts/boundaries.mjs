@@ -1,5 +1,6 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import ts from 'typescript';
+import { posix } from 'node:path';
 export function boundaryProblems(path, code) {
   const problems = [];
   const source = ts.createSourceFile(path, code, ts.ScriptTarget.Latest, true);
@@ -14,6 +15,21 @@ export function boundaryProblems(path, code) {
           : undefined;
     if (specifier && ts.isStringLiteralLike(specifier)) {
       const name = specifier.text;
+      const target = name.startsWith('.')
+        ? posix.normalize(posix.join(posix.dirname(path), name))
+        : name;
+      if (
+        path.startsWith('src/views/') &&
+        !target.startsWith('src/views/') &&
+        !/^three(?:\/|$)/.test(name)
+      )
+        problems.push('Views may import only views and three');
+      if (
+        /^src\/(document|import|generate|engine|strudel)\//.test(path) &&
+        (/^(react|react-dom)(\/|$)/.test(name) ||
+          /^src\/(studio|components|views)(\/|$)/.test(target))
+      )
+        problems.push('Logic directories must stay framework-free');
       if (/^(?:@strudel\/|superdough(?:\/|$))/.test(name) && !path.startsWith('src/strudel/'))
         problems.push('Strudel imports belong in src/strudel/');
       if (/^(src|tests)\//.test(path) && /(^|\/)spikes(\/|$)/.test(name))

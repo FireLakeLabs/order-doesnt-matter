@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Score</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#9EF0D0}a:hover{color:#C6F7E6}
+.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.ib{width:44px;height:44px;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:10px;background:transparent;color:#9FB2BE;cursor:pointer;padding:0;flex:none}
+.ib:hover{background:#16212C;color:#E6EEF2}
+.tab{display:inline-flex;align-items:center;gap:8px;height:44px;padding:0 16px;border-radius:10px;color:#9FB2BE;text-decoration:none;font-size:13px;font-weight:500}
+.tab:hover{color:#E6EEF2}
+.tab.on{background:#16212C;color:#E6EEF2}
+.sec{display:flex;flex-direction:column;justify-content:space-between;align-items:flex-start;height:44px;padding:6px 10px;box-sizing:border-box;border:1px solid #1B2733;border-radius:8px;background:#111922;color:#9FB2BE;font:inherit;cursor:pointer;text-align:left}
+.sec.on{border-color:#9EF0D0;background:#132029;color:#E6EEF2}
+.dot{width:6px;height:6px;border-radius:50%;display:inline-block}
+.rg{fill:none}
+.row{display:flex;align-items:stretch;border-bottom:1px solid #141E28}
+.nm{width:280px;flex:none;display:flex;align-items:center;gap:10px;padding:0 4px 0 16px;box-sizing:border-box;border-right:1px solid #1B2733}
+.ln{width:824px;flex:none;position:relative;background:repeating-linear-gradient(90deg,#1B2733 0 1px,transparent 0 103px)}
+.chip{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;border-radius:11px;background:#16212C;color:#9FB2BE;font-family:'JetBrains Mono',monospace;font-size:11px;border:0;cursor:pointer}
+.hit{position:absolute;left:0;right:0;top:12px;bottom:12px;border-radius:3px}
+.map{display:flex;gap:2px;width:84px;height:8px;margin-left:auto;margin-right:12px}
+.map span{border-radius:2px;background:#1B2733}
+.rest{height:30px;color:#9FB2BE;font-size:12px}
+</style>
+</helmet>
+<div style="width: 1440px; height: 900px; box-sizing: border-box; background: #0A0F14; color: #E6EEF2; font-family: Inter, system-ui, sans-serif; font-size: 13px; display: flex; flex-direction: column; overflow: hidden">
+
+<header style="height: 60px; flex: none; display: flex; align-items: center; gap: 12px; padding: 0 12px 0 16px; border-bottom: 1px solid #1B2733; box-sizing: border-box">
+<div style="display: flex; align-items: center; gap: 10px; width: 220px">
+<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #9EF0D0"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle><path d="M12 1v6"></path></svg>
+<span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 15px">Order Doesn't Matter</span>
+</div>
+<div style="display: flex; align-items: center; gap: 4px">
+<button aria-label="Pause" style="width: 44px; height: 44px; border-radius: 50%; border: 0; background: #9EF0D0; color: #0A0F14; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14"></path></svg></button>
+<button class="ib" aria-label="Stop"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="1.5"></rect></svg></button>
+<div style="display: flex; align-items: baseline; gap: 6px; margin-left: 8px; font-family: 'JetBrains Mono', monospace">
+<span style="font-size: 15px">140</span><span style="font-size: 11px; color: #8194A1">bpm</span>
+<span style="font-size: 15px; margin-left: 12px">11</span><span style="font-size: 11px; color: #8194A1">/ 28 bars</span>
+</div>
+</div>
+<nav aria-label="Views" style="display: flex; gap: 4px; margin: 0 auto; padding: 3px; border: 1px solid #1B2733; border-radius: 13px">
+<a class="tab" href="Main.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><circle cx="12" cy="12" r="4"></circle></svg>Stage</a>
+<a class="tab on" href="Score.dc.html"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h7M14 6h7M3 12h4M10 12h11M3 18h10M17 18h4"></path></svg>Score</a>
+</nav>
+<div style="display: flex; align-items: center; width: 320px; justify-content: flex-end">
+<button class="ib" aria-label="Undo"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 14 4 9l5-5"></path><path d="M4 9h10a6 6 0 0 1 0 12h-3"></path></svg></button>
+<button class="ib" aria-label="Redo"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m15 14 5-5-5-5"></path><path d="M20 9H10a6 6 0 0 0 0 12h3"></path></svg></button>
+<span style="width: 1px; height: 24px; background: #1B2733; margin: 0 6px"></span>
+<button class="ib" aria-label="Paste or open Strudel"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"></path></svg></button>
+<button class="ib" aria-label="Keep work"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16"></path></svg></button>
+<button class="ib" aria-label="Help and tour"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7M12 17h.01"></path></svg></button>
+<button class="ib" aria-label="Theme"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"></path></svg></button>
+</div>
+</header>
+
+<div style="position: relative; height: 64px; flex: none; padding: 10px 16px; box-sizing: border-box; display: flex; gap: 4px; border-bottom: 1px solid #1B2733">
+<button class="sec" style="flex: 4 1 0"><span style="font-weight: 600">intro</span><span><span class="dot" style="background: #8EE6C2"></span> <span class="dot" style="background: #E8A0D8"></span> <span class="dot" style="background: #9DB7C9"></span></span></button>
+<button class="sec" style="flex: 4 1 0"><span style="font-weight: 600">build</span><span><span class="dot" style="background: #8EE6C2"></span> <span class="dot" style="background: #F2A27C"></span> <span class="dot" style="background: #D6C08A"></span> <span class="dot" style="background: #C9A0F0"></span></span></button>
+<button class="sec on" style="flex: 8 1 0" aria-pressed="true"><span style="font-weight: 600">drop</span><span><span class="dot" style="background: #A99CFF"></span> <span class="dot" style="background: #FFB38A"></span> <span class="dot" style="background: #7CC8F2"></span> <span class="dot" style="background: #6FD3C7"></span> <span class="dot" style="background: #6FA0FF"></span> <span class="dot" style="background: #F0D878"></span></span></button>
+<button class="sec" style="flex: 4 1 0"><span style="font-weight: 600">breakdown</span><span><span class="dot" style="background: #8EE6C2"></span> <span class="dot" style="background: #E8A0D8"></span> <span class="dot" style="background: #B8E08A"></span></span></button>
+<button class="sec" style="flex: 8 1 0"><span style="font-weight: 600">drop</span><span><span class="dot" style="background: #A99CFF"></span> <span class="dot" style="background: #FFB38A"></span> <span class="dot" style="background: #7CC8F2"></span> <span class="dot" style="background: #6FD3C7"></span> <span class="dot" style="background: #6FA0FF"></span> <span class="dot" style="background: #F0D878"></span></span></button>
+<div aria-hidden="true" style="position: absolute; left: 37.4%; top: 4px; bottom: 4px; width: 2px; background: #FFFFFF; border-radius: 1px; box-shadow: 0 0 10px rgba(255,255,255,.7)"></div>
+</div>
+
+<div style="flex: 1; display: flex; min-height: 0">
+<section aria-label="Score lanes" style="flex: 1; min-width: 0; position: relative">
+
+<div class="row" style="height: 32px">
+<div class="nm" style="font-size: 12px; color: #9FB2BE"><span style="font-weight: 600; color: #E6EEF2">drop</span> bars 9–16
+<button class="chip" style="margin-left: auto; margin-right: 8px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"></path></svg>Whole song</button></div>
+<div class="ln" style="display: grid; grid-template-columns: repeat(8, 103px); align-items: center; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #8194A1"><span style="padding-left: 6px">9</span><span style="padding-left: 6px">10</span><span style="padding-left: 6px; color: #E6EEF2">11</span><span style="padding-left: 6px">12</span><span style="padding-left: 6px">13</span><span style="padding-left: 6px">14</span><span style="padding-left: 6px">15</span><span style="padding-left: 6px">16</span></div>
+</div>
+
+<div class="row" style="height: 44px">
+<div class="nm"><span style="width: 10px; height: 10px; border-radius: 50%; background: #A99CFF; flex: none"></span><span style="flex: 1">kick</span><button class="chip">drive .45</button><button class="ib" aria-label="Mute kick"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"></path><path d="M17 9a4 4 0 0 1 0 6"></path></svg></button></div>
+<div class="ln"><div class="hit" style="background: repeating-linear-gradient(90deg, #A99CFF 0 9px, transparent 0 103px)"></div></div>
+</div>
+<div class="row" style="height: 44px">
+<div class="nm"><span style="width: 10px; height: 10px; border-radius: 50%; background: #FFB38A; flex: none"></span><span style="flex: 1">snare</span><button class="chip">drive .35</button><button class="chip">room .45</button><button class="ib" aria-label="Mute snare"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"></path><path d="M17 9a4 4 0 0 1 0 6"></path></svg></button></div>
+<div class="ln"><div class="hit" style="background: repeating-linear-gradient(90deg, transparent 0 51.5px, #FFB38A 0 60.5px, transparent 0 103px)"></div></div>
+</div>
+<div class="row" style="height: 44px">
+<div class="nm"><span style="width: 10px; height: 10px; border-radius: 50%; background: #7CC8F2; flex: none"></span><span style="flex: 1">hats</span><button class="chip"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px"><path d="M2 14l3-5 3 7 3-9 3 6 3-3 3 5 2-3"></path></svg>level</button><button class="ib" aria-label="Mute hats"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"></path><path d="M17 9a4 4 0 0 1 0 6"></path></svg></button></div>
+<div class="ln"><div class="hit" style="background: repeating-linear-gradient(90deg, #7CC8F2 0 5px, transparent 0 12.875px)"></div></div>
+</div>
+<div class="row" style="height: 44px">
+<div class="nm"><span style="width: 10px; height: 10px; border-radius: 50%; background: #6FD3C7; flex: none"></span><span style="flex: 1">open hat</span><button class="chip">level .4</button><button class="ib" aria-label="Mute open hat"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"></path><path d="M17 9a4 4 0 0 1 0 6"></path></svg></button></div>
+<div class="ln"><div class="hit" style="background: repeating-linear-gradient(90deg, transparent 0 25.75px, #6FD3C7 0 34px, transparent 0 51.5px)"></div></div>
+</div>
+
+<div class="row" style="height: 52px">
+<div class="nm"><span style="width: 10px; height: 10px; border-radius: 50%; background: #6FA0FF; flex: none"></span><span style="flex: 1">subBass</span><button class="chip">level .95</button><button class="ib" aria-label="Mute subBass"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"></path><path d="M17 9a4 4 0 0 1 0 6"></path></svg></button></div>
+<div class="ln" style="display: grid; grid-template-columns: repeat(16, 51.5px); align-items: end">
+<span style="grid-column: span 2; height: 10px; margin: 0 2px 6px 1px; border-radius: 3px; background: #6FA0FF"></span><span style="grid-column: span 2; height: 10px; margin: 0 2px 6px 1px; border-radius: 3px; background: #6FA0FF"></span><span style="grid-column: span 2; height: 10px; margin: 0 2px 16px 1px; border-radius: 3px; background: #6FA0FF"></span><span style="height: 10px; margin: 0 2px 24px 1px; border-radius: 3px; background: #6FA0FF"></span><span style="height: 10px; margin: 0 2px 34px 1px; border-radius: 3px; background: #6FA0FF"></span>
+<span style="grid-column: span 2; height: 10px; margin: 0 2px 6px 1px; border-radius: 3px; background: #6FA0FF"></span><span style="grid-column: span 2; height: 10px; margin: 0 2px 6px 1px; border-radius: 3px; background: #6FA0FF"></span><span style="grid-column: span 2; height: 10px; margin: 0 2px 16px 1px; border-radius: 3px; background: #6FA0FF"></span><span style="height: 10px; margin: 0 2px 24px 1px; border-radius: 3px; background: #6FA0FF"></span><span style="height: 10px; margin: 0 2px 34px 1px; border-radius: 3px; background: #6FA0FF"></span>
+</div>
+</div>
+
+<div class="row" style="height: 52px; background: #111922">
+<div class="nm"><span style="width: 10px; height: 10px; border-radius: 50%; background: #F0D878; flex: none"></span><span style="flex: 1; font-weight: 600">wobbleBass</span><button class="chip">res 11</button><button class="chip">+4</button><button class="ib" aria-label="Mute wobbleBass"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9z"></path><path d="M17 9a4 4 0 0 1 0 6"></path></svg></button></div>
+<div class="ln" style="display: grid; grid-template-columns: repeat(16, 51.5px); align-items: end">
+<span style="grid-column: span 2; height: 10px; margin: 0 2px 6px 1px; border-radius: 3px; background: #F0D878"></span><span style="grid-column: span 2; height: 10px; margin: 0 2px 6px 1px; border-radius: 3px; background: #F0D878"></span><span style="grid-column: span 2; height: 10px; margin: 0 2px 16px 1px; border-radius: 3px; background: #F0D878"></span><span style="height: 10px; margin: 0 2px 24px 1px; border-radius: 3px; background: #F0D878"></span><span style="height: 10px; margin: 0 2px 34px 1px; border-radius: 3px; background: #F0D878"></span>
+<span style="grid-column: span 2; height: 10px; margin: 0 2px 6px 1px; border-radius: 3px; background: #F0D878"></span><span style="grid-column: span 2; height: 10px; margin: 0 2px 6px 1px; border-radius: 3px; background: #F0D878"></span><span style="grid-column: span 2; height: 10px; margin: 0 2px 16px 1px; border-radius: 3px; background: #F0D878"></span><span style="height: 10px; margin: 0 2px 24px 1px; border-radius: 3px; background: #F0D878"></span><span style="height: 10px; margin: 0 2px 34px 1px; border-radius: 3px; background: #F0D878"></span>
+</div>
+</div>
+<div class="row" style="height: 76px; background: #111922">
+<div class="nm" style="padding-left: 36px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="color: #F0D878"><path d="M2 12q2.5-9 5 0t5 0 5 0 5 0"></path></svg><span style="flex: 1">cutoff <span style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: #9FB2BE">140 – 2600 Hz</span></span><span style="display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 11px; background: #3A2C12; color: #F2B866; font-size: 11px; margin-right: 12px">heard from bar 12</span></div>
+<div class="ln"><svg width="824" height="76" role="img" aria-label="Cutoff sweep across eight bars; the sweep speed is 2, 4, 3 then 8 per bar" style="display: block"><path d="M0 38 q12.875 -56 25.75 0 t25.75 0 t25.75 0 t25.75 0 q6.44 -56 12.875 0 t12.875 0 t12.875 0 t12.875 0 t12.875 0 t12.875 0 t12.875 0 t12.875 0 q8.58 -56 17.167 0 t17.167 0 t17.167 0 t17.167 0 t17.167 0 t17.167 0 q3.22 -56 6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 q12.875 -56 25.75 0 t25.75 0 t25.75 0 t25.75 0 q6.44 -56 12.875 0 t12.875 0 t12.875 0 t12.875 0 t12.875 0 t12.875 0 t12.875 0 t12.875 0 q8.58 -56 17.167 0 t17.167 0 t17.167 0 t17.167 0 t17.167 0 t17.167 0 q3.22 -56 6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0 t6.4375 0" style="fill: none; stroke: #F0D878; stroke-width: 2"></path></svg></div>
+</div>
+
+<div class="row" style="height: 28px; border-bottom: 0"><div class="nm" style="font-size: 11px; color: #8194A1; letter-spacing: .04em; width: 100%; border-right: 0">Resting in this section · shown by where they play</div></div>
+<div class="row rest"><div class="nm"><span class="dot" style="background: #8EE6C2"></span>darkPad<span class="map"><span style="flex: 4; background: #8EE6C2"></span><span style="flex: 4; background: #8EE6C2"></span><span style="flex: 8"></span><span style="flex: 4; background: #8EE6C2"></span><span style="flex: 8"></span></span></div><div class="ln" style="opacity: .4"></div></div>
+<div class="row rest"><div class="nm"><span class="dot" style="background: #E8A0D8"></span>vocalAtmos<span class="map"><span style="flex: 4; background: #E8A0D8"></span><span style="flex: 4"></span><span style="flex: 8"></span><span style="flex: 4; background: #E8A0D8"></span><span style="flex: 8"></span></span></div><div class="ln" style="opacity: .4"></div></div>
+<div class="row rest"><div class="nm"><span class="dot" style="background: #9DB7C9"></span>intro hats<span class="map"><span style="flex: 4; background: #9DB7C9"></span><span style="flex: 4"></span><span style="flex: 8"></span><span style="flex: 4"></span><span style="flex: 8"></span></span></div><div class="ln" style="opacity: .4"></div></div>
+<div class="row rest"><div class="nm"><span class="dot" style="background: #F2A27C"></span>snare roll<span class="map"><span style="flex: 4"></span><span style="flex: 4; background: #F2A27C"></span><span style="flex: 8"></span><span style="flex: 4"></span><span style="flex: 8"></span></span></div><div class="ln" style="opacity: .4"></div></div>
+<div class="row rest"><div class="nm"><span class="dot" style="background: #D6C08A"></span>riser<span class="map"><span style="flex: 4"></span><span style="flex: 4; background: #D6C08A"></span><span style="flex: 8"></span><span style="flex: 4"></span><span style="flex: 8"></span></span></div><div class="ln" style="opacity: .4"></div></div>
+<div class="row rest"><div class="nm"><span class="dot" style="background: #C9A0F0"></span>preDropVocal<span class="map"><span style="flex: 4"></span><span style="flex: 4; background: #C9A0F0"></span><span style="flex: 8"></span><span style="flex: 4"></span><span style="flex: 8"></span></span></div><div class="ln" style="opacity: .4"></div></div>
+<div class="row rest"><div class="nm"><span class="dot" style="background: #B8E08A"></span>triangle<span class="map"><span style="flex: 4"></span><span style="flex: 4"></span><span style="flex: 8"></span><span style="flex: 4; background: #B8E08A"></span><span style="flex: 8"></span></span></div><div class="ln" style="opacity: .4"></div></div>
+
+<div aria-hidden="true" style="position: absolute; left: 527px; top: 0; height: 626px; width: 2px; background: #FFFFFF; box-shadow: 0 0 10px rgba(255,255,255,.7)"></div>
+<div style="position: absolute; left: 16px; bottom: 16px; right: 16px; display: flex; align-items: center; gap: 16px; font-size: 12px; color: #9FB2BE">
+<span>13 instruments in one window. Room for four more before anything scrolls.</span>
+<button class="chip" style="margin-left: auto; height: 44px; padding: 0 14px; border-radius: 10px; font-family: inherit; font-size: 13px"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>Instrument</button>
+</div>
+</section>
+
+<aside aria-label="Editor" style="width: 312px; flex: none; border-left: 1px solid #1B2733; padding: 16px; box-sizing: border-box; display: flex; flex-direction: column; gap: 16px">
+<div style="display: flex; align-items: center; gap: 8px; font-size: 12px; color: #9FB2BE"><span style="width: 10px; height: 10px; border-radius: 50%; background: #F0D878"></span>wobbleBass<svg class="i" viewBox="0 0 24 24" aria-hidden="true" style="width: 14px; height: 14px"><path d="m9 6 6 6-6 6"></path></svg><span style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 18px; color: #E6EEF2">Cutoff</span></div>
+
+<div role="group" aria-label="Shape" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 3px; border: 1px solid #1B2733; border-radius: 13px">
+<button class="ib" aria-label="Sine" aria-pressed="true" style="width: auto; background: #16212C; color: #F0D878"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12q2.5-9 5 0t5 0 5 0 5 0"></path></svg></button>
+<button class="ib" aria-label="Saw" style="width: auto"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 17 11 7v10l9-10v10"></path></svg></button>
+<button class="ib" aria-label="Square" style="width: auto"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 17V7h6v10h6V7h6v10"></path></svg></button>
+<button class="ib" aria-label="Triangle" style="width: auto"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m2 17 5-10 5 10 5-10 5 10"></path></svg></button>
+<button class="ib" aria-label="Drift" style="width: auto"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 14l3-5 3 7 3-9 3 6 3-3 3 5 2-3"></path></svg></button>
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between"><label for="lo" style="font-weight: 500">Lowest</label><span style="font-family: 'JetBrains Mono', monospace; color: #F0D878">140 Hz</span></div>
+<input id="lo" type="range" min="20" max="5000" value="140" style="width: 100%; height: 28px; accent-color: #F0D878">
+<div style="display: flex; justify-content: space-between"><label for="hi" style="font-weight: 500">Highest</label><span style="font-family: 'JetBrains Mono', monospace; color: #F0D878">2600 Hz</span></div>
+<input id="hi" type="range" min="20" max="5000" value="2600" style="width: 100%; height: 28px; accent-color: #F0D878">
+</div>
+
+<div style="display: flex; flex-direction: column; gap: 8px">
+<div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-weight: 500">Sweeps per bar</span><span style="font-size: 12px; color: #9FB2BE">one box per bar</span></div>
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+<button style="height: 64px; border: 1px solid #2A3B4A; border-radius: 10px; background: #111922; color: inherit; font: inherit; cursor: pointer"><svg width="52" height="20" aria-hidden="true"><path d="M0 10 q6.5 -20 13 0 t13 0 t13 0 t13 0" style="fill: none; stroke: #F0D878; stroke-width: 1.5"></path></svg><span style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 15px">2</span></button>
+<button style="height: 64px; border: 1px solid #2A3B4A; border-radius: 10px; background: #111922; color: inherit; font: inherit; cursor: pointer"><svg width="52" height="20" aria-hidden="true"><path d="M0 10 q3.25 -20 6.5 0 t6.5 0 t6.5 0 t6.5 0 t6.5 0 t6.5 0 t6.5 0 t6.5 0" style="fill: none; stroke: #F0D878; stroke-width: 1.5"></path></svg><span style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 15px">4</span></button>
+<button aria-pressed="true" style="height: 64px; border: 1px solid #F0D878; border-radius: 10px; background: #1C1A10; color: inherit; font: inherit; cursor: pointer"><svg width="52" height="20" aria-hidden="true"><path d="M0 10 q4.33 -20 8.67 0 t8.67 0 t8.67 0 t8.67 0 t8.67 0 t8.67 0" style="fill: none; stroke: #F0D878; stroke-width: 1.5"></path></svg><span style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 15px">3</span></button>
+<button style="height: 64px; border: 1px solid #2A3B4A; border-radius: 10px; background: #111922; color: inherit; font: inherit; cursor: pointer"><svg width="52" height="20" aria-hidden="true"><path d="M0 10 q1.625 -20 3.25 0 t3.25 0 t3.25 0 t3.25 0 t3.25 0 t3.25 0 t3.25 0 t3.25 0 t3.25 0 t3.25 0 t3.25 0 t3.25 0 t3.25 0 t3.25 0 t3.25 0 t3.25 0" style="fill: none; stroke: #F0D878; stroke-width: 1.5"></path></svg><span style="display: block; font-family: 'JetBrains Mono', monospace; font-size: 15px">8</span></button>
+</div>
+</div>
+
+<div style="display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 10px; background: #3A2C12; color: #F2B866; font-size: 12px; line-height: 1.4"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg>Changed. You will hear it from bar 12.</div>
+
+<div style="margin-top: auto; display: flex; gap: 8px">
+<button class="ib" aria-label="Edit as source" style="border: 1px solid #1B2733"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"></path></svg></button>
+<button class="ib" aria-label="Remove this setting" style="border: 1px solid #1B2733"><svg class="i" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg></button>
+<button style="flex: 1; height: 44px; border: 0; border-radius: 10px; background: #9EF0D0; color: #0A0F14; font: inherit; font-weight: 600; cursor: pointer">Done</button>
+</div>
+</aside>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

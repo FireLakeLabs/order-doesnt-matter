@@ -1,4 +1,6 @@
 import { readdirSync } from 'node:fs';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 import { deployedCommit, licencePlugins } from './scripts/licenses';
 const licences = licencePlugins();
@@ -9,9 +11,9 @@ const harness = readdirSync('harness')
   .map((name) => `harness/${name}`);
 export default defineConfig({
   define: { __BUILD_SHA__: JSON.stringify(deployedCommit()) },
-  plugins: [licences.app()],
+  plugins: [react(), tailwindcss(), licences.app()],
   worker: { plugins: () => [licences.worker()] },
   server: { port: 0 },
   preview: { port: 0 },
-  build: { rollupOptions: { input: ['index.html', ...harness] } },
+  build: { rollupOptions: { input: ['index.html', 'studio.html', ...harness] } },
 });

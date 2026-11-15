@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Loom</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#9EF0D0}a:hover{color:#C6F7E6}
+.th{display:flex;align-items:center;height:32px}
+.th>b{width:120px;flex:none;font-weight:400;font-size:12px;color:#9FB2BE;display:flex;align-items:center;gap:8px}
+.th>b:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--c)}
+.th>div{flex:1;display:flex;height:100%;align-items:center;background:linear-gradient(transparent calc(50% - 1px),color-mix(in srgb,var(--c) 30%,transparent) 0 calc(50% + 1px),transparent 0)}
+.th i{height:16px;display:block}
+.f4{flex:4 1 0}.f8{flex:8 1 0}.f1{flex:1 1 0}
+.bar4{background:repeating-linear-gradient(90deg,var(--c) 0 23.5%,transparent 0 25%)}
+.long4{background:linear-gradient(90deg,var(--c) 0 98.5%,transparent 0)}
+.q4{background:repeating-linear-gradient(90deg,var(--c) 0 2.6%,transparent 0 6.25%)}
+.e4{background:repeating-linear-gradient(90deg,var(--c) 0 1.7%,transparent 0 3.125%),linear-gradient(90deg,transparent,transparent)}
+.ramp{-webkit-mask-image:linear-gradient(90deg,rgba(0,0,0,.25),#000);mask-image:linear-gradient(90deg,rgba(0,0,0,.25),#000)}
+.last4{background:linear-gradient(90deg,transparent 0 93.75%,var(--c) 0)}
+.k8{background:repeating-linear-gradient(90deg,var(--c) 0 1.7%,transparent 0 12.5%)}
+.s8{background:repeating-linear-gradient(90deg,transparent 0 6.25%,var(--c) 0 7.95%,transparent 0 12.5%)}
+.h8{background:repeating-linear-gradient(90deg,var(--c) 0 .75%,transparent 0 1.5625%)}
+.o8{background:repeating-linear-gradient(90deg,transparent 0 3.125%,var(--c) 0 4.5%,transparent 0 6.25%)}
+.bar8{background:repeating-linear-gradient(90deg,var(--c) 0 12%,transparent 0 12.5%)}
+.w2{background:repeating-linear-gradient(90deg,var(--c) 0 25%,color-mix(in srgb,var(--c) 40%,#0A0F14) 0 50%)}
+.w4{background:repeating-linear-gradient(90deg,var(--c) 0 12.5%,color-mix(in srgb,var(--c) 40%,#0A0F14) 0 25%)}
+.w3{background:repeating-linear-gradient(90deg,var(--c) 0 16.667%,color-mix(in srgb,var(--c) 40%,#0A0F14) 0 33.333%)}
+.w8{background:repeating-linear-gradient(90deg,var(--c) 0 6.25%,color-mix(in srgb,var(--c) 40%,#0A0F14) 0 12.5%)}
+.hd{font-size:12px;font-weight:600;padding-left:4px;border-left:1px solid #2A3B4A;box-sizing:border-box}
+</style>
+</helmet>
+<div style="width: 960px; height: 640px; box-sizing: border-box; background: #0A0F14; color: #E6EEF2; font-family: Inter, system-ui, sans-serif; font-size: 13px; position: relative; overflow: hidden; padding: 84px 40px 0">
+
+<div style="position: absolute; left: 20px; top: 16px; line-height: 1.5">
+<div style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 18px">Loom</div>
+<div style="font-size: 12px; color: #9FB2BE">The whole song as cloth. One thread per instrument; a thread shows where it plays.</div>
+</div>
+<div style="position: absolute; right: 20px; top: 16px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #9FB2BE">28 bars · 13 threads</div>
+
+<div style="display: flex; height: 24px; margin-left: 120px">
+<span class="hd f4">intro</span><span class="hd f4">build</span><span class="hd f8" style="color: #9EF0D0">drop</span><span class="hd f4">breakdown</span><span class="hd f8">drop</span>
+</div>
+
+<div style="position: relative">
+<div class="th" style="--c: #8EE6C2"><b>darkPad</b><div><i class="f4 bar4"></i><i class="f4 bar4 ramp"></i><i class="f8"></i><i class="f4 bar4"></i><i class="f8"></i></div></div>
+<div class="th" style="--c: #E8A0D8"><b>vocalAtmos</b><div><i class="f4 long4"></i><i class="f4"></i><i class="f8"></i><i class="f4 long4"></i><i class="f8"></i></div></div>
+<div class="th" style="--c: #9DB7C9"><b>intro hats</b><div><i class="f4 q4"></i><i class="f4"></i><i class="f8"></i><i class="f4"></i><i class="f8"></i></div></div>
+<div class="th" style="--c: #F2A27C"><b>snare roll</b><div><i class="f4"></i><i class="f4 e4 ramp"></i><i class="f8"></i><i class="f4"></i><i class="f8"></i></div></div>
+<div class="th" style="--c: #D6C08A"><b>riser</b><div><i class="f4"></i><i class="f4 long4 ramp"></i><i class="f8"></i><i class="f4"></i><i class="f8"></i></div></div>
+<div class="th" style="--c: #C9A0F0"><b>preDropVocal</b><div><i class="f4"></i><i class="f4 last4"></i><i class="f8"></i><i class="f4"></i><i class="f8"></i></div></div>
+<div class="th" style="--c: #A99CFF"><b>kick</b><div><i class="f4"></i><i class="f4"></i><i class="f8 k8"></i><i class="f4"></i><i class="f8 k8"></i></div></div>
+<div class="th" style="--c: #FFB38A"><b>snare</b><div><i class="f4"></i><i class="f4"></i><i class="f8 s8"></i><i class="f4"></i><i class="f8 s8"></i></div></div>
+<div class="th" style="--c: #7CC8F2"><b>hats</b><div><i class="f4"></i><i class="f4"></i><i class="f8 h8"></i><i class="f4"></i><i class="f8 h8"></i></div></div>
+<div class="th" style="--c: #6FD3C7"><b>open hat</b><div><i class="f4"></i><i class="f4"></i><i class="f8 o8"></i><i class="f4"></i><i class="f8 o8"></i></div></div>
+<div class="th" style="--c: #6FA0FF"><b>subBass</b><div><i class="f4"></i><i class="f4"></i><i class="f8 bar8"></i><i class="f4"></i><i class="f8 bar8"></i></div></div>
+<div class="th" style="--c: #F0D878"><b>wobbleBass</b><div><i class="f4"></i><i class="f4"></i><i class="f1 w2"></i><i class="f1 w4"></i><i class="f1 w3"></i><i class="f1 w8"></i><i class="f1 w2"></i><i class="f1 w4"></i><i class="f1 w3"></i><i class="f1 w8"></i><i class="f4"></i><i class="f1 w2"></i><i class="f1 w4"></i><i class="f1 w3"></i><i class="f1 w8"></i><i class="f1 w2"></i><i class="f1 w4"></i><i class="f1 w3"></i><i class="f1 w8"></i></div></div>
+<div class="th" style="--c: #B8E08A"><b>triangle</b><div><i class="f4"></i><i class="f4"></i><i class="f8"></i><i class="f4 q4"></i><i class="f8"></i></div></div>
+<div aria-hidden="true" style="position: absolute; left: calc(120px + (100% - 120px) * .3714); top: -8px; bottom: -8px; width: 2px; background: #FFFFFF; box-shadow: 0 0 12px rgba(255,255,255,.8)"></div>
+</div>
+
+<div style="margin: 20px 0 0 120px; font-size: 12px; color: #9FB2BE; line-height: 1.6">The build fades in from the left because its level rises. The wobble thread changes weave every bar: 2, 4, 3, then 8 sweeps.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":640}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

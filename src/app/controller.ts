@@ -293,8 +293,8 @@ export function createApp(
     );
     return work;
   }
-  const play = () => track(startPlayback());
-  async function startPlayback() {
+  const play = (fromCycle?: number) => track(startPlayback(fromCycle));
+  async function startPlayback(resumeCycle?: number) {
     if (!state.doc || !checked || starting || loading) return;
     const piece = epoch,
       transport = ++transportRevision;
@@ -304,7 +304,7 @@ export function createApp(
     update({ ...state, message: 'Preparing sounds…' });
     try {
       // Check the actual seek window too before the engine evaluates on the page.
-      const fromCycle = startCycle(state);
+      const fromCycle = resumeCycle ?? startCycle(state);
       const result = await preflight.query(
         generate(state.doc!, playbackOptions(state)),
         fromCycle,

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Themes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@600;800&family=Inter:wght@400;500;600&family=Press+Start+2P&family=Silkscreen:wght@400;700&family=Space+Grotesk:wght@600;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE58A}
+.card{flex:1;background:var(--g);color:var(--t);border-radius:18px;padding:22px;box-sizing:border-box;display:flex;flex-direction:column;gap:14px;border:1px solid var(--l)}
+.card h2{margin:0;font-family:var(--f);font-size:var(--fs);font-weight:var(--fw);line-height:1.2}
+.card p{margin:0;font-size:13px;color:var(--m);line-height:1.45;min-height:38px}
+.card svg{display:block;margin:0 auto;filter:var(--glow)}
+.card circle{fill:none}
+.c1{stroke:var(--c1)}.c2{stroke:var(--c2)}.c3{stroke:var(--c3)}.c4{stroke:var(--c4)}.c5{stroke:var(--c5)}
+.sw{display:flex;gap:6px}
+.sw i{flex:1;height:26px;border-radius:6px}
+.ln{height:12px;border-radius:3px}
+.l1{background:repeating-linear-gradient(90deg,var(--c1) 0 5%,transparent 0 25%)}
+.l2{background:repeating-linear-gradient(90deg,var(--c3) 0 2.5%,transparent 0 6.25%)}
+.l3{background:linear-gradient(90deg,var(--c2) 0 48%,transparent 0 50%,var(--c2) 0 73%,transparent 0 75%,var(--c2) 0)}
+.ct{display:flex;align-items:center;gap:8px;margin-top:auto}
+.pb{width:36px;height:36px;border-radius:50%;background:var(--a);display:inline-flex;align-items:center;justify-content:center}
+.pb:after{content:"";border-left:11px solid var(--g);border-top:7px solid transparent;border-bottom:7px solid transparent;margin-left:3px}
+.ch{height:28px;padding:0 10px;border-radius:14px;background:var(--p);color:var(--t);font-size:12px;display:inline-flex;align-items:center;border:1px solid var(--l)}
+</style>
+</helmet>
+<div style="width: 1680px; height: 640px; box-sizing: border-box; background: #000000; padding: 28px; display: flex; gap: 16px; font-family: Inter, system-ui, sans-serif">
+
+<div class="card" style="--g: #07060D; --p: #12101F; --l: #2A2545; --t: #F4F1FF; --m: #A49EC4; --a: #FFD23F; --c1: #FF4D8D; --c2: #FFD23F; --c3: #3DDCFF; --c4: #5BFF8F; --c5: #B388FF; --f: 'Space Grotesk', sans-serif; --fs: 26px; --fw: 700; --glow: drop-shadow(0 0 8px rgba(255,77,141,.55))">
+<h2>Arcade</h2><p>Neon on black. Loud, legible, the one I would ship as default.</p>
+<svg width="220" height="220"><g transform="translate(110 110) rotate(-90)"><circle class="c1" r="40" pathLength="100" style="stroke-width: 14; stroke-dasharray: 4 21"></circle><circle class="c2" r="58" pathLength="100" style="stroke-width: 14; stroke-dasharray: 30 3.33"></circle><circle class="c3" r="76" pathLength="100" style="stroke-width: 14; stroke-dasharray: 2.5 3.75"></circle><circle class="c4" r="94" pathLength="100" style="stroke-width: 14; stroke-dasharray: 11 1.5"></circle></g></svg>
+<div class="sw"><i style="background: var(--c1)"></i><i style="background: var(--c2)"></i><i style="background: var(--c3)"></i><i style="background: var(--c4)"></i><i style="background: var(--c5)"></i></div>
+<div class="ln l1"></div><div class="ln l2"></div><div class="ln l3"></div>
+<div class="ct"><span class="pb"></span><span class="ch">140 bpm</span><span class="ch">½ speed</span></div>
+</div>
+
+<div class="card" style="--g: #1A0B2E; --p: #2A1247; --l: #4A2470; --t: #FFE9F3; --m: #D4A9D8; --a: #FF9A56; --c1: #FF5E99; --c2: #FF9A56; --c3: #FFD166; --c4: #6EE7E0; --c5: #9B8CFF; --f: 'Bricolage Grotesque', sans-serif; --fs: 28px; --fw: 800; --glow: drop-shadow(0 0 8px rgba(255,154,86,.5))">
+<h2>Sunset</h2><p>Purple dusk, hot pink, orange. Made for Night drive.</p>
+<svg width="220" height="220"><g transform="translate(110 110) rotate(-90)"><circle class="c1" r="40" pathLength="100" style="stroke-width: 14; stroke-dasharray: 4 21"></circle><circle class="c2" r="58" pathLength="100" style="stroke-width: 14; stroke-dasharray: 30 3.33"></circle><circle class="c3" r="76" pathLength="100" style="stroke-width: 14; stroke-dasharray: 2.5 3.75"></circle><circle class="c4" r="94" pathLength="100" style="stroke-width: 14; stroke-dasharray: 11 1.5"></circle></g></svg>
+<div class="sw"><i style="background: var(--c1)"></i><i style="background: var(--c2)"></i><i style="background: var(--c3)"></i><i style="background: var(--c4)"></i><i style="background: var(--c5)"></i></div>
+<div class="ln l1"></div><div class="ln l2"></div><div class="ln l3"></div>
+<div class="ct"><span class="pb"></span><span class="ch">140 bpm</span><span class="ch">½ speed</span></div>
+</div>
+
+<div class="card" style="--g: #020A04; --p: #06180B; --l: #0F3A1C; --t: #B8FFC8; --m: #5FBF7A; --a: #00FF66; --c1: #00FF66; --c2: #9DFFB8; --c3: #00B84A; --c4: #FFB000; --c5: #5CFF9D; --f: 'VT323', monospace; --fs: 38px; --fw: 400; --glow: drop-shadow(0 0 7px rgba(0,255,102,.7))">
+<h2>PHOSPHOR</h2><p>One green tube and an amber warning light. Made for Scope and Tracker.</p>
+<svg width="220" height="220"><g transform="translate(110 110) rotate(-90)"><circle class="c1" r="40" pathLength="100" style="stroke-width: 14; stroke-dasharray: 4 21"></circle><circle class="c2" r="58" pathLength="100" style="stroke-width: 14; stroke-dasharray: 30 3.33"></circle><circle class="c3" r="76" pathLength="100" style="stroke-width: 14; stroke-dasharray: 2.5 3.75"></circle><circle class="c4" r="94" pathLength="100" style="stroke-width: 14; stroke-dasharray: 11 1.5"></circle></g></svg>
+<div class="sw"><i style="background: var(--c1)"></i><i style="background: var(--c2)"></i><i style="background: var(--c3)"></i><i style="background: var(--c4)"></i><i style="background: var(--c5)"></i></div>
+<div class="ln l1"></div><div class="ln l2"></div><div class="ln l3"></div>
+<div class="ct"><span class="pb"></span><span class="ch">140 bpm</span><span class="ch">½ speed</span></div>
+</div>
+
+<div class="card" style="--g: #F6F0E4; --p: #EAE1CF; --l: #1D1B2F; --t: #1D1B2F; --m: #4A4760; --a: #FF4F7B; --c1: #FF4F7B; --c2: #2F5BEA; --c3: #FFC400; --c4: #00A66C; --c5: #FF7A1A; --f: 'Bricolage Grotesque', sans-serif; --fs: 28px; --fw: 800; --glow: none">
+<h2>Riso</h2><p>The light one. Paper with fluorescent ink, replacing today's Paper.</p>
+<svg width="220" height="220" style="mix-blend-mode: multiply"><g transform="translate(110 110) rotate(-90)"><circle class="c1" r="40" pathLength="100" style="stroke-width: 16; stroke-dasharray: 4 21"></circle><circle class="c2" r="58" pathLength="100" style="stroke-width: 16; stroke-dasharray: 30 3.33"></circle><circle class="c3" r="76" pathLength="100" style="stroke-width: 16; stroke-dasharray: 2.5 3.75"></circle><circle class="c4" r="94" pathLength="100" style="stroke-width: 16; stroke-dasharray: 11 1.5"></circle></g></svg>
+<div class="sw"><i style="background: var(--c1)"></i><i style="background: var(--c2)"></i><i style="background: var(--c3)"></i><i style="background: var(--c4)"></i><i style="background: var(--c5)"></i></div>
+<div class="ln l1"></div><div class="ln l2"></div><div class="ln l3"></div>
+<div class="ct"><span class="pb"></span><span class="ch">140 bpm</span><span class="ch">½ speed</span></div>
+</div>
+
+<div class="card" style="--g: #C9DB8E; --p: #B4C97A; --l: #2F5D3A; --t: #0F2A1D; --m: #2F5D3A; --a: #0F2A1D; --c1: #0F2A1D; --c2: #2F5D3A; --c3: #4E8046; --c4: #0F2A1D; --c5: #6E9A4E; --f: 'Silkscreen', monospace; --fs: 24px; --fw: 700; --glow: none">
+<h2>Pocket</h2><p>Four shades of pea green, like a handheld screen. Made for Runner.</p>
+<svg width="220" height="220"><g transform="translate(110 110) rotate(-90)"><circle class="c1" r="40" pathLength="100" style="stroke-width: 14; stroke-dasharray: 4 21"></circle><circle class="c2" r="58" pathLength="100" style="stroke-width: 14; stroke-dasharray: 30 3.33"></circle><circle class="c3" r="76" pathLength="100" style="stroke-width: 14; stroke-dasharray: 2.5 3.75"></circle><circle class="c4" r="94" pathLength="100" style="stroke-width: 14; stroke-dasharray: 11 1.5"></circle></g></svg>
+<div class="sw"><i style="background: var(--c1)"></i><i style="background: var(--c2)"></i><i style="background: var(--c3)"></i><i style="background: var(--c5)"></i><i style="background: #D7E8A0"></i></div>
+<div class="ln l1"></div><div class="ln l2"></div><div class="ln l3"></div>
+<div class="ct"><span class="pb"></span><span class="ch">140 bpm</span><span class="ch">½ speed</span></div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1680,"height":640}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
