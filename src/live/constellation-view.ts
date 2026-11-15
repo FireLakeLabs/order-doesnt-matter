@@ -26,13 +26,26 @@ export const words = (i: LiveInstrument, playing: boolean) =>
         .filter(Boolean)
         .join(' · ');
 export const roomWords = (r: LiveRoom) =>
-  `Room ${r.orbit} · ${
-    r.conflict
-      ? 'settings differ'
-      : [r.reverb === null ? '' : `reverb ${r.reverb}`, r.delay === null ? '' : `delay ${r.delay}`]
-          .filter(Boolean)
-          .join(' · ')
-  }`;
+  [
+    `Room ${r.orbit}`,
+    r.reverb === null ? '' : `reverb ${r.reverb}`,
+    r.delay === null ? '' : `delay ${r.delay}`,
+    r.conflict ? 'settings differ; outcome unpredictable' : '',
+  ]
+    .filter(Boolean)
+    .join(' · ');
+/** Sampled sends, not permanent membership or a prediction of audio tails. */
+export const membershipWords = (i: LiveInstrument, model: LiveModel) => {
+  if (i.error || i.noteStarts === null) return 'rooms not known';
+  const rooms = model.rooms.filter((r) => r.members.includes(i.id));
+  return [
+    rooms.map((r) => `Room ${r.orbit}`).join(' + '),
+    i.roomUnknown ? 'some rooms not known' : rooms.length ? '' : 'no sends in this window',
+  ]
+    .filter(Boolean)
+    .join(' · ');
+};
+const outline = (n: number) => ['solid', 'dashed', 'dotted'][n];
 export function text(n: Element, value: string) {
   if (n.textContent !== value) n.textContent = value;
 }
@@ -55,9 +68,8 @@ export function mountConstellation(
   const svg = svgNode('svg');
   svg.setAttribute('aria-hidden', 'true');
   drawing.append(svg);
-  // At most one room per instrument. Reserve the nodes so section changes do
-  // not replace focused controls or rebuild on playback acknowledgements.
-  const regions = initial.instruments.map(() => {
+  // Bounded outline pool; the complete text key covers every sampled room.
+  const regions = Array.from({ length: 3 }, () => {
     const path = svgNode('path');
     svg.append(path);
     const label = document.createElement('span');
@@ -67,7 +79,7 @@ export function mountConstellation(
   });
   const description = document.createElement('p');
   description.className = 'constellation-description';
-  const idle = 'Select an instrument to edit.';
+  const idle = 'Select an instrument to edit. Full names and rooms are in List.';
   description.textContent = idle;
   const planets = new Map(
     initial.instruments.map((i) => {
@@ -100,7 +112,9 @@ export function mountConstellation(
   const hint = document.createElement('p');
   hint.className = 'constellation-touch-hint';
   hint.textContent = 'Use List below to choose an instrument.';
-  host.append(drawing, hint, description);
+  const roomKey = document.createElement('p');
+  roomKey.className = 'live-room-key';
+  host.append(drawing, hint, roomKey, description);
   let width = 240,
     key = '',
     established = false,
@@ -141,6 +155,12 @@ export function mountConstellation(
       b.dataset.y = String(p.y + 4);
       b.dataset.r = String(p.r);
     }
+    text(
+      roomKey,
+      model.rooms.length
+        ? `Sampled sends in the queried window${layout.textRooms ? ' · dense rooms: text only' : ' · outlines may be disconnected'}. ${model.rooms.map((r, n) => `${roomWords(r)}${!layout.textRooms ? ` (${outline(n)})` : ''}`).join('; ')}`
+        : 'No shared sends observed in this queried window. Unasked or failed instruments have unknown rooms.',
+    );
     regions.forEach(({ path, label }, n) => {
       const r = layout.regions[n];
       path.style.display = r ? '' : 'none';
@@ -151,7 +171,9 @@ export function mountConstellation(
       label.style.left = `${r.label.x + 4}px`;
       label.style.top = `${r.label.y + 4}px`;
       label.style.width = `${r.label.width}px`;
-      text(label, roomWords(model.rooms.find((room) => room.orbit === r.orbit)!));
+      path.dataset.orbit = String(r.orbit);
+      path.setAttribute('stroke-dasharray', ['', '8 4', '2 4'][n]);
+      text(label, `Room ${r.orbit} · ${outline(n)}`);
     });
   }
   const observer = new ResizeObserver((entries) => {
@@ -166,7 +188,7 @@ export function mountConstellation(
     model = next;
     const nextKey = JSON.stringify([
       model.rooms,
-      model.instruments.map((i) => [i.id, i.room, i.noteStarts]),
+      model.instruments.map((i) => [i.id, i.name, i.room, i.noteStarts]),
     ]);
     if (key !== nextKey) {
       const answered = model.instruments.every((i) => i.noteStarts !== null || i.error);
@@ -216,7 +238,7 @@ export function mountConstellation(
                   : '',
       );
       p.button.classList.toggle('constellation-has-mark', !!p.mark.textContent);
-      const label = `${i.name}${i.nameSource === 'generated' ? ' (generated name)' : ''}, ${words(i, playing)}, ${i.room === null ? 'no room' : `Room ${i.room}`}`;
+      const label = `${i.name}${i.nameSource === 'generated' ? ' (generated name)' : ''}, ${words(i, playing)}, ${membershipWords(i, model)}`;
       if (p.button.getAttribute('aria-label') !== label) p.button.setAttribute('aria-label', label);
       p.button.title = label;
     }

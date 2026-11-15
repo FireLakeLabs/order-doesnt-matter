@@ -87,6 +87,7 @@ it('groups top-level sends, default room, varying sends and conflicting settings
       delay: 'varies',
       conflict: true,
     },
+    { orbit: 2, members: [rows[1].id], reverb: 1, delay: 0, conflict: false },
   ]);
   expect(m.instruments[2].room).toBeNull();
   i.events = {
@@ -248,4 +249,84 @@ it('count-in/zero/first-positive observation never pairs a flash with an exclude
       expect(predicted, `origin ${origin}, flash ${sample}, onset ${onset}`).toBeDefined();
     }
   }
+});
+
+it('real queried alternating orbits retain both send types, conflicts, mute/solo and cached windows', async () => {
+  const doc = importStrudel(
+    'stack(note("c3*2").s("sine").orbit("<1 2>").room(.3).roomsize("<1 2>"), note("e3*2").s("sine").orbit("<1 2>").delay(.4).delaytime("<.1 .2>"), note("g3*2").s("sine").orbit("<1 2>").room(.6).roomsize(3).delay(.2).delaytime(.3))',
+  ).doc;
+  const rows = instruments(doc);
+  const events: Record<string, EventResult> = Object.fromEntries(
+    await Promise.all(
+      rows.map(async (r) => [r.id, await queryEventsNode(generate(doc, { only: r.id }), 0, 8)]),
+    ),
+  );
+  expect(Object.values(events).every((r) => !r.error)).toBe(true);
+  const i = { ...input(), rows, events };
+  const m = liveModel(i);
+  expect(m.rooms).toEqual(
+    [1, 2].map((orbit) => ({
+      orbit,
+      members: rows.map((r) => r.id),
+      reverb: 'varies',
+      delay: 'varies',
+      conflict: true,
+    })),
+  );
+  expect(liveModel({ ...i, solo: rows[0].id }).rooms).toBe(m.rooms);
+  expect(
+    liveModel({ ...i, rows: rows.map((r) => ({ ...r, muted: true })) }).instruments.every(
+      (r) => r.silenced,
+    ),
+  ).toBe(true);
+  expect(liveModel({ ...i, fromCycle: 0, toCycle: 1 }).rooms.map((r) => r.orbit)).toEqual([1]);
+  expect(liveModel({ ...i, fromCycle: 1, toCycle: 2 }).rooms.map((r) => r.orbit)).toEqual([2]);
+  const sections = [
+    {
+      id: 'a',
+      name: 'A',
+      nameSource: 'author' as const,
+      start: 0,
+      cycles: 2,
+      instrumentIds: rows.map((r) => r.id),
+    },
+  ];
+  expect(liveModel({ ...i, sections, playhead: 2 }).rooms).toEqual(m.rooms);
+  expect(liveModel({ ...i, sections, playhead: 8 }).rooms).toEqual([]);
+  let reads = 0;
+  const value = {
+    get room() {
+      reads++;
+      return 0.2;
+    },
+  };
+  const held = { ...input(), events: { [rows[0].id]: result([event(0, 1, value)]) } };
+  const first = liveModel(held),
+    before = reads;
+  for (let n = 0; n < 100; n++)
+    expect(liveModel({ ...held, playhead: n / 100 }).rooms).toBe(first.rooms);
+  expect(reads).toBe(before);
+});
+it('ties/default orbit, private FX, unknown orbit and broken/unasked rows never invent rooms', () => {
+  const i = input();
+  i.events = {
+    [rows[0].id]: result([
+      event(0, 1, { room: 0.2 }),
+      event(1, 2, { orbit: 2, delay: 0.4 }),
+      event(2, 3, { FX: [{ room: 1, orbit: 8 }] }),
+      event(3, 4, { room: 0.3, orbit: 'unknown' }),
+    ]),
+    [rows[1].id]: {
+      ...result([event(0, 1, { room: 1 })]),
+      error: { message: 'broken', phase: 'query' },
+    },
+  };
+  const m = liveModel(i);
+  expect(m.rooms.map((r) => [r.orbit, r.members, r.reverb, r.delay])).toEqual([
+    [1, [rows[0].id], 0.2, 0],
+    [2, [rows[0].id], 0, 0.4],
+  ]);
+  expect(m.instruments[0]).toMatchObject({ room: 1, roomUnknown: true });
+  expect(m.instruments[1]).toMatchObject({ noteStarts: null, error: 'broken' });
+  expect(m.instruments[2].noteStarts).toBeNull();
 });
