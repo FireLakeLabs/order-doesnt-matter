@@ -2,9 +2,10 @@ import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import type { PointerEvent } from 'react';
 import { runtime, store } from './runtime';
 import { useStudioStore } from './store';
+import type { StudioClock } from './clock';
 import { markedLoop, pageRange, pointerCycle } from './transport';
 
-export function ScrubStrip() {
+export function ScrubStrip({ clock }: { clock: StudioClock }) {
   const { state } = useStudioStore(store);
   const time = useSyncExternalStore(runtime.transport.subscribe, runtime.transport.getSnapshot);
   const [pages, setPages] = useState(() => pageRange(0));
@@ -28,7 +29,8 @@ export function ScrubStrip() {
         to: pages.from + i * 4 + 4,
       }));
   const draw = (now: number) => {
-    const display = last && !gesture.current ? now % range.to : now;
+    const current = last ? now % range.to : now;
+    const display = last && !gesture.current ? current : now;
     const fraction = (display - range.from) / (range.to - range.from);
     if (knob.current) {
       const width = track.current?.clientWidth ?? 0;
@@ -42,25 +44,18 @@ export function ScrubStrip() {
       track.current?.querySelectorAll<HTMLElement>('[data-from]') ?? [],
     ))
       block.dataset.current = String(
-        display >= Number(block.dataset.from) && display < Number(block.dataset.to),
+        current >= Number(block.dataset.from) && current < Number(block.dataset.to),
       );
   };
-  useEffect(() => {
-    let handle: number;
-    const tick = () => {
-      const now = runtime.getPlayhead();
+  useEffect(() =>
+    clock.subscribe(({ now }) => {
       draw(now);
       if (!last && !gesture.current) {
         const next = pageRange(now);
         if (next.from !== pages.from) setPages(next);
       }
-      handle = requestAnimationFrame(tick);
-    };
-    handle = requestAnimationFrame(tick);
-    return () => {
-      cancelAnimationFrame(handle);
-    };
-  });
+    }),
+  );
   const position = (event: PointerEvent<HTMLDivElement>) => {
     const rect = event.currentTarget.getBoundingClientRect();
     const bounds = gesture.current ?? range;
@@ -79,7 +74,6 @@ export function ScrubStrip() {
       }
     } else {
       runtime.scrubTo(cycle);
-      draw(cycle);
     }
   };
   const finish = (event: PointerEvent<HTMLDivElement>, cancelled = false) => {
@@ -94,21 +88,7 @@ export function ScrubStrip() {
     } else void runtime.endScrub();
   };
   return (
-    <section
-      className="scrub-strip"
-      data-region="scrub-strip"
-      style={{ padding: 0, position: 'relative', display: 'block', userSelect: 'none' }}
-    >
-      <style>{`
-        .song-track { position: absolute; inset: 0; display: flex; touch-action: none; cursor: ew-resize; overflow: hidden; }
-        .song-block { position: relative; border-right: 1px solid var(--line); border-top: 3px solid var(--line); padding: 5px 12px 17px; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--muted); }
-        .song-block[data-current=true] { color: var(--text); border-top-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, var(--panel)); }
-        .song-block small { opacity: .7; margin-left: 12px; font-size: 9px; }
-        .song-playhead { position: absolute; top: 0; bottom: 0; width: 2px; background: var(--text); pointer-events: none; }
-        .song-knob { position: absolute; width: 24px; height: 24px; left: -11px; bottom: 0; border: 2px solid var(--ground); border-radius: var(--radius); background: var(--accent); box-shadow: var(--control-shadow); pointer-events: auto; }
-        .song-loop { position: absolute; top: 2px; bottom: 0; border: 2px solid var(--accent); background: color-mix(in srgb, var(--accent) 12%, transparent); pointer-events: none; }
-        .song-hint { position: absolute; bottom: 2px; right: 12px; font-size: 9px; pointer-events: none; color: var(--muted); background: var(--panel); padding: 0 4px; }
-      `}</style>
+    <section className="scrub-strip" data-region="scrub-strip">
       <div
         ref={track}
         className="song-track"

@@ -32,15 +32,23 @@ export const runtime = {
   getCps() {
     return actualCps(app.state.cps ?? 0.5, transport.getSnapshot().speed);
   },
-  getPlayhead() {
+  getPlayhead(cps?: number) {
     if (transport.getSnapshot().scrubbing || seeking) return held;
     const now = app.frame();
     if (now !== null)
       held = wrapCycle(
-        livePlayhead(now, this.getCps(), app.engine?.outputLatency()) ?? 0,
+        livePlayhead(now, cps ?? this.getCps(), app.engine?.outputLatency()) ?? 0,
         transport.getSnapshot().loop,
       );
     return Math.max(0, held);
+  },
+  sample() {
+    const cps = this.getCps();
+    return {
+      now: this.getPlayhead(cps),
+      cps,
+      playing: app.state.playing && !transport.getSnapshot().scrubbing,
+    };
   },
   async play() {
     const token = generation;

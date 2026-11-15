@@ -1,19 +1,26 @@
-/** One RAF for the page. Stages share both the clock sample and frame callback. */
+export interface TransportFrame {
+  now: number;
+  cps: number;
+  playing: boolean;
+}
+export type StudioClock = ReturnType<typeof createFrameClock>;
+
+/** One page RAF sends the same transport sample to every subscriber. */
 export function createFrameClock(
-  read: () => number,
+  read: () => TransportFrame,
   request: (callback: FrameRequestCallback) => number,
   cancel: (id: number) => void,
 ) {
-  const listeners = new Set<(now: number) => void>();
+  const listeners = new Set<(sample: TransportFrame) => void>();
   let handle: number | undefined;
   const tick = () => {
     handle = undefined;
-    const now = read();
-    for (const listener of listeners) listener(now);
+    const sample = read();
+    for (const listener of listeners) listener(sample);
     if (listeners.size) handle = request(tick);
   };
   return {
-    subscribe(listener: (now: number) => void) {
+    subscribe(listener: (sample: TransportFrame) => void) {
       listeners.add(listener);
       handle ??= request(tick);
       return () => {

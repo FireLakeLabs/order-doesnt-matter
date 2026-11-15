@@ -116,6 +116,7 @@ test('frame builder preserves real spans, fragments, signals, values, room membe
     notes,
     now: 0.25,
     cps: 0.25,
+    playing: true,
     theme: resolveTheme('riso'),
     lookAhead: 4,
     trails: 2,
@@ -143,6 +144,9 @@ test('frame builder preserves real spans, fragments, signals, values, room membe
     height: 600,
     dpr: 2,
   });
+  const scrubbed = buildFrame({ ...frame, state: s, score, playing: false });
+  expect(scrubbed.playing).toBe(false);
+  expect(scrubbed.instruments.every((instrument) => !instrument.sounding)).toBe(true);
 });
 
 test('one frame clock shares the sample across stages and cancels its last subscription', () => {
@@ -152,7 +156,8 @@ test('one frame clock shares the sample across stages and cancels its last subsc
     return 7;
   });
   const cancel = vi.fn();
-  const read = vi.fn(() => 3.25);
+  const sample = { now: 3.25, cps: 0.25, playing: false };
+  const read = vi.fn(() => sample);
   const clock = createFrameClock(read, request, cancel);
   const a = vi.fn(),
     b = vi.fn();
@@ -161,8 +166,8 @@ test('one frame clock shares the sample across stages and cancels its last subsc
   expect(request).toHaveBeenCalledTimes(1);
   tick!(0);
   expect(read).toHaveBeenCalledTimes(1);
-  expect(a).toHaveBeenCalledWith(3.25);
-  expect(b).toHaveBeenCalledWith(3.25);
+  expect(a).toHaveBeenCalledWith(sample);
+  expect(b).toHaveBeenCalledWith(sample);
   offA();
   expect(cancel).not.toHaveBeenCalled();
   offB();
