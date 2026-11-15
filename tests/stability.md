@@ -11,7 +11,9 @@ Node proofs use real Strudel and the two-slot per-file query pool, with two Vite
 file workers. Every question executes independently; no result cache. Fresh-worker
 import, termination, global isolation and pool-recovery canaries remain. The Node
 wrapper enforces 60 s, and the complete browser command (build, serve, tests,
-shutdown, cleanup) enforces 180 s. No retries or raised timeouts.
+shutdown, cleanup) enforces 300 s. No retries. The owner approved the 25 s
+per-case and 300 s command limits on 2026-11-15; earlier measurements below
+retain the limits in force when they were recorded. See `docs/standards.md`.
 
 Play readiness requires a new `swapped`, `canPlay`, playing transport and an empty
 message. Score readiness requires every row result. Pending waits require the
@@ -24,9 +26,9 @@ programs still exercise the real worker's 5 s deadline and <7 s responsive-page 
 
 Every default run prints executed test count, complete-command seconds per test,
 and the five slowest Playwright tests (including their per-test hooks). Any test
-above 20 s fails the command, even when Playwright reports it passed; 20 s exactly
+above 25 s fails the command, even when Playwright reports it passed; 25 s exactly
 passes. `tests/checks.test.ts` covers the boundary, ranking, skips and empty reports
-without sleeping. The 180 s command budget remains independent.
+without sleeping. The 300 s command budget remains independent.
 
 `ODM_PROFILE_PATH=test-results/timing/run.json npm run test:browser` also retains
 per-test timings. `scripts/browser-report.mjs` uses Playwright's step clock,
