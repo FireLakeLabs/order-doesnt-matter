@@ -28,16 +28,24 @@ const pixels = (page: Page) =>
     for (const byte of bytes) hash = Math.imul(hash ^ byte, 16777619);
     return hash >>> 0;
   });
-async function choose(page: Page, name: string | RegExp) {
-  await page.getByRole('button', { name: 'Views', exact: true }).click();
-  await page.getByRole('dialog').getByRole('button', { name }).click();
-  await expect(page.locator('.view-host')).toHaveAttribute('data-score-ready', 'true');
+async function choose(page: Page, name: string) {
+  const stage = page.locator('[data-region="stage-a"]');
+  await stage.getByRole('button', { name: 'Views', exact: true }).click();
+  await stage
+    .locator('.shelf-popover')
+    .getByRole('button', { name: `${name} on Stage A`, exact: true })
+    .click();
+  await expect(stage.locator('.view-host')).toHaveAttribute('data-score-ready', 'true');
   await frames(page);
 }
+
 async function load(page: Page, path: string) {
   const source = await readFile(path, 'utf8');
   await page.evaluate((source) => window.odmStudio.load(source), source);
-  await expect(page.locator('.view-host')).toHaveAttribute('data-score-ready', 'true');
+  await expect(page.locator('[data-region="stage-a"] .view-host')).toHaveAttribute(
+    'data-score-ready',
+    'true',
+  );
   await frames(page, 8);
 }
 
@@ -114,7 +122,7 @@ test('Rain: real score motion, lifetime, five themes, corpus and frame cost', as
   await page.goto('/studio.html?inspect');
   await page.waitForFunction(() => window.odmStudio.app.canPlay);
   await load(page, 'corpus/programs/real-dubstep-arranged.strudel');
-  await choose(page, /Rain/);
+  await choose(page, 'Rain');
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await page.waitForFunction(
     () => window.odmStudio.app.state.playing && window.odmStudio.getPlayhead() > 0.1,
@@ -127,13 +135,13 @@ test('Rain: real score motion, lifetime, five themes, corpus and frame cost', as
   const stopped = await pixels(page);
   await frames(page);
   expect(await pixels(page)).toBe(stopped);
-  // Warm both shelf choices before comparing listener counts (React lazily installs dialog listeners).
-  await choose(page, 'Test card diagnostic');
-  await choose(page, /Rain/);
+  // Warm both shelf choices before comparing global listener counts.
+  await choose(page, 'Test card');
+  await choose(page, 'Rain');
   const before = await page.evaluate(() => window.rainListeners);
   for (let i = 0; i < 3; i++) {
-    await choose(page, 'Test card diagnostic');
-    await choose(page, /Rain/);
+    await choose(page, 'Test card');
+    await choose(page, 'Rain');
     await expect(page.locator('[data-region="stage-a"] canvas')).toHaveCount(1);
   }
   expect(await page.evaluate(() => window.rainListeners)).toBe(before);
@@ -238,7 +246,7 @@ test('Rain: real score motion, lifetime, five themes, corpus and frame cost', as
       .poll(() => page.evaluate(() => window.rainLabels))
       .toContain(name === 'real-techno' ? 'cp' : 'sine 2');
     await canvas.screenshot({ path: `${shots}/${name}.png` });
-    await expect(page.locator('.view-status')).toHaveText('');
+    await expect(page.locator('[data-region="stage-a"] .view-status')).toHaveText('');
   }
   expect(errors).toEqual([]);
 });
