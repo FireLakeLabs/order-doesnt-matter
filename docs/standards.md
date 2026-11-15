@@ -4,17 +4,16 @@ Logic runs in Node with vitest against real Strudel: document operations, import
 generation, event comparisons, and pure drawing geometry. Browser tests cover
 browser behavior against a built copy. No jsdom is needed for plain logic.
 
-The complete browser command includes build, serving, tests, and shutdown in its
-wall time. It fails above five minutes and reports the duration to the console
-and GitHub step summary. The timing unit test exercises the limit without waiting.
-`ODM_BROWSER_LIMIT_SECONDS` can lower the limit to test the command's failure path.
-Each run gets its own build directory. Every server asks the OS for a free port
-with port 0, including local development; two copies must run together.
+The complete browser command includes build, serving, tests, cleanup and shutdown
+in its wall time. Node and browser suite durations are printed to the console and
+GitHub step summary, with an informational warning above 60 s and 300 s respectively.
+Suite durations and completed case durations do not fail a run (D44). Each run gets
+its own build directory. Every server asks the OS for a free port with port 0,
+including local development; two copies must run together.
 
-Owner exception to D5/D16/D27 (2026-11-15): the browser command limit is 300 s,
-and completed cases pass up to 25 s, replacing 180 s and 20 s respectively.
-Longer cases fail, except explicit optional recording exceptions. The Node budget
-is 60 s; worker execution deadlines and no-retry rules still apply.
+A 60 s per-test hard timeout protects against hangs; retries remain off. Worker
+execution deadlines still apply. `npm run check` keeps format check, lint,
+typecheck, Node tests, docs check, boundaries and build as deterministic gates.
 
 Directory ownership keeps later implementers apart:
 
@@ -57,8 +56,14 @@ imports in source/tests. Its pragmatic port pattern catches positive literal
 scripts, tests and workflows. Computed ports and aliased module names are outside
 this check; review them. Frozen spikes and corpus stay outside root checks.
 
-Keep PRs around 400 authored lines where possible. Contracts and their required
-canaries can need more; report the actual size and keep features separate.
+Keep features separate and code quality intact. D44 drops the 400-line aim,
+doc word budgets, mandatory recorded demos and metrics upkeep.
 Report what was measured separately from what was seen; no agent can hear, never
 describe how something sounds. Browser assertions are checks, not visual review.
 D13 applies: third-party music stays out unless redistribution permission is recorded.
+
+## Done
+
+A visualization is done when the owner sees it running on a real piece on desktop,
+it has the effect the brief stated, it keeps time with playback, and the gates
+pass. No verification write-up is required.

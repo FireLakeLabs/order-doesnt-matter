@@ -14,13 +14,9 @@ you play with the score directly, without making Strudel's syntax the subject.
 
 ## Current phase
 
-The in-page layout, retention/export, structural editors and live-view
-improvements are built. Now and Watch enlarge; playing and editing contexts
-have separate labels. Paper is the default theme. The final implementation wave
-is guided practice: for tour work, read the
-[specification](research/guided-tour-spec.md) and
-[approved mockup brief](research/guided-tour/implementation-brief.md).
-Preserve the visitor's session and recovery state through practice.
+The redesign wave is next; [D44–D47](docs/decisions.md) set the process,
+desktop scope and design direction. Details land with its briefs. Preserve the
+visitor's session and recovery state through guided practice.
 
 Now (`src/live/`) and Watch (`src/spiral/`) share `src/live/model.ts`.
 The app is live at odm.firelakelabs.com
@@ -34,6 +30,8 @@ for the built-page browser suite.
 
 ## Working rules
 
+- Desktop only; accessibility and phone support are not requirements.
+- Implementers follow `.agents/skills/build`; the lead follows `.agents/skills/orchestrate`.
 - Use the Node version in `.node-version` and npm.
 - Strudel versions are pinned: `@strudel/core`, `@strudel/mini`,
   `@strudel/tonal`, `@strudel/transpiler` at 1.2.6; `@strudel/web`,

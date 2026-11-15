@@ -144,3 +144,20 @@ Keep each entry to a few lines.
   a way from a planet into its settings.
 - **D43 (2026-11-12) Own code MIT; the hosted app meets Strudel's AGPL** by
   public source and an in-app notice.
+- **D44 (2026-11-15) Process reset.** Suite and case time limits are reported,
+  not enforced; a 60 s per-test timeout remains as hang protection. Doc word
+  budgets, mandatory recorded demos, metrics upkeep and the 400-line aim are
+  dropped. Deterministic gates stay. Replaces the budget parts of D16 and D27
+  and mandatory recording in D33; the real-piece check in D21 and combined
+  check in D28 stay.
+- **D45 (2026-11-15) Desktop only.** Accessibility and phone support are not
+  requirements. Replaces the touch-size part of D30.
+- **D46 (2026-11-15) Three skills.** Implementers follow `build`: gates, then a
+  bounded Opus code review. The lead follows `orchestrate` and judges intent
+  and effect, not code minutiae.
+- **D47 (2026-11-15) Redesign direction.** A single-screen desktop layout with
+  live views as the centre replaces D34; views may show settings and rewrites
+  (replaces D37). Five themes, Arcade default; many visualizations, each one
+  file behind a shared view contract. 3D views use three.js loaded on demand,
+  others Canvas 2D; the interface moves to React with shadcn/ui. Details land
+  with the wave.

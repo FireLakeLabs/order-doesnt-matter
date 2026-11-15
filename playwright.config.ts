@@ -4,6 +4,8 @@ const audio = /\/(engine|silent-swap)\.spec\.ts$/;
 const delivery = /@audio-delivery/;
 export default defineConfig({
   testDir: './tests/browser',
+  timeout: 60_000,
+  retries: 0,
   // Bound concurrent score-worker queries; audio clocks run afterward.
   workers: 3,
   use: {

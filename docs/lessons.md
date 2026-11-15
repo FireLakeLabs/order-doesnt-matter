@@ -49,13 +49,12 @@ something that went wrong at least once. Written 2026-11-12.
 
 - **An intermittent failure has a cause.** A test that failed one run in many
   was excluding a note starting exactly at cycle zero. Re-running hid it twice.
-- **Wait on signals, never on time,** and keep a hard budget per test and per
-  suite (D27). The budget is what made slow tests visible.
+- **Wait on signals, never on time.** Report suite and case durations; keep a
+  per-test timeout for hangs (D44). Hard suite budgets turned growth into rework.
 - **Strudel's web bundle carries its own scheduler.** Patching `@strudel/core`
   alone changes nothing in playback.
-- **Treat aggregate time budgets as a coverage policy.** When the suite grows,
-  report completed assertions and cutoff work before tuning. Get owner approval
-  for revised limits and test the new boundary.
+- **Keep duration visible without cutting off coverage** (D44). Report completed
+  assertions and timings; suite growth alone is not a reason to optimise.
 
 ## Working with the owner
 
@@ -65,3 +64,12 @@ something that went wrong at least once. Written 2026-11-12.
   private notes, and the owner could not see it.
 - **Ask early about things only the owner can judge** (how a delay feels, a
   default, a colour) and keep asking; several went unanswered for two phases.
+
+## Process, 2026-11-15
+
+- **A hard time budget with no escape turned test growth into optimisation work.**
+  PR #28: 18 commits, 30 browser runs; limits raised by exception on 11-15.
+- **Briefs must ask for delight.** None did, and one specified “conservative
+  defaults”; the owner's retrospective found the product plain and joyless.
+- **Verification paperwork did not earn its upkeep.** Write-ups and metrics grew
+  beyond the living docs without catching a defect the real-piece check did not.

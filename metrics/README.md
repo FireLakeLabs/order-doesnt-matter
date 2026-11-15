@@ -1,3 +1,5 @@
+`prs.csv` is frozen as of PR #69 and is no longer maintained.
+
 # Pull request metrics
 
 `prs.csv` records observations, not performance targets. Blank cells mean no

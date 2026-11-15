@@ -1,17 +1,13 @@
 import { mkdtempSync, rmSync, appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
 import { browserSummary, formatBrowserSummary } from './browser-summary.mjs';
-import { timingResult, BROWSER_LIMIT_SECONDS } from './timing.mjs';
-import { forwardBrowserSignals, killBrowserRun } from './browser-process.mjs';
+import { timingResult, formatTiming, BROWSER_WARN_SECONDS } from './timing.mjs';
+import { forwardBrowserSignals } from './browser-process.mjs';
 import { cacheBuiltAssets } from './browser-assets.mjs';
 const start = performance.now();
 const mode = process.argv[2] ?? 'ci';
 if (!['ci', 'online', 'demo', 'measure', 'edit-demo'].includes(mode))
   throw Error('Unknown browser mode');
-// ODM_BROWSER_LIMIT_SECONDS is a lower-only override for exercising the failure path.
-const limit = Number(process.env.ODM_BROWSER_LIMIT_SECONDS ?? BROWSER_LIMIT_SECONDS);
-if (!Number.isFinite(limit) || limit < 0 || limit > BROWSER_LIMIT_SECONDS)
-  throw Error('Invalid browser time limit');
 const outDir = mkdtempSync('.browser-build-');
 // Always retain the accounting reporter, including when the caller asks for JSON.
 const args = process.argv.slice(3);
@@ -74,19 +70,12 @@ try {
     child.stdout.pipe(process.stdout, { end: false });
     child.stderr.pipe(process.stderr, { end: false });
     const offSignals = forwardBrowserSignals(child);
-    const remaining = Math.max(0, limit * 1000 - (performance.now() - start));
-    const timer = setTimeout(() => {
-      console.error('Browser process exceeded wall budget');
-      killBrowserRun(child);
-    }, remaining);
     child.once('error', (error) => {
-      clearTimeout(timer);
       offSignals();
       reject(error);
     });
     // close also waits for inherited worker output pipes to close.
     child.once('close', (code) => {
-      clearTimeout(timer);
       offSignals();
       resolve(code ?? 1);
     });
@@ -109,13 +98,6 @@ try {
     console.error('Missing browser timing report', error);
     process.exitCode = 1;
   }
-  // Detect reporting guards before deleting evidence, then measure the complete
-  // command below including successful cleanup.
-  if (
-    (rows && !browserSummary(rows, 0, mode).ok) ||
-    !timingResult(start, performance.now(), limit).ok
-  )
-    process.exitCode ||= 1;
   if (process.exitCode) console.error(`Failed browser run retained: ${outDir}`);
   else {
     try {
@@ -126,18 +108,16 @@ try {
     }
   }
   console.log(`Browser phases (seconds): ${JSON.stringify(phases)}`);
-  const result = timingResult(start, performance.now(), limit);
-  const message = `Browser suite: ${result.seconds.toFixed(3)} s / ${limit} s — ${result.ok ? 'within budget' : 'OVER BUDGET'}`;
+  const result = timingResult(start, performance.now(), BROWSER_WARN_SECONDS);
+  const message = formatTiming('Browser', result, BROWSER_WARN_SECONDS);
   if (rows) {
-    const summary = browserSummary(rows, result.seconds, mode);
+    const summary = browserSummary(rows, result.seconds);
     const report = formatBrowserSummary(summary);
     console.log(report);
     if (process.env.GITHUB_STEP_SUMMARY)
       appendFileSync(process.env.GITHUB_STEP_SUMMARY, `\n\`\`\`text\n${report}\n\`\`\`\n`);
-    if (!summary.ok) process.exitCode = 1;
   }
   console.log(message);
   if (process.env.GITHUB_STEP_SUMMARY)
     appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${message}\n`);
-  if (!result.ok) process.exitCode = 1;
 }

@@ -17,7 +17,7 @@ export function killBrowserRun(child) {
   }
 }
 
-// Detaching isolates deadline kills; forward parent cancellation explicitly.
+// Detaching isolates cancellation; forward parent signals explicitly.
 export function forwardBrowserSignals(child) {
   const handlers = [
     ['SIGINT', 130],
