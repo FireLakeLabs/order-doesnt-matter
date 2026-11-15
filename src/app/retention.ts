@@ -9,6 +9,7 @@ export function createRetention(
   options: {
     storage?: () => Pick<Storage, 'getItem' | 'setItem'>;
     namespace?: string;
+    persistent?: boolean;
   } = {},
 ) {
   const storage = options.storage ?? (() => localStorage);
@@ -18,7 +19,7 @@ export function createRetention(
     last: Doc | null = null;
   let notice = 'Recovery on this device: ready after you load a piece.';
   try {
-    const text = storage().getItem(key);
+    const text = options.persistent === false ? null : storage().getItem(key);
     if (text !== null) {
       candidate = readDocument(text);
       notice = 'Work from your last visit is available. Recover it, or load another piece.';
@@ -26,6 +27,9 @@ export function createRetention(
   } catch {
     notice = 'Recovery could not be read on this device. Download a document to keep your work.';
   }
+  if (options.persistent === false)
+    notice =
+      'Practice is not saved to recovery. History and unfinished input are kept in memory only.';
   return {
     get candidate() {
       return candidate;
@@ -40,6 +44,7 @@ export function createRetention(
       candidate = null;
     },
     record(doc: Doc | null) {
+      if (options.persistent === false) return;
       if (!doc || doc === last || suspended || candidate) return;
       last = doc;
       try {

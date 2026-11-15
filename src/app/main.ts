@@ -38,7 +38,7 @@ document.body.innerHTML = `
 const aboutDialog = mountAbout();
 const keep = mountKeep(app);
 const get = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id)! as T;
-const source = get<HTMLTextAreaElement>('source'),
+let source = get<HTMLTextAreaElement>('source'),
   score = get('score');
 const paste = get<HTMLButtonElement>('paste'),
   panel = get('paste-panel');
@@ -89,8 +89,11 @@ function closeEditor() {
   renderEditor();
   (liveOrigin?.isConnected ? liveOrigin : originCell())?.focus();
 }
-const renderPanel = createPanel(get('editor'), closeEditor);
+let renderPanel = createPanel(get('editor'), closeEditor);
+let entryLocked = false;
 function renderEditor() {
+  if (entryLocked) return;
+  const owner = app.editor;
   const { doc, playing, fromCycle, toCycle } = app.state;
   const target = doc && targetId ? describeTarget(doc, targetId) : null;
   get('score-workspace').classList.toggle('editing', !!target);
@@ -114,7 +117,9 @@ function renderEditor() {
             : undefined,
           window: { fromCycle: app.state.fromCycle, toCycle: app.state.toCycle },
           pending: entry?.status ?? 'none',
+          submit: (work) => owner!.submit(work),
           apply: (next, options) => {
+            if (app.editor !== owner) return;
             const oldRows = app.state.rows;
             const oldIndex = oldRows.findIndex((r) => r.id === targetId);
             if (options?.selection !== undefined) targetId = options.selection ?? null;
@@ -129,7 +134,7 @@ function renderEditor() {
                 ?.focus({ preventScroll: true });
             }
           },
-          ask: (candidate, id) => app.editor!.ask(candidate, id, fromCycle, toCycle),
+          ask: (candidate, id) => owner!.ask(candidate, id, fromCycle, toCycle),
         }
       : null,
     entry,
@@ -199,6 +204,76 @@ document.addEventListener('keydown', (event) => {
     else app.editor?.undo();
   }
 });
+// Entry fences blur commits before moving focus. Park the actual mounted kind,
+// including its closures, errors, selection and scroll; never serialize a form.
+get('editor').addEventListener(
+  'change',
+  (event) => {
+    if (entryLocked) {
+      event.stopImmediatePropagation();
+    }
+  },
+  true,
+);
+function parkOriginal() {
+  const saved = {
+    source,
+    score,
+    renderPanel,
+    targetId,
+    origin,
+    liveOrigin,
+    selectedSession,
+    previousSheet,
+    previousNotes,
+    editNotice,
+    editor: get('editor'),
+    pasteHidden: panel.hidden,
+    keepHidden: get('keep-panel').hidden,
+    scroll: [window.scrollX, window.scrollY],
+  };
+  for (const id of ['source', 'score', 'editor'] as const) {
+    const node = saved[id],
+      replacement = document.createElement(node.tagName);
+    replacement.id = id;
+    if (id === 'editor') replacement.hidden = true;
+    node.replaceWith(replacement);
+  }
+  source = get<HTMLTextAreaElement>('source');
+  score = get('score');
+  renderPanel = createPanel(get('editor'), closeEditor);
+  targetId = null;
+  origin = null;
+  liveOrigin = null;
+  selectedSession = null;
+  previousSheet = [];
+  previousNotes = undefined;
+  editNotice = undefined;
+  panel.hidden = false;
+  get('keep-panel').hidden = true;
+  entryLocked = false;
+  return () => {
+    renderPanel(null, undefined, false);
+    for (const id of ['source', 'score', 'editor'] as const) get(id).replaceWith(saved[id]);
+    ({
+      source,
+      score,
+      renderPanel,
+      targetId,
+      origin,
+      liveOrigin,
+      selectedSession,
+      previousSheet,
+      previousNotes,
+      editNotice,
+    } = saved);
+    panel.hidden = saved.pasteHidden;
+    get('keep-panel').hidden = saved.keepHidden;
+    paste.setAttribute('aria-expanded', String(!panel.hidden));
+    get('keep').setAttribute('aria-expanded', String(!get('keep-panel').hidden));
+    window.scrollTo(...(saved.scroll as [number, number]));
+  };
+}
 let previousLiveRows = '';
 let previousNotes: unknown;
 let previousSheet: unknown[] = [];

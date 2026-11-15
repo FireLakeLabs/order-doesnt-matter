@@ -60,6 +60,7 @@ export default {
       slider.oninput = () => edit(fromSlider(info, Number(slider!.value)), gesture);
       body.append(slider);
     }
+    let draft = false;
     const field = input(
       typeof target.value === 'boolean'
         ? 'checkbox'
@@ -77,7 +78,11 @@ export default {
         } else step(event);
       };
     }
+    field.oninput = () => {
+      draft = true;
+    };
     field.onchange = () => {
+      draft = false;
       if (field!.type === 'number') {
         if (field!.value.trim() && Number.isFinite(field!.valueAsNumber))
           edit(field!.valueAsNumber);
@@ -101,7 +106,7 @@ export default {
         if (field.type === 'checkbox') field.checked = target.value === true;
         else if (
           valueChanged ||
-          document.activeElement !== field ||
+          !draft ||
           field.value === String(target.value) ||
           context.pending === 'failed'
         )

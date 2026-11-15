@@ -43,9 +43,12 @@ export default {
     actions.append(apply, revert);
     form.append(fieldLabel('Source text', field), actions, error, status);
     body.append(form);
-    form.onsubmit = async (event) => {
+    form.onsubmit = (event) => {
       event.preventDefault();
       if (busy) return;
+      void (context.submit ?? ((work) => work()))(check);
+    };
+    async function check() {
       const before = context.doc,
         id = context.target.nodeId,
         text = field.value;
@@ -56,17 +59,17 @@ export default {
       const result = await prepareSource(before, id, text, context.ask);
       busy = false;
       apply.disabled = revert.disabled = false;
-      if (disposed) return;
+      if (disposed) return false;
       if (context.doc !== before) {
         status.textContent =
           'The piece changed while checking. Your text is kept; apply again when ready.';
-        return;
+        return false;
       }
       field.setAttribute('aria-invalid', String('ok' in result));
       if ('ok' in result) {
         error.textContent = result.reason;
         status.textContent = '';
-        return;
+        return false;
       }
       const { doc: chosen, broken, promoted } = result;
       context.apply(chosen);
@@ -76,7 +79,8 @@ export default {
         promoted && native.kind !== 'source'
           ? 'Applied. This is now editable in its own editor.'
           : 'Applied. Your source text is kept.';
-    };
+      return !broken;
+    }
     return {
       update(next: EditorContext) {
         context = next;

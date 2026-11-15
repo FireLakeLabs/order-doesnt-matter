@@ -39,6 +39,14 @@ export function createEditSession(doc: Doc, ports: Ports) {
     last = -Infinity;
   let queued: { doc: Doc; token: number; targets: string[] } | undefined;
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let operation = { serial: 0, kind: 'load' };
+  const submissions = new Set<Promise<unknown>>();
+  const waiters = new Set<() => void>();
+  let failure = false,
+    suspended = false;
+  const wake = () => {
+    for (const done of waiters) done();
+  };
   const emit = () => ports.changed(p);
   function cancel() {
     epoch++;
@@ -65,12 +73,16 @@ export function createEditSession(doc: Doc, ports: Ports) {
     last = performance.now();
     ports.refresh(work.doc, work.targets);
     try {
-      const revision = await ports.play(work.doc);
+      const revision = ports.playing() ? await ports.play(work.doc) : -1;
       if (generation !== epoch) return;
-      p = transition(p, { type: 'sent', ...work, revision });
+      p =
+        revision < 0
+          ? transition(p, { type: 'clear' })
+          : transition(p, { type: 'sent', ...work, revision });
       emit();
     } catch (error) {
       if (generation !== epoch) return;
+      failure = true;
       const before = p.doc;
       p = transition(p, {
         type: 'failed',
@@ -117,6 +129,7 @@ export function createEditSession(doc: Doc, ports: Ports) {
     } finally {
       running = false;
       schedule();
+      wake();
     }
   }
   function install(next: Doc, selected?: string) {
@@ -157,9 +170,52 @@ export function createEditSession(doc: Doc, ports: Ports) {
     } else ports.refresh(next, rows);
   }
   return {
+    suspend(value: boolean) {
+      suspended = value;
+      if (value) p = transition(p, { type: 'clear' });
+    },
+    /** Includes source validation and rollback, but never waits for a sparse note. */
+    async settle(): Promise<boolean> {
+      while (submissions.size || running || queued || timer) {
+        if (submissions.size) await Promise.allSettled([...submissions]);
+        else
+          await new Promise<void>((resolve) => {
+            const done = () => {
+              waiters.delete(done);
+              resolve();
+            };
+            waiters.add(done);
+          });
+      }
+      return !failure && !Object.values(p.entries).some((e) => e.status === 'failed');
+    },
+    submit(work: () => Promise<boolean>) {
+      if (suspended) return Promise.resolve(false);
+      const task = work().then(
+        (ok) => {
+          failure = !ok;
+          return ok;
+        },
+        (error) => {
+          failure = true;
+          throw error;
+        },
+      );
+      submissions.add(task);
+      void task
+        .finally(() => {
+          submissions.delete(task);
+          wake();
+        })
+        .catch(() => {});
+      return task;
+    },
     ask(candidate: Doc, instrumentId: string, from: number, to: number) {
       questions.cancel();
       return questions.query(generate(candidate, { only: instrumentId }), from, to);
+    },
+    get operation() {
+      return operation;
     },
     get state() {
       return p;
@@ -171,21 +227,31 @@ export function createEditSession(doc: Doc, ports: Ports) {
       return !!h.future.length;
     },
     apply(next: Doc, options: { gesture?: string } = {}, target?: string) {
-      if (next === p.doc) return;
+      if (suspended || next === p.doc) return;
+      failure = false;
+      operation = { serial: operation.serial + 1, kind: 'edit' };
       h = push(h, next, 'document', options.gesture);
       install(next, target);
     },
     edit(id: string, value: Constant, gesture?: string) {
+      if (suspended) return;
+      failure = false;
       const next = setConstant(p.doc, id, value);
       if ('ok' in next || next === p.doc) return;
       h = push(h, next, id, gesture);
       install(next, id);
     },
     undo() {
+      if (suspended) return;
+      failure = false;
+      operation = { serial: operation.serial + 1, kind: 'undo' };
       h = undo(h);
       install(h.present);
     },
     redo() {
+      if (suspended) return;
+      failure = false;
+      operation = { serial: operation.serial + 1, kind: 'redo' };
       h = redo(h);
       install(h.present);
     },
@@ -198,10 +264,19 @@ export function createEditSession(doc: Doc, ports: Ports) {
       p = next;
       if ((event.type !== 'progress' && event.type !== 'trigger') || changed) emit();
     },
+    stopped() {
+      // Stop clears display feedback, not submitted documents. A queued candidate
+      // still drains (as a stopped edit); running cancellation settles in finally.
+      p = transition(p, { type: 'clear' });
+      emit();
+      schedule();
+      wake();
+    },
     clear() {
       cancel();
       p = transition(p, { type: 'clear' });
       emit();
+      wake();
     },
     dispose() {
       cancel();
