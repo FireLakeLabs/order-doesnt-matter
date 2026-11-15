@@ -53,10 +53,12 @@ export function sectionAt(frame: Pick<ViewFrame, 'sections' | 'now'>) {
 /** Long held notes earn radial weight. Even 20 bands fit at >=10 px on a 760 px stage. */
 export function bandLayout(frame: ViewFrame, previous = false): Band[] {
   const section = sectionAt(frame);
-  const cycle = previous && section ? section.from - 1 : Math.floor(frame.now);
+  const cycle = section ? section.from - 1 : Math.floor(frame.now) - 1;
+  const from = previous ? cycle : (section?.from ?? frame.from);
+  const to = previous ? cycle + 1 : (section?.to ?? frame.to);
   const stats = new Map<string, { count: number; duration: number }>();
   for (const note of frame.notes) {
-    const duration = Math.min(cycle + 1, note.end) - Math.max(cycle, note.start);
+    const duration = Math.min(to, note.end) - Math.max(from, note.start);
     if (duration <= 0) continue;
     const stat = stats.get(note.instrument) ?? { count: 0, duration: 0 };
     stat.count++;
@@ -97,6 +99,19 @@ export function bandLayout(frame: ViewFrame, previous = false): Band[] {
     })),
   ];
 }
+export function ghostBand(band: Band, bands: readonly Band[], pixelRadius: number) {
+  const inner = band.radius + band.width / 2;
+  let outer = 1.02;
+  for (const other of bands) {
+    if (other.id !== band.id && other.radius >= band.radius)
+      outer = Math.min(outer, other.radius - other.width / 2);
+  }
+  const gap = Math.max(0, outer - inner);
+  return {
+    radius: inner + gap / 2,
+    width: Math.min(Math.max(1.25 / pixelRadius, band.width * 0.075), gap * 0.65),
+  };
+}
 export function sectionEase(frame: ViewFrame) {
   const section = sectionAt(frame);
   const t =
@@ -130,13 +145,23 @@ export function occupancy(arcs: readonly Arc[], size = TEXTURE_SIZE) {
 }
 /** Unit annulus strips: radius/width are uniforms so section changes need no mesh rebuild. */
 export function arcVertices(arcs: readonly Arc[], depth = 0.012) {
-  const positions: number[] = [];
-  const timing: number[] = [];
-  const surfaces: number[] = [];
+  const stepsFor = (arc: Arc) => Math.max(1, Math.ceil((arc.to - arc.from) * 128));
+  const length = arcs.reduce((count, arc) => count + stepsFor(arc) * 54, 0);
+  const positions = new Float32Array(length);
+  const timing = new Float32Array(length);
+  const surfaces = new Float32Array(length);
+  let offset = 0;
   const vertex = (time: number, radial: number, z: number, arc: Arc, shade: number) => {
-    positions.push(time * TAU, radial, z);
-    timing.push(arc.start, arc.end, arc.onset ? 1 : 0);
-    surfaces.push(time, radial + 0.5, shade);
+    positions[offset] = time * TAU;
+    positions[offset + 1] = radial;
+    positions[offset + 2] = z;
+    timing[offset] = arc.start;
+    timing[offset + 1] = arc.end;
+    timing[offset + 2] = arc.onset ? 1 : 0;
+    surfaces[offset] = time;
+    surfaces[offset + 1] = radial + 0.5;
+    surfaces[offset + 2] = shade;
+    offset += 3;
   };
   const quad = (
     a: number,
@@ -156,7 +181,7 @@ export function arcVertices(arcs: readonly Arc[], depth = 0.012) {
     vertex(a, r1, z1, arc, shade);
   };
   for (const arc of arcs) {
-    const steps = Math.max(1, Math.ceil((arc.to - arc.from) * 512));
+    const steps = stepsFor(arc);
     for (let step = 0; step < steps; step++) {
       const a = arc.from + ((arc.to - arc.from) * step) / steps;
       const b = arc.from + ((arc.to - arc.from) * (step + 1)) / steps;
@@ -165,9 +190,5 @@ export function arcVertices(arcs: readonly Arc[], depth = 0.012) {
       quad(a, b, -0.5, -0.5, 0, depth, arc, 0.55);
     }
   }
-  return {
-    positions: new Float32Array(positions),
-    timing: new Float32Array(timing),
-    surfaces: new Float32Array(surfaces),
-  };
+  return { positions, timing, surfaces };
 }

@@ -2,6 +2,7 @@ import type { ViewDefinition, ViewFrame, ViewNote, ViewTheme } from './types';
 import {
   arcVertices,
   bandLayout,
+  ghostBand,
   cycleArcs,
   DENSE_AT,
   occupancy,
@@ -299,19 +300,19 @@ const view: ViewDefinition = {
           camera.aspect = width / height;
           camera.updateProjectionMatrix();
         }
-        if (
-          lastNotes !== frame.notes ||
-          lastCycle !== cycle ||
-          lastInventory !== inventory ||
-          resized
-        ) {
+        const scoreChanged = lastNotes !== frame.notes || lastInventory !== inventory;
+        const cycleChanged = lastCycle !== cycle;
+        if (scoreChanged || cycleChanged) {
           const grouped = new Map<string, ViewNote[]>();
           for (const note of frame.notes) {
             const group = grouped.get(note.instrument) ?? [];
             group.push(note);
             grouped.set(note.instrument, group);
           }
-          if (lastInventory !== inventory) {
+          if (
+            bands.length !== frame.instruments.length ||
+            bands.some((band, index) => band.id !== frame.instruments[index].id)
+          ) {
             bands.forEach(releaseBand);
             bands.length = 0;
             for (const instrument of frame.instruments) {
@@ -333,11 +334,13 @@ const view: ViewDefinition = {
             populate(band.current, cycleArcs(notes, cycle));
             populate(band.next, cycleArcs(notes, cycle + 1));
           }
-          layout = new Map(bandLayout(frame).map((band) => [band.id, band]));
-          previous = new Map(bandLayout(frame, true).map((band) => [band.id, band]));
           lastNotes = frame.notes;
           lastCycle = cycle;
           lastInventory = inventory;
+        }
+        if (scoreChanged || cycleChanged || resized) {
+          layout = new Map(bandLayout(frame).map((band) => [band.id, band]));
+          previous = new Map(bandLayout(frame, true).map((band) => [band.id, band]));
         }
         const theme = frame.theme;
         if (lastTheme !== theme) {
@@ -352,8 +355,10 @@ const view: ViewDefinition = {
           lastTheme = theme;
         }
         const size = Math.min(width, height);
-        count.style.fontSize = `${String(size * 0.11)}px`;
-        section.style.fontSize = `${String(Math.max(9, size * 0.018))}px`;
+        if (resized) {
+          count.style.fontSize = `${String(size * 0.11)}px`;
+          section.style.fontSize = `${String(Math.max(9, size * 0.018))}px`;
+        }
         const cycleText = String(cycle + 1);
         if (count.textContent !== cycleText) count.textContent = cycleText;
         const sectionText = sectionAt(frame)?.name ?? 'cycle';
@@ -365,26 +370,32 @@ const view: ViewDefinition = {
           (1 / (0.84 * Math.tan((35 * Math.PI) / 360))) * Math.max(1, height / width),
         );
         camera.lookAt(0, 0, 0);
-        quarterTicks.rotation.z = ringAngle(frame.now, cycle);
+        quarterTicks.rotation.z = -ringAngle(cycle, frame.now);
         disc.rotation.x = ((18 + Math.sin(frame.now / 64) * 2) * Math.PI) / 180;
+        const easedBands = [...layout.values()].map((target) => {
+          const before = previous.get(target.id) ?? target;
+          return {
+            ...target,
+            radius: THREE.MathUtils.lerp(before.radius, target.radius, easing),
+            width: THREE.MathUtils.lerp(before.width, target.width, easing),
+          };
+        });
         for (let index = 0; index < bands.length; index++) {
           const band = bands[index];
           const instrument = frame.instruments[index];
-          const target = layout.get(band.id);
+          const target = easedBands.find((pose) => pose.id === band.id);
           if (!target) continue;
-          const before = previous.get(band.id) ?? target;
-          const radius = THREE.MathUtils.lerp(before.radius, target.radius, easing);
-          const thickness = THREE.MathUtils.lerp(before.width, target.width, easing);
+          const { radius, width: thickness } = target;
+          const ghost = ghostBand(target, easedBands, size * 0.42);
           band.track.scale.set(radius, radius, 1);
           band.track.material.color.set(target.resting ? theme.muted : theme.line);
           band.track.material.opacity = target.resting ? 0.32 : 0.55;
           band.current.mesh.visible = !target.resting;
-          band.next.mesh.visible = true;
+          band.next.mesh.visible = ghost.width > 0;
           for (const layer of [band.current, band.next]) {
             const u = layer.material.uniforms;
-            u.radius.value = radius + (layer === band.next ? thickness * 0.58 : 0);
-            u.bandWidth.value =
-              layer === band.next ? Math.max(1.25 / (size * 0.42), thickness * 0.075) : thickness;
+            u.radius.value = layer === band.next ? ghost.radius : radius;
+            u.bandWidth.value = layer === band.next ? ghost.width : thickness;
             u.phase.value = phase;
             u.now.value = phase;
             u.flashDuration.value = Math.max(0.00001, frame.cps * 0.15);

@@ -268,11 +268,19 @@ test('Ring visual evidence: 300-frame CPU measurement', async ({ page }) => {
     // Reselect Arcade for the measured glow path.
     const theme = { ...frame.theme };
     const costs: number[] = [];
+    const seams: { cycle: number; cost: number }[] = [];
+    let previousCycle = Math.floor(10.4);
     for (let i = 0; i < 310; i++) {
       await new Promise(requestAnimationFrame);
       const start = performance.now();
-      handle.frame({ ...frame, theme, now: 10.4 + (i * frame.cps) / 60 });
-      if (i >= 10) costs.push(performance.now() - start);
+      const now = 10.4 + (i * frame.cps) / 60;
+      handle.frame({ ...frame, theme, now });
+      const cost = performance.now() - start;
+      if (i >= 10) {
+        costs.push(cost);
+        if (Math.floor(now) !== previousCycle) seams.push({ cycle: Math.floor(now), cost });
+      }
+      previousCycle = Math.floor(now);
     }
     costs.sort((a, b) => a - b);
     return {
@@ -280,6 +288,7 @@ test('Ring visual evidence: 300-frame CPU measurement', async ({ page }) => {
       median: (costs[149] + costs[150]) / 2,
       p95: costs[285],
       max: costs[299],
+      seams,
       width: frame.width,
       height: frame.height,
       dpr: frame.dpr,

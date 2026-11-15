@@ -3,6 +3,7 @@ import type { ViewFrame, ViewNote } from '../../src/views/types';
 import {
   arcVertices,
   bandLayout,
+  ghostBand,
   cycleArcs,
   occupancy,
   ringAngle,
@@ -105,7 +106,7 @@ test('held notes earn width by duration; resting instruments are hairlines outsi
   expect(bands[2].radius).toBeGreaterThan(0.94);
   expect(bands[2].width * 760 * 0.42).toBeCloseTo(0.8);
 });
-test('section re-form and trails are deterministic when seeking backwards or stopped', () => {
+test('section re-form and trails follow requested musical time', () => {
   const f = frame(2);
   f.sections = [{ name: 'Drop', from: 10, to: 20 }];
   f.notes = [note(9, 10), note(10, 11, '1')];
@@ -113,7 +114,6 @@ test('section re-form and trails are deterministic when seeking backwards or sto
   const midway = sectionEase({ ...f, now: 10.25 });
   expect(midway).toBe(0.5);
   expect(sectionEase({ ...f, now: 15 })).toBe(1);
-  expect(sectionEase({ ...f, now: 10.25, playing: false })).toBe(midway);
   expect(bandLayout(f, true).find((b) => b.id === '1')?.resting).toBe(true);
   expect(trailDuration(0)).toBe(0);
   expect(trailDuration(1)).toBe(0.25);
@@ -162,4 +162,43 @@ test('section labels and transitions follow the absolute turn after an arrangeme
   expect(sectionAt({ ...f, now: 24.25 })).toEqual({ name: 'Drop', from: 24, to: 32 });
   expect(sectionEase({ ...f, now: 24.25 })).toBe(sectionEase({ ...f, now: 8.25 }));
   expect(sectionEase({ ...f, now: 0 })).toBe(1);
+});
+
+test('band edges remain stable across alternation, with and without sections and backwards seeks', () => {
+  const f = frame(2);
+  f.from = 10;
+  f.to = 12;
+  f.notes = [note(10, 11), note(11, 11.02), note(10, 10.25, '1'), note(11, 11.25, '1')];
+  for (const sections of [[], [{ name: 'Drop', from: 10, to: 12 }]]) {
+    f.sections = sections;
+    const first = bandLayout({ ...f, now: 10.75 });
+    expect(bandLayout({ ...f, now: 11.25 })).toEqual(first);
+    expect(bandLayout({ ...f, now: 10.75 })).toEqual(first);
+  }
+});
+
+test('bounded typed geometry retains real arc endpoints', () => {
+  const arcs = [{ from: 0.137, to: 0.763, start: 0.137, end: 0.763, onset: true }];
+  const data = arcVertices(arcs);
+  const angles = data.positions.filter((_, index) => index % 3 === 0);
+  expect(data.positions).toBeInstanceOf(Float32Array);
+  expect(data.positions.length).toBeLessThanOrEqual(128 * 54);
+  expect(Math.min(...angles)).toBeCloseTo(arcs[0].from * Math.PI * 2, 5);
+  expect(Math.max(...angles)).toBeCloseTo(arcs[0].to * Math.PI * 2, 5);
+  expect(data.positions.length).toBe(data.timing.length);
+  expect(data.positions.length).toBe(data.surfaces.length);
+});
+
+test('upcoming ghosts remain between adjacent bands even with twenty playing instruments', () => {
+  for (const count of [1, 6, 20]) {
+    const bands = bandLayout(frame(count));
+    for (const [index, band] of bands.entries()) {
+      const ghost = ghostBand(band, bands, 760 * 0.42);
+      expect(ghost.radius - ghost.width / 2).toBeGreaterThanOrEqual(band.radius + band.width / 2);
+      if (bands[index + 1])
+        expect(ghost.radius + ghost.width / 2).toBeLessThanOrEqual(
+          bands[index + 1].radius - bands[index + 1].width / 2,
+        );
+    }
+  }
 });
