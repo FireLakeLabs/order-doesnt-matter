@@ -53,6 +53,7 @@ export interface FrameInput {
   score: ScoreWindow;
   notes: ViewNote[];
   now: number;
+  cps?: number;
   theme: ViewTheme;
   lookAhead: number;
   trails: 0 | 1 | 2;
@@ -74,10 +75,11 @@ export function buildFrame(input: FrameInput): ViewFrame {
     toCycle: score.to,
   });
   const { names } = instrumentInventory(state);
+  const members = sectionMembership(state, now);
   return {
     now,
     playing: state.playing,
-    cps: state.cps ?? 0.5,
+    cps: input.cps ?? state.cps ?? 0.5,
     notes,
     from: score.from,
     to: score.to,
@@ -96,7 +98,7 @@ export function buildFrame(input: FrameInput): ViewFrame {
             note.start <= now &&
             note.end > now,
         ),
-      inSection: instrument.inSection,
+      inSection: members?.has(instrument.id) ?? instrument.inSection,
       muted: instrument.silenced,
     })),
     sections: state.sections.map((section) => ({
@@ -112,4 +114,42 @@ export function buildFrame(input: FrameInput): ViewFrame {
     height,
     dpr,
   };
+}
+
+/** Use score ancestry, independent of mute/solo and the editor's pinned section. */
+export function sectionMembership(
+  state: Pick<AppState, 'rows' | 'sections'>,
+  now: number,
+): Set<string> | null {
+  const last = state.sections.at(-1);
+  if (!last) return null;
+  const length = last.start + last.cycles;
+  const cycle = ((now % length) + length) % length;
+  const section = state.sections.find(
+    (part) => cycle >= part.start && cycle < part.start + part.cycles,
+  );
+  if (!section) return null;
+  return new Set(
+    state.rows
+      .filter((row) => row.uses.some((use) => use.path.some((node) => node.id === section.id)))
+      .map((row) => row.id),
+  );
+}
+export function playingSplit(state: Pick<AppState, 'rows' | 'sections'>, now: number) {
+  const members = sectionMembership(state, now);
+  return {
+    playing: state.rows.filter((row) => !members || members.has(row.id)),
+    resting: state.rows.filter((row) => members && !members.has(row.id)),
+  };
+}
+/** A scored-note level, not an audio measurement. Polyphony adds energy. */
+export function noteLevel(notes: ViewNote[], instrument: string, now: number): number {
+  const power = notes.reduce((sum, note) => {
+    if (note.instrument !== instrument || !note.hasOnset || note.start > now || note.end <= now)
+      return sum;
+    const gain =
+      typeof note.value.gain === 'number' && Number.isFinite(note.value.gain) ? note.value.gain : 1;
+    return sum + gain * gain;
+  }, 0);
+  return Math.min(1, Math.sqrt(power));
 }
