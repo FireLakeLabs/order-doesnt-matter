@@ -48,39 +48,8 @@ async function prepare(page: Page, source: string) {
     .route('**/studio-sounds/burst.wav', (route) =>
       route.fulfill({ path: 'tests/fixtures/sounds/burst.wav', contentType: 'audio/wav' }),
     );
-  await page.goto('/studio.html?inspect&a=test-card&b=&theme=arcade');
-  await page.waitForFunction(() => window.odmStudio.app.canPlay);
-  await page.evaluate(async (source) => {
-    await window.odmStudio.load(source);
-  }, source);
-  await page.waitForFunction(() =>
-    performance.getEntriesByType('resource').some((entry) => /\/ring\.view-/.test(entry.name)),
-  );
-  // Wrap the public definition from its actual built module, before the host mounts it.
-  await page.evaluate(async () => {
-    const url = performance
-      .getEntriesByType('resource')
-      .find((entry) => /\/ring\.view-/.test(entry.name))!.name;
-    const { default: definition } = (await import(/* @vite-ignore */ url)) as {
-      default: ViewDefinition;
-    };
-    window.ringTest = { costs: [], listeners: 0, definition };
-    const original = definition.mount;
-    definition.mount = async (element) => {
-      const handle = await original(element);
-      window.ringTest.handle = handle;
-      return {
-        frame(frame) {
-          window.ringTest.frame = frame;
-          const start = performance.now();
-          handle.frame(frame);
-          window.ringTest.costs.push(performance.now() - start);
-        },
-        dispose() {
-          handle.dispose();
-        },
-      };
-    };
+  await page.addInitScript(() => {
+    window.ringTest = { costs: [], listeners: 0 };
     const add = EventTarget.prototype.addEventListener;
     const remove = EventTarget.prototype.removeEventListener;
     EventTarget.prototype.addEventListener = function (type, callback, options) {
@@ -92,15 +61,60 @@ async function prepare(page: Page, source: string) {
       return remove.call(this, type, callback, options);
     };
   });
+  // Instrument the actual built definition before the query-selected view mounts.
+  await page.route('**/assets/ring.view-*.js', async (route) => {
+    const response = await route.fetch();
+    const body = await response.text();
+    const name = body.match(/export\{([\w$]+) as default\}/)?.[1];
+    if (!name) throw Error('The built Ring module has no default definition');
+    await route.fulfill({
+      response,
+      body:
+        body +
+        `
+      const ringProbeDefinition = ${name};
+      window.ringTest.definition = ringProbeDefinition;
+      const ringProbeMount = ringProbeDefinition.mount;
+      ringProbeDefinition.mount = async (element) => {
+        const handle = await ringProbeMount(element);
+        window.ringTest.handle = handle;
+        return {
+          frame(frame) {
+            window.ringTest.frame = frame;
+            const start = performance.now();
+            handle.frame(frame);
+            window.ringTest.costs.push(performance.now() - start);
+          },
+          dispose() { handle.dispose(); }
+        };
+      };
+    `,
+    });
+  });
+  await page.goto('/studio.html?inspect&a=test-card&b=&theme=arcade');
+  await page.waitForFunction(() => window.odmStudio.app.canPlay);
   expect(
     await page.evaluate(() =>
       performance.getEntriesByType('resource').some((entry) => /three\.module-/.test(entry.name)),
     ),
   ).toBe(false);
-  await select(page, 'Ring');
+  await page.goto('/studio.html?inspect&a=ring&b=&theme=arcade');
+  await page.waitForFunction(() => window.odmStudio.app.canPlay);
+  await page.evaluate(async (source) => {
+    await window.odmStudio.load(source);
+    window.ringTest.frame = undefined;
+  }, source);
   await page.waitForFunction(() => !!window.ringTest.handle);
   await expect(page.locator('[data-ring]')).toHaveCount(1);
-  await page.waitForFunction(() => (window.ringTest.frame?.notes.length ?? 0) > 0);
+  await expect(page.locator('[data-region="stage-a"] .view-host')).toHaveAttribute(
+    'data-score-ready',
+    'true',
+  );
+  await page.waitForFunction(
+    () =>
+      (window.ringTest.frame?.notes.length ?? 0) > 0 &&
+      window.ringTest.frame?.instruments.length === window.odmStudio.app.state.rows.length,
+  );
 }
 
 test('Ring: real arrangement, changing pixels, themes and disposable lifetime', async ({
