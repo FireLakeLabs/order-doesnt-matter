@@ -22,20 +22,29 @@ async function frames(page: Page, count = 3) {
 }
 async function select(page: Page, name: string) {
   const previous = await page.locator('[data-region="stage-a"] canvas').elementHandle();
-  await page.getByRole('button', { name: 'Views', exact: true }).click();
-  await page.getByRole('dialog').getByRole('button', { name }).click();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page
+    .locator('[data-region="stage-a"]')
+    .getByRole('button', { name: 'Views', exact: true })
+    .click();
+  await page
+    .locator('[data-region="stage-a"] .shelf-popover')
+    .getByRole('button', { name, exact: true })
+    .click();
+  await expect(page.locator('[data-region="stage-a"] .shelf-popover')).toHaveCount(0);
   if (previous) {
     await page.waitForFunction((canvas) => !canvas.isConnected, previous);
     await previous.dispose();
   }
   await expect(page.locator('[data-region="stage-a"] canvas')).toHaveCount(1);
   await page.waitForFunction(
-    () => document.querySelector('.view-host')?.getAttribute('data-score-ready') === 'true',
+    () =>
+      document
+        .querySelector('[data-region="stage-a"] .view-host')
+        ?.getAttribute('data-score-ready') === 'true',
     undefined,
     { timeout: 0 },
   );
-  if (name === 'Loom whole song')
+  if (name === 'Loom on Stage A')
     await page.waitForFunction(() => (window.loomProbe.latest?.notes.length ?? 0) > 0);
 }
 async function load(page: Page, path: string) {
@@ -45,7 +54,10 @@ async function load(page: Page, path: string) {
   );
   await frames(page);
   await page.waitForFunction(
-    () => document.querySelector('.view-host')?.getAttribute('data-score-ready') === 'true',
+    () =>
+      document
+        .querySelector('[data-region="stage-a"] .view-host')
+        ?.getAttribute('data-score-ready') === 'true',
     undefined,
     { timeout: 0 },
   );
@@ -97,17 +109,14 @@ test('Loom: real arrangement, cache cost, five themes, lifecycle, no-section and
     route.fulfill({ path: 'tests/fixtures/sounds/burst.wav', contentType: 'audio/wav' }),
   );
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/studio.html?inspect');
+  await page.goto('/studio.html?a=loom&theme=arcade&b=&inspect');
   await page.waitForFunction(() => window.odmStudio.app.canPlay);
-  await page.getByRole('button', { name: 'Views', exact: true }).click();
-  await expect(
-    page.getByRole('dialog').getByRole('button', { name: 'Loom whole song' }),
-  ).toBeVisible();
+  await expect(page.locator('[data-region="stage-a"] canvas')).toHaveCount(1);
   await page.evaluate(async () => {
     const resource = performance
       .getEntriesByType('resource')
       .find((entry) => /\/loom\.view-[^/]+\.js/.test(entry.name));
-    if (!resource) throw Error('Loom chunk was not loaded by the shelf');
+    if (!resource) throw Error('Loom chunk was not loaded by the stage');
     const module = (await import(resource.name)) as { default: ViewDefinition };
     const definition = module.default;
     const original = definition.mount;
@@ -126,7 +135,9 @@ test('Loom: real arrangement, cache cost, five themes, lifecycle, no-section and
       };
     };
   });
-  await page.getByRole('dialog').getByRole('button', { name: 'Loom whole song' }).click();
+  // Remount through the shell to capture host frames for the comparison and profiling stage.
+  await select(page, 'Test card on Stage A');
+  await select(page, 'Loom on Stage A');
   await load(page, 'corpus/programs/real-dubstep-arranged.strudel');
   expect(
     await page.evaluate(() => ({
@@ -158,13 +169,13 @@ test('Loom: real arrangement, cache cost, five themes, lifecycle, no-section and
   expect((await canvas.screenshot()).equals(stopped)).toBe(true);
 
   // Exercise actual stage swap ownership, collecting garbage before listener counts.
-  await select(page, 'Test card diagnostic');
-  await select(page, 'Loom whole song');
+  await select(page, 'Test card on Stage A');
+  await select(page, 'Loom on Stage A');
   const cdp = await context.newCDPSession(page);
   await cdp.send('HeapProfiler.collectGarbage');
   const listeners = (await cdp.send('Memory.getDOMCounters')).jsEventListeners;
-  await select(page, 'Test card diagnostic');
-  await select(page, 'Loom whole song');
+  await select(page, 'Test card on Stage A');
+  await select(page, 'Loom on Stage A');
   await cdp.send('HeapProfiler.collectGarbage');
   expect((await cdp.send('Memory.getDOMCounters')).jsEventListeners).toBeLessThanOrEqual(listeners);
 
@@ -262,6 +273,6 @@ test('Loom: real arrangement, cache cost, five themes, lifecycle, no-section and
     probe.definition.mount = probe.original;
   });
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
-  await expect(page.locator('.view-status')).toHaveText('');
+  await expect(page.locator('[data-region="stage-a"] .view-status')).toHaveText('');
   expect(errors).toEqual([]);
 });
