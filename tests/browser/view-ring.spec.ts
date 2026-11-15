@@ -23,10 +23,15 @@ async function frames(page: Page, count = 3) {
 }
 async function select(page: Page, name: string) {
   const wide = page.locator('.wide-shelf');
-  if (await wide.isVisible()) await wide.getByRole('button', { name }).click();
+  if (await wide.isVisible())
+    await wide.getByRole('button', { name: `${name} on Stage A`, exact: true }).click();
   else {
-    await page.getByRole('button', { name: 'Views', exact: true }).click();
-    await page.getByRole('dialog').getByRole('button', { name }).click();
+    const stage = page.locator('[data-region="stage-a"]');
+    await stage.getByRole('button', { name: 'Views', exact: true }).click();
+    await stage
+      .locator('.shelf-popover')
+      .getByRole('button', { name: `${name} on Stage A`, exact: true })
+      .click();
   }
 }
 async function prepare(page: Page, source: string) {
@@ -43,7 +48,7 @@ async function prepare(page: Page, source: string) {
     .route('**/studio-sounds/burst.wav', (route) =>
       route.fulfill({ path: 'tests/fixtures/sounds/burst.wav', contentType: 'audio/wav' }),
     );
-  await page.goto('/studio.html?inspect');
+  await page.goto('/studio.html?inspect&a=test-card&b=&theme=arcade');
   await page.waitForFunction(() => window.odmStudio.app.canPlay);
   await page.evaluate(async (source) => {
     await window.odmStudio.load(source);
@@ -92,7 +97,7 @@ async function prepare(page: Page, source: string) {
       performance.getEntriesByType('resource').some((entry) => /three\.module-/.test(entry.name)),
     ),
   ).toBe(false);
-  await select(page, 'Ring now');
+  await select(page, 'Ring');
   await page.waitForFunction(() => !!window.ringTest.handle);
   await expect(page.locator('[data-ring]')).toHaveCount(1);
   await page.waitForFunction(() => (window.ringTest.frame?.notes.length ?? 0) > 0);
@@ -123,10 +128,10 @@ test('Ring: real arrangement, changing pixels, themes and disposable lifetime', 
   expect((await canvas.screenshot()).equals(stopped)).toBe(true);
   const listeners = await page.evaluate(() => window.ringTest.listeners);
   for (let i = 0; i < 1; i++) {
-    await select(page, 'Test card diagnostic');
+    await select(page, 'Test card');
     await expect(canvas).toHaveCount(0);
     expect(await page.evaluate(() => window.ringTest.listeners)).toBe(0);
-    await select(page, 'Ring now');
+    await select(page, 'Ring');
     await expect(canvas).toHaveCount(1);
     expect(await page.evaluate(() => window.ringTest.listeners)).toBe(listeners);
   }
@@ -257,9 +262,10 @@ test('Ring visual evidence: 300-frame CPU measurement', async ({ page }) => {
     height: 760,
     dpr: 1,
   }));
-  await page.getByRole('button', { name: 'Unmount view', exact: true }).click();
+  await page.getByRole('button', { name: 'Clear Stage A', exact: true }).click();
   const standalone = await page.evaluateHandle(async () => {
     const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;inset:0;width:1300px;height:760px;z-index:9999';
     document.body.append(el);
     const handle = await window.ringTest.definition!.mount(el);
     return { el, handle };
