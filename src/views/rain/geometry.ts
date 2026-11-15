@@ -46,33 +46,28 @@ export interface Lane {
   low: number;
   high: number;
 }
+/** Ground trails are visible too; keep their pitch coordinates until they fade. */
+function visible(frame: ViewFrame, note: ViewNote) {
+  return (
+    (note.end > frame.now && note.start < frame.now + frame.lookAhead) ||
+    (note.hasOnset &&
+      frame.trails > 0 &&
+      note.start <= frame.now &&
+      frame.now - note.start < (frame.trails === 2 ? 1 : 0.25))
+  );
+}
 export function lanes(frame: ViewFrame, groups = indexNotes(frame.notes)): Lane[] {
   const active = frame.instruments
-    .filter((instrument) =>
-      groups
-        .get(instrument.id)
-        ?.some(
-          ({ note }) =>
-            (note.end > frame.now && note.start < frame.now + frame.lookAhead) ||
-            (note.hasOnset &&
-              frame.trails > 0 &&
-              note.start <= frame.now &&
-              frame.now - note.start < (frame.trails === 2 ? 1 : 0.25)),
-        ),
-    )
+    .filter((instrument) => groups.get(instrument.id)?.some(({ note }) => visible(frame, note)))
     .sort((a, b) => a.index - b.index);
   const width = frame.width * (active.length === 1 ? 1 / 3 : 0.9);
   return active.map((instrument, i) => {
     const events = groups.get(instrument.id) ?? [];
+    // Pitch bounds belong to the visible marks, including ground trails.
     let low = Infinity;
     let high = -Infinity;
     for (const event of events) {
-      if (
-        event.pitch === undefined ||
-        event.note.end <= frame.now ||
-        event.note.start >= frame.now + frame.lookAhead
-      )
-        continue;
+      if (event.pitch === undefined || !visible(frame, event.note)) continue;
       low = Math.min(low, event.pitch);
       high = Math.max(high, event.pitch);
     }

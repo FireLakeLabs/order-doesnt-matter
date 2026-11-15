@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { drawRain } from '../../src/views/rain.view';
 import {
   indexNotes,
   landing,
@@ -86,11 +87,67 @@ describe('Rain score geometry', () => {
     f.notes = [
       note('0', 10, 11, { note: 'c3' }),
       note('0', 11, 12, { note: 'c4' }),
-      note('0', 20, 21, { note: 'c8' }),
+      note('0', 15, 16, { note: 'c8' }),
     ];
     const lane = lanes(f)[0];
     expect(notePosition(lane, lane.events[0])).toBe(0);
     expect(notePosition(lane, lane.events[1])).toBe(1);
+  });
+  it('includes pitched ground trails in the visible range until they fade', () => {
+    const f = frame(1);
+    f.notes = [note('0', 10.25, 10.3, { note: 'c3' }), note('0', 10.25, 10.3, { note: 'c4' })];
+    const lane = lanes(f)[0];
+    expect(notePosition(lane, lane.events[0])).toBe(0);
+    expect(notePosition(lane, lane.events[1])).toBe(1);
+    expect(lanes({ ...f, now: 10.51 })).toEqual([]);
+  });
+  it('shows six lanes and holds both bass spans at the specified drop moment', () => {
+    const f = frame();
+    f.notes = [
+      ...Array.from({ length: 4 }, (_, i) => note(String(i), 10.5, 10.625)),
+      note('4', 10, 11, { note: 'eb1' }),
+      note('5', 10, 11, { note: 'eb2' }),
+    ];
+    const road = lanes(f);
+    expect(road).toHaveLength(6);
+    expect(
+      road
+        .filter((lane) =>
+          lane.events.some(({ note }) => landing(note, f.now, f.cps, f.trails).held),
+        )
+        .map((lane) => lane.instrument.id),
+    ).toEqual(['4', '5']);
+  });
+  it('draws an unpitched onset cap only before it crosses the line', () => {
+    const f = frame(1);
+    f.theme.glow = false;
+    f.notes = [note('0', 10.5, 11)];
+    const fills: number[] = [];
+    const noop = () => {};
+    const ctx = {
+      globalAlpha: 1,
+      fill(this: { globalAlpha: number }) {
+        fills.push(this.globalAlpha);
+      },
+      fillRect: noop,
+      beginPath: noop,
+      moveTo: noop,
+      lineTo: noop,
+      closePath: noop,
+      stroke: noop,
+      save: noop,
+      restore: noop,
+      clip: noop,
+      fillText: noop,
+      ellipse: noop,
+      createLinearGradient: () => ({ addColorStop: noop }),
+    } as unknown as CanvasRenderingContext2D;
+    drawRain(ctx, f);
+    expect(fills).toContain(0.93);
+    fills.length = 0;
+    drawRain(ctx, { ...f, now: 10.6 });
+    expect(fills).toContain(0.18);
+    expect(fills).not.toContain(0.93);
   });
   it('lands only onsets, holds until the real end, and computes all trails from musical time', () => {
     const n = note();

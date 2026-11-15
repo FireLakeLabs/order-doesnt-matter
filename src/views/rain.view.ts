@@ -124,7 +124,7 @@ export function drawRain(
         ctx.globalAlpha = opacity * 0.5;
         ctx.stroke();
       }
-      if (note.hasOnset && event.pitch === undefined) {
+      if (note.hasOnset && note.start >= now && event.pitch === undefined) {
         ctx.globalAlpha = opacity * 0.93;
         ctx.fillStyle = lane.instrument.colour;
         ctx.strokeStyle = lane.instrument.colour;
@@ -158,13 +158,6 @@ export function drawRain(
         ctx.restore();
         ctx.lineWidth = 1;
       }
-      // A narrow luminous leading edge gives depth without a shadow per distant event.
-      if (theme.glow && note.hasOnset) {
-        ctx.globalAlpha = opacity * 0.28;
-        ctx.strokeStyle = theme.text;
-        slab(ctx, frame, lane, event, start, Math.min(end, start + 0.008));
-        ctx.fill();
-      }
       ctx.fillStyle = lane.instrument.colour;
     }
   }
@@ -173,7 +166,7 @@ export function drawRain(
   const fadeBottom = edge(0, now + lookAhead * 0.8).y;
   const fog = ctx.createLinearGradient(0, fadeTop, 0, fadeBottom);
   fog.addColorStop(0, theme.ground);
-  fog.addColorStop(1, `${theme.ground}00`);
+  fog.addColorStop(1, 'transparent');
   ctx.save();
   const first = road[0]?.left ?? width * 0.05;
   const last = road.at(-1)?.right ?? width * 0.95;
