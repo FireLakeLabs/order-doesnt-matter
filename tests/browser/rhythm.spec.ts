@@ -8,6 +8,7 @@ import {
   appSignal,
   waitForPending,
   throughCycle,
+  sharedProgram,
 } from './helpers';
 import { instruments } from '../../src/document';
 async function openBass(page: import('@playwright/test').Page) {
@@ -33,46 +34,6 @@ test('signed evenly spread hits explain omitted positions and Undo restores the 
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
   await expect(hits).toHaveValue('-3');
   expect(await page.evaluate(() => window.odmApp.state.doc)).toEqual(before);
-});
-test('Kiln: edited pitch is triggered; splitting then resting the first half moves its onset', async ({
-  page,
-}) => {
-  await openProgram(page, { example: 'Kiln' });
-  await page.getByRole('button', { name: 'Section 2', exact: true }).click();
-  await openBass(page);
-  await play(page);
-  const value = page.getByLabel('Note value', { exact: true });
-  await value.fill('83');
-  await swap(page, () => value.press('Enter'));
-  await page.getByRole('button', { name: 'Split in 2', exact: true }).click();
-  await page.locator('[data-path="0"]').press('ArrowDown');
-  await swap(page, () => page.getByRole('button', { name: 'Rest', exact: true }).click());
-  await waitForPending(page);
-  await expect(page.getByRole('button', { name: 'Bring back', exact: true })).toBeVisible();
-  const cycle = await page.evaluate(() =>
-    Math.ceil(window.odmApp.history.filter((e) => e.type === 'swapped').at(-1)!.cycle),
-  );
-  await throughCycle(page, cycle + 1);
-  const triggered = await page.evaluate(
-    (c) =>
-      window.odmApp.history
-        .filter(
-          (e) =>
-            e.type === 'trigger' &&
-            e.cycle >= c &&
-            e.cycle < c + 1 &&
-            (e.value as { s?: string }).s === 'triangle',
-        )
-        .map((e) =>
-          e.type === 'trigger'
-            ? { cycle: e.cycle - c, note: String((e.value as { note?: unknown }).note) }
-            : null,
-        ),
-    cycle,
-  );
-  expect(triggered.map((e) => e!.cycle)).toEqual([0.125, 0.25, 0.5, 0.75]);
-  expect(triggered[0]!.note).toBe('83');
-  await page.getByRole('button', { name: 'Stop', exact: true }).click();
 });
 test('real house: a bass edit reaches triggers and preserves every other instrument onset bag', async ({
   page,
@@ -115,52 +76,6 @@ test('real house: a bass edit reaches triggers and preserves every other instrum
   }
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
 });
-test('phone: List, arrow selection, Done and Escape return focus, no horizontal page overflow', async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await openProgram(page, { example: 'Kiln' });
-  const origin = await openBass(page);
-  await expect(page.locator('[data-view="List"]')).toBeVisible();
-  await page.locator('[data-path="0"]').press('ArrowRight');
-  await expect(page.locator('[data-path="1"]')).toBeFocused();
-  for (const action of ['Split in 2', 'Take turns']) {
-    await page.getByRole('button', { name: action, exact: true }).press('Enter');
-    await page.locator('[data-path="1"]').press('ArrowDown');
-    await page.getByRole('button', { name: 'Remove', exact: true }).click();
-    await expect(page.locator('[data-path="1.0"]')).toHaveCount(0);
-  }
-  await page.getByRole('button', { name: 'Boxes', exact: true }).click();
-  await expect(page.locator('[data-view="Boxes"]')).toBeVisible();
-  await page.getByText('Speed and length', { exact: true }).press('Enter');
-  const faster = page.getByLabel('Faster ×n', { exact: true });
-  await faster.fill('3/2');
-  await faster.press('Enter');
-  await expect(page.getByLabel('Faster ×n', { exact: true })).toHaveValue('1.5');
-  await page.getByLabel('Faster ×n', { exact: true }).press('ArrowUp');
-  await expect(page.getByLabel('Faster ×n', { exact: true })).toHaveValue('2.5');
-  await page.getByRole('button', { name: 'None for Faster ×n', exact: true }).press('Enter');
-  await expect(page.getByLabel('Faster ×n', { exact: true })).toHaveValue('1');
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  expect(
-    await page
-      .locator('.rhythm-editor button')
-      .evaluateAll((nodes) =>
-        nodes
-          .filter((n) => n.getBoundingClientRect().width > 0)
-          .every((n) => n.getBoundingClientRect().height >= 44),
-      ),
-  ).toBe(true);
-  await page.keyboard.press('Escape');
-  await expect(origin).toBeFocused();
-  await origin.press('Enter');
-  await expect(page.getByRole('button', { name: 'Boxes', exact: true })).toHaveAttribute(
-    'aria-pressed',
-    'true',
-  );
-  await page.getByRole('button', { name: 'Done', exact: true }).click();
-  await expect(origin).toBeFocused();
-});
 test('desktop fine pointer: eight proportional boxes and edited row above the drawer', async ({
   page,
 }) => {
@@ -198,97 +113,64 @@ test('desktop fine pointer: eight proportional boxes and edited row above the dr
   }
 });
 
-test('Kiln live: split removal, undo, literal marks and evenly spread drum hits', async ({
-  page,
-}) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await openProgram(page, { example: 'Kiln' });
-  // Shorten scheduling waits while retaining the bundled score.
-  await page.evaluate(() => {
-    const doc = window.odmApp.state.doc!;
-    window.odmApp.editor!.apply({
-      ...doc,
-      body: doc.body.map((n) => (n.kind === 'tempo' ? { ...n, cpm: 240 } : n)),
-    });
-  });
-  await page.getByRole('button', { name: 'Section 2', exact: true }).press('Enter');
-  await openBass(page);
-  await play(page);
-  await page.getByRole('button', { name: 'Split in 2', exact: true }).press('Enter');
-  await page.locator('[data-path="0"]').press('ArrowDown');
-  await page.getByRole('button', { name: 'Remove', exact: true }).press('Enter');
-  await expect(page.locator('[data-path="0.0"]')).toHaveCount(0);
-  await page.getByRole('button', { name: 'Remove', exact: true }).press('Enter');
-  await swap(page, () => page.getByRole('button', { name: 'Undo', exact: true }).press('Enter'));
-  await waitForPending(page);
-  await page.keyboard.press('Escape');
-  const doc = await page.evaluate(() => window.odmApp.state.doc!);
-  const clap = instruments(doc).find((r) => JSON.stringify(r.pattern.core).includes('cp'))!;
-  const origin = await selectNode(page, { nodeId: `${clap.pattern.id}:rhythm` });
-  await page.getByRole('button', { name: 'List', exact: true }).press('Enter');
-  await page.locator('[data-path="0"]').press('ArrowRight');
-  await page.getByRole('button', { name: 'Spread hits evenly…', exact: true }).press('Enter');
-  await page.getByLabel('hits', { exact: true }).fill('3');
-  await swap(page, () => page.getByLabel('hits', { exact: true }).press('Enter'));
-  // A swap can acknowledge an earlier queued edit; wait for this gesture too.
-  await waitForPending(page);
-  await expect(page.getByLabel('hits', { exact: true })).toBeFocused();
-  await expect(page.getByLabel('out of', { exact: true })).toHaveValue('8');
-  // At this deliberately fast tempo, editing can reach a later section under
-  // load. Restart the edited piece at the selected bass section for observation.
-  await page.getByRole('button', { name: 'Stop', exact: true }).click();
-  await page.evaluate(() => (window.odmApp.history.length = 0));
-  await play(page);
-  const boundary = await page.evaluate(() =>
-    Math.ceil(
-      Math.max(
-        window.odmApp.engine!.now()!,
-        window.odmApp.history.filter((e) => e.type === 'swapped').at(-1)!.cycle,
-      ),
-    ),
-  );
-  await throughCycle(page, boundary + 1);
-  // Trigger callbacks await rendering and can arrive out of timestamp order.
-  // A future drum callback alone does not finish the bass observation window.
-  await appSignal(page, (cycle) => window.odmApp.engine!.now()! >= cycle, boundary + 1);
-  // Rendering callbacks can finish after the audio clock crosses the boundary.
-  await appSignal(
+test.describe('Kiln rhythm with shared setup', () => {
+  sharedProgram((page) => openProgram(page, { example: 'Kiln' }));
+
+  test('Kiln: edited pitch is triggered; splitting then resting the first half moves its onset', async ({
     page,
-    (c) => {
-      const events = window.odmApp.history.filter(
-        (e) => e.type === 'trigger' && e.cycle >= c && e.cycle < c + 1,
-      );
-      return (
-        events.filter(
-          (e) =>
-            e.type === 'trigger' &&
-            (e.value as { s?: string; gain?: number }).s === 'triangle' &&
-            (e.value as { gain?: number }).gain === 0.45,
-        ).length >= 4 &&
-        events.filter((e) => e.type === 'trigger' && (e.value as { s?: string }).s === 'cp')
-          .length >= 4
-      );
-    },
-    boundary,
-  );
-  const bassStarts = await page.evaluate(
-    (c) =>
-      window.odmApp.history
-        .filter(
+  }) => {
+    await page.getByRole('button', { name: 'Section 2', exact: true }).click();
+    await openBass(page);
+    await play(page);
+    const value = page.getByLabel('Note value', { exact: true });
+    await value.fill('83');
+    await swap(page, () => value.press('Enter'));
+    await page.getByRole('button', { name: 'Split in 2', exact: true }).click();
+    await page.locator('[data-path="0"]').press('ArrowDown');
+    await swap(page, () => page.getByRole('button', { name: 'Rest', exact: true }).click());
+    await waitForPending(page);
+    await expect(page.getByRole('button', { name: 'Bring back', exact: true })).toBeVisible();
+    const cycle = await page.evaluate(() =>
+      Math.ceil(
+        Math.max(
+          window.odmApp.engine!.now()!,
+          window.odmApp.history.filter((e) => e.type === 'swapped').at(-1)!.cycle,
+        ),
+      ),
+    );
+    await throughCycle(page, cycle + 1);
+    // A later drum callback can arrive before an earlier bass callback finishes
+    // rendering. Neither it nor the swap timestamp closes this observation window.
+    const early = await page.evaluate(() => ({
+      now: window.odmApp.engine!.now(),
+      history: window.odmApp.history,
+    }));
+    await appSignal(
+      page,
+      (c) =>
+        window.odmApp.engine!.now()! >= c + 1 &&
+        window.odmApp.history.filter(
           (e) =>
             e.type === 'trigger' &&
             e.cycle >= c &&
             e.cycle < c + 1 &&
             (e.value as { s?: string; gain?: number }).s === 'triangle' &&
             (e.value as { gain?: number }).gain === 0.45,
-        )
-        .map((e) => (e.type === 'trigger' ? e.cycle - c : -1))
-        .sort((a, b) => a - b),
-    boundary,
-  );
-  expect(bassStarts).toEqual([0, 0.25, 0.5, 0.75]);
-  expect(
-    await page.evaluate(
+        ).length >= 4,
+      cycle,
+    );
+    await test.info().attach('bass-window-completion', {
+      body: JSON.stringify({
+        cycle,
+        early,
+        complete: await page.evaluate(() => ({
+          now: window.odmApp.engine!.now(),
+          history: window.odmApp.history,
+        })),
+      }),
+      contentType: 'application/json',
+    });
+    const triggered = await page.evaluate(
       (c) =>
         window.odmApp.history
           .filter(
@@ -296,32 +178,194 @@ test('Kiln live: split removal, undo, literal marks and evenly spread drum hits'
               e.type === 'trigger' &&
               e.cycle >= c &&
               e.cycle < c + 1 &&
-              (e.value as { s?: string }).s === 'cp',
+              (e.value as { s?: string; gain?: number }).s === 'triangle' &&
+              (e.value as { gain?: number }).gain === 0.45,
+          )
+          .map((e) =>
+            e.type === 'trigger'
+              ? { cycle: e.cycle - c, note: String((e.value as { note?: unknown }).note) }
+              : null,
+          )
+          .sort((a, b) => a!.cycle - b!.cycle),
+      cycle,
+    );
+    expect(triggered.map((e) => e!.cycle)).toEqual([0.125, 0.25, 0.5, 0.75]);
+    expect(triggered[0]!.note).toBe('83');
+    await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  });
+
+  test('phone: List, arrow selection, Done and Escape return focus, no horizontal page overflow', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const origin = await openBass(page);
+    await expect(page.locator('[data-view="List"]')).toBeVisible();
+    await page.locator('[data-path="0"]').press('ArrowRight');
+    await expect(page.locator('[data-path="1"]')).toBeFocused();
+    for (const action of ['Split in 2', 'Take turns']) {
+      await page.getByRole('button', { name: action, exact: true }).press('Enter');
+      await page.locator('[data-path="1"]').press('ArrowDown');
+      await page.getByRole('button', { name: 'Remove', exact: true }).click();
+      await expect(page.locator('[data-path="1.0"]')).toHaveCount(0);
+    }
+    await page.getByRole('button', { name: 'Boxes', exact: true }).click();
+    await expect(page.locator('[data-view="Boxes"]')).toBeVisible();
+    await page.getByText('Speed and length', { exact: true }).press('Enter');
+    const faster = page.getByLabel('Faster ×n', { exact: true });
+    await faster.fill('3/2');
+    await faster.press('Enter');
+    await expect(page.getByLabel('Faster ×n', { exact: true })).toHaveValue('1.5');
+    await page.getByLabel('Faster ×n', { exact: true }).press('ArrowUp');
+    await expect(page.getByLabel('Faster ×n', { exact: true })).toHaveValue('2.5');
+    await page.getByRole('button', { name: 'None for Faster ×n', exact: true }).press('Enter');
+    await expect(page.getByLabel('Faster ×n', { exact: true })).toHaveValue('1');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    expect(
+      await page
+        .locator('.rhythm-editor button')
+        .evaluateAll((nodes) =>
+          nodes
+            .filter((n) => n.getBoundingClientRect().width > 0)
+            .every((n) => n.getBoundingClientRect().height >= 44),
+        ),
+    ).toBe(true);
+    await page.keyboard.press('Escape');
+    await expect(origin).toBeFocused();
+    await origin.press('Enter');
+    await expect(page.getByRole('button', { name: 'Boxes', exact: true })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    await page.getByRole('button', { name: 'Done', exact: true }).click();
+    await expect(origin).toBeFocused();
+  });
+
+  test('Kiln live: split removal, undo, literal marks and evenly spread drum hits', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    // Shorten scheduling waits while retaining the bundled score.
+    await page.evaluate(() => {
+      const doc = window.odmApp.state.doc!;
+      window.odmApp.editor!.apply({
+        ...doc,
+        body: doc.body.map((n) => (n.kind === 'tempo' ? { ...n, cpm: 240 } : n)),
+      });
+    });
+    await page.getByRole('button', { name: 'Section 2', exact: true }).press('Enter');
+    await openBass(page);
+    await play(page);
+    await page.getByRole('button', { name: 'Split in 2', exact: true }).press('Enter');
+    await page.locator('[data-path="0"]').press('ArrowDown');
+    await page.getByRole('button', { name: 'Remove', exact: true }).press('Enter');
+    await expect(page.locator('[data-path="0.0"]')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Remove', exact: true }).press('Enter');
+    await swap(page, () => page.getByRole('button', { name: 'Undo', exact: true }).press('Enter'));
+    await waitForPending(page);
+    await page.keyboard.press('Escape');
+    const doc = await page.evaluate(() => window.odmApp.state.doc!);
+    const clap = instruments(doc).find((r) => JSON.stringify(r.pattern.core).includes('cp'))!;
+    const origin = await selectNode(page, { nodeId: `${clap.pattern.id}:rhythm` });
+    await page.getByRole('button', { name: 'List', exact: true }).press('Enter');
+    await page.locator('[data-path="0"]').press('ArrowRight');
+    await page.getByRole('button', { name: 'Spread hits evenly…', exact: true }).press('Enter');
+    await page.getByLabel('hits', { exact: true }).fill('3');
+    await swap(page, () => page.getByLabel('hits', { exact: true }).press('Enter'));
+    // A swap can acknowledge an earlier queued edit; wait for this gesture too.
+    await waitForPending(page);
+    await expect(page.getByLabel('hits', { exact: true })).toBeFocused();
+    await expect(page.getByLabel('out of', { exact: true })).toHaveValue('8');
+    // At this deliberately fast tempo, editing can reach a later section under
+    // load. Restart the edited piece at the selected bass section for observation.
+    await page.getByRole('button', { name: 'Stop', exact: true }).click();
+    await page.evaluate(() => (window.odmApp.history.length = 0));
+    await play(page);
+    const boundary = await page.evaluate(() =>
+      Math.ceil(
+        Math.max(
+          window.odmApp.engine!.now()!,
+          window.odmApp.history.filter((e) => e.type === 'swapped').at(-1)!.cycle,
+        ),
+      ),
+    );
+    await throughCycle(page, boundary + 1);
+    // Trigger callbacks await rendering and can arrive out of timestamp order.
+    // A future drum callback alone does not finish the bass observation window.
+    await appSignal(page, (cycle) => window.odmApp.engine!.now()! >= cycle, boundary + 1);
+    // Rendering callbacks can finish after the audio clock crosses the boundary.
+    await appSignal(
+      page,
+      (c) => {
+        const events = window.odmApp.history.filter(
+          (e) => e.type === 'trigger' && e.cycle >= c && e.cycle < c + 1,
+        );
+        return (
+          events.filter(
+            (e) =>
+              e.type === 'trigger' &&
+              (e.value as { s?: string; gain?: number }).s === 'triangle' &&
+              (e.value as { gain?: number }).gain === 0.45,
+          ).length >= 4 &&
+          events.filter((e) => e.type === 'trigger' && (e.value as { s?: string }).s === 'cp')
+            .length >= 4
+        );
+      },
+      boundary,
+    );
+    const bassStarts = await page.evaluate(
+      (c) =>
+        window.odmApp.history
+          .filter(
+            (e) =>
+              e.type === 'trigger' &&
+              e.cycle >= c &&
+              e.cycle < c + 1 &&
+              (e.value as { s?: string; gain?: number }).s === 'triangle' &&
+              (e.value as { gain?: number }).gain === 0.45,
           )
           .map((e) => (e.type === 'trigger' ? e.cycle - c : -1))
           .sort((a, b) => a - b),
       boundary,
-    ),
-  ).toEqual([0.25, 11 / 32, 14 / 32, 0.75]);
-  if (process.env.ODM_RHYTHM_SHOTS) {
-    await waitForPending(page);
-    await page.getByRole('button', { name: 'Boxes', exact: true }).press('Enter');
-    for (const [name, width, height] of [
-      ['desktop', 1440, 900],
-      ['phone', 390, 844],
-    ] as const) {
-      await page.setViewportSize({ width, height });
-      await page.getByLabel('hits', { exact: true }).scrollIntoViewIfNeeded();
-      await page.screenshot({ path: `test-results/rhythm-${name}.png` });
-      await page.getByText('Speed and length', { exact: true }).press('Enter');
-      await page.getByLabel('Faster ×n', { exact: true }).scrollIntoViewIfNeeded();
-      await expect(page.getByLabel('Faster ×n', { exact: true })).toBeVisible();
-      await page.screenshot({ path: `test-results/rhythm-speed-${name}.png` });
-      await page.getByText('Speed and length', { exact: true }).press('Enter');
+    );
+    expect(bassStarts).toEqual([0, 0.25, 0.5, 0.75]);
+    expect(
+      await page.evaluate(
+        (c) =>
+          window.odmApp.history
+            .filter(
+              (e) =>
+                e.type === 'trigger' &&
+                e.cycle >= c &&
+                e.cycle < c + 1 &&
+                (e.value as { s?: string }).s === 'cp',
+            )
+            .map((e) => (e.type === 'trigger' ? e.cycle - c : -1))
+            .sort((a, b) => a - b),
+        boundary,
+      ),
+    ).toEqual([0.25, 11 / 32, 14 / 32, 0.75]);
+    if (process.env.ODM_RHYTHM_SHOTS) {
+      await waitForPending(page);
+      await page.getByRole('button', { name: 'Boxes', exact: true }).press('Enter');
+      for (const [name, width, height] of [
+        ['desktop', 1440, 900],
+        ['phone', 390, 844],
+      ] as const) {
+        await page.setViewportSize({ width, height });
+        await page.getByLabel('hits', { exact: true }).scrollIntoViewIfNeeded();
+        await page.screenshot({ path: `test-results/rhythm-${name}.png` });
+        await page.getByText('Speed and length', { exact: true }).press('Enter');
+        await page.getByLabel('Faster ×n', { exact: true }).scrollIntoViewIfNeeded();
+        await expect(page.getByLabel('Faster ×n', { exact: true })).toBeVisible();
+        await page.screenshot({ path: `test-results/rhythm-speed-${name}.png` });
+        await page.getByText('Speed and length', { exact: true }).press('Enter');
+      }
     }
-  }
-  await page.getByRole('button', { name: 'Back to plain step', exact: true }).press('Enter');
-  await page.keyboard.press('Escape');
-  await expect(origin).toBeFocused();
-  await page.getByRole('button', { name: 'Stop', exact: true }).press('Enter');
+    await page.getByRole('button', { name: 'Back to plain step', exact: true }).press('Enter');
+    await page.keyboard.press('Escape');
+    await expect(origin).toBeFocused();
+    await page.getByRole('button', { name: 'Stop', exact: true }).press('Enter');
+  });
 });

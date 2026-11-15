@@ -3,6 +3,7 @@ import { spawn } from 'node:child_process';
 import { browserSummary, formatBrowserSummary } from './browser-summary.mjs';
 import { timingResult, BROWSER_LIMIT_SECONDS } from './timing.mjs';
 import { forwardBrowserSignals, killBrowserRun } from './browser-process.mjs';
+import { cacheBuiltAssets } from './browser-assets.mjs';
 const start = performance.now();
 const mode = process.argv[2] ?? 'ci';
 if (!['ci', 'online', 'demo', 'measure', 'edit-demo'].includes(mode))
@@ -37,6 +38,7 @@ try {
   await build({ build: { outDir } });
   phase('build');
   server = await preview({
+    plugins: [cacheBuiltAssets(outDir)],
     build: { outDir },
     preview: { host: '127.0.0.1', port: 0, open: false },
   });
