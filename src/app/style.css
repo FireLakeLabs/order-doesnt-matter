@@ -1,18 +1,6 @@
+@import './theme.css';
+
 :root {
-  --text: #dfedec;
-  --muted: #b9cdd3;
-  --canvas: #0b141b;
-  --panel: #182a35;
-  --border: #52717b;
-  --line: #2b3d48;
-  --accent: #a3efd5;
-  --selection: #d1c2f4;
-  --warning: #f0cb86;
-  --danger: #ffb3a8;
-  --toggle-on: #203c40;
-  --button: #213740;
-  --hover: #2d4a51;
-  color-scheme: dark;
   font:
     15px/1.5 system-ui,
     sans-serif;
@@ -76,7 +64,7 @@ h1 {
 }
 #play,
 #load {
-  color: #102323;
+  color: var(--accent-text);
   background: var(--accent);
   border-color: var(--accent);
 }
@@ -104,7 +92,7 @@ main {
   min-width: 0;
 }
 #paste-panel {
-  background: #15232c;
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 16px;
@@ -121,8 +109,8 @@ textarea {
   min-height: 130px;
   resize: vertical;
   padding: 12px;
-  color: #e0eeeb;
-  background: #0d1820;
+  color: var(--text);
+  background: var(--canvas);
   border: 1px solid var(--border);
   border-radius: 5px;
   font:
@@ -297,7 +285,7 @@ a {
   background: var(--panel);
 }
 .about-dialog::backdrop {
-  background: #000a;
+  background: var(--backdrop);
 }
 .about-dialog small {
   display: block;

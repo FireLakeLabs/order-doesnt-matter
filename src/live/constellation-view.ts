@@ -1,3 +1,4 @@
+import { laneColour } from '../app/theme';
 import { constellationLayout, regionPath } from './constellation';
 import type { LiveInstrument, LiveModel, LiveRoom } from './model';
 
@@ -35,7 +36,7 @@ export const roomWords = (r: LiveRoom) =>
 export function text(n: Element, value: string) {
   if (n.textContent !== value) n.textContent = value;
 }
-export const colour = (i: LiveInstrument) => `hsl(${(i.colour * 67 + 155) % 360} 65% 75%)`;
+export const colour = (i: LiveInstrument) => laneColour(i.colour);
 const svgNode = <K extends keyof SVGElementTagNameMap>(tag: K) =>
   document.createElementNS('http://www.w3.org/2000/svg', tag);
 

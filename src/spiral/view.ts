@@ -1,3 +1,4 @@
+import { laneColour, themePaint } from '../app/theme';
 import { liveModel, turnNotes, type LiveInput, type TurnNote } from '../live/model';
 import {
   opacityAt,
@@ -13,7 +14,7 @@ import {
 import { livePlayhead } from '../live/playhead';
 import './style.css';
 export type SpiralInput = LiveInput & { known: [number, number][]; end: number | null };
-const colour = (lane: number) => `hsl(${(lane * 67 + 155) % 360} 65% 75%)`;
+
 function silencedAt(input: SpiralInput, lane: number, cycle: number) {
   const row = input.rows[lane];
   if (row.muted || row.pattern.muted || (input.solo !== null && input.solo !== row.id)) return true;
@@ -34,6 +35,7 @@ export function drawSpiral(
   reduced: boolean,
   view: ViewSettings = defaultView,
 ) {
+  const paint = themePaint();
   const ctx = canvas.getContext('2d')!,
     width = canvas.clientWidth,
     height = canvas.clientHeight;
@@ -85,7 +87,7 @@ export function drawSpiral(
   ) {
     const known = input.known.some(([from, to]) => from <= turn && to >= turn + 1);
     ctx.globalAlpha = known ? 0.22 : 0.65;
-    ctx.strokeStyle = known ? '#637383' : '#c6b88b';
+    ctx.strokeStyle = known ? paint.track : paint.unknown;
     ctx.lineWidth = known ? 0.6 : 1;
     ctx.setLineDash(known ? [] : [3, 5]);
     const r1 = g.core + g.pitch * (turn - motion + view.keep + 1),
@@ -120,21 +122,21 @@ export function drawSpiral(
     const m = group[0],
       lane = lanes[m.lane];
     ctx.globalAlpha = m.opacity;
-    ctx.strokeStyle = lane.error ? '#ffaaaa' : colour(m.lane);
+    ctx.strokeStyle = lane.error ? paint.danger : paint.lane(m.lane);
     ctx.setLineDash(lane.error ? [1, 3] : lane.sound === 'missing' ? [3, 3] : []);
     ctx.lineWidth = m.width;
     ctx.beginPath();
     for (const span of group) path(span.from, span.bodyTo, span.radius, span.bodyEndRadius, false);
     ctx.stroke();
     if (silenced) {
-      ctx.strokeStyle = '#101820';
+      ctx.strokeStyle = paint.canvas;
       ctx.lineWidth = m.width * 0.55;
       ctx.setLineDash([]);
       ctx.stroke();
     }
     // A head crosses the band width at the exact onset, without stretching time.
     ctx.globalAlpha = m.opacity;
-    ctx.strokeStyle = '#f5fafc';
+    ctx.strokeStyle = paint.text;
     ctx.lineWidth = Math.max(1, m.width * 0.22);
     ctx.setLineDash([]);
     ctx.beginPath();
@@ -147,12 +149,20 @@ export function drawSpiral(
         ctx.moveTo(c * (span.radius - half), s * (span.radius - half));
         ctx.lineTo(c * (span.radius + half), s * (span.radius + half));
       }
+    // A contrasting under-stroke separates the head from the band. Both
+    // strokes share the exact onset path; no scored span is lengthened.
+    const headWidth = ctx.lineWidth;
+    ctx.strokeStyle = paint.canvas;
+    ctx.lineWidth = headWidth + 2;
+    ctx.stroke();
+    ctx.strokeStyle = paint.text;
+    ctx.lineWidth = headWidth;
     ctx.stroke();
     if (!reduced && !silenced && !lane.error)
       for (const span of group) {
         if (!span.onset || now < span.start || now - span.start >= 0.07) continue;
         ctx.globalAlpha = 1 - (now - span.start) / 0.07;
-        ctx.fillStyle = colour(span.lane);
+        ctx.fillStyle = paint.lane(span.lane);
         ctx.beginPath();
         ctx.arc(
           Math.cos(span.startAngle) * span.radius,
@@ -169,7 +179,7 @@ export function drawSpiral(
     if (lane.error) {
       const r = g.core + g.pitch * (view.keep + 1) + (lane.colour + 1) * g.spacing;
       ctx.globalAlpha = 1;
-      ctx.strokeStyle = '#ffaaaa';
+      ctx.strokeStyle = paint.danger;
       ctx.lineWidth = 1;
       ctx.setLineDash([2, 3]);
       path(Math.floor(now), Math.floor(now) + 1, r, r + g.pitch);
@@ -184,7 +194,7 @@ export function drawSpiral(
     }
   ctx.globalAlpha = 1;
   ctx.setLineDash([]);
-  ctx.strokeStyle = '#f5fafc';
+  ctx.strokeStyle = paint.text;
   ctx.lineWidth = 2;
   const gate = reduced ? (now - Math.floor(now)) * Math.PI * 2 - Math.PI / 2 : -Math.PI / 2;
   ctx.beginPath();
@@ -196,8 +206,26 @@ export function drawSpiral(
   ctx.stroke();
   ctx.font = '600 13px system-ui';
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#f5fafc';
+  ctx.fillStyle = paint.text;
   ctx.fillText('Now', 0, -Math.min(width, height) / 2 + 18);
+  // Spread identifiers around the current turn, rather than piling them at
+  // the gate. These annotate tracks, never pretend to be additional events.
+  ctx.font = '600 10px system-ui';
+  for (let n = 0; n < lanes.length; n++) {
+    const phase = (n + 0.5) / lanes.length;
+    const t = Math.floor(now) + phase;
+    const a = (t - motion) * Math.PI * 2 - Math.PI / 2;
+    const r = g.core + g.pitch * (t - motion + view.keep + 1) + (n + 1) * g.spacing;
+    const x = Math.cos(a) * r,
+      y = Math.sin(a) * r;
+    const label = String(n + 1),
+      w = ctx.measureText(label).width + 4;
+    ctx.fillStyle = paint.canvas;
+    ctx.fillRect(x - w / 2, y - 6, w, 12);
+    ctx.fillStyle = paint.text;
+    ctx.fillText(label, x, y + 3);
+  }
+  ctx.font = '600 13px system-ui';
   if (input.end !== null && input.end >= now - view.keep && input.end <= now + view.upcoming + 1) {
     const a = (input.end - motion) * Math.PI * 2 - Math.PI / 2,
       r = g.core + g.pitch * (input.end - motion + view.keep + 1);
@@ -217,6 +245,7 @@ export function createSpiral(host: HTMLElement) {
   );
   const legend = document.createElement('ol');
   legend.className = 'spiral-legend';
+  legend.setAttribute('aria-label', 'Watch lanes · full instrument names');
   const status = document.createElement('p');
   status.className = 'spiral-status';
   const stage = document.createElement('div');
@@ -369,7 +398,7 @@ export function createSpiral(host: HTMLElement) {
         ...words.map((word, n) => {
           const li = document.createElement('li');
           li.textContent = word;
-          li.style.setProperty('--spiral-colour', colour(n));
+          li.style.setProperty('--spiral-colour', laneColour(n));
           return li;
         }),
       );
@@ -377,7 +406,9 @@ export function createSpiral(host: HTMLElement) {
     const unknown = Array.from({ length: last - first }, (_, n) => first + n).some(
       (turn) => !input.known.some(([a, b]) => a <= turn && b >= turn + 1),
     );
-    const text = unknown ? 'Striped stretches: not asked yet' : 'One turn · one cycle';
+    const text = unknown
+      ? 'Striped stretches: not asked yet'
+      : 'One turn · one cycle · numbers identify lanes';
     if (status.textContent !== text) status.textContent = text;
   }
 }

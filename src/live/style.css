@@ -17,6 +17,7 @@
   min-width: 0;
 }
 .live-preview {
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 12px;
@@ -37,6 +38,7 @@
   padding: 0;
 }
 #preview-expanded .live-preview {
+  background: var(--panel);
   border: 0;
   padding: 0;
 }
@@ -110,7 +112,7 @@
   transition: none;
 }
 .live-absent {
-  opacity: 0.55;
+  color: var(--muted);
 }
 .live-stopped .live-dot {
   transition: none;
@@ -168,8 +170,8 @@
   pointer-events: none;
 }
 .constellation path {
-  fill: color-mix(in srgb, var(--accent) 16%, var(--canvas));
-  stroke: var(--muted);
+  fill: var(--room-fill);
+  stroke: var(--room-line);
   stroke-width: 1.5px;
   paint-order: stroke fill;
 }
@@ -211,7 +213,7 @@
   width: calc(2 * var(--radius));
   height: calc(2 * var(--radius));
   margin: 0;
-  opacity: 0.85;
+  opacity: 1;
   border: 1.5px solid var(--live-colour);
   box-shadow: none;
 }
@@ -226,7 +228,7 @@
 }
 .constellation-planet.live-glowing .live-dot {
   opacity: 1;
-  background: color-mix(in srgb, var(--live-colour) 65%, var(--text));
+  background: color-mix(in srgb, var(--live-colour) 95%, var(--text));
 }
 .constellation-planet.live-lit .live-dot::after {
   opacity: 1;
@@ -309,7 +311,7 @@
     opacity: 1;
   }
   .constellation-planet.live-playing .live-dot {
-    background: color-mix(in srgb, var(--live-colour) 65%, var(--text));
+    background: color-mix(in srgb, var(--live-colour) 95%, var(--text));
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -330,7 +332,7 @@
 .constellation-mark-inside .constellation-mark {
   top: calc(var(--centre) - 6px);
   width: calc(2 * var(--radius) - 8px);
-  color: #671a16;
+  color: var(--canvas);
   font-size: var(--mark-size);
 }
 .constellation-name-inside.constellation-mark-inside .constellation-mark {
