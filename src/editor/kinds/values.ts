@@ -14,6 +14,7 @@ import { setModifier } from '../../document/edits/values-modifier';
 import { replaceChunk } from '../../document/edits/values-chunk';
 import { convertValues } from '../../document/edits/values-convert';
 import { fieldLabel, withUnit } from '../presentation';
+import { miniStructure, structuralMini } from './mini-structure';
 import './values.css';
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text = '') => {
   const n = document.createElement(tag);
@@ -63,6 +64,7 @@ export default {
       const c = valueSetting(context.doc, context.target.nodeId)?.node.value.core;
       return c?.kind === 'sequence' ? c.steps : undefined;
     };
+    const mini = new Map<string, ReturnType<typeof miniStructure>>();
     function at(path: number[]): Step | undefined {
       let list = steps(),
         step: Step | undefined;
@@ -176,7 +178,18 @@ export default {
           row = el('div');
         row.className = 'editor-list-item';
         box.append(row);
-        if (isGroup(s)) group(s.steps, row, p);
+        if (structuralMini(s) || mini.has(p.join('.'))) {
+          let editor = mini.get(p.join('.'));
+          if (!editor) {
+            editor = miniStructure(
+              () => context,
+              p.flatMap((n, i) => (i ? ['steps', n] : [n])),
+            );
+            mini.set(p.join('.'), editor);
+          }
+          row.append(editor.root);
+          updates.push(editor.update);
+        } else if (isGroup(s)) group(s.steps, row, p);
         else if (s.kind === 'value') {
           const numeric = Number.isFinite(Number(s.value)),
             info = controlInfo(context.target.control);
