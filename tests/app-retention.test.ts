@@ -263,6 +263,60 @@ it('preparation drains submitted validation and swaps, can cancel, and refuses a
   app.editor?.dispose();
 });
 
+it('cancelled preparation cannot block a restart or clear its newer preparation', async () => {
+  const app = createApp({ retention: createRetention({ persistent: false }) });
+  await app.load(kiln);
+  const editor = app.editor!;
+  let releaseFirst!: (ok: boolean) => void, releaseSecond!: (ok: boolean) => void;
+  vi.spyOn(editor, 'settle')
+    .mockImplementationOnce(() => new Promise<boolean>((resolve) => (releaseFirst = resolve)))
+    .mockImplementationOnce(() => new Promise<boolean>((resolve) => (releaseSecond = resolve)));
+  const first = new AbortController();
+  const cancelled = app.beginPractice(first.signal);
+  expect(app.preparing).toBe(true);
+  first.abort();
+  expect(app.preparing).toBe(false);
+  const second = new AbortController();
+  const restarted = app.beginPractice(second.signal);
+  expect(app.preparing).toBe(true);
+  releaseFirst(true);
+  expect(await cancelled).toBe(false);
+  expect(app.preparing).toBe(true);
+  expect(await app.beginPractice(new AbortController().signal)).toBe(false);
+  releaseSecond(true);
+  expect(await restarted).toBe(true);
+  app.endPractice();
+  expect(app.editor).toBe(editor);
+  editor.dispose();
+});
+
+it('cancellation during the final settlement leaves the visitor session mounted', async () => {
+  const app = createApp({ retention: createRetention({ persistent: false }) });
+  await app.load(kiln);
+  const editor = app.editor!,
+    doc = app.state.doc,
+    park = vi.fn();
+  let release!: (ok: boolean) => void, reached!: () => void;
+  const settling = new Promise<void>((resolve) => (reached = resolve));
+  vi.spyOn(editor, 'settle')
+    .mockResolvedValueOnce(true)
+    .mockImplementationOnce(() => {
+      reached();
+      return new Promise<boolean>((resolve) => (release = resolve));
+    });
+  const cancel = new AbortController();
+  const entering = app.beginPractice(cancel.signal, park);
+  await settling;
+  cancel.abort();
+  release(true);
+  expect(await entering).toBe(false);
+  expect(park).not.toHaveBeenCalled();
+  expect(app.practice).toBe(false);
+  expect(app.editor).toBe(editor);
+  expect(app.state.doc).toBe(doc);
+  editor.dispose();
+});
+
 it('entry drains queued edits without waiting for their sparse display trigger, and keeps a failed rollback', async () => {
   const app = createApp({ retention: createRetention({ persistent: false }) });
   await app.load(kiln);

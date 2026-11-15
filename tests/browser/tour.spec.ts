@@ -297,7 +297,17 @@ test('practice entry waits for submitted source validation, cancels, and keeps v
   await source.fill('.lpf(850)');
   await page.evaluate(() => {
     const editor = window.odmApp.editor!,
-      ask = editor.ask.bind(editor);
+      ask = editor.ask.bind(editor),
+      settle = editor.settle.bind(editor);
+    // Keep the cancelled attempt finishing after the submitted edit is ready.
+    editor.settle = async () => {
+      editor.settle = settle;
+      const ok = await settle();
+      await new Promise<void>((resolve) =>
+        Object.assign(window, { releaseCancelledPreparation: resolve }),
+      );
+      return ok;
+    };
     editor.ask = async (...args) => {
       editor.ask = ask;
       await new Promise<void>((resolve) => Object.assign(window, { releaseSource: resolve }));
@@ -314,9 +324,19 @@ test('practice entry waits for submitted source validation, cancels, and keeps v
   await expect(
     page.getByText('Applied. This is now editable in its own editor.', { exact: true }),
   ).toBeVisible();
+  await page.waitForFunction(
+    () =>
+      !!(window as unknown as { releaseCancelledPreparation: unknown }).releaseCancelledPreparation,
+  );
   await page.locator('#take-tour').click();
   await page.locator('#tour-start').click();
   await lesson(page, 1);
+  await page.evaluate(() =>
+    (
+      window as unknown as { releaseCancelledPreparation: () => void }
+    ).releaseCancelledPreparation(),
+  );
+  expect(await page.evaluate(() => window.odmApp.practice)).toBe(true);
   await page.locator('#tour-end').click();
   await expect(source).toHaveValue('.lpf(850)');
   await source.fill('unfinished (');
@@ -398,7 +418,17 @@ test('practice is usable with denied storage and a late rejected playback cannot
   });
   await expect(page.locator('#load-error')).toBeEmpty();
   await page.locator('#about').click();
+  await page.evaluate(() => {
+    Object.assign(window, {
+      aboutClosed: new Promise<void>((resolve) =>
+        document.querySelector('#about-dialog')!.addEventListener('close', () => resolve(), {
+          once: true,
+        }),
+      ),
+    });
+  });
   await page.keyboard.press('Escape');
+  await page.evaluate(() => (window as unknown as { aboutClosed: Promise<void> }).aboutClosed);
   await expect(page.locator('dialog[open]')).toHaveCount(0);
   await expect(page.locator('#take-tour')).toBeFocused();
 });
