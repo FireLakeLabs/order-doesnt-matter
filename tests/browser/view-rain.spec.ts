@@ -119,10 +119,9 @@ test('Rain: real score motion, lifetime, five themes, corpus and frame cost', as
     route.fulfill({ path: 'tests/fixtures/sounds/burst.wav', contentType: 'audio/wav' }),
   );
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/studio.html?inspect');
+  await page.goto('/studio.html?inspect&a=rain&theme=arcade');
   await page.waitForFunction(() => window.odmStudio.app.canPlay);
   await load(page, 'corpus/programs/real-dubstep-arranged.strudel');
-  await choose(page, 'Rain');
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await page.waitForFunction(
     () => window.odmStudio.app.state.playing && window.odmStudio.getPlayhead() > 0.1,
