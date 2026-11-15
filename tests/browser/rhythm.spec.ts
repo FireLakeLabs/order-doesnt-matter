@@ -16,6 +16,25 @@ async function openBass(page: import('@playwright/test').Page) {
   const bass = instruments(doc).find((r) => r.name === 'bass')!;
   return selectNode(page, { nodeId: `${bass.pattern.id}:rhythm` });
 }
+test('signed evenly spread hits explain omitted positions and Undo restores the score', async ({
+  page,
+}) => {
+  await openProgram(page, { source: 'note("fs2(-3,8)").s("sine")' });
+  await selectNode(page, { breadcrumb: ['Instrument 1', 'Rhythm'] });
+  await page.getByRole('button', { name: 'List', exact: true }).click();
+  await expect(page.locator('[data-path="0"]')).toContainText('leave 3 of 8 positions empty');
+  await expect(page.locator('#editor')).toContainText('5 of 8 positions can play.');
+  const before = await page.evaluate(() => window.odmApp.state.doc);
+  const hits = page.getByLabel('hits', { exact: true });
+  await expect(hits).toHaveValue('-3');
+  await hits.fill('-2');
+  await hits.press('Enter');
+  await waitForPending(page);
+  await expect(page.locator('#editor')).toContainText('6 of 8 positions can play.');
+  await page.getByRole('button', { name: 'Undo', exact: true }).click();
+  await expect(hits).toHaveValue('-3');
+  expect(await page.evaluate(() => window.odmApp.state.doc)).toEqual(before);
+});
 test('real house: a bass edit reaches triggers and preserves every other instrument onset bag', async ({
   page,
 }) => {

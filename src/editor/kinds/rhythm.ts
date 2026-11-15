@@ -95,6 +95,7 @@ const ordinal = (n: number) =>
   `${n}${n % 100 >= 11 && n % 100 <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th')}`;
 const partName = (path: number[]) => path.map((n) => `${ordinal(n + 1)} part`).join(' › ');
 const description = (s: Step): string => {
+  const spread = s.kind === 'euclid' ? euclidNumbers(s) : undefined;
   const name =
     s.kind === 'value'
       ? s.value
@@ -106,8 +107,10 @@ const description = (s: Step): string => {
             ? 'takes turns, one per cycle'
             : s.kind === 'together'
               ? 'at the same time'
-              : s.kind === 'euclid' && euclidNumbers(s)
-                ? `${euclidNumbers(s)!.hits} hits out of ${euclidNumbers(s)!.outOf}`
+              : spread
+                ? spread.hits < 0
+                  ? `leave ${-spread.hits} of ${spread.outOf} positions empty`
+                  : `${spread.hits} hits out of ${spread.outOf}`
                 : s.kind === 'other' && rhythmMarks(s)
                   ? `${description(rhythmMarks(s)!.base)} · ${rhythmMarks(s)!
                       .ops.map(
@@ -414,7 +417,14 @@ export default {
         input.value = String(value);
         input.setAttribute('aria-label', label);
         input.dataset.rhythmKey = label;
-        const apply = () => change(rhythmNumber(input.value));
+        let submitted = value;
+        const apply = () => {
+          const next = rhythmNumber(input.value);
+          if (next === submitted) return;
+          // Rendering may blur this field before its Enter handler returns.
+          submitted = next;
+          change(next);
+        };
         input.onchange = apply;
         input.onkeydown = (e) => {
           if (e.key === 'Enter') {
@@ -472,6 +482,13 @@ export default {
       if (euclid) {
         const group = el('div');
         group.className = 'rhythm-action-group';
+        if (euclid.hits < 0)
+          group.append(
+            el(
+              'p',
+              `Negative hits leave positions empty: ${euclid.outOf + euclid.hits} of ${euclid.outOf} positions can play.`,
+            ),
+          );
         for (const [key, label] of [
           ['hits', 'hits'],
           ['outOf', 'out of'],

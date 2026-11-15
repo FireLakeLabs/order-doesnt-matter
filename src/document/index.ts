@@ -52,7 +52,13 @@ export function walk(doc: Doc, visit: (node: DocumentNode, path: Path) => void):
         break;
       case 'value':
       case 'rest':
+        break;
       case 'other':
+        if (s.expression) {
+          step(s.expression.step);
+          for (const mark of s.expression.marks)
+            if (typeof mark.amount === 'object') step(mark.amount);
+        }
         break;
       default:
         unreachable(s);
