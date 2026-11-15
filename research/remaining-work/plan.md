@@ -55,8 +55,10 @@ Parent review reproduced and corrected three settlement/failure-state defects
 queue not waking its barrier). All three new Node regressions failed before and
 passed after. A browser regression also failed before/passed after preserving
 Now List disclosure and its editor return origin. Original assertions remain.
-Final combined acceptance and the narrow-base/CI results are recorded in the
-tour PR description and research/guided-tour/verification.md at publication.
+Final combined acceptance passed 668 Node tests and 119 browser tests, with
+three existing skips, in 216.887/300 s on four CPUs; slowest 15.669/25 s.
+The narrow base typecheck and all 12 tour browser cases passed. Current-head CI
+and merge approval remain pending. See the tour PR and its verification record.
 
 Retained limits: screen-reader behavior, real mobile keyboards and physical
 speaker behavior remain unverified. History/drafts persist in memory only;

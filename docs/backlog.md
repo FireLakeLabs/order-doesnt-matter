@@ -9,10 +9,10 @@ and pass CI; they remain unmerged. Implementation status does not imply deployme
 
 - **Release approval.** The reviewed feature stack remains open and unmerged.
   Every merge to main publishes; final merge/release needs owner authorization.
-- **Final combined acceptance.** The implementation before guided practice passed
-  659 Node tests and 107 browser tests, with three existing skips, in 185.573 s.
-  Repeat combined acceptance after the tour, using the owner-approved limits in
-  [standards](standards.md). Full evidence is in the
+- **Final combined acceptance.** The combined implementation including guided
+  practice passed 668 Node tests and 119 browser tests, with three existing skips,
+  in 216.887 s under the owner-approved limits in [standards](standards.md).
+  Current tour-head CI and release verification remain. Full evidence is in the
   [wave record](../research/remaining-work/plan.md).
 
 ## Editor and retention boundaries
@@ -75,6 +75,5 @@ Preserve the original session, drafts and recovery state; practice must never
 replace the visitor's saved work. Follow the
 [specification](../research/guided-tour-spec.md) and
 [source-grounded brief](../research/guided-tour/implementation-brief.md).
-Session preservation and cancellation preceded visible tour integration. Parent
-acceptance, final-head CI and release approval remain; manual screen-reader and
+Session preservation and cancellation preceded visible tour integration. Final-head CI and release approval remain; manual screen-reader and
 real mobile-keyboard behavior are unverified.

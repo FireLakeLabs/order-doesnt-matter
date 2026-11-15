@@ -94,3 +94,37 @@ is the next parent-owned checkpoint.
 Owned preview tab closed; static server/runner exited and released the lock. No
 production server or repository test runner was started. Only the three requested
 research files are committed; no source, tooling, living docs, hosting or PR changes.
+
+
+## Parent review of the implemented tour
+
+The owner approved the mockup as shown. Parent read the full implementation
+handoff/diff and corrected three reproduced state/settlement defects and the
+Now List disclosure/editor-return origin. Each regression failed before its
+correction and passed after. These are product-state corrections, not retries
+or timing changes. Original assertions and optional skips remain.
+
+Independent combined implementation at parent `44e4e6e`, CPUs 0–3, separate
+exclusive acceptance-lock acquisitions:
+
+| Gate | Result | Timing |
+| --- | --- | --- |
+| Full Node/build check |668 tests passed | Node 39.940/60 s; complete 54.714 s |
+| Full browser |119 passed,3 existing skips, all 15 audio cases |216.887/300 s; wrapper 217.099 s |
+| Slowest completed case | within 25 s guard |15.669 s |
+
+Lock waits were 0.000105/0.000112 s, excluded. The explicit narrower PR base
+(typechecked against#67) also passed all 12 tour browser cases; complete command
+37.573 s, with 115.364 s lock wait excluded. This verifies routing compatibility;
+the combined implementation supplies Paper and the other feature branches.
+
+Parent inspected fresh desktop 1440 x 900 cutoff,390 x 844 Keep work and 390 x 667
+Watch captures. Guidance, focus rings, Stop/End/Close and practice export labels
+were readable/reachable. Short-phone previews need internal scrolling. The
+three-size canary measured 12 checkpoints/36 controls with bounds, center hit tests
+and 44 px minimum heights; no root horizontal overflow. Production-only npm audit
+reported zero vulnerabilities. Historical development failures remain retained.
+
+No manual screen reader, real mobile keyboard, GPU completion or physical-speaker
+behavior was verified. No merge or deployment occurred. Current PR-head CI and
+release approval remain separate from these local checks.
