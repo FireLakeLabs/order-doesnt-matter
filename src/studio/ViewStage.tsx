@@ -12,7 +12,6 @@ import { mountView } from './view-lifecycle';
 import { ViewShelf, viewDragType } from './ViewShelf';
 import type { Layout, Stage } from './session';
 
-
 function Drawing({
   viewId,
   theme,
