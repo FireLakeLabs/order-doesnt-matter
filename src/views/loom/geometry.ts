@@ -209,9 +209,13 @@ export function activeRange(thread: Thread, now: number, wake = 0) {
   return { first, end: low };
 }
 
-export function flash(stitch: Stitch, now: number, cps: number) {
-  if (!stitch.onset || now < stitch.start || now >= stitch.end) return 0;
+function onsetFlash(stitch: Stitch, now: number, cps: number) {
+  if (!stitch.onset || now < stitch.start) return 0;
   return Math.pow(clamp(1 - (now - stitch.start) / Math.max(0.0001, cps * 0.15)), 2);
+}
+
+export function flash(stitch: Stitch, now: number, cps: number) {
+  return now >= stitch.end ? 0 : onsetFlash(stitch, now, cps);
 }
 
 export const wakeLength = (trails: ViewFrame['trails']) =>
@@ -220,6 +224,8 @@ export const wakeLength = (trails: ViewFrame['trails']) =>
 /** Fragments can be held, but only an onset-bearing note leaves a hit's afterglow. */
 export function stitchLight(stitch: Stitch, now: number, cps: number, wake: number) {
   if (now < stitch.start) return 0;
-  if (now < stitch.end) return (0.12 + 0.7 * flash(stitch, now, cps)) * (0.2 + 0.8 * stitch.level);
-  return stitch.onset && wake > 0 ? 0.55 * clamp(1 - (now - stitch.end) / wake) * stitch.level : 0;
+  const held =
+    (0.12 + 0.7 * onsetFlash(stitch, Math.min(now, stitch.end), cps)) * (0.2 + 0.8 * stitch.level);
+  if (now < stitch.end) return held;
+  return stitch.onset && wake > 0 ? held * clamp(1 - (now - stitch.end) / wake) : 0;
 }

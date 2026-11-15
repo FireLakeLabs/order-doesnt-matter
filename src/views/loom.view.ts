@@ -257,7 +257,7 @@ function drawLive(ctx: CanvasRenderingContext2D, cloth: Cloth, frame: ViewFrame)
         for (let pixel = start; pixel < end; pixel++) {
           const age = now - (cloth.from + (pixel + 1) / scale);
           const light =
-            0.55 *
+            0.12 *
             thread.occupancy[pixel] *
             (thread.levels?.[pixel] ?? 1) *
             Math.max(0, 1 - age / wakeCycles);

@@ -174,15 +174,32 @@ describe('Loom score geometry', () => {
     expect(wakeLength(1)).toBe(0.25);
     expect(wakeLength(2)).toBe(1);
     expect(stitchLight(stitch, 1.125, 0.5, wakeLength(0))).toBe(0);
-    expect(stitchLight(stitch, 1.125, 0.5, wakeLength(1))).toBeCloseTo(0.275);
+    expect(stitchLight(stitch, 1.125, 0.5, wakeLength(1))).toBeCloseTo(0.06);
     const long = stitchLight(stitch, 1.3, 0.5, wakeLength(2));
     expect(long).toBeGreaterThan(0);
     expect(stitchLight(stitch, 1.3, 0.5, wakeLength(1))).toBe(0);
     expect(stitchLight(stitch, 2, 0.5, wakeLength(2))).toBe(0);
     expect(stitchLight(stitch, 1.3, 0.5, wakeLength(2))).toBe(long);
-    expect(stitchLight({ ...stitch, level: 0.5 }, 1.3, 0.5, 1)).toBeCloseTo(long / 2);
+    expect(stitchLight({ ...stitch, level: 0.5 }, 1.3, 0.5, 1)).toBeLessThan(long);
     expect(stitchLight(thread.stitches[1], 1.1, 0.5, 1)).toBe(0);
     expect(activeRange(thread, 1.3, 1)).toEqual({ first: 0, end: 2 });
     expect(activeRange(thread, 1.3, 0.25)).toEqual({ first: 2, end: 2 });
+  });
+
+  it('never creates a second flash at note-off, for short or held notes at any speed', () => {
+    const base = buildCloth(frame([note(0, 1)])).threads[0].stitches[0];
+    for (const end of [0.01, 0.125, 1, 4]) {
+      for (const cps of [0.1, 0.5, 1]) {
+        for (const level of [0.2, 1]) {
+          const stitch = { ...base, end, level };
+          for (const trails of [1, 2] as const) {
+            const before = stitchLight(stitch, end - 0.000001, cps, wakeLength(trails));
+            const after = stitchLight(stitch, end + 0.000001, cps, wakeLength(trails));
+            expect(after).toBeLessThanOrEqual(before);
+            expect(after).toBeGreaterThan(0);
+          }
+        }
+      }
+    }
   });
 });
