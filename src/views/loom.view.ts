@@ -1,5 +1,5 @@
 import type { ViewDefinition, ViewFrame } from './types';
-import { activeRange, buildCloth, flash } from './loom/geometry';
+import { activeRange, buildCloth, flash, stitchLight, wakeLength } from './loom/geometry';
 import type { Cloth, Stitch } from './loom/geometry';
 
 function shape(ctx: CanvasRenderingContext2D, stitch: Stitch, radius: number) {
@@ -205,6 +205,7 @@ function drawLive(ctx: CanvasRenderingContext2D, cloth: Cloth, frame: ViewFrame)
   const { now, theme, trails, cps } = frame;
   const { box, scale } = cloth;
   const pocket = theme.name === 'pocket';
+  const wakeCycles = wakeLength(trails);
   if (now < cloth.from || now > cloth.to) return;
   const x = box.left + (now - cloth.from) * scale;
   ctx.fillStyle = theme.text;
@@ -226,7 +227,7 @@ function drawLive(ctx: CanvasRenderingContext2D, cloth: Cloth, frame: ViewFrame)
       box.height + 16,
     );
   if (trails) {
-    const wake = (trails === 1 ? 0.25 : 1) * scale;
+    const wake = wakeCycles * scale;
     const start = Math.max(box.left, x - wake);
     if (pocket) {
       ctx.fillStyle = theme.text;
@@ -246,26 +247,54 @@ function drawLive(ctx: CanvasRenderingContext2D, cloth: Cloth, frame: ViewFrame)
     }
   }
   cloth.threads.forEach((thread, row) => {
-    if (frame.instruments[row].muted || !frame.instruments[row].inSection) return;
+    // A resting row may still carry the afterglow of the section that just ended.
+    if (frame.instruments[row].muted) return;
     if (thread.occupancy) {
+      if (wakeCycles) {
+        const start = Math.max(0, Math.floor(x - box.left - wakeCycles * scale));
+        const end = Math.min(thread.occupancy.length, Math.floor(x - box.left));
+        ctx.fillStyle = theme.text;
+        for (let pixel = start; pixel < end; pixel++) {
+          const age = now - (cloth.from + (pixel + 1) / scale);
+          const light =
+            0.55 *
+            thread.occupancy[pixel] *
+            (thread.levels?.[pixel] ?? 1) *
+            Math.max(0, 1 - age / wakeCycles);
+          if (!light || (pocket && (pixel + row) % 4 >= Math.ceil(light * 4))) continue;
+          ctx.globalAlpha = pocket ? 1 : light;
+          ctx.fillRect(
+            box.left + pixel,
+            thread.tops?.[pixel] ?? thread.y - box.pitch * 0.3,
+            1,
+            box.pitch * 0.6,
+          );
+        }
+      }
       // Light the coverage around the gate, never thousands of individual subpixel events.
       const pixel = Math.min(thread.occupancy.length - 1, Math.floor(x - box.left));
       const coverage = thread.occupancy[pixel];
-      if (coverage) {
+      if (coverage && frame.instruments[row].inSection) {
         ctx.fillStyle = theme.text;
         ctx.globalAlpha = pocket ? 1 : 0.55 * coverage;
         ctx.fillRect(x - 1, thread.tops?.[pixel] ?? thread.y - box.pitch * 0.3, 2, box.pitch * 0.6);
       }
       return;
     }
-    const { first, end } = activeRange(thread, now);
+    const { first, end } = activeRange(thread, now, wakeCycles);
     for (let i = first; i < end; i++) {
       const stitch = thread.stitches[i];
-      if (stitch.end <= now) continue;
+      if (stitch.end > now && !frame.instruments[row].inSection) continue;
+      const light = stitchLight(stitch, now, cps, wakeCycles);
+      if (!light) continue;
       const hit = flash(stitch, now, cps);
       ctx.fillStyle = theme.text;
-      ctx.globalAlpha = pocket ? 1 : (0.12 + 0.7 * hit) * (0.2 + 0.8 * stitch.level);
-      if (pocket) ctx.fillRect(stitch.x, stitch.y, stitch.width, hit > 0.5 ? 3 : 1);
+      ctx.globalAlpha = pocket ? 1 : light;
+      if (pocket && stitch.end <= now) {
+        for (let pixel = Math.floor(stitch.x); pixel < stitch.x + stitch.width; pixel++) {
+          if ((pixel + row) % 4 < Math.ceil(light * 4)) ctx.fillRect(pixel, stitch.y, 1, 1);
+        }
+      } else if (pocket) ctx.fillRect(stitch.x, stitch.y, stitch.width, hit > 0.5 ? 3 : 1);
       else {
         shape(ctx, stitch, theme.radius);
         ctx.fill();
@@ -301,6 +330,8 @@ function appearance(frame: ViewFrame) {
     frame.from,
     frame.to,
     frame.theme,
+    document.fonts.check(`11px "${frame.theme.fontMono}"`),
+    document.fonts.check(`22px "${frame.theme.fontDisplay}"`),
     frame.sections,
     frame.instruments.map(({ id, name, colour, muted }) => [id, name, colour, muted]),
   ]);

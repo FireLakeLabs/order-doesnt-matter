@@ -6,6 +6,8 @@ import {
   layout,
   occupancy,
   pitch,
+  stitchLight,
+  wakeLength,
 } from '../../src/views/loom/geometry';
 import type { ViewFrame, ViewNote } from '../../src/views/types';
 
@@ -99,6 +101,9 @@ describe('Loom score geometry', () => {
     expect(pitch({ note: 42, n: 9, freq: 440 })).toBe(42);
     expect(pitch({ n: '60' })).toBe(60);
     expect(pitch({ freq: 440 })).toBe(69);
+    expect(pitch({ note: 'x', n: 60, freq: 440 })).toBe(60);
+    expect(pitch({ note: 'cs3' })).toBe(49);
+    expect(pitch({ note: 'df3' })).toBe(49);
     expect(pitch({ note: 'bad', freq: 440 })).toBe(69);
     expect(pitch({ s: 'bd' })).toBeUndefined();
   });
@@ -160,5 +165,24 @@ describe('Loom score geometry', () => {
     const tops = thread.tops;
     if (!tops) throw Error('Expected dense pitch contour');
     expect(tops[10]).toBeGreaterThan(tops[tops.length - 10]);
+  });
+
+  it('keeps ended hits lit for the selected wake, fading by level and reversible musical time', () => {
+    const thread = buildCloth(frame([note(0, 1), { ...note(0, 1), hasOnset: false }])).threads[0];
+    const stitch = thread.stitches[0];
+    expect(wakeLength(0)).toBe(0);
+    expect(wakeLength(1)).toBe(0.25);
+    expect(wakeLength(2)).toBe(1);
+    expect(stitchLight(stitch, 1.125, 0.5, wakeLength(0))).toBe(0);
+    expect(stitchLight(stitch, 1.125, 0.5, wakeLength(1))).toBeCloseTo(0.275);
+    const long = stitchLight(stitch, 1.3, 0.5, wakeLength(2));
+    expect(long).toBeGreaterThan(0);
+    expect(stitchLight(stitch, 1.3, 0.5, wakeLength(1))).toBe(0);
+    expect(stitchLight(stitch, 2, 0.5, wakeLength(2))).toBe(0);
+    expect(stitchLight(stitch, 1.3, 0.5, wakeLength(2))).toBe(long);
+    expect(stitchLight({ ...stitch, level: 0.5 }, 1.3, 0.5, 1)).toBeCloseTo(long / 2);
+    expect(stitchLight(thread.stitches[1], 1.1, 0.5, 1)).toBe(0);
+    expect(activeRange(thread, 1.3, 1)).toEqual({ first: 0, end: 2 });
+    expect(activeRange(thread, 1.3, 0.25)).toEqual({ first: 2, end: 2 });
   });
 });

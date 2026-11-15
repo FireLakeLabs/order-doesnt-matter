@@ -2,20 +2,26 @@ import type { ViewFrame, ViewNote } from '../types';
 
 export const clamp = (value: number, low = 0, high = 1) => Math.max(low, Math.min(high, value));
 
-export function pitch(value: ViewNote['value']): number | undefined {
-  const note = value.note ?? value.n;
+function parsePitch(note: unknown): number | undefined {
   if (typeof note === 'number' && Number.isFinite(note)) return note;
   if (typeof note === 'string') {
     const numeric = Number(note);
     if (note.trim() && Number.isFinite(numeric)) return numeric;
-    const match = /^([a-g])([#b]*)(-?\d+)?$/i.exec(note);
+    const match = /^([a-g])([#bsf]*)(-?\d+)?$/i.exec(note);
     if (match) {
-      const semitone = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 }[match[1].toLowerCase() as 'c'];
+      const semitones: Record<string, number> = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 };
+      const semitone = semitones[match[1].toLowerCase()];
       let accidental = 0;
-      for (const mark of match[2]) accidental += mark === '#' ? 1 : -1;
+      for (const mark of match[2]) accidental += /[#s]/i.test(mark) ? 1 : -1;
       return (Number(match.at(3) ?? 3) + 1) * 12 + semitone + accidental;
     }
   }
+  return undefined;
+}
+
+export function pitch(value: ViewNote['value']): number | undefined {
+  const parsed = parsePitch(value.note) ?? parsePitch(value.n);
+  if (parsed !== undefined) return parsed;
   const frequency = Number(value.freq);
   return frequency > 0 && Number.isFinite(frequency)
     ? 69 + 12 * Math.log2(frequency / 440)
@@ -190,7 +196,7 @@ export function buildCloth(frame: ViewFrame): Cloth {
 }
 
 /** End-exclusive spans, indexed backwards with prefix maxima to include long held voices. */
-export function activeRange(thread: Thread, now: number) {
+export function activeRange(thread: Thread, now: number, wake = 0) {
   let low = 0;
   let high = thread.stitches.length;
   while (low < high) {
@@ -199,11 +205,21 @@ export function activeRange(thread: Thread, now: number) {
     else high = middle;
   }
   let first = low;
-  while (first > 0 && thread.maxEnds[first - 1] > now) first--;
+  while (first > 0 && thread.maxEnds[first - 1] > now - wake) first--;
   return { first, end: low };
 }
 
 export function flash(stitch: Stitch, now: number, cps: number) {
   if (!stitch.onset || now < stitch.start || now >= stitch.end) return 0;
   return Math.pow(clamp(1 - (now - stitch.start) / Math.max(0.0001, cps * 0.15)), 2);
+}
+
+export const wakeLength = (trails: ViewFrame['trails']) =>
+  trails === 0 ? 0 : trails === 1 ? 0.25 : 1;
+
+/** Fragments can be held, but only an onset-bearing note leaves a hit's afterglow. */
+export function stitchLight(stitch: Stitch, now: number, cps: number, wake: number) {
+  if (now < stitch.start) return 0;
+  if (now < stitch.end) return (0.12 + 0.7 * flash(stitch, now, cps)) * (0.2 + 0.8 * stitch.level);
+  return stitch.onset && wake > 0 ? 0.55 * clamp(1 - (now - stitch.end) / wake) * stitch.level : 0;
 }
