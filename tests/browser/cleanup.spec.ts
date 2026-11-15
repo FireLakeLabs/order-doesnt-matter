@@ -1,13 +1,11 @@
+import { blockHttps } from './offline';
 import { test } from './helpers';
 import { scoreReady, play } from './helpers';
 import { expect } from '@playwright/test';
 import type {} from '../../src/app/main';
 
 test('sit-out rows, sticky headings, late sounds and phone toolbar', async ({ page }) => {
-  await page.route(
-    (url) => url.protocol === 'https:',
-    (route) => route.abort('internetdisconnected'),
-  );
+  await blockHttps(page);
   await page.goto('/?inspect');
   await page
     .getByLabel('Your Strudel program')
@@ -49,10 +47,7 @@ test('sit-out rows, sticky headings, late sounds and phone toolbar', async ({ pa
 });
 
 test('sounds beyond the discovery cap say not used yet only during playback', async ({ page }) => {
-  await page.route(
-    (url) => url.protocol === 'https:',
-    (route) => route.abort('internetdisconnected'),
-  );
+  await blockHttps(page);
   await page.goto('/?inspect');
   const sections = Array.from({ length: 32 }, () => '[4,early]').join(',');
   await page
