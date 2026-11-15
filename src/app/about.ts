@@ -48,6 +48,11 @@ export function mountAbout() {
     <form method="dialog"><button autofocus>Close</button></form>`;
   document.body.append(dialog);
   trigger.onclick = () => dialog.showModal();
-  dialog.addEventListener('close', () => trigger.focus({ preventScroll: true }));
+  dialog.addEventListener('close', () => {
+    // A tour exit may already have restored focus before this queued event runs.
+    const active = document.activeElement;
+    if (!dialog.open && (!active || active === document.body || dialog.contains(active)))
+      trigger.focus({ preventScroll: true });
+  });
   return dialog;
 }

@@ -31,8 +31,8 @@ export function createApp(
   } = {},
 ) {
   let retention = options.retention ?? createRetention();
-  let practice = false,
-    preparing = false;
+  let practice = false;
+  let preparing: AbortSignal | undefined;
   const work = new Set<Promise<unknown>>();
   function track<T>(task: Promise<T>): Promise<T> {
     work.add(task);
@@ -520,13 +520,13 @@ export function createApp(
       return practice;
     },
     get preparing() {
-      return preparing;
+      return !!preparing && !preparing.aborted;
     },
     /** Wait for submitted work, including validation, queued swaps and score answers.
      * Cancellation leaves the original active; display-pending sparse notes do not block. */
     async beginPractice(signal: AbortSignal, park: () => void = () => {}) {
-      if (practice || preparing) return false;
-      preparing = true;
+      if (practice || signal.aborted || (preparing && !preparing.aborted)) return false;
+      preparing = signal;
       try {
         do {
           await editor?.settle();
@@ -541,6 +541,7 @@ export function createApp(
           (state.doc && (!checked || Object.values(state.events).some((e) => e.error)))
         )
           return false;
+        if (signal.aborted || preparing !== signal) return false;
         park();
         original = {
           state,
@@ -566,7 +567,7 @@ export function createApp(
         update(state);
         return true;
       } finally {
-        preparing = false;
+        if (preparing === signal) preparing = undefined;
       }
     },
     endPractice(restore: () => void = () => {}) {
