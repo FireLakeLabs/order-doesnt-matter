@@ -53,6 +53,9 @@ something that went wrong at least once. Written 2026-11-12.
   suite (D27). The budget is what made slow tests visible.
 - **Strudel's web bundle carries its own scheduler.** Patching `@strudel/core`
   alone changes nothing in playback.
+- **Treat aggregate time budgets as a coverage policy.** When the suite grows,
+  report completed assertions and cutoff work before tuning. Get owner approval
+  for revised limits and test the new boundary.
 
 ## Working with the owner
 

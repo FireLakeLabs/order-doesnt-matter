@@ -219,6 +219,18 @@ get('editor').addEventListener(
 );
 function parkOriginal() {
   renderPanel.freeze(true);
+  const liveState = {
+    panels: ['.live-panel', '.live-list-disclosure'].map((selector) => ({
+      selector,
+      open: get('live').querySelector<HTMLDetailsElement>(selector)?.open,
+    })),
+    more: get('live').querySelector('.live-list-more')?.getAttribute('aria-expanded'),
+    origin: liveOrigin?.dataset.listId
+      ? `[data-list-id="${CSS.escape(liveOrigin.dataset.listId)}"]`
+      : liveOrigin?.dataset.liveId
+        ? `[data-live-id="${CSS.escape(liveOrigin.dataset.liveId)}"]`
+        : null,
+  };
   const saved = {
     source,
     score,
@@ -279,6 +291,20 @@ function parkOriginal() {
     previousSheet = [...previousSheet];
     if (previousSheet.length) previousSheet[6] = false;
     window.scrollTo(...(saved.scroll as [number, number]));
+    const activation = app.activation;
+    // The following controller update can rebuild Now for the restored score.
+    // Restore its disclosure and semantic origin after that synchronous render.
+    queueMicrotask(() => {
+      if (app.practice || app.activation !== activation) return;
+      for (const { selector, open } of liveState.panels) {
+        const panel = get('live').querySelector<HTMLDetailsElement>(selector);
+        if (panel && open !== undefined) panel.open = open;
+      }
+      const more = get('live').querySelector<HTMLButtonElement>('.live-list-more');
+      if (more && liveState.more && more.getAttribute('aria-expanded') !== liveState.more)
+        more.click();
+      if (liveState.origin) liveOrigin = get('live').querySelector<HTMLElement>(liveState.origin);
+    });
   };
 }
 let previousLiveRows = '';

@@ -321,3 +321,22 @@ it('a cancelled practice replacement cannot publish its late error into the rest
   expect(app.state.playing).toBe(false);
   editor?.dispose();
 });
+
+it('an observed practice playback failure does not block the restored session from entering again', async () => {
+  const app = createApp({ retention: createRetention({ persistent: false }) });
+  await app.load(kiln);
+  const original = app.state.doc,
+    editor = app.editor;
+  expect(await app.beginPractice(new AbortController().signal)).toBe(true);
+  await app.load(kiln);
+  audio.rejectNext();
+  await app.play();
+  expect(app.state.message).toContain('Rejected swap');
+  app.endPractice();
+  expect(app.state.doc).toBe(original);
+  expect(app.state.message).toBe('');
+  expect(await app.beginPractice(new AbortController().signal)).toBe(true);
+  app.endPractice();
+  expect(app.editor).toBe(editor);
+  editor?.dispose();
+});

@@ -50,23 +50,23 @@ Three views of one piece, each with one job.
 | View              | Job                                                                                                    |
 | ----------------- | ------------------------------------------------------------------------------------------------------ |
 | **Score sheet**   | Find and edit. One row per instrument, one column per setting in use, a song strip of sections on top. |
-| **Constellation** | Overview. Which instruments are sounding now, and who shares a room. Not an editor.                    |
+| **Constellation** | Overview. Active instruments and sampled room sends. Not an editor.                                    |
 | **Spiral**        | Watch. One turn per cycle, with "now" as a bright gate. Not an editor.                                 |
 
 | Thing in Strudel      | What you see                                                            |
 | --------------------- | ----------------------------------------------------------------------- |
 | An instrument         | A row in the sheet; a planet in the constellation; a band in the spiral |
 | A setting over time   | A cell drawn from its real values; a **lane** when opened               |
-| What drives a setting | Nested under it: a moon of the moon                                     |
-| A rewrite             | An ordered chip in the sheet; a **shell** around the planet             |
+| What drives a setting | Nested under it in the editor                                           |
+| A rewrite             | An ordered chip in the sheet; branch controls in its editor             |
 | A note                | A mark with its real start and end, never a step in an assumed grid     |
 | A continuous signal   | A curve only, never a note                                              |
 | A section of the song | A block in the song strip; instruments not in it say so                 |
 | An orbit              | **Room**: a region around the instruments that send into it             |
 | Code we do not model  | Still visible, playable, and editable as text                           |
 
-Selecting anything opens **one editor** for that one thing, named by a
-breadcrumb. Nothing else is editable while it is open.
+Selecting a target opens **one editor**, named by a breadcrumb. Choosing another
+target reuses it.
 
 ## Rules that follow
 
@@ -80,22 +80,25 @@ breadcrumb. Nothing else is editable while it is open.
 - Nothing in the interface may suggest that a setting processes the sound that
   came before it.
 
-## Chosen next interface (2026-11-14)
+## Current interface (2026-11-15)
 
-Layout and live context are implemented; retention awaits a separate wave:
-
-- One editor stays in the page, with live previews available. Replaces D34's
-  panel placement.
-- Now and Watch follow actual playback. The score can stay pinned; explicit
-  labels distinguish playing and editing.
-- First retention features: local document recovery, a portable document
-  download, and fresh generated Strudel export. Recovery limits, replacement
-  confirmation and storage-failure feedback still need specification.
-- A Driver.js guided tour is implemented last, after the other outstanding work.
-  Its [specification](../research/guided-tour-spec.md) awaits that final wave.
+- One in-page editor replaces D34's placement. Now and Watch follow playback;
+  the score can stay pinned, with explicit playing/editing labels.
+- Paper is default; Fern and Night are alternatives. Instrument navigation
+  reaches settings; phone List starts with four rows and More.
+- Supported mini forms and callback branches have structural controls;
+  unproven forms keep source editing.
+- Now shows all sampled rooms. Watch defaults to Ring, with optional Fly-through;
+  both share scored times. Reduced motion holds depth still within each turn;
+  perspective overlaps can obscure notes.
+- Keep work offers explicit local recovery, JSON download/reopening and generated
+  Strudel export. Keep current/Replace protects edits; storage failures are visible.
+  Recovery is one latest browser document, not saved history or transport.
+- Guided practice is an opt-in eight-lesson Kiln tour. It retains the original
+  session and mounted drafts in memory, excludes practice from recovery, and
+  restores stopped playback. See its [specification](../research/guided-tour-spec.md).
 
 ## Not yet settled
 
-- How a room shows a conflict whose outcome cannot be predicted.
 - Whether heard length is drawn at all, and if so from what.
-- How the selected instrument's own system is drawn beside the editor.
+- What a system display would explain beyond the existing context.

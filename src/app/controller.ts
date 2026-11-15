@@ -464,6 +464,7 @@ export function createApp(
     checked: boolean;
     restoredDocument: boolean;
     playbackNotice: string | undefined;
+    playbackFailed: boolean;
   } | null = null;
   function invalidate() {
     switching = true;
@@ -549,6 +550,7 @@ export function createApp(
           checked,
           restoredDocument,
           playbackNotice,
+          playbackFailed,
         };
         editor?.suspend(true);
         invalidate();
@@ -571,8 +573,16 @@ export function createApp(
       if (!practice || !original) return;
       invalidate();
       editor?.dispose();
-      ({ state, editor, retention, cachedWindow, checked, restoredDocument, playbackNotice } =
-        original);
+      ({
+        state,
+        editor,
+        retention,
+        cachedWindow,
+        checked,
+        restoredDocument,
+        playbackNotice,
+        playbackFailed,
+      } = original);
       original = null;
       practice = false;
       restore();

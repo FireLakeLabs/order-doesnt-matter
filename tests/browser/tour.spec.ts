@@ -594,3 +594,15 @@ test('practice uses load/play/edit failure outcomes and offers stopped continuat
   await lesson(page, 3);
   await page.locator('#tour-end').click();
 });
+
+test('practice restores the Now List disclosure and editor return origin', async ({ page }) => {
+  await openProgram(page, { example: 'Kiln' });
+  await page.locator('#live .live-list-disclosure > summary').click();
+  const origin = page.locator('#live .live-instrument').filter({ hasText: 'bass' }).first();
+  await origin.click();
+  await start(page);
+  await page.locator('#tour-end').click();
+  await expect(page.locator('#live .live-list-disclosure')).toHaveAttribute('open', '');
+  await page.locator('#editor').getByRole('button', { name: 'Done', exact: true }).click();
+  await expect(origin).toBeFocused();
+});

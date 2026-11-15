@@ -44,6 +44,7 @@ export function createEditSession(doc: Doc, ports: Ports) {
   const waiters = new Set<() => void>();
   let failure = false,
     suspended = false;
+  let stopGeneration = 0;
   const wake = () => {
     for (const done of waiters) done();
   };
@@ -53,6 +54,7 @@ export function createEditSession(doc: Doc, ports: Ports) {
     clearTimeout(timer);
     timer = undefined;
     queued = undefined;
+    wake();
   }
   function schedule() {
     if (running || timer || !queued) return;
@@ -67,7 +69,8 @@ export function createEditSession(doc: Doc, ports: Ports) {
   async function flush() {
     if (running || !queued) return;
     const work = queued,
-      generation = epoch;
+      generation = epoch,
+      stopped = stopGeneration;
     queued = undefined;
     running = true;
     last = performance.now();
@@ -82,6 +85,9 @@ export function createEditSession(doc: Doc, ports: Ports) {
       emit();
     } catch (error) {
       if (generation !== epoch) return;
+      // Explicit Stop already retained this document as a stopped edit. Its
+      // cancelled audio replacement is not a failed submission in that session.
+      if (stopped !== stopGeneration) return;
       failure = true;
       const before = p.doc;
       p = transition(p, {
@@ -265,6 +271,7 @@ export function createEditSession(doc: Doc, ports: Ports) {
       if ((event.type !== 'progress' && event.type !== 'trigger') || changed) emit();
     },
     stopped() {
+      ++stopGeneration;
       // Stop clears display feedback, not submitted documents. A queued candidate
       // still drains (as a stopped edit); running cancellation settles in finally.
       p = transition(p, { type: 'clear' });

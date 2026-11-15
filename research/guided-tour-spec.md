@@ -135,6 +135,7 @@ These are integration leads, not proof that our finished flow is accessible.
   announcements and reduced motion. Visually review desktop at 1440×900 and
   phones at 390×844 and 390×667, including enlargement and scrolling.
 - Run `npm run check` and `npm run test:browser` with the pinned Node/npm, free
-  ports and existing 60 s/180 s budgets. Add focused coverage within those
-  budgets; do not raise timeouts or add retries. Measure browser assertions
+  ports, the 60 s Node budget and owner-approved 25 s per-case/300 s browser
+  budgets. Add focused coverage within those limits; do not add retries or raise
+  them further. Measure browser assertions
   separately from visual review and report any unverified accessibility behavior.
