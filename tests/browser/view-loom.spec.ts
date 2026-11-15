@@ -21,8 +21,13 @@ async function frames(page: Page, count = 3) {
   }, count);
 }
 async function select(page: Page, name: string) {
+  const previous = await page.locator('[data-region="stage-a"] canvas').elementHandle();
   await page.getByRole('button', { name: 'Views', exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name }).click();
+  if (previous) {
+    await page.waitForFunction((canvas) => !canvas.isConnected, previous);
+    await previous.dispose();
+  }
   await expect(page.locator('[data-region="stage-a"] canvas')).toHaveCount(1);
   await page.waitForFunction(
     () => document.querySelector('.view-host')?.getAttribute('data-score-ready') === 'true',
@@ -160,6 +165,7 @@ test('Loom: real arrangement, cache cost, five themes, lifecycle, no-section and
   expect((await cdp.send('Memory.getDOMCounters')).jsEventListeners).toBeLessThanOrEqual(listeners);
 
   // Same real score, drawn in an exactly 1300x760 stage for visual comparison and CPU timing.
+  expect(await page.evaluate(() => window.loomProbe.latest!.notes.length)).toBeGreaterThan(0);
   await page.evaluate(async () => {
     const probe = window.loomProbe;
     const host = document.createElement('div');
