@@ -104,7 +104,6 @@ export async function createAudio({
     },
     async prepare(code, _from, revision) {
       let candidate: Pattern | undefined;
-      const oldCps = repl.scheduler.cps;
       const previousWritten = writtenCps;
       const execution = new ExecutionBudget();
       const binding = `__odmBudget_${crypto.randomUUID()}`;
@@ -160,7 +159,7 @@ export async function createAudio({
             installed = wrapped;
           } catch (error) {
             writtenCps = previousWritten;
-            tempo.set(oldCps);
+            tempo.set(actualCps(previousWritten, speed));
             await repl.setPattern(previous, false);
             if (!wasPlaying) repl.stop();
             throw error;

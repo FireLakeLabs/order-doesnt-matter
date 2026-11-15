@@ -142,7 +142,7 @@ export function engineWith(
     async setLoop(next) {
       checkLoop(next);
       const token = epoch;
-      if (!(await waitForSwaps(token))) return;
+      if (!(await waitForSwaps(token))) throw cancelled(token);
       const copy = next ? { ...next } : null;
       if (saved && audio.playing()) {
         await engine.play(saved.code, {
@@ -195,8 +195,21 @@ export function engineWith(
             inventory.registry === registryEpoch
               ? inventory.values
               : [];
-          const discovered = await audio.preflight(code, from, reuse.length ? [] : starts);
-          if (token !== epoch) throw cancelled(token);
+          // A loop can wrap before the destination window ends. Check and load
+          // every part of the range, including cycles behind the seek position.
+          const checkingLoop = options.loop === undefined ? loop : options.loop;
+          const discovered = { values: [] as unknown[], discoveryValues: [] as unknown[] };
+          for (let start = checkingLoop?.from ?? from; ; start += 16) {
+            const result = await audio.preflight(
+              code,
+              start,
+              reuse.length || start !== (checkingLoop?.from ?? from) ? [] : starts,
+            );
+            if (token !== epoch) throw cancelled(token);
+            discovered.values.push(...result.values);
+            discovered.discoveryValues.push(...result.discoveryValues);
+            if (!checkingLoop || start + 16 >= checkingLoop.to) break;
+          }
           const staleInventory = () =>
             reuse.length &&
             (generation !== discoveryRevision ||

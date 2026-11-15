@@ -292,3 +292,56 @@ test('a seek waits for in-flight edits and cannot reinstall the earlier source',
   expect(codes).toEqual(['second', 'third', 'third']);
   engine.stop();
 });
+
+test('loop preflight checks and loads the entire range before seeking near its end', async () => {
+  const { engine, audio } = fixture();
+  const windows: number[] = [];
+  let reject = false;
+  audio.now = () => 27;
+  audio.preflight = async (_code, from) => {
+    windows.push(from);
+    if (reject && from === 20) throw Error('unchecked loop head');
+    return { values: [{ s: `cycle-${String(from)}` }], discoveryValues: [] };
+  };
+  await engine.play('sine');
+  await engine.setLoop({ from: 20, to: 28 });
+  expect(windows).toEqual([0, 20]);
+  expect(engine.sounds()).toContainEqual({ name: 'cycle-20', state: 'ready' });
+  await engine.seek(27);
+  expect(windows.at(-1)).toBe(20);
+  await engine.setLoop({ from: 0, to: 36 });
+  expect(windows.slice(-3)).toEqual([0, 16, 32]);
+  reject = true;
+  await expect(engine.setLoop({ from: 20, to: 28 })).rejects.toThrow('unchecked loop head');
+  expect(engine.playing).toBe(true);
+  engine.stop();
+});
+
+test('Stop rejects a loop request waiting behind a swap so callers retain the confirmed range', async () => {
+  const { engine, audio } = fixture();
+  const loops: unknown[] = [];
+  audio.setLoop = (loop) => {
+    loops.push(loop);
+  };
+  await engine.play('first');
+  const prepare = audio.prepare;
+  let finish!: () => void;
+  audio.prepare = async (...args) => {
+    await new Promise<void>((resolve) => {
+      finish = resolve;
+    });
+    return prepare(...args);
+  };
+  const swap = engine.play('second');
+  for (let i = 0; i < 20 && !finish; i++) await Promise.resolve();
+  const marking = engine.setLoop({ from: 8, to: 10 });
+  const rejected = Promise.all([
+    expect(swap).rejects.toThrow('cancelled'),
+    expect(marking).rejects.toThrow('cancelled'),
+  ]);
+  engine.stop();
+  finish();
+  await rejected;
+  expect(loops).toEqual([null]);
+  expect(engine.playing).toBe(false);
+});

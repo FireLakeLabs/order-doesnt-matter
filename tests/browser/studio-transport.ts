@@ -239,7 +239,10 @@ test('Studio whole-cycle loop repeats boundary notes exactly, clears in place an
       )
       .map((e) => ({ cycle: e.cycle, value: e.value })),
   );
-  expect(passes[0].length).toBeGreaterThan(10);
+  expect(passes[0]).toHaveLength(28);
+  expect(
+    new Set(events.map((event) => JSON.stringify([event.cycle, event.value, event.time]))).size,
+  ).toBe(events.length);
   expect(passes[1]).toEqual(passes[0]);
   expect(passes[2]).toEqual(passes[0]);
   for (let i = 0; i < 20; i++) {

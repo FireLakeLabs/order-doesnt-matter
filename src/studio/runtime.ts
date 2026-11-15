@@ -14,7 +14,9 @@ export const app = createApp({
   retention: createRetention({ persistent: false }),
   configureEngine(engine) {
     engine.setSpeed(transport.getSnapshot().speed);
-    void engine.setLoop(transport.getSnapshot().loop);
+    void engine.setLoop(transport.getSnapshot().loop).catch(() => {
+      // The engine reports playback errors; Stop can cancel this setup.
+    });
   },
 });
 export const store = createStore(app);
