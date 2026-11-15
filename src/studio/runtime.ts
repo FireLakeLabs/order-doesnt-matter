@@ -22,7 +22,7 @@ export const runtime = {
   async play() {
     // The controller owns preparation, transport cancellation and swaps.
     await app.play(paused ? held : undefined);
-    paused = false;
+    if (app.state.playing) paused = false;
   },
   pause() {
     this.getPlayhead();

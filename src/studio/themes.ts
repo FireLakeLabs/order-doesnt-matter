@@ -136,3 +136,27 @@ export function instrumentColour(name: string, index: number): string {
       .toUpperCase()
   );
 }
+
+const viewThemes = new WeakMap<ViewTheme, ViewTheme>();
+/** Pass exactly the public view contract, keeping Studio palette metadata in the host. */
+export function viewTheme(theme: ViewTheme): ViewTheme {
+  const cached = viewThemes.get(theme);
+  if (cached) return cached;
+  const { name, ground, panel, line, text, muted, accent, fontDisplay, fontMono, radius, glow } =
+    theme;
+  const resolved = {
+    name,
+    ground,
+    panel,
+    line,
+    text,
+    muted,
+    accent,
+    fontDisplay,
+    fontMono,
+    radius,
+    glow,
+  };
+  viewThemes.set(theme, resolved);
+  return resolved;
+}

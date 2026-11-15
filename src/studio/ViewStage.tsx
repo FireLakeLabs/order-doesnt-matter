@@ -60,10 +60,11 @@ export function ViewStage({
       const state = runtime.app.state;
       if (!mounted.definition) return;
       cache.request(state, neededRange(mounted.definition.span, now, lookAhead, state.sections));
-      container.dataset.scoreReady = String(
+      const scoreReady = String(
         state.rows.length > 0 &&
           state.rows.every((row) => Object.hasOwn(cache.score.events, row.id)),
       );
+      if (container.dataset.scoreReady !== scoreReady) container.dataset.scoreReady = scoreReady;
       mounted.frame(
         buildFrame({
           state,
@@ -77,13 +78,14 @@ export function ViewStage({
           dpr: window.devicePixelRatio,
         }),
       );
-      if (status.current)
-        status.current.textContent =
-          mountError ||
-          cache.error ||
-          (state.rows.length && !cache.notes.length && !Object.keys(cache.score.events).length
-            ? 'Asking the score…'
-            : '');
+      const message =
+        mountError ||
+        cache.error ||
+        (state.rows.length && !cache.notes.length && !Object.keys(cache.score.events).length
+          ? 'Asking the score…'
+          : '');
+      if (status.current && status.current.textContent !== message)
+        status.current.textContent = message;
     });
     return () => {
       unsubscribe();

@@ -2,7 +2,8 @@ import type { AppState } from '../app/state';
 import type { EventResult } from '../contract';
 import { liveModel } from '../live/model';
 import type { ViewDefinition, ViewFrame, ViewNote, ViewTheme } from '../views/types';
-import { instrumentColour } from './themes';
+import { instrumentColour, viewTheme } from './themes';
+import { instrumentInventory } from './instrument-names';
 
 export interface ScoreWindow {
   from: number;
@@ -47,23 +48,6 @@ export function viewNotes(score: ScoreWindow): ViewNote[] {
         }),
   );
 }
-export function instrumentNames(state: AppState, notes: ViewNote[]) {
-  const counts = new Map<string, number>();
-  return state.rows.map((row) => {
-    if (row.nameSource === 'author') return row.name.replaceAll('$', '');
-    const known = state.events[row.id] as EventResult | undefined;
-    const inventorySound = known?.events
-      .map((event) => bag(event.value).s)
-      .find((sound) => typeof sound === 'string');
-    const sound =
-      inventorySound ??
-      notes.find((note) => note.instrument === row.id && typeof note.value.s === 'string')?.value.s;
-    const name = typeof sound === 'string' ? sound : 'sound';
-    const count = (counts.get(name) ?? 0) + 1;
-    counts.set(name, count);
-    return count === 1 ? name : `${name} ${String(count)}`;
-  });
-}
 export interface FrameInput {
   state: AppState;
   score: ScoreWindow;
@@ -89,7 +73,7 @@ export function buildFrame(input: FrameInput): ViewFrame {
     fromCycle: score.from,
     toCycle: score.to,
   });
-  const names = instrumentNames(state, notes);
+  const { names } = instrumentInventory(state);
   return {
     now,
     playing: state.playing,
@@ -123,7 +107,7 @@ export function buildFrame(input: FrameInput): ViewFrame {
     rooms: live.rooms.map(({ orbit, members }) => ({ orbit, members })),
     lookAhead,
     trails,
-    theme,
+    theme: viewTheme(theme),
     width,
     height,
     dpr,

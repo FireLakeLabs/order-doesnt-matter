@@ -97,12 +97,39 @@ test('Studio real piece: transport, themes, pixels, sizing and stage lifetime', 
       await frames(page);
       expect(await page.evaluate(() => window.odmStudio.getPlayhead())).toBe(paused);
       expect(paused).toBeGreaterThanOrEqual(held);
+      const resumed = await page.evaluateHandle(() => {
+        const app = window.odmStudio.app;
+        const engine = app.engine!;
+        const play = engine.play.bind(engine);
+        let fromCycle: number | undefined;
+        engine.play = (code, options) => {
+          fromCycle = options?.fromCycle;
+          return play(code, options);
+        };
+        return {
+          first: new Promise<{ now: number | null; fromCycle: number | undefined }>((resolve) => {
+            const off = app.subscribe((state) => {
+              if (state.playing) {
+                off();
+                resolve({ now: engine.now(), fromCycle });
+              }
+            });
+          }),
+          restore: () => {
+            engine.play = play;
+          },
+        };
+      });
       await page.getByRole('button', { name: 'Play', exact: true }).click();
-      await page.waitForFunction(
-        (held) =>
-          window.odmStudio.app.state.playing && (window.odmStudio.app.engine?.now() ?? 0) > held,
-        paused,
-      );
+      const first = await resumed.evaluate(async ({ first }) => first);
+      await resumed.evaluate(({ restore }) => {
+        restore();
+      });
+      await resumed.dispose();
+      // Assert the engine's seek request on its first playing notification. Its
+      // clock can initially precede that request by Strudel's scheduling margin.
+      expect(first.fromCycle).toBe(paused);
+      expect(first.now).not.toBeNull();
     }
     await page.getByRole('button', { name: 'Stop', exact: true }).click();
     await frames(page);

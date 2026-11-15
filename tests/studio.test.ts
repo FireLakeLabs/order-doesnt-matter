@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs';
 import { expect, test, vi } from 'vitest';
 import { discoverViews, views } from '../src/views';
 import type { ViewDefinition, ViewFrame } from '../src/views/types';
-import { instrumentColour, resolveTheme, themeNames } from '../src/studio/themes';
+import { instrumentInventory } from '../src/studio/instrument-names';
+import { instrumentColour, resolveTheme, themeNames, viewTheme } from '../src/studio/themes';
 import { createStore } from '../src/studio/store';
 import { initialState, loadPiece } from '../src/app/state';
 import { importStrudel } from '../src/import';
@@ -210,4 +211,48 @@ test('score cache asks once per range, covers requested spans and discards stale
   await Promise.resolve();
   expect(cache.notes.every((note) => note.start === 17)).toBe(true);
   cache.dispose();
+});
+
+test('instrument identities and suffixes survive resting sections, repeats and changing sound events', () => {
+  const s = loadPiece(
+    initialState(),
+    '',
+    importStrudel('arrange([4, s("~ bd")], [4, stack(s("bd"), s("sd"))])'),
+  );
+  const inventory = instrumentInventory(s);
+  expect(inventory.names).toEqual(['bd', 'bd 2', 'sd']);
+  expect(inventory.sounds).toEqual(['bd', 'bd', 'sd']);
+  const later = {
+    ...s,
+    fromCycle: 32,
+    toCycle: 36,
+    events: { [s.rows[0].id]: result([event(32, 33, { s: 'hh' })]) },
+  };
+  expect(instrumentInventory(later)).toBe(inventory);
+  const resting = { ...later, events: {} };
+  expect(instrumentInventory(resting).names).toEqual(['bd', 'bd 2', 'sd']);
+  const changed = loadPiece(s, '', importStrudel('stack(s("hh"), s("hh"))'));
+  expect(instrumentInventory(changed).names).toEqual(['hh', 'hh 2']);
+});
+
+test('view themes expose only public contract fields with stable identity', () => {
+  const theme = resolveTheme('arcade');
+  const publicTheme = viewTheme(theme);
+  expect(viewTheme(theme)).toBe(publicTheme);
+  expect(Object.keys(publicTheme).sort()).toEqual(
+    [
+      'name',
+      'ground',
+      'panel',
+      'line',
+      'text',
+      'muted',
+      'accent',
+      'fontDisplay',
+      'fontMono',
+      'radius',
+      'glow',
+    ].sort(),
+  );
+  expect(publicTheme).not.toHaveProperty('instrumentColours');
 });

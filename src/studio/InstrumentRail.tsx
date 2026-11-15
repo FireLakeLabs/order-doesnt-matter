@@ -1,9 +1,8 @@
-import { instrumentNames, viewNotes } from './frame';
+import { instrumentInventory } from './instrument-names';
 import { instrumentColour } from './themes';
 import type { AppState } from '../app/state';
 export function InstrumentRail({ state, theme }: { state: AppState; theme: string }) {
-  const notes = viewNotes({ from: 0, to: Infinity, events: state.events });
-  const names = instrumentNames(state, notes);
+  const { names, sounds } = instrumentInventory(state);
   const errors = new Map(Object.entries(state.events).map(([id, result]) => [id, result.error]));
   return (
     <aside className="instrument-rail region" data-region="instrument-rail">
@@ -12,7 +11,7 @@ export function InstrumentRail({ state, theme }: { state: AppState; theme: strin
       </h2>
       <ol data-testid="instruments">
         {state.rows.map((row, index) => {
-          const sound = notes.find((note) => note.instrument === row.id)?.value.s;
+          const sound = sounds[index];
           return (
             <li key={row.id}>
               <span
