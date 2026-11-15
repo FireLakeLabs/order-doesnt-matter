@@ -71,9 +71,10 @@ they remain a separately authorized wave.
   `npm audit` (Vite, Vitest and lint dependencies). The production-only audit on
   2026-11-14 reported none. Updates belong in a separate checked change.
 
-- **CI browser time** is about 104 s of a 180 s limit and has reached 128 s
-  under load. A requested 10 s saving was not found. Trim before adding more.
-- **Two demo tests exceed the 20 s single-test guard**; they run outside the
+- **Combined browser acceptance:** the expanded suite was cut off at 180 s.
+  The owner approved 300 s total and 25 s per completed case on 2026-11-15.
+  Record a complete combined run under those limits; retain timing evidence.
+- **Two demo tests exceed the per-test guard**; they run outside the
   normal suite.
 - **Pull requests run 500–1,900 lines** against a 400-line aim.
 - `metrics/prs.csv`: cycle time measures open-to-merge only; rework-commit
