@@ -69,8 +69,8 @@ export function rhythmPulses(step: Step, from: number, to: number): Pulse[] | un
         const n = euclidNumbers(s);
         if (!n) return;
         // Distribute groups of hits and gaps until at most one remainder remains.
-        let hits = Array.from({ length: n.hits }, () => [true]);
-        let gaps = Array.from({ length: n.outOf - n.hits }, () => [false]);
+        let hits = Array.from({ length: Math.abs(n.hits) }, () => [true]);
+        let gaps = Array.from({ length: n.outOf - Math.abs(n.hits) }, () => [false]);
         while (Math.min(hits.length, gaps.length) > 1) {
           const count = Math.min(hits.length, gaps.length),
             joined = hits.slice(0, count).map((h, i) => [...h, ...gaps[i]]);
@@ -83,7 +83,9 @@ export function rhythmPulses(step: Step, from: number, to: number): Pulse[] | un
           const start = c + i / n.outOf,
             stop = c + (i + 1) / n.outOf;
           if (stop <= begin || start >= end) continue;
-          const hit = pattern[(((i - n.turn) % n.outOf) + n.outOf) % n.outOf];
+          // Pinned bjorklund complements before euclidRot rotates right.
+          const mask = pattern[(((i - n.turn) % n.outOf) + n.outOf) % n.outOf];
+          const hit = n.hits < 0 ? !mask : mask;
           const inner = hit
             ? rhythmPulses(s.step, start, stop)
             : [{ start, end: stop, from: start, to: stop }];

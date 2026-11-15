@@ -96,19 +96,29 @@ function pack(
  * ten instruments and falls linearly to 0.17 at thirty. Actual r is R times
  * (0.9 + 0.1 * sqrt(clamp(starts, 0, 32) / 32)). If packing cannot fit, R
  * shrinks in 3% steps. Only the list, rooms and box determine that ceiling. */
-export function constellationLayout(model: LiveModel, box: { width: number; height: number }) {
+export function constellationLayout(
+  model: LiveModel,
+  box: { width: number; height: number },
+): { planets: Planet[]; regions: Region[]; height: number; textRooms: boolean } {
   if (!model.instruments.length)
-    return { planets: [] as Planet[], regions: [] as Region[], height: 128 };
-  const ids = [
-    ...model.rooms.flatMap((room) => room.members.map((id) => ({ id, room: room.orbit }))),
-    ...model.instruments.filter((i) => i.room === null).map((i) => ({ id: i.id, room: null })),
-  ];
+    return { planets: [] as Planet[], regions: [] as Region[], height: 128, textRooms: false };
+  // Memberships overlap; placement must contain exactly one entry per instrument.
+  const ids = model.instruments.map((i) => ({
+    id: i.id,
+    room: model.rooms.find((r) => r.members.includes(i.id))?.orbit ?? null,
+  }));
+  const overlapping = model.instruments.some(
+    (i) => model.rooms.filter((r) => r.members.includes(i.id)).length > 1,
+  );
+  const padding = overlapping ? 14 : 6;
+  // Above three rooms use the complete text key/List, avoiding indistinguishable outlines.
+  let textRooms = model.rooms.length > 3;
   const density = 0.28 - 0.11 * Math.min(1, Math.max(0, (ids.length - 10) / 20));
   let radius = Math.sqrt((density * box.width * box.height) / (Math.PI * ids.length));
   const top = model.rooms.some((room) => room.members.length) ? 34 : 10;
   function finish(packed: NonNullable<ReturnType<typeof pack>>, radius: number) {
-    const minX = Math.min(...packed.map((p) => p.x - radius - 6));
-    const maxX = Math.max(...packed.map((p) => p.x + radius + 6));
+    const minX = Math.min(...packed.map((p) => p.x - radius - padding));
+    const maxX = Math.max(...packed.map((p) => p.x + radius + padding));
     const shift = (box.width - maxX + minX) / 2 - minX;
     const centres = packed.map((p) => ({ ...p, x: p.x + shift, y: p.y * 1.15 + top }));
     const instruments = new Map(model.instruments.map((i) => [i.id, i]));
@@ -126,14 +136,28 @@ export function constellationLayout(model: LiveModel, box: { width: number; heig
       };
     });
     const regions: Region[] = model.rooms
-      .filter((room) => room.members.length)
+      .filter((room) => !textRooms && room.members.length)
       .map((room) => {
-        const members = centres.filter((p) => p.room === room.orbit);
-        const circles = members.map((p) => ({ x: p.x, y: p.y, r: radius + 5 }));
-        const links = members.slice(1).map((p, n) => ({
-          from: p,
-          to: members.slice(0, n + 1).toSorted((a, b) => distance(p, a) - distance(p, b))[0],
+        const members = centres.filter((p) => room.members.includes(p.id));
+        const circles = members.map((p) => ({
+          x: p.x,
+          y: p.y,
+          r:
+            radius +
+            5 +
+            model.rooms.filter((r) => r.orbit < room.orbit && r.members.includes(p.id)).length * 4,
         }));
+        const links = members
+          .slice(1)
+          .map((p, n) => ({
+            from: p,
+            to: members.slice(0, n + 1).toSorted((a, b) => distance(p, a) - distance(p, b))[0],
+          }))
+          .filter((l) =>
+            centres.every(
+              (p) => room.members.includes(p.id) || segmentDistance(p, l.from, l.to) > radius + 12,
+            ),
+          );
         const left = Math.min(...circles.map((c) => c.x - c.r));
         const upper = Math.min(...circles.map((c) => c.y - c.r));
         return {
@@ -144,8 +168,7 @@ export function constellationLayout(model: LiveModel, box: { width: number; heig
             x: Math.max(8, left),
             y: Math.max(0, upper - 24),
             width: Math.min(box.width - 16, Math.max(90, 2 * radius + 8)),
-            height:
-              !room.conflict && (room.reverb === 'varies' || room.delay === 'varies') ? 36 : 24,
+            height: 24,
           },
         };
       });
@@ -211,21 +234,24 @@ export function constellationLayout(model: LiveModel, box: { width: number; heig
       ...planets.map((p) => p.y + radius + (p.inside ? 8 : 19)),
       ...regions.map((r) => r.label.y + r.label.height),
     );
-    return { planets, regions, height: Math.min(box.height, Math.max(128, bottom + 8)) };
+    return { planets, regions, textRooms, height: Math.min(box.height, Math.max(128, bottom + 8)) };
   }
+  let labelFailures = 0;
   for (;;) {
+    if (overlapping && labelFailures >= 8) textRooms = true;
     for (const seed of [0.5, 0.33, 0.67])
       for (const phase of [0.23, 0, 0.44]) {
         const packed = pack(
           ids,
           box.width - 16,
           (box.height - top - 14) / 1.15,
-          radius + 6,
+          radius + padding,
           seed,
           phase,
         );
         const layout = packed && finish(packed, radius);
         if (layout) return layout;
+        if (packed) labelFailures++;
       }
     radius *= 0.97;
   }

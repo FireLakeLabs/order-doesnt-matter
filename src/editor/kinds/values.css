@@ -12,3 +12,61 @@
   font-size: 13px;
   color: var(--muted);
 }
+
+/* Shared structural Lists live inside the existing rhythm and values editors. */
+#editor .mini-structure {
+  min-width: 0;
+  width: 100%;
+}
+#editor .mini-tree {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 240px;
+  overflow: auto;
+}
+#editor .mini-tree button {
+  margin: 0;
+  margin-left: min(calc(var(--mini-depth) * 10px), 40px);
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  flex-shrink: 0;
+}
+#editor .mini-tree button[aria-pressed='true'] {
+  border-color: var(--selection);
+}
+#editor .mini-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: end;
+}
+#editor .mini-actions > p,
+#editor .mini-actions > h3,
+#editor .mini-actions > details,
+#editor .mini-mark {
+  flex-basis: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+#editor .mini-actions label,
+#editor .mini-actions input,
+#editor .mini-actions select,
+#editor .mini-actions textarea {
+  max-width: 100%;
+  min-width: 0;
+}
+#editor .mini-actions h3 {
+  max-width: none;
+}
+#editor .mini-mark {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 6px;
+}
+#editor .mini-mark label {
+  width: min(230px, 100%);
+  margin: 0;
+}

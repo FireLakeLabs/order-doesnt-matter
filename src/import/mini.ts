@@ -1,4 +1,4 @@
-import type { Step } from '../document';
+import type { MiniExpression, MiniMark, Step } from '../document';
 import { miniAst } from '../strudel/evaluate-mini';
 
 interface Node {
@@ -16,6 +16,58 @@ function node(value: unknown): Node {
   if (!value || typeof value !== 'object' || !('type_' in value) || typeof value.type_ !== 'string')
     throw Error('Strudel mini AST changed: expected a typed node');
   return value as Node;
+}
+/** Split only outer punctuation; nested argument patterns keep their own marks.
+ * The pinned PEG aggregates !/@, so their written occurrences come from source.
+ * Tail/range/underscore and Euclid after outer marks remain opaque. */
+function ordered(text: string): MiniExpression | undefined {
+  const cuts: number[] = [];
+  const stack: string[] = [];
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if ('[<{('.includes(c)) stack.push(c);
+    else if (']>})'.includes(c)) stack.pop();
+    else if (!stack.length && '!*/@?'.includes(c)) cuts.push(i);
+  }
+  if (!cuts.length) return;
+  const symbols = cuts.map((i) => text[i]).join('');
+  // Keep the existing compact forms and serialized v2 documents unchanged.
+  if (/^!?@?\??$/.test(symbols)) return;
+  const base = parseSteps(text.slice(0, cuts[0]));
+  if (base.length !== 1 || base[0].kind === 'other') return;
+  const marks: MiniMark[] = [];
+  for (let i = 0; i < cuts.length; i++) {
+    const symbol = text[cuts[i]],
+      arg = text.slice(cuts[i] + 1, cuts[i + 1]).trim();
+    if (symbol === '*' || symbol === '/') {
+      const amount = parseSteps(arg);
+      if (amount.length !== 1 || amount[0].kind === 'other') return;
+      // Rates are slices, not slice_with_ops (e.g. *2(3,8) acts on the note).
+      if (!/^(?:-?[\d.]+|\[.*\]|<.*>|\{.*\})$/s.test(arg)) return;
+      marks.push({ name: symbol === '*' ? 'faster' : 'slower', amount: amount[0] });
+    } else {
+      if (arg && (!/^-?\d+(?:\.\d+)?(?:e[+-]?\d+)?$/i.test(arg) || !Number.isFinite(Number(arg))))
+        return;
+      marks.push({
+        name: symbol === '!' ? 'repeat' : symbol === '@' ? 'weight' : 'chance',
+        ...(arg ? { amount: Number(arg) } : {}),
+      });
+    }
+  }
+  return { step: base[0], marks };
+}
+export function printExpression(expression: MiniExpression): string {
+  const symbols = { faster: '*', slower: '/', repeat: '!', weight: '@', chance: '?' };
+  return (
+    printSteps([expression.step]) +
+    expression.marks
+      .map(
+        (m) =>
+          symbols[m.name] +
+          (typeof m.amount === 'object' ? printSteps([m.amount]) : (m.amount ?? '')),
+      )
+      .join('')
+  );
 }
 export function parseSteps(notation: string): Step[] {
   const root = node(miniAst(notation));
@@ -35,6 +87,12 @@ export function parseSteps(notation: string): Step[] {
       !Array.isArray(n.source_) &&
       typeof n.source_ === 'object'
     ) {
+      try {
+        const expression = ordered(raw(n));
+        if (expression) return { kind: 'other', notation: printExpression(expression), expression };
+      } catch {
+        /* Unknown outer forms retain the complete original chunk. */
+      }
       let child: Step;
       try {
         child = convert(n.source_);
@@ -140,7 +198,7 @@ function printStep(step: Step): string {
   let text: string;
   switch (step.kind) {
     case 'other':
-      return step.notation;
+      return step.expression ? printExpression(step.expression) : step.notation;
     case 'value':
       text = step.value;
       break;

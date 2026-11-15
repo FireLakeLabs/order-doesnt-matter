@@ -13,6 +13,7 @@ import { aboutControls, mountAbout } from './about';
 import { keepMarkup, mountKeep } from './keep';
 import './style.css';
 import { mountTour } from './tour';
+import { mountTheme } from './theme';
 
 const app = createApp({ confirmReplacement: () => keep.confirmReplacement() });
 document.body.innerHTML = `
@@ -37,6 +38,7 @@ document.body.innerHTML = `
     <p id="playback-context" aria-live="polite"></p>
     <div id="score-workspace"><div id="score"><p class="welcome">Paste a Strudel program or choose an original to see its score. Press Play when you're ready. <button data-take-tour>Take a tour</button></p></div><aside id="editor" hidden></aside>${previewMarkup}</div>
   </main><footer>Read the score. Follow the cycles.</footer>`;
+mountTheme(document.querySelector('.transport')!);
 const aboutDialog = mountAbout();
 const keep = mountKeep(app);
 const get = <T extends HTMLElement = HTMLElement>(id: string) => document.getElementById(id)! as T;

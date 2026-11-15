@@ -12,7 +12,7 @@ const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text = '') => {
 };
 // These calls already have a purpose-built rewrite editor.
 const purposeBuilt = new Set(
-  'fast slow early late rev palindrome ply euclid euclidRot degradeBy sometimes sometimesBy often rarely every firstOf off jux segment'.split(
+  'fast slow early late rev palindrome ply euclid euclidRot degradeBy sometimes sometimesBy often rarely every firstOf off jux segment when superimpose layer'.split(
     ' ',
   ),
 );

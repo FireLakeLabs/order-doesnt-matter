@@ -86,13 +86,11 @@ test('nested values keep their spans; groups, rests, modifiers, chunk parse refu
   await page.getByRole('button', { name: 'Switch off', exact: true }).nth(1).click();
   await page.getByRole('button', { name: 'Switch on', exact: true }).click();
   await expect(field).toHaveValue('.6');
-  const chunk = page.getByRole('textbox', {
-    name: 'Value 4: Different cycle lengths',
-    exact: true,
-  });
+  await page.getByText('Edit selected part as text', { exact: true }).click();
+  const chunk = page.getByRole('textbox', { name: 'Part 4 mini source', exact: true });
   await chunk.fill('[');
-  await page.getByRole('button', { name: 'Save text', exact: true }).click();
-  await expect(page.locator('.values-editor [role="alert"]')).toContainText('does not parse');
+  await page.getByRole('button', { name: 'Save mini text', exact: true }).click();
+  await expect(page.locator('.mini-structure [role="alert"]')).toContainText('does not parse');
   await page.getByRole('button', { name: 'Undo', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Switch on', exact: true })).toHaveCount(1);
 });

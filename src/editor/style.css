@@ -213,7 +213,7 @@ input:checked ~ .editor-toggle-state::before {
   outline-offset: -4px;
 }
 .odm-sheet [data-edit-state='pending'] {
-  background: #594d244d !important;
+  background: var(--pending) !important;
   border-bottom: 3px dashed var(--warning);
 }
 .odm-sheet [data-edit-state='failed'] {
@@ -264,6 +264,7 @@ input:checked ~ .editor-toggle-state::before {
 }
 
 #preview-expanded {
+  z-index: 1;
   grid-column: 1 / -1;
   position: static;
   inset: auto;

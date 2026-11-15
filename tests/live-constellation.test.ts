@@ -178,3 +178,36 @@ it('counts real starts in the section, excludes fragments, and distinguishes una
     0,
   );
 });
+
+for (const count of [6, 14, 30])
+  it(`${count} overlapping memberships place each planet once and exclude every nonmember`, () => {
+    const m = model(count, 2);
+    m.rooms[0].members = m.instruments.filter((_, n) => n % 2 === 0).map((i) => i.id);
+    m.rooms[1].members = m.instruments.filter((_, n) => n % 3 === 0).map((i) => i.id);
+    const layout = constellationLayout(m, { width: 358, height: 300 });
+    expect(layout.planets.map((p) => p.id)).toEqual(m.instruments.map((i) => i.id));
+    expect(layout.regions).toHaveLength(2);
+    for (const region of layout.regions)
+      for (const p of layout.planets) {
+        const member = m.rooms.find((r) => r.orbit === region.orbit)!.members.includes(p.id);
+        if (member)
+          expect(
+            region.circles.some((c) => Math.hypot(c.x - p.x, c.y - p.y) + p.r <= c.r + 0.001),
+          ).toBe(true);
+        else {
+          expect(region.circles.every((c) => Math.hypot(c.x - p.x, c.y - p.y) > c.r + p.r)).toBe(
+            true,
+          );
+          expect(region.links.every((l) => segmentDistance(p, l.from, l.to) > p.r + 6)).toBe(true);
+        }
+      }
+    m.rooms = Array.from({ length: 8 }, (_, n) => ({
+      ...m.rooms[0],
+      orbit: n,
+      members: m.instruments.map((i) => i.id),
+    }));
+    const dense = constellationLayout(m, { width: 240, height: 240 });
+    expect(dense.planets).toHaveLength(count);
+    expect(dense.regions).toEqual([]);
+    expect(dense.textRooms).toBe(true);
+  });

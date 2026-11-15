@@ -1,0 +1,110 @@
+/* Paper/Fern/Night match the reviewed study's foreground, card, secondary,
+   border and primary tokens. Paper is a light page, not the study's chat frame. */
+:root {
+  color-scheme: light;
+  --text: #212d46;
+  --muted: #495976;
+  --canvas: #fcf8ef;
+  --panel: #fcf8ef;
+  --button: #ece4d5;
+  --border: #716c7e;
+  --accent: #4053b6;
+  --accent-text: #fff;
+  --selection: #65409a;
+  --warning: #92491b;
+  --danger: #a32938;
+  --lane-saturation: 58%;
+  --lane-lightness: 32%;
+}
+:root[data-theme='fern'] {
+  color-scheme: dark;
+  --text: #e9f0ed;
+  --muted: #b5c4bf;
+  --canvas: #101c19;
+  --panel: #172421;
+  --button: #243731;
+  --border: #718c80;
+  --accent: #a8e2be;
+  --accent-text: #14231c;
+  --selection: #dac3f5;
+  --warning: #f0c98c;
+  --danger: #ffb3a8;
+  --lane-saturation: 65%;
+  --lane-lightness: 75%;
+}
+:root[data-theme='night'] {
+  color-scheme: dark;
+  --text: #eef1ff;
+  --muted: #bac5e0;
+  --canvas: #0e1325;
+  --panel: #151b32;
+  --button: #26304f;
+  --border: #7c8cb5;
+  --accent: #c3b8ff;
+  --accent-text: #201939;
+  --selection: #81d5ed;
+  --warning: #f0c98c;
+  --danger: #ffb3c2;
+  --lane-saturation: 65%;
+  --lane-lightness: 78%;
+}
+:root {
+  --line: color-mix(in srgb, var(--border) 55%, var(--panel));
+  --hover: color-mix(in srgb, var(--accent) 12%, var(--button));
+  --toggle-on: color-mix(in srgb, var(--accent) 12%, var(--panel));
+  --pending: color-mix(in srgb, var(--warning) 12%, var(--panel));
+  --room-fill: color-mix(in srgb, var(--accent) 10%, var(--canvas));
+  --room-line: var(--border);
+  --backdrop: #000a;
+}
+.theme-picker {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.theme-picker select {
+  min-height: 44px;
+  padding: 8px;
+  color: var(--text);
+  background: var(--button);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+/* The sheet's legacy fills are paint only; keep its layout and semantics. */
+:root .odm-sheet {
+  background: var(--panel);
+}
+:root .odm-sheet th,
+:root .odm-sheet td {
+  border-right-color: var(--line);
+}
+:root .odm-sheet thead th,
+:root .odm-sheet th:first-child {
+  background: var(--button);
+}
+:root .odm-sheet tbody tr:nth-child(even) td {
+  background: var(--toggle-on);
+}
+:root .odm-sheet tbody th {
+  border-left-color: var(--accent);
+}
+:root .odm-sheet tbody th[scope='row'] {
+  border-left-color: hsl(
+    calc(var(--instrument-colour) * 67 + 155) var(--lane-saturation) var(--lane-lightness)
+  );
+}
+:root .odm-sheet .sheet-axis {
+  stroke: var(--border);
+}
+:root .odm-sheet .sheet-chips li {
+  background: var(--pending);
+  border-color: var(--warning);
+}
+:root .odm-sheet .sheet-sections li {
+  background: var(--button);
+}
+:root .odm-sheet .sheet-sections .sheet-current {
+  background: var(--toggle-on);
+}

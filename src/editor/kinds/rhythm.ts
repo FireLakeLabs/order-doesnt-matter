@@ -19,6 +19,7 @@ import { wrapRhythm } from '../../document/edits/rhythm-wrap';
 import { replaceRhythmChunk } from '../../document/edits/rhythm-chunk';
 import { printSteps } from '../../import/mini';
 import { fieldLabel } from '../presentation';
+import { miniStructure, structuralMini } from './mini-structure';
 import './rhythm.css';
 const el = <K extends keyof HTMLElementTagNameMap>(tag: K, text = '') => {
   const node = document.createElement(tag);
@@ -95,6 +96,7 @@ const ordinal = (n: number) =>
   `${n}${n % 100 >= 11 && n % 100 <= 13 ? 'th' : ({ 1: 'st', 2: 'nd', 3: 'rd' }[n % 10] ?? 'th')}`;
 const partName = (path: number[]) => path.map((n) => `${ordinal(n + 1)} part`).join(' › ');
 const description = (s: Step): string => {
+  const spread = s.kind === 'euclid' ? euclidNumbers(s) : undefined;
   const name =
     s.kind === 'value'
       ? s.value
@@ -106,16 +108,26 @@ const description = (s: Step): string => {
             ? 'takes turns, one per cycle'
             : s.kind === 'together'
               ? 'at the same time'
-              : s.kind === 'euclid' && euclidNumbers(s)
-                ? `${euclidNumbers(s)!.hits} hits out of ${euclidNumbers(s)!.outOf}`
-                : s.kind === 'other' && rhythmMarks(s)
-                  ? `${description(rhythmMarks(s)!.base)} · ${rhythmMarks(s)!
-                      .ops.map(
-                        (op) =>
-                          `${{ repeat: 'repeat ×', faster: 'faster ×', slower: 'slower ÷', weight: 'length ' }[op.name]}${op.name === 'weight' ? rhythmMarks(s)!.weight : op.amount}`,
-                      )
-                      .join(' · ')}`
-                  : 'source chunk';
+              : spread
+                ? spread.hits < 0
+                  ? `leave ${-spread.hits} of ${spread.outOf} positions empty`
+                  : `${spread.hits} hits out of ${spread.outOf}`
+                : structuralMini(s)
+                  ? s.kind === 'polymeter'
+                    ? 'different lane lengths · List'
+                    : s.kind === 'choose'
+                      ? 'time-addressed candidates · List'
+                      : s.kind === 'euclid'
+                        ? 'changing evenly spread hits · List'
+                        : 'ordered outer marks · List'
+                  : s.kind === 'other' && rhythmMarks(s)
+                    ? `${description(rhythmMarks(s)!.base)} · ${rhythmMarks(s)!
+                        .ops.map(
+                          (op) =>
+                            `${{ repeat: 'repeat ×', faster: 'faster ×', slower: 'slower ÷', weight: 'length ' }[op.name]}${op.name === 'weight' ? rhythmMarks(s)!.weight : op.amount}`,
+                        )
+                        .join(' · ')}`
+                    : 'source chunk';
   const weight = 'weight' in s ? s.weight : undefined;
   return [
     name,
@@ -151,6 +163,7 @@ export default {
     error.className = 'editor-error';
     root.append(controls, structure, actions, error);
     body.append(root);
+    const mini = new Map<string, ReturnType<typeof miniStructure>>();
     const pointer = matchMedia('(pointer: coarse)');
     const steps = () => {
       const c = sequenceOwner(context.doc, context.target.nodeId)?.core;
@@ -244,7 +257,7 @@ export default {
       while (selected.length > 1 && !rhythmStep(list, selected)) selected = selected.slice(0, -1);
       if (!rhythmStep(list, selected)) selected = [0];
       const width = structure.clientWidth || root.clientWidth;
-      const unresolved = drawing().some((b) => !b.path.length);
+      const unresolved = drawing().some((b) => !b.path.length) || list.some(structuralMini);
       if (unresolved) view = 'List';
       if (!view) view = innerWidth < 900 ? 'List' : 'Boxes';
       const key = JSON.stringify([
@@ -258,6 +271,7 @@ export default {
       if (key === rendered) return;
       rendered = key;
       const focus = (document.activeElement as HTMLElement)?.dataset.rhythmKey;
+      const miniFocus = (document.activeElement as HTMLElement)?.dataset.miniKey;
       const marksOpen = root.querySelector<HTMLDetailsElement>('.rhythm-marks')?.open;
       controls.replaceChildren();
       for (const label of ['Boxes', 'List']) {
@@ -359,6 +373,21 @@ export default {
             select(moveSelection(list, path, e.key), true);
           }
         };
+        if (view === 'List' && (structuralMini(s) || mini.has(path.join('.')))) {
+          if (!same(selected, path)) return;
+          const id = path.join('.');
+          let editor = mini.get(id);
+          if (!editor) {
+            editor = miniStructure(
+              () => context,
+              path.flatMap((n, i) => (i ? ['steps', n] : [n])),
+            );
+            mini.set(id, editor);
+          }
+          item.append(editor.root);
+          editor.update();
+          return;
+        }
         const pulses = boxes.find((box) => same(box.path, path))?.pulses;
         if (pulses) {
           const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -402,6 +431,13 @@ export default {
         part(s, zoom, tree, z - a);
       } else list.forEach((s, i) => part(s, [i], tree, 1));
       const s = rhythmStep(list, selected)!;
+      if (view === 'List' && (structuralMini(s) || mini.has(selected.join('.')))) {
+        if (miniFocus)
+          Array.from(root.querySelectorAll<HTMLElement>('[data-mini-key]'))
+            .find((n) => n.dataset.miniKey === miniFocus)
+            ?.focus({ preventScroll: true });
+        return;
+      }
       actions.append(el('h3', `Selected · ${partName(selected)}`));
       const numeric = (
         parent: HTMLElement,
@@ -416,7 +452,14 @@ export default {
         input.value = String(value);
         input.setAttribute('aria-label', label);
         input.dataset.rhythmKey = label;
-        const apply = () => change(rhythmNumber(input.value));
+        let submitted = value;
+        const apply = () => {
+          const next = rhythmNumber(input.value);
+          if (next === submitted) return;
+          // Rendering may blur this field before its Enter handler returns.
+          submitted = next;
+          change(next);
+        };
         input.onchange = apply;
         input.onkeydown = (e) => {
           if (e.key === 'Enter') {
@@ -474,6 +517,13 @@ export default {
       if (euclid) {
         const group = el('div');
         group.className = 'rhythm-action-group';
+        if (euclid.hits < 0)
+          group.append(
+            el(
+              'p',
+              `Negative hits leave positions empty: ${euclid.outOf + euclid.hits} of ${euclid.outOf} positions can play.`,
+            ),
+          );
         for (const [key, label] of [
           ['hits', 'hits'],
           ['outOf', 'out of'],

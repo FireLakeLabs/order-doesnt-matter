@@ -1,3 +1,6 @@
+import { parse } from 'acorn';
+import type * as JS from 'estree';
+import { callbackBranches, callbackTrail } from './edits/rewrite-shared';
 import {
   findById,
   instruments,
@@ -109,16 +112,46 @@ export interface Target {
 export const rhythmTargetId = (pattern: Pattern) => `${pattern.id}:rhythm`;
 /** Plain setup labels shared by the sheet and its source breadcrumb. */
 export function setupSummary(code: string): string {
-  const plain = code.trim().replace(/\s+/g, ' ');
-  const samples = /^(?:await\s+)?samples\s*\(\s*(['"])(.*?)\1/.exec(plain);
-  if (samples) return `Loads sounds from ${samples[2]}`.slice(0, 60);
-  if (/^(?:await\s+)?samples\s*\(\s*\{/.test(plain)) return 'Loads sounds from a sample map';
-  const helper =
-    /^(?:async\s+)?function\s+([\w$]+)/.exec(plain) ??
-    /^(?:const|let|var)\s+([\w$]+)\s*=\s*(?:async\s+)?(?:function\b|(?:\([^)]*\)|[\w$]+)\s*=>)/.exec(
-      plain,
-    );
-  return helper ? `Defines helper: ${helper[1]}`.slice(0, 60) : plain.slice(0, 60);
+  try {
+    // Parse, never execute. Comments are trivia; strings and templates stay intact.
+    const first = (
+      parse(code, {
+        ecmaVersion: 'latest',
+        allowAwaitOutsideFunction: true,
+      }) as unknown as JS.Program
+    ).body[0];
+    const expression = first?.type === 'ExpressionStatement' ? first.expression : undefined;
+    const call = expression?.type === 'AwaitExpression' ? expression.argument : expression;
+    if (
+      call?.type === 'CallExpression' &&
+      call.callee.type === 'Identifier' &&
+      call.callee.name === 'samples'
+    ) {
+      const arg = call.arguments[0];
+      const name =
+        arg?.type === 'Literal' && typeof arg.value === 'string'
+          ? arg.value
+          : arg?.type === 'TemplateLiteral' && !arg.expressions.length
+            ? arg.quasis[0].value.cooked
+            : undefined;
+      if (name !== undefined && name !== null) return `Loads sounds from ${name}`.slice(0, 60);
+      if (arg?.type === 'ObjectExpression') return 'Loads sounds from a sample map';
+    }
+    if (first?.type === 'FunctionDeclaration' && first.id)
+      return `Defines helper: ${first.id.name}`.slice(0, 60);
+    if (first?.type === 'VariableDeclaration') {
+      const declaration = first.declarations[0];
+      if (
+        declaration?.id.type === 'Identifier' &&
+        declaration.init &&
+        ['ArrowFunctionExpression', 'FunctionExpression'].includes(declaration.init.type)
+      )
+        return `Defines helper: ${declaration.id.name}`.slice(0, 60);
+    }
+  } catch {
+    /* Invalid or unsupported JavaScript still has its complete source editor. */
+  }
+  return 'Setup source';
 }
 export function describeTarget(doc: Doc, nodeId: string): Target {
   const argument = /^(.*):arg:(\d+)$/.exec(nodeId);
@@ -186,7 +219,13 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
     pattern?.core.kind === 'opaque';
   let kind: TargetKind = 'unknown';
   if (sourceAddress) kind = 'source';
-  else if (rewrites && pattern && rows.some((r) => r.pattern.id === id)) kind = 'rewrite';
+  else if (
+    rewrites &&
+    pattern &&
+    (rows.some((r) => r.pattern.id === id) ||
+      callbackBranches(doc).some((b) => b.body.id === id && b.supported))
+  )
+    kind = 'rewrite';
   else if (selectedSection && !rhythm && !sourceAddress) kind = 'section';
   else if (setting) kind = editable ? 'setting-constant' : valueKind(setting.value);
   else if (row?.id === id && !rhythm && !sourceAddress) kind = 'instrument';
@@ -211,16 +250,25 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
           : kind === 'source'
             ? 'Source text'
             : 'Pattern');
-  const breadcrumb = setup
-    ? ['setup', setupSummary(String(node.code))]
-    : kind === 'section'
-      ? ['Piece', selectedSection!.name]
-      : [
-          row?.name ?? 'Piece',
-          ...(section ? [`in ${section.name}`] : []),
-          ...(kind === 'instrument' ? [] : [label]),
-          ...(sourceAddress && label !== 'Source text' ? ['Source text'] : []),
-        ];
+  const trail = callbackTrail(doc, id);
+  const breadcrumb = (
+    setup
+      ? ['setup', setupSummary(String(node.code))]
+      : kind === 'section'
+        ? ['Piece', selectedSection!.name]
+        : [
+            row?.name ?? 'Piece',
+            ...(section ? [`in ${section.name}`] : []),
+            ...(kind === 'instrument' ? [] : [label]),
+            ...(sourceAddress && label !== 'Source text' ? ['Source text'] : []),
+          ]
+  ).map((part) => part.replaceAll('$', ''));
+  if (!setup && kind !== 'section')
+    breadcrumb.splice(
+      1 + (section ? 1 : 0),
+      0,
+      ...trail.flatMap((b) => [b.parent.name, `${b.role} · ${b.parameter}`]),
+    );
   return {
     nodeId,
     node,
@@ -228,7 +276,7 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
     instrumentId: kind === 'section' ? undefined : row?.id,
     use: kind === 'section' ? undefined : use,
     section,
-    breadcrumb: breadcrumb.map((part) => part.replaceAll('$', '')),
+    breadcrumb,
     generatedParts: breadcrumb.map((_, i) =>
       setup
         ? false
@@ -269,3 +317,44 @@ export function describeTarget(doc: Doc, nodeId: string): Target {
   };
 }
 export { setConstant } from './edits/set-constant';
+
+/** Existing selection addresses only, including explicitly labelled use-site layers. */
+export function instrumentTargets(doc: Doc, id: string): { nodeId: string; text: string }[] {
+  const row = instruments(doc).find((row) => row.id === id);
+  if (!row) return [];
+  const targets = new Map<string, string>();
+  const seen = new Set<string>();
+  function gather(pattern: Pattern) {
+    if (seen.has(pattern.id)) return;
+    seen.add(pattern.id);
+    if (pattern.core.kind === 'ref') {
+      const target = shared(doc, pattern.core.name);
+      if (target) gather(target);
+    }
+    if (pattern.core.kind === 'group') pattern.core.parts.forEach((part) => gather(part.pattern));
+    for (const layer of pattern.layers) {
+      if (layer.kind === 'settings')
+        layer.settings.forEach((setting) => targets.set(setting.id, setting.name));
+      else targets.set(layer.id, layer.kind === 'rewrite' ? layer.name : 'Source text');
+    }
+  }
+  gather(row.pattern);
+  const rhythm = rhythmTargetId(row.pattern);
+  if (describeTarget(doc, rhythm).kind === 'rhythm') targets.set(rhythm, 'Rhythm');
+  targets.set(`${row.pattern.id}:rewrites`, 'Rewrites');
+  row.uses.forEach((use) =>
+    use.layers.forEach((layer) => {
+      if (layer.kind === 'settings')
+        layer.settings.forEach((setting) => targets.set(setting.id, setting.name));
+      else targets.set(layer.id, layer.kind === 'rewrite' ? layer.name : 'Source text');
+    }),
+  );
+  return [...targets].map(([nodeId, text]) => {
+    const target = describeTarget(doc, nodeId);
+    const label = target.control || text;
+    return {
+      nodeId,
+      text: target.section ? `${label} · in ${target.section.name.replaceAll('$', '')}` : label,
+    };
+  });
+}

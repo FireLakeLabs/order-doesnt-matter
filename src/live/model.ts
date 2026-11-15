@@ -29,7 +29,9 @@ export interface LiveInstrument {
   silenced: boolean;
   sound: 'ready' | 'loading' | 'missing' | 'not-loaded' | 'none';
   error: string | null;
+  /** Legacy dominant orbit; drawing/text use all LiveModel.rooms memberships. */
   room: number | null;
+  roomUnknown?: boolean;
 }
 export interface LiveRoom {
   orbit: number;
@@ -52,7 +54,13 @@ export interface TurnNote {
   label: string;
 }
 type Note = { cps: number; start: number; end: number; value: Record<string, unknown> };
-type Part = { room: number | null; inSection: boolean; sends: Note[]; noteStarts: number };
+type Part = {
+  room: number | null;
+  inSection: boolean;
+  sends: Note[];
+  noteStarts: number;
+  roomUnknown?: boolean;
+};
 type Indexed = { notes: Note[]; names: string[]; parts: Map<string, Part> };
 const cache = new WeakMap<LiveInput['events'], Map<string, Indexed>>();
 const bag = (value: unknown): Record<string, unknown> =>
@@ -97,22 +105,29 @@ function search(notes: Note[], cycle: number, upper = false) {
 }
 // Pinned node_modules/superdough/superdough.mjs:195 defaults orbit to 1;
 // line 485 uses it when absent. Only top-level sends are shared; FX bags stay private.
-const orbit = (note: Note) => (typeof note.value.orbit === 'number' ? note.value.orbit : 1);
+const orbit = (note: Note) =>
+  note.value.orbit === undefined
+    ? 1
+    : typeof note.value.orbit === 'number' && Number.isFinite(note.value.orbit)
+      ? note.value.orbit
+      : null;
 function participation(index: Indexed | undefined, from: number, to: number): Part {
   if (!index) return { room: null, inSection: false, sends: [], noteStarts: 0 };
   const key = `${from}:${to}`;
   let part = index.parts.get(key);
   if (part) return part;
   const notes = index.notes.slice(search(index.notes, from), search(index.notes, to));
-  const sends = notes.filter((n) => Number(n.value.room) > 0 || Number(n.value.delay) > 0);
+  const positive = notes.filter((n) => Number(n.value.room) > 0 || Number(n.value.delay) > 0);
+  const sends = positive.filter((n) => orbit(n) !== null);
   const counts = new Map<number, number>();
-  for (const n of sends) counts.set(orbit(n), (counts.get(orbit(n)) ?? 0) + 1);
+  for (const n of sends) counts.set(orbit(n)!, (counts.get(orbit(n)!) ?? 0) + 1);
   const room = [...counts].sort((a, b) => b[1] - a[1] || a[0] - b[0])[0]?.[0] ?? null;
   part = {
     room,
     inSection: !!notes.length,
     noteStarts: notes.length,
-    sends: sends.filter((n) => orbit(n) === room),
+    sends,
+    roomUnknown: positive.length !== sends.length,
   };
   index.parts.set(key, part);
   return part;
@@ -174,11 +189,12 @@ export function liveModel(input: LiveInput): LiveModel {
     const parts = new Map([...indices].map(([id, index]) => [id, participation(index, from, to)]));
     const groups = new Map<number, { members: string[]; notes: Note[] }>();
     for (const [id, part] of parts)
-      if (part.room !== null) {
-        const group = groups.get(part.room) ?? { members: [], notes: [] };
-        group.members.push(id);
-        group.notes.push(...part.sends);
-        groups.set(part.room, group);
+      for (const n of part.sends) {
+        const room = orbit(n)!;
+        const group = groups.get(room) ?? { members: [], notes: [] };
+        if (!group.members.includes(id)) group.members.push(id);
+        group.notes.push(n);
+        groups.set(room, group);
       }
     aggregate = {
       parts,
@@ -215,6 +231,7 @@ export function liveModel(input: LiveInput): LiveModel {
         sound: priorities.find((s) => states.includes(s)) ?? 'none',
         error: input.events[row.id]?.error?.message ?? null,
         room: part?.room ?? null,
+        roomUnknown: !!part?.roomUnknown || !!input.events[row.id]?.opaqueValues,
       };
     }),
   };

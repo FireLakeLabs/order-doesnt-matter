@@ -1,3 +1,5 @@
+@import '../app/theme.css';
+
 /* The standalone drawing harness supplies a viewport-sized stage. */
 main.spiral-dialog {
   width: 100%;
@@ -6,8 +8,8 @@ main.spiral-dialog {
   margin: 0;
   padding: 16px;
   border: 0;
-  background: #101820;
-  color: #edf4f7;
+  background: var(--panel);
+  color: var(--text);
   overflow: hidden;
 }
 main.spiral-dialog[open] {
@@ -50,7 +52,7 @@ main.spiral-dialog[open] {
   min-height: 0;
 }
 .spiral-status {
-  color: #b7c8d0;
+  color: var(--muted);
   text-align: center;
   font-size: 13px;
   margin: 8px 0;
@@ -72,7 +74,7 @@ main.spiral-dialog[open] {
 .spiral-message {
   margin: 0;
   font-size: 13px;
-  color: #d2bfa0;
+  color: var(--warning);
 }
 @media (max-width: 760px) {
   main.spiral-dialog {
@@ -170,4 +172,14 @@ main.spiral-dialog[open] {
   min-height: 44px;
   margin: 0;
   accent-color: var(--accent);
+}
+
+.spiral-controls select {
+  min-height: 44px;
+  min-width: 0;
+  width: 100%;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 4px;
 }

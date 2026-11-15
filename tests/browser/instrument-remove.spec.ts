@@ -1,5 +1,14 @@
 import { expect } from '@playwright/test';
-import { test, openProgram, selectNode, play, swap, appSignal, signal } from './helpers';
+import {
+  test,
+  openProgram,
+  selectNode,
+  play,
+  swap,
+  appSignal,
+  signal,
+  waitForPending,
+} from './helpers';
 
 test('Kiln: live deletion removes row, planet and a full cycle of triggers; Undo restores exactly', async ({
   page,
@@ -97,4 +106,55 @@ test('delete confirmation can be cancelled; the last instrument explains how to 
   );
   await expect(page.locator('tbody tr')).toHaveCount(1);
   await expect(page.getByRole('button', { name: 'Undo', exact: true })).toBeDisabled();
+});
+
+test('verified dependency navigates inside the editor; refusal and mute retain the shared driver', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 667 });
+  await openProgram(page, {
+    source:
+      'const drum=s("bd"); const hat=s("hh").gain(drum); const bell=s("cp"); stack(drum,hat,bell)',
+  });
+  const before = await page.evaluate(() => ({
+    doc: window.odmApp.state.doc,
+    row: window.odmApp.state.rows[0],
+  }));
+  const origin = await selectNode(page, { nodeId: before.row.id });
+  await page.getByRole('button', { name: 'Delete instrument', exact: true }).click();
+  await page.getByRole('button', { name: 'Delete everywhere', exact: true }).click();
+  const go = page.getByRole('button', { name: 'Go to hat › gain', exact: true });
+  await expect(go).toBeVisible();
+  await expect(page.locator('#editor')).not.toContainText('bell depends');
+  await go.press('Enter');
+  await expect(page.locator('#editor-breadcrumb')).toHaveText('hat › gain');
+  expect(await page.evaluate(() => window.odmApp.state.doc)).toEqual(before.doc);
+  await expect(page.locator('#undo')).toBeDisabled();
+  await page.keyboard.press('Escape');
+  await expect(origin).toBeFocused();
+  await origin.press('Enter');
+  await page.getByLabel('Mute everywhere', { exact: true }).check();
+  await page.getByRole('button', { name: 'Delete instrument', exact: true }).click();
+  await page.getByRole('button', { name: 'Delete everywhere', exact: true }).click();
+  await expect(go).toBeVisible();
+  await page.locator('#undo').click();
+  await waitForPending(page);
+  expect(await page.evaluate(() => window.odmApp.state.doc)).toEqual(before.doc);
+});
+
+test('opaque references give cautious guidance without invented dependent links', async ({
+  page,
+}) => {
+  await openProgram(page, {
+    source: 'const drum=s("bd"); const hat=s("hh").gain(()=>drum); stack(drum,hat)',
+  });
+  await selectNode(page, { breadcrumb: ['drum'] });
+  await page.getByRole('button', { name: 'Delete instrument', exact: true }).click();
+  await page.getByRole('button', { name: 'Delete everywhere', exact: true }).click();
+  await expect(page.locator('#editor')).toContainText('Dependencies cannot be determined safely');
+  await expect(page.getByRole('button', { name: /^Go to / })).toHaveCount(0);
+  await expect(
+    page.getByRole('button', { name: 'Inspect instrument source', exact: true }),
+  ).toBeVisible();
+  await expect(page.locator('#undo')).toBeDisabled();
 });
