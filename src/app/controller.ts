@@ -1,9 +1,10 @@
-import { sections, walk, type Doc } from '../document';
+import { migrate, sections, walk, type Doc } from '../document';
 import { createEditSession, type EditSession } from '../editor/session';
-import type { Engine, EngineEvent, EventResult } from '../contract';
+import type { Engine, EngineEvent, EventResult, ImportWarning } from '../contract';
 import { generate } from '../generate';
 import { importStrudel } from '../import';
 import { createEngine } from '../engine';
+import { createRetention, documentJSON, readDocument } from './retention';
 import type { SpiralInput } from '../spiral';
 import { createBrowserQueries } from '../strudel/evaluate-browser';
 import {
@@ -22,7 +23,16 @@ import {
   type AppState,
 } from './state';
 
-export function createApp() {
+export function createApp(
+  options: {
+    retention?: ReturnType<typeof createRetention>;
+    confirmReplacement?: () => Promise<boolean>;
+  } = {},
+) {
+  const retention = options.retention ?? createRetention();
+  let loadRevision = 0,
+    restoredDocument = false,
+    loading = 0;
   let state = initialState(),
     engine: Engine | null = null;
   let editor: EditSession | null = null;
@@ -152,6 +162,7 @@ export function createApp() {
   const listeners = new Set<(state: AppState) => void>();
   const history: EngineEvent[] = [];
   const update = (next: AppState) => {
+    if (state.doc !== next.doc) retention.record(next.doc);
     state = next;
     for (const listener of listeners) listener(state);
   };
@@ -222,15 +233,30 @@ export function createApp() {
   }
   // All engine replacements, including solo, share a serial queue.
   let swaps = Promise.resolve();
-  function replacePlayback(doc: Doc, options: Parameters<Engine['play']>[1] = {}) {
+  function replacePlayback(
+    doc: Doc,
+    options: Parameters<Engine['play']>[1] = {},
+    whole = false,
+    current?: () => boolean,
+  ) {
     const piece = epoch,
       transport = transportRevision;
-    const work = swaps.then(() => {
-      if (piece !== epoch || transport !== transportRevision) return -1;
-      return engine!.play(
-        generate(doc, { ...playbackOptions(state), instrumentTags: true }),
+    const work = swaps.then(async () => {
+      if (piece !== epoch || transport !== transportRevision || current?.() === false) return -1;
+      const revision = await engine!.play(
+        generate(doc, { ...(whole ? {} : playbackOptions(state)), instrumentTags: true }),
         options,
       );
+      if (current?.() === false) {
+        // A newer edit/load during engine preparation owns the score. Restore it
+        // inside this queue slot, before another replacement can run.
+        if (state.doc && engine?.playing && piece === epoch && transport === transportRevision)
+          await engine.play(
+            generate(state.doc, { ...playbackOptions(state), instrumentTags: true }),
+          );
+        return -1;
+      }
+      return revision;
     });
     swaps = work.then(
       () => {},
@@ -239,7 +265,7 @@ export function createApp() {
     return work;
   }
   async function play() {
-    if (!state.doc || !checked || starting) return;
+    if (!state.doc || !checked || starting || loading) return;
     const piece = epoch,
       transport = ++transportRevision;
     starting = true;
@@ -284,6 +310,101 @@ export function createApp() {
     }
   }
   let subscribed = false;
+  async function loadDocument(
+    value: unknown,
+    source = '',
+    warnings: ImportWarning[] = [],
+    restore = true,
+  ) {
+    const request = ++loadRevision,
+      before = state.doc;
+    let doc: Doc;
+    try {
+      doc = migrate(value);
+      generate(doc);
+    } catch (error) {
+      update({ ...state, loadError: `Could not open document: ${String(error)}` });
+      return;
+    }
+    if (
+      (restoredDocument ||
+        editor?.canUndo ||
+        editor?.canRedo ||
+        (retention.candidate && documentJSON(doc) !== documentJSON(retention.candidate))) &&
+      options.confirmReplacement &&
+      !(await options.confirmReplacement())
+    )
+      return;
+    if (request !== loadRevision || state.doc !== before) return;
+    loading = request;
+    update({ ...state, loadError: '' });
+    try {
+      // Stage replacements before touching the existing session, history or transport.
+      let result: EventResult | undefined;
+      if (before || restore) {
+        const from = restore ? 0 : Math.max(0, engine?.now() ?? 0);
+        result = await preflight.query(generate(doc), from, from + 16);
+        if (request !== loadRevision || state.doc !== before) return;
+        if (result.error) {
+          update({ ...state, loadError: `Could not play this piece: ${result.error.message}` });
+          return;
+        }
+        if (!restore && engine?.playing) {
+          try {
+            const revision = await replacePlayback(
+              doc,
+              { discoverCycles: sections(doc).map((s) => s.start) },
+              true,
+              () => request === loadRevision && state.doc === before,
+            );
+            if (revision < 0) return;
+          } catch (error) {
+            update({ ...state, loadError: String(error) });
+            return;
+          }
+        }
+      }
+      if (request !== loadRevision) return;
+      if (restore) {
+        ++transportRevision;
+        engine?.stop();
+      }
+      editor?.dispose();
+      dirtyRows.clear();
+      editor = createEditSession(doc, {
+        playing: () => !!engine?.playing,
+        play: (doc) => replacePlayback(doc, { discoverCycles: sections(doc).map((s) => s.start) }),
+        changed: (pending) => update(editedPiece(state, pending.doc)),
+        refresh: (_doc: Doc, ids: string[]) => {
+          if (!ids.length) return;
+          cachedWindow = null;
+          ids.forEach((id) => dirtyRows.add(id));
+          void askWindow([...dirtyRows]);
+        },
+      });
+      const piece = ++epoch;
+      checked = false;
+      cachedWindow = null;
+      queries.cancel();
+      restoredDocument = restore;
+      retention.adopt();
+      update({ ...loadPiece(state, source, { doc, warnings }), message: 'Asking the score…' });
+      void askWindow();
+      result ??= await preflight.query(generate(doc), 0, 16);
+      if (piece !== epoch) return;
+      checked = !result.error;
+      update({
+        ...state,
+        cps: result.error ? null : result.cps,
+        message: result.error ? `Could not play this piece: ${result.error.message}` : '',
+      });
+    } finally {
+      if (loading === request) {
+        loading = 0;
+        update({ ...state });
+      }
+    }
+  }
   return {
     get warning() {
       return !!state.message && state.message === playbackNotice;
@@ -305,60 +426,37 @@ export function createApp() {
     },
     watchInput,
     get canPlay() {
-      return checked && !starting;
+      return checked && !starting && !loading;
     },
     subscribe(listener: (state: AppState) => void) {
       listeners.add(listener);
       listener(state);
       return () => listeners.delete(listener);
     },
-    async load(source: string) {
-      let imported;
+    retention,
+    loadDocument,
+    async openDocument(text: string) {
       try {
-        imported = importStrudel(source);
+        await loadDocument(readDocument(text));
+      } catch (error) {
+        update({ ...state, loadError: `Could not open document: ${String(error)}` });
+      }
+    },
+    async recover() {
+      if (retention.candidate) await loadDocument(retention.candidate);
+    },
+    downloadDocument() {
+      return state.doc ? documentJSON(state.doc) : null;
+    },
+    exportStrudel() {
+      return state.doc ? generate(state.doc) : null;
+    },
+    async load(source: string) {
+      try {
+        const imported = importStrudel(source);
+        await loadDocument(imported.doc, source, imported.warnings, false);
       } catch {
         update(loadFailure(state));
-        return;
-      }
-      editor?.dispose();
-      dirtyRows.clear();
-      editor = createEditSession(imported.doc, {
-        playing: () => !!engine?.playing,
-        play: (doc) => replacePlayback(doc, { discoverCycles: sections(doc).map((s) => s.start) }),
-        changed: (pending) => update(editedPiece(state, pending.doc)),
-        refresh: (_doc: Doc, ids: string[]) => {
-          if (!ids.length) return;
-          cachedWindow = null;
-          ids.forEach((id) => dirtyRows.add(id));
-          void askWindow([...dirtyRows]);
-        },
-      });
-      const piece = ++epoch;
-      checked = false;
-      cachedWindow = null;
-      queries.cancel();
-      preflight.cancel();
-      update({ ...loadPiece(state, source, imported), message: 'Asking the score…' });
-      void askWindow();
-      // Also question the whole program: setup-only/opaque programs may have no rows,
-      // and audio.prepare asks sixteen cycles before it commits.
-      const from = Math.max(0, engine?.now() ?? 0);
-      const result: EventResult = await preflight.query(generate(imported.doc), from, from + 16);
-      if (piece !== epoch) return;
-      checked = !result.error;
-      update({
-        ...state,
-        cps: result.error ? null : result.cps,
-        message: result.error ? `Could not play this piece: ${result.error.message}` : '',
-      });
-      if (checked && engine?.playing) {
-        try {
-          await replacePlayback(imported.doc, {
-            discoverCycles: sections(imported.doc).map((s) => s.start),
-          });
-        } catch (error) {
-          message(error);
-        }
       }
     },
     solo(id: string | null) {
