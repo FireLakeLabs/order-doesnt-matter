@@ -297,3 +297,27 @@ it('entry drains queued edits without waiting for their sparse display trigger, 
   app.stop();
   editor.dispose();
 });
+
+it('a cancelled practice replacement cannot publish its late error into the restored session', async () => {
+  const app = createApp({ retention: createRetention({ persistent: false }) });
+  await app.load(kiln);
+  const original = app.state.doc,
+    editor = app.editor;
+  expect(await app.beginPractice(new AbortController().signal)).toBe(true);
+  await app.load(kiln);
+  await app.play();
+  audio.pauseNext();
+  const count = audio.codes.length;
+  const loading = app.load('s("sine")');
+  await vi.waitFor(() => expect(audio.codes.length).toBeGreaterThan(count));
+  app.endPractice();
+  audio.rejectNext();
+  audio.release();
+  await loading;
+  expect(app.state.doc).toBe(original);
+  expect(app.editor).toBe(editor);
+  expect(app.state.loadError).toBe('');
+  expect(app.state.message).toBe('');
+  expect(app.state.playing).toBe(false);
+  editor?.dispose();
+});

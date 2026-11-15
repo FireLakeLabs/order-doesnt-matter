@@ -12,6 +12,7 @@ import { createPreviews, previewMarkup } from './previews';
 import { aboutControls, mountAbout } from './about';
 import { keepMarkup, mountKeep } from './keep';
 import './style.css';
+import { mountTour } from './tour';
 
 const app = createApp({ confirmReplacement: () => keep.confirmReplacement() });
 document.body.innerHTML = `
@@ -21,6 +22,7 @@ document.body.innerHTML = `
     <button id="undo" disabled>Undo</button><button id="redo" disabled>Redo</button>
     <button id="paste" aria-expanded="true" aria-controls="paste-panel">Paste Strudel</button>
   <button id="keep" aria-expanded="false" aria-controls="keep-panel">Keep work</button>
+  <button id="take-tour" data-take-tour>Help → Take a tour</button>
   ${aboutControls}</div><p id="solo-banner" hidden><span></span> <button id="stop-solo">Stop solo</button></p><p id="message" role="status"></p><div id="sound-notice" hidden><span role="status">Default sounds could not load. Check your connection, then press Play again.</span><button id="dismiss-sound-notice" aria-label="Dismiss sound notice">Dismiss</button></div></header>
   <main>
     ${keepMarkup}
@@ -33,7 +35,7 @@ document.body.innerHTML = `
     <details id="notes" hidden><summary>Notes</summary><ul></ul></details>
     <div class="score-toolbar"><h2>The score</h2><span id="editing-context"></span><output id="window"></output><button id="follow" aria-pressed="true">Follow</button></div>
     <p id="playback-context" aria-live="polite"></p>
-    <div id="score-workspace"><div id="score"><p class="welcome">Paste a Strudel program or choose an original to see its score. Press Play when you're ready.</p></div><aside id="editor" hidden></aside>${previewMarkup}</div>
+    <div id="score-workspace"><div id="score"><p class="welcome">Paste a Strudel program or choose an original to see its score. Press Play when you're ready. <button data-take-tour>Take a tour</button></p></div><aside id="editor" hidden></aside>${previewMarkup}</div>
   </main><footer>Read the score. Follow the cycles.</footer>`;
 const aboutDialog = mountAbout();
 const keep = mountKeep(app);
@@ -216,6 +218,7 @@ get('editor').addEventListener(
   true,
 );
 function parkOriginal() {
+  renderPanel.freeze(true);
   const saved = {
     source,
     score,
@@ -235,6 +238,7 @@ function parkOriginal() {
   for (const id of ['source', 'score', 'editor'] as const) {
     const node = saved[id],
       replacement = document.createElement(node.tagName);
+    for (const attr of Array.from(node.attributes)) replacement.setAttribute(attr.name, attr.value);
     replacement.id = id;
     if (id === 'editor') replacement.hidden = true;
     node.replaceWith(replacement);
@@ -271,6 +275,9 @@ function parkOriginal() {
     get('keep-panel').hidden = saved.keepHidden;
     paste.setAttribute('aria-expanded', String(!panel.hidden));
     get('keep').setAttribute('aria-expanded', String(!get('keep-panel').hidden));
+    renderPanel.freeze(false);
+    previousSheet = [...previousSheet];
+    if (previousSheet.length) previousSheet[6] = false;
     window.scrollTo(...(saved.scroll as [number, number]));
   };
 }
@@ -344,6 +351,10 @@ app.subscribe((state) => {
       },
     );
   }
+  if (!state.doc && previousSheet.length) {
+    score.innerHTML = `<p class="welcome">Paste a Strudel program or choose an original to see its score. Press Play when you're ready. <button data-take-tour>Take a tour</button></p>`;
+    previousSheet = [];
+  }
   const liveRows = JSON.stringify(state.rows.map((r) => r.id));
   if (previousLiveRows !== liveRows) {
     previousLiveRows = liveRows;
@@ -373,6 +384,19 @@ app.subscribe((state) => {
     }),
   );
   renderEditor();
+});
+mountTour(app, {
+  lock: (value) => {
+    entryLocked = value;
+    renderPanel.freeze(value);
+    if (!value) renderEditor();
+  },
+  park: parkOriginal,
+  closeDialogs: () => {
+    if (aboutDialog.open) aboutDialog.close();
+    if (keep.dialog.open) keep.dialog.close();
+  },
+  previews,
 });
 document.addEventListener('visibilitychange', () =>
   app.setWatch(!!app.state.doc && !document.hidden),

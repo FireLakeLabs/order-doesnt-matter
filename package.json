@@ -30,6 +30,7 @@
     "@strudel/web": "1.3.0",
     "@strudel/webaudio": "1.3.0",
     "acorn": "8.15.0",
+    "driver.js": "1.10.2",
     "superdough": "1.3.0"
   },
   "devDependencies": {

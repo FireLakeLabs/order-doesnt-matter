@@ -43,9 +43,17 @@ export function mountKeep(app: App) {
     setTimeout(() => URL.revokeObjectURL(url), 0);
   }
   get('download-document').onclick = () =>
-    download(app.downloadDocument(), 'odm-document.json', 'application/json');
+    download(
+      app.downloadDocument(),
+      app.practice ? 'odm-practice-kiln.json' : 'odm-document.json',
+      'application/json',
+    );
   get('export-strudel').onclick = () =>
-    download(app.exportStrudel(), 'odm-score.strudel', 'text/plain');
+    download(
+      app.exportStrudel(),
+      app.practice ? 'odm-practice-kiln.strudel' : 'odm-score.strudel',
+      'text/plain',
+    );
   get('recover').onclick = () => {
     void app.recover();
   };
@@ -55,9 +63,13 @@ export function mountKeep(app: App) {
     const selected = file.files?.[0];
     file.value = '';
     if (!selected) return;
+    const activation = app.activation;
     try {
-      await app.openDocument(await selected.text());
+      const text = await selected.text();
+      if (activation !== app.activation) return;
+      await app.openDocument(text);
     } catch {
+      if (activation !== app.activation) return;
       get('load-error').textContent = 'Could not read this file. Your current work is still here.';
     }
   };
@@ -66,6 +78,10 @@ export function mountKeep(app: App) {
       panel.hidden = false;
       toggle.setAttribute('aria-expanded', 'true');
     }
+    get('download-document').textContent = app.practice
+      ? 'Download practice document'
+      : 'Download document';
+    get('export-strudel').textContent = app.practice ? 'Export practice Strudel' : 'Export Strudel';
     get('recovery-status').textContent = app.retention.notice;
     get('recover').hidden = !app.retention.candidate;
     for (const id of ['download-document', 'export-strudel'])

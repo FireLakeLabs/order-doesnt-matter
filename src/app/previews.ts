@@ -19,6 +19,7 @@ export function createPreviews() {
   const dialog = get('preview-expanded') as HTMLDialogElement;
   const close = get('preview-close');
   const spiral = createSpiral(get('spiral'));
+  const listeners = new Set<(kind: 'now' | 'watch', open: boolean) => void>();
   let current: 'now' | 'watch' | null = null;
   function shrink(focus = true) {
     if (!current) return;
@@ -34,6 +35,7 @@ export function createPreviews() {
       kind === 'watch' ? get('spiral').querySelector<HTMLDetailsElement>('.spiral-controls') : null;
     if (controls) controls.open = false;
     if (focus) button.focus();
+    for (const listener of listeners) listener(kind, false);
   }
   for (const kind of ['now', 'watch'] as const) {
     const button = get(kind === 'now' ? 'now-enlarge' : 'watch');
@@ -47,6 +49,7 @@ export function createPreviews() {
       button.setAttribute('aria-expanded', 'true');
       dialog.show();
       close.focus({ preventScroll: true });
+      for (const listener of listeners) listener(kind, true);
       dialog.scrollIntoView({ block: 'nearest' });
     };
   }
@@ -60,6 +63,14 @@ export function createPreviews() {
   });
   return {
     spiral,
+    shrink,
+    get current() {
+      return current;
+    },
+    subscribe(listener: (kind: 'now' | 'watch', open: boolean) => void) {
+      listeners.add(listener);
+      return () => listeners.delete(listener);
+    },
     escape() {
       if (!dialog.open || get('editor').contains(document.activeElement)) return false;
       shrink();

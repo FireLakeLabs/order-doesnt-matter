@@ -403,6 +403,7 @@ export function createApp(
             );
             if (revision < 0) return;
           } catch (error) {
+            if (request !== loadRevision) return;
             update({ ...state, loadError: String(error) });
             return;
           }
@@ -438,8 +439,7 @@ export function createApp(
       restoredDocument = restore;
       retention.adopt();
       update({ ...loadPiece(state, source, { doc, warnings }), message: 'Asking the score…' });
-      await askWindow();
-      if (piece !== epoch) return;
+      const answers = askWindow();
       result ??= await preflight.query(generate(doc), 0, 16);
       if (piece !== epoch) return;
       checked = !result.error;
@@ -448,6 +448,7 @@ export function createApp(
         cps: result.error ? null : result.cps,
         message: result.error ? `Could not play this piece: ${result.error.message}` : '',
       });
+      await answers;
     } finally {
       if (loading === request) {
         loading = 0;
@@ -510,6 +511,9 @@ export function createApp(
     },
     get retention() {
       return retention;
+    },
+    get activation() {
+      return epoch;
     },
     get practice() {
       return practice;
