@@ -51,8 +51,7 @@ and pass CI; they remain unmerged. Implementation status does not imply deployme
 - **Lint advisories:** seven moderate minimatch/typescript-eslint chain entries
   remain without an established compatible remedy. The last recorded
   production-only audit reported none; dependency changes need fresh checks.
-- **PR size:** contracts, proof and rearrangement have exceeded the 400-line aim.
-  Keep features separate and report actual authored size and verification limits.
+- **Redesign wave:** planned; its design lives with the owner until its briefs land.
 
 ## Design questions
 
