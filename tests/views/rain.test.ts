@@ -140,7 +140,6 @@ describe('Rain score geometry', () => {
       clip: noop,
       fillText: noop,
       ellipse: noop,
-      createLinearGradient: () => ({ addColorStop: noop }),
     } as unknown as CanvasRenderingContext2D;
     drawRain(ctx, f);
     expect(fills).toContain(0.93);

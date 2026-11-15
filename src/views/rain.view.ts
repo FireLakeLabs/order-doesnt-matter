@@ -164,9 +164,6 @@ export function drawRain(
   // Fade the final fifth in depth into the ground, including the road itself.
   const fadeTop = height * 0.12;
   const fadeBottom = edge(0, now + lookAhead * 0.8).y;
-  const fog = ctx.createLinearGradient(0, fadeTop, 0, fadeBottom);
-  fog.addColorStop(0, theme.ground);
-  fog.addColorStop(1, 'transparent');
   ctx.save();
   const first = road[0]?.left ?? width * 0.05;
   const last = road.at(-1)?.right ?? width * 0.95;
@@ -179,9 +176,12 @@ export function drawRain(
   ctx.lineTo(farLeft.x, farLeft.y);
   ctx.closePath();
   ctx.clip();
-  ctx.globalAlpha = 1;
-  ctx.fillStyle = fog;
-  ctx.fillRect(0, fadeTop - 1, width, fadeBottom - fadeTop + 1);
+  // Alpha rows avoid dark interpolation through transparent black on light grounds.
+  ctx.fillStyle = theme.ground;
+  for (let y = fadeTop; y < fadeBottom; y++) {
+    ctx.globalAlpha = 1 - (y - fadeTop) / (fadeBottom - fadeTop);
+    ctx.fillRect(0, y, width, Math.min(1, fadeBottom - y));
+  }
   ctx.restore();
   ctx.globalAlpha = 1;
 
