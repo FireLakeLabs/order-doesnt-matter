@@ -13,6 +13,7 @@ import {
 } from './model';
 import { livePlayhead } from '../live/playhead';
 import './style.css';
+import { depthProjection } from './projection';
 export type SpiralInput = LiveInput & { known: [number, number][]; end: number | null };
 
 function silencedAt(input: SpiralInput, lane: number, cycle: number) {
@@ -48,8 +49,26 @@ export function drawSpiral(
   ctx.clearRect(-width / 2, -height / 2, width, height);
   const g = laneGeometry(input.rows.length, { width, height }, view);
   const motion = reduced ? Math.floor(now) : now;
+  const depth =
+    view.style === 'fly-through'
+      ? depthProjection(input.rows.length, { width, height }, motion, view)
+      : null;
+  const point = (time: number, radius: number): [number, number] => {
+    if (depth) return depth.point(time, radius);
+    const angle = (time - motion) * Math.PI * 2 - Math.PI / 2;
+    return [Math.cos(angle) * radius, Math.sin(angle) * radius];
+  };
   const path = (from: number, to: number, r1: number, r2: number, begin = true) => {
     if (begin) ctx.beginPath();
+    if (depth) {
+      ctx.moveTo(...point(from, r1));
+      const samples = Math.max(1, Math.ceil((to - from) * 64));
+      for (let n = 1; n <= samples; n++) {
+        const f = n / samples;
+        ctx.lineTo(...point(from + (to - from) * f, r1 + (r2 - r1) * f));
+      }
+      return;
+    }
     const steps = Math.max(1, Math.ceil((to - from) * 8));
     const angle = (from - motion) * 2 * Math.PI - Math.PI / 2;
     let c = Math.cos(angle),
@@ -100,8 +119,13 @@ export function drawSpiral(
           a = (t - motion) * Math.PI * 2 - Math.PI / 2,
           r = g.core + g.pitch * (t - motion + view.keep + 1);
         ctx.beginPath();
-        ctx.moveTo(Math.cos(a) * (r - 3), Math.sin(a) * (r - 3));
-        ctx.lineTo(Math.cos(a) * (r + g.pitch), Math.sin(a) * (r + g.pitch));
+        if (depth) {
+          ctx.moveTo(...point(t, r - 3));
+          ctx.lineTo(...point(t, r + g.pitch));
+        } else {
+          ctx.moveTo(Math.cos(a) * (r - 3), Math.sin(a) * (r - 3));
+          ctx.lineTo(Math.cos(a) * (r + g.pitch), Math.sin(a) * (r + g.pitch));
+        }
         ctx.stroke();
       }
   }
@@ -124,20 +148,21 @@ export function drawSpiral(
     ctx.globalAlpha = m.opacity;
     ctx.strokeStyle = lane.error ? paint.danger : paint.lane(m.lane);
     ctx.setLineDash(lane.error ? [1, 3] : lane.sound === 'missing' ? [3, 3] : []);
-    ctx.lineWidth = m.width;
+    const bandWidth = m.width * (depth?.width(m.turn + 0.5) ?? 1);
+    ctx.lineWidth = bandWidth;
     ctx.beginPath();
     for (const span of group) path(span.from, span.bodyTo, span.radius, span.bodyEndRadius, false);
     ctx.stroke();
     if (silenced) {
       ctx.strokeStyle = paint.canvas;
-      ctx.lineWidth = m.width * 0.55;
+      ctx.lineWidth = bandWidth * 0.55;
       ctx.setLineDash([]);
       ctx.stroke();
     }
     // A head crosses the band width at the exact onset, without stretching time.
     ctx.globalAlpha = m.opacity;
     ctx.strokeStyle = paint.text;
-    ctx.lineWidth = Math.max(1, m.width * 0.22);
+    ctx.lineWidth = Math.max(1, bandWidth * 0.22);
     ctx.setLineDash([]);
     ctx.beginPath();
     for (const span of group)
@@ -146,8 +171,13 @@ export function drawSpiral(
         const c = Math.cos(angle),
           s = Math.sin(angle),
           half = span.width / 2;
-        ctx.moveTo(c * (span.radius - half), s * (span.radius - half));
-        ctx.lineTo(c * (span.radius + half), s * (span.radius + half));
+        if (depth) {
+          ctx.moveTo(...point(span.from, span.radius - half));
+          ctx.lineTo(...point(span.from, span.radius + half));
+        } else {
+          ctx.moveTo(c * (span.radius - half), s * (span.radius - half));
+          ctx.lineTo(c * (span.radius + half), s * (span.radius + half));
+        }
       }
     // A contrasting under-stroke separates the head from the band. Both
     // strokes share the exact onset path; no scored span is lengthened.
@@ -164,13 +194,10 @@ export function drawSpiral(
         ctx.globalAlpha = 1 - (now - span.start) / 0.07;
         ctx.fillStyle = paint.lane(span.lane);
         ctx.beginPath();
-        ctx.arc(
-          Math.cos(span.startAngle) * span.radius,
-          Math.sin(span.startAngle) * span.radius,
-          Math.max(2, span.width),
-          0,
-          Math.PI * 2,
-        );
+        const head = depth
+          ? point(span.start, span.radius)
+          : [Math.cos(span.startAngle) * span.radius, Math.sin(span.startAngle) * span.radius];
+        ctx.arc(head[0], head[1], Math.max(2, span.width), 0, Math.PI * 2);
         ctx.fill();
       }
   }
@@ -186,11 +213,15 @@ export function drawSpiral(
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.beginPath();
+      const broken = depth ? point(Math.floor(now), r) : [0, -r];
+      ctx.save();
+      ctx.translate(broken[0], broken[1] + r);
       ctx.moveTo(-4, -r - 4);
       ctx.lineTo(4, -r + 4);
       ctx.moveTo(4, -r - 4);
       ctx.lineTo(-4, -r + 4);
       ctx.stroke();
+      ctx.restore();
     }
   ctx.globalAlpha = 1;
   ctx.setLineDash([]);
@@ -198,11 +229,17 @@ export function drawSpiral(
   ctx.lineWidth = 2;
   const gate = reduced ? (now - Math.floor(now)) * Math.PI * 2 - Math.PI / 2 : -Math.PI / 2;
   ctx.beginPath();
-  ctx.moveTo(Math.cos(gate) * g.core, Math.sin(gate) * g.core);
-  ctx.lineTo(
-    Math.cos(gate) * g.pitch * (view.keep + view.upcoming + 2.7),
-    Math.sin(gate) * g.pitch * (view.keep + view.upcoming + 2.7),
-  );
+  if (depth) {
+    const r = g.core + g.pitch * (now - motion + view.keep + 1);
+    ctx.moveTo(...point(now, r));
+    ctx.lineTo(...point(now, r + g.pitch));
+  } else {
+    ctx.moveTo(Math.cos(gate) * g.core, Math.sin(gate) * g.core);
+    ctx.lineTo(
+      Math.cos(gate) * g.pitch * (view.keep + view.upcoming + 2.7),
+      Math.sin(gate) * g.pitch * (view.keep + view.upcoming + 2.7),
+    );
+  }
   ctx.stroke();
   ctx.font = '600 13px system-ui';
   ctx.textAlign = 'center';
@@ -216,8 +253,7 @@ export function drawSpiral(
     const t = Math.floor(now) + phase;
     const a = (t - motion) * Math.PI * 2 - Math.PI / 2;
     const r = g.core + g.pitch * (t - motion + view.keep + 1) + (n + 1) * g.spacing;
-    const x = Math.cos(a) * r,
-      y = Math.sin(a) * r;
+    const [x, y] = depth ? point(t, r) : [Math.cos(a) * r, Math.sin(a) * r];
     const label = String(n + 1),
       w = ctx.measureText(label).width + 4;
     ctx.fillStyle = paint.canvas;
@@ -229,10 +265,11 @@ export function drawSpiral(
   if (input.end !== null && input.end >= now - view.keep && input.end <= now + view.upcoming + 1) {
     const a = (input.end - motion) * Math.PI * 2 - Math.PI / 2,
       r = g.core + g.pitch * (input.end - motion + view.keep + 1);
+    const [x, y] = depth ? point(input.end, r) : [Math.cos(a) * r, Math.sin(a) * r];
     ctx.fillText(
       'End · repeats',
-      Math.max(-width / 2 + 55, Math.min(width / 2 - 55, Math.cos(a) * r + 18)),
-      Math.max(-height / 2 + 14, Math.min(height / 2 - 14, Math.sin(a) * r)),
+      Math.max(-width / 2 + 55, Math.min(width / 2 - 55, x + 18)),
+      Math.max(-height / 2 + 14, Math.min(height / 2 - 14, y)),
     );
   }
 }
@@ -262,6 +299,27 @@ export function createSpiral(host: HTMLElement) {
   controls.append(summary, options);
   let latest: SpiralInput | undefined;
   function populateControls() {
+    const styleLabel = document.createElement('label');
+    styleLabel.textContent = 'Style';
+    const style = document.createElement('select');
+    style.setAttribute('aria-label', 'Style');
+    for (const [value, words] of [
+      ['ring', 'Ring'],
+      ['fly-through', 'Fly-through'],
+    ]) {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = words;
+      style.append(option);
+    }
+    style.value = settings.style ?? 'ring';
+    style.onchange = () => {
+      settings.style = style.value === 'fly-through' ? 'fly-through' : 'ring';
+      saveView(settings);
+      if (latest) update(latest);
+    };
+    styleLabel.append(style);
+    options.append(styleLabel);
     for (const [key, words, min, max, step] of [
       ['keep', 'Keep what just played', 0.1, 2, 0.1],
       ['upcoming', "Show what's coming", 1, 4, 1],
@@ -406,9 +464,13 @@ export function createSpiral(host: HTMLElement) {
     const unknown = Array.from({ length: last - first }, (_, n) => first + n).some(
       (turn) => !input.known.some(([a, b]) => a <= turn && b >= turn + 1),
     );
-    const text = unknown
-      ? 'Striped stretches: not asked yet'
-      : 'One turn · one cycle · numbers identify lanes';
+    const text =
+      (unknown
+        ? 'Striped stretches: not asked yet'
+        : 'One turn · one cycle · numbers identify lanes') +
+      (settings.style === 'fly-through'
+        ? ` · Fly-through: scored spans, not audio tails; depth overlaps${reduced.matches ? ' · Reduced motion: static depth per turn' : ''}`
+        : '');
     if (status.textContent !== text) status.textContent = text;
   }
 }
