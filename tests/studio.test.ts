@@ -7,7 +7,7 @@ import { instrumentColour, resolveTheme, themeNames, viewTheme } from '../src/st
 import { createStore } from '../src/studio/store';
 import { initialState, loadPiece } from '../src/app/state';
 import { importStrudel } from '../src/import';
-import { buildFrame, neededRange, viewNotes } from '../src/studio/frame';
+import { buildFrame, neededRange, viewNotes, playingSplit, noteLevel } from '../src/studio/frame';
 import { createFrameClock } from '../src/studio/clock';
 import { mountView } from '../src/studio/view-lifecycle';
 import { createScoreCache } from '../src/studio/score-cache';
@@ -115,6 +115,7 @@ test('frame builder preserves real spans, fragments, signals, values, room membe
     score,
     notes,
     now: 0.25,
+    cps: 0.25,
     theme: resolveTheme('riso'),
     lookAhead: 4,
     trails: 2,
@@ -135,7 +136,7 @@ test('frame builder preserves real spans, fragments, signals, values, room membe
   ]);
   expect(frame).toMatchObject({
     now: 0.25,
-    cps: 1,
+    cps: 0.25,
     lookAhead: 4,
     trails: 2,
     width: 800,
@@ -220,7 +221,7 @@ test('instrument identities and suffixes survive resting sections, repeats and c
     importStrudel('arrange([4, s("~ bd")], [4, stack(s("bd"), s("sd"))])'),
   );
   const inventory = instrumentInventory(s);
-  expect(inventory.names).toEqual(['bd', 'bd 2', 'sd']);
+  expect(inventory.names).toEqual(['bd · Section 1', 'bd · Section 2', 'sd']);
   expect(inventory.sounds).toEqual(['bd', 'bd', 'sd']);
   const later = {
     ...s,
@@ -230,7 +231,7 @@ test('instrument identities and suffixes survive resting sections, repeats and c
   };
   expect(instrumentInventory(later)).toBe(inventory);
   const resting = { ...later, events: {} };
-  expect(instrumentInventory(resting).names).toEqual(['bd', 'bd 2', 'sd']);
+  expect(instrumentInventory(resting).names).toEqual(['bd · Section 1', 'bd · Section 2', 'sd']);
   const changed = loadPiece(s, '', importStrudel('stack(s("hh"), s("hh"))'));
   expect(instrumentInventory(changed).names).toEqual(['hh', 'hh 2']);
 });
@@ -255,4 +256,104 @@ test('view themes expose only public contract fields with stable identity', () =
     ].sort(),
   );
   expect(publicTheme).not.toHaveProperty('instrumentColours');
+});
+
+test('section-based generated names disambiguate sounds and preserve author names', () => {
+  const s = loadPiece(
+    initialState(),
+    '',
+    importStrudel(`
+    const intro = stack(s("hh"), s("bd"));
+    const build = stack(s("hh"), s("sd"));
+    arrange([4, intro], [4, build])
+  `),
+  );
+  expect(instrumentInventory(s).names).toEqual(['hh · intro', 'bd', 'hh · build', 'sd']);
+  const named = loadPiece(
+    initialState(),
+    '',
+    importStrudel('const custom = s("hh"); stack(custom, s("hh"))'),
+  );
+  expect(instrumentInventory(named).names).toEqual(['custom', 'hh']);
+});
+
+test('dubstep rail split follows the playhead through sections and repeats, independently of mute', () => {
+  const s = loadPiece(
+    initialState(),
+    '',
+    importStrudel(readFileSync('corpus/programs/real-dubstep-arranged.strudel', 'utf8')),
+  );
+  const names = instrumentInventory(s);
+  expect(s.rows).toHaveLength(13);
+  expect(playingSplit(s, 0).playing).toHaveLength(3);
+  expect(playingSplit(s, 4).playing).toHaveLength(4);
+  expect(playingSplit(s, 8).playing).toHaveLength(6);
+  expect(playingSplit(s, 16).playing).toHaveLength(3);
+  expect(playingSplit(s, 28).playing.map((row) => row.id)).toEqual(
+    playingSplit(s, 0).playing.map((row) => row.id),
+  );
+  expect(names.groups.filter((group) => group === 'dubstepDrums')).toHaveLength(4);
+  const muted = { ...s, rows: s.rows.map((row) => ({ ...row, muted: true })) };
+  expect(playingSplit(muted, 8).playing).toHaveLength(6);
+});
+
+test('meters use overlapping onset notes and gain, without counting signal fragments', () => {
+  const notes = viewNotes({
+    from: 0,
+    to: 4,
+    events: {
+      bd: result([
+        event(0, 1, { gain: 0.5 }),
+        event(0, 1, { gain: 0.5 }),
+        { ...event(0, 1), whole: null },
+      ]),
+    },
+  });
+  expect(noteLevel(notes, 'bd', 0.5)).toBeCloseTo(Math.sqrt(0.5));
+  expect(noteLevel(notes, 'bd', 1)).toBe(0);
+});
+
+test('a failed frame releases once even if dispose also fails; a synchronous mount failure is reported', async () => {
+  const error = Error('broken frame');
+  const release = vi.fn(() => {
+    throw Error('broken cleanup');
+  });
+  const failed = vi.fn();
+  const element = { replaceChildren: vi.fn() } as unknown as HTMLElement;
+  const lifecycle = mountView(
+    async () => ({
+      id: 'bad',
+      name: 'Bad',
+      tag: 'test',
+      mount: () => ({
+        frame() {
+          throw error;
+        },
+        dispose: release,
+      }),
+    }),
+    element,
+    failed,
+  );
+  await vi.waitFor(() => expect(lifecycle.definition).toBeDefined());
+  await Promise.resolve();
+  lifecycle.frame({} as ViewFrame);
+  lifecycle.frame({} as ViewFrame);
+  lifecycle.dispose();
+  expect(release).toHaveBeenCalledTimes(1);
+  expect(failed).toHaveBeenCalledExactlyOnceWith(error);
+  const mountFailure = vi.fn();
+  mountView(
+    () => {
+      throw Error('broken load');
+    },
+    element,
+    mountFailure,
+  );
+  await vi.waitFor(() => expect(mountFailure).toHaveBeenCalledOnce());
+});
+
+test('author names reserve their exact spelling before generated numeric suffixes', () => {
+  const s = loadPiece(initialState(), '', importStrudel('const bd = s("bd"); stack(s("bd"), bd)'));
+  expect(instrumentInventory(s).names).toEqual(['bd 2', 'bd']);
 });
