@@ -14,7 +14,7 @@ import { session, type Stage } from './session';
 
 // All subscribers receive one latency-corrected sample from one page RAF.
 const clock = createFrameClock(
-  () => runtime.getPlayhead(),
+  () => runtime.sample(),
   (callback) => requestAnimationFrame(callback),
   (id) => {
     cancelAnimationFrame(id);
@@ -48,13 +48,14 @@ export function Studio() {
   return (
     <main className="studio" data-filled={filledStage ?? undefined}>
       <TopBar
+        clock={clock}
         snapshot={snapshot}
         theme={theme.name}
         setTheme={(name) => {
           session.layout({ theme: name });
         }}
       />
-      <ScrubStrip />
+      <ScrubStrip clock={clock} />
       <div className="workspace">
         <InstrumentRail state={snapshot.state} theme={theme} clock={clock} />
         {(['a', 'b'] as const).map((stage) => (

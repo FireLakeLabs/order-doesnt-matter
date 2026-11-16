@@ -53,7 +53,8 @@ export interface FrameInput {
   score: ScoreWindow;
   notes: ViewNote[];
   now: number;
-  cps?: number;
+  cps: number;
+  playing: boolean;
   theme: ViewTheme;
   lookAhead: number;
   trails: 0 | 1 | 2;
@@ -78,8 +79,8 @@ export function buildFrame(input: FrameInput): ViewFrame {
   const members = sectionMembership(state, now);
   return {
     now,
-    playing: state.playing,
-    cps: input.cps ?? state.cps ?? 0.5,
+    playing: input.playing,
+    cps: input.cps,
     notes,
     from: score.from,
     to: score.to,
@@ -89,7 +90,7 @@ export function buildFrame(input: FrameInput): ViewFrame {
       index,
       colour: instrumentColour(theme.name, index),
       sounding:
-        state.playing &&
+        input.playing &&
         !instrument.silenced &&
         notes.some(
           (note) =>

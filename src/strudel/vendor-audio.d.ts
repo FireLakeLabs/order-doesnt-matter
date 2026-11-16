@@ -55,5 +55,9 @@ declare module 'superdough' {
     name: string,
   ): Promise<AudioBuffer>;
   export function samples(map: object, base?: string): Promise<void>;
-  export function getSuperdoughAudioController(): { output: { destinationGain: GainNode } };
+  export function getSuperdoughAudioController(): {
+    output: { destinationGain: GainNode };
+    nodes: Record<string, { disconnect(): void }>;
+    buses: Record<string, { disconnect(): void }>;
+  };
 }

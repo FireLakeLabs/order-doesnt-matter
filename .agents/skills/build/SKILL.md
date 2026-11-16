@@ -24,6 +24,11 @@ pass. If you believe a gate is wrong, leave it and say so in the handback. Do
 not send code to review while a gate fails. Suite durations are printed for
 information; they are not gates.
 
+When agents share a machine, serialize heavy gates under `flock /tmp/odm-gates.lock`,
+in a detached session, recording the full log and exit code to files. A wrapper
+exit of 143 without a failing assertion is a wrapper timeout, not a test failure.
+Never stop processes by name or pattern; stop only process ids you started.
+
 For anything visible, take screenshots on the brief's real piece and look at
 them. Compare against the sizes and effect the brief states. Passing tests are
 not evidence that it looks right.

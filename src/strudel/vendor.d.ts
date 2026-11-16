@@ -15,6 +15,8 @@ declare module '@strudel/core' {
     part: TimeSpan;
     value: unknown;
     hasOnset(): boolean;
+    withValue(fn: (value: unknown) => unknown): Hap;
+    withSpan(fn: (span: TimeSpan) => TimeSpan): Hap;
   }
   export class Pattern {
     constructor(query: (state: State) => Hap[]);
@@ -27,7 +29,7 @@ declare module '@strudel/core' {
   export class Cyclist {
     constructor(options: {
       getTime: () => number;
-      setInterval?: () => number;
+      setInterval?: (callback: () => void) => number;
       clearInterval?: () => void;
       onTrigger?: (
         hap: Hap,
@@ -46,6 +48,8 @@ declare module '@strudel/core' {
     getTime(): number;
     setPattern(pattern: Pattern, autostart?: boolean): Promise<void>;
     stop(): void;
+    setCps(cps: number): void;
+    clock: { getPhase(): number };
   }
 }
 declare module '@strudel/transpiler' {

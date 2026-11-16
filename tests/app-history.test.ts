@@ -17,6 +17,10 @@ const audio = vi.hoisted(() => {
     revision = 0;
   const emit = (event: EngineEvent) => listeners.forEach((listener) => listener(event));
   const engine: Engine = {
+    setSpeed() {},
+    async setLoop() {},
+    async seek() {},
+    silence() {},
     async play(code) {
       codes.push(code);
       playing = true;

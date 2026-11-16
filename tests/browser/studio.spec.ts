@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test, type Page, type BrowserContext } from '@playwright/test';
 import type {} from '../../src/studio/main';
 
-const shots = '/tmp/odm-studio-shell';
+const shots = '/tmp/odm-studio-integration';
 async function frames(page: Page, count = 4) {
   await page.evaluate(async (count) => {
     await new Promise<void>((resolve) => {
@@ -63,7 +63,8 @@ async function noScroll(page: Page) {
 async function startAt(page: Page, cycle: number) {
   await page.evaluate(async (cycle) => {
     window.odmStudio.stop();
-    await window.odmStudio.app.play(cycle);
+    await window.odmStudio.seek(cycle);
+    await window.odmStudio.play();
   }, cycle);
   await page.waitForFunction(
     (cycle) => window.odmStudio.app.state.playing && window.odmStudio.getPlayhead() >= cycle,
@@ -87,26 +88,6 @@ test('Studio shell on dubstep: section rail, two stages, shared clock, shelf, fi
   await expect(page.locator('canvas')).toHaveCount(2);
   await expect(page.locator('.view-host').first()).toHaveAttribute('data-score-ready', 'true');
   await expect(page.locator('.view-host').last()).toHaveAttribute('data-score-ready', 'true');
-  // Subscribe read probes only in this test. Both canvases share a single sample per RAF.
-  await page.evaluate(() => {
-    const runtime = window.odmStudio;
-    const read = runtime.getPlayhead.bind(runtime);
-    const reads = new Map<number, number>();
-    runtime.getPlayhead = () => {
-      const time = document.timeline.currentTime as number;
-      reads.set(time, (reads.get(time) ?? 0) + 1);
-      return read();
-    };
-    Object.assign(window, { studioReads: reads, studioReadPlayhead: read });
-  });
-  await frames(page, 8);
-  expect(
-    await page.evaluate(() =>
-      [...(window as unknown as { studioReads: Map<number, number> }).studioReads.values()].every(
-        (count) => count === 1,
-      ),
-    ),
-  ).toBe(true);
   await startAt(page, 3.9);
   await expect(page.getByTestId('playing-instruments').locator('li')).toHaveCount(4);
   await expect(page.locator('.resting-chip')).toHaveCount(9);
@@ -121,10 +102,12 @@ test('Studio shell on dubstep: section rail, two stages, shared clock, shelf, fi
   const before = await pixels(page, 'b');
   await frames(page, 8);
   expect(await pixels(page, 'b')).not.toBe(before);
-  // Hold only the visual clock for repeatable theme comparisons at the first drop.
-  // The real scheduler/trigger checks run separately below.
-  await page.evaluate(() => {
-    window.odmStudio.getPlayhead = () => 10.4;
+  // Hold the real transport for repeatable theme comparisons in the first drop.
+  await page.evaluate(async () => {
+    window.odmStudio.pause();
+    await window.odmStudio.seek(9.4);
+    window.odmStudio.setSpeed(0.5);
+    await window.odmStudio.setLoop({ from: 8, to: 10 });
   });
   await frames(page);
   const sizes = await page.locator('[data-region]').evaluateAll((regions) =>
@@ -194,11 +177,6 @@ test('Studio shell on dubstep: section rail, two stages, shared clock, shelf, fi
   await tile.dragTo(page.locator('[data-region="stage-b"]'));
   await expect(page.locator('canvas')).toHaveCount(2);
   await page.keyboard.press('Escape');
-  await page.evaluate(() => {
-    window.odmStudio.getPlayhead = (
-      window as unknown as { studioReadPlayhead: () => number }
-    ).studioReadPlayhead;
-  });
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
   await frames(page);
   const stopped = await pixels(page);
@@ -395,13 +373,16 @@ test('a host frame failure stays in its stage while the other stage keeps drawin
   await page.waitForFunction(() => window.odmStudio.app.state.playing);
   await page.evaluate(() => {
     let once = true;
-    Object.assign(window.odmStudio, {
-      getCps() {
+    // DPR is read inside each stage's host adapter, after the shared time sample.
+    const dpr = window.devicePixelRatio;
+    Object.defineProperty(window, 'devicePixelRatio', {
+      configurable: true,
+      get() {
         if (once) {
           once = false;
           throw Error('Deliberate host frame failure');
         }
-        return 0.5;
+        return dpr;
       },
     });
   });
@@ -412,4 +393,205 @@ test('a host frame failure stays in its stage while the other stage keeps drawin
   await frames(page, 8);
   expect(await pixels(page, 'b')).not.toBe(before);
   await expect(page.locator('[data-region="stage-b"]').getByRole('alert')).toHaveCount(0);
+});
+
+declare global {
+  interface Window {
+    studioFrameSamples: {
+      time: number;
+      stage: string;
+      now: number;
+      cps: number;
+      playing: boolean;
+      members: string[];
+      railMembers: string[];
+      section: number[];
+    }[];
+    studioRafCounts: Map<number, number>;
+    studioReadCounts: Map<number, { now: number; cps: number }>;
+  }
+}
+
+test('one page sample drives both real test cards, strip and rail through scrub, speed and three loops', async ({
+  page,
+  context,
+}) => {
+  await assets(context);
+  await page.addInitScript(() => {
+    window.studioFrameSamples = [];
+    window.studioRafCounts = new Map();
+    const request = window.requestAnimationFrame.bind(window);
+    window.requestAnimationFrame = (callback) => {
+      const time = Number(document.timeline.currentTime);
+      window.studioRafCounts.set(time, (window.studioRafCounts.get(time) ?? 0) + 1);
+      return request(callback);
+    };
+  });
+  let instrumented = false;
+  // Record the actual frames delivered to the existing test card, retaining its drawing.
+  await page.route('**/assets/test-card.view-*.js', async (route) => {
+    const response = await route.fetch();
+    const original = await response.text();
+    const body = original.replace(/frame\((\w+)\)\{/, (_, frame: string) => {
+      instrumented = true;
+      return `frame(${frame}){window.studioFrameSamples.push({time:Number(document.timeline.currentTime),stage:canvas.closest('[data-region]').dataset.region,now:${frame}.now,cps:${frame}.cps,playing:${frame}.playing,members:${frame}.instruments.filter(i=>i.inSection).map(i=>i.id),railMembers:[...document.querySelectorAll('.instrument-row')].map(row=>row.dataset.instrument),section:[...document.querySelectorAll('.song-block[data-current="true"]')].flatMap(block=>[Number(block.dataset.from),Number(block.dataset.to)])});`;
+    });
+    // The minifier renames locals; derive the canvas name from the mount body.
+    const canvas = original.match(/(?:const|let) (\w+)=document.createElement\("canvas"\)/)?.[1];
+    expect(canvas).toBeTruthy();
+    await route.fulfill({
+      response,
+      body: body.replace('stage:canvas.closest', `stage:${canvas}.closest`),
+    });
+  });
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/studio.html?inspect&a=test-card&b=test-card');
+  await load(page);
+  await expect(page.locator('.view-host[data-score-ready="true"]')).toHaveCount(2);
+  expect(instrumented).toBe(true);
+  const track = (await page.getByTestId('song-track').boundingBox())!;
+  const point = (cycle: number) => ({ x: track.x + (track.width * cycle) / 28, y: track.y + 30 });
+  const checkPosition = async (cycle: number, members: number, playing = false) => {
+    await expect
+      .poll(() =>
+        page.evaluate(
+          ({ cycle, members, playing }) => {
+            const [a, b] = window.studioFrameSamples.slice(-2);
+            const block = document.querySelector<HTMLElement>('.song-block[data-current="true"]');
+            const rows = Array.from(document.querySelectorAll<HTMLElement>('.instrument-row')).map(
+              (row) => row.dataset.instrument!,
+            );
+            return (
+              !!a &&
+              !!b &&
+              a.stage !== b.stage &&
+              a.time === b.time &&
+              Math.abs(a.now - cycle) < 0.001 &&
+              a.now === b.now &&
+              a.cps === b.cps &&
+              a.playing === playing &&
+              b.playing === playing &&
+              Number(
+                document.querySelector('[aria-label="Playhead"]')?.getAttribute('aria-valuenow'),
+              ) === a.now &&
+              document.querySelector('[aria-label="Cycle"]')?.textContent ===
+                `cycle ${a.now.toFixed(2)}` &&
+              !!block &&
+              a.now % 28 >= Number(block.dataset.from) &&
+              a.now % 28 < Number(block.dataset.to) &&
+              rows.length === members &&
+              JSON.stringify(rows.sort()) === JSON.stringify(a.members.sort()) &&
+              JSON.stringify(a.members.sort()) === JSON.stringify(b.members.sort())
+            );
+          },
+          { cycle, members, playing },
+        ),
+      )
+      .toBe(true);
+  };
+  await page.mouse.move(point(1).x, point(1).y);
+  await page.mouse.down();
+  await checkPosition(1, 3);
+  for (const [cycle, members] of [
+    [8.4, 6],
+    [2, 3],
+    [28, 3],
+    [9, 6],
+  ]) {
+    await page.mouse.move(point(cycle).x, point(cycle).y);
+    await checkPosition(cycle, members);
+  }
+  await page.mouse.up();
+  const fullCps = await page.evaluate(() => window.studioFrameSamples.at(-1)!.cps);
+  await page.getByRole('button', { name: 'Speed 0.5', exact: true }).click();
+  await expect
+    .poll(() => page.evaluate(() => window.studioFrameSamples.at(-1)!.cps))
+    .toBe(fullCps / 2);
+  await checkPosition(9, 6);
+  await expect(page.locator('.tempo')).toContainText('70 BPM');
+  await page.keyboard.down('Shift');
+  await page.mouse.move(point(8).x, point(8).y);
+  await page.mouse.down();
+  await page.mouse.move(point(10).x, point(10).y);
+  await page.mouse.up();
+  await page.keyboard.up('Shift');
+  await page.waitForFunction(
+    () => window.odmStudio.transport.getSnapshot().loop?.to === 10,
+    undefined,
+    { polling: 20 },
+  );
+  await page.evaluate(() => {
+    window.studioFrameSamples.length = 0;
+    window.studioRafCounts.clear();
+    window.studioReadCounts = new Map();
+    const runtime = window.odmStudio;
+    const readNow = runtime.getPlayhead.bind(runtime);
+    const readCps = runtime.getCps.bind(runtime);
+    const mark = (field: 'now' | 'cps') => {
+      const time = Number(document.timeline.currentTime);
+      const counts = window.studioReadCounts.get(time) ?? { now: 0, cps: 0 };
+      counts[field]++;
+      window.studioReadCounts.set(time, counts);
+    };
+    runtime.getPlayhead = (cps) => {
+      mark('now');
+      return readNow(cps);
+    };
+    runtime.getCps = () => {
+      mark('cps');
+      return readCps();
+    };
+  });
+  await page.getByRole('button', { name: 'Play', exact: true }).click();
+  await page.waitForFunction(
+    () => {
+      const samples = window.studioFrameSamples.filter(
+        (frame) => frame.stage === 'stage-a' && frame.playing,
+      );
+      return samples.filter((frame, i) => i > 0 && frame.now < samples[i - 1].now).length >= 3;
+    },
+    undefined,
+    { polling: 50 },
+  );
+  const result = await page.evaluate(() => {
+    const samples = window.studioFrameSamples.filter((frame) => frame.playing);
+    const pairs = samples.every(
+      (frame, i) =>
+        i % 2 ||
+        (samples[i + 1]?.time === frame.time &&
+          samples[i + 1]?.now === frame.now &&
+          samples[i + 1]?.cps === frame.cps),
+    );
+    // Omit the first registration bucket, which can contain a click-driven render.
+    const counts = [...window.studioRafCounts.values()].slice(1);
+    return {
+      frames: samples.length,
+      pairs,
+      inLoop: samples.every(
+        (frame) =>
+          frame.now >= 8 &&
+          frame.now < 10 &&
+          frame.members.length === 6 &&
+          frame.section[0] === 8 &&
+          frame.section[1] === 16 &&
+          JSON.stringify(frame.members.slice().sort()) ===
+            JSON.stringify(frame.railMembers.slice().sort()),
+      ),
+      halfSpeed: samples.every((frame) => frame.cps === 140 / 240 / 2),
+      callbacksPerFrame: [...new Set(counts)],
+      readsPerFrame: [
+        ...new Set(
+          [...window.studioReadCounts.values()].map((count) => `${count.now}/${count.cps}`),
+        ),
+      ],
+    };
+  });
+  expect(result.frames).toBeGreaterThan(100);
+  expect(result.pairs).toBe(true);
+  expect(result.inLoop).toBe(true);
+  expect(result.halfSpeed).toBe(true);
+  expect(result.callbacksPerFrame).toEqual([1]);
+  expect(result.readsPerFrame).toEqual(['1/1']);
+  await mkdir(shots, { recursive: true });
+  await writeFile(`${shots}/shared-frame-measurements.json`, JSON.stringify(result, null, 2));
 });
