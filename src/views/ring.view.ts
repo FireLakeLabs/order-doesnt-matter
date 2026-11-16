@@ -115,13 +115,14 @@ const view: ViewDefinition = {
     root.append(canvas, centre);
     element.append(root);
     const scene = new THREE.Scene();
+    const black = new THREE.Color(0);
     const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 20);
     const disc = new THREE.Group();
     scene.add(disc);
     const composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
     // Selective, finite-support bloom: only sounding notes emit. Its kernel reaches
-    // <6% of the ring radius, and max composition preserves the saturated score ink.
+    // about 5% of the ring radius diagonally; max composition preserves the score ink.
     const lightA = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
     const lightB = lightA.clone();
     const blurStep = new THREE.Vector2();
@@ -445,7 +446,6 @@ const view: ViewDefinition = {
             u.flashDuration.value = Math.max(0.00001, frame.cps * 0.15);
             u.trail.value = trailDuration(frame.trails);
             u.muted.value = instrument.muted ? 0.23 : 1;
-            u.lightPass.value = 0;
             layer.ink.set(instrument.colour);
             layer.ground.set(theme.ground);
             layer.highlight.set(theme.text);
@@ -453,7 +453,7 @@ const view: ViewDefinition = {
         }
         if (theme.glow) {
           const background = scene.background;
-          scene.background = new THREE.Color(0);
+          scene.background = black;
           gate.visible = bead.visible = quarterTicks.visible = false;
           for (const band of bands) {
             band.track.visible = false;

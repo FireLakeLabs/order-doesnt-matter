@@ -38,17 +38,15 @@ export function cycleArcs(notes: readonly ViewNote[], cycle: number): Arc[] {
       .sort((a, b) => Number(a.onset) - Number(b.onset) || a.start - b.start)
   );
 }
-/** Short percussive spans read as separated ticks; timing retains the real sounding span.
- * Dense scores bypass this display exaggeration and retain exact area occupancy. */
+/** Short hits read as separated ticks; timing retains the real sounding span.
+ * Below 2% spacing display ticks can join. Dense cycles retain exact occupancy.
+ * Continuations keep their clipped real span; ticks never wrap into another cycle. */
 export function displayArcs(arcs: readonly Arc[]): Arc[] {
-  return arcs
-    .map((arc) => {
-      if (!arc.onset || arc.end - arc.start > 0.2) return arc;
-      const from = arc.start;
-      const to = arc.start + Math.max(0.02, Math.min(0.035, (arc.end - arc.start) * 0.65));
-      return { ...arc, from, to: Math.max(from, to) };
-    })
-    .filter((arc) => arc.to > arc.from);
+  return arcs.map((arc) => {
+    if (!arc.onset || arc.end - arc.start > 0.2 || arc.start < 0) return arc;
+    const width = Math.max(0.02, Math.min(0.035, (arc.end - arc.start) * 0.65));
+    return { ...arc, to: Math.min(1, arc.from + width) };
+  });
 }
 /** Upcoming events live clockwise of the fixed gate; increasing now turns anticlockwise. */
 export function ringAngle(time: number, now: number) {

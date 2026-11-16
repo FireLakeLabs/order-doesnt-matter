@@ -220,9 +220,23 @@ test('short hits stay separated and legible while retaining their actual soundin
   }
   const tiny = displayArcs(cycleArcs([note(10.4, 10.401)], 10))[0];
   expect(tiny.to - tiny.from).toBeCloseTo(0.02);
-  const seam = displayArcs(cycleArcs([note(10.995, 11.001)], 11))[0];
-  expect(seam.to - seam.from).toBeCloseTo(0.02);
-  expect(seam.start).toBeLessThan(0);
+  for (const [start, end] of [
+    [10.9, 11.05],
+    [10.995, 11.001],
+  ]) {
+    for (const cycle of [10, 11]) {
+      const seam = displayArcs(cycleArcs([note(start, end)], cycle))[0];
+      expect(seam.from).toBeGreaterThanOrEqual(0);
+      expect(seam.to).toBeLessThanOrEqual(1);
+      expect(seam.to).toBeGreaterThan(seam.from);
+      expect(seam.start).toBeCloseTo(start - cycle);
+      expect(seam.end).toBeCloseTo(end - cycle);
+      if (cycle === 11) {
+        expect(seam.from).toBe(0);
+        expect(seam.to).toBeCloseTo(end - cycle);
+      }
+    }
+  }
   const held = cycleArcs([note(10, 11), note(10.3, 10.8, '0', false)], 10);
   expect(displayArcs(held)).toEqual(held);
 });

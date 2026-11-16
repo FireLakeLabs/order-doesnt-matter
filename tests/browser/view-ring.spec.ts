@@ -21,6 +21,13 @@ async function frames(page: Page, count = 3) {
     for (let i = 0; i < count; i++) await new Promise(requestAnimationFrame);
   }, count);
 }
+async function startAt(page: Page, cycle: number) {
+  await page.evaluate(async (cycle) => {
+    window.odmStudio.stop();
+    await window.odmStudio.seek(cycle);
+    await window.odmStudio.play();
+  }, cycle);
+}
 async function select(page: Page, name: string) {
   const wide = page.locator('.wide-shelf');
   if (await wide.isVisible())
@@ -160,9 +167,7 @@ test('Ring: real arrangement, changing pixels, themes and disposable lifetime', 
 test('Ring: saturated sounding ink and clean ground beyond the halo', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await prepare(page, await readFile('corpus/programs/real-dubstep-arranged.strudel', 'utf8'));
-  await page.evaluate(async () => {
-    await window.odmStudio.app.play(10.4);
-  });
+  await startAt(page, 10.4);
   await page.waitForFunction(
     () => (window.ringTest.frame?.now ?? 0) >= 10.4 && (window.ringTest.frame?.to ?? 0) >= 15,
   );
@@ -232,9 +237,7 @@ test('Ring visual evidence: five themes and motion', async ({ page }) => {
     width: 1300,
     height: 760,
   }));
-  await page.evaluate(async () => {
-    await window.odmStudio.app.play(10.4);
-  });
+  await startAt(page, 10.4);
   await page.waitForFunction(
     () => (window.ringTest.frame?.now ?? 0) >= 10.4 && (window.ringTest.frame?.to ?? 0) >= 15,
   );
@@ -323,9 +326,7 @@ test('Ring visual evidence: 300-frame CPU measurement', async ({ page }) => {
   test.skip(!process.env.ODM_RING_EVIDENCE, 'Set ODM_RING_EVIDENCE=1 to measure frame cost');
   await page.setViewportSize({ width: 1920, height: 1080 });
   await prepare(page, await readFile('corpus/programs/real-dubstep-arranged.strudel', 'utf8'));
-  await page.evaluate(async () => {
-    await window.odmStudio.app.play(10.4);
-  });
+  await startAt(page, 10.4);
   await page.waitForFunction(
     () => (window.ringTest.frame?.now ?? 0) >= 10.4 && (window.ringTest.frame?.to ?? 0) >= 15,
   );
