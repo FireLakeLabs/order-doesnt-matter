@@ -1,4 +1,6 @@
 import type { CreateEngine, Engine, EngineEvent, OutputTap } from '../contract';
+import { checkLoop, checkSpeed, wrapCycle } from './transport';
+import type { CycleLoop, PlaybackSpeed } from '../contract';
 import { message, Revision, SoundBook } from './logic';
 import { PlaybackNotice, PlaybackOverrun, PREFLIGHT_TIMEOUT } from './playback-limits';
 
@@ -22,6 +24,9 @@ export interface AudioBackend {
   time(): number;
   outputLatency(): number;
   seek(cycle: number): void;
+  setSpeed?(speed: PlaybackSpeed): void;
+  setLoop?(loop: CycleLoop | null): void;
+  silence?(): void;
   tap: OutputTap;
 }
 export type Dispatch = (
@@ -42,6 +47,9 @@ export function engineWith(
   connect: (dispatch: Dispatch, error: (e: unknown) => void, silent: SilentWindow) => void,
   registry = { epoch: 0, trusted: true },
 ): Engine {
+  let saved: { code: string; options: Parameters<Engine['play']>[1] } | undefined;
+  let loop: CycleLoop | null = null;
+  let triggerEpoch = 0;
   let inventory:
     | { scope: object; identity: string; starts: string; values: unknown[]; registry: number }
     | undefined;
@@ -81,13 +89,14 @@ export function engineWith(
   connect(
     async (revision, value, cycle, time, render, instrument) => {
       const token = epoch,
+        generation = triggerEpoch,
         current = books.get(revision);
       if (!enabled || !current) return;
       const ready = await current.observe(value);
-      if (token !== epoch || !enabled) return;
+      if (token !== epoch || generation !== triggerEpoch || !enabled) return;
       try {
         if (ready) await render();
-        if (token !== epoch) return;
+        if (token !== epoch || generation !== triggerEpoch) return;
         emit({
           type: 'trigger',
           value,
@@ -112,17 +121,63 @@ export function engineWith(
     clearInventory();
     enabled = false;
     epoch++;
+    triggerEpoch++;
     audio.stop();
     books.clear();
     emit({ type: 'transport', playing: false });
   }
-  return {
+  async function waitForSwaps(token: number) {
+    let pending: Promise<void>;
+    do {
+      pending = queue;
+      await pending;
+    } while (pending !== queue);
+    return token === epoch;
+  }
+  const engine: Engine = {
+    setSpeed(speed) {
+      checkSpeed(speed);
+      audio.setSpeed?.(speed);
+    },
+    async setLoop(next) {
+      checkLoop(next);
+      const token = epoch;
+      if (!(await waitForSwaps(token))) throw cancelled(token);
+      const copy = next ? { ...next } : null;
+      if (saved && audio.playing()) {
+        await engine.play(saved.code, {
+          ...saved.options,
+          fromCycle: wrapCycle(Math.max(0, audio.now()), copy),
+          loop: copy,
+          discardScheduledAudio: true,
+        });
+      } else {
+        loop = copy;
+        audio.setLoop?.(copy);
+      }
+    },
+    async seek(cycle) {
+      if (!Number.isFinite(cycle) || cycle < 0)
+        throw Error('Seek cycle must be finite and positive');
+      const token = epoch;
+      if (!(await waitForSwaps(token))) return;
+      if (saved && audio.playing())
+        await engine.play(saved.code, {
+          ...saved.options,
+          fromCycle: wrapCycle(cycle, loop),
+          loop,
+          discardScheduledAudio: true,
+        });
+      else audio.seek(wrapCycle(cycle, loop));
+    },
+    silence: () => audio.silence?.(),
     play(code, options = {}) {
       const token = epoch;
       const work = queue.then(async () => {
         try {
           if (options.fromCycle !== undefined && !Number.isFinite(options.fromCycle))
             throw Error('Start cycle must be finite');
+          if (options.loop !== undefined) checkLoop(options.loop);
           await audio.resume();
           if (token !== epoch) throw cancelled(token);
           const from = options.fromCycle ?? (audio.playing() ? Math.max(0, audio.now()) : 0);
@@ -140,8 +195,21 @@ export function engineWith(
             inventory.registry === registryEpoch
               ? inventory.values
               : [];
-          const discovered = await audio.preflight(code, from, reuse.length ? [] : starts);
-          if (token !== epoch) throw cancelled(token);
+          // A loop can wrap before the destination window ends. Check and load
+          // every part of the range, including cycles behind the seek position.
+          const checkingLoop = options.loop === undefined ? loop : options.loop;
+          const discovered = { values: [] as unknown[], discoveryValues: [] as unknown[] };
+          for (let start = checkingLoop?.from ?? from; ; start += 16) {
+            const result = await audio.preflight(
+              code,
+              start,
+              reuse.length || start !== (checkingLoop?.from ?? from) ? [] : starts,
+            );
+            if (token !== epoch) throw cancelled(token);
+            discovered.values.push(...result.values);
+            discovered.discoveryValues.push(...result.discoveryValues);
+            if (!checkingLoop || start + 16 >= checkingLoop.to) break;
+          }
           const staleInventory = () =>
             reuse.length &&
             (generation !== discoveryRevision ||
@@ -179,7 +247,16 @@ export function engineWith(
             throw Error('Section inventory changed during playback preparation');
           }
           const wasPlaying = audio.playing();
-          if (options.fromCycle !== undefined && wasPlaying) audio.stop();
+          if (options.fromCycle !== undefined && wasPlaying) {
+            audio.stop();
+            if (options.discardScheduledAudio) {
+              triggerEpoch++;
+              audio.silence?.();
+              books.clear();
+            }
+          }
+          if (options.loop !== undefined) loop = options.loop ? { ...options.loop } : null;
+          audio.setLoop?.(loop);
           if (!audio.playing()) audio.seek(options.fromCycle ?? 0);
           books.set(revision, next);
           active = revisions.next();
@@ -211,6 +288,7 @@ export function engineWith(
               registry: registryEpoch,
             };
           else clearInventory();
+          saved = { code, options };
           return revision;
         } catch (e) {
           if (e !== overrun?.error) error(e);
@@ -239,6 +317,7 @@ export function engineWith(
     },
     tap: () => audio.tap,
   };
+  return engine;
 }
 export const createEngine: CreateEngine = async () => {
   pageRegistry.epoch++;

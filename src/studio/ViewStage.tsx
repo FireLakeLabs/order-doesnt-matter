@@ -4,16 +4,13 @@ import { Button } from '../components/ui/button';
 import { createBrowserQueries } from '../strudel/evaluate-browser';
 import { views } from '../views';
 import type { ViewTheme } from '../views/types';
-import type { createFrameClock } from './clock';
+import type { StudioClock } from './clock';
 import { buildFrame, neededRange } from './frame';
 import { runtime } from './runtime';
 import { createScoreCache } from './score-cache';
 import { mountView } from './view-lifecycle';
 import { ViewShelf, viewDragType } from './ViewShelf';
 import type { Layout, Stage } from './session';
-
-// The transport wave adds this method; preserve the foundations fallback until then.
-const transport: typeof runtime & { getCps?: () => number } = runtime;
 
 function Drawing({
   viewId,
@@ -27,7 +24,7 @@ function Drawing({
   theme: ViewTheme;
   lookAhead: number;
   trails: 0 | 1 | 2;
-  clock: ReturnType<typeof createFrameClock>;
+  clock: StudioClock;
   metadata: (name: string, tag: string) => void;
 }) {
   const host = useRef<HTMLDivElement>(null);
@@ -68,7 +65,7 @@ function Drawing({
       size = { width: entry.contentRect.width, height: entry.contentRect.height };
     });
     observer.observe(container);
-    const unsubscribe = clock.subscribe((now) => {
+    const unsubscribe = clock.subscribe(({ now, cps, playing }) => {
       if (broken || !mounted.definition || size.width <= 0 || size.height <= 0) return;
       try {
         const { theme, lookAhead, trails } = options.current;
@@ -85,7 +82,8 @@ function Drawing({
             score: cache.score,
             notes: cache.notes,
             now,
-            cps: transport.getCps?.() ?? state.cps ?? 0.5,
+            cps,
+            playing,
             theme,
             lookAhead,
             trails,
@@ -152,7 +150,7 @@ export function ViewStage({
   theme: ViewTheme;
   lookAhead: number;
   trails: 0 | 1 | 2;
-  clock: ReturnType<typeof createFrameClock>;
+  clock: StudioClock;
   filled: boolean;
   onFill: () => void;
   onSelect: (stage: Stage, id: string | null) => void;

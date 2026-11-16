@@ -82,6 +82,11 @@ Fonts are bundled (no network font requests). Mockup: `mockups/Themes.dc.html`.
 
 ## A view is one file
 
+A view's browser test is the shared smoke only, registered with
+`viewSmoke(test, 'view-id')` from `tests/browser/view-smoke.ts`.
+Frame cost and theme sweeps are measured locally with `npm run measure:views`
+and reported in the pull request, never gated.
+
 `src/views/<id>.ts` default-exports a `ViewDefinition`. A registry discovers the
 files, so adding a file adds a view to the shelf. Views never import Strudel,
 the engine, the document or React. The host owns the animation frame, resizing

@@ -16,6 +16,10 @@ const audio = vi.hoisted(() => {
   const listeners = new Set<(e: EngineEvent) => void>();
   const emit = (e: EngineEvent) => listeners.forEach((listener) => listener(e));
   const engine: Engine = {
+    setSpeed() {},
+    async setLoop() {},
+    async seek() {},
+    silence() {},
     async play(code) {
       codes.push(code);
       if (barrier) {
