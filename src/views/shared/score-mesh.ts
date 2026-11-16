@@ -5,7 +5,7 @@ import type { ScoreStrip, LightRange } from './score-geometry';
 export type { ScoreStrip } from './score-geometry';
 
 /** One draw call for a collection of bands, including a whole song's helix. */
-export function createScoreMesh(stage: ThreeStage, helix = false) {
+export function createScoreMesh(stage: Pick<ThreeStage, 'THREE' | 'quality'>, helix = false) {
   const { THREE } = stage;
   const ground = new THREE.Color(),
     highlight = new THREE.Color();

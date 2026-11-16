@@ -1,5 +1,9 @@
-import { createQualityGovernor } from './quality';
+import { createQualityGovernor, createFrameObserver } from './quality';
+
 import type { ViewFrame } from '../types';
+
+// Keep learned machine quality when switching among three.js views.
+const governor = createQualityGovernor();
 
 /** Lazy renderer and selective bloom shared by the three.js views. Scene resources
  * belong to the view; this stage owns the renderer and postprocessing graph. */
@@ -17,7 +21,7 @@ export async function createThreeStage(element: HTMLElement, id: string) {
   renderer.setPixelRatio(1);
   renderer.setSize(1, 1);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  const governor = createQualityGovernor();
+  const observeFrame = createFrameObserver(governor);
   const canvas = renderer.domElement;
   canvas.dataset[id] = '';
   canvas.style.display = 'block';
@@ -73,9 +77,7 @@ export async function createThreeStage(element: HTMLElement, id: string) {
     dpr = 0,
     lost = false,
     disposed = false;
-  let appliedScale = 0,
-    previousStart = 0,
-    previousPlaying = false;
+  let appliedScale = 0;
   function sizeRenderer(cssResized = false) {
     const ratio = dpr * governor.quality.scale;
     renderer.setPixelRatio(ratio);
@@ -161,11 +163,7 @@ export async function createThreeStage(element: HTMLElement, id: string) {
       // cadence includes it; paused/manual draws use only their own CPU cost so
       // a long pause is not mistaken for an expensive frame.
       const cost = performance.now() - started;
-      const interval =
-        previousStart && previousPlaying && frame.playing ? started - previousStart : 0;
-      governor.observe(Math.max(cost, interval), interval || cost);
-      previousStart = started;
-      previousPlaying = frame.playing;
+      observeFrame(started, cost, frame.playing);
     },
     dispose() {
       if (disposed) return;

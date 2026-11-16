@@ -37,10 +37,8 @@ export function scoreGeometry(
   for (const strip of strips) {
     const ink = rgb(strip.colour);
     for (const arc of strip.arcs) {
-      const steps = Math.max(
-        1,
-        Math.ceil((arc.to - arc.from) * Math.min(strip.segments ?? 128, helix ? 64 : 128)),
-      );
+      const perCycle = Math.min(strip.segments ?? 128, helix ? 64 : 128);
+      const steps = Math.max(1, Math.ceil((arc.to - arc.from) * perCycle));
       const firstVertex = positions.length / 3;
       for (let i = 0; i <= steps; i++) {
         const time = strip.cycle + arc.from + ((arc.to - arc.from) * i) / steps;
@@ -64,9 +62,10 @@ export function scoreGeometry(
       }
       for (const lod of lods) {
         const firstIndex = lod.indices.length;
-        for (let i = 0; i < steps; i += lod.stride) {
+        const stride = Math.min(lod.stride, Math.max(1, Math.floor(perCycle / 16)));
+        for (let i = 0; i < steps; i += stride) {
           const a = firstVertex + i * 2,
-            b = firstVertex + Math.min(steps, i + lod.stride) * 2;
+            b = firstVertex + Math.min(steps, i + stride) * 2;
           lod.indices.push(a, b, b + 1, a, b + 1, a + 1);
         }
         if (!strip.track)

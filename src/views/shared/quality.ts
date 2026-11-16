@@ -1,5 +1,5 @@
 /** Cosmetic quality follows observed wall time, never the score clock. A window
- * tolerates individual fast frames amid GPU stalls; slower recovery avoids churn. */
+ * tolerates individual fast frames amid GPU stalls; failed recovery probes back off before trying again. */
 const levels = [
   { scale: 1, bloom: true },
   { scale: 0.75, bloom: true },
@@ -13,7 +13,9 @@ export function createQualityGovernor() {
     duration = 0,
     total = 0,
     samples = 0,
-    headroom = 0;
+    headroom = 0,
+    recoveryDelay = 4000,
+    probing = false;
   return {
     get quality() {
       return levels[level];
@@ -28,15 +30,31 @@ export function createQualityGovernor() {
       if (duration >= 750) {
         const average = total / samples;
         duration = total = samples = 0;
-        if (average > 33 && level < levels.length - 1) {
+        if (average > 36 && level < levels.length - 1) {
+          if (probing) recoveryDelay = Math.min(32000, recoveryDelay * 2);
           level++;
           headroom = 0;
-        }
+        } else if (probing) recoveryDelay = 4000;
+        probing = false;
       }
-      if (headroom >= 4000 && level > 0) {
+      if (headroom >= recoveryDelay && level > 0) {
         level--;
+        probing = true;
         duration = total = samples = headroom = 0;
       }
     },
+  };
+}
+
+/** Each stage observes its own cadence; a shared governor retains machine quality
+ * across mounts without confusing two stages' start times or pause gaps. */
+export function createFrameObserver(governor: ReturnType<typeof createQualityGovernor>) {
+  let previousStart = 0,
+    previousPlaying = false;
+  return (started: number, cost: number, playing: boolean) => {
+    const interval = previousStart && previousPlaying && playing ? started - previousStart : 0;
+    governor.observe(Math.max(cost, interval), interval || cost);
+    previousStart = started;
+    previousPlaying = playing;
   };
 }

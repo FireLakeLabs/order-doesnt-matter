@@ -167,6 +167,21 @@ for (const id of ['ring', 'tunnel', 'coil'])
     };
     const dir = `${process.env.ODM_VIEW_MEASURE_DIR}/responsiveness`;
     await mkdir(dir, { recursive: true });
-    await writeFile(`${dir}/${id}-${mode}.json`, JSON.stringify(result, null, 2));
+    await page.screenshot({ path: `${dir}/${id}-${mode}.png` });
+    const remounted = await page.evaluate(async () => {
+      const el = document.createElement('div');
+      const frame = { ...window.viewProbe.frame!, playing: false };
+      el.style.cssText = `position:fixed;inset:0;width:${frame.width}px;height:${frame.height}px`;
+      document.body.append(el);
+      const handle = await window.viewProbe.definition.mount(el);
+      handle.frame(frame);
+      const learned = { ...el.querySelector('canvas')!.dataset };
+      handle.dispose();
+      el.remove();
+      return learned;
+    });
+    expect(remounted.renderScale).toBe(data.quality.renderScale);
+    expect(remounted.bloom).toBe(data.quality.bloom);
+    await writeFile(`${dir}/${id}-${mode}.json`, JSON.stringify({ ...result, remounted }, null, 2));
     console.log(JSON.stringify(result));
   });

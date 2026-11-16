@@ -36,7 +36,15 @@ test('emission range keeps held notes, onset flashes and fragments, but skips un
   const onset = data.lights[0];
   expect(lightRange(data.lights, 0.8, 1)).toEqual({ start: onset.first, count: onset.count });
   expect(lightRange(data.lights, 15, 0.1)).toEqual({ start: 0, count: 0 });
-  expect(lightRange(data.lights, 10.4, 0.1)).toEqual({ start: middle.first, count: middle.count });
+  const simultaneous = scoreGeometry(
+    [strip, { ...strip, arcs: [{ from: 0, to: 1, start: 0, end: 1, onset: false }] }],
+    true,
+    () => [1, 1, 1],
+  );
+  expect(lightRange(simultaneous.lights, 10.4, 0.1)).toEqual({
+    start: 0,
+    count: simultaneous.indices.length,
+  });
 });
 
 test('every coarser index buffer retains both real endpoints and emission spans', () => {
@@ -53,4 +61,13 @@ test('every coarser index buffer retains both real endpoints and emission spans'
     });
   }
   expect(data.lods[2].indices.length).toBeLessThan(data.lods[0].indices.length / 2);
+});
+
+test('compressed helix occupancy retains at least sixteen chords per cycle', () => {
+  const data = scoreGeometry(
+    [{ ...strip, segments: 24, arcs: [{ from: 0, to: 1, start: 0, end: 1, onset: false }] }],
+    true,
+    () => [1, 1, 1],
+  );
+  expect(data.lods[2].indices.length / 6).toBeGreaterThanOrEqual(16);
 });
