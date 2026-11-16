@@ -1,6 +1,14 @@
-import { mkdtempSync, rmSync, appendFileSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  mkdtempSync,
+  rmSync,
+  appendFileSync,
+  readFileSync,
+  writeFileSync,
+  mkdirSync,
+} from 'node:fs';
 import { spawn } from 'node:child_process';
 import { availableParallelism } from 'node:os';
+import { dirname } from 'node:path';
 import { browserSummary, formatBrowserSummary } from './browser-summary.mjs';
 import { timingResult, formatTiming, BROWSER_WARN_SECONDS } from './timing.mjs';
 import { forwardBrowserSignals } from './browser-process.mjs';
@@ -29,8 +37,10 @@ function phase(name) {
   phaseStart = now;
   const body = JSON.stringify({ phases, wallSeconds: (now - start) / 1000 }, null, 2) + '\n';
   writeFileSync(`${outDir}/command.json`, body);
-  if (process.env.ODM_PROFILE_PATH)
+  if (process.env.ODM_PROFILE_PATH) {
+    mkdirSync(dirname(process.env.ODM_PROFILE_PATH), { recursive: true });
     writeFileSync(`${process.env.ODM_PROFILE_PATH}.command.json`, body);
+  }
 }
 let server;
 try {
