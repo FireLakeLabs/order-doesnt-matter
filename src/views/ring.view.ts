@@ -4,6 +4,7 @@ import {
   bandLayout,
   ghostBand,
   cycleArcs,
+  displayArcs,
   DENSE_AT,
   occupancy,
   sectionAt,
@@ -37,7 +38,7 @@ uniform float now;
 uniform float flashDuration;
 uniform float trail;
 uniform float muted;
-uniform float glow;
+uniform float lightPass;
 uniform float ghost;
 uniform float dense;
 uniform sampler2D occupied;
@@ -53,23 +54,29 @@ void main() {
   }
   if (coverage < 0.001) discard;
   if (ghost > 0.5) {
-    float ahead = vSurface.x + 1.0 - now;
+    if (lightPass > 0.5) discard;
+    float ahead = fract(vSurface.x + 1.0 - now);
     if (ahead <= 0.0 || ahead > 0.5) discard;
-    gl_FragColor = vec4(mix(ground, ink, 0.24 * muted), coverage * (1.0 - ahead * 1.2));
+    gl_FragColor = vec4(ink, coverage * muted * (0.75 - ahead * 0.7));
   } else {
     float age = now - vSurface.x;
-    float brightness = age <= 0.0 ? 0.86 : (trail > 0.0 ? mix(0.3, 1.0, max(0.0, 1.0 - age / trail)) : 0.3);
     float sounding = step(timing.x, now) * (1.0 - step(timing.y, now));
     float flash = timing.z * step(timing.x, now) * max(0.0, 1.0 - (now - timing.x) / flashDuration);
-    flash *= flash;
-    // Short contiguous events retain their complete span, with a bright onset tick.
-    float head = 1.0 - smoothstep(0.008, 0.023, vSurface.x - timing.x);
-    if (timing.y - timing.x <= 0.2 && timing.z > 0.5) brightness *= mix(0.28, 1.0, head);
-    vec3 colour = mix(ground, ink, brightness * muted);
-    colour = mix(colour, highlight, flash * 0.85 * muted);
-    colour *= 1.0 + glow * muted * (sounding * 0.2 + flash * 0.35);
-    float bevel = mix(0.78, 1.0, smoothstep(0.0, 0.10, min(vSurface.y, 1.0-vSurface.y)));
-    gl_FragColor = vec4(mix(ground, colour, vSurface.z * bevel), coverage);
+    // Keep a held arc's flash at its onset near the gate, so short hits retain the emphasis.
+    flash *= flash * (1.0 - smoothstep(0.025, 0.055, vSurface.x - timing.x));
+    if (lightPass > 0.5) {
+      if (sounding + flash < 0.001) discard;
+      gl_FragColor = vec4(ink * muted * max(sounding, flash), coverage);
+    } else {
+      bool shortHit = timing.y - timing.x <= 0.2 && timing.z > 0.5;
+      float brightness = age <= 0.0 ? (shortHit ? 1.0 : 0.7) :
+        (trail > 0.0 ? mix(0.3, 1.0, max(0.0, 1.0 - age / trail)) : 0.3);
+      brightness = max(brightness, sounding);
+      vec3 colour = mix(ground, ink, pow(brightness, 2.2) * muted);
+      colour = mix(colour, highlight, flash * 0.85 * muted);
+      float bevel = mix(0.86, 1.0, smoothstep(0.0, 0.08, min(vSurface.y, 1.0-vSurface.y)));
+      gl_FragColor = vec4(mix(ground, colour, vSurface.z * bevel), coverage);
+    }
   }
   #include <colorspace_fragment>
 }`;
@@ -81,11 +88,12 @@ const view: ViewDefinition = {
   async mount(element) {
     // Both the renderer and its postprocessing graph are loaded only on mount.
     const THREE = await import('three');
-    const [{ EffectComposer }, { RenderPass }, { UnrealBloomPass }, { OutputPass }] =
+    const [{ EffectComposer }, { RenderPass }, { ShaderPass }, { FullScreenQuad }, { OutputPass }] =
       await Promise.all([
         import('three/addons/postprocessing/EffectComposer.js'),
         import('three/addons/postprocessing/RenderPass.js'),
-        import('three/addons/postprocessing/UnrealBloomPass.js'),
+        import('three/addons/postprocessing/ShaderPass.js'),
+        import('three/addons/postprocessing/Pass.js'),
         import('three/addons/postprocessing/OutputPass.js'),
       ]);
     const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -107,39 +115,74 @@ const view: ViewDefinition = {
     root.append(canvas, centre);
     element.append(root);
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 20);
+    const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 20);
     const disc = new THREE.Group();
     scene.add(disc);
     const composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
-    const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.35, 0.22, 0.8);
+    // Selective, finite-support bloom: only sounding notes emit. Its kernel reaches
+    // <6% of the ring radius, and max composition preserves the saturated score ink.
+    const lightA = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
+    const lightB = lightA.clone();
+    const blurStep = new THREE.Vector2();
+    const blurMaterial = new THREE.ShaderMaterial({
+      uniforms: { source: { value: lightA.texture }, stepSize: { value: blurStep } },
+      vertexShader:
+        'varying vec2 uvOut; void main(){uvOut=uv;gl_Position=vec4(position.xy,0.,1.);}',
+      fragmentShader: `
+        uniform sampler2D source; uniform vec2 stepSize; varying vec2 uvOut;
+        void main(){
+          vec3 light=vec3(0.);
+          float total=0.;
+          for(int i=-4;i<=4;i++){
+            float weight=exp(-float(i*i)/5.0);
+            light+=texture2D(source,uvOut+float(i)*stepSize).rgb*weight;
+            total+=weight;
+          }
+          gl_FragColor=vec4(light/total,1.);
+        }`,
+    });
+    const blurQuad = new FullScreenQuad(blurMaterial);
+    const bloom = new ShaderPass(
+      new THREE.ShaderMaterial({
+        uniforms: { tDiffuse: { value: null }, light: { value: lightA.texture } },
+        vertexShader:
+          'varying vec2 uvOut; void main(){uvOut=uv;gl_Position=vec4(position.xy,0.,1.);}',
+        fragmentShader: `
+        uniform sampler2D tDiffuse; uniform sampler2D light; varying vec2 uvOut;
+        void main(){
+          vec4 base=texture2D(tDiffuse,uvOut);
+          gl_FragColor=vec4(max(base.rgb,texture2D(light,uvOut).rgb*0.65),base.a);
+        }`,
+      }),
+    );
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
     // A radial gate belongs to the stationary disc, not the rotating score.
-    const gateGeometry = new THREE.BoxGeometry(0.006, 0.82, 0.009);
+    const gateGeometry = new THREE.BoxGeometry(0.006, 0.56, 0.009);
     const gateMaterial = new THREE.MeshBasicMaterial();
     const gate = new THREE.Mesh(gateGeometry, gateMaterial);
-    gate.position.set(0, 0.65, 0.035);
-    disc.add(gate);
+    gate.position.set(0, 0.52, 0.12);
+    scene.add(gate);
     const beadGeometry = new THREE.SphereGeometry(0.014, 12, 8);
     const bead = new THREE.Mesh(beadGeometry, gateMaterial);
-    bead.position.set(0, 1.06, 0.035);
-    disc.add(bead);
+    bead.position.set(0, 0.83, 0.12);
+    scene.add(bead);
     const tickGeometry = new THREE.BufferGeometry();
     const ticks: number[] = [];
     for (let i = 0; i < 4; i++) {
       const angle = (i * TAU) / 4;
       ticks.push(
+        Math.sin(angle) * 1.0,
+        Math.cos(angle) * 1.0,
+        0,
         Math.sin(angle) * 1.025,
         Math.cos(angle) * 1.025,
-        0,
-        Math.sin(angle) * 1.045,
-        Math.cos(angle) * 1.045,
         0,
       );
     }
     tickGeometry.setAttribute('position', new THREE.Float32BufferAttribute(ticks, 3));
-    const tickMaterial = new THREE.LineBasicMaterial();
+    const tickMaterial = new THREE.LineBasicMaterial({ transparent: true, opacity: 0.65 });
     const quarterTicks = new THREE.LineSegments(tickGeometry, tickMaterial);
     disc.add(quarterTicks);
     const full = [{ from: 0, to: 1, start: 0, end: 1, onset: false }];
@@ -210,7 +253,7 @@ const view: ViewDefinition = {
           flashDuration: { value: 0.075 },
           trail: { value: 0.25 },
           muted: { value: 1 },
-          glow: { value: 1 },
+          lightPass: { value: 0 },
           ghost: { value: ghost ? 1 : 0 },
           dense: { value: 0 },
           occupied: { value: emptyTexture },
@@ -240,7 +283,7 @@ const view: ViewDefinition = {
       layer.texture?.dispose();
       layer.texture = undefined;
       const dense = arcs.length >= DENSE_AT;
-      layer.mesh.geometry = dense ? unitGeometry : geometry(arcs);
+      layer.mesh.geometry = dense ? unitGeometry : geometry(displayArcs(arcs));
       layer.material.uniforms.dense.value = dense ? 1 : 0;
       if (dense) {
         layer.texture = new THREE.DataTexture(
@@ -294,7 +337,8 @@ const view: ViewDefinition = {
           dpr = frame.dpr;
           renderer.setPixelRatio(dpr);
           renderer.setSize(width, height);
-          // UnrealBloomPass downsamples its light buffers; keep the scene at native resolution.
+          lightA.setSize(Math.ceil((width * dpr) / 2), Math.ceil((height * dpr) / 2));
+          lightB.setSize(Math.ceil((width * dpr) / 2), Math.ceil((height * dpr) / 2));
           composer.setPixelRatio(dpr);
           composer.setSize(width, height);
           camera.aspect = width / height;
@@ -347,7 +391,7 @@ const view: ViewDefinition = {
           renderer.setClearColor(theme.ground);
           scene.background = new THREE.Color(theme.ground);
           gateMaterial.color.set(theme.text);
-          tickMaterial.color.set(theme.muted);
+          tickMaterial.color.set(theme.text);
           count.style.fontFamily = `"${theme.fontDisplay}", sans-serif`;
           section.style.fontFamily = `"${theme.fontMono}", monospace`;
           count.style.color = theme.text;
@@ -367,11 +411,11 @@ const view: ViewDefinition = {
         camera.position.set(
           0,
           Math.sin(frame.now / 48) * 0.08,
-          (1 / (0.84 * Math.tan((35 * Math.PI) / 360))) * Math.max(1, height / width),
+          (1 / (0.84 * Math.tan((48 * Math.PI) / 360))) * Math.max(1, height / width),
         );
         camera.lookAt(0, 0, 0);
         quarterTicks.rotation.z = -ringAngle(cycle, frame.now);
-        disc.rotation.x = ((18 + Math.sin(frame.now / 64) * 2) * Math.PI) / 180;
+        disc.rotation.x = -((18 + Math.sin(frame.now / 64) * 2) * Math.PI) / 180;
         const easedBands = [...layout.values()].map((target) => {
           const before = previous.get(target.id) ?? target;
           return {
@@ -389,7 +433,7 @@ const view: ViewDefinition = {
           const ghost = ghostBand(target, easedBands, size * 0.42);
           band.track.scale.set(radius, radius, 1);
           band.track.material.color.set(target.resting ? theme.muted : theme.line);
-          band.track.material.opacity = target.resting ? 0.32 : 0.55;
+          band.track.material.opacity = target.resting ? 0.32 : 0.24;
           band.current.mesh.visible = !target.resting;
           band.next.mesh.visible = ghost.width > 0;
           for (const layer of [band.current, band.next]) {
@@ -401,14 +445,41 @@ const view: ViewDefinition = {
             u.flashDuration.value = Math.max(0.00001, frame.cps * 0.15);
             u.trail.value = trailDuration(frame.trails);
             u.muted.value = instrument.muted ? 0.23 : 1;
-            u.glow.value = theme.glow ? 1 : 0;
+            u.lightPass.value = 0;
             layer.ink.set(instrument.colour);
             layer.ground.set(theme.ground);
             layer.highlight.set(theme.text);
           }
         }
         if (theme.glow) {
-          // The composer renders the scene and adds the downsampled light buffers.
+          const background = scene.background;
+          scene.background = new THREE.Color(0);
+          gate.visible = bead.visible = quarterTicks.visible = false;
+          for (const band of bands) {
+            band.track.visible = false;
+            band.current.material.uniforms.lightPass.value = 1;
+            band.next.material.uniforms.lightPass.value = 1;
+          }
+          renderer.setRenderTarget(lightA);
+          renderer.render(scene, camera);
+          // Two bounded Gaussian passes, with a diagonal support of 5% radius.
+          const support = size * 0.42 * 0.035;
+          blurMaterial.uniforms.source.value = lightA.texture;
+          blurStep.set(support / (4 * width), 0);
+          renderer.setRenderTarget(lightB);
+          blurQuad.render(renderer);
+          blurMaterial.uniforms.source.value = lightB.texture;
+          blurStep.set(0, support / (4 * height));
+          renderer.setRenderTarget(lightA);
+          blurQuad.render(renderer);
+          renderer.setRenderTarget(null);
+          scene.background = background;
+          gate.visible = bead.visible = quarterTicks.visible = true;
+          for (const band of bands) {
+            band.track.visible = true;
+            band.current.material.uniforms.lightPass.value = 0;
+            band.next.material.uniforms.lightPass.value = 0;
+          }
           composer.render();
         } else renderer.render(scene, camera);
       },
@@ -423,6 +494,10 @@ const view: ViewDefinition = {
         tickMaterial.dispose();
         for (const pass of composer.passes) pass.dispose();
         composer.dispose();
+        lightA.dispose();
+        lightB.dispose();
+        blurMaterial.dispose();
+        blurQuad.dispose();
         renderer.dispose();
         renderer.forceContextLoss();
         root.remove();

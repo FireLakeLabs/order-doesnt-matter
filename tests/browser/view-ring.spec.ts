@@ -157,6 +157,70 @@ test('Ring: real arrangement, changing pixels, themes and disposable lifetime', 
   expect(errors).toEqual([]);
 });
 
+test('Ring: saturated sounding ink and clean ground beyond the halo', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await prepare(page, await readFile('corpus/programs/real-dubstep-arranged.strudel', 'utf8'));
+  await page.evaluate(async () => {
+    await window.odmStudio.app.play(10.4);
+  });
+  await page.waitForFunction(
+    () => (window.ringTest.frame?.now ?? 0) >= 10.4 && (window.ringTest.frame?.to ?? 0) >= 15,
+  );
+  await page.evaluate(() => {
+    window.odmStudio.pause();
+  });
+  const result = await page.evaluate(async () => {
+    const frame = { ...window.ringTest.frame!, now: 10.4, width: 1300, height: 760, dpr: 1 };
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;inset:0;width:1300px;height:760px;z-index:9999';
+    document.body.append(el);
+    const handle = await window.ringTest.definition!.mount(el);
+    handle.frame(frame);
+    const copy = document.createElement('canvas');
+    copy.width = 1300;
+    copy.height = 760;
+    const context = copy.getContext('2d')!;
+    context.drawImage(el.querySelector('canvas')!, 0, 0);
+    const pixels = context.getImageData(0, 0, 1300, 760).data;
+    const at = (x: number, y: number) => [
+      ...pixels.slice((y * 1300 + x) * 4, (y * 1300 + x) * 4 + 3),
+    ];
+    const rgb = (hex: string) =>
+      [1, 3, 5].map((offset) => parseInt(hex.slice(offset, offset + 2), 16));
+    const ground = rgb(frame.theme.ground);
+    let outsideError = 0;
+    for (let y = 0; y < 760; y += 8)
+      for (let x = 0; x < 1300; x += 8) {
+        // The projected playing bands end within 321 px; allow another 12% of the 319.2 px radius.
+        if (Math.hypot(x - 650, y - 380) <= 360) continue;
+        outsideError = Math.max(
+          outsideError,
+          ...at(x, y).map((channel, i) => Math.abs(channel - ground[i])),
+        );
+      }
+    const colours = [
+      {
+        actual: at(700, 145),
+        expected: rgb(frame.instruments.find((i) => i.name === 'wobbleBass')!.colour),
+      },
+      {
+        actual: at(700, 180),
+        expected: rgb(frame.instruments.find((i) => i.name === 'subBass')!.colour),
+      },
+    ];
+    handle.dispose();
+    el.remove();
+    return { outsideError, colours, halo: at(954, 380) };
+  });
+  expect(result.halo[1]).toBeGreaterThan(20);
+  expect(result.halo[1]).toBeGreaterThan(result.halo[0] * 1.3);
+  expect(result.outsideError).toBeLessThanOrEqual(1);
+  for (const colour of result.colours)
+    expect(
+      Math.max(...colour.actual.map((channel, i) => Math.abs(channel - colour.expected[i]))),
+    ).toBeLessThanOrEqual(2);
+});
+
 // Evidence is opt-in: the normal suite checks playback/lifetime without writing screenshots.
 test('Ring visual evidence: five themes and motion', async ({ page }) => {
   test.skip(!process.env.ODM_RING_EVIDENCE, 'Set ODM_RING_EVIDENCE=1 to capture visual evidence');

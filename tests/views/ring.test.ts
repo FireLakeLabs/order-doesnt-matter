@@ -5,6 +5,7 @@ import {
   bandLayout,
   ghostBand,
   cycleArcs,
+  displayArcs,
   occupancy,
   ringAngle,
   sectionEase,
@@ -201,4 +202,27 @@ test('upcoming ghosts remain between adjacent bands even with twenty playing ins
         );
     }
   }
+});
+
+test('short hits stay separated and legible while retaining their actual sounding times', () => {
+  const ticks = displayArcs(
+    cycleArcs(
+      Array.from({ length: 8 }, (_, i) => note(10 + i / 8, 10 + (i + 1) / 8)),
+      10,
+    ),
+  );
+  expect(ticks).toHaveLength(8);
+  for (const [index, tick] of ticks.entries()) {
+    expect(tick.to - tick.from).toBeGreaterThanOrEqual(0.02 - 1e-10);
+    expect(tick.to).toBeLessThan(tick.end);
+    expect(tick.start).toBe(index / 8);
+    expect(tick.end).toBe((index + 1) / 8);
+  }
+  const tiny = displayArcs(cycleArcs([note(10.4, 10.401)], 10))[0];
+  expect(tiny.to - tiny.from).toBeCloseTo(0.02);
+  const seam = displayArcs(cycleArcs([note(10.995, 11.001)], 11))[0];
+  expect(seam.to - seam.from).toBeCloseTo(0.02);
+  expect(seam.start).toBeLessThan(0);
+  const held = cycleArcs([note(10, 11), note(10.3, 10.8, '0', false)], 10);
+  expect(displayArcs(held)).toEqual(held);
 });
