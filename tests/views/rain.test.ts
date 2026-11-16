@@ -38,6 +38,9 @@ const frame = (count = 6): ViewFrame => ({
     sounding: true,
     inSection: true,
     muted: false,
+    settings: [],
+    rewrites: [],
+    room: null,
   })),
   theme: {
     name: 'arcade',
