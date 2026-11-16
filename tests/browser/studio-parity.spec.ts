@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { appSignal } from './helpers';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import packageJson from '../../package.json' with { type: 'json' };
 const { dependencies } = packageJson;
@@ -253,7 +254,8 @@ test('Practice teaches real Studio controls and restores the mounted draft, hist
   await pictures(page, 'help');
   await page.getByRole('button', { name: 'Start practice', exact: true }).click();
   const guide = page.getByRole('complementary', { name: 'Guided practice' });
-  await expect(guide).toContainText('Make it move', { timeout: 7000 });
+  await appSignal(page, () => !!document.querySelector('[data-practice-ready="true"]'));
+  await expect(guide).toContainText('Make it move');
   await pictures(page, 'practice');
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect(guide).toContainText('Take it slow');
@@ -317,7 +319,8 @@ test('Practice teaches real Studio controls and restores the mounted draft, hist
   await expect(input).toHaveValue('// my unfinished draft');
   await page.getByRole('button', { name: 'Help', exact: true }).click();
   await page.getByRole('button', { name: 'Start practice', exact: true }).click();
-  await expect(guide).toBeVisible();
+  await appSignal(page, () => !!document.querySelector('[data-practice-ready="true"]'));
+  await expect(guide).toContainText('Make it move');
   await page.getByRole('button', { name: 'End practice', exact: true }).click();
   await expect(input).toHaveValue('// my unfinished draft');
   // Cancel precisely while Studio awaits loop setup, then release that work.
@@ -388,7 +391,8 @@ test('Practice teaches real Studio controls and restores the mounted draft, hist
   });
   await page.getByRole('button', { name: 'Help', exact: true }).click();
   await page.getByRole('button', { name: 'Start practice', exact: true }).click();
-  await expect(guide).toBeVisible();
+  await appSignal(page, () => !!document.querySelector('[data-practice-ready="true"]'));
+  await expect(guide).toContainText('Make it move');
   for (let step = 0; step < 5; step++)
     await guide.getByRole('button', { name: 'Skip step', exact: true }).click();
   await page

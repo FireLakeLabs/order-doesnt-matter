@@ -124,7 +124,11 @@ export function Help() {
         </DialogContent>
       </Dialog>
       {state.active && (
-        <aside className="practice-guide" aria-label="Guided practice">
+        <aside
+          className="practice-guide"
+          aria-label="Guided practice"
+          data-practice-ready={state.active}
+        >
           <header>
             <span>PLAYTIME · {state.step + 1} / 6</span>
             <Button
