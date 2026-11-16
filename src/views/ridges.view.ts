@@ -71,8 +71,8 @@ void main(){
     vec3 base=mix(ground,panel,.85*vFade);
     float pigment=(.025+wash*(.14+played*.20+gate*.35))*vFade*vMark.w;
     vec3 colour=mix(base,terrain,pigment);
-    if(flatInk>.5)colour=mix(ground,mix(panel,terrainInk,paper*.32),(.45+.45*vFade));
-    if(paper>.5)colour=mix(ground,terrainInk,.12+.12*vFade+vMark.z*.12);
+    if(flatInk>.5)colour=mix(ground,mix(panel,terrainInk,paper*.32),(.45+.45*vFade)*vMark.w);
+    if(paper>.5)colour=mix(ground,terrainInk,(.12+.12*vFade+vMark.z*.12)*vMark.w);
     colour=mix(colour,ground,foreground*.85);
     if(lightPass>.5)colour=terrain*wash*(played*.17+gate*.38)*vFade*vMark.w;
     gl_FragColor=vec4(colour,1.);

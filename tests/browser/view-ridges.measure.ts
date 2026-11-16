@@ -107,3 +107,43 @@ test('ridges: host window refresh during playback', async ({ page }) => {
   );
   await page.screenshot({ path: `${path}/window-refresh.png` });
 });
+
+// Face pigment, as well as the crest, must dim when the terrain instrument is muted.
+test('ridges: flat ink faces preserve muted state', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await prepare(page, 'ridges');
+  await page.evaluate(async () => {
+    await window.odmStudio.seek(10.4);
+    await window.odmStudio.play();
+  });
+  await page.waitForFunction(() => (window.viewProbe.frame?.now ?? 0) >= 10.4);
+  await page.evaluate(() => window.odmStudio.pause());
+  for (const theme of ['riso', 'pocket']) {
+    await page.getByRole('button', { name: `Theme ${theme}`, exact: true }).click();
+    await page.waitForFunction((theme) => window.viewProbe.frame?.theme.name === theme, theme);
+    const sample = await page.evaluate(async () => {
+      const frame = { ...window.viewProbe.frame!, now: 10.4, width: 1300, height: 760, dpr: 1 };
+      const el = document.createElement('div');
+      document.body.append(el);
+      const handle = await window.viewProbe.definition.mount(el);
+      const copy = document.createElement('canvas');
+      copy.width = 1300;
+      copy.height = 760;
+      const context = copy.getContext('2d')!;
+      const draw = (muted: boolean) => {
+        handle.frame({ ...frame, instruments: frame.instruments.map((i) => ({ ...i, muted })) });
+        context.drawImage(el.querySelector('canvas')!, 0, 0, 1300, 760);
+        return [...context.getImageData(80, 700, 1, 1).data].slice(0, 3);
+      };
+      const live = draw(false),
+        quiet = draw(true);
+      handle.dispose();
+      el.remove();
+      return { live, quiet, ground: frame.theme.ground };
+    });
+    const ground = [1, 3, 5].map((i) => parseInt(sample.ground.slice(i, i + 2), 16));
+    const pigment = (colour: number[]) =>
+      colour.reduce((sum, n, i) => sum + (n - ground[i]) ** 2, 0);
+    expect(pigment(sample.quiet)).toBeLessThan(pigment(sample.live));
+  }
+});
