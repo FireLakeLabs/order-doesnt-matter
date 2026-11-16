@@ -62,6 +62,8 @@ export function viewSmoke(test: typeof import('@playwright/test').test, id: stri
     await choose(id);
     await page.getByRole('button', { name: 'Theme riso', exact: true }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'riso');
+    // Wait for the new theme to be presented before checking draw errors.
+    await canvas.screenshot();
     await ready();
     expect(errors).toEqual([]);
   });
