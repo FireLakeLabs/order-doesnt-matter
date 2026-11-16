@@ -60,7 +60,9 @@ export async function openProgram(
 export async function play(page: Page) {
   return test.step('ODM:playback', async () => {
     await swap(page, () => page.getByRole('button', { name: 'Play', exact: true }).click());
-    await appSignal(page, () => window.odmApp.canPlay && window.odmApp.state.playing);
+    await appSignal(page, function playbackReady() {
+      return window.odmApp.canPlay && window.odmApp.state.playing;
+    });
     await expect(page.locator('#message')).toBeEmpty();
   });
 }
@@ -68,21 +70,23 @@ export async function play(page: Page) {
 // Signal waits share the enclosing test's deadline, rather than an unrelated 5 s
 // assertion budget. No global timeouts or retries; a stuck engine fails the test.
 export async function appSignal<A>(page: Page, predicate: (arg: A) => unknown, arg?: A) {
-  return test.step('ODM:observation', async () => {
-    const handle = await page.waitForFunction(predicate as (arg: unknown) => unknown, arg, {
-      timeout: 0,
-    });
-    await handle.dispose();
-  });
+  // Preserve the timing reporter's phase title; name the signal in its child step.
+  return test.step('ODM:observation', () =>
+    test.step(`Wait for ${predicate.name || predicate.toString()}`, async () => {
+      const handle = await page.waitForFunction(predicate as (arg: unknown) => unknown, arg, {
+        timeout: 0,
+      });
+      await handle.dispose();
+    }));
 }
 export async function scoreReady(page: Page) {
   return test.step('ODM:import', async () => {
-    await appSignal(
-      page,
-      () =>
+    await appSignal(page, function scoreRowsReady() {
+      return (
         window.odmApp.canPlay &&
-        Object.keys(window.odmApp.state.events).length === window.odmApp.state.rows.length,
-    );
+        Object.keys(window.odmApp.state.events).length === window.odmApp.state.rows.length
+      );
+    });
   });
 }
 export async function swap(page: Page, action: () => Promise<unknown>) {
@@ -97,8 +101,9 @@ export async function swap(page: Page, action: () => Promise<unknown>) {
     await appSignal(
       page,
       // History is capped: an older swap can disappear while this one arrives.
-      (revision) =>
-        window.odmApp.history.some((e) => e.type === 'swapped' && e.revision > revision),
+      function newerRevisionTriggered(revision) {
+        return window.odmApp.history.some((e) => e.type === 'swapped' && e.revision > revision);
+      },
       before,
     );
   });
@@ -106,7 +111,9 @@ export async function swap(page: Page, action: () => Promise<unknown>) {
 export async function throughCycle(page: Page, cycle: number) {
   await appSignal(
     page,
-    (c) => window.odmApp.history.some((e) => e.type === 'trigger' && e.cycle >= c),
+    function cycleTriggered(c) {
+      return window.odmApp.history.some((e) => e.type === 'trigger' && e.cycle >= c);
+    },
     cycle,
   );
 }
@@ -201,9 +208,11 @@ export async function selectNode(
 }
 export async function waitForPending(page: Page) {
   return test.step('ODM:swap', async () => {
-    await appSignal(page, () =>
-      Object.values(window.odmApp.editor!.state.entries).every((e) => e.status !== 'pending'),
-    );
+    await appSignal(page, function editorEntriesSettled() {
+      return Object.values(window.odmApp.editor!.state.entries).every(
+        (e) => e.status !== 'pending',
+      );
+    });
     await scoreReady(page);
     await expect(page.locator('#editor-status')).not.toContainText('Change failed');
   });
@@ -225,6 +234,7 @@ export function signal<T>(read: () => T | Promise<T>, options: { timeout?: numbe
   const info = test.info();
   return expect.poll(read, {
     timeout: info.timeout,
+    message: `Wait for ${read.name || read.toString()}`,
     ...options,
   });
 }
@@ -302,7 +312,7 @@ export function sharedProgram<T>(setup: (page: Page) => Promise<T>) {
     expect(restored, 'shared piece must restore its exact original document').toBe(baseline.doc);
     await appSignal(
       page,
-      ({ events, context }) => {
+      function sharedContextRestored({ events, context }) {
         const state = window.odmApp.state;
         return (
           JSON.stringify(state.events) === events &&

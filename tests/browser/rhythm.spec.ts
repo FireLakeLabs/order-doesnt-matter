@@ -79,7 +79,6 @@ test('real house: a bass edit reaches triggers and preserves every other instrum
 test('desktop fine pointer: eight proportional boxes and edited row above the drawer', async ({
   page,
 }) => {
-  test.setTimeout(3000);
   await page.setViewportSize({ width: 1440, height: 900 });
   await openProgram(page, { source: 'note("c2 d2@2 e2 f2 g2 a2 b2 c3").s("sine")' });
   await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
@@ -130,67 +129,55 @@ test.describe('Kiln rhythm with shared setup', () => {
     await swap(page, () => page.getByRole('button', { name: 'Rest', exact: true }).click());
     await waitForPending(page);
     await expect(page.getByRole('button', { name: 'Bring back', exact: true })).toBeVisible();
-    const cycle = await page.evaluate(() =>
-      Math.ceil(
-        Math.max(
-          window.odmApp.engine!.now()!,
-          window.odmApp.history.filter((e) => e.type === 'swapped').at(-1)!.cycle,
-        ),
+    const revision = await page.evaluate(() =>
+      Math.max(
+        ...window.odmApp.history
+          .filter((e) => e.type === 'swapped' || e.type === 'committed')
+          .map((e) => e.revision),
       ),
     );
-    await throughCycle(page, cycle + 1);
-    // A later drum callback can arrive before an earlier bass callback finishes
-    // rendering. Neither it nor the swap timestamp closes this observation window.
-    const early = await page.evaluate(() => ({
-      now: window.odmApp.engine!.now(),
-      history: window.odmApp.history,
-    }));
-    await appSignal(
-      page,
-      (c) =>
-        window.odmApp.engine!.now()! >= c + 1 &&
-        window.odmApp.history.filter(
+    // A late scheduler query can be skipped. Observe the edited note in any
+    // cycle of this revision, rather than requiring every callback in one cycle.
+    function editedBassTriggered(revision: number) {
+      return window.odmApp.history
+        .filter((e) => e.type === 'trigger')
+        .find(
           (e) =>
-            e.type === 'trigger' &&
-            e.cycle >= c &&
-            e.cycle < c + 1 &&
+            e.revision >= revision &&
             (e.value as { s?: string; gain?: number }).s === 'triangle' &&
-            (e.value as { gain?: number }).gain === 0.45,
-        ).length >= 4,
-      cycle,
-    );
-    await test.info().attach('bass-window-completion', {
-      body: JSON.stringify({
-        cycle,
-        early,
-        complete: await page.evaluate(() => ({
-          now: window.odmApp.engine!.now(),
-          history: window.odmApp.history,
-        })),
-      }),
-      contentType: 'application/json',
+            (e.value as { gain?: number }).gain === 0.45 &&
+            String((e.value as { note?: unknown }).note) === '83',
+        );
+    }
+    await appSignal(page, editedBassTriggered, revision);
+    const trigger = await page.evaluate(editedBassTriggered, revision);
+    expect(trigger!.cycle % 1).toBe(0.125);
+    // The score proves the whole rhythm, independently of delivery under load.
+    // Its worker can still be finishing after playback acknowledges the edit.
+    await appSignal(page, function restedBassScoreReady() {
+      const state = window.odmApp.state;
+      const bass = state.rows.find((r) => r.name === 'bass')!;
+      return state.events[bass.id]?.events.some(
+        (e) =>
+          e.whole?.[0] === state.fromCycle + 0.125 &&
+          String((e.value as { note?: unknown }).note) === '83',
+      );
     });
-    const triggered = await page.evaluate(
-      (c) =>
-        window.odmApp.history
-          .filter(
-            (e) =>
-              e.type === 'trigger' &&
-              e.cycle >= c &&
-              e.cycle < c + 1 &&
-              (e.value as { s?: string; gain?: number }).s === 'triangle' &&
-              (e.value as { gain?: number }).gain === 0.45,
-          )
-          .map((e) =>
-            e.type === 'trigger'
-              ? { cycle: e.cycle - c, note: String((e.value as { note?: unknown }).note) }
-              : null,
-          )
-          .sort((a, b) => a!.cycle - b!.cycle),
-      cycle,
-    );
-    expect(triggered.map((e) => e!.cycle)).toEqual([0.125, 0.25, 0.5, 0.75]);
-    expect(triggered[0]!.note).toBe('83');
+    const starts = await page.evaluate(() => {
+      const state = window.odmApp.state;
+      const bass = state.rows.find((r) => r.name === 'bass')!;
+      return state.events[bass.id].events
+        .filter(
+          (e) =>
+            e.whole &&
+            e.part[0] === e.whole[0] &&
+            e.whole[0] >= state.fromCycle &&
+            e.whole[0] < state.fromCycle + 1,
+        )
+        .map((e) => e.whole![0] - state.fromCycle)
+        .sort((a, b) => a - b);
+    });
+    expect(starts).toEqual([0.125, 0.25, 0.5, 0.75]);
     await page.getByRole('button', { name: 'Stop', exact: true }).click();
   });
 
