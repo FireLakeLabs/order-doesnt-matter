@@ -90,7 +90,10 @@ export function instrumentDetails(doc: Doc | null): Map<string, InstrumentDetail
       else
         rewrites.push({
           nodeId: use.nodeId,
-          name: target.control,
+          name:
+            target.node && 'name' in target.node && typeof target.node.name === 'string'
+              ? target.node.name
+              : 'Source text',
           label: use.text.replace(/^in .*?: /, ''),
           source: target.kind === 'source',
           sectionId: target.section?.id,
@@ -160,7 +163,9 @@ export function instrumentFacts(doc: Doc | null): Map<string, Facts> {
           : 1;
     facts.set(id, {
       settings: [...settings.values()],
-      rewrites: details.rewrites.map((rewrite) => rewrite.label),
+      rewrites: details.rewrites
+        .filter((rewrite) => !rewrite.source)
+        .map((rewrite) => rewrite.label),
       room,
     });
   }

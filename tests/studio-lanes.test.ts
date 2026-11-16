@@ -163,5 +163,20 @@ test('views and tray use the same setting inventory, labels and ordered rewrites
       .filter((rewrite) => !rewrite.sectionId || rewrite.sectionId === model.sections[0].nodeId)
       .map((rewrite) => rewrite.label),
   );
+  expect(row.rewrites.map((rewrite) => rewrite.name)).toEqual(['fast', 'rev']);
   expect(facts.rewrites).toEqual(details.rewrites.map((rewrite) => rewrite.label));
+});
+
+test('opaque use-site layers remain editable source without becoming overview labels', () => {
+  const doc = importStrudel('const part = s("bd").fast(2); arrange([4, part.log()])').doc;
+  const model = scoreModel({ doc, events: {}, sounds: [], fromCycle: 0, toCycle: 4, playhead: 0 });
+  const row = model.rows[0];
+  expect(row.rewrites).toContainEqual(
+    expect.objectContaining({
+      name: 'Source text',
+      summary: expect.stringContaining('log()'),
+      source: true,
+    }),
+  );
+  expect(instrumentFacts(doc).get(row.id)!.rewrites).toEqual(['fast 2']);
 });
