@@ -91,6 +91,7 @@ test('ridges: host window refresh during playback', async ({ page }) => {
     };
   };
   const path = `${process.env.ODM_VIEW_MEASURE_DIR}/ridges`;
+  await mkdir(path, { recursive: true });
   await writeFile(
     `${path}/window-refresh.json`,
     JSON.stringify(
