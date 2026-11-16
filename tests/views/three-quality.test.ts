@@ -79,3 +79,18 @@ test('pause and resume gaps do not masquerade as GPU backpressure', () => {
   nextStage(1, 1, true);
   expect(governor.quality).toBe(learned);
 });
+
+test('software mounts start conservatively and remounts retain measured quality', () => {
+  const governor = createQualityGovernor();
+  governor.classifyRenderer('ANGLE (Google, SwiftShader Device (Subzero))');
+  expect(governor.quality).toEqual({ scale: 0.25, bloom: false });
+  for (let i = 0; i < 3; i++) governor.observe(100, 250);
+  expect(governor.quality.scale).toBe(0.175);
+  governor.classifyRenderer('ANGLE (Google, SwiftShader Device (Subzero))');
+  expect(governor.quality.scale).toBe(0.175);
+  for (let i = 0; i < 250; i++) governor.observe(16, 16);
+  expect(governor.quality.scale).toBe(0.25);
+  const hardware = createQualityGovernor();
+  hardware.classifyRenderer('ANGLE (AMD, Vulkan, RADV REMBRANDT)');
+  expect(hardware.quality).toEqual({ scale: 1, bloom: true });
+});

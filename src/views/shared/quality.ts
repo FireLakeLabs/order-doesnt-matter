@@ -15,10 +15,18 @@ export function createQualityGovernor() {
     samples = 0,
     headroom = 0,
     recoveryDelay = 4000,
-    probing = false;
+    probing = false,
+    rendererKnown = false;
   return {
     get quality() {
       return levels[level];
+    },
+    // CPU WebGL has no hardware rasterizer. Avoid expensive full-quality
+    // paused mounts before cadence samples exist; measured headroom can recover.
+    classifyRenderer(name: string) {
+      if (rendererKnown) return;
+      rendererKnown = true;
+      if (/swiftshader|llvmpipe|software/i.test(name)) level = 4;
     },
     observe(frameMs: number, elapsedMs: number) {
       const elapsed = Math.min(250, Math.max(1, elapsedMs));
