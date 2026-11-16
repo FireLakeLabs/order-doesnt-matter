@@ -1,3 +1,4 @@
+import { createQualityGovernor } from './quality';
 import type { ViewFrame } from '../types';
 
 /** Lazy renderer and selective bloom shared by the three.js views. Scene resources
@@ -16,6 +17,7 @@ export async function createThreeStage(element: HTMLElement, id: string) {
   renderer.setPixelRatio(1);
   renderer.setSize(1, 1);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
+  const governor = createQualityGovernor();
   const canvas = renderer.domElement;
   canvas.dataset[id] = '';
   canvas.style.display = 'block';
@@ -71,6 +73,20 @@ export async function createThreeStage(element: HTMLElement, id: string) {
     dpr = 0,
     lost = false,
     disposed = false;
+  let appliedScale = 0,
+    previousStart = 0,
+    previousPlaying = false;
+  function sizeRenderer(cssResized = false) {
+    const ratio = dpr * governor.quality.scale;
+    renderer.setPixelRatio(ratio);
+    if (cssResized) renderer.setSize(width, height);
+    lightA.setSize(Math.ceil((width * ratio) / 2), Math.ceil((height * ratio) / 2));
+    lightB.setSize(Math.ceil((width * ratio) / 2), Math.ceil((height * ratio) / 2));
+    composer.setPixelRatio(ratio);
+    if (cssResized) composer.setSize(width, height);
+    appliedScale = governor.quality.scale;
+    canvas.dataset.renderScale = String(appliedScale);
+  }
   const fallback = document.createElement('div');
   fallback.setAttribute('role', 'alert');
   fallback.style.cssText =
@@ -90,6 +106,9 @@ export async function createThreeStage(element: HTMLElement, id: string) {
     root,
     scene,
     camera,
+    get quality() {
+      return governor.quality;
+    },
     resize(frame: ViewFrame) {
       if (disposed || frame.width <= 0 || frame.height <= 0) return false;
       const resized = width !== frame.width || height !== frame.height || dpr !== frame.dpr;
@@ -97,12 +116,7 @@ export async function createThreeStage(element: HTMLElement, id: string) {
         width = frame.width;
         height = frame.height;
         dpr = frame.dpr;
-        renderer.setPixelRatio(dpr);
-        renderer.setSize(width, height);
-        lightA.setSize(Math.ceil((width * dpr) / 2), Math.ceil((height * dpr) / 2));
-        lightB.setSize(Math.ceil((width * dpr) / 2), Math.ceil((height * dpr) / 2));
-        composer.setPixelRatio(dpr);
-        composer.setSize(width, height);
+        sizeRenderer(true);
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
       }
@@ -116,9 +130,13 @@ export async function createThreeStage(element: HTMLElement, id: string) {
     },
     render(frame: ViewFrame, emission: (enabled: boolean) => void) {
       if (lost || disposed) return;
+      const started = performance.now();
+      if (appliedScale !== governor.quality.scale) sizeRenderer();
       const theme = frame.theme;
       const size = Math.min(width, height);
-      if (theme.glow) {
+      const glow = theme.glow && governor.quality.bloom;
+      if (canvas.dataset.bloom !== String(glow)) canvas.dataset.bloom = String(glow);
+      if (glow) {
         const background = scene.background;
         scene.background = black;
         emission(true);
@@ -139,6 +157,15 @@ export async function createThreeStage(element: HTMLElement, id: string) {
         emission(false);
         composer.render();
       } else renderer.render(scene, camera);
+      // Submission alone misses GPU/compositor backpressure. Continuous playback
+      // cadence includes it; paused/manual draws use only their own CPU cost so
+      // a long pause is not mistaken for an expensive frame.
+      const cost = performance.now() - started;
+      const interval =
+        previousStart && previousPlaying && frame.playing ? started - previousStart : 0;
+      governor.observe(Math.max(cost, interval), interval || cost);
+      previousStart = started;
+      previousPlaying = frame.playing;
     },
     dispose() {
       if (disposed) return;

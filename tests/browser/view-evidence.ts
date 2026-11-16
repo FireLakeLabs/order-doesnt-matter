@@ -19,7 +19,7 @@ async function presented(page: Page) {
     for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
   });
 }
-async function prepare(page: Page, id: string, file = 'real-dubstep-arranged') {
+export async function prepare(page: Page, id: string, file = 'real-dubstep-arranged') {
   await page.context().route('https://raw.githubusercontent.com/**', (route) => {
     const bank: Record<string, unknown> = {
       _base: 'https://raw.githubusercontent.com/view-evidence/',
