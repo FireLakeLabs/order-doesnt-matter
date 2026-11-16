@@ -65,7 +65,7 @@ void main(){
   float played=step(vTime,now)*current;
   float gate=exp(-pow((vTime-now)*42.,2.))*current;
   vec3 terrain=mix(terrainInk,accent,vMark.z);
-  float foreground=1.-step(0.,vDistance);
+  float foreground=smoothstep(0.,1.,-vDistance);
   if(vMark.x<.5){
     float wash=exp(-max(0.,vFace)*6.);
     vec3 base=mix(ground,panel,.85*vFade);
