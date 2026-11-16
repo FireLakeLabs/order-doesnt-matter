@@ -39,7 +39,8 @@ export const practice = {
         if (original) session.restore(original);
         if (originalTime) {
           runtime.setSpeed(originalTime.speed);
-          transport.update({ ...originalTime, scrubbing: false, marking: false });
+          transport.update({ scrubbing: false, marking: false });
+          void runtime.setLoop(originalTime.loop);
         }
       });
     }

@@ -9,6 +9,7 @@ import {
   DialogTitle,
 } from '../components/ui/dialog';
 import { practice } from './practice';
+import { session } from './session';
 
 const lessons = [
   [
@@ -45,7 +46,15 @@ export function Help() {
     const target = document.querySelector(lessons[state.step][2]);
     target?.classList.add('tour-target');
     const escape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') practice.close();
+      if (
+        event.key !== 'Escape' ||
+        event.defaultPrevented ||
+        document.querySelector('[role="dialog"]')
+      )
+        return;
+      event.preventDefault();
+      if (session.getSnapshot().editorTarget) session.openEditor(null);
+      else practice.close();
     };
     window.addEventListener('keydown', escape);
     return () => {

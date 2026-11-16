@@ -56,6 +56,7 @@ export function Studio() {
   }, [theme]);
   useEffect(() => {
     const escape = (event: KeyboardEvent) => {
+      if (event.defaultPrevented) return;
       const field =
         event.target instanceof Element &&
         event.target.closest('input, textarea, [contenteditable="true"]');
@@ -71,7 +72,10 @@ export function Studio() {
       }
       if (event.key === 'Escape' && !document.querySelector('[role="dialog"]')) {
         session.fill(null);
-        session.openEditor(null);
+        if (session.getSnapshot().editorTarget) {
+          event.preventDefault();
+          session.openEditor(null);
+        }
       }
     };
     window.addEventListener('keydown', escape);
@@ -133,6 +137,7 @@ export function Studio() {
           {context && kindFor(context).layout === 'wide' && (
             <div className="wide-editor">
               <EditorHost
+                key={String(runtime.app.practice)}
                 context={context}
                 name={editorName}
                 entry={runtime.app.editor?.state.entries[context.target.nodeId]}

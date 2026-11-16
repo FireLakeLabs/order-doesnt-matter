@@ -98,6 +98,16 @@ test('Keep work shares edited recovery across old page, Studio and reload, with 
   await expect(page.getByText('Strudel copied.', { exact: true })).toBeVisible();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('0.8');
   await pictures(page, 'keep');
+  await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
+  await page.getByRole('button', { name: 'Paste', exact: true }).click();
+  await page.getByLabel('Strudel program').fill('// pending paste draft');
+  await page.getByRole('button', { name: 'Lichen', exact: true }).click();
+  await page.getByRole('button', { name: 'Keep current', exact: true }).click();
+  await expect(page.getByRole('dialog', { name: 'Replace current work?' })).toBeHidden();
+  await expect(page.getByLabel('Strudel program')).toHaveValue('// pending paste draft');
+  expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(studioDoc);
+  await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
+  await page.getByRole('button', { name: /^Keep work/ }).click();
   await page.getByLabel('Document file').setInputFiles({
     name: 'piece.json',
     mimeType: 'application/json',
@@ -320,13 +330,13 @@ test('Practice teaches real Studio controls and restores the mounted draft, hist
       parityLoopDone?: boolean;
     };
     runtime.setLoop = async (loop) => {
+      runtime.setLoop = original;
+      await original.call(runtime, loop);
       await new Promise<void>((resolve) => {
         holder.parityReleaseLoop = () => {
-          runtime.setLoop = original;
           resolve();
         };
       });
-      await original.call(runtime, loop);
       holder.parityLoopDone = true;
     };
   });
@@ -351,4 +361,69 @@ test('Practice teaches real Studio controls and restores the mounted draft, hist
   await page.locator('#editor').getByRole('button', { name: 'Done', exact: true }).click();
   await page.getByRole('button', { name: 'Paste', exact: true }).click();
   await expect(page.getByLabel('Strudel program')).toHaveValue('// my paste draft');
+  await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
+  // Kiln practice uses the same setting id and kind as the visitor's own Kiln.
+  await page
+    .locator('.lane-label:not([data-setting])')
+    .filter({ has: page.locator('strong', { hasText: /^hh$/ }) })
+    .click();
+  await page.getByRole('button', { name: 'Edit Level', exact: true }).click();
+  await page.getByRole('spinbutton').fill('0.91');
+  const constantDoc = await page.evaluate(async () => {
+    const runtime = window.odmStudio;
+    await runtime.setLoop({ from: 0, to: 1 });
+    const engine = runtime.app.engine!;
+    const original = engine.setLoop.bind(engine);
+    const holder = window as typeof window & {
+      parityConstant?: Element | null;
+      parityEngineLoops?: ({ from: number; to: number } | null)[];
+    };
+    holder.parityConstant = document.querySelector('#editor input[type="number"]');
+    holder.parityEngineLoops = [];
+    engine.setLoop = async (loop) => {
+      await original(loop);
+      holder.parityEngineLoops!.push(loop ? { ...loop } : null);
+    };
+    return runtime.app.state.doc;
+  });
+  await page.getByRole('button', { name: 'Help', exact: true }).click();
+  await page.getByRole('button', { name: 'Start practice', exact: true }).click();
+  await expect(guide).toBeVisible();
+  for (let step = 0; step < 5; step++)
+    await guide.getByRole('button', { name: 'Skip step', exact: true }).click();
+  await page
+    .locator('.lane-label:not([data-setting])')
+    .filter({ has: page.locator('strong', { hasText: /^hh$/ }) })
+    .click();
+  await page.getByRole('button', { name: 'Edit Level', exact: true }).click();
+  await page.getByRole('spinbutton').fill('0.33');
+  await page.getByRole('spinbutton').press('Enter');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#editor')).toBeHidden();
+  await expect(guide).toBeVisible();
+  await page.getByRole('button', { name: 'Edit Level', exact: true }).click();
+  await page.getByRole('spinbutton').fill('0.35');
+  await page.getByRole('spinbutton').press('Enter');
+  await guide.getByRole('button', { name: 'Finish practice', exact: true }).click();
+  await expect(guide).toBeHidden();
+  await expect(page.getByRole('spinbutton')).toHaveValue('0.91');
+  expect(
+    await page.evaluate(
+      () =>
+        (window as typeof window & { parityConstant?: Element | null }).parityConstant ===
+        document.querySelector('#editor input[type="number"]'),
+    ),
+  ).toBe(true);
+  expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(constantDoc);
+  await page.waitForFunction(() =>
+    (
+      window as typeof window & { parityEngineLoops?: ({ from: number; to: number } | null)[] }
+    ).parityEngineLoops?.some((loop) => loop?.from === 0 && loop.to === 1),
+  );
+  expect(await page.evaluate(() => window.odmStudio.transport.getSnapshot().loop)).toEqual({
+    from: 0,
+    to: 1,
+  });
+  await page.getByRole('spinbutton').press('Enter');
+  expect(await page.evaluate(() => window.odmStudio.app.exportStrudel())).toContain('0.91');
 });

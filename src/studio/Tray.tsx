@@ -42,6 +42,7 @@ export function Tray({
     return (
       <aside className="tray region" data-region="tray">
         <EditorHost
+          key={String(runtime.app.practice)}
           context={context}
           name={editorName}
           entry={runtime.app.editor?.state.entries[context.target.nodeId]}

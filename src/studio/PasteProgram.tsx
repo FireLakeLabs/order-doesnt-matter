@@ -30,7 +30,10 @@ export function PasteProgram({
     try {
       const before = runtime.app.activation;
       await runtime.load(program);
-      if (before !== runtime.app.activation) setPasteOpen(false);
+      if (before !== runtime.app.activation) {
+        setSource(program);
+        setPasteOpen(false);
+      }
     } finally {
       setImporting(false);
     }
@@ -57,7 +60,6 @@ export function PasteProgram({
               variant="outline"
               disabled={importing}
               onClick={() => {
-                setSource(example.source);
                 void load(example.source);
               }}
             >
