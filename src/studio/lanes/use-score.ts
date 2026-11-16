@@ -36,7 +36,13 @@ export function useScore(clock: StudioClock) {
     let requested: { doc: typeof runtime.app.state.doc; from: number; to: number } | null = null;
     const unsubscribe = clock.subscribe(({ now }) => {
       const state = runtime.app.state;
-      const range = scoreRange(state.sections, now);
+      const range = state.follow
+        ? scoreRange(state.sections, now)
+        : {
+            from: state.fromCycle,
+            to: state.toCycle,
+            name: state.sections.find((part) => part.id === state.selected)?.name ?? 'Score',
+          };
       if (
         !requested ||
         requested.doc !== state.doc ||

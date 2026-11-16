@@ -109,6 +109,18 @@ export function InstrumentRail({
               <ol>
                 {rows.map((row) => {
                   const index = indexOf(row);
+                  const sound = state.sounds.find(
+                    (sound) =>
+                      sound.name === sounds[index] || sound.name === sounds[index]?.split(':')[0],
+                  );
+                  const soundState =
+                    sound?.state === 'ready'
+                      ? 'ready'
+                      : sound?.state === 'loading'
+                        ? 'loading'
+                        : sound?.state === 'missing'
+                          ? 'missing'
+                          : 'not loaded yet';
                   const muted = state.doc ? definitionMuted(state.doc, row.id) : false;
                   return (
                     <li
@@ -130,7 +142,9 @@ export function InstrumentRail({
                         <span className="instrument-dot" />
                         <span className="instrument-name">
                           <strong>{names[index]}</strong>
-                          <small>{sounds[index] ?? 'sound'}</small>
+                          <small title={sound?.detail}>
+                            {sounds[index] ?? 'sound'} · {soundState}
+                          </small>
                         </span>
                       </button>
                       <span className="instrument-meter" title="Scored note level">

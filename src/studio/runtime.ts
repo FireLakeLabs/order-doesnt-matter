@@ -1,5 +1,5 @@
 import { createApp } from '../app/controller';
-import { createRetention } from '../app/retention';
+import { replacement } from './replacement';
 import { examples } from '../app/examples';
 import { livePlayhead } from '../live/playhead';
 import { createStore } from './store';
@@ -9,9 +9,8 @@ import type { CycleLoop, PlaybackSpeed } from '../contract';
 
 export const transport = createTransportStore();
 // Page lifetime ownership. React effects never create controllers, workers or audio.
-// Studio does not overwrite the existing page's recovery document.
 export const app = createApp({
-  retention: createRetention({ persistent: false }),
+  confirmReplacement: () => replacement.request(),
   configureEngine(engine) {
     engine.setSpeed(transport.getSnapshot().speed);
     void engine.setLoop(transport.getSnapshot().loop).catch(() => {
@@ -128,9 +127,11 @@ export const runtime = {
     if (transport.getSnapshot().loop) void this.setLoop(null);
     else transport.update({ marking: !transport.getSnapshot().marking });
   },
-  async load(source: string) {
-    await app.load(source);
-    if (!app.state.loadError) {
+  async replaceWork(load: () => Promise<void>) {
+    const before = app.activation,
+      practice = app.practice;
+    await load();
+    if (before !== app.activation && app.practice === practice) {
       generation++;
       await this.setLoop(null);
       held = 0;
@@ -139,5 +140,15 @@ export const runtime = {
       transport.update({ scrubbing: false, marking: false });
     }
   },
+  load(source: string) {
+    return this.replaceWork(() => app.load(source));
+  },
+  recover() {
+    return this.replaceWork(() => app.recover());
+  },
+  openDocument(text: string) {
+    return this.replaceWork(() => app.openDocument(text));
+  },
 };
-export const ready = runtime.load(examples[0].source);
+// Recovery is explicit, exactly as on the original page. Never overwrite a candidate.
+export const ready = app.retention.candidate ? Promise.resolve() : runtime.load(examples[0].source);
