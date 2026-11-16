@@ -22,6 +22,7 @@
     "test:browser:online": "node scripts/browser.mjs online",
     "demo": "node scripts/browser.mjs demo",
     "measure:edit": "node scripts/browser.mjs measure",
+    "measure:views": "node scripts/browser.mjs measure-views",
     "shots:editors": "ODM_EDITOR_SHOTS=1 playwright test tests/browser/shots.spec.ts --project=optional --workers=1 --output=.browser-build-shots-results"
   },
   "dependencies": {

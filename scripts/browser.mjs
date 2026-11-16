@@ -7,18 +7,27 @@ import {
   mkdirSync,
 } from 'node:fs';
 import { spawn } from 'node:child_process';
-import { availableParallelism } from 'node:os';
-import { dirname } from 'node:path';
+import { availableParallelism, tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
 import { browserSummary, formatBrowserSummary } from './browser-summary.mjs';
 import { timingResult, formatTiming, BROWSER_WARN_SECONDS } from './timing.mjs';
 import { forwardBrowserSignals } from './browser-process.mjs';
 import { cacheBuiltAssets } from './browser-assets.mjs';
 const start = performance.now();
 const mode = process.argv[2] ?? 'ci';
-if (!['ci', 'legacy', 'studio', 'online', 'demo', 'measure', 'edit-demo'].includes(mode))
+if (
+  !['ci', 'legacy', 'studio', 'online', 'demo', 'measure', 'measure-views', 'edit-demo'].includes(
+    mode,
+  )
+)
   throw Error('Unknown browser mode');
 const suite = ['ci', 'legacy', 'studio'].includes(mode);
-const project = mode === 'ci' || mode === 'studio' ? 'studio' : suite ? 'audio' : 'optional';
+const project =
+  { ci: 'studio', legacy: 'audio', studio: 'studio', 'measure-views': 'measure-views' }[mode] ??
+  'optional';
+const measureDir =
+  mode === 'measure-views' ? mkdtempSync(join(tmpdir(), 'odm-view-measurements-')) : undefined;
+if (measureDir) console.log(`View measurements and screenshots: ${measureDir}`);
 console.log(`Browser selection: ${mode}; available CPUs: ${availableParallelism()}`);
 const outDir = mkdtempSync('.browser-build-');
 // Always retain the accounting reporter, including when the caller asks for JSON.
@@ -61,7 +70,7 @@ try {
         'node_modules/@playwright/test/cli.js',
         'test',
         `--project=${project}`,
-        ...(suite ? [] : [`tests/browser/${mode}.spec.ts`]),
+        ...(suite || mode === 'measure-views' ? [] : [`tests/browser/${mode}.spec.ts`]),
         ...args,
         '--reporter',
         `${reporters},./scripts/browser-report.mjs`,
@@ -74,6 +83,7 @@ try {
         env: {
           ...process.env,
           ODM_BROWSER_MODE: mode,
+          ODM_VIEW_MEASURE_DIR: measureDir,
           ODM_REPORT_PATH: reportPath,
           ODM_URL: `http://127.0.0.1:${address.port}`,
         },

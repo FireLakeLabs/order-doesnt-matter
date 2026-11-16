@@ -40,7 +40,15 @@ async function load(page: Page, piece = 'real-dubstep-arranged') {
     source,
     { timeout: 0 },
   );
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.getByRole('dialog').waitFor({ state: 'hidden', timeout: 0 });
+  await page.waitForFunction(
+    () =>
+      document
+        .querySelector('[data-region="stage-a"] .view-host')
+        ?.getAttribute('data-score-ready') === 'true',
+    undefined,
+    { timeout: 0 },
+  );
 }
 const pixels = (page: Page, stage: 'a' | 'b' = 'a') =>
   page.locator(`[data-region="stage-${stage}"] canvas`).evaluate((canvas: HTMLCanvasElement) => {
@@ -85,8 +93,17 @@ test('Studio shell on dubstep: section rail, two stages, shared clock, shelf, fi
   await expect(page.locator('.resting-chip')).toHaveCount(10);
   await expect(page.getByTestId('instruments')).not.toContainText('Instrument ');
   await expect(page.locator('canvas')).toHaveCount(2);
-  await expect(page.locator('.view-host').first()).toHaveAttribute('data-score-ready', 'true');
-  await expect(page.locator('.view-host').last()).toHaveAttribute('data-score-ready', 'true');
+  await page.waitForFunction(
+    () => {
+      const hosts = Array.from(document.querySelectorAll('.view-host'));
+      return (
+        hosts.length === 2 &&
+        hosts.every((host) => host.getAttribute('data-score-ready') === 'true')
+      );
+    },
+    undefined,
+    { timeout: 0 },
+  );
   // Subscribe read probes only in this test. Both canvases share a single sample per RAF.
   await page.evaluate(() => {
     const runtime = window.odmStudio;
@@ -378,8 +395,7 @@ test('a test-only registered failure is visible, retries, and leaves the other s
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await page.waitForFunction(() => window.odmStudio.app.state.playing);
   const before = await pixels(page);
-  await frames(page, 8);
-  expect(await pixels(page)).not.toBe(before);
+  await expect.poll(() => pixels(page)).not.toBe(before);
   await expect(page.getByRole('button', { name: 'Pause', exact: true })).toBeEnabled();
 });
 

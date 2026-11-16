@@ -33,5 +33,6 @@ export default defineConfig({
       dependencies: process.env.ODM_BROWSER_MODE === 'ci' ? ['audio'] : [],
     },
     { name: 'optional', testMatch: optional },
+    { name: 'measure-views', testMatch: /\/view-[^/]+\.measure\.ts$/ },
   ],
 });
