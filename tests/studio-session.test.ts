@@ -114,3 +114,28 @@ test('a mute during solo restores the baseline and ends solo without losing orig
   // Undo returns the exact prior version, including its solo marker and baseline.
   expect(soloedInstrument(solo)).toBe(rows[0].id);
 });
+
+test('new layouts use Ring and Loom; explicit empties and diagnostic links remain valid', () => {
+  const available = ['ring', 'loom', 'test-card'];
+  expect(parseLayout(null, '', available)).toMatchObject({ a: 'ring', b: 'loom' });
+  expect(parseLayout(null, '?a=test-card&b=', available)).toMatchObject({
+    a: 'test-card',
+    b: null,
+  });
+  const session = createSession(parseLayout(null, '', available));
+  session.selectInstrument('one');
+  session.openEditor('cutoff');
+  session.toggleLane('cutoff');
+  session.selectInstrument('two');
+  expect(session.getSnapshot()).toMatchObject({
+    selectedInstrument: 'two',
+    editorTarget: null,
+    expandedSettings: ['cutoff'],
+  });
+  session.resetSelection();
+  expect(session.getSnapshot()).toMatchObject({
+    selectedInstrument: null,
+    editorTarget: null,
+    expandedSettings: [],
+  });
+});

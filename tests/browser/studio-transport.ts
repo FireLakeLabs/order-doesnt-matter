@@ -1,3 +1,4 @@
+import { openStudio } from './studio-open';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
@@ -26,7 +27,7 @@ async function load(page: Page, piece = 'real-dubstep-arranged') {
       route.fulfill({ path: 'tests/fixtures/sounds/burst.wav', contentType: 'audio/wav' }),
     );
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/studio.html?inspect');
+  await openStudio(page);
   await page.waitForFunction(() => window.odmStudio.app.canPlay);
   await page.evaluate(
     async (source) => {
