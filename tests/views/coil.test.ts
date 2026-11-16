@@ -1,5 +1,6 @@
 import { expect, test } from 'vitest';
-import { coilDetail, coilRange, helixPoint } from '../../src/views/coil/model';
+import * as THREE from 'three';
+import { coilDetail, coilRange, helixPoint, coilPose } from '../../src/views/coil/model';
 import { cycleStrips } from '../../src/views/shared/score-strips';
 import { scoreFrame } from './score-fixture';
 
@@ -45,5 +46,54 @@ test('static strips preserve empty tracks, real spans, muted instruments and den
     });
     const occupancy = cycleStrips(f, 10, true).filter((s) => !s.track)[0].arcs;
     expect(occupancy.length).toBeLessThanOrEqual(64);
+  }
+});
+
+test('the long-lens level axis keeps loop pitch even and the complete song in view', () => {
+  for (const [width, height] of [
+    [1300, 760],
+    [1920, 1080],
+    [1131, 469],
+  ]) {
+    const frame = { width, height, now: 10.4 };
+    const { distance, follow } = coilPose(frame, 0, 28);
+    const camera = new THREE.PerspectiveCamera(1, width / height, distance * 0.5, distance * 1.5);
+    camera.up.set(0, 1, -0.25);
+    camera.position.set(distance * 0.18 + follow, distance * 0.25, distance);
+    camera.lookAt(follow, 0, 0);
+    camera.updateMatrixWorld();
+    const centres = Array.from({ length: 28 }, (_, i) =>
+      new THREE.Vector3((i / 28 - 0.5) * 10, 0, 0).project(camera),
+    );
+    const pitches = centres.slice(1).map((p, i) => p.x - centres[i].x);
+    expect(Math.max(...pitches) / Math.min(...pitches)).toBeLessThan(1.02);
+    expect(
+      Math.max(...centres.map((p) => p.y)) - Math.min(...centres.map((p) => p.y)),
+    ).toBeLessThan(1e-6);
+    const points = Array.from({ length: 28 * 64 + 1 }, (_, i) => {
+      const p = helixPoint(i / 64, 0, 28, 1.2);
+      return new THREE.Vector3(p.x, p.y, p.z).project(camera).x;
+    });
+    const span = (Math.max(...points) - Math.min(...points)) / 2;
+    expect(span).toBeGreaterThan(0.87);
+    expect(span).toBeLessThan(0.94);
+  }
+});
+test('500 onsets degrade to occupancy while empty and twenty-voice scores retain every band', () => {
+  for (const count of [1, 20]) {
+    const frame = scoreFrame(count);
+    expect(cycleStrips(frame, 10).filter((strip) => strip.track)).toHaveLength(count);
+    frame.notes = Array.from({ length: 500 }, (_, i) => ({
+      instrument: '0',
+      start: 10 + i / 500,
+      end: 10 + (i + 0.5) / 500,
+      hasOnset: true,
+      value: {},
+    }));
+    const occupied = cycleStrips(frame, 10).filter((strip) => !strip.track);
+    expect(occupied).toHaveLength(1);
+    expect(occupied[0].arcs.length).toBeLessThanOrEqual(64);
+    expect(occupied[0].arcs.length).toBeGreaterThan(0);
+    expect(cycleStrips(frame, 10).filter((strip) => strip.track)).toHaveLength(count);
   }
 });

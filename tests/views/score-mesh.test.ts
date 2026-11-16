@@ -39,3 +39,42 @@ test('every LOD restores the full colour range after rendering only emission', (
   expect(counts[3]).toBe(counts[0] / 4);
   score.dispose();
 });
+
+test('helix styling retains geometry buffers and matches a fresh layout and palette', () => {
+  const stage = { THREE, quality: { scale: 1, bloom: true } as const };
+  const mesh = createScoreMesh(stage, true);
+  const strips = [0, 1].map((cycle) => ({
+    cycle,
+    radius: 1,
+    width: 0.1,
+    colour: '#ff0000',
+    muted: false,
+    arcs: [{ from: 0.137, to: 0.763, start: 0.137, end: 0.763, onset: true }],
+  }));
+  mesh.populate(strips);
+  const geometry = mesh.mesh.geometry;
+  const index = geometry.index;
+  const positions = geometry.getAttribute('position').array;
+  const angles = geometry.getAttribute('curve').array;
+  const styled = strips.map((strip) => ({
+    ...strip,
+    radius: 0.75,
+    width: 0.2,
+    colour: '#0000ff',
+    muted: true,
+  }));
+  expect(mesh.restyle(styled)).toBe(true);
+  expect(mesh.mesh.geometry).toBe(geometry);
+  expect(mesh.mesh.geometry.index).toBe(index);
+  expect(mesh.mesh.geometry.getAttribute('position').array).toBe(positions);
+  expect(mesh.mesh.geometry.getAttribute('curve').array).toBe(angles);
+  const fresh = createScoreMesh(stage, true);
+  fresh.populate(styled);
+  for (const name of ['position', 'timing', 'band', 'ink', 'quiet', 'curve'])
+    expect(mesh.mesh.geometry.getAttribute(name).array).toEqual(
+      fresh.mesh.geometry.getAttribute(name).array,
+    );
+  expect(mesh.restyle([])).toBe(false);
+  mesh.dispose();
+  fresh.dispose();
+});

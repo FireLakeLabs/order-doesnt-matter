@@ -28,7 +28,7 @@ export function createScoreMesh(stage: Pick<ThreeStage, 'THREE' | 'quality'>, he
     vertexShader: `
       attribute vec3 timing; attribute vec3 band; attribute vec3 ink; attribute float quiet;
       #if HELIX
-      attribute vec3 curve;
+      attribute vec2 curve;
       #endif
       uniform float now; uniform float helix; uniform float songFrom; uniform float songLength;
       varying vec3 vTiming; varying vec3 vInk; varying vec3 vSurface;
@@ -39,9 +39,10 @@ export function createScoreMesh(stage: Pick<ThreeStage, 'THREE' | 'quality'>, he
         #if HELIX
           float d = (time-now)/0.7;
           float playing = abs(d)<2. ? exp(-d*d*d*d) : 0.;
-          float enlarge = 1.+playing*0.16;
-          point=vec3(((time-songFrom)/songLength-0.5)*10.,curve.y*enlarge,curve.x*enlarge+position.z);
-          side=mix(0.34,1.,(curve.z+1.)*0.5);
+          float r=(band.x+position.y*band.y)*(1.+playing*0.16);
+          point=vec3(((time-songFrom)/songLength-0.5)*10.,curve.y*r,curve.x*r+position.z);
+          float facing=modelViewMatrix[1].z*curve.y+modelViewMatrix[2].z*curve.x;
+          side=mix(0.34,1.,(facing+1.)*0.5);
         #else
           float angle=(time-now)*6.28318530718;
           float r=band.x+position.y*band.y;
@@ -84,6 +85,7 @@ export function createScoreMesh(stage: Pick<ThreeStage, 'THREE' | 'quality'>, he
   const colour = new THREE.Color();
   let lods: { geometry: typeof mesh.geometry; lights: LightRange[] }[] = [],
     emitting = { start: 0, count: 0 };
+  let styling: ReturnType<typeof scoreGeometry> | undefined;
   return {
     mesh,
     material,
@@ -96,6 +98,7 @@ export function createScoreMesh(stage: Pick<ThreeStage, 'THREE' | 'quality'>, he
         },
         helix,
       );
+      styling = data;
       if (lods.length) for (const lod of lods) lod.geometry.dispose();
       else mesh.geometry.dispose();
       const attributes = {
@@ -105,7 +108,7 @@ export function createScoreMesh(stage: Pick<ThreeStage, 'THREE' | 'quality'>, he
         ink: new THREE.BufferAttribute(data.inks, 3),
         quiet: new THREE.BufferAttribute(data.quiet, 1),
       };
-      const curve = new THREE.BufferAttribute(data.curves, 3);
+      const curve = new THREE.BufferAttribute(data.curves, 2);
       // Static index LODs share the same vertex buffers and keep every arc's
       // exact endpoints. Only curve tessellation follows render resolution.
       lods = data.lods.map((lod) => {
@@ -117,6 +120,27 @@ export function createScoreMesh(stage: Pick<ThreeStage, 'THREE' | 'quality'>, he
         return { geometry, lights: lod.lights };
       });
       mesh.geometry = lods[0].geometry;
+    },
+    /** Same strip topology: update appearance/layout without replacing any geometry. */
+    restyle(strips: Pick<ScoreStrip, 'radius' | 'width' | 'colour' | 'muted'>[]) {
+      const data = styling;
+      if (!data || strips.length !== data.styles.length) return false;
+      for (let strip = 0; strip < strips.length; strip++) {
+        const next = strips[strip],
+          range = data.styles[strip];
+        colour.set(next.colour);
+        for (let vertex = range.first; vertex < range.first + range.count; vertex++) {
+          data.bands[vertex * 3] = next.radius;
+          data.bands[vertex * 3 + 1] = next.width;
+          data.inks[vertex * 3] = colour.r;
+          data.inks[vertex * 3 + 1] = colour.g;
+          data.inks[vertex * 3 + 2] = colour.b;
+          data.quiet[vertex] = next.muted ? 0.23 : 1;
+        }
+      }
+      for (const name of ['band', 'ink', 'quiet'])
+        mesh.geometry.getAttribute(name).needsUpdate = true;
+      return true;
     },
     update(frame: ViewFrame, fade = 1, opacity = 1) {
       const u = material.uniforms;
@@ -141,6 +165,7 @@ export function createScoreMesh(stage: Pick<ThreeStage, 'THREE' | 'quality'>, he
     dispose() {
       if (lods.length) for (const lod of lods) lod.geometry.dispose();
       else mesh.geometry.dispose();
+      styling = undefined;
       material.dispose();
       mesh.removeFromParent();
     },

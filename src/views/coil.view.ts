@@ -2,9 +2,8 @@ import type { ViewDefinition, ViewFrame } from './types';
 import { createThreeStage } from './shared/three-stage';
 import { createScoreMesh } from './shared/score-mesh';
 import { cycleStrips, scoreInventory } from './shared/score-strips';
-import { coilDetail, coilRange, helixPoint } from './coil/model';
+import { coilDetail, coilRange, helixPoint, coilPose } from './coil/model';
 import type { ScoreStrip } from './shared/score-mesh';
-import { evidence, nextMount } from './coil/profile';
 
 const view: ViewDefinition = {
   id: 'coil',
@@ -12,13 +11,10 @@ const view: ViewDefinition = {
   tag: 'whole song',
   span: 'song',
   async mount(element) {
-    const mount = nextMount(),
-      mountStart = performance.now();
-    evidence('mount-start', { mount });
     const stage = await createThreeStage(element, 'coil');
-    stage.renderer.info.autoReset = false;
-    evidence('mounted', { mount, ms: performance.now() - mountStart });
     const { THREE, scene, camera, root, canvas } = stage;
+    camera.fov = 1;
+    camera.up.set(0, 1, -0.25);
     const body = new THREE.Group();
     scene.add(body);
     const score = createScoreMesh(stage, true);
@@ -40,6 +36,7 @@ const view: ViewDefinition = {
     root.append(caption);
     let notes: ViewFrame['notes'] | undefined,
       inventory = '',
+      topology = '',
       theme: ViewFrame['theme'] | undefined;
     let rangeKey = '',
       detailCycle = NaN;
@@ -68,9 +65,6 @@ const view: ViewDefinition = {
     canvas.addEventListener('lostpointercapture', up);
     let last: ViewFrame | undefined;
     const point = new THREE.Vector3();
-    let frames = 0,
-      builds = 0,
-      previousFrame = 0;
     return {
       frame(frame) {
         if (frame.width <= 0 || frame.height <= 0) return;
@@ -89,9 +83,6 @@ const view: ViewDefinition = {
           (drag || rotation === 0)
         )
           return;
-        const frameStart = performance.now();
-        const interval = previousFrame ? frameStart - previousFrame : 0;
-        previousFrame = frameStart;
         last = { ...frame };
         const resized = stage.resize(frame);
         const range = coilRange(frame);
@@ -100,22 +91,11 @@ const view: ViewDefinition = {
           .join('|');
         const nextRangeKey = `${String(range.from)}:${String(range.length)}:${sectionsKey}`;
         const cycle = Math.floor(frame.now);
-        const changed =
-          resized ||
-          notes !== frame.notes ||
-          inventory !== key ||
-          theme !== frame.theme ||
-          rangeKey !== nextRangeKey;
+        const shape = frame.instruments.map((i) => `${i.id}:${String(i.index)}`).join('|');
+        const changed = notes !== frame.notes || topology !== shape || rangeKey !== nextRangeKey;
+        const styled = resized || theme !== frame.theme || inventory !== key;
         const compressed = range.length > 64;
-        if (changed) {
-          const buildStart = performance.now();
-          const reasons = {
-            resized,
-            notes: notes !== frame.notes,
-            inventory: inventory !== key,
-            theme: theme !== frame.theme,
-            range: rangeKey !== nextRangeKey,
-          };
+        if (changed || styled) {
           // A continuous outer spine joins the loops even where section membership
           // changes the instrument bands within them.
           const strips: ScoreStrip[] = [
@@ -132,29 +112,13 @@ const view: ViewDefinition = {
           ];
           for (let cycle = range.from; cycle < range.to; cycle++)
             strips.push(...cycleStrips(frame, cycle, compressed));
-          const populateStart = performance.now();
-          score.populate(strips);
-          evidence('populate', {
-            mount,
-            build: ++builds,
-            reasons,
-            strips: strips.length,
-            vertices: score.mesh.geometry.getAttribute('position').count,
-            triangles: (score.mesh.geometry.index?.count ?? 0) / 3,
-            populateMs: performance.now() - populateStart,
-            buildMs: performance.now() - buildStart,
-            now: frame.now,
-            theme: frame.theme.name,
-          });
+          if (changed || !score.restyle(strips)) score.populate(strips);
           score.material.uniforms.songFrom.value = range.from;
           score.material.uniforms.songLength.value = range.length;
           score.material.uniforms.hideNear.value = compressed ? 1 : 0;
-          notes = frame.notes;
-          inventory = key;
-          theme = frame.theme;
         }
         detail.mesh.visible = compressed;
-        if (compressed && (changed || detailCycle !== cycle)) {
+        if (compressed && (changed || styled || detailCycle !== cycle)) {
           // Only seven nearby loops change detail at a seam; the whole-song
           // occupancy and connecting spine retain their original GPU buffers.
           const strips: ScoreStrip[] = [];
@@ -165,11 +129,15 @@ const view: ViewDefinition = {
           )
             if (coilDetail(turn, frame.now, range.length))
               strips.push(...cycleStrips(frame, turn).filter((strip) => !strip.track));
-          detail.populate(strips);
+          if (changed || detailCycle !== cycle || !detail.restyle(strips)) detail.populate(strips);
           detail.material.uniforms.songFrom.value = range.from;
           detail.material.uniforms.songLength.value = range.length;
           detailCycle = cycle;
         }
+        notes = frame.notes;
+        inventory = key;
+        topology = shape;
+        theme = frame.theme;
         if (rangeKey !== nextRangeKey) {
           labels.replaceChildren();
           brackets = [];
@@ -177,6 +145,7 @@ const view: ViewDefinition = {
             const element = document.createElement('div');
             element.style.cssText =
               'position:absolute;height:12px;border:1px solid;border-top:0;white-space:nowrap;padding-top:18px;font-size:12px';
+            element.className = 'coil-section';
             element.textContent = section.name;
             labels.append(element);
             brackets.push({
@@ -191,12 +160,13 @@ const view: ViewDefinition = {
         // Cosmetic release is deliberately frame-based; it never moves score time.
         if (!drag) rotation = Math.abs(rotation) < 0.001 ? 0 : rotation * 0.82;
         body.rotation.x = rotation;
-        const aspect = frame.width / frame.height;
-        const distance = Math.max(5.2, 5.75 / (Math.tan((48 * Math.PI) / 360) * aspect));
-        // Analytic slow following stays reversible and reaches the same pose on a seek.
-        const follow = (frame.now - range.from) / range.length - 0.5;
-        camera.position.set(1.6 + follow * 0.3, distance * 0.27, distance);
-        camera.lookAt(0.4 + follow * 0.16, 0, 0);
+        const { distance, follow } = coilPose(frame, range.from, range.length);
+        camera.position.set(distance * 0.18 + follow, distance * 0.25, distance);
+        camera.lookAt(follow, 0, 0);
+        // Tight depth bounds preserve precision with the distant, narrow-angle lens.
+        camera.near = distance * 0.5;
+        camera.far = distance * 1.5;
+        camera.updateProjectionMatrix();
         camera.updateMatrixWorld();
         body.updateMatrixWorld();
         score.update(frame);
@@ -216,17 +186,18 @@ const view: ViewDefinition = {
         bead.frustumCulled = false;
         gateMaterial.color.set(frame.theme.text);
         lineMaterial.color.set(frame.theme.text);
+        point.set(0, -1.5, 0).project(camera);
+        const baseline = ((1 - point.y) * frame.height) / 2;
         for (const bracket of brackets) {
           point
             .set(((bracket.from - range.from) / range.length - 0.5) * 10, -1.5, 0)
             .project(camera);
-          const x = ((point.x + 1) * frame.width) / 2,
-            y = ((1 - point.y) * frame.height) / 2;
+          const x = ((point.x + 1) * frame.width) / 2;
           point.set(((bracket.to - range.from) / range.length - 0.5) * 10, -1.5, 0).project(camera);
           const right = ((point.x + 1) * frame.width) / 2;
           const active = frame.now >= bracket.from && frame.now < bracket.to;
           bracket.element.style.left = `${String(x)}px`;
-          bracket.element.style.top = `${String(y)}px`;
+          bracket.element.style.top = `${String(baseline)}px`;
           bracket.element.style.width = `${String(Math.max(1, right - x - 4))}px`;
           bracket.element.style.color = active ? frame.theme.text : frame.theme.muted;
           bracket.element.style.borderColor = active ? frame.theme.accent : frame.theme.line;
@@ -237,41 +208,13 @@ const view: ViewDefinition = {
           : `cycle ${String(cycle - range.from + 1)} / ${String(range.length)} · drag to turn`;
         caption.style.color = frame.theme.muted;
         caption.style.font = `13px "${frame.theme.fontMono}"`;
-        const drawStart = performance.now();
-        stage.renderer.info.reset();
-        const calls = stage.renderer.info.render.calls,
-          triangles = stage.renderer.info.render.triangles;
         stage.render(frame, (enabled) => {
           gate.visible = bead.visible = !enabled;
           score.emission(enabled);
           detail.emission(enabled);
         });
-        const frameMs = performance.now() - frameStart;
-        if (frames === 0)
-          requestAnimationFrame(() =>
-            requestAnimationFrame(() => {
-              evidence('first-presented', { mount, ms: performance.now() - mountStart });
-            }),
-          );
-        if (++frames <= 5 || frames % 20 === 0 || frameMs > 50)
-          evidence('frame', {
-            mount,
-            frame: frames,
-            frameMs,
-            renderMs: performance.now() - drawStart,
-            interval,
-            calls: stage.renderer.info.render.calls - calls,
-            triangles: stage.renderer.info.render.triangles - triangles,
-            vertices: score.mesh.geometry.getAttribute('position').count,
-            builds,
-            now: frame.now,
-            playing: frame.playing,
-            theme: frame.theme.name,
-            quality: stage.quality,
-          });
       },
       dispose() {
-        evidence('dispose', { mount, frames, builds });
         if (drag && canvas.hasPointerCapture(drag.id)) canvas.releasePointerCapture(drag.id);
         canvas.removeEventListener('pointerdown', down);
         canvas.removeEventListener('pointermove', move);

@@ -17,3 +17,15 @@ export function helixPoint(time: number, from: number, length: number, radius = 
 export function coilDetail(cycle: number, now: number, length: number) {
   return length <= 64 || Math.abs(cycle - Math.floor(now)) <= 3;
 }
+
+/** A long-lens pose keeps the loop spacing almost parallel across the song.
+ * Matching the elevation in camera.up keeps the helix axis level. */
+export function coilPose(
+  frame: Pick<ViewFrame, 'width' | 'height' | 'now'>,
+  from: number,
+  length: number,
+) {
+  const distance = 5.35 / (Math.tan(Math.PI / 360) * (frame.width / frame.height));
+  const follow = ((frame.now - from) / length - 0.5) * 0.16;
+  return { distance, follow };
+}
