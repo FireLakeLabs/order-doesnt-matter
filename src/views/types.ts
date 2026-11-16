@@ -5,6 +5,12 @@ export interface ViewNote {
   hasOnset: boolean; // false for a fragment or a continuous signal
   value: Record<string, unknown>; // the note's settings
 }
+export interface ViewSetting {
+  name: string;
+  label: string;
+  kind: 'constant' | 'values' | 'signal' | 'other';
+  value?: number | string;
+}
 export interface ViewInstrument {
   id: string;
   name: string;
@@ -13,6 +19,9 @@ export interface ViewInstrument {
   sounding: boolean;
   inSection: boolean;
   muted: boolean;
+  settings: ViewSetting[];
+  rewrites: string[];
+  room: number | null;
 }
 export interface ViewTheme {
   name: string;

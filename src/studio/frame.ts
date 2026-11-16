@@ -3,6 +3,7 @@ import type { EventResult } from '../contract';
 import { liveModel } from '../live/model';
 import type { ViewDefinition, ViewFrame, ViewNote, ViewTheme } from '../views/types';
 import { instrumentColour, viewTheme } from './themes';
+import { instrumentFacts } from './view-instruments';
 import { instrumentInventory } from './instrument-names';
 
 export interface ScoreWindow {
@@ -77,6 +78,7 @@ export function buildFrame(input: FrameInput): ViewFrame {
   });
   const { names } = instrumentInventory(state);
   const members = sectionMembership(state, now);
+  const facts = instrumentFacts(state.doc);
   return {
     now,
     playing: input.playing,
@@ -85,6 +87,7 @@ export function buildFrame(input: FrameInput): ViewFrame {
     from: score.from,
     to: score.to,
     instruments: live.instruments.map((instrument, index) => ({
+      ...(facts.get(instrument.id) ?? { settings: [], rewrites: [], room: null }),
       id: instrument.id,
       name: names[index],
       index,
