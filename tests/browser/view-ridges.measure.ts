@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test';
 import { viewEvidence, prepare } from './view-evidence';
-import { mkdir } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { terrainDriver } from '../../src/views/ridges/model';
+import type { ViewFrame } from '../../src/views/types';
 
 viewEvidence(test, 'ridges');
 // Ridges-specific evidence supplements the common five-theme/corpus/CPU sweep.
@@ -57,4 +59,48 @@ test('ridges: section approach and continuous cycle slide', async ({ page }) => 
   await expect(second.locator('.view-host')).toHaveAttribute('data-score-ready', 'true');
   await expect(second.locator('canvas[data-ridges]')).toHaveCount(1);
   await page.screenshot({ path: `${path}/both-stages.png` });
+});
+
+// Local evidence of the real host replacing its queried window; deliberately not a CI gate.
+test('ridges: host window refresh during playback', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await prepare(page, 'ridges', 'real-techno');
+  await page.evaluate(() => window.odmStudio.seek(3.95));
+  await page.waitForFunction(() => (window.viewProbe.frame?.now ?? 0) >= 3.95);
+  const before = await page.evaluate(() => window.viewProbe.frame!);
+  await page.evaluate(() => window.odmStudio.play());
+  await page.waitForFunction(
+    (previousTo) =>
+      (window.viewProbe.frame?.now ?? 0) > 4 && (window.viewProbe.frame?.to ?? 0) > previousTo,
+    before.to,
+  );
+  await page.evaluate(() => window.odmStudio.pause());
+  const after = await page.evaluate(() => window.viewProbe.frame!);
+  const describe = (frame: ViewFrame) => {
+    const terrain = terrainDriver(frame);
+    return {
+      now: frame.now,
+      from: frame.from,
+      to: frame.to,
+      terrain: terrain && {
+        instrument: terrain.instrument,
+        setting: terrain.setting,
+        min: terrain.min,
+        max: terrain.max,
+      },
+    };
+  };
+  const path = `${process.env.ODM_VIEW_MEASURE_DIR}/ridges`;
+  await writeFile(
+    `${path}/window-refresh.json`,
+    JSON.stringify(
+      {
+        before: describe(before),
+        after: describe(after),
+      },
+      null,
+      2,
+    ),
+  );
+  await page.screenshot({ path: `${path}/window-refresh.png` });
 });

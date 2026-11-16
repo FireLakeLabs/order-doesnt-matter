@@ -79,6 +79,18 @@ describe('Ridges profile', () => {
     expect(ridgeProfile(driver, 0).at(-1)?.height).toBeCloseTo(ridgeProfile(driver, 1)[0].height);
     expect(profileHeight(ridgeProfile(driver, 1), 0.5)).toBeCloseTo(1);
   });
+  it('bounds sparse geometry just below the density threshold without losing short peaks', () => {
+    const f = scoreFrame();
+    f.notes = Array.from({ length: 127 }, (_, i) =>
+      note(i / 127, (i + 1) / 127, { cutoff: i % 2 ? 400 : 800 }),
+    );
+    const profile = ridgeProfile(terrainDriver(f), 0);
+    expect(profile.length).toBeLessThanOrEqual(BINS + 3 * f.notes.length + 2);
+    f.notes = f.notes.map((n) => ({ ...n, end: n.start + 0.1 / 127 }));
+    const narrow = ridgeProfile(terrainDriver(f), 0);
+    expect(narrow.length).toBeLessThanOrEqual(BINS + 2 * f.notes.length + 2);
+    expect(narrow.filter((p) => p.height > 0.01)).toHaveLength(127);
+  });
   it('retains every dense note as occupancy, even below pixel width', () => {
     const f = scoreFrame();
     f.notes = Array.from({ length: 500 }, (_, i) =>
@@ -142,7 +154,7 @@ describe('Ridges time and section projection', () => {
     expect(ridgePose(10, 11, 6).fade).toBeLessThan(0.1);
     expect(ridgePose(16, 10, 6).scale).toBeLessThan(ridgePose(11, 10, 6).scale);
   });
-  it('has exactly the same poses with time backwards, stopped, and across negative cycles', () => {
+  it('computes deterministic model poses for reverse queries and negative cycles', () => {
     const times = [-0.01, 0, 10.4, 10.8, 11, 11.1, 20];
     const forward = times.map((now) => ridgePose(11, now, 6));
     const reverse = [...times]

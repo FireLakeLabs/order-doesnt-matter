@@ -25,7 +25,9 @@ const identity = new Set([
   'cycle',
   'duration',
 ]);
-/** Dimensionless variance times change frequency: units and instrument names cannot win. */
+/** Dimensionless variance times change frequency: units and instrument names cannot win.
+ * Analyse exactly the supplied notes. A refreshed host window can change the driver/range;
+ * retaining earlier extrema would make reverse scrubbing depend on visit order. */
 export function terrainDriver(
   frame: Pick<ViewFrame, 'notes' | 'instruments'>,
 ): Terrain | undefined {
@@ -137,11 +139,14 @@ export function ridgeProfile(terrain: Terrain | undefined, cycle: number): Ridge
     ];
   }
   const times = new Set([cycle, cycle + 1]);
-  for (const n of samples)
-    for (let i = 0; i <= 24; i++) {
-      const t = n.start + ((n.end - n.start) * i) / 24;
+  for (const n of samples) {
+    // Spend vertices on visible width; retain a midpoint even for a subpixel peak.
+    const steps = Math.min(24, Math.max(2, Math.ceil(((n.end - n.start) * BINS) / 2) * 2));
+    for (let i = 0; i <= steps; i++) {
+      const t = n.start + ((n.end - n.start) * i) / steps;
       if (t >= cycle && t <= cycle + 1) times.add(t);
     }
+  }
   const local = { ...terrain, samples };
   return [...times]
     .sort((a, b) => a - b)
