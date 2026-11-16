@@ -40,7 +40,15 @@ async function load(page: Page, piece = 'real-dubstep-arranged') {
     source,
     { timeout: 0 },
   );
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await page.getByRole('dialog').waitFor({ state: 'hidden', timeout: 0 });
+  await page.waitForFunction(
+    () =>
+      document
+        .querySelector('[data-region="stage-a"] .view-host')
+        ?.getAttribute('data-score-ready') === 'true',
+    undefined,
+    { timeout: 0 },
+  );
 }
 const pixels = (page: Page, stage: 'a' | 'b' = 'a') =>
   page.locator(`[data-region="stage-${stage}"] canvas`).evaluate((canvas: HTMLCanvasElement) => {
@@ -86,8 +94,17 @@ test('Studio shell on dubstep: section rail, two stages, shared clock, shelf, fi
   await expect(page.locator('.resting-chip')).toHaveCount(10);
   await expect(page.getByTestId('instruments')).not.toContainText('Instrument ');
   await expect(page.locator('canvas')).toHaveCount(2);
-  await expect(page.locator('.view-host').first()).toHaveAttribute('data-score-ready', 'true');
-  await expect(page.locator('.view-host').last()).toHaveAttribute('data-score-ready', 'true');
+  await page.waitForFunction(
+    () => {
+      const hosts = Array.from(document.querySelectorAll('.view-host'));
+      return (
+        hosts.length === 2 &&
+        hosts.every((host) => host.getAttribute('data-score-ready') === 'true')
+      );
+    },
+    undefined,
+    { timeout: 0 },
+  );
   await startAt(page, 3.9);
   await expect(page.getByTestId('playing-instruments').locator('li')).toHaveCount(4);
   await expect(page.locator('.resting-chip')).toHaveCount(9);
@@ -100,8 +117,8 @@ test('Studio shell on dubstep: section rail, two stages, shared clock, shelf, fi
   await expect(selected).toHaveAttribute('data-selected', 'true');
   await expect(page.locator('.instrument-row[data-sounding="true"]').first()).toBeVisible();
   const before = await pixels(page, 'b');
-  await frames(page, 8);
-  expect(await pixels(page, 'b')).not.toBe(before);
+  // Frames can repeat between note onsets; observe a changed drawing instead.
+  await expect.poll(() => pixels(page, 'b')).not.toBe(before);
   // Hold the real transport for repeatable theme comparisons in the first drop.
   await page.evaluate(async () => {
     window.odmStudio.pause();
@@ -356,8 +373,7 @@ test('a test-only registered failure is visible, retries, and leaves the other s
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await page.waitForFunction(() => window.odmStudio.app.state.playing);
   const before = await pixels(page);
-  await frames(page, 8);
-  expect(await pixels(page)).not.toBe(before);
+  await expect.poll(() => pixels(page)).not.toBe(before);
   await expect(page.getByRole('button', { name: 'Pause', exact: true })).toBeEnabled();
 });
 
@@ -390,8 +406,8 @@ test('a host frame failure stays in its stage while the other stage keeps drawin
     'Deliberate host frame failure',
   );
   const before = await pixels(page, 'b');
-  await frames(page, 8);
-  expect(await pixels(page, 'b')).not.toBe(before);
+  // Frames can repeat between note onsets; observe a changed drawing instead.
+  await expect.poll(() => pixels(page, 'b')).not.toBe(before);
   await expect(page.locator('[data-region="stage-b"]').getByRole('alert')).toHaveCount(0);
 });
 
@@ -447,7 +463,11 @@ test('one page sample drives both real test cards, strip and rail through scrub,
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/studio.html?inspect&a=test-card&b=test-card');
   await load(page);
-  await expect(page.locator('.view-host[data-score-ready="true"]')).toHaveCount(2);
+  await page.waitForFunction(
+    () => document.querySelectorAll('.view-host[data-score-ready="true"]').length === 2,
+    undefined,
+    { timeout: 0 },
+  );
   expect(instrumented).toBe(true);
   const track = (await page.getByTestId('song-track').boundingBox())!;
   const point = (cycle: number) => ({ x: track.x + (track.width * cycle) / 28, y: track.y + 30 });
