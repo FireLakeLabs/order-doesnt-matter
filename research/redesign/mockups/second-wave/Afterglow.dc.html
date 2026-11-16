@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Afterglow</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.ax{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#A49EC4;text-anchor:end}
+.hh{fill:#FFD23F;opacity:.55}
+.ol{fill:none;stroke-width:2}
+.fl{opacity:.9}
+.lg{font-family:'JetBrains Mono',monospace;font-size:11px;fill:#A49EC4}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="A scrolling spectrogram of the measured output, low frequencies at the bottom, with the scored notes outlined on top in instrument colours. The snare's measured glow carries on well past its scored outline. To the right of now nothing is measured yet; only dashed score outlines continue." style="position: absolute; left: 0; top: 0; display: block">
+<defs>
+<linearGradient id="tail" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" style="stop-color: #C2387A; stop-opacity: .8"></stop>
+<stop offset="1" style="stop-color: #3B1F6B; stop-opacity: 0"></stop>
+</linearGradient>
+<linearGradient id="kick" x1="0" y1="1" x2="0" y2="0">
+<stop offset="0" style="stop-color: #FFD23F; stop-opacity: .95"></stop>
+<stop offset="1" style="stop-color: #C2387A; stop-opacity: 0"></stop>
+</linearGradient>
+</defs>
+
+<rect x="60" y="110" width="660" height="440" style="fill: #0E0B1C"></rect>
+<rect x="720" y="110" width="220" height="440" style="fill: #07060D"></rect>
+
+<g style="filter: blur(2.5px)">
+<rect x="60" y="528" width="528" height="10" style="fill: #FFD23F"></rect>
+<rect x="588" y="516" width="132" height="10" style="fill: #FFD23F"></rect>
+<rect x="60" y="481" width="528" height="10" style="fill: #FFD23F; opacity: .8"></rect>
+<rect x="60" y="434" width="528" height="9" style="fill: #C2387A; opacity: .8"></rect>
+<rect x="60" y="387" width="528" height="8" style="fill: #C2387A; opacity: .55"></rect>
+<rect x="60" y="340" width="528" height="7" style="fill: #3B1F6B; opacity: .9"></rect>
+<rect x="588" y="470" width="132" height="10" style="fill: #FFD23F; opacity: .85"></rect>
+<rect x="588" y="422" width="132" height="9" style="fill: #C2387A; opacity: .7"></rect>
+<rect x="588" y="376" width="132" height="8" style="fill: #C2387A; opacity: .4"></rect>
+<rect x="588" y="328" width="132" height="7" style="fill: #3B1F6B; opacity: .6"></rect>
+<rect x="258" y="420" width="34" height="122" style="fill: url(#kick)"></rect>
+<rect x="588" y="420" width="34" height="122" style="fill: url(#kick)"></rect>
+<rect x="93" y="170" width="22" height="300" style="fill: #FFD23F; opacity: .85"></rect>
+<rect x="115" y="190" width="150" height="260" style="fill: url(#tail)"></rect>
+<rect x="423" y="170" width="22" height="300" style="fill: #FFD23F; opacity: .85"></rect>
+<rect x="445" y="190" width="150" height="260" style="fill: url(#tail)"></rect>
+<rect class="hh" x="93" y="128" width="9" height="46"></rect>
+<rect class="hh" x="134" y="128" width="9" height="46" style="opacity: .4"></rect>
+<rect class="hh" x="175" y="120" width="60" height="70" style="fill: url(#tail)"></rect>
+<rect class="hh" x="175" y="128" width="9" height="46"></rect>
+<rect class="hh" x="217" y="128" width="9" height="46" style="opacity: .45"></rect>
+<rect class="hh" x="258" y="128" width="9" height="46"></rect>
+<rect class="hh" x="299" y="128" width="9" height="46" style="opacity: .4"></rect>
+<rect class="hh" x="340" y="120" width="60" height="70" style="fill: url(#tail)"></rect>
+<rect class="hh" x="340" y="128" width="9" height="46"></rect>
+<rect class="hh" x="382" y="128" width="9" height="46" style="opacity: .5"></rect>
+<rect class="hh" x="423" y="128" width="9" height="46"></rect>
+<rect class="hh" x="464" y="128" width="9" height="46" style="opacity: .4"></rect>
+<rect class="hh" x="505" y="120" width="60" height="70" style="fill: url(#tail)"></rect>
+<rect class="hh" x="505" y="128" width="9" height="46"></rect>
+<rect class="hh" x="547" y="128" width="9" height="46" style="opacity: .45"></rect>
+<rect class="hh" x="588" y="128" width="9" height="46"></rect>
+<rect class="hh" x="629" y="128" width="9" height="46" style="opacity: .5"></rect>
+<rect class="hh" x="670" y="120" width="50" height="70" style="fill: url(#tail)"></rect>
+<rect class="hh" x="670" y="128" width="9" height="46"></rect>
+<rect class="hh" x="711" y="128" width="9" height="46" style="opacity: .8"></rect>
+</g>
+
+<rect class="ol" x="60" y="525" width="198" height="16" rx="3" style="stroke: #B388FF"></rect>
+<rect class="ol" x="258" y="525" width="330" height="16" rx="3" style="stroke: #B388FF"></rect>
+<rect class="ol" x="588" y="513" width="132" height="16" rx="3" style="stroke: #B388FF"></rect>
+<path d="M 720 513 L 918 513 L 918 529 L 720 529" style="fill: none; stroke: #B388FF; stroke-width: 2; stroke-dasharray: 5 4"></path>
+<rect class="ol" x="60" y="478" width="198" height="16" rx="3" style="stroke: #FF8A3D"></rect>
+<rect class="ol" x="258" y="478" width="330" height="16" rx="3" style="stroke: #FF8A3D"></rect>
+<rect class="ol" x="588" y="467" width="132" height="16" rx="3" style="stroke: #FF8A3D"></rect>
+<path d="M 720 467 L 918 467 L 918 483 L 720 483" style="fill: none; stroke: #FF8A3D; stroke-width: 2; stroke-dasharray: 5 4"></path>
+
+<rect x="60" y="558" width="880" height="14" style="fill: #12101F"></rect>
+<rect class="fl" x="93" y="560" width="41" height="10" rx="2" style="fill: #FFD23F"></rect>
+<rect class="fl" x="423" y="560" width="41" height="10" rx="2" style="fill: #FFD23F"></rect>
+<rect x="753" y="560" width="41" height="10" rx="2" style="fill: none; stroke: #FFD23F; stroke-width: 1.5; stroke-dasharray: 3 3"></rect>
+<rect class="fl" x="258" y="560" width="41" height="10" rx="2" style="fill: #FF4D8D"></rect>
+<rect class="fl" x="588" y="560" width="41" height="10" rx="2" style="fill: #FF4D8D"></rect>
+<rect x="918" y="560" width="22" height="10" rx="2" style="fill: none; stroke: #FF4D8D; stroke-width: 1.5; stroke-dasharray: 3 3"></rect>
+
+<path d="M 464 162 L 464 154 L 590 154 L 590 162" style="fill: none; stroke: #F4F1FF; stroke-width: 1.5"></path>
+<text x="527" y="146" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #F4F1FF; text-anchor: middle">snare rings past its scored end</text>
+
+<line x1="720" y1="100" x2="720" y2="574" style="stroke: #F4F1FF; stroke-width: 2"></line>
+<text x="728" y="104" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #F4F1FF">now</text>
+<text x="830" y="300" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #A49EC4; text-anchor: middle">not measured yet</text>
+<text x="830" y="316" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #A49EC4; text-anchor: middle">score only</text>
+
+<text class="ax" x="52" y="118">16k</text>
+<text class="ax" x="52" y="304">1k</text>
+<text class="ax" x="52" y="461">100</text>
+<text class="ax" x="52" y="544">30 Hz</text>
+
+<rect x="60" y="584" width="40" height="8" style="fill: #C2387A"></rect>
+<text class="lg" x="108" y="592">measured output</text>
+<rect x="240" y="583" width="40" height="10" rx="2" style="fill: none; stroke: #B388FF; stroke-width: 2"></rect>
+<text class="lg" x="288" y="592">scored note</text>
+<rect x="400" y="584" width="40" height="8" rx="2" style="fill: #FFD23F"></rect>
+<text class="lg" x="448" y="592">unpitched onset strip</text>
+</svg>
+
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">08</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Afterglow</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">heard vs scored</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 11 · 40% · needs audio</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div>
+<p class="sp">Shows</p>
+<p class="tx">Score meets sound. The measured output scrolls as a spectrogram with the scored notes outlined on top, so what rings on after a note ends is plain to see.</p>
+</div>
+<div>
+<p class="sp">Mapping</p>
+<ul class="mp">
+<li>needs audio → output spectrum, low at the bottom, log scale</li>
+<li>brightness → measured level; heat colours mean measured only</li>
+<li>scored note → outline at its pitch and real span, instrument colour</li>
+<li>unpitched notes → spans on the floor strip</li>
+<li>after now → dashed outlines only; nothing is measured yet</li>
+</ul>
+</div>
+<div>
+<p class="sp">Build</p>
+<ul class="mp">
+<li>Canvas 2D · audio + score · window</li>
+<li>measured and scored always labelled apart</li>
+<li>tails are seen, never inferred from settings</li>
+</ul>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

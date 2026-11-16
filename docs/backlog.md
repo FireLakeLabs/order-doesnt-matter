@@ -51,7 +51,16 @@ and pass CI; they remain unmerged. Implementation status does not imply deployme
 - **Lint advisories:** seven moderate minimatch/typescript-eslint chain entries
   remain without an established compatible remedy. The last recorded
   production-only audit reported none; dependency changes need fresh checks.
-- **Redesign wave:** planned; its design lives with the owner until its briefs land.
+- **Redesign wave:** in progress per the [Studio design](../research/redesign/design.md).
+  Left: Scope (with the Studio audio tap), the switch to the Studio as the main
+  page, and a polish pass.
+- **Timing-dependent browser tests:** the Studio transport comparisons, the
+  practice start-up wait, the flood delivery count and a Kiln rhythm wait that
+  hangs to the 60 s limit failed CI and deploys without a product defect. Being
+  fixed before the second wave.
+- **Second wave of views:** 24 more views, planned in
+  [second-wave.md](../research/redesign/second-wave.md). Starts after the test
+  fixes; Afterglow waits for Scope.
 
 ## Design questions
 

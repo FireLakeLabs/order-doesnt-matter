@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Chord star</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.pc{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:17px;text-anchor:middle;fill:#A49EC4}
+.pc.on{fill:#F4F1FF}
+.nd{fill:#2A2545}
+.hl{font-family:'JetBrains Mono',monospace;font-size:12px;fill:#A49EC4}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="The circle of fifths with twelve pitch classes. A flat, C and E flat are lit and joined into a blue triangle: A flat major. The previous chord, C minor, is a faded dashed outline; the next chord, F minor, is dotted. The lead's E flat is a pink pip beside E flat." style="position: absolute; left: 0; top: 0; display: block">
+
+<circle cx="480" cy="320" r="200" style="fill: none; stroke: #2A2545; stroke-width: 1.5"></circle>
+<circle cx="480" cy="320" r="120" style="fill: none; stroke: #2A2545; stroke-width: 1; opacity: .5"></circle>
+
+<polygon points="480,120 580,146.8 280,320" style="fill: none; stroke: #6FA0FF; stroke-width: 1.5; stroke-dasharray: 6 5; opacity: .4"></polygon>
+<polygon points="380,146.8 306.8,420 480,120" style="fill: none; stroke: #6FA0FF; stroke-width: 1.5; stroke-dasharray: 1 6; stroke-linecap: round; opacity: .55"></polygon>
+<text class="hl" x="392" y="178" style="fill: #6FA0FF; opacity: .8">next</text>
+
+<polygon points="306.8,420 480,120 280,320" style="fill: #6FA0FF; fill-opacity: .2; stroke: #6FA0FF; stroke-width: 2.5; filter: drop-shadow(0 0 10px #6FA0FF)"></polygon>
+
+<circle class="nd" cx="480" cy="120" r="6"></circle>
+<circle class="nd" cx="580" cy="146.8" r="6"></circle>
+<circle class="nd" cx="653.2" cy="220" r="6"></circle>
+<circle class="nd" cx="680" cy="320" r="6"></circle>
+<circle class="nd" cx="653.2" cy="420" r="6"></circle>
+<circle class="nd" cx="580" cy="493.2" r="6"></circle>
+<circle class="nd" cx="480" cy="520" r="6"></circle>
+<circle class="nd" cx="380" cy="493.2" r="6"></circle>
+<circle class="nd" cx="306.8" cy="420" r="6"></circle>
+<circle class="nd" cx="280" cy="320" r="6"></circle>
+<circle class="nd" cx="306.8" cy="220" r="6"></circle>
+<circle class="nd" cx="380" cy="146.8" r="6"></circle>
+
+<circle cx="480" cy="120" r="12" style="fill: #6FA0FF; filter: drop-shadow(0 0 8px #6FA0FF)"></circle>
+<circle cx="280" cy="320" r="12" style="fill: #6FA0FF; filter: drop-shadow(0 0 8px #6FA0FF)"></circle>
+<circle cx="306.8" cy="420" r="17" style="fill: #6FA0FF; filter: drop-shadow(0 0 10px #6FA0FF)"></circle>
+<circle cx="306.8" cy="420" r="24" style="fill: none; stroke: #6FA0FF; stroke-width: 1.5; opacity: .6"></circle>
+<circle cx="280" cy="320" r="19" style="fill: none; stroke: #FF9EC0; stroke-width: 3; filter: drop-shadow(0 0 8px #FF9EC0)"></circle>
+
+<text class="pc on" x="480" y="89">C</text>
+<text class="pc" x="598" y="121">G</text>
+<text class="pc" x="684" y="207">D</text>
+<text class="pc" x="716" y="325">A</text>
+<text class="pc" x="684" y="443">E</text>
+<text class="pc" x="598" y="529">B</text>
+<text class="pc" x="480" y="561">F♯</text>
+<text class="pc" x="362" y="529">D♭</text>
+<text class="pc on" x="268" y="452">A♭</text>
+<text class="pc on" x="236" y="325">E♭</text>
+<text class="pc" x="276" y="207">B♭</text>
+<text class="pc" x="362" y="121">F</text>
+
+<text x="500" y="318" style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 76px; fill: #F4F1FF; text-anchor: middle">A♭</text>
+<text x="500" y="346" style="font-family: 'Space Grotesk', sans-serif; font-weight: 500; font-size: 18px; fill: #A49EC4; text-anchor: middle">major</text>
+<text x="500" y="374" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; fill: #A49EC4; text-anchor: middle">A♭2 E♭3 C4 · E♭4</text>
+
+<text class="hl" x="776" y="150">chords</text>
+<line x1="776" y1="160" x2="936" y2="160" style="stroke: #2A2545"></line>
+<text class="hl" x="776" y="188">bar 17</text><text x="840" y="188" style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; fill: #A49EC4">C minor</text>
+<rect x="768" y="200" width="172" height="32" rx="8" style="fill: #12101F; stroke: #6FA0FF; stroke-width: 1.5"></rect>
+<text class="hl" x="776" y="221" style="fill: #F4F1FF">bar 18</text><text x="840" y="221" style="font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 15px; fill: #F4F1FF">A♭ major</text>
+<text class="hl" x="776" y="256">bar 19</text><text x="840" y="256" style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; fill: #6FA0FF">F minor</text>
+<text class="hl" x="776" y="286" style="opacity: .6">bar 20</text><text x="840" y="286" style="font-family: 'Space Grotesk', sans-serif; font-size: 15px; fill: #6FA0FF; opacity: .6">G major</text>
+
+<circle cx="30" cy="528" r="5" style="fill: #6FA0FF"></circle><text class="hl" x="42" y="532" style="fill: #F4F1FF">darkPad</text>
+<circle cx="30" cy="552" r="5" style="fill: #FF9EC0"></circle><text class="hl" x="42" y="556" style="fill: #F4F1FF">lead</text>
+<rect x="24" y="568" width="150" height="22" rx="11" style="fill: none; stroke: #2A2545"></rect>
+<circle cx="38" cy="579" r="4" style="fill: #E8A0D8"></circle><text class="hl" x="48" y="583">not pitched: vocal</text>
+</svg>
+
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">05</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Chord star</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">harmony</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 18 · 30% · breakdown</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div>
+<p class="sp">Shows</p>
+<p class="tx">Harmony at a glance. The pitches sounding now light up on the circle of fifths and join into a shape, so chords you know become shapes you know.</p>
+</div>
+<div>
+<p class="sp">Mapping</p>
+<ul class="mp">
+<li>pitch class → its place on the circle of fifths; octave ignored</li>
+<li>sounding notes → lit in their instrument's colour; lowest → heavier</li>
+<li>several at once → joined into a polygon</li>
+<li>chord before → fading outline · next chord → dotted, from the window</li>
+<li>a clear triad is named; anything else lists its notes</li>
+</ul>
+</div>
+<div>
+<p class="sp">Build</p>
+<ul class="mp">
+<li>Canvas 2D · score · window</li>
+<li>pitch from note, freq, or n with a scale</li>
+<li>unpitched instruments listed, never dropped</li>
+</ul>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

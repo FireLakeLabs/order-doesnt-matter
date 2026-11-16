@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Rimshot</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.en{fill:none;stroke-width:2;stroke-linejoin:round}
+.lb{font-family:'JetBrains Mono',monospace;font-size:11px;text-anchor:middle}
+.hud{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.14em;fill:#F4F1FF}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="Looking down a sixteen-lane vector tube shaped like a soft star. Each instrument owns a run of lanes around the rim. Small vector enemies climb from the far end toward the rim; the snare and the next hats are almost there. The subBass and wobbleBass lanes are lit from the rim back to where their held notes end. A white claw sits on the hats lane where a burst marks the note that just landed." style="position: absolute; left: 0; top: 0; display: block">
+<rect x="0" y="0" width="960" height="600" style="fill: #020205"></rect>
+
+<g style="filter: drop-shadow(0 0 4px rgba(120,140,255,.6))">
+<path d="{{lk}}" style="fill: #FF4D8D; opacity: .07"></path>
+<path d="{{ls}}" style="fill: #FFD23F; opacity: .07"></path>
+<path d="{{lh}}" style="fill: #3DDCFF; opacity: .07"></path>
+<path d="{{lo}}" style="fill: #5BFF8F; opacity: .07"></path>
+<path d="{{lb}}" style="fill: #B388FF; opacity: .07"></path>
+<path d="{{lw}}" style="fill: #FF8A3D; opacity: .07"></path>
+<path d="{{spokes}}" style="fill: none; stroke: #4F5BD5; stroke-width: 1.2"></path>
+<path d="{{near}}" style="fill: none; stroke: #6F7BFF; stroke-width: 2.5"></path>
+<path d="{{far}}" style="fill: none; stroke: #4F5BD5; stroke-width: 1.5"></path>
+</g>
+
+<path d="{{railSub}}" style="fill: #B388FF; opacity: .45; filter: drop-shadow(0 0 10px #B388FF)"></path>
+<path d="{{railWob}}" style="fill: #FF8A3D; opacity: .45; filter: drop-shadow(0 0 10px #FF8A3D)"></path>
+
+<g style="filter: drop-shadow(0 0 5px currentColor)">
+<path class="en" d="{{eKick}}" style="stroke: #FF4D8D"></path>
+<path class="en" d="{{eSnare}}" style="stroke: #FFD23F"></path>
+<path class="en" d="{{eHats}}" style="stroke: #3DDCFF"></path>
+<path class="en" d="{{eOh}}" style="stroke: #5BFF8F"></path>
+<path class="en" d="{{eSub}}" style="stroke: #B388FF"></path>
+<path class="en" d="{{eWob}}" style="stroke: #FF8A3D"></path>
+</g>
+
+<path d="{{burst}}" style="fill: none; stroke: #CFF6FF; stroke-width: 2; stroke-linecap: round"></path>
+<path d="{{claw}}" style="fill: none; stroke: #FFFFFF; stroke-width: 3; stroke-linejoin: round; stroke-linecap: round; filter: drop-shadow(0 0 8px #3DDCFF)"></path>
+
+<text class="lb" x="{{lab.kick.x}}" y="{{lab.kick.y}}" style="fill: #FF4D8D">kick</text>
+<text class="lb" x="{{lab.snare.x}}" y="{{lab.snare.y}}" style="fill: #FFD23F">snare</text>
+<text class="lb" x="{{lab.hats.x}}" y="{{lab.hats.y}}" style="fill: #3DDCFF">hats</text>
+<text class="lb" x="{{lab.oh.x}}" y="{{lab.oh.y}}" style="fill: #5BFF8F">open hat</text>
+<text class="lb" x="{{lab.sub.x}}" y="{{lab.sub.y}}" style="fill: #B388FF">subBass</text>
+<text class="lb" x="{{lab.wob.x}}" y="{{lab.wob.y}}" style="fill: #FF8A3D">wobbleBass</text>
+
+<text class="hud" x="936" y="72" style="text-anchor: end; fill: #FFD23F">LEVEL III · DROP</text>
+<text class="hud" x="936" y="92" style="text-anchor: end; fill: #A49EC4">NEXT TUBE IN 5.6</text>
+<circle cx="910" cy="124" r="16" style="fill: none; stroke: #4F5BD5; stroke-width: 1.5"></circle>
+<circle cx="910" cy="124" r="5" style="fill: none; stroke: #4F5BD5; stroke-width: 1"></circle>
+<text x="886" y="128" style="font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #A49EC4; text-anchor: end">breakdown</text>
+<text x="24" y="100" style="font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #A49EC4">rim = now</text>
+<text x="24" y="116" style="font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #A49EC4">far end = one window ahead</text>
+<text x="24" y="132" style="font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #A49EC4">lit lane = held note</text>
+</svg>
+
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">24</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Rimshot</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">tube shooter</span>
+</div>
+<div style="position: absolute; left: 24px; top: 56px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 11 · 40% · window 1</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div>
+<p class="sp">Shows</p>
+<p class="tx">Down the throat of a vector tube. Notes climb their lanes from the far end and reach the rim exactly on their onset, where the claw zaps them.</p>
+</div>
+<div>
+<p class="sp">Mapping</p>
+<ul class="mp">
+<li>instrument → a run of lanes around the rim · pitch → lane within its run</li>
+<li>depth → time until onset; the far end is one Window ahead</li>
+<li>onset → the enemy reaches the rim and is zapped; the claw jumps there</li>
+<li>held note → its lane lights from the rim back to where the note ends</li>
+<li>section → a new tube shape, previewed before it arrives</li>
+</ul>
+</div>
+<div>
+<p class="sp">Build</p>
+<ul class="mp">
+<li>Canvas 2D vector lines · score · window</li>
+<li>unpitched parts cycle through their lanes</li>
+<li>over 32 lanes → lanes merge, enemies shrink</li>
+</ul>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+const CX = 480, CY = 330, R = 238, N = 16, NOW = 10.4, LA = 1;
+const f = (v) => v.toFixed(1);
+const V = [];
+for (let i = 0; i < N; i++) {
+const a = -Math.PI / 2 + (2 * Math.PI * i) / N - Math.PI / N;
+const r = R * (i % 2 ? 0.84 : 1);
+V.push([Math.cos(a) * r, Math.sin(a) * r]);
+}
+const s = (d) => 1 / (1 + 4.5 * d);
+const P = (v, d) => [CX + v[0] * s(d), CY + v[1] * s(d)];
+const ring = (d) => 'M' + V.map((v) => P(v, d).map(f).join(' ')).join(' L') + ' Z';
+const quad = (i, d0, d1) => {
+const a = V[i], b = V[(i + 1) % N];
+return ' M' + [P(a, d0), P(b, d0), P(b, d1), P(a, d1)].map((p) => p.map(f).join(' ')).join(' L') + ' Z';
+};
+const mid = (i, d) => { const a = P(V[i], d), b = P(V[(i + 1) % N], d); return [(a[0] + b[0]) / 2, (a[1] + b[1]) / 2]; };
+let spokes = '';
+V.forEach((v) => { spokes += ' M' + P(v, 0).map(f).join(' ') + ' L' + P(v, 1).map(f).join(' '); });
+const runs = { lk: [0, 1], ls: [2, 3], lh: [4, 5, 6, 7], lo: [8, 9], lb: [10, 11, 12], lw: [13, 14, 15] };
+const out = { near: ring(0), far: ring(1), spokes: spokes };
+Object.keys(runs).forEach((k) => { out[k] = runs[k].map((i) => quad(i, 0, 1)).join(''); });
+out.railSub = quad(10, 0, 0.6);
+out.railWob = quad(13, 0, 0.6);
+const glyph = (kind, i, t) => {
+const d = (t - NOW) / LA;
+const c = mid(i, d);
+const h = 13 * s(d) + 2;
+const x = c[0], y = c[1];
+if (kind === 'diamond') return ' M' + f(x) + ' ' + f(y - h) + ' L' + f(x + h) + ' ' + f(y) + ' L' + f(x) + ' ' + f(y + h) + ' L' + f(x - h) + ' ' + f(y) + ' Z';
+if (kind === 'bow') return ' M' + f(x - h) + ' ' + f(y - h) + ' L' + f(x + h) + ' ' + f(y + h) + ' L' + f(x + h) + ' ' + f(y - h) + ' L' + f(x - h) + ' ' + f(y + h) + ' Z';
+if (kind === 'square') return ' M' + f(x - h) + ' ' + f(y - h) + ' h' + f(2 * h) + ' v' + f(2 * h) + ' h' + f(-2 * h) + ' Z';
+if (kind === 'ring') return ' M' + f(x - h) + ' ' + f(y) + ' a' + f(h) + ' ' + f(h) + ' 0 1 0 ' + f(2 * h) + ' 0 a' + f(h) + ' ' + f(h) + ' 0 1 0 ' + f(-2 * h) + ' 0';
+return ' M' + f(x - h * 1.4) + ' ' + f(y) + ' L' + f(x) + ' ' + f(y - h * 0.7) + ' L' + f(x + h * 1.4) + ' ' + f(y) + ' L' + f(x) + ' ' + f(y + h * 0.7) + ' Z';
+};
+out.eHats = [[4, 10.5], [5, 10.625], [6, 10.75], [7, 10.875], [4, 11.0], [5, 11.125], [6, 11.25], [7, 11.375]].map((q) => glyph('diamond', q[0], q[1])).join('');
+out.eSnare = glyph('bow', 2, 10.5);
+out.eKick = glyph('square', 0, 11.0);
+out.eOh = glyph('ring', 8, 10.75) + glyph('ring', 9, 11.25);
+out.eSub = glyph('dart', 11, 11.0);
+out.eWob = glyph('dart', 14, 11.0);
+const m7 = mid(7, 0);
+const ux = (m7[0] - CX), uy = (m7[1] - CY);
+const ul = Math.sqrt(ux * ux + uy * uy);
+const nx = ux / ul, ny = uy / ul;
+const a7 = P(V[7], 0), b7 = P(V[8], 0);
+out.claw = 'M' + f(a7[0]) + ' ' + f(a7[1]) + ' L' + f(m7[0] + nx * 22) + ' ' + f(m7[1] + ny * 22) + ' L' + f(b7[0]) + ' ' + f(b7[1]) + ' M' + f(m7[0] + nx * 22) + ' ' + f(m7[1] + ny * 22) + ' L' + f(m7[0] + nx * 6) + ' ' + f(m7[1] + ny * 6);
+let burst = '';
+for (let k = 0; k < 10; k++) {
+const a = (2 * Math.PI * k) / 10;
+burst += ' M' + f(m7[0] - nx * 8 + Math.cos(a) * 8) + ' ' + f(m7[1] - ny * 8 + Math.sin(a) * 8) + ' L' + f(m7[0] - nx * 8 + Math.cos(a) * 20) + ' ' + f(m7[1] - ny * 8 + Math.sin(a) * 20);
+}
+out.burst = burst;
+const lab = (i0, i1) => {
+const a = P(V[i0], 0), b = P(V[(i1 + 1) % N], 0);
+const mx = (a[0] + b[0]) / 2 - CX, my = (a[1] + b[1]) / 2 - CY;
+const l = Math.sqrt(mx * mx + my * my) || 1;
+return { x: f(CX + (mx / l) * 262), y: f(CY + (my / l) * 262 + 4) };
+};
+out.lab = { kick: lab(0, 1), snare: lab(2, 3), hats: lab(4, 7), oh: lab(8, 9), sub: lab(10, 12), wob: lab(13, 15) };
+return out;
+}
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Saucers</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.nm{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#A49EC4;text-anchor:middle}
+.on{fill:#F4F1FF}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="Flying saucers over a desert farm at night, each piloted by a small green alien. The subBass saucer's purple tractor beam is lifting a cow, the wobbleBass saucer's orange beam is lifting a pickup truck, and the hats saucer is zapping the ground. The snare saucer is charging up. A huge mothership across the top right is Room 1; the snare and wobbleBass saucers fly in its light. The kick and open hat saucers are dark and resting." style="position: absolute; left: 0; top: 0; display: block">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" style="stop-color: #04040E"></stop>
+<stop offset="1" style="stop-color: #141432"></stop>
+</linearGradient>
+<linearGradient id="room" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" style="stop-color: #FFD23F; stop-opacity: .12"></stop>
+<stop offset="1" style="stop-color: #FFD23F; stop-opacity: 0"></stop>
+</linearGradient>
+<linearGradient id="bp" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" style="stop-color: #B388FF; stop-opacity: .7"></stop>
+<stop offset="1" style="stop-color: #B388FF; stop-opacity: .12"></stop>
+</linearGradient>
+<linearGradient id="bo" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" style="stop-color: #FF8A3D; stop-opacity: .65"></stop>
+<stop offset="1" style="stop-color: #FF8A3D; stop-opacity: .1"></stop>
+</linearGradient>
+<g id="ufo">
+<path d="M -18 -4 A 18 17 0 0 1 18 -4 Z" style="fill: #9FE8FF; opacity: .3"></path>
+<ellipse cx="0" cy="-11" rx="6" ry="7" style="fill: #7CFF9E"></ellipse>
+<ellipse cx="-2.6" cy="-12" rx="2" ry="3" style="fill: #07060D"></ellipse>
+<ellipse cx="2.6" cy="-12" rx="2" ry="3" style="fill: #07060D"></ellipse>
+<ellipse cx="0" cy="0" rx="44" ry="11" style="fill: #24203A; stroke: currentColor; stroke-width: 2"></ellipse>
+<ellipse cx="0" cy="7" rx="26" ry="6" style="fill: #17142A"></ellipse>
+<circle cx="-30" cy="2" r="2.6" style="fill: currentColor"></circle>
+<circle cx="-15" cy="5" r="2.6" style="fill: currentColor"></circle>
+<circle cx="0" cy="6" r="2.6" style="fill: currentColor"></circle>
+<circle cx="15" cy="5" r="2.6" style="fill: currentColor"></circle>
+<circle cx="30" cy="2" r="2.6" style="fill: currentColor"></circle>
+</g>
+</defs>
+
+<rect x="0" y="0" width="960" height="600" style="fill: url(#sky)"></rect>
+<path d="{{stars}}" style="fill: #F4F1FF; opacity: .6"></path>
+
+<polygon points="560,110 960,110 960,500 600,500" style="fill: url(#room)"></polygon>
+<ellipse cx="780" cy="60" rx="300" ry="56" style="fill: #110F22; stroke: #2A2545; stroke-width: 2"></ellipse>
+<ellipse cx="780" cy="88" rx="220" ry="18" style="fill: #0B0A18"></ellipse>
+<path d="{{rim}}" style="fill: #FFD23F; opacity: .8"></path>
+<text x="560" y="40" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #FFD23F">mothership · room 1</text>
+
+<path d="M 0 490 L 0 452 L 60 452 L 74 430 L 150 430 L 166 452 L 250 458 L 420 462 L 460 444 L 540 444 L 556 466 L 700 470 L 760 448 L 840 448 L 860 470 L 960 470 L 960 490 Z" style="fill: #120E22"></path>
+<rect x="0" y="490" width="960" height="110" style="fill: #0D0A18"></rect>
+<rect x="196" y="452" width="56" height="38" style="fill: #0A0814"></rect>
+<polygon points="190,454 224,432 258,454" style="fill: #0A0814"></polygon>
+<rect x="208" y="464" width="10" height="9" style="fill: #FFD23F; opacity: .8"></rect>
+<line x1="300" y1="490" x2="300" y2="436" style="stroke: #0A0814; stroke-width: 3"></line>
+<path d="M 300 436 L 286 424 M 300 436 L 316 426 M 300 436 L 298 452 M 300 436 L 288 448" style="stroke: #0A0814; stroke-width: 3"></path>
+<path d="M 40 496 L 40 484 M 80 496 L 80 484 M 120 496 L 120 484 M 160 496 L 160 484 M 40 488 L 160 488" style="stroke: #1E1A30; stroke-width: 2"></path>
+
+<ellipse cx="130" cy="508" rx="34" ry="6" style="fill: none; stroke: #FF4D8D; stroke-width: 1.5; opacity: .35"></ellipse>
+<use href="#ufo" transform="translate(130 170)" style="color: #3A3555"></use>
+<text class="nm" x="130" y="200">kick · resting</text>
+
+<use href="#ufo" transform="translate(268 128) scale(.9)" style="color: #3A3555"></use>
+<text class="nm" x="268" y="156">open hat</text>
+
+<path d="M 380 220 L 372 300 L 388 330 L 366 410 L 380 440 L 362 500" style="fill: none; stroke: #CFF6FF; stroke-width: 3; stroke-linejoin: round; filter: drop-shadow(0 0 8px #3DDCFF)"></path>
+<path d="M 362 500 L 346 488 M 362 500 L 380 486 M 362 500 L 340 502 M 362 500 L 384 504" style="stroke: #3DDCFF; stroke-width: 2; stroke-linecap: round"></path>
+<g style="filter: drop-shadow(0 0 10px #3DDCFF)"><use href="#ufo" transform="translate(380 208) scale(.8)" style="color: #3DDCFF"></use></g>
+<text class="nm on" x="380" y="186">hats</text>
+
+<polygon points="500,342 540,342 590,500 450,500" style="fill: url(#bp)"></polygon>
+<g transform="translate(520 438)">
+<ellipse cx="0" cy="0" rx="18" ry="10" style="fill: #EDE6F8"></ellipse>
+<circle cx="18" cy="-6" r="7" style="fill: #EDE6F8"></circle>
+<path d="M -11 8 L -12 18 M -4 9 L -4 19 M 6 9 L 7 19 M 12 8 L 14 17" style="stroke: #EDE6F8; stroke-width: 3; stroke-linecap: round"></path>
+<ellipse cx="-6" cy="-2" rx="5" ry="4" style="fill: #2A2545"></ellipse>
+<ellipse cx="6" cy="3" rx="4" ry="3" style="fill: #2A2545"></ellipse>
+</g>
+<g style="filter: drop-shadow(0 0 12px #B388FF)"><use href="#ufo" transform="translate(520 330)" style="color: #B388FF"></use></g>
+<text class="nm on" x="520" y="364" style="fill: #F4F1FF">subBass · 40% up</text>
+
+<g style="filter: drop-shadow(0 0 10px #FFD23F)"><use href="#ufo" transform="translate(640 200) scale(.9)" style="color: #FFD23F"></use></g>
+<circle cx="640" cy="200" r="54" style="fill: none; stroke: #FFD23F; stroke-width: 1.5; stroke-dasharray: 3 5; opacity: .6"></circle>
+<text class="nm" x="640" y="270" style="fill: #FFD23F">snare · fires in 0.1</text>
+
+<polygon points="782,272 818,272 860,500 740,500" style="fill: url(#bo)"></polygon>
+<g transform="translate(800 412)">
+<path d="M -24 0 L -24 -10 L -6 -10 L -2 -20 L 14 -20 L 20 -10 L 24 -10 L 24 0 Z" style="fill: #F2E2D2"></path>
+<rect x="0" y="-18" width="10" height="7" style="fill: #3A3555"></rect>
+<circle cx="-14" cy="2" r="5" style="fill: #3A3555"></circle>
+<circle cx="14" cy="2" r="5" style="fill: #3A3555"></circle>
+</g>
+<g style="filter: drop-shadow(0 0 12px #FF8A3D)"><use href="#ufo" transform="translate(800 262)" style="color: #FF8A3D"></use></g>
+<text class="nm on" x="800" y="296" style="fill: #F4F1FF">wobbleBass · 40% up</text>
+</svg>
+
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">23</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Saucers</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">invasion</span>
+</div>
+<div style="position: absolute; left: 24px; top: 56px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 11 · 40%</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div>
+<p class="sp">Shows</p>
+<p class="tx">A night-sky invasion. Each instrument flies a saucer: short notes are zaps, held notes are tractor beams that lift their cargo for exactly the note's length.</p>
+</div>
+<div>
+<p class="sp">Mapping</p>
+<ul class="mp">
+<li>instrument → a saucer and its pilot · altitude → pitch; unpitched by row</li>
+<li>onset → the beam fires · held note → cargo rises over its real span</li>
+<li>gain → beam width · resting → lights off, drifting</li>
+<li>room (orbit) → a mothership; saucers sending to it fly in its light</li>
+<li>section change → the mothership arrives or leaves</li>
+</ul>
+</div>
+<div>
+<p class="sp">Build</p>
+<ul class="mp">
+<li>Canvas 2D · score · window</li>
+<li>cargo picked from a small set by row, never by name</li>
+<li>over 10 instruments → saucers fly in squadrons</li>
+</ul>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+let seed = 23;
+const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+let stars = '';
+for (let i = 0; i < 110; i++) {
+const x = rnd() * 960, y = rnd() * 440, r = 0.5 + rnd() * 1.1;
+stars += ' M' + x.toFixed(1) + ' ' + y.toFixed(1) + ' h' + r.toFixed(1) + ' v' + r.toFixed(1) + ' h-' + r.toFixed(1) + ' Z';
+}
+let rim = '';
+for (let i = 0; i < 18; i++) {
+const a = Math.PI * (0.05 + 0.9 * i / 17);
+const x = 780 - 290 * Math.cos(a), y = 60 + 50 * Math.sin(a);
+rim += ' M' + (x - 3).toFixed(1) + ' ' + y.toFixed(1) + ' a3 3 0 1 0 6 0 a3 3 0 1 0 -6 0';
+}
+return { stars: stars, rim: rim };
+}
+}
+</script>
+</body>
+</html>

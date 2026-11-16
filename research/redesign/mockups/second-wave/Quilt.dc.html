@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Quilt</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.rg{fill:none;stroke-width:4.5}
+.rl{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;fill:#F4F1FF}
+.rb{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#A49EC4}
+.lg{font-family:'JetBrains Mono',monospace;font-size:11px;fill:#A49EC4}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="The song as a quilt: five rows for the sections, one square patch per bar. Inside each patch every instrument is a square ring with its notes stitched at their real positions, time running clockwise. The two drop rows repeat a four-patch motif where the bass splits its bar in two. Bars up to bar 11 are sewn in colour; later bars are chalk outlines." style="position: absolute; left: 0; top: 0; display: block">
+<path d="{{fabIntro}}" style="fill: #141028"></path>
+<path d="{{fabBuild}}" style="fill: #1A1230"></path>
+<path d="{{fabDrop}}" style="fill: #1F0F24"></path>
+<path d="{{fabBreak}}" style="fill: #0F1630"></path>
+<path d="{{stitch}}" style="fill: none; stroke: #2A2545; stroke-width: 1; stroke-dasharray: 3 3"></path>
+
+<path class="rg" d="{{chalk}}" style="stroke: #5A5480; stroke-width: 1.5; stroke-dasharray: 2 3"></path>
+<path class="rg" d="{{s_pad}}" style="stroke: #6FA0FF"></path>
+<path class="rg" d="{{s_vocal}}" style="stroke: #E8A0D8"></path>
+<path class="rg" d="{{f_vocal}}" style="stroke: #E8A0D8; stroke-dasharray: 1.5 3.5"></path>
+<path class="rg" d="{{s_ih}}" style="stroke: #8FE9FF"></path>
+<path class="rg" d="{{s_roll}}" style="stroke: #FFE680"></path>
+<path class="rg" d="{{s_riser}}" style="stroke: #FFB27A"></path>
+<path class="rg" d="{{s_chant}}" style="stroke: #FF8FB8"></path>
+<path class="rg" d="{{s_kick}}" style="stroke: #FF4D8D"></path>
+<path class="rg" d="{{s_snare}}" style="stroke: #FFD23F"></path>
+<path class="rg" d="{{s_hats}}" style="stroke: #3DDCFF"></path>
+<path class="rg" d="{{s_oh}}" style="stroke: #5BFF8F"></path>
+<path class="rg" d="{{s_sub}}" style="stroke: #B388FF"></path>
+<path class="rg" d="{{s_wob}}" style="stroke: #FF8A3D"></path>
+<path class="rg" d="{{s_lead}}" style="stroke: #FF9EC0"></path>
+<path d="{{knots}}" style="fill: #F4F1FF"></path>
+
+<rect x="300" y="264" width="92" height="92" rx="6" style="fill: none; stroke: #FFD23F; stroke-width: 2.5; filter: drop-shadow(0 0 8px #FFD23F)"></rect>
+
+<text class="rl" x="24" y="114">Intro</text><text class="rb" x="24" y="130">bars 1–4</text>
+<text class="rl" x="24" y="212">Build</text><text class="rb" x="24" y="228">bars 5–8</text>
+<text class="rl" x="24" y="310">Drop</text><text class="rb" x="24" y="326">bars 9–16</text>
+<text class="rl" x="24" y="408">Breakdown</text><text class="rb" x="24" y="424">bars 17–20</text>
+<text class="rl" x="24" y="506">Drop</text><text class="rb" x="24" y="522">bars 21–28</text>
+
+<line x1="120" y1="572" x2="140" y2="572" style="stroke: #FF8A3D; stroke-width: 4.5"></line>
+<text class="lg" x="146" y="576">sewn: played</text>
+<line x1="250" y1="572" x2="270" y2="572" style="stroke: #5A5480; stroke-width: 1.5; stroke-dasharray: 2 3"></line>
+<text class="lg" x="276" y="576">chalk: still to come</text>
+<line x1="420" y1="572" x2="440" y2="572" style="stroke: #E8A0D8; stroke-width: 4.5; stroke-dasharray: 1.5 3.5"></line>
+<text class="lg" x="446" y="576">carried over, no new onset</text>
+<rect x="640" y="569" width="5" height="5" style="fill: #F4F1FF"></rect>
+<text class="lg" x="652" y="576">onset · time runs clockwise</text>
+</svg>
+
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">15</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Quilt</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">form</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 11 of 28 · 40%</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div>
+<p class="sp">Shows</p>
+<p class="tx">The song as a quilt: a row per section, a patch per bar. Bars that repeat sew identical patches, so the song's form shows up as pattern.</p>
+</div>
+<div>
+<p class="sp">Mapping</p>
+<ul class="mp">
+<li>section → a row · cycle → a patch, in order</li>
+<li>instrument → a square ring, outermost first; time runs clockwise</li>
+<li>note → a stitched stretch of its ring at its real place; onset → a knot</li>
+<li>note carried over from an earlier cycle → dotted, no knot</li>
+<li>played → sewn in colour · ahead → chalk</li>
+</ul>
+</div>
+<div>
+<p class="sp">Build</p>
+<ul class="mp">
+<li>Canvas 2D · score · whole song</li>
+<li>long sections → rows wrap</li>
+<li>over 8 instruments → inner rings blend to texture</li>
+</ul>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+const NOW = 10.4, S = 84, X0 = 120, Y0 = 72, DX = 92, DY = 98;
+const f = (v) => v.toFixed(1);
+const seg = (x0, y0, L, s, e) => {
+const P = 4 * L;
+const pt = (d) => {
+d = Math.min(d, P);
+if (d <= L) return [x0 + d, y0];
+if (d <= 2 * L) return [x0 + L, y0 + d - L];
+if (d <= 3 * L) return [x0 + L - (d - 2 * L), y0 + L];
+return [x0, y0 + L - (d - 3 * L)];
+};
+const a = s * P, b = e * P;
+let out = ' M' + pt(a).map(f).join(' ');
+[L, 2 * L, 3 * L].forEach((c) => { if (c > a && c < b) out += ' L' + pt(c).map(f).join(' '); });
+return out + ' L' + pt(b).map(f).join(' ');
+};
+const eighth = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => [i / 8, (i + 1) / 8]);
+const whole = [[0, 1]];
+const N = {
+pad: whole, riser: whole, wob: whole, vocal: whole,
+ih: [[0, 0.25], [0.25, 0.5], [0.5, 0.75], [0.75, 1]],
+roll: eighth, hats: eighth,
+chant: [[0.75, 1]],
+kick: [[0, 0.125]],
+snare: [[0.5, 0.625]],
+oh: [[0.25, 0.375], [0.75, 0.875]],
+lead: [[0, 0.125], [0.25, 0.375], [0.5, 0.625], [0.75, 0.875]]
+};
+const subN = (c) => (c % 4 === 3 ? [[0, 0.5], [0.5, 1]] : whole);
+const rows = [
+{ name: 'intro', from: 0, n: 4, fl: ['pad', 'vocal', 'ih'] },
+{ name: 'build', from: 4, n: 4, fl: ['pad', 'roll', 'riser'] },
+{ name: 'drop', from: 8, n: 8, fl: ['kick', 'snare', 'hats', 'oh', 'sub', 'wob'] },
+{ name: 'break', from: 16, n: 4, fl: ['pad', 'vocal', 'lead'] },
+{ name: 'drop', from: 20, n: 8, fl: ['kick', 'snare', 'hats', 'oh', 'sub', 'wob'] }
+];
+const out = { chalk: '', knots: '', f_vocal: '', stitch: '', fabIntro: '', fabBuild: '', fabDrop: '', fabBreak: '' };
+['pad', 'vocal', 'ih', 'roll', 'riser', 'chant', 'kick', 'snare', 'hats', 'oh', 'sub', 'wob', 'lead'].forEach((k) => { out['s_' + k] = ''; });
+const fab = { intro: 'fabIntro', build: 'fabBuild', drop: 'fabDrop', break: 'fabBreak' };
+rows.forEach((r, ri) => {
+for (let k = 0; k < r.n; k++) {
+const c = r.from + k;
+const x = X0 + k * DX, y = Y0 + ri * DY;
+const box = ' M' + x + ' ' + y + ' h' + S + ' v' + S + ' h-' + S + ' Z';
+out[fab[r.name]] += box;
+out.stitch += ' M' + (x + 3) + ' ' + (y + 3) + ' h' + (S - 6) + ' v' + (S - 6) + ' h-' + (S - 6) + ' Z';
+const fl = r.fl.slice();
+if (c === 7) fl.push('chant');
+fl.forEach((name, i) => {
+const inset = 6 + i * 6.5;
+const L = S - 2 * inset;
+const x0 = x + inset, y0 = y + inset;
+const notes = name === 'sub' ? subN(c) : N[name];
+const frag = name === 'vocal' && c % 4 !== 0;
+notes.forEach((n) => {
+const t0 = c + n[0], t1 = c + n[1];
+const sewnEnd = Math.min(t1, NOW);
+if (t0 < NOW) {
+const d = seg(x0, y0, L, n[0], sewnEnd - c);
+if (frag) out.f_vocal += d; else out['s_' + name] += d;
+if (!frag) {
+const p = n[0] * 4 * L;
+const q = p <= L ? [x0 + p, y0] : p <= 2 * L ? [x0 + L, y0 + p - L] : p <= 3 * L ? [x0 + L - (p - 2 * L), y0 + L] : [x0, y0 + L - (p - 3 * L)];
+out.knots += ' M' + f(q[0] - 2.5) + ' ' + f(q[1] - 2.5) + ' h5 v5 h-5 Z';
+}
+}
+if (t1 > NOW) out.chalk += seg(x0, y0, L, Math.max(t0, NOW) - c, n[1]);
+});
+});
+}
+});
+return out;
+}
+}
+</script>
+</body>
+</html>

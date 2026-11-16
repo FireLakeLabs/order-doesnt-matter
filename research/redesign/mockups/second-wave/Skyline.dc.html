@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Skyline</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+
+<div style="position: absolute; left: 0; top: 0; width: 960px; height: 520px; background: linear-gradient(#07060D 40%, #1A1233)"></div>
+
+<svg width="960" height="600" viewBox="0 0 960 600" aria-hidden="true" style="position: absolute; left: 0; top: 0; display: block">
+<circle cx="120" cy="120" r="1.5" style="fill: #F4F1FF; opacity: .6"></circle>
+<circle cx="260" cy="90" r="1" style="fill: #F4F1FF; opacity: .5"></circle>
+<circle cx="520" cy="130" r="1.5" style="fill: #F4F1FF; opacity: .5"></circle>
+<circle cx="640" cy="80" r="1" style="fill: #F4F1FF; opacity: .7"></circle>
+<circle cx="780" cy="150" r="1.5" style="fill: #F4F1FF; opacity: .5"></circle>
+<circle cx="880" cy="100" r="1" style="fill: #F4F1FF; opacity: .6"></circle>
+<circle cx="830" cy="230" r="1" style="fill: #F4F1FF; opacity: .4"></circle>
+<circle cx="200" cy="250" r="1" style="fill: #F4F1FF; opacity: .4"></circle>
+<polygon points="360,306 374,306 440,56 294,56" style="fill: #FFD23F; opacity: .1"></polygon>
+<polygon points="363,306 371,306 400,56 334,56" style="fill: #FFD23F; opacity: .1"></polygon>
+<text x="367" y="48" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; fill: #FFD23F; text-anchor: middle">bar 11</text>
+</svg>
+
+<div role="img" aria-label="The song as a night skyline: one building per bar, floors are the instruments playing that bar, windows are their notes at their real positions. The drops are the tall towers. Bar 11 is lit by a searchlight; its windows light up up to the playhead. Bars ahead are dark." style="position: absolute; left: 0; top: 0; width: 960px; height: 520px">
+<sc-for list="{{buildings}}" as="b" hint-placeholder-count="28">
+<div style="position: absolute; left: {{b.x}}px; top: {{b.y}}px; width: 26px; height: {{b.h}}px; box-sizing: border-box; background: #12101F; border: 1px solid {{b.edge}}; border-bottom: 0; border-radius: 3px 3px 0 0"></div>
+</sc-for>
+<sc-for list="{{windows}}" as="w" hint-placeholder-count="200">
+<div style="position: absolute; left: {{w.x}}px; top: {{w.y}}px; width: {{w.w}}px; height: {{w.h}}px; background: {{w.c}}; opacity: {{w.o}}; box-shadow: {{w.sh}}; border-radius: 1px"></div>
+</sc-for>
+</div>
+
+<div aria-hidden="true" style="position: absolute; left: 0; top: 520px; width: 960px; height: 80px; overflow: hidden; background: #0A0817">
+<div style="position: absolute; left: 0; top: 0; width: 960px; height: 520px; transform: scaleY(-1); transform-origin: 50% 50%; opacity: .22; filter: blur(1.5px)">
+<sc-for list="{{buildings}}" as="b" hint-placeholder-count="28">
+<div style="position: absolute; left: {{b.x}}px; top: {{b.ry}}px; width: 26px; height: {{b.h}}px; background: #12101F"></div>
+</sc-for>
+<sc-for list="{{windows}}" as="w" hint-placeholder-count="200">
+<div style="position: absolute; left: {{w.x}}px; top: {{w.ry}}px; width: {{w.w}}px; height: {{w.h}}px; background: {{w.c}}; opacity: {{w.o}}"></div>
+</sc-for>
+</div>
+</div>
+<div style="position: absolute; left: 0; top: 519px; width: 960px; height: 2px; background: #2A2545"></div>
+
+<sc-for list="{{districts}}" as="d" hint-placeholder-count="5">
+<div style="position: absolute; left: {{d.x}}px; top: 560px; width: {{d.w}}px; box-sizing: border-box; border-top: 1px solid #5A5480; padding-top: 5px; font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .08em; color: #D9D4F2; text-align: center">{{d.label}}</div>
+</sc-for>
+
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">14</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Skyline</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">whole song</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 11 of 28 · 40%</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div>
+<p class="sp">Shows</p>
+<p class="tx">The song as a city at night. Each bar is a building, its floors are the instruments playing, and its windows are their notes, lit as they sound.</p>
+</div>
+<div>
+<p class="sp">Mapping</p>
+<ul class="mp">
+<li>cycle → a building, left to right · section → a district</li>
+<li>floor → an instrument playing that cycle, in row order</li>
+<li>window → a note at its real place and length across the floor</li>
+<li>played → lit · now → lights window by window · ahead → dark</li>
+<li>searchlight → the playhead · unasked cycles → scaffolding</li>
+</ul>
+</div>
+<div>
+<p class="sp">Build</p>
+<ul class="mp">
+<li>Canvas 2D · score · whole song</li>
+<li>over 200 cycles → buildings thin to a silhouette</li>
+<li>dense floors → one lit band</li>
+</ul>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+const X0 = 40, STEP = 31.43, W = 26, FH = 34, G = 520, NOW = 10.4;
+const eighth = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => [i / 8, (i + 1) / 8]);
+const P = {
+pad: ['#6FA0FF', [[0, 1]]],
+vocal: ['#E8A0D8', [[0, 1]]],
+ih: ['#8FE9FF', [[0, 0.25], [0.25, 0.5], [0.5, 0.75], [0.75, 1]]],
+roll: ['#FFE680', eighth],
+riser: ['#FFB27A', [[0, 1]]],
+chant: ['#FF8FB8', [[0.75, 1]]],
+kick: ['#FF4D8D', [[0, 0.125]]],
+snare: ['#FFD23F', [[0.5, 0.625]]],
+hats: ['#3DDCFF', eighth],
+oh: ['#5BFF8F', [[0.25, 0.375], [0.75, 0.875]]],
+sub: ['#B388FF', [[0, 1]]],
+wob: ['#FF8A3D', [[0, 1]]],
+lead: ['#FF9EC0', [[0, 0.125], [0.25, 0.375], [0.5, 0.625], [0.75, 0.875]]]
+};
+const sec = (c) => (c < 4 ? 'intro' : c < 8 ? 'build' : c < 16 ? 'drop' : c < 20 ? 'breakdown' : 'drop');
+const F = {
+intro: ['pad', 'vocal', 'ih'],
+build: ['pad', 'roll', 'riser'],
+drop: ['kick', 'snare', 'hats', 'oh', 'sub', 'wob'],
+breakdown: ['pad', 'vocal', 'lead']
+};
+const buildings = [];
+const windows = [];
+for (let c = 0; c < 28; c++) {
+const fl = F[sec(c)].slice();
+if (c === 7) fl.push('chant');
+const h = fl.length * FH + 10;
+const x = X0 + c * STEP;
+buildings.push({ x: x.toFixed(1), y: G - h, ry: G - h, h: h, edge: c === 10 ? '#FFD23F' : '#2A2545' });
+fl.forEach((name, f) => {
+const col = P[name][0];
+P[name][1].forEach((n) => {
+const t0 = c + n[0];
+const t1 = c + n[1];
+let o = 0.5;
+let sh = 'none';
+if (c > 10) o = 0.12;
+if (c === 10) {
+o = t0 <= NOW ? 0.85 : 0.15;
+if (t0 <= NOW && NOW < t1) { o = 1; sh = '0 0 8px ' + col; }
+}
+const y = G - (f + 1) * FH + 7;
+windows.push({ x: (x + 2 + n[0] * (W - 4)).toFixed(1), y: y, ry: y, w: Math.max(2, (n[1] - n[0]) * (W - 4) - 1).toFixed(1), h: FH - 14, c: col, o: o, sh: sh });
+});
+});
+}
+const d = (label, a, b) => ({ label: label, x: (X0 + a * STEP).toFixed(1), w: ((b - a) * STEP - 5).toFixed(1) });
+return {
+buildings: buildings,
+windows: windows,
+districts: [d('INTRO', 0, 4), d('BUILD', 4, 8), d('DROP', 8, 16), d('BREAK', 16, 20), d('DROP', 20, 28)]
+};
+}
+}
+</script>
+</body>
+</html>

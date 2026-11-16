@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Metronomes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.bd{fill:#12101F;stroke:#2A2545;stroke-width:1.5}
+.sl{fill:#0B0A14}
+.sc{fill:none;stroke:#2A2545;stroke-width:2}
+.arm{stroke-width:5;stroke-linecap:round}
+.nm{font-family:'JetBrains Mono',monospace;font-size:13px;text-anchor:middle;fill:#A49EC4}
+.on{fill:#F4F1FF}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="Six metronomes in a row, one per instrument. Kick, subBass and wobbleBass swing in step; the snare arm is about to reach its extreme; the hats arm swings fast." style="position: absolute; left: 0; top: 0; display: block">
+<rect x="0" y="490" width="960" height="10" style="fill: #12101F"></rect>
+
+<g transform="translate(105 0)">
+<polygon class="bd" points="-62,490 62,490 26,300 -26,300"></polygon>
+<rect class="sl" x="-7" y="312" width="14" height="150" rx="7"></rect>
+<path class="sc" d="M -68.4 267.1 A 200 200 0 0 1 68.4 267.1"></path>
+<g transform="translate(0 455) rotate(-13.2)" style="opacity: .12"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #FF4D8D"></line></g>
+<g transform="translate(0 455) rotate(-10.2)" style="opacity: .25"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #FF4D8D"></line></g>
+<g transform="translate(0 455) rotate(-6.2)"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #FF4D8D"></line><rect x="-11" y="-184" width="22" height="16" rx="4" style="fill: #FF4D8D"></rect></g>
+<circle cx="0" cy="455" r="7" style="fill: #2A2545"></circle>
+<text class="nm" x="0" y="526">kick</text>
+</g>
+
+<g transform="translate(255 0)">
+<polygon class="bd" points="-62,490 62,490 26,300 -26,300"></polygon>
+<rect class="sl" x="-7" y="312" width="14" height="150" rx="7"></rect>
+<path class="sc" d="M -68.4 267.1 A 200 200 0 0 1 68.4 267.1"></path>
+<circle cx="68.4" cy="267.1" r="11" style="fill: none; stroke: #FFD23F; stroke-width: 2; stroke-dasharray: 3 4"></circle>
+<g transform="translate(0 455) rotate(15)" style="opacity: .12"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #FFD23F"></line></g>
+<g transform="translate(0 455) rotate(17.4)" style="opacity: .25"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #FFD23F"></line></g>
+<g transform="translate(0 455) rotate(19)"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #FFD23F"></line><rect x="-11" y="-184" width="22" height="16" rx="4" style="fill: #FFD23F"></rect></g>
+<circle cx="0" cy="455" r="7" style="fill: #2A2545"></circle>
+<text class="nm" x="0" y="526">snare</text>
+<text x="86" y="250" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #FFD23F">click</text>
+</g>
+
+<g transform="translate(405 0)">
+<polygon class="bd" points="-62,490 62,490 26,300 -26,300"></polygon>
+<polygon points="-62,490 62,490 26,300 -26,300" style="fill: #3DDCFF; opacity: .1"></polygon>
+<rect class="sl" x="-7" y="312" width="14" height="150" rx="7"></rect>
+<path class="sc" d="M -68.4 267.1 A 200 200 0 0 1 68.4 267.1"></path>
+<path d="M 68.4 267.1 A 200 200 0 0 0 55.8 262.9" style="fill: none; stroke: #3DDCFF; stroke-width: 4; stroke-linecap: round"></path>
+<g transform="translate(0 455) rotate(19.6)" style="opacity: .14"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #3DDCFF"></line></g>
+<g transform="translate(0 455) rotate(18.5)" style="opacity: .28"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #3DDCFF"></line></g>
+<g transform="translate(0 455) rotate(16.2)" style="filter: drop-shadow(0 0 8px #3DDCFF)"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #3DDCFF"></line><rect x="-11" y="-84" width="22" height="16" rx="4" style="fill: #3DDCFF"></rect></g>
+<circle cx="0" cy="455" r="7" style="fill: #2A2545"></circle>
+<text class="nm on" x="0" y="526">hats</text>
+</g>
+
+<g transform="translate(555 0)">
+<polygon class="bd" points="-62,490 62,490 26,300 -26,300"></polygon>
+<rect class="sl" x="-7" y="312" width="14" height="150" rx="7"></rect>
+<path class="sc" d="M -68.4 267.1 A 200 200 0 0 1 68.4 267.1"></path>
+<g transform="translate(0 455) rotate(-17.5)" style="opacity: .12"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #5BFF8F"></line></g>
+<g transform="translate(0 455) rotate(-15)" style="opacity: .25"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #5BFF8F"></line></g>
+<g transform="translate(0 455) rotate(-11.8)"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #5BFF8F"></line><rect x="-11" y="-132" width="22" height="16" rx="4" style="fill: #5BFF8F"></rect></g>
+<circle cx="0" cy="455" r="7" style="fill: #2A2545"></circle>
+<text class="nm" x="0" y="526">open hat</text>
+</g>
+
+<g transform="translate(705 0)">
+<polygon class="bd" points="-62,490 62,490 26,300 -26,300"></polygon>
+<polygon points="-62,490 62,490 26,300 -26,300" style="fill: #B388FF; opacity: .12"></polygon>
+<rect class="sl" x="-7" y="312" width="14" height="150" rx="7"></rect>
+<path class="sc" d="M -68.4 267.1 A 200 200 0 0 1 68.4 267.1"></path>
+<path d="M -68.4 267.1 A 200 200 0 0 1 -21.6 256.2" style="fill: none; stroke: #B388FF; stroke-width: 4; stroke-linecap: round"></path>
+<g transform="translate(0 455) rotate(-13.2)" style="opacity: .12"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #B388FF"></line></g>
+<g transform="translate(0 455) rotate(-10.2)" style="opacity: .25"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #B388FF"></line></g>
+<g transform="translate(0 455) rotate(-6.2)" style="filter: drop-shadow(0 0 8px #B388FF)"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #B388FF"></line><rect x="-11" y="-184" width="22" height="16" rx="4" style="fill: #B388FF"></rect></g>
+<circle cx="0" cy="455" r="7" style="fill: #2A2545"></circle>
+<text class="nm on" x="0" y="526">subBass</text>
+</g>
+
+<g transform="translate(855 0)">
+<polygon class="bd" points="-62,490 62,490 26,300 -26,300"></polygon>
+<polygon points="-62,490 62,490 26,300 -26,300" style="fill: #FF8A3D; opacity: .12"></polygon>
+<rect class="sl" x="-7" y="312" width="14" height="150" rx="7"></rect>
+<path class="sc" d="M -68.4 267.1 A 200 200 0 0 1 68.4 267.1"></path>
+<path d="M -68.4 267.1 A 200 200 0 0 1 -21.6 256.2" style="fill: none; stroke: #FF8A3D; stroke-width: 4; stroke-linecap: round"></path>
+<g transform="translate(0 455) rotate(-13.2)" style="opacity: .12"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #FF8A3D"></line></g>
+<g transform="translate(0 455) rotate(-10.2)" style="opacity: .25"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #FF8A3D"></line></g>
+<g transform="translate(0 455) rotate(-6.2)" style="filter: drop-shadow(0 0 8px #FF8A3D)"><line class="arm" x1="0" y1="0" x2="0" y2="-200" style="stroke: #FF8A3D"></line><rect x="-11" y="-184" width="22" height="16" rx="4" style="fill: #FF8A3D"></rect></g>
+<circle cx="0" cy="455" r="7" style="fill: #2A2545"></circle>
+<text class="nm on" x="0" y="526">wobbleBass</text>
+</g>
+
+<path d="M 105 552 L 105 560 L 855 560 L 855 552 M 705 552 L 705 560" style="fill: none; stroke: #A49EC4; stroke-width: 1.5; opacity: .6"></path>
+<text x="480" y="580" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; fill: #A49EC4; text-anchor: middle">kick · subBass · wobbleBass swing in step</text>
+</svg>
+
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">01</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Metronomes</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">in step</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 11 · 40%</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div>
+<p class="sp">Shows</p>
+<p class="tx">Each instrument keeps time like a metronome. Parts that hit together swing together; a polyrhythm drifts in and out of step.</p>
+</div>
+<div>
+<p class="sp">Mapping</p>
+<ul class="mp">
+<li>onset → the arm reaches an extreme, alternating sides</li>
+<li>between onsets → an eased swing, worked out from now</li>
+<li>held note → the swing it covers stays lit</li>
+<li>hits per cycle → the weight's height on the arm</li>
+<li>resting → arm parked upright, body dimmed</li>
+</ul>
+</div>
+<div>
+<p class="sp">Build</p>
+<ul class="mp">
+<li>Canvas 2D · score · window</li>
+<li>20 instruments → a 5 × 4 grid</li>
+<li>over 32 hits a cycle → the arm blurs into a fan</li>
+</ul>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
