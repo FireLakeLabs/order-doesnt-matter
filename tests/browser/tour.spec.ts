@@ -321,13 +321,15 @@ test('practice entry waits for submitted source validation, cancels, and keeps v
   expect(await page.evaluate(() => window.odmApp.practice)).toBe(false);
   await page.locator('#tour-cancel').click();
   await page.evaluate(() => (window as unknown as { releaseSource: () => void }).releaseSource());
-  await expect(
-    page.getByText('Applied. This is now editable in its own editor.', { exact: true }),
-  ).toBeVisible();
+  // settle finishes only after the released source validation and its edit finish.
+  // Observe that barrier before checking the resulting editor message.
   await page.waitForFunction(
     () =>
       !!(window as unknown as { releaseCancelledPreparation: unknown }).releaseCancelledPreparation,
   );
+  await expect(
+    page.getByText('Applied. This is now editable in its own editor.', { exact: true }),
+  ).toBeVisible();
   await page.locator('#take-tour').click();
   await page.locator('#tour-start').click();
   await lesson(page, 1);

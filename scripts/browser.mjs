@@ -1,13 +1,34 @@
-import { mkdtempSync, rmSync, appendFileSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+  mkdtempSync,
+  rmSync,
+  appendFileSync,
+  readFileSync,
+  writeFileSync,
+  mkdirSync,
+} from 'node:fs';
 import { spawn } from 'node:child_process';
+import { availableParallelism, tmpdir } from 'node:os';
+import { dirname, join } from 'node:path';
 import { browserSummary, formatBrowserSummary } from './browser-summary.mjs';
 import { timingResult, formatTiming, BROWSER_WARN_SECONDS } from './timing.mjs';
 import { forwardBrowserSignals } from './browser-process.mjs';
 import { cacheBuiltAssets } from './browser-assets.mjs';
 const start = performance.now();
 const mode = process.argv[2] ?? 'ci';
-if (!['ci', 'online', 'demo', 'measure', 'edit-demo'].includes(mode))
+if (
+  !['ci', 'legacy', 'studio', 'online', 'demo', 'measure', 'measure-views', 'edit-demo'].includes(
+    mode,
+  )
+)
   throw Error('Unknown browser mode');
+const suite = ['ci', 'legacy', 'studio'].includes(mode);
+const project =
+  { ci: 'studio', legacy: 'audio', studio: 'studio', 'measure-views': 'measure-views' }[mode] ??
+  'optional';
+const measureDir =
+  mode === 'measure-views' ? mkdtempSync(join(tmpdir(), 'odm-view-measurements-')) : undefined;
+if (measureDir) console.log(`View measurements and screenshots: ${measureDir}`);
+console.log(`Browser selection: ${mode}; available CPUs: ${availableParallelism()}`);
 const outDir = mkdtempSync('.browser-build-');
 // Always retain the accounting reporter, including when the caller asks for JSON.
 const args = process.argv.slice(3);
@@ -25,8 +46,10 @@ function phase(name) {
   phaseStart = now;
   const body = JSON.stringify({ phases, wallSeconds: (now - start) / 1000 }, null, 2) + '\n';
   writeFileSync(`${outDir}/command.json`, body);
-  if (process.env.ODM_PROFILE_PATH)
+  if (process.env.ODM_PROFILE_PATH) {
+    mkdirSync(dirname(process.env.ODM_PROFILE_PATH), { recursive: true });
     writeFileSync(`${process.env.ODM_PROFILE_PATH}.command.json`, body);
+  }
 }
 let server;
 try {
@@ -46,8 +69,8 @@ try {
       [
         'node_modules/@playwright/test/cli.js',
         'test',
-        `--project=${mode === 'ci' ? 'audio' : 'optional'}`,
-        ...(mode === 'ci' ? [] : [`tests/browser/${mode}.spec.ts`]),
+        `--project=${project}`,
+        ...(suite || mode === 'measure-views' ? [] : [`tests/browser/${mode}.spec.ts`]),
         ...args,
         '--reporter',
         `${reporters},./scripts/browser-report.mjs`,
@@ -60,6 +83,7 @@ try {
         env: {
           ...process.env,
           ODM_BROWSER_MODE: mode,
+          ODM_VIEW_MEASURE_DIR: measureDir,
           ODM_REPORT_PATH: reportPath,
           ODM_URL: `http://127.0.0.1:${address.port}`,
         },

@@ -1,12 +1,13 @@
 name: Check
 on:
+  workflow_dispatch:
   pull_request:
   push:
     branches: [main]
 permissions:
   contents: read
 jobs:
-  check:
+  code:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
@@ -23,17 +24,45 @@ jobs:
       - run: npm run check:docs
       - run: npm run check:boundaries
       - run: npm run build
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:browser
-      - uses: actions/upload-artifact@v4
-        if: failure()
-        with:
-          name: browser-failure-evidence
-          path: .browser-build-*/
-          include-hidden-files: true
-          if-no-files-found: ignore
-          retention-days: 7
       - run: npm ci --prefix infra
       - run: npm test --prefix infra
       - run: npx --no-install cdk synth OrderDoesntMatter --strict --quiet
         working-directory: infra
+
+  browser:
+    name: Browser (${{ matrix.suite }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        suite: [legacy, studio]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:browser:${{ matrix.suite }}
+        env:
+          ODM_PROFILE_PATH: browser-results/${{ matrix.suite }}.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-${{ matrix.suite }}-evidence
+          path: |
+            browser-results/
+            .browser-build-*/
+          include-hidden-files: true
+          if-no-files-found: ignore
+          retention-days: 7
+
+  check:
+    if: always()
+    needs: [code, browser]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 1
+    steps:
+      - run: test '${{ needs.code.result }}' = success && test '${{ needs.browser.result }}' = success
