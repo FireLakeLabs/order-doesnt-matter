@@ -1,4 +1,5 @@
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname, join } from 'node:path';
 import { expect } from '@playwright/test';
 
 // Register a view's complete CI browser check with viewSmoke(test, 'loom').
@@ -6,6 +7,14 @@ import { expect } from '@playwright/test';
 // Extended checks and measurements belong to npm run measure:views, outside CI.
 export function viewSmoke(test: typeof import('@playwright/test').test, id: string) {
   test(`${id}: shared Studio smoke`, async ({ page, context }, testInfo) => {
+    const diagnosticDir = process.env.ODM_PROFILE_PATH
+      ? join(dirname(process.env.ODM_PROFILE_PATH), 'ring-diagnostic')
+      : '/tmp/odm-ring-smoke-diagnostic';
+    const attach = async (name: string, value: { body: Buffer | string; contentType: string }) => {
+      await mkdir(diagnosticDir, { recursive: true });
+      await writeFile(join(diagnosticDir, name), value.body);
+      await testInfo.attach(name, value);
+    };
     const errors: string[] = [];
     const consoleOutput: string[] = [];
     page.on('console', (message) => consoleOutput.push(`[${message.type()}] ${message.text()}`));
@@ -114,19 +123,19 @@ export function viewSmoke(test: typeof import('@playwright/test').test, id: stri
         .toBe(false);
     } finally {
       if (id === 'ring') {
-        await testInfo.attach('ring-before.png', { body: before, contentType: 'image/png' });
-        await testInfo.attach('ring-compared.png', { body: latest, contentType: 'image/png' });
-        await testInfo.attach('ring-state-before.json', {
+        await attach('ring-before.png', { body: before, contentType: 'image/png' });
+        await attach('ring-compared.png', { body: latest, contentType: 'image/png' });
+        await attach('ring-state-before.json', {
           body: beforeState,
           contentType: 'application/json',
         });
-        await testInfo.attach('ring-state-after.json', {
+        await attach('ring-state-after.json', {
           body: await state(),
           contentType: 'application/json',
         });
         const box = await canvas.boundingBox();
         if (box)
-          await testInfo.attach('ring-page-clipped.png', {
+          await attach('ring-page-clipped.png', {
             body: await page.screenshot({ clip: box }),
             contentType: 'image/png',
           });
@@ -144,12 +153,13 @@ export function viewSmoke(test: typeof import('@playwright/test').test, id: stri
             floatBuffer: !!gl?.getExtension('EXT_color_buffer_float'),
           };
         });
-        await testInfo.attach('ring-gpu.json', {
+        await attach('ring-gpu.json', {
           body: JSON.stringify(gpu),
           contentType: 'application/json',
         });
         const immediate = await page.evaluate<string>(`(() => {
           const d = window.ringSmokeDiagnostic.findLast(d => d.element.isConnected && d.latest);
+          if (!d) return '';
           d.handle.frame({...d.latest,now:d.latest.now+0.001});
           const canvas = d.element.querySelector('canvas');
           const copy = document.createElement('canvas');
@@ -157,11 +167,12 @@ export function viewSmoke(test: typeof import('@playwright/test').test, id: stri
           copy.getContext('2d').drawImage(canvas,0,0);
           return copy.toDataURL();
         })()`);
-        await testInfo.attach('ring-immediate-buffer.png', {
-          body: Buffer.from(immediate.split(',')[1], 'base64'),
-          contentType: 'image/png',
-        });
-        await testInfo.attach('ring-console.txt', {
+        if (immediate)
+          await attach('ring-immediate-buffer.png', {
+            body: Buffer.from(immediate.split(',')[1], 'base64'),
+            contentType: 'image/png',
+          });
+        await attach('ring-console.txt', {
           body: consoleOutput.join('\n') + '\nPAGE ERRORS\n' + errors.join('\n'),
           contentType: 'text/plain',
         });
