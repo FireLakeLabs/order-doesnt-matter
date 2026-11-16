@@ -1,3 +1,4 @@
+import { openStudio } from './studio-open';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test, type Page, type BrowserContext } from '@playwright/test';
 import type {} from '../../src/studio/main';
@@ -88,7 +89,7 @@ test('Studio shell on dubstep: section rail, two stages, shared clock, shelf, fi
   page.on('pageerror', (error) => errors.push(String(error)));
   await assets(context);
   await page.setViewportSize({ width: 2560, height: 1440 });
-  await page.goto('/studio.html?inspect&a=test-card&b=test-card');
+  await openStudio(page, 'a=test-card&b=test-card');
   await load(page);
   await expect(page.getByTestId('playing-instruments').locator('li')).toHaveCount(3);
   await expect(page.locator('.resting-chip')).toHaveCount(10);
@@ -235,7 +236,7 @@ test('mute and solo are document edits: scheduled triggers change and Undo resto
 }) => {
   await assets(context);
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/studio.html?inspect&a=test-card');
+  await openStudio(page);
   await load(page);
   await startAt(page, 8);
   await page.evaluate(() => {
@@ -362,7 +363,7 @@ test('a test-only registered failure is visible, retries, and leaves the other s
     await route.fulfill({ response, body });
   });
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/studio.html?inspect&a=test-card&b=broken');
+  await openStudio(page, 'a=test-card&b=broken');
   await load(page);
   expect(registered).toBe(true);
   const b = page.locator('[data-region="stage-b"]');
@@ -382,7 +383,7 @@ test('a host frame failure stays in its stage while the other stage keeps drawin
   context,
 }) => {
   await assets(context);
-  await page.goto('/studio.html?inspect&a=test-card&b=test-card');
+  await openStudio(page, 'a=test-card&b=test-card');
   await page.waitForFunction(() => window.odmStudio.app.canPlay);
   await expect(page.locator('.view-host canvas')).toHaveCount(2);
   await page.getByRole('button', { name: 'Play', exact: true }).click();
@@ -461,7 +462,7 @@ test('one page sample drives both real test cards, strip and rail through scrub,
     });
   });
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/studio.html?inspect&a=test-card&b=test-card');
+  await openStudio(page, 'a=test-card&b=test-card');
   await load(page);
   await page.waitForFunction(
     () => document.querySelectorAll('.view-host[data-score-ready="true"]').length === 2,
@@ -614,4 +615,12 @@ test('one page sample drives both real test cards, strip and rail through scrub,
   expect(result.readsPerFrame).toEqual(['1/1']);
   await mkdir(shots, { recursive: true });
   await writeFile(`${shots}/shared-frame-measurements.json`, JSON.stringify(result, null, 2));
+});
+
+// The visitor's real defaults are covered separately from timing-sensitive tests.
+test('fresh Studio defaults to Ring and Loom', async ({ page }) => {
+  await page.addInitScript(() => localStorage.removeItem('odm-studio-layout'));
+  await page.goto('/studio.html');
+  await expect(page.locator('[data-region="stage-a"] .stage-header h2')).toHaveText('Ring');
+  await expect(page.locator('[data-region="stage-b"] .stage-header h2')).toHaveText('Loom');
 });

@@ -1,3 +1,4 @@
+import { openStudio } from './studio-open';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import type {} from '../../src/studio/main';
@@ -102,7 +103,7 @@ test('real dubstep score fits both desktops, follows sections and ruler scrubbin
 }) => {
   await assets(context);
   await page.setViewportSize({ width: 2560, height: 1440 });
-  await page.goto('/studio.html?inspect');
+  await openStudio(page);
   await load(page, await readFile('corpus/programs/real-dubstep-arranged.strudel', 'utf8'));
   await seek(page, 9.4);
   await page.evaluate(() => window.odmStudio.setLoop({ from: 8, to: 10 }));
@@ -189,7 +190,7 @@ test('cutoff edit is pending until its engine acknowledgement; top-bar Undo rest
 }) => {
   await assets(context);
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/studio.html?inspect&a=test-card&b=');
+  await openStudio(page);
   await load(page, await readFile('corpus/programs/real-dubstep-arranged.strudel', 'utf8'));
   await seek(page, 9.4);
   await row(page, 'wobbleBass').click();
@@ -235,7 +236,7 @@ test('cutoff edit is pending until its engine acknowledgement; top-bar Undo rest
 
 test('custom definitions open as source, and nine things fit a 560px tray', async ({ page }) => {
   await page.setViewportSize({ width: 2560, height: 1440 });
-  await page.goto('/studio.html?inspect&a=test-card&b=');
+  await openStudio(page);
   await load(page, await readFile('corpus/programs/micro-register.strudel', 'utf8'));
   await page.locator('.lane-label').first().click();
   await tray(page).getByRole('button', { name: 'ghosts custom', exact: true }).click();
@@ -273,7 +274,7 @@ test('an opaque corpus instrument stays visible and source-editable while playba
   page,
 }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/studio.html?inspect&a=test-card&b=');
+  await openStudio(page);
   // Both wholly opaque corpus patterns deliberately throw. Remove only this
   // fixture's intentional failure to exercise its otherwise real Pattern query.
   const original = await readFile('corpus/programs/micro-query-late-throws.strudel', 'utf8');
@@ -305,7 +306,7 @@ test('editing retains the ready score and native editor notes while replacement 
 }) => {
   await assets(context);
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/studio.html?inspect&a=test-card&b=');
+  await openStudio(page);
   await load(page, await readFile('corpus/programs/real-dubstep-arranged.strudel', 'utf8'));
   await seek(page, 9.4);
   await row(page, 'wobbleBass').click();
