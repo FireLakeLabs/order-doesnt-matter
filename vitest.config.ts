@@ -5,7 +5,7 @@ export default defineConfig({
     retry: 0,
     // Two files, each with a small query pool: bound CPU contention on CI.
     maxWorkers: 2,
-    include: ['src/**/*.test.ts', 'tests/*.test.ts'],
+    include: ['src/**/*.test.ts', 'tests/*.test.ts', 'tests/views/**/*.test.ts'],
     server: { deps: { inline: [/@strudel\//, /@kabelsalat\//] } },
   },
 });
