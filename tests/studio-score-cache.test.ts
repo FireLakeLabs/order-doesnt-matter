@@ -46,3 +46,21 @@ test('releasing the stage rejects pending replies, including an older document',
   await setImmediate();
   expect(cache.score.events).toEqual({});
 });
+
+test('cleanup followed by setup can re-ask a canceled request at the same range', async () => {
+  const replies: ((result: EventResult) => void)[] = [];
+  const query = vi.fn(() => new Promise<EventResult>((resolve) => replies.push(resolve)));
+  const cache = createScoreCache(query);
+  const state = piece('s("bd")');
+  const range = { from: 0, to: 16 };
+  cache.request(state, range);
+  cache.dispose();
+  cache.request(state, range);
+  expect(query).toHaveBeenCalledTimes(2);
+  replies[0](result);
+  await setImmediate();
+  expect(cache.score.events).toEqual({});
+  replies[1](result);
+  await vi.waitFor(() => expect(Object.keys(cache.score.events)).toHaveLength(1));
+  cache.dispose();
+});
