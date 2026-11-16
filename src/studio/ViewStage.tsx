@@ -19,6 +19,7 @@ function Drawing({
   trails,
   clock,
   metadata,
+  cache,
 }: {
   viewId: string;
   theme: ViewTheme;
@@ -26,6 +27,7 @@ function Drawing({
   trails: 0 | 1 | 2;
   clock: StudioClock;
   metadata: (name: string, tag: string) => void;
+  cache: ReturnType<typeof createScoreCache>;
 }) {
   const host = useRef<HTMLDivElement>(null);
   const status = useRef<HTMLParagraphElement>(null);
@@ -42,8 +44,6 @@ function Drawing({
     const owned = document.createElement('div');
     owned.className = 'view-owned';
     container.append(owned);
-    const queries = createBrowserQueries();
-    const cache = createScoreCache(queries.query);
     let active = true,
       broken = false;
     let size = { width: container.clientWidth, height: container.clientHeight };
@@ -104,12 +104,10 @@ function Drawing({
       active = false;
       unsubscribe();
       observer.disconnect();
-      cache.dispose();
-      queries.cancel();
       mounted.dispose();
       owned.remove();
     };
-  }, [viewId, attempt, clock, metadata]);
+  }, [viewId, attempt, clock, metadata, cache]);
   return (
     <div className="view-stage">
       <div ref={host} className="view-host" />
@@ -156,6 +154,18 @@ export function ViewStage({
   onSelect: (stage: Stage, id: string | null) => void;
   choices: Pick<Layout, 'a' | 'b'>;
 }) {
+  // Allocation is inert; workers start only when a drawing requests a score.
+  const [{ cache, queries }] = useState(() => {
+    const queries = createBrowserQueries();
+    return { cache: createScoreCache(queries.query), queries };
+  });
+  useEffect(
+    () => () => {
+      cache.dispose();
+      queries.cancel();
+    },
+    [cache, queries],
+  );
   const [metadata, setMetadata] = useState({ id: '', name: '', tag: '' });
   const [shelfOpen, setShelfOpen] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -262,6 +272,7 @@ export function ViewStage({
           trails={trails}
           clock={clock}
           metadata={metadataCallback}
+          cache={cache}
         />
       ) : (
         <div className="empty-stage">
