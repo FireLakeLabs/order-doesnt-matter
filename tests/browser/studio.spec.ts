@@ -119,8 +119,8 @@ test('Studio shell on dubstep: section rail, two stages, shared clock, shelf, fi
   await expect(selected).toHaveAttribute('data-selected', 'true');
   await expect(page.locator('.instrument-row[data-sounding="true"]').first()).toBeVisible();
   const before = await pixels(page, 'b');
-  await frames(page, 8);
-  expect(await pixels(page, 'b')).not.toBe(before);
+  // Frames can repeat between note onsets; observe a changed drawing instead.
+  await expect.poll(() => pixels(page, 'b')).not.toBe(before);
   // Hold only the visual clock for repeatable theme comparisons at the first drop.
   // The real scheduler/trigger checks run separately below.
   await page.evaluate(() => {
@@ -409,7 +409,7 @@ test('a host frame failure stays in its stage while the other stage keeps drawin
     'Deliberate host frame failure',
   );
   const before = await pixels(page, 'b');
-  await frames(page, 8);
-  expect(await pixels(page, 'b')).not.toBe(before);
+  // Frames can repeat between note onsets; observe a changed drawing instead.
+  await expect.poll(() => pixels(page, 'b')).not.toBe(before);
   await expect(page.locator('[data-region="stage-b"]').getByRole('alert')).toHaveCount(0);
 });

@@ -1,13 +1,17 @@
 import { mkdtempSync, rmSync, appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { spawn } from 'node:child_process';
+import { availableParallelism } from 'node:os';
 import { browserSummary, formatBrowserSummary } from './browser-summary.mjs';
 import { timingResult, formatTiming, BROWSER_WARN_SECONDS } from './timing.mjs';
 import { forwardBrowserSignals } from './browser-process.mjs';
 import { cacheBuiltAssets } from './browser-assets.mjs';
 const start = performance.now();
 const mode = process.argv[2] ?? 'ci';
-if (!['ci', 'online', 'demo', 'measure', 'edit-demo'].includes(mode))
+if (!['ci', 'legacy', 'studio', 'online', 'demo', 'measure', 'edit-demo'].includes(mode))
   throw Error('Unknown browser mode');
+const suite = ['ci', 'legacy', 'studio'].includes(mode);
+const project = mode === 'ci' || mode === 'studio' ? 'studio' : suite ? 'audio' : 'optional';
+console.log(`Browser selection: ${mode}; available CPUs: ${availableParallelism()}`);
 const outDir = mkdtempSync('.browser-build-');
 // Always retain the accounting reporter, including when the caller asks for JSON.
 const args = process.argv.slice(3);
@@ -46,8 +50,8 @@ try {
       [
         'node_modules/@playwright/test/cli.js',
         'test',
-        `--project=${mode === 'ci' ? 'audio' : 'optional'}`,
-        ...(mode === 'ci' ? [] : [`tests/browser/${mode}.spec.ts`]),
+        `--project=${project}`,
+        ...(suite ? [] : [`tests/browser/${mode}.spec.ts`]),
         ...args,
         '--reporter',
         `${reporters},./scripts/browser-report.mjs`,
