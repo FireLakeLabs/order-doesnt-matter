@@ -1,3 +1,4 @@
+import { openStudio } from './studio-open';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test, type Page, type BrowserContext } from '@playwright/test';
 import type {} from '../../src/studio/main';
@@ -88,12 +89,12 @@ test('Studio shell on dubstep: section rail, two stages, shared clock, shelf, fi
   page.on('pageerror', (error) => errors.push(String(error)));
   await assets(context);
   await page.setViewportSize({ width: 2560, height: 1440 });
-  await page.goto('/studio.html?inspect&a=test-card&b=test-card');
+  await openStudio(page, 'a=test-card&b=test-card');
   await load(page);
   await expect(page.getByTestId('playing-instruments').locator('li')).toHaveCount(3);
   await expect(page.locator('.resting-chip')).toHaveCount(10);
   await expect(page.getByTestId('instruments')).not.toContainText('Instrument ');
-  await expect(page.locator('canvas')).toHaveCount(2);
+  await expect(page.locator('.view-host canvas')).toHaveCount(2);
   await page.waitForFunction(
     () => {
       const hosts = Array.from(document.querySelectorAll('.view-host'));
@@ -163,7 +164,7 @@ test('Studio shell on dubstep: section rail, two stages, shared clock, shelf, fi
   await a.getByRole('button', { name: 'Views', exact: true }).click();
   await expect(a.locator('.shelf-popover')).toBeVisible();
   await page.screenshot({ path: `${shots}/shelf-1920x1080.png` });
-  await a.getByRole('button', { name: 'Test card on Stage B', exact: true }).click();
+  await a.getByRole('button', { name: 'Loom on Stage B', exact: true }).click();
   await expect(a.locator('.shelf-popover')).toHaveCount(0);
   for (const name of ['phosphor', 'pocket', 'riso', 'sunset']) {
     await page.getByRole('button', { name: `Theme ${name}`, exact: true }).click();
@@ -187,12 +188,12 @@ test('Studio shell on dubstep: section rail, two stages, shared clock, shelf, fi
   await page.keyboard.press('Escape');
   await expect(page.locator('.studio')).not.toHaveAttribute('data-filled');
   await page.getByRole('button', { name: 'Clear Stage B', exact: true }).click();
-  await expect(page.locator('canvas')).toHaveCount(1);
+  await expect(page.locator('.view-host canvas')).toHaveCount(1);
   await a.getByRole('button', { name: 'Views', exact: true }).click();
-  const tile = a.locator('[data-view="test-card"]');
+  const tile = a.locator('[data-view="loom"]');
   // Real HTML drag payload and drop handling; a tile can target either stage.
   await tile.dragTo(page.locator('[data-region="stage-b"]'));
-  await expect(page.locator('canvas')).toHaveCount(2);
+  await expect(page.locator('.view-host canvas')).toHaveCount(2);
   await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
   await frames(page);
@@ -235,7 +236,7 @@ test('mute and solo are document edits: scheduled triggers change and Undo resto
 }) => {
   await assets(context);
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/studio.html?inspect');
+  await openStudio(page);
   await load(page);
   await startAt(page, 8);
   await page.evaluate(() => {
@@ -279,7 +280,7 @@ test('links override persisted layout; optional storage and a dense rail remain 
   page,
 }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/studio.html?inspect');
+  await page.goto('/studio.html?inspect&a=test-card');
   await page.getByRole('button', { name: 'Theme riso', exact: true }).click();
   await page
     .getByRole('group', { name: 'Window', exact: true })
@@ -293,10 +294,10 @@ test('links override persisted layout; optional storage and a dense rail remain 
     .locator('[data-region="stage-b"]')
     .getByRole('button', { name: 'Views', exact: true })
     .click();
-  await page.getByRole('button', { name: 'Test card on Stage B', exact: true }).click();
+  await page.getByRole('button', { name: 'Loom on Stage B', exact: true }).click();
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'riso');
-  await expect(page.locator('canvas')).toHaveCount(2);
+  await expect(page.locator('.view-host canvas')).toHaveCount(2);
   await expect(
     page
       .getByRole('group', { name: 'Window', exact: true })
@@ -310,7 +311,7 @@ test('links override persisted layout; optional storage and a dense rail remain 
   const saved = await page.evaluate(() => localStorage.getItem('odm-studio-layout'));
   await page.goto('/studio.html?inspect&a=test-card&b=&theme=phosphor');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'phosphor');
-  await expect(page.locator('canvas')).toHaveCount(1);
+  await expect(page.locator('.view-host canvas')).toHaveCount(1);
   expect(await page.evaluate(() => localStorage.getItem('odm-studio-layout'))).toBe(saved);
   await page.addInitScript(() =>
     Object.defineProperty(window, 'localStorage', {
@@ -319,7 +320,7 @@ test('links override persisted layout; optional storage and a dense rail remain 
       },
     }),
   );
-  await page.goto('/studio.html?inspect');
+  await page.goto('/studio.html?inspect&a=test-card');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'arcade');
   await page.getByRole('button', { name: 'Theme pocket', exact: true }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'pocket');
@@ -362,7 +363,7 @@ test('a test-only registered failure is visible, retries, and leaves the other s
     await route.fulfill({ response, body });
   });
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/studio.html?inspect&a=test-card&b=broken');
+  await openStudio(page, 'a=test-card&b=broken');
   await load(page);
   expect(registered).toBe(true);
   const b = page.locator('[data-region="stage-b"]');
@@ -382,9 +383,9 @@ test('a host frame failure stays in its stage while the other stage keeps drawin
   context,
 }) => {
   await assets(context);
-  await page.goto('/studio.html?inspect&a=test-card&b=test-card');
+  await openStudio(page, 'a=test-card&b=test-card');
   await page.waitForFunction(() => window.odmStudio.app.canPlay);
-  await expect(page.locator('canvas')).toHaveCount(2);
+  await expect(page.locator('.view-host canvas')).toHaveCount(2);
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await page.waitForFunction(() => window.odmStudio.app.state.playing);
   await page.evaluate(() => {
@@ -461,7 +462,7 @@ test('one page sample drives both real test cards, strip and rail through scrub,
     });
   });
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/studio.html?inspect&a=test-card&b=test-card');
+  await openStudio(page, 'a=test-card&b=test-card');
   await load(page);
   await page.waitForFunction(
     () => document.querySelectorAll('.view-host[data-score-ready="true"]').length === 2,
@@ -614,4 +615,12 @@ test('one page sample drives both real test cards, strip and rail through scrub,
   expect(result.readsPerFrame).toEqual(['1/1']);
   await mkdir(shots, { recursive: true });
   await writeFile(`${shots}/shared-frame-measurements.json`, JSON.stringify(result, null, 2));
+});
+
+// The visitor's real defaults are covered separately from timing-sensitive tests.
+test('fresh Studio defaults to Ring and Loom', async ({ page }) => {
+  await page.addInitScript(() => localStorage.removeItem('odm-studio-layout'));
+  await page.goto('/studio.html');
+  await expect(page.locator('[data-region="stage-a"] .stage-header h2')).toHaveText('Ring');
+  await expect(page.locator('[data-region="stage-b"] .stage-header h2')).toHaveText('Loom');
 });

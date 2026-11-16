@@ -73,7 +73,7 @@ export function viewSmoke(test: typeof import('@playwright/test').test, id: stri
     expect((await picture()).equals(before)).toBe(false);
     await page.getByRole('button', { name: 'Stop', exact: true }).click();
     await page.getByRole('button', { name: 'Play', exact: true }).waitFor({ timeout: 0 });
-    await choose('test-card');
+    await choose(id === 'band' ? 'loom' : 'band');
     await choose(id);
     await page.getByRole('button', { name: 'Theme riso', exact: true }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'riso');

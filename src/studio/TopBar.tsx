@@ -1,5 +1,15 @@
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import { Pause, Play, Square, ClipboardPaste, StepBack, StepForward, Repeat2 } from 'lucide-react';
+import {
+  Pause,
+  Play,
+  Square,
+  ClipboardPaste,
+  StepBack,
+  StepForward,
+  Repeat2,
+  Undo2,
+  Redo2,
+} from 'lucide-react';
 import { Button } from '../components/ui/button';
 import {
   Dialog,
@@ -142,6 +152,24 @@ export function TopBar({
         )}
       </output>
       <output ref={cycle} className="cycle-readout" aria-label="Cycle" />
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label="Undo"
+        disabled={!runtime.app.editor?.canUndo}
+        onClick={() => runtime.app.editor?.undo()}
+      >
+        <Undo2 />
+      </Button>
+      <Button
+        variant="ghost"
+        size="icon"
+        aria-label="Redo"
+        disabled={!runtime.app.editor?.canRedo}
+        onClick={() => runtime.app.editor?.redo()}
+      >
+        <Redo2 />
+      </Button>
       <Dialog open={pasteOpen} onOpenChange={setPasteOpen}>
         <DialogTrigger asChild>
           <Button variant="outline">

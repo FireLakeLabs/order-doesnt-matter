@@ -13,7 +13,7 @@ export interface Layout {
   theme: string;
 }
 export const layoutKey = 'odm-studio-layout';
-const defaults: Layout = { a: 'test-card', b: null, lookAhead: 4, trails: 1, theme: 'arcade' };
+const defaults: Layout = { a: 'ring', b: 'loom', lookAhead: 4, trails: 1, theme: 'arcade' };
 /** Treat storage and links as untrusted input; an explicit empty stage clears it. */
 export function parseLayout(stored: string | null, search: string, ids: readonly string[]): Layout {
   let value: Partial<Layout> = {};
@@ -31,7 +31,11 @@ export function parseLayout(stored: string | null, search: string, ids: readonly
       : value.a === undefined
         ? validView(defaults.a)
         : validView(value.a),
-    b: params.has('b') ? validView(params.get('b')) : validView(value.b),
+    b: params.has('b')
+      ? validView(params.get('b'))
+      : value.b === undefined
+        ? validView(defaults.b)
+        : validView(value.b),
     lookAhead:
       value.lookAhead === 1 ||
       value.lookAhead === 2 ||
@@ -60,6 +64,8 @@ export function createSession(layout: Layout, storage?: StoragePort) {
   let snapshot = {
     layout,
     selectedInstrument: null as string | null,
+    editorTarget: null as string | null,
+    expandedSettings: [] as string[],
     filledStage: null as Stage | null,
   };
   const listeners = new Set<() => void>();
@@ -84,7 +90,30 @@ export function createSession(layout: Layout, storage?: StoragePort) {
       emit();
     },
     selectInstrument(id: string | null) {
-      snapshot = { ...snapshot, selectedInstrument: id };
+      snapshot = { ...snapshot, selectedInstrument: id, editorTarget: null };
+      emit();
+    },
+    resetSelection() {
+      snapshot = {
+        ...snapshot,
+        selectedInstrument: null,
+        editorTarget: null,
+        expandedSettings: [],
+      };
+      emit();
+    },
+    openEditor(id: string | null) {
+      snapshot = { ...snapshot, editorTarget: id };
+      emit();
+    },
+    toggleLane(id: string) {
+      const expanded = snapshot.expandedSettings;
+      snapshot = {
+        ...snapshot,
+        expandedSettings: expanded.includes(id)
+          ? expanded.filter((key) => key !== id)
+          : [...expanded, id],
+      };
       emit();
     },
     fill(stage: Stage | null) {
