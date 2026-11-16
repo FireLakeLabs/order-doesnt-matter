@@ -64,6 +64,7 @@ export function createScoreCache(query: QueryEvents) {
     },
     dispose() {
       ++revision;
+      requested = '';
     },
   };
 }
