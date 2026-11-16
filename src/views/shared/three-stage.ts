@@ -21,11 +21,6 @@ export async function createThreeStage(element: HTMLElement, id: string) {
   renderer.setPixelRatio(1);
   renderer.setSize(1, 1);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  const gl = renderer.getContext();
-  const info = gl.getExtension('WEBGL_debug_renderer_info');
-  governor.classifyRenderer(
-    String(gl.getParameter(info ? info.UNMASKED_RENDERER_WEBGL : gl.RENDERER)),
-  );
   const observeFrame = createFrameObserver(governor);
   const canvas = renderer.domElement;
   canvas.dataset[id] = '';

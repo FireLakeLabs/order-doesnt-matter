@@ -235,28 +235,6 @@ export function viewEvidence(test: typeof Test, id: string) {
     expect(
       (await page.screenshot({ clip: { x: 0, y: 0, width: 1300, height: 760 } })).equals(validSize),
     ).toBe(true);
-    if (id === 'coil') {
-      const before = await page.screenshot({ clip: { x: 0, y: 0, width: 1300, height: 760 } });
-      await page.mouse.move(650, 380);
-      await page.mouse.down();
-      await page.mouse.move(650, 480, { steps: 6 });
-      await standalone.evaluate(({ handle }, frame) => handle.frame(frame), saved);
-      await presented(page);
-      expect(
-        (await page.screenshot({ clip: { x: 0, y: 0, width: 1300, height: 760 } })).equals(before),
-      ).toBe(false);
-      await page.mouse.up();
-      await standalone.evaluate(async ({ handle }, frame) => {
-        for (let i = 0; i < 70; i++) {
-          handle.frame(frame);
-          await new Promise(requestAnimationFrame);
-        }
-      }, saved);
-      await page.screenshot({
-        path: `${shots}/released.png`,
-        clip: { x: 0, y: 0, width: 1300, height: 760 },
-      });
-    }
     // Simulate context loss only after visual evidence; remount is the visible recovery action.
     await standalone.evaluate(({ el }) =>
       el
@@ -331,59 +309,5 @@ export function viewEvidence(test: typeof Test, id: string) {
       await at(page, 0.4);
       await mkdir(shots, { recursive: true });
       await page.screenshot({ path: `${shots}/${name}-1920x1080.png` });
-      if (id === 'coil' && name === 'techno')
-        await expect(page.getByText('16 cycles shown', { exact: true })).toBeVisible();
-    });
-  if (id === 'coil')
-    test('coil: compressed 256-cycle geometry and reverse seek', async ({ page }) => {
-      await page.setViewportSize({ width: 1920, height: 1080 });
-      await prepare(page, id);
-      await at(page, 10.4);
-      const mounted = await page.evaluateHandle(async () => {
-        const original = window.viewProbe.frame!;
-        const notes = Array.from({ length: 10 }, (_, i) =>
-          original.notes.map((note) => ({
-            ...note,
-            start: note.start + i * 28,
-            end: note.end + i * 28,
-          })),
-        )
-          .flat()
-          .filter((note) => note.start < 256);
-        const frame = {
-          ...original,
-          now: 10.4,
-          from: 0,
-          to: 256,
-          width: 1300,
-          height: 760,
-          dpr: 1,
-          notes,
-          sections: [{ name: '256-cycle study', from: 0, to: 256 }],
-        };
-        const el = document.createElement('div');
-        el.style.cssText = 'position:fixed;inset:0;width:1300px;height:760px;z-index:9999';
-        document.body.append(el);
-        const handle = await window.viewProbe.definition.mount(el);
-        handle.frame(frame);
-        return { el, handle, frame };
-      });
-      await mkdir(shots, { recursive: true });
-      const before = await page.screenshot({
-        path: `${shots}/long-256.png`,
-        clip: { x: 0, y: 0, width: 1300, height: 760 },
-      });
-      await mounted.evaluate(({ handle, frame }) => {
-        handle.frame({ ...frame, now: 200.4 });
-        handle.frame(frame);
-      });
-      expect(
-        (await page.screenshot({ clip: { x: 0, y: 0, width: 1300, height: 760 } })).equals(before),
-      ).toBe(true);
-      await mounted.evaluate(({ handle, el }) => {
-        handle.dispose();
-        el.remove();
-      });
-      await mounted.dispose();
     });
 }

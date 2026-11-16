@@ -6,15 +6,12 @@ import { scoreFrame } from './score-fixture';
 
 test('every LOD restores the full colour range after rendering only emission', () => {
   const governor = createQualityGovernor();
-  const score = createScoreMesh(
-    {
-      THREE,
-      get quality() {
-        return governor.quality;
-      },
+  const score = createScoreMesh({
+    THREE,
+    get quality() {
+      return governor.quality;
     },
-    true,
-  );
+  });
   score.populate(
     [0, 10, 20].map((cycle) => ({
       cycle,
