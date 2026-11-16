@@ -6,6 +6,7 @@ import editorStyles from '../../editor/style.css?inline';
 import { session } from '../session';
 import { runtime } from '../runtime';
 import { plainName } from './model';
+import { editorFrozen, registerEditor, holdEditor, takeEditor, type MountedEditor } from './park';
 
 // Inside @scope the panel root is addressed explicitly by :scope. Keep named
 // descendants such as #editor-status intact. No declaration is changed.
@@ -35,38 +36,69 @@ export function EditorHost({
   entry?: PendingEntry;
   close: () => void;
 }) {
+  const root = useRef<HTMLElement>(null);
   const body = useRef<HTMLDivElement>(null);
   const error = useRef<HTMLParagraphElement>(null);
-  const mounted = useRef<{
-    id: string;
-    kind: EditorKind;
-    handle: ReturnType<EditorKind['mount']>;
-  } | null>(null);
+  const mounted = useRef<MountedEditor | null>(null);
+  const live = useRef(false);
   const kind = kindFor(context);
   useLayoutEffect(() => {
     const el = body.current;
-    if (!el) return;
+    if (!el || editorFrozen) return;
     let current = mounted.current;
     if (!current || current.id !== context.target.nodeId || current.kind !== kind) {
       if (error.current) error.current.textContent = '';
       current?.handle.destroy();
       el.replaceChildren();
-      current = { id: context.target.nodeId, kind, handle: kind.mount(el, context) };
+      const held = takeEditor(context.target.nodeId, kind);
+      const element = held?.element ?? document.createElement('div');
+      element.classList.add('editor-body');
+      el.append(element);
+      current = held ?? {
+        id: context.target.nodeId,
+        kind,
+        element,
+        handle: kind.mount(element, context),
+      };
+      if (held) held.handle.update(context);
       mounted.current = current;
     } else current.handle.update(context);
   }, [context, kind]);
-  useLayoutEffect(
-    () => () => {
-      mounted.current?.handle.destroy();
+  useLayoutEffect(() => {
+    live.current = true;
+    const fence = (event: Event) => {
+      if (editorFrozen) event.stopImmediatePropagation();
+    };
+    const host = root.current;
+    host?.addEventListener('change', fence, true);
+    host?.addEventListener('submit', fence, true);
+    const unregister = registerEditor(() => {
+      const current = mounted.current;
+      if (!current) return;
+      holdEditor(current);
       mounted.current = null;
-    },
-    [],
-  );
+    });
+    return () => {
+      unregister();
+      host?.removeEventListener('change', fence, true);
+      host?.removeEventListener('submit', fence, true);
+      live.current = false;
+      // React StrictMode replays effects before this microtask. Preserve the
+      // same form on that replay; a real unmount still destroys it exactly once.
+      queueMicrotask(() => {
+        if (!live.current) {
+          mounted.current?.handle.destroy();
+          mounted.current = null;
+        }
+      });
+    };
+  }, []);
   const offers = editorKinds.flatMap(
     (kind) => kind.conversions?.(context.target, context.doc) ?? [],
   );
   return (
     <section
+      ref={root}
       id="editor"
       className="studio-editor"
       data-layout={kind.layout ?? 'side'}
@@ -83,7 +115,7 @@ export function EditorHost({
           </button>{' '}
           › {plainName(context.target.control)}
         </h2>
-        {context.target.kind !== 'source' && (
+        {context.target.node && context.target.kind !== 'source' && (
           <button
             onClick={() => {
               session.openEditor(
@@ -96,7 +128,7 @@ export function EditorHost({
         )}
       </header>
       <div className="studio-editor-scroll">
-        <div className="editor-body" ref={body} />
+        <div className="editor-mount" ref={body} />
         {!!offers.length && (
           <div className="editor-conversions">
             <h3>Change to…</h3>

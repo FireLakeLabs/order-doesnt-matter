@@ -8,7 +8,16 @@ import {
   type PointerEvent,
 } from 'react';
 import type { StudioClock } from './clock';
+import { MoreHorizontal } from 'lucide-react';
 import { session } from './session';
+import { Button } from '../components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from '../components/ui/dropdown-menu';
 import { runtime } from './runtime';
 import { instrumentInventory } from './instrument-names';
 import { instrumentColour } from './themes';
@@ -143,12 +152,101 @@ export function ScoreArea({
   return (
     <section className="score-area region" data-region="score" data-score-ready={score.ready}>
       <header className="score-heading">
-        <h2>
-          {score.name.replaceAll('$', '')}{' '}
-          <small>
-            cycles {score.from + 1}–{score.to}
-          </small>
-        </h2>
+        <div className="score-title">
+          <div className="score-navigation">
+            <Button
+              variant="ghost"
+              size="sm"
+              aria-pressed={runtime.app.state.follow}
+              onClick={() => {
+                runtime.app.follow(!runtime.app.state.follow);
+              }}
+            >
+              Follow
+            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm">
+                  Sections
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {runtime.app.state.sections.length ? (
+                  runtime.app.state.sections.flatMap((part) => [
+                    <DropdownMenuItem
+                      key={part.id}
+                      onSelect={() => {
+                        runtime.app.select(part.id);
+                      }}
+                    >
+                      {part.name}
+                    </DropdownMenuItem>,
+                    <DropdownMenuItem
+                      key={`edit-${part.id}`}
+                      onSelect={() => {
+                        session.openEditor(part.id);
+                      }}
+                    >
+                      Edit section {part.name}
+                    </DropdownMenuItem>,
+                  ])
+                ) : (
+                  <DropdownMenuItem disabled>Four-cycle pages</DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  disabled={!runtime.app.state.doc}
+                  onSelect={() => {
+                    session.openEditor(
+                      runtime.app.state.sections.length
+                        ? 'piece:add-section'
+                        : 'piece:make-sections',
+                    );
+                  }}
+                >
+                  {runtime.app.state.sections.length ? 'Add a section' : 'Make sections'}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" aria-label="Score setup">
+                  <MoreHorizontal />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {score.model?.tempo && (
+                  <DropdownMenuItem disabled>{score.model.tempo}</DropdownMenuItem>
+                )}
+                {score.model?.setup.map((entry) => (
+                  <DropdownMenuItem
+                    key={entry.nodeId}
+                    onSelect={() => {
+                      session.openEditor(entry.nodeId);
+                    }}
+                  >
+                    {entry.summary}
+                  </DropdownMenuItem>
+                ))}
+                {!score.model?.setup.length && (
+                  <DropdownMenuItem disabled>No setup code in this piece</DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+          <h2
+            title={
+              runtime.app.state.follow
+                ? 'Score follows playback'
+                : 'Score pinned while the stages follow playback'
+            }
+          >
+            {score.name.replaceAll('$', '')}{' '}
+            <small>
+              cycles {score.from + 1}–{score.to}
+            </small>
+          </h2>
+        </div>
         <div
           className="score-ruler"
           data-testid="score-ruler"

@@ -24,6 +24,11 @@ import type { StudioSnapshot } from './store';
 import { speeds } from './transport';
 import { runtime } from './runtime';
 import { themeNames, resolveTheme } from './themes';
+import { dependencies } from '../../package.json';
+import { examples } from '../app/examples';
+import { KeepWork } from './KeepWork';
+import { Help } from './Help';
+import { session } from './session';
 
 declare const __BUILD_SHA__: string | null;
 const repository = 'https://github.com/FireLakeLabs/order-doesnt-matter';
@@ -41,6 +46,7 @@ export function TopBar({
   setTheme: (name: string) => void;
 }) {
   const { state, canPlay } = snapshot;
+  const { editorTarget } = useSyncExternalStore(session.subscribe, session.getSnapshot);
   const time = useSyncExternalStore(runtime.transport.subscribe, runtime.transport.getSnapshot);
   const cycle = useRef<HTMLOutputElement>(null);
   const tempo = useRef<HTMLElement>(null);
@@ -55,11 +61,12 @@ export function TopBar({
   const [source, setSource] = useState('');
   const [pasteOpen, setPasteOpen] = useState(false);
   const [importing, setImporting] = useState(false);
-  const load = async () => {
+  const load = async (program = source) => {
     setImporting(true);
     try {
-      await runtime.load(source);
-      if (!runtime.app.state.loadError) setPasteOpen(false);
+      const before = runtime.app.activation;
+      await runtime.load(program);
+      if (before !== runtime.app.activation) setPasteOpen(false);
     } finally {
       setImporting(false);
     }
@@ -172,7 +179,7 @@ export function TopBar({
       </Button>
       <Dialog open={pasteOpen} onOpenChange={setPasteOpen}>
         <DialogTrigger asChild>
-          <Button variant="outline">
+          <Button variant="outline" disabled={!!editorTarget}>
             <ClipboardPaste />
             Paste
           </Button>
@@ -182,6 +189,22 @@ export function TopBar({
             <DialogTitle>Paste Strudel</DialogTitle>
             <DialogDescription>Import a program as a Studio score.</DialogDescription>
           </DialogHeader>
+          <div className="dialog-actions">
+            <span>Try an original:</span>
+            {examples.map((example) => (
+              <Button
+                key={example.name}
+                variant="outline"
+                disabled={importing}
+                onClick={() => {
+                  setSource(example.source);
+                  void load(example.source);
+                }}
+              >
+                {example.name}
+              </Button>
+            ))}
+          </div>
           <textarea
             aria-label="Strudel program"
             value={source}
@@ -201,8 +224,40 @@ export function TopBar({
           <p role="status">{state.loadError}</p>
         </DialogContent>
       </Dialog>
-      <span className="top-message" role="status">
-        {state.loadError || state.message}
+      <KeepWork />
+      <Help />
+      {!!state.warnings.length && (
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="ghost">Notes ({state.warnings.length})</Button>
+          </DialogTrigger>
+          <DialogContent className="notes-dialog">
+            <DialogHeader>
+              <DialogTitle>Notes about this piece</DialogTitle>
+              <DialogDescription>
+                Code stays in your piece, including the parts we do not model.
+              </DialogDescription>
+            </DialogHeader>
+            <ul>
+              {state.warnings.map((warning, i) => (
+                <li key={i}>{warning.message}</li>
+              ))}
+            </ul>
+          </DialogContent>
+        </Dialog>
+      )}
+      <span
+        className="top-message"
+        title={
+          state.loadError ||
+          state.message ||
+          (runtime.app.retention.notice.includes('could not') ? runtime.app.retention.notice : '')
+        }
+        role="status"
+      >
+        {state.loadError ||
+          state.message ||
+          (runtime.app.retention.notice.includes('could not') ? runtime.app.retention.notice : '')}
       </span>
       <div className="theme-swatches" aria-label="Themes">
         {themeNames.map((name) => (
@@ -222,8 +277,8 @@ export function TopBar({
         <a href={repository} target="_blank" rel="noopener">
           Our source
         </a>
-        <a href={strudelSource('web', '1.3.0')} target="_blank" rel="noopener">
-          Strudel 1.3.0 source
+        <a href={strudelSource('web', dependencies['@strudel/web'])} target="_blank" rel="noopener">
+          Strudel {dependencies['@strudel/web']} source
         </a>
         <Dialog>
           <DialogTrigger asChild>
@@ -233,7 +288,7 @@ export function TopBar({
             <DialogHeader>
               <DialogTitle>About Order Doesn't Matter</DialogTitle>
               <DialogDescription>
-                A visual instrument for Strudel. Read and edit a program’s score, and follow its
+                A visual instrument for Strudel. Read and edit a program's score, and follow its
                 cycles.
               </DialogDescription>
             </DialogHeader>
@@ -260,13 +315,17 @@ export function TopBar({
             <a href="/licenses.txt" target="_blank" rel="noopener">
               Full licence texts and third-party notices
             </a>
-            <p>Strudel’s corresponding source for our pinned versions:</p>
+            <p>
+              <a href="https://strudel.cc" target="_blank" rel="noopener">
+                Visit Strudel
+              </a>
+            </p>
+            <p>Strudel's corresponding source for our pinned versions:</p>
             <ul>
               {['core', 'mini', 'tonal', 'transpiler', 'web', 'webaudio', 'superdough'].map(
                 (name) => {
-                  const version = ['web', 'webaudio', 'superdough'].includes(name)
-                    ? '1.3.0'
-                    : '1.2.6';
+                  const packageName = name === 'superdough' ? name : `@strudel/${name}`;
+                  const version = dependencies[packageName as keyof typeof dependencies];
                   return (
                     <li key={name}>
                       <a href={strudelSource(name, version)} target="_blank" rel="noopener">

@@ -12,6 +12,12 @@ export interface Layout {
   trails: 0 | 1 | 2;
   theme: string;
 }
+let restoredSelection = false;
+export function consumeRestoredSelection() {
+  const value = restoredSelection;
+  restoredSelection = false;
+  return value;
+}
 export const layoutKey = 'odm-studio-layout';
 const defaults: Layout = { a: 'ring', b: 'loom', lookAhead: 4, trails: 1, theme: 'arcade' };
 /** Treat storage and links as untrusted input; an explicit empty stage clears it. */
@@ -79,6 +85,16 @@ export function createSession(layout: Layout, storage?: StoragePort) {
       return () => {
         listeners.delete(notify);
       };
+    },
+    restore(value: typeof snapshot) {
+      snapshot = value;
+      restoredSelection = true;
+      try {
+        storage?.setItem(layoutKey, JSON.stringify(snapshot.layout));
+      } catch {
+        /* Storage is optional. */
+      }
+      emit();
     },
     layout(change: Partial<Layout>) {
       snapshot = { ...snapshot, layout: { ...snapshot.layout, ...change } };
