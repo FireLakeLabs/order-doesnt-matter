@@ -32,6 +32,10 @@ export function viewSmoke(test: typeof import('@playwright/test').test, id: stri
       if (!clip) throw Error('The view canvas is not visible');
       return page.screenshot({ clip });
     };
+    const presented = () =>
+      page.evaluate(async () => {
+        for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
+      });
     const ready = () =>
       page.waitForFunction(
         () =>
@@ -65,9 +69,7 @@ export function viewSmoke(test: typeof import('@playwright/test').test, id: stri
     const before = await picture();
     // Synchronize with drawn frames; software WebGL screenshot encoding can
     // itself exceed expect.poll's deadline even while the view is animating.
-    await page.evaluate(async () => {
-      for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
-    });
+    await presented();
     expect((await picture()).equals(before)).toBe(false);
     await page.getByRole('button', { name: 'Stop', exact: true }).click();
     await page.getByRole('button', { name: 'Play', exact: true }).waitFor({ timeout: 0 });
@@ -76,7 +78,7 @@ export function viewSmoke(test: typeof import('@playwright/test').test, id: stri
     await page.getByRole('button', { name: 'Theme riso', exact: true }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'riso');
     // Wait for the new theme to be presented before checking draw errors.
-    await picture();
+    await presented();
     await ready();
     expect(errors).toEqual([]);
   });
