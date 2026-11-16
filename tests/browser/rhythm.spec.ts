@@ -9,6 +9,7 @@ import {
   waitForPending,
   throughCycle,
   sharedProgram,
+  signal,
 } from './helpers';
 import { instruments } from '../../src/document';
 async function openBass(page: import('@playwright/test').Page) {
@@ -154,19 +155,10 @@ test.describe('Kiln rhythm with shared setup', () => {
     expect(trigger!.cycle % 1).toBe(0.125);
     // The score proves the whole rhythm, independently of delivery under load.
     // Its worker can still be finishing after playback acknowledges the edit.
-    await appSignal(page, function restedBassScoreReady() {
+    function restedBassStarts() {
       const state = window.odmApp.state;
       const bass = state.rows.find((r) => r.name === 'bass')!;
-      return state.events[bass.id]?.events.some(
-        (e) =>
-          e.whole?.[0] === state.fromCycle + 0.125 &&
-          String((e.value as { note?: unknown }).note) === '83',
-      );
-    });
-    const starts = await page.evaluate(() => {
-      const state = window.odmApp.state;
-      const bass = state.rows.find((r) => r.name === 'bass')!;
-      return state.events[bass.id].events
+      return (state.events[bass.id]?.events ?? [])
         .filter(
           (e) =>
             e.whole &&
@@ -176,8 +168,8 @@ test.describe('Kiln rhythm with shared setup', () => {
         )
         .map((e) => e.whole![0] - state.fromCycle)
         .sort((a, b) => a - b);
-    });
-    expect(starts).toEqual([0.125, 0.25, 0.5, 0.75]);
+    }
+    await signal(() => page.evaluate(restedBassStarts)).toEqual([0.125, 0.25, 0.5, 0.75]);
     await page.getByRole('button', { name: 'Stop', exact: true }).click();
   });
 
