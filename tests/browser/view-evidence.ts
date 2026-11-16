@@ -195,13 +195,15 @@ export function viewEvidence(test: typeof Test, id: string) {
         });
       }
     }
-    await standalone.evaluate(({ el, handle }, frame) => {
+    const resized = await standalone.evaluate(({ el, handle }, frame) => {
       el.style.width = '1920px';
       el.style.height = '1080px';
       handle.frame({ ...frame, width: 1920, height: 1080 });
+      return el.querySelector('canvas')!.toDataURL();
     }, saved);
-    const resized = await page.screenshot({ path: `${shots}/arcade-1920x1080.png` });
-    // A resized cached view must match a fresh mount at the same size.
+    await page.screenshot({ path: `${shots}/arcade-1920x1080.png` });
+    // Compare renderer pixels exactly; DOM border antialiasing can vary between
+    // composited layers and is unrelated to the cached band geometry.
     const fresh = await page.evaluateHandle(
       async (frame) => {
         const el = document.createElement('div');
@@ -209,11 +211,12 @@ export function viewEvidence(test: typeof Test, id: string) {
         document.body.append(el);
         const handle = await window.viewProbe.definition.mount(el);
         handle.frame({ ...frame, width: 1920, height: 1080 });
-        return { el, handle };
+        return { el, handle, picture: el.querySelector('canvas')!.toDataURL() };
       },
       await saved.jsonValue(),
     );
-    expect((await page.screenshot()).equals(resized)).toBe(true);
+    await page.screenshot({ path: `${shots}/fresh-1920x1080.png` });
+    expect(await fresh.evaluate(({ picture }) => picture)).toBe(resized);
     await fresh.evaluate(({ el, handle }) => {
       handle.dispose();
       el.remove();
