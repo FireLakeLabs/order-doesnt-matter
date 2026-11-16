@@ -105,8 +105,9 @@ async function prepare(page: Page, source: string) {
       performance.getEntriesByType('resource').some((entry) => /three\.module-/.test(entry.name)),
     ),
   ).toBe(false);
-  await page.goto('/studio.html?inspect&a=ring&b=&theme=arcade');
-  await page.waitForFunction(() => window.odmStudio.app.canPlay);
+  const stage = page.locator('[data-region="stage-a"]');
+  await stage.getByRole('button', { name: 'Views', exact: true }).click();
+  await stage.locator('.shelf-popover [data-view="ring"] .view-choice').click();
   await page.evaluate(async (source) => {
     await window.odmStudio.load(source);
     window.ringTest.frame = undefined;
