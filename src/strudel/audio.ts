@@ -10,6 +10,9 @@ import {
   samples,
   getSuperdoughAudioController,
 } from '@strudel/web';
+import type { CycleLoop, PlaybackSpeed } from '../contract';
+import { actualCps, wrapCycle } from '../engine/transport';
+import { captureTempo, discardVoices, loopPattern, speedPattern } from './audio-transport';
 import { silence } from '@strudel/core';
 import { playheadCycle, seekTo } from './index';
 import type { Hap, Pattern } from './index';
@@ -57,6 +60,11 @@ export async function createAudio({
   let dispatch: Dispatch = async () => {},
     silent: SilentWindow = () => {},
     failed: (error: unknown) => void = () => {};
+  let speed: PlaybackSpeed = 1;
+  let loop: CycleLoop | null = null;
+  let writtenCps = 0.5;
+  let speedBoundary: { cycle: number; time: number; cps: number } | undefined;
+  const sourceCycles = new WeakMap<Hap, number>();
   const revisions = new WeakMap<Hap, number>();
   let committing: Promise<void>[] | undefined;
   let capture: ((p: Pattern) => Pattern) | undefined,
@@ -66,10 +74,15 @@ export async function createAudio({
     miniAllStrings: false,
     editPattern: (p) => (capture ? capture(p) : p),
     defaultOutput: (hap, deadline, duration, cps, time) => {
+      if (hap.value && typeof hap.value === 'object') {
+        const tempo = (hap.value as Record<string, unknown>).cps;
+        if (typeof tempo === 'number' && Number.isFinite(tempo) && tempo > 0)
+          writtenCps = tempo / speed;
+      }
       const work = dispatch(
         revisions.get(hap) ?? 0,
         hap.value && typeof hap.value === 'object' ? { ...hap.value } : hap.value,
-        Number(hap.whole?.begin ?? hap.part.begin),
+        sourceCycles.get(hap) ?? Number(hap.whole?.begin ?? hap.part.begin),
         time,
         () => webaudioOutput(hap, deadline, duration, cps, time),
         instrumentIdentity(hap),
@@ -78,6 +91,7 @@ export async function createAudio({
       return work;
     },
   });
+  const tempo = captureTempo(repl.scheduler);
   const unavailable = await defaults(),
     context = getAudioContext();
   // Depends on Superdough's private final gain, downstream of all orbit effects.
@@ -90,7 +104,7 @@ export async function createAudio({
     },
     async prepare(code, _from, revision) {
       let candidate: Pattern | undefined;
-      const oldCps = repl.scheduler.cps;
+      const previousWritten = writtenCps;
       const execution = new ExecutionBudget();
       const binding = `__odmBudget_${crypto.randomUUID()}`;
       const source = boundedSource(code, binding);
@@ -104,26 +118,30 @@ export async function createAudio({
       Object.defineProperty(globalThis, binding, { value: execution, configurable: true });
       try {
         execution.begin();
-        await repl.evaluate(source, false);
+        cps = await tempo.during(previousWritten, async () => {
+          await repl.evaluate(source, false);
+        });
         execution.check();
         if (repl.state.error) throw repl.state.error;
-        cps = repl.scheduler.cps;
       } finally {
         execution.end();
         Reflect.deleteProperty(globalThis, binding);
         capture = undefined;
-        repl.setCps(oldCps);
       }
       if (!candidate) throw Error('Strudel evaluation produced no pattern');
       const pattern = candidate;
       inspect?.(pattern, cps);
       const wrapped = guarded(
-        pattern,
+        loopPattern(
+          speedPattern(pattern, () => speed),
+          () => loop,
+          sourceCycles,
+        ),
         failed,
         (hap) => revisions.set(hap, revision),
         (state) => {
           const { cycle, time } = schedulingBoundary(repl.scheduler, state);
-          silent(revision, cycle, time);
+          silent(revision, wrapCycle(cycle, loop), time);
         },
         execution,
       );
@@ -134,12 +152,14 @@ export async function createAudio({
             wasPlaying = repl.scheduler.started;
           committing = [];
           try {
-            repl.setCps(cps);
+            writtenCps = cps;
+            tempo.set(actualCps(cps, speed));
             await repl.setPattern(wrapped, true);
             await Promise.all(committing);
             installed = wrapped;
           } catch (error) {
-            repl.setCps(oldCps);
+            writtenCps = previousWritten;
+            tempo.set(actualCps(previousWritten, speed));
             await repl.setPattern(previous, false);
             if (!wasPlaying) repl.stop();
             throw error;
@@ -196,11 +216,40 @@ export async function createAudio({
     },
     stop: () => repl.stop(),
     playing: () => repl.scheduler.started,
-    now: () => playheadCycle(repl.scheduler),
+    now: () => {
+      const boundary = speedBoundary;
+      const now =
+        boundary && context.currentTime < boundary.time
+          ? boundary.cycle + (context.currentTime - boundary.time) * boundary.cps
+          : playheadCycle(repl.scheduler);
+      return wrapCycle(now, loop);
+    },
     time: () => context.currentTime,
     outputLatency: () => (context.baseLatency ?? 0) + (context.outputLatency ?? 0),
     cps: () => repl.scheduler.cps,
+    setSpeed(factor) {
+      if (factor === speed) return;
+      // Cyclist applies cps at its next query, after all already scheduled notes.
+      // Depends on clock.getPhase() being the next tick's phase (canary tested).
+      if (repl.scheduler.started) {
+        speedBoundary = {
+          cycle: repl.scheduler.lastEnd,
+          time: repl.scheduler.clock.getPhase() + repl.scheduler.latency,
+          cps:
+            speedBoundary && context.currentTime < speedBoundary.time
+              ? speedBoundary.cps
+              : repl.scheduler.cps,
+        };
+      }
+      speed = factor;
+      tempo.set(actualCps(writtenCps, speed));
+    },
+    setLoop(value) {
+      loop = value;
+    },
+    silence: () => discardVoices(getSuperdoughAudioController()),
     seek: (cycle) => {
+      speedBoundary = undefined;
       // The accessor validates phase anchors; Cyclist initializes one only on its first tick.
       repl.scheduler.seconds_at_cps_change ??= context.currentTime;
       seekTo(repl.scheduler, cycle, context.currentTime);

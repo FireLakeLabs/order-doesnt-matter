@@ -26,6 +26,7 @@ import {
 
 export function createApp(
   options: {
+    configureEngine?: (engine: Engine) => void;
     retention?: ReturnType<typeof createRetention>;
     confirmReplacement?: () => Promise<boolean>;
   } = {},
@@ -316,6 +317,7 @@ export function createApp(
         engineCreation = undefined;
         throw error;
       }));
+      options.configureEngine?.(engine);
       // Subscribe once, including when Stop was pressed during initialization.
       if (!subscribed) {
         engine.subscribe(observe);
