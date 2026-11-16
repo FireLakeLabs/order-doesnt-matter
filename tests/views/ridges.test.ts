@@ -72,6 +72,42 @@ describe('Ridges profile', () => {
     expect(profile.find((p) => Math.abs(p.x - 0.2) < 1e-9)?.height).toBeCloseTo(0.14);
     expect(profileHeight(profile, 0.75)).toBeCloseTo(1);
   });
+  for (const count of [8, 16])
+    it(`keeps every one of ${count} adjacent notes as a peak above a shared saddle`, () => {
+      const f = scoreFrame();
+      f.notes = Array.from({ length: count }, (_, i) =>
+        note(i / count, (i + 1) / count, { gain: i % 2 ? 0.9 : 0.1 }),
+      );
+      const driver = terrainDriver(f)!;
+      const profile = ridgeProfile(driver, 0);
+      const peaks = profile.filter(
+        (p, i) =>
+          i > 0 &&
+          i < profile.length - 1 &&
+          p.height > profile[i - 1].height &&
+          p.height > profile[i + 1].height,
+      );
+      expect(peaks).toHaveLength(count);
+      for (let i = 0; i < count; i++) {
+        const peak = terrainHeight(driver, (i + 0.5) / count);
+        expect(peak).toBeCloseTo(peakValue(driver, i % 2 ? 0.9 : 0.1));
+        if (i > 0) {
+          const saddle = terrainHeight(driver, i / count);
+          expect(saddle).toBeGreaterThan(0);
+          expect(saddle).toBeLessThan(peak);
+          expect(terrainHeight(driver, i / count - 1e-9)).toBeCloseTo(saddle, 6);
+          expect(terrainHeight(driver, i / count + 1e-9)).toBeCloseTo(saddle, 6);
+        }
+      }
+    });
+  it('uses asymmetric fixed shoulders and ground only in actual rests', () => {
+    expect(peakEnvelope(0.25)).not.toBeCloseTo(peakEnvelope(0.75));
+    expect(peakEnvelope(0.5)).toBe(1);
+    const f = scoreFrame();
+    f.notes = [note(0, 0.4, { gain: 0.2 }), note(0.6, 1, { gain: 0.8 })];
+    expect(terrainHeight(terrainDriver(f), 0.5)).toBe(0);
+    expect(terrainHeight(terrainDriver(f), 0.4)).toBe(0);
+  });
   it('clips a long note without restarting its envelope at cycle boundaries and uses max for chords', () => {
     const f = scoreFrame();
     f.notes = [note(0.5, 2.5, { note: 60 }), note(1, 2, { note: 72 })];

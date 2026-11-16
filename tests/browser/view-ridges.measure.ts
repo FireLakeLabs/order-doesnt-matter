@@ -36,6 +36,8 @@ test('ridges: section approach and continuous cycle slide', async ({ page }) => 
     ['before-breakdown', 14.4],
     ['boundary-before', 14.99],
     ['boundary-after', 15.01],
+    ['spire-before', 14.49],
+    ['spire-flare', 14.52],
     ...Array.from({ length: 4 }, (_, i): [string, number] => [
       `consecutive-${String(i)}`,
       14.4 + (i * 0.05 * 140) / 240,

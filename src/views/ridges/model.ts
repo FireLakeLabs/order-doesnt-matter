@@ -82,24 +82,55 @@ export function terrainDriver(
   }
   return winner ?? fallback.sort((a, b) => b.max - b.min - (a.max - a.min))[0];
 }
-export const peakEnvelope = (phase: number) => Math.sin(Math.PI * clamp(phase)) ** 2;
+/** One fixed, asymmetric mountain shoulder, independent of the setting's value. */
+const mountainShoulder = [
+  [0, 0],
+  [0.18, 0.12],
+  [0.35, 0.44],
+  [0.5, 1],
+  [0.59, 0.7],
+  [0.78, 0.32],
+  [1, 0],
+];
+export function peakEnvelope(phase: number) {
+  const p = clamp(phase);
+  for (let i = 1; i < mountainShoulder.length; i++) {
+    const [x, y] = mountainShoulder[i],
+      [before, height] = mountainShoulder[i - 1];
+    if (p <= x) return height + ((y - height) * (p - before)) / (x - before);
+  }
+  return 0;
+}
 export const peakValue = (terrain: Terrain, value: number) =>
   terrain.max === terrain.min
     ? 0.55
     : 0.14 + 0.86 * clamp((value - terrain.min) / (terrain.max - terrain.min));
-/** The setting is constant for the entire note. Only this fixed envelope rounds its shoulder. */
+/** Adjacent notes share a saddle below both peaks; a real rest still reaches ground. */
+function joinedHeight(terrain: Terrain) {
+  const starts = new Map<number, number>(),
+    ends = new Map<number, number>();
+  for (const note of terrain.samples) {
+    const height = peakValue(terrain, note.value);
+    starts.set(note.start, Math.max(starts.get(note.start) ?? 0, height));
+    ends.set(note.end, Math.max(ends.get(note.end) ?? 0, height));
+  }
+  return (note: Terrain['samples'][number], time: number) => {
+    const peak = peakValue(terrain, note.value);
+    const phase = (time - note.start) / (note.end - note.start);
+    const neighbour = phase < 0.5 ? ends.get(note.start) : starts.get(note.end);
+    const saddle = 0.62 * Math.min(peak, neighbour ?? 0);
+    return saddle + (peak - saddle) * peakEnvelope(phase);
+  };
+}
+/** The sampled setting stays constant. Only the fixed shoulder and adjacent saddles shape it. */
 export function terrainHeight(terrain: Terrain | undefined, time: number) {
-  let height = 0;
-  if (terrain)
-    for (const note of terrain.samples) {
-      if (time < note.start || time > note.end) continue;
-      height = Math.max(
-        height,
-        peakValue(terrain, note.value) *
-          peakEnvelope((time - note.start) / (note.end - note.start)),
-      );
-    }
-  return height;
+  if (!terrain) return 0;
+  const height = joinedHeight(terrain);
+  let result = 0;
+  for (const note of terrain.samples) {
+    if (time >= note.start && time <= note.end) result = Math.max(result, height(note, time));
+  }
+  return result;
 }
 export interface RidgePoint {
   x: number;
@@ -113,6 +144,7 @@ export function ridgeProfile(terrain: Terrain | undefined, cycle: number): Ridge
       { x: 0, height: 0, count: 0 },
       { x: 1, height: 0, count: 0 },
     ];
+  const height = joinedHeight(terrain);
   if (samples.length >= DENSE_AT) {
     const bins = Array.from({ length: BINS }, (_, i) => ({
       x: (i + 0.5) / BINS,
@@ -125,10 +157,7 @@ export function ridgeProfile(terrain: Terrain | undefined, cycle: number): Ridge
       for (let i = first; i <= last; i++) {
         // Max within the occupied bin preserves even a subpixel note's peak.
         const t = clamp((note.start + note.end) / 2, cycle + i / BINS, cycle + (i + 1) / BINS);
-        bins[i].height = Math.max(
-          bins[i].height,
-          peakValue(terrain, note.value) * peakEnvelope((t - note.start) / (note.end - note.start)),
-        );
+        bins[i].height = Math.max(bins[i].height, height(note, t));
         bins[i].count++;
       }
     }
@@ -147,10 +176,14 @@ export function ridgeProfile(terrain: Terrain | undefined, cycle: number): Ridge
       if (t >= cycle && t <= cycle + 1) times.add(t);
     }
   }
-  const local = { ...terrain, samples };
   return [...times]
     .sort((a, b) => a - b)
-    .map((t) => ({ x: t - cycle, height: terrainHeight(local, t), count: 1 }));
+    .map((t) => {
+      let y = 0;
+      for (const note of samples)
+        if (t >= note.start && t <= note.end) y = Math.max(y, height(note, t));
+      return { x: t - cycle, height: y, count: 1 };
+    });
 }
 export function profileHeight(profile: RidgePoint[], x: number) {
   for (let i = 1; i < profile.length; i++)
