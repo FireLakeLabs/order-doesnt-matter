@@ -85,6 +85,8 @@ export interface Scheduler {
   latency: number;
   started: boolean;
   getTime(): number;
+  clock: { getPhase(): number };
+  setCps(cps: number): void;
 }
 function schedulerState(value: unknown): Scheduler {
   if (!value || typeof value !== 'object') throw Error('Strudel scheduler: expected an object');

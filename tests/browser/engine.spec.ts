@@ -1,3 +1,4 @@
+import './studio-transport';
 import { blockHttps } from './offline';
 import { kilnDiscovery, assetDiscovery, opaqueDiscovery } from './discovery';
 import { test } from './helpers';

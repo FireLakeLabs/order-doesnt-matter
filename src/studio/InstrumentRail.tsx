@@ -9,7 +9,7 @@ import { instrumentInventory } from './instrument-names';
 import { instrumentColour } from './themes';
 import { neededRange, noteLevel, playingSplit } from './frame';
 import { createScoreCache } from './score-cache';
-import type { createFrameClock } from './clock';
+import type { StudioClock } from './clock';
 import { runtime } from './runtime';
 import { session, muteEdit, soloEdit, soloedInstrument } from './session';
 import type { AppState } from '../app/state';
@@ -21,7 +21,7 @@ export function InstrumentRail({
 }: {
   state: AppState;
   theme: ViewTheme;
-  clock: ReturnType<typeof createFrameClock>;
+  clock: StudioClock;
 }) {
   const rail = useRef<HTMLElement>(null);
   const { layout, selectedInstrument } = useSyncExternalStore(
@@ -38,7 +38,7 @@ export function InstrumentRail({
     const queries = createBrowserQueries();
     const cache = createScoreCache(queries.query);
     let membership = '';
-    const off = clock.subscribe((cycle) => {
+    const off = clock.subscribe(({ now: cycle, playing }) => {
       const state = runtime.app.state;
       const split = playingSplit(state, cycle);
       const key = split.playing.map((row) => row.id).join(':');
@@ -55,7 +55,7 @@ export function InstrumentRail({
         const element = container.querySelector<HTMLElement>(`[data-instrument="${row.id}"]`);
         if (!element) continue;
         const silenced = row.muted || (state.solo !== null && state.solo !== row.id);
-        const level = state.playing && !silenced ? noteLevel(cache.notes, row.id, cycle) : 0;
+        const level = playing && !silenced ? noteLevel(cache.notes, row.id, cycle) : 0;
         const sounding = String(level > 0);
         if (element.dataset.sounding !== sounding) element.dataset.sounding = sounding;
         const meter = element.querySelector<HTMLElement>('.meter-fill');

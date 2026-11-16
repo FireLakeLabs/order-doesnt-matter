@@ -157,7 +157,8 @@ test('Loom: real arrangement, cache cost, five themes, lifecycle, no-section and
   // Capture the real running page at the first drop through the controller's seek API.
   await page.evaluate(async () => {
     window.odmStudio.stop();
-    await window.odmStudio.app.play(10.4);
+    await window.odmStudio.seek(10.4);
+    await window.odmStudio.play();
   });
   await page.waitForFunction(() => window.odmStudio.getPlayhead() >= 10.4);
   await page.getByRole('button', { name: 'Pause', exact: true }).click();

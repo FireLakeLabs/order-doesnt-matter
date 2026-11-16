@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Pause, Play, Square, ClipboardPaste } from 'lucide-react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { Pause, Play, Square, ClipboardPaste, StepBack, StepForward, Repeat2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import {
   Dialog,
@@ -9,7 +9,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '../components/ui/dialog';
+import type { StudioClock } from './clock';
 import type { StudioSnapshot } from './store';
+import { speeds } from './transport';
 import { runtime } from './runtime';
 import { themeNames, resolveTheme } from './themes';
 
@@ -18,15 +20,28 @@ const repository = 'https://github.com/FireLakeLabs/order-doesnt-matter';
 const strudelSource = (name: string, version: string) =>
   `https://codeberg.org/uzu/strudel/src/tag/${encodeURIComponent(`${name === 'superdough' ? name : `@strudel/${name}`}@${version}`)}`;
 export function TopBar({
+  clock,
   snapshot,
   theme,
   setTheme,
 }: {
+  clock: StudioClock;
   snapshot: StudioSnapshot;
   theme: string;
   setTheme: (name: string) => void;
 }) {
   const { state, canPlay } = snapshot;
+  const time = useSyncExternalStore(runtime.transport.subscribe, runtime.transport.getSnapshot);
+  const cycle = useRef<HTMLOutputElement>(null);
+  const tempo = useRef<HTMLElement>(null);
+  useEffect(
+    () =>
+      clock.subscribe(({ now, cps }) => {
+        if (cycle.current) cycle.current.textContent = `cycle ${now.toFixed(2)}`;
+        if (tempo.current) tempo.current.textContent = String(Math.round(cps * 240));
+      }),
+    [clock],
+  );
   const [source, setSource] = useState('');
   const [pasteOpen, setPasteOpen] = useState(false);
   const [importing, setImporting] = useState(false);
@@ -66,10 +81,67 @@ export function TopBar({
         >
           <Square />
         </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label="Step back one beat"
+          disabled={state.playing || time.scrubbing}
+          onClick={() => {
+            runtime.step(-1);
+          }}
+        >
+          <StepBack />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label="Step forward one beat"
+          disabled={state.playing || time.scrubbing}
+          onClick={() => {
+            runtime.step(1);
+          }}
+        >
+          <StepForward />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          aria-label={time.loop ? 'Clear loop' : 'Mark loop'}
+          title={
+            time.loop
+              ? `Loop cycles ${String(time.loop.from)}–${String(time.loop.to)}; click to clear`
+              : 'Mark loop: drag across the strip (or Shift-drag anytime)'
+          }
+          aria-pressed={!!time.loop || time.marking}
+          onClick={() => {
+            runtime.toggleLoop();
+          }}
+        >
+          <Repeat2 />
+        </Button>
+      </div>
+      <div className="speed-control" aria-label="Speed">
+        <span>Speed</span>
+        {speeds.map((speed, i) => (
+          <button
+            key={speed}
+            aria-label={`Speed ${String(speed)}`}
+            aria-pressed={time.speed === speed}
+            onClick={() => {
+              runtime.setSpeed(speed);
+            }}
+          >
+            {['1/4', '1/2', '3/4', '1×'][i]}
+          </button>
+        ))}
       </div>
       <output className="tempo">
-        {Math.round((state.cps ?? 0.5) * 240)} <small>BPM</small>
+        <span ref={tempo} /> <small>BPM</small>
+        {time.speed !== 1 && (
+          <small className="written">written at {Math.round((state.cps ?? 0.5) * 240)}</small>
+        )}
       </output>
+      <output ref={cycle} className="cycle-readout" aria-label="Cycle" />
       <Dialog open={pasteOpen} onOpenChange={setPasteOpen}>
         <DialogTrigger asChild>
           <Button variant="outline">
