@@ -42,6 +42,7 @@ export function Tray({
     return (
       <aside className="tray region" data-region="tray">
         <EditorHost
+          key={String(runtime.app.practice)}
           context={context}
           name={editorName}
           entry={runtime.app.editor?.state.entries[context.target.nodeId]}
@@ -69,6 +70,13 @@ export function Tray({
       <header className="tray-heading">
         <span className="lane-dot" />
         <h2>{name}</h2>
+        <button
+          onClick={() => {
+            session.openEditor(instrument.id);
+          }}
+        >
+          Instrument
+        </button>
         {!sourceOnly && (
           <button
             onClick={() => {
@@ -119,6 +127,16 @@ export function Tray({
               </li>
             ))}
           </ol>
+          {row.rewriteTarget && (
+            <button
+              className="rhythm-open"
+              onClick={() => {
+                if (row.rewriteTarget) session.openEditor(row.rewriteTarget);
+              }}
+            >
+              Add rewrite
+            </button>
+          )}
           {!rewrites.length && <p className="tray-quiet">No rewrites</p>}
         </section>
         <section className="tray-group">

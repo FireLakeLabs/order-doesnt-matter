@@ -10,7 +10,7 @@ export function editorContext(id: string | null, score: StudioScore): EditorCont
     editor = app.editor;
   if (!id || !doc || !editor) return null;
   const target = describeTarget(doc, id);
-  if (!target.node) return null;
+  if (!target.node && !['piece:add-section', 'piece:make-sections'].includes(id)) return null;
   const entry = Object.entries(editor.state.entries).find(([key]) => key === id)?.[1];
   return {
     doc,

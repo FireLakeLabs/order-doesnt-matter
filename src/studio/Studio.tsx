@@ -14,7 +14,7 @@ import { editorContext } from './tray/context';
 import { EditorHost, kindFor } from './tray/EditorHost';
 import { instrumentInventory } from './instrument-names';
 import { createFrameClock } from './clock';
-import { session, type Stage } from './session';
+import { session, consumeRestoredSelection, type Stage } from './session';
 
 // All subscribers receive one latency-corrected sample from one page RAF.
 const clock = createFrameClock(
@@ -42,7 +42,7 @@ export function Studio() {
   useEffect(() => {
     if (activation.current !== runtime.app.activation) {
       activation.current = runtime.app.activation;
-      session.resetSelection();
+      if (!consumeRestoredSelection()) session.resetSelection();
     }
   }, [snapshot.state.doc]);
   useEffect(() => {
@@ -56,7 +56,27 @@ export function Studio() {
   }, [theme]);
   useEffect(() => {
     const escape = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') session.fill(null);
+      if (event.defaultPrevented) return;
+      const field =
+        event.target instanceof Element &&
+        event.target.closest('input, textarea, [contenteditable="true"]');
+      if (
+        (event.ctrlKey || event.metaKey) &&
+        event.key.toLowerCase() === 'z' &&
+        !field &&
+        !document.querySelector('[role="dialog"]')
+      ) {
+        event.preventDefault();
+        if (event.shiftKey) runtime.app.editor?.redo();
+        else runtime.app.editor?.undo();
+      }
+      if (event.key === 'Escape' && !document.querySelector('[role="dialog"]')) {
+        session.fill(null);
+        if (session.getSnapshot().editorTarget) {
+          event.preventDefault();
+          session.openEditor(null);
+        }
+      }
     };
     window.addEventListener('keydown', escape);
     return () => {
@@ -76,6 +96,18 @@ export function Studio() {
           session.layout({ theme: name });
         }}
       />
+      {snapshot.state.soundNotice.visible && (
+        <div className="studio-notice" role="status">
+          Default sounds could not load. Check your connection, then press Play again.
+          <button
+            onClick={() => {
+              runtime.app.dismissSoundNotice();
+            }}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
       <ScrubStrip clock={clock} />
       <div className="workspace">
         <InstrumentRail state={snapshot.state} theme={theme} clock={clock} />
@@ -105,6 +137,7 @@ export function Studio() {
           {context && kindFor(context).layout === 'wide' && (
             <div className="wide-editor">
               <EditorHost
+                key={String(runtime.app.practice)}
                 context={context}
                 name={editorName}
                 entry={runtime.app.editor?.state.entries[context.target.nodeId]}
