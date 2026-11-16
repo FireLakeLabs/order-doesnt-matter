@@ -11,6 +11,8 @@ import {
   visibleSettings,
 } from './constellation/geometry';
 
+const nameFont = (theme: ViewFrame['theme']) => `13px "${theme.fontDisplay}"`;
+
 const circle = (c: CanvasRenderingContext2D, x: number, y: number, r: number) => {
   c.beginPath();
   c.arc(x, y, Math.max(0, r), 0, TAU);
@@ -96,7 +98,7 @@ function drawDisc(
     c.fillStyle = theme.ground;
     c.fillText(String(i + 1), sx, sy + 3);
   }
-  c.font = `13px "${theme.fontDisplay}"`;
+  c.font = nameFont(theme);
   c.fillStyle = theme.text;
   c.fillText(instrument.name, x, y + r + 25, disc.cell.w - 12);
   c.font = `11px "${theme.fontMono}"`;
@@ -234,6 +236,13 @@ const view: ViewDefinition = {
         c.fillRect(0, 0, canvas.width, canvas.height);
         c.setTransform(dpr, 0, 0, dpr, 0, 0);
         c.font = `11px "${theme.fontMono}"`;
+        const measureName = (text: string) => {
+          c.save();
+          c.font = nameFont(theme);
+          const width = c.measureText(text).width;
+          c.restore();
+          return width;
+        };
         const length = frame.sections.at(-1)?.to ?? 0;
         const phase = length ? ((frame.now % length) + length) % length : frame.now;
         const section =
@@ -244,11 +253,12 @@ const view: ViewDefinition = {
           width,
           height,
           theme.fontMono,
+          theme.fontDisplay,
           frame.instruments.map((i) => [i.id, i.inSection, i.room, i.name, i.settings]),
           frame.rooms,
         ]);
         if (nextKey !== key || previousNotes !== frame.notes) {
-          drawing = layout(frame, (text) => c.measureText(text).width);
+          drawing = layout(frame, (text) => c.measureText(text).width, measureName);
           key = nextKey;
         }
         if (previousNotes !== frame.notes || cycle !== Math.floor(frame.now)) {
@@ -303,7 +313,7 @@ const view: ViewDefinition = {
               moons: [],
             };
             c.font = `11px "${theme.fontMono}"`;
-            enlarged.moons = moons(enlarged, (text) => c.measureText(text).width);
+            enlarged.moons = moons(enlarged, (text) => c.measureText(text).width, measureName);
             drawDisc(
               c,
               enlarged,

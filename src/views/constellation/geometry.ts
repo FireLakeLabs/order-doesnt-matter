@@ -40,7 +40,11 @@ export const visibleSettings = (instrument: ViewInstrument) =>
   );
 
 /** Labels own rectangles before painting; each cell owns its entire solar system. */
-export function moons(disc: Omit<Disc, 'moons'>, measure: (text: string) => number): Moon[] {
+export function moons(
+  disc: Omit<Disc, 'moons'>,
+  measure: (text: string) => number,
+  measureName: (text: string) => number = measure,
+): Moon[] {
   const result: Moon[] = [];
   const occupied: Box[] = [
     {
@@ -50,9 +54,9 @@ export function moons(disc: Omit<Disc, 'moons'>, measure: (text: string) => numb
       h: disc.radius * 2 + 10,
     },
     {
-      x: disc.x - Math.min(disc.cell.w - 8, measure(disc.instrument.name)) / 2,
+      x: disc.x - Math.min(disc.cell.w - 8, measureName(disc.instrument.name)) / 2,
       y: disc.y + disc.radius + 10,
-      w: Math.min(disc.cell.w - 8, measure(disc.instrument.name)),
+      w: Math.min(disc.cell.w - 8, measureName(disc.instrument.name)),
       h: 20,
     },
   ];
@@ -96,7 +100,11 @@ export function moons(disc: Omit<Disc, 'moons'>, measure: (text: string) => numb
 }
 
 /** Same document, section and dimensions always give the same layout. No simulation. */
-export function layout(frame: ViewFrame, measure: (text: string) => number): Layout {
+export function layout(
+  frame: ViewFrame,
+  measure: (text: string) => number,
+  measureName: (text: string) => number = measure,
+): Layout {
   const resting = frame.instruments.filter((i) => !i.inSection);
   const roomOf = (instrument: ViewInstrument) =>
     frame.rooms.find((room) => room.members.includes(instrument.id))?.orbit ??
@@ -162,7 +170,7 @@ export function layout(frame: ViewFrame, measure: (text: string) => number): Lay
       cell,
       moons: [] as Moon[],
     };
-    if (!dense) disc.moons = moons(disc, measure);
+    if (!dense) disc.moons = moons(disc, measure, measureName);
     return disc;
   });
   return { discs, resting, rest, dense, detail };

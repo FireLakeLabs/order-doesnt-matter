@@ -21,7 +21,7 @@ export interface ViewInstrument {
   muted: boolean;
   settings: ViewSetting[];
   rewrites: string[];
-  room: number | null;
+  room: number | null; // Document orbit when known (default 1); frame.rooms has sampled memberships.
 }
 export interface ViewTheme {
   name: string;

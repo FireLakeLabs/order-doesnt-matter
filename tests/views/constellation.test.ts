@@ -185,3 +185,19 @@ test('repeated ordered rewrites on a containing group remain distinct', () => {
   for (const facts of instrumentFacts(doc).values())
     expect(facts.rewrites).toEqual(['fast 2', 'fast 2']);
 });
+
+test('moon labels clear the instrument name measured in its wider display font', () => {
+  const input = frame();
+  input.instruments[0].name = 'Wide title';
+  input.instruments[0].settings = Array.from({ length: 9 }, (_, i) => ({
+    name: `setting ${String(i)}`,
+    label: `control ${String(i)}`,
+    kind: 'constant',
+    value: 1,
+  }));
+  const nameWidth = 300;
+  const disc = layout(input, measure, () => nameWidth).discs[0];
+  const nameBox = { x: disc.x - nameWidth / 2, y: disc.y + disc.radius + 10, w: nameWidth, h: 20 };
+  expect(disc.moons).toHaveLength(9);
+  expect(disc.moons.every((moon) => !overlap(moon.box, nameBox))).toBe(true);
+});
