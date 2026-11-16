@@ -1,6 +1,7 @@
 import { expect, it } from 'vitest';
 import {
   analyse,
+  cameraKick,
   characterHeight,
   coinCount,
   groundHeight,
@@ -9,6 +10,7 @@ import {
 } from '../../src/views/runner/model';
 import { pitch } from '../../src/views/shared/retro-2d';
 import type { ViewNote } from '../../src/views/types';
+import { scoreFrame } from './score-fixture';
 const note = (
   instrument: string,
   start: number,
@@ -124,4 +126,38 @@ it('chooses current section roles without letting resting score evidence win', (
   expect(intro.get('sample')?.role).toBe('ground');
   expect(intro.get('roll')?.role).toBe('coin');
   expect(analyse(notes, new Set(['a', 'b', 'c', 'd', 'e'])).get('d')?.role).toBe('ground');
+});
+
+it('keeps camera kicks on blocks despite dense coins, with a pitched-only fallback and reversible time', () => {
+  const frame = scoreFrame(5);
+  frame.instruments.forEach((instrument, i) => {
+    instrument.id = 'abcde'[i];
+  });
+  const parts = analyse(level());
+  frame.now = 1;
+  expect(cameraKick(parts, frame)).toBe(1);
+  frame.now = 1.125; // A coin onset, after the block's kick has settled.
+  expect(cameraKick(parts, frame)).toBe(0);
+  frame.now = 1.5; // Backbeat crate, not another camera kick.
+  expect(cameraKick(parts, frame)).toBe(0);
+  frame.now = 1;
+  expect(cameraKick(parts, frame)).toBe(1);
+  const dense = analyse([
+    ...level(),
+    ...Array.from({ length: 500 }, (_, i) => note('c', i / 500, {}, 0.001)),
+  ]);
+  frame.now = 0.5;
+  expect(cameraKick(dense, frame)).toBe(0);
+  const pitched = analyse([note('d', 1, { note: 24 }), note('d', 2, { note: 31 }, 1, false)]);
+  frame.now = 1;
+  expect(cameraKick(pitched, frame)).toBe(1);
+  frame.instruments[3].muted = true;
+  expect(cameraKick(pitched, frame)).toBe(0);
+  frame.instruments[3].muted = false;
+  frame.instruments[3].inSection = false;
+  expect(cameraKick(pitched, frame)).toBe(0);
+  frame.instruments[3].inSection = true;
+  frame.now = 2;
+  expect(cameraKick(pitched, frame)).toBe(0); // A fragment never kicks the camera.
+  expect(cameraKick(analyse([]), frame)).toBe(0);
 });

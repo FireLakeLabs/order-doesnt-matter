@@ -1,11 +1,7 @@
 import type { ViewFrame, ViewNote } from '../types';
-import { clamp, pitch } from '../shared/retro-2d';
+import { clamp, indexScore, type Event } from '../shared/retro-2d';
 
 export type Role = 'ground' | 'platform' | 'block' | 'crate' | 'coin';
-export interface Event {
-  note: ViewNote;
-  pitch: number | undefined;
-}
 export interface Part {
   id: string;
   events: Event[];
@@ -22,26 +18,20 @@ export interface Part {
 /** Static score evidence only. Names, sound names and row order cannot pick roles. */
 export function analyse(notes: ViewNote[], active?: ReadonlySet<string>): Map<string, Part> {
   const parts = new Map<string, Part>();
-  for (const note of notes) {
-    let part = parts.get(note.instrument);
-    if (!part) {
-      part = {
-        id: note.instrument,
-        events: [],
-        hits: [],
-        low: Infinity,
-        high: -Infinity,
-        density: 0,
-        duration: 0,
-        regularity: 0,
-        phase: 0,
-        meanPitch: Infinity,
-        role: 'crate',
-      };
-      parts.set(note.instrument, part);
-    }
-    const p = pitch(note.value);
-    part.events.push({ note, pitch: p });
+  for (const [id, events] of indexScore(notes)) {
+    parts.set(id, {
+      id,
+      events,
+      hits: [],
+      low: Infinity,
+      high: -Infinity,
+      density: 0,
+      duration: 0,
+      regularity: 0,
+      phase: 0,
+      meanPitch: Infinity,
+      role: 'crate',
+    });
   }
   for (const part of parts.values()) {
     part.events.sort((a, b) => a.note.start - b.note.start || a.note.end - b.note.end);
@@ -130,6 +120,24 @@ export function groundHeight(part: Part | undefined, time: number) {
 export function impact(start: number, now: number, cps: number, seconds = 0.22) {
   const age = (now - start) / Math.max(0.001, cps);
   return age >= 0 ? clamp(1 - age / seconds) : 0;
+}
+/** Only the block rhythm moves the camera; other hits keep their local effects.
+ * A pitched-only level can use its terrain rhythm instead. */
+export function cameraKick(
+  parts: Map<string, Part>,
+  frame: Pick<ViewFrame, 'now' | 'cps' | 'instruments'>,
+) {
+  let source: Part | undefined;
+  for (const part of parts.values()) {
+    if (part.role !== 'block' && part.role !== 'ground') continue;
+    const instrument = frame.instruments.find((i) => i.id === part.id);
+    if (!instrument?.inSection || instrument.muted) continue;
+    source = part;
+    if (part.role === 'block') break;
+  }
+  if (!source) return 0;
+  const end = upperBound(source.hits, frame.now);
+  return end ? impact(source.hits[end - 1].note.start, frame.now, frame.cps, 0.12) : 0;
 }
 /** Feet land on the top of a block exactly at its onset, then step off behind it.
  * Dense blocks use the same envelope's maximum, rather than accumulating jumps. */

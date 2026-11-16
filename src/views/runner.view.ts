@@ -2,6 +2,7 @@ import type { ViewDefinition, ViewFrame, ViewNote } from './types';
 import { clamp } from './shared/retro-2d';
 import {
   analyse,
+  cameraKick,
   characterHeight,
   coinCount,
   groundHeight,
@@ -88,15 +89,9 @@ function drawRunner(c: CanvasRenderingContext2D, f: ViewFrame, parts: Map<string
     c.fillRect(x, y, i % 3 ? 1 : 7, 1);
     if (i % 3 === 0) c.fillRect(x + 3, y - 3, 1, 7);
   }
-  let kick = 0;
-  for (const p of parts.values()) {
-    if (!active(p) || f.instruments.find((i) => i.id === p.id)?.muted) continue;
-    const end = upperBound(p.hits, f.now);
-    if (end > 0) kick = Math.max(kick, impact(p.hits[end - 1].note.start, f.now, f.cps, 0.12));
-  }
   c.save();
   // Kick remains crisp: integer camera motion, strongest exactly on the hit.
-  c.translate(0, Math.round(kick * 2));
+  c.translate(0, Math.round(cameraKick(parts, f) * 2));
   // Terrain sampled on the pixel grid retains even subpixel steps as occupancy.
   for (let x = 0; x < w; x++) {
     const y = floor(f.now + (x - gate) / speed);
@@ -133,7 +128,6 @@ function drawRunner(c: CanvasRenderingContext2D, f: ViewFrame, parts: Map<string
         c.fillStyle = accent;
         c.fillRect(x + 1, y - 64, 33, 13);
         c.fillRect(x + 1, y - 51, 25, 3);
-        c.fillStyle = paper;
         c.font = `5px "${t.fontDisplay}"`;
         c.fillStyle = pocket ? ink : paper;
         c.fillText(s.name.toUpperCase(), x + 3, y - 55, 29);
@@ -321,11 +315,7 @@ function drawHud(
     w * 0.5,
   );
   c.textAlign = 'right';
-  c.fillText(
-    f.from <= 0 ? 'COINS FROM START' : `COINS FROM ${String(f.from)}`,
-    w - 8 * scale,
-    23 * headerScale,
-  );
+  c.fillText(f.from <= 0 ? 'COINS FROM START' : 'COINS THIS PASS', w - 8 * scale, 23 * headerScale);
   c.textAlign = 'left';
   const rows = Math.ceil(
     f.instruments.length / Math.max(1, Math.floor(w / Math.max(130, 76 * scale))),
@@ -348,11 +338,13 @@ function drawHud(
     c.fillRect(x, y - 4 * scale, 3 * scale, 3 * scale);
     c.globalAlpha = 1;
     c.fillStyle = resting ? middle : ink;
-    const visible = p
-      ? upperBound(p.hits, f.now + f.lookAhead) - upperBound(p.hits, f.now - f.lookAhead / 2 - 1e-9)
-      : 0;
+    const visible =
+      p && inst.inSection
+        ? upperBound(p.hits, f.now + f.lookAhead) -
+          upperBound(p.hits, f.now - f.lookAhead / 2 - 1e-9)
+        : 0;
     c.fillText(
-      `${inst.name} / ${p?.role ?? 'REST'} ×${String(visible)}`,
+      `${inst.name} / ${(inst.inSection ? (p?.role ?? 'rest') : 'rest').toUpperCase()} ×${String(visible)}`,
       x + 5 * scale,
       y,
       cell - 8 * scale,
