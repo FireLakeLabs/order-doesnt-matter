@@ -75,5 +75,15 @@ it('keeps active channels visible first when a narrow stage needs overflow', () 
 it('retains onsets before cycle zero when scrubbing backwards', () => {
   const data = analyse([note(-0.03)]);
   expect(data.rows.get('0')?.get(-1)).toMatchObject({ count: 1, off: true });
-  expect(rowY({ now: -0.03 }, -1, 400, 24)).toBeCloseTo(387.52);
+  expect(rowY({ now: -0.03 }, -1, 400, 24)).toBeCloseTo(399.52);
+});
+
+it('keeps the current row over the gate through its entire sixteenth, forwards and backwards', () => {
+  const gate = 400,
+    height = 24;
+  for (const now of [10, 10.001, 10.03, 10.06, 10.1, 10.06, 10.03, -0.03]) {
+    const y = rowY({ now }, Math.floor(now * 16), gate, height);
+    expect(y - height / 2).toBeLessThanOrEqual(gate);
+    expect(y + height / 2).toBeGreaterThan(gate);
+  }
 });

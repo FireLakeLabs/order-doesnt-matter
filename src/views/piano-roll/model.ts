@@ -7,7 +7,8 @@ export function rows(f: ViewFrame, score: Score) {
   const unpitched: string[] = [];
   for (const instrument of [...f.instruments].sort((a, b) => a.index - b.index)) {
     const events = score.get(instrument.id) ?? [];
-    if (!events.length || events.some((e) => e.pitch === undefined)) unpitched.push(instrument.id);
+    // No note evidence means no role; the legend still retains the instrument.
+    if (events.some((e) => e.pitch === undefined)) unpitched.push(instrument.id);
     for (const e of events)
       if (e.pitch !== undefined && e.note.end >= time.from && e.note.start <= time.to) {
         low = Math.min(low, Math.floor(e.pitch));

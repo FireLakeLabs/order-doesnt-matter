@@ -44,7 +44,6 @@ export function drawTracker(
     c.globalAlpha = quiet(inst);
     c.fillStyle = inst.colour;
     c.fillText(`${hex(inst.index + 1)} ${inst.name}`, x + 8, 97, l.cell - 16);
-    c.globalAlpha *= 0.2 + pulse * 0.8;
     const meterWidth = l.cell - 16;
     for (let j = 0; j < 12; j++) {
       c.globalAlpha = quiet(inst) * (j / 12 < pulse ? 1 : 0.12);

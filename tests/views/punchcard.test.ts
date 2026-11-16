@@ -10,7 +10,7 @@ it('keeps every instrument row within the card with one or twenty instruments', 
     for (let i = 0; i < count; i++) expect(l.top + (i + 0.5) * l.row).toBeLessThan(l.bottom);
   }
 });
-it('retains all dense onsets and fragments without turning fragments into hits', () => {
+it('indexes dense onsets and fragments and suppresses fragment flashes at arbitrary time', () => {
   const f = scoreFrame(20);
   f.notes = Array.from({ length: 500 }, (_, i) => ({
     instrument: String(i % 20),

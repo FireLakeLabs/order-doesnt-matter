@@ -14,15 +14,14 @@ it('keeps pitch above percussion including mixed channels and resting instrument
   expect(r.high).toBe(69);
   expect(r.y(69)).toBeLessThan(r.y(36));
   expect(r.unpitched).toContain('0');
-  expect(r.unpitched).toContain('19');
+  expect(r.unpitched).not.toContain('19');
   expect(r.drumY('0')).toBeGreaterThan(r.y(36));
-  expect(r.drumY('19')).toBeLessThan(r.bottom);
 });
 it('handles one, twenty, empty and dense scores without losing events', () => {
   for (const count of [1, 20]) {
     const f = scoreFrame(count);
     f.now = 0.4;
-    expect(rows(f, indexScore([])).unpitched).toHaveLength(count);
+    expect(rows(f, indexScore([])).unpitched).toHaveLength(0);
     f.notes = Array.from({ length: 500 }, (_, i) => ({
       instrument: String(i % count),
       start: i / 500,
@@ -64,4 +63,16 @@ it('bounds the keyboard to visible pitches and makes trails reversible and optio
   expect(trail(n, f)).toBe(0);
   f.trails = 2;
   expect(trail({ ...n, hasOnset: false }, f)).toBe(0);
+});
+
+it('assigns no percussion role without note evidence, regardless of settings or name', () => {
+  const f = scoreFrame(2);
+  f.instruments[0].name = 'drums';
+  f.instruments[0].settings = [{ name: 'note', label: 'pitch', kind: 'constant', value: 60 }];
+  f.instruments[1].name = 'synth';
+  f.instruments[1].inSection = false;
+  expect(rows(f, indexScore([])).unpitched).toEqual([]);
+  const note = { instrument: '0', start: 10, end: 11, hasOnset: true, value: {} };
+  expect(rows(f, indexScore([note])).unpitched).toEqual(['0']);
+  expect(rows(f, indexScore([{ ...note, value: { note: 60 } }])).unpitched).toEqual([]);
 });

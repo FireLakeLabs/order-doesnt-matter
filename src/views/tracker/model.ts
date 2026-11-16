@@ -82,7 +82,7 @@ export function layout(f: Pick<ViewFrame, 'width' | 'height' | 'now' | 'instrume
   };
 }
 export function rowY(f: Pick<ViewFrame, 'now'>, row: number, gate: number, height: number) {
-  return gate + (row - f.now * 16) * height;
+  return gate + (row + 0.5 - f.now * 16) * height;
 }
 
 export function channels(f: Pick<ViewFrame, 'instruments'>) {
