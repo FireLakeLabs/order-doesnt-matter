@@ -29,6 +29,9 @@ export default defineConfig({
     {
       name: 'studio',
       testMatch: studio,
+      // Studio pages draw WebGL on a software renderer in CI; three at once on
+      // one runner starve each other into 60 s timeouts.
+      workers: 1,
       // The complete local command runs both pages without overlapping their clocks.
       dependencies: process.env.ODM_BROWSER_MODE === 'ci' ? ['audio'] : [],
     },
