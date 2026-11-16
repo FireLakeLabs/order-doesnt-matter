@@ -58,3 +58,13 @@ test('every coarser index buffer retains both real endpoints and emission spans'
   }
   expect(data.lods[2].indices.length).toBeLessThan(data.lods[0].indices.length / 2);
 });
+
+test('optional helix geometry bakes unit angles independently of layout', () => {
+  const data = scoreGeometry([strip], () => [1, 1, 1], true);
+  const resized = scoreGeometry([{ ...strip, radius: 0.5, width: 0.2 }], () => [0, 0, 1], true);
+  expect(data.curves).toEqual(resized.curves);
+  expect(data.curves[0]).toBeCloseTo(Math.sin(10.137 * Math.PI * 2), 5);
+  expect(data.curves[1]).toBeCloseTo(Math.cos(10.137 * Math.PI * 2), 5);
+  expect(data.curves.length).toBe((data.positions.length / 3) * 2);
+  expect(data.styles).toEqual([{ first: 0, count: data.positions.length / 3 }]);
+});

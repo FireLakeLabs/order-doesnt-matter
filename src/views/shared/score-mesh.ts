@@ -4,12 +4,13 @@ import { scoreGeometry, lightRange } from './score-geometry';
 import type { ScoreStrip, LightRange } from './score-geometry';
 export type { ScoreStrip } from './score-geometry';
 
-/** One draw call for a collection of score bands. */
-export function createScoreMesh(stage: Pick<ThreeStage, 'THREE' | 'quality'>) {
+/** One draw call for a collection of bands, including a whole song's helix. */
+export function createScoreMesh(stage: Pick<ThreeStage, 'THREE' | 'quality'>, helix = false) {
   const { THREE } = stage;
   const ground = new THREE.Color(),
     highlight = new THREE.Color();
   const material = new THREE.ShaderMaterial({
+    defines: { HELIX: helix ? 1 : 0 },
     uniforms: {
       now: { value: 0 },
       ground: { value: ground },
@@ -19,31 +20,51 @@ export function createScoreMesh(stage: Pick<ThreeStage, 'THREE' | 'quality'>) {
       lightPass: { value: 0 },
       fade: { value: 1 },
       opacity: { value: 1 },
+      hideNear: { value: 0 },
+      helix: { value: helix ? 1 : 0 },
+      songFrom: { value: 0 },
+      songLength: { value: 16 },
     },
     vertexShader: `
       attribute vec3 timing; attribute vec3 band; attribute vec3 ink; attribute float quiet;
-      uniform float now;
+      #if HELIX
+      attribute vec2 curve;
+      #endif
+      uniform float now; uniform float helix; uniform float songFrom; uniform float songLength;
       varying vec3 vTiming; varying vec3 vInk; varying vec3 vSurface;
       void main(){
         float time=position.x;
-        float angle=(time-now)*6.28318530718;
-        float r=band.x+position.y*band.y;
-        vec3 point=vec3(sin(angle)*r,cos(angle)*r,position.z);
+        vec3 point;
+        float side = 1.;
+        #if HELIX
+          float d = (time-now)/0.7;
+          float playing = abs(d)<2. ? exp(-d*d*d*d) : 0.;
+          float r=(band.x+position.y*band.y)*(1.+playing*0.16);
+          point=vec3(((time-songFrom)/songLength-0.5)*10.,curve.y*r,curve.x*r+position.z);
+          float facing=modelViewMatrix[1].z*curve.y+modelViewMatrix[2].z*curve.x;
+          side=mix(0.34,1.,(facing+1.)*0.5);
+        #else
+          float angle=(time-now)*6.28318530718;
+          float r=band.x+position.y*band.y;
+          point=vec3(sin(angle)*r,cos(angle)*r,position.z);
+        #endif
         vTiming=timing; vInk=ink;
-        vSurface=vec3(time,band.z*quiet,1.);
+        vSurface=vec3(time,band.z*quiet,side);
         gl_Position=projectionMatrix*modelViewMatrix*vec4(point,1.);
       }`,
     fragmentShader: `
       uniform float now; uniform float flashDuration; uniform float trail; uniform float lightPass;
-      uniform float fade; uniform float opacity; uniform vec3 ground; uniform vec3 highlight;
+      uniform float fade; uniform float opacity; uniform float hideNear; uniform float helix; uniform vec3 ground; uniform vec3 highlight;
       varying vec3 vTiming; varying vec3 vInk; varying vec3 vSurface;
       void main(){
         bool track=vTiming.z<0.;
+        if (!track && hideNear>0.5 && abs(floor(vSurface.x)-floor(now))<3.5) discard;
         float sounding=track?0.:step(vTiming.x,now)*(1.-step(vTiming.y,now));
         float flash=max(0.,vTiming.z)*step(vTiming.x,now)*max(0.,1.-(now-vTiming.x)/flashDuration);
         flash*=flash*(1.-smoothstep(0.025,0.055,vSurface.x-vTiming.x));
         float age=now-vSurface.x;
         float brightness=age<=0.?1.:(trail>0.?mix(0.3,1.,max(0.,1.-age/trail)):0.3);
+        if(helix>0.5) brightness=max(brightness,0.8);
         brightness=track?0.19:max(brightness,sounding);
         float strength=fade*vSurface.y*vSurface.z;
         if(lightPass>0.5){
@@ -64,14 +85,20 @@ export function createScoreMesh(stage: Pick<ThreeStage, 'THREE' | 'quality'>) {
   const colour = new THREE.Color();
   let lods: { geometry: typeof mesh.geometry; lights: LightRange[] }[] = [],
     emitting = { start: 0, count: 0 };
+  let styling: ReturnType<typeof scoreGeometry> | undefined;
   return {
     mesh,
     material,
     populate(strips: ScoreStrip[]) {
-      const data = scoreGeometry(strips, (ink) => {
-        colour.set(ink);
-        return [colour.r, colour.g, colour.b];
-      });
+      const data = scoreGeometry(
+        strips,
+        (ink) => {
+          colour.set(ink);
+          return [colour.r, colour.g, colour.b];
+        },
+        helix,
+      );
+      styling = data;
       if (lods.length) for (const lod of lods) lod.geometry.dispose();
       else mesh.geometry.dispose();
       const attributes = {
@@ -81,16 +108,39 @@ export function createScoreMesh(stage: Pick<ThreeStage, 'THREE' | 'quality'>) {
         ink: new THREE.BufferAttribute(data.inks, 3),
         quiet: new THREE.BufferAttribute(data.quiet, 1),
       };
+      const curve = new THREE.BufferAttribute(data.curves, 2);
       // Static index LODs share the same vertex buffers and keep every arc's
       // exact endpoints. Only curve tessellation follows render resolution.
       lods = data.lods.map((lod) => {
         const geometry = new THREE.BufferGeometry();
         for (const [name, attribute] of Object.entries(attributes))
           geometry.setAttribute(name, attribute);
+        if (helix) geometry.setAttribute('curve', curve);
         geometry.setIndex(new THREE.BufferAttribute(lod.indices, 1));
         return { geometry, lights: lod.lights };
       });
       mesh.geometry = lods[0].geometry;
+    },
+    /** Same strip topology: update appearance/layout without replacing any geometry. */
+    restyle(strips: Pick<ScoreStrip, 'radius' | 'width' | 'colour' | 'muted'>[]) {
+      const data = styling;
+      if (!data || strips.length !== data.styles.length) return false;
+      for (let strip = 0; strip < strips.length; strip++) {
+        const next = strips[strip],
+          range = data.styles[strip];
+        colour.set(next.colour);
+        for (let vertex = range.first; vertex < range.first + range.count; vertex++) {
+          data.bands[vertex * 3] = next.radius;
+          data.bands[vertex * 3 + 1] = next.width;
+          data.inks[vertex * 3] = colour.r;
+          data.inks[vertex * 3 + 1] = colour.g;
+          data.inks[vertex * 3 + 2] = colour.b;
+          data.quiet[vertex] = next.muted ? 0.23 : 1;
+        }
+      }
+      for (const name of ['band', 'ink', 'quiet'])
+        mesh.geometry.getAttribute(name).needsUpdate = true;
+      return true;
     },
     update(frame: ViewFrame, fade = 1, opacity = 1) {
       const u = material.uniforms;
@@ -115,6 +165,7 @@ export function createScoreMesh(stage: Pick<ThreeStage, 'THREE' | 'quality'>) {
     dispose() {
       if (lods.length) for (const lod of lods) lod.geometry.dispose();
       else mesh.geometry.dispose();
+      styling = undefined;
       material.dispose();
       mesh.removeFromParent();
     },

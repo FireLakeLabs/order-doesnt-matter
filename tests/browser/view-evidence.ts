@@ -81,8 +81,11 @@ export async function prepare(page: Page, id: string, file = 'real-dubstep-arran
       performance.getEntriesByType('resource').some((e) => /three\.module-/.test(e.name)),
     ),
   ).toBe(false);
-  await page.goto(`/studio.html?inspect&a=${id}&b=&theme=arcade`);
-  await page.waitForFunction(() => window.odmStudio.app.canPlay);
+  // Stay in this session: a second navigation now correctly offers recovery
+  // rather than silently replacing the first page's saved draft.
+  const stage = page.locator('[data-region="stage-a"]');
+  await stage.getByRole('button', { name: 'Views', exact: true }).click();
+  await stage.locator(`.shelf-popover [data-view="${id}"] .view-choice`).click();
   await page.evaluate(
     async (source) => {
       await window.odmStudio.load(source);

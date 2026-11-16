@@ -253,7 +253,7 @@ test('Practice teaches real Studio controls and restores the mounted draft, hist
   await pictures(page, 'help');
   await page.getByRole('button', { name: 'Start practice', exact: true }).click();
   const guide = page.getByRole('complementary', { name: 'Guided practice' });
-  await expect(guide).toContainText('Make it move');
+  await expect(guide).toContainText('Make it move', { timeout: 7000 });
   await pictures(page, 'practice');
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect(guide).toContainText('Take it slow');

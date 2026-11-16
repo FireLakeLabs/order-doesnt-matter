@@ -35,7 +35,7 @@ declare global {
     };
   }
 }
-for (const id of ['ring', 'tunnel'])
+for (const id of ['ring', 'tunnel', 'coil'])
   test(`${id}: renderer responsiveness`, async ({ page }) => {
     await page.setViewportSize({ width: 1920, height: 1080 });
     await page.addInitScript(() => {
