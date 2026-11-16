@@ -147,7 +147,7 @@ export function KeepWork() {
               })();
             }}
           />
-          <p role="status">{notice || state.loadError}</p>
+          <p role="status">{state.loadError || notice}</p>
         </DialogContent>
       </Dialog>
       <Dialog

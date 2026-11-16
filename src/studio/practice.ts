@@ -31,10 +31,10 @@ export const practice = {
     run?.abort();
     run = undefined;
     update({ active: false });
-    runtime.stop();
     freezeEditor(false);
-    restoreEditor();
-    if (runtime.app.practice)
+    if (runtime.app.practice) {
+      runtime.stop();
+      restoreEditor();
       runtime.app.endPractice(() => {
         if (original) session.restore(original);
         if (originalTime) {
@@ -42,6 +42,7 @@ export const practice = {
           transport.update({ ...originalTime, scrubbing: false, marking: false });
         }
       });
+    }
     original = undefined;
     originalTime = undefined;
     update({ open: false, preparing: false, active: false, error: '' });
@@ -68,8 +69,10 @@ export const practice = {
       }
       runtime.stop();
       await runtime.setLoop(null);
+      if (cancelled()) return;
       runtime.setSpeed(1);
       session.resetSelection();
+      session.fill(null);
       freezeEditor(false);
       await runtime.load(examples[0].source);
       if (cancelled()) return;

@@ -128,9 +128,10 @@ export const runtime = {
     else transport.update({ marking: !transport.getSnapshot().marking });
   },
   async replaceWork(load: () => Promise<void>) {
-    const before = app.activation;
+    const before = app.activation,
+      practice = app.practice;
     await load();
-    if (before !== app.activation) {
+    if (before !== app.activation && app.practice === practice) {
       generation++;
       await this.setLoop(null);
       held = 0;

@@ -113,7 +113,14 @@ export function EditorHost({
           <button className="tray-back" onClick={close}>
             {name}
           </button>{' '}
-          › {plainName(context.target.control)}
+          ›{' '}
+          {context.target.kind === 'section'
+            ? context.target.section?.name
+            : kind.id === 'section'
+              ? 'Sections'
+              : context.target.kind === 'instrument'
+                ? 'Instrument'
+                : plainName(context.target.control)}
         </h2>
         {context.target.node && context.target.kind !== 'source' && (
           <button

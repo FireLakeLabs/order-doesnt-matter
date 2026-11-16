@@ -29,7 +29,17 @@ async function ready(page: Page) {
 }
 async function load(page: Page, source: string) {
   await page.waitForFunction(() => window.odmStudio.app.canPlay);
-  await page.evaluate((source) => window.odmStudio.load(source), source);
+  const edited = await page.evaluate(
+    () => !!(window.odmStudio.app.editor?.canUndo || window.odmStudio.app.editor?.canRedo),
+  );
+  await page.evaluate((source) => {
+    void window.odmStudio.load(source);
+  }, source);
+  if (edited)
+    await page
+      .getByRole('dialog', { name: 'Replace current work?' })
+      .getByRole('button', { name: 'Replace', exact: true })
+      .click();
   await page.waitForFunction(
     (source) => window.odmStudio.app.canPlay && window.odmStudio.app.state.source === source,
     source,

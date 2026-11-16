@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { dependencies } from '../../package.json' with { type: 'json' };
+import packageJson from '../../package.json' with { type: 'json' };
+const { dependencies } = packageJson;
 import type {} from '../../src/studio/main';
 import type {} from '../../src/app/main';
 
@@ -25,7 +26,7 @@ async function pictures(page: Page, name: string) {
     }, theme);
     await page.evaluate(async () => {
       await document.fonts.ready;
-      await Promise.all(document.getAnimations().map((animation) => animation.finished));
+      await Promise.allSettled(document.getAnimations().map((animation) => animation.finished));
     });
     await page.screenshot({ path: `${shots}/${name}-${theme}-${width}x${height}.png` });
     const dimensions = await page.evaluate(() => ({
@@ -80,7 +81,7 @@ test('Keep work shares edited recovery across old page, Studio and reload, with 
   expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(oldDoc);
   await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
   await page.locator('.lane-label').first().click();
-  await page.getByRole('button', { name: 'Edit Gain', exact: true }).click();
+  await page.getByRole('button', { name: 'Edit Level', exact: true }).click();
   await page.getByRole('spinbutton').fill('0.8');
   await page.getByRole('spinbutton').press('Enter');
   await page.locator('#editor').getByRole('button', { name: 'Done', exact: true }).click();
@@ -198,6 +199,9 @@ test('Practice teaches real Studio controls and restores the mounted draft, hist
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto(url);
   await ready(page);
+  await page.getByRole('button', { name: 'Paste', exact: true }).click();
+  await page.getByLabel('Strudel program').fill('// my paste draft');
+  await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
   await page.getByRole('button', { name: 'Sections', exact: true }).click();
   await pictures(page, 'sections');
   await page.getByRole('menuitem', { name: 'Section 2', exact: true }).click();
@@ -215,7 +219,7 @@ test('Practice teaches real Studio controls and restores the mounted draft, hist
     .locator('.lane-label')
     .filter({ has: page.locator('strong', { hasText: /^hh$/ }) })
     .click();
-  await page.getByRole('button', { name: 'Edit Gain', exact: true }).click();
+  await page.getByRole('button', { name: 'Edit Level', exact: true }).click();
   await page.getByRole('spinbutton').fill('0.6');
   await page.getByRole('spinbutton').press('Enter');
   await page
@@ -262,11 +266,14 @@ test('Practice teaches real Studio controls and restores the mounted draft, hist
   await expect(guide).toContainText('Pick your colours');
   await page.getByRole('button', { name: 'Theme riso', exact: true }).click();
   await expect(guide).toContainText('Make a little change');
+  await page.getByRole('button', { name: 'Paste', exact: true }).click();
+  await page.getByLabel('Strudel program').fill('// practice paste draft');
+  await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
   await page
     .locator('.lane-label:not([data-setting])')
     .filter({ has: page.locator('strong', { hasText: /^hh$/ }) })
     .click();
-  await page.getByRole('button', { name: 'Edit Gain', exact: true }).click();
+  await page.getByRole('button', { name: 'Edit Level', exact: true }).click();
   await page.getByRole('spinbutton').fill('0.4');
   await page.getByRole('spinbutton').press('Enter');
   await page.getByRole('button', { name: 'Finish practice', exact: true }).click();
@@ -291,14 +298,57 @@ test('Practice teaches real Studio controls and restores the mounted draft, hist
     playing: false,
   });
   await expect(page.getByRole('button', { name: 'Undo', exact: true })).toBeEnabled();
+  await page.getByRole('button', { name: 'Play', exact: true }).click();
+  await page.waitForFunction(() => window.odmStudio.app.state.playing);
   // Help cancellation and exiting at the first step preserve the same draft too.
   await page.getByRole('button', { name: 'Help', exact: true }).click();
   await page.getByRole('button', { name: 'Close help', exact: true }).click();
+  expect(await page.evaluate(() => window.odmStudio.app.state.playing)).toBe(true);
   await expect(input).toHaveValue('// my unfinished draft');
   await page.getByRole('button', { name: 'Help', exact: true }).click();
   await page.getByRole('button', { name: 'Start practice', exact: true }).click();
   await expect(guide).toBeVisible();
   await page.getByRole('button', { name: 'End practice', exact: true }).click();
   await expect(input).toHaveValue('// my unfinished draft');
+  // Cancel precisely while Studio awaits loop setup, then release that work.
+  // A late continuation must never load Kiln into the restored work session.
+  await page.evaluate(() => {
+    const runtime = window.odmStudio;
+    const original = runtime.setLoop;
+    const holder = window as typeof window & {
+      parityReleaseLoop?: () => void;
+      parityLoopDone?: boolean;
+    };
+    runtime.setLoop = async (loop) => {
+      await new Promise<void>((resolve) => {
+        holder.parityReleaseLoop = () => {
+          runtime.setLoop = original;
+          resolve();
+        };
+      });
+      await original.call(runtime, loop);
+      holder.parityLoopDone = true;
+    };
+  });
+  await page.getByRole('button', { name: 'Help', exact: true }).click();
+  await page.getByRole('button', { name: 'Start practice', exact: true }).click();
+  await page.waitForFunction(
+    () =>
+      typeof (window as typeof window & { parityReleaseLoop?: unknown }).parityReleaseLoop ===
+      'function',
+  );
+  await page.getByRole('button', { name: 'Close help', exact: true }).click();
+  await page.evaluate(() =>
+    (window as typeof window & { parityReleaseLoop: () => void }).parityReleaseLoop(),
+  );
+  await page.waitForFunction(
+    () => (window as typeof window & { parityLoopDone?: boolean }).parityLoopDone,
+  );
+  await expect(input).toHaveValue('// my unfinished draft');
+  await expect(page.getByRole('dialog', { name: 'Replace current work?' })).toBeHidden();
+  expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(before.doc);
   expect(await page.evaluate(() => localStorage.getItem('odm:recovery'))).toBe(before.recovery);
+  await page.locator('#editor').getByRole('button', { name: 'Done', exact: true }).click();
+  await page.getByRole('button', { name: 'Paste', exact: true }).click();
+  await expect(page.getByLabel('Strudel program')).toHaveValue('// my paste draft');
 });

@@ -177,6 +177,7 @@ export function ScoreArea({
                       key={part.id}
                       onSelect={() => {
                         runtime.app.select(part.id);
+                        if (!runtime.app.state.playing) void runtime.seek(part.start);
                       }}
                     >
                       {part.name}

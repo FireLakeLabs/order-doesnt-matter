@@ -1,15 +1,5 @@
-import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
-import {
-  Pause,
-  Play,
-  Square,
-  ClipboardPaste,
-  StepBack,
-  StepForward,
-  Repeat2,
-  Undo2,
-  Redo2,
-} from 'lucide-react';
+import { useEffect, useRef, useSyncExternalStore } from 'react';
+import { Pause, Play, Square, StepBack, StepForward, Repeat2, Undo2, Redo2 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import {
   Dialog,
@@ -25,7 +15,7 @@ import { speeds } from './transport';
 import { runtime } from './runtime';
 import { themeNames, resolveTheme } from './themes';
 import { dependencies } from '../../package.json';
-import { examples } from '../app/examples';
+import { PasteProgram } from './PasteProgram';
 import { KeepWork } from './KeepWork';
 import { Help } from './Help';
 import { session } from './session';
@@ -58,19 +48,6 @@ export function TopBar({
       }),
     [clock],
   );
-  const [source, setSource] = useState('');
-  const [pasteOpen, setPasteOpen] = useState(false);
-  const [importing, setImporting] = useState(false);
-  const load = async (program = source) => {
-    setImporting(true);
-    try {
-      const before = runtime.app.activation;
-      await runtime.load(program);
-      if (before !== runtime.app.activation) setPasteOpen(false);
-    } finally {
-      setImporting(false);
-    }
-  };
   return (
     <header className="top-bar" data-region="top-bar">
       <h1>
@@ -177,53 +154,14 @@ export function TopBar({
       >
         <Redo2 />
       </Button>
-      <Dialog open={pasteOpen} onOpenChange={setPasteOpen}>
-        <DialogTrigger asChild>
-          <Button variant="outline" disabled={!!editorTarget}>
-            <ClipboardPaste />
-            Paste
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="paste-dialog">
-          <DialogHeader>
-            <DialogTitle>Paste Strudel</DialogTitle>
-            <DialogDescription>Import a program as a Studio score.</DialogDescription>
-          </DialogHeader>
-          <div className="dialog-actions">
-            <span>Try an original:</span>
-            {examples.map((example) => (
-              <Button
-                key={example.name}
-                variant="outline"
-                disabled={importing}
-                onClick={() => {
-                  setSource(example.source);
-                  void load(example.source);
-                }}
-              >
-                {example.name}
-              </Button>
-            ))}
-          </div>
-          <textarea
-            aria-label="Strudel program"
-            value={source}
-            onChange={(event) => {
-              setSource(event.target.value);
-            }}
-            spellCheck={false}
-          />
-          <Button
-            disabled={importing || !source.trim()}
-            onClick={() => {
-              void load();
-            }}
-          >
-            {importing ? 'Importing…' : 'Import program'}
-          </Button>
-          <p role="status">{state.loadError}</p>
-        </DialogContent>
-      </Dialog>
+      <PasteProgram
+        active={!runtime.app.practice}
+        disabled={!!editorTarget}
+        error={state.loadError}
+      />
+      {runtime.app.practice && (
+        <PasteProgram key="practice" active disabled={!!editorTarget} error={state.loadError} />
+      )}
       <KeepWork />
       <Help />
       {!!state.warnings.length && (
