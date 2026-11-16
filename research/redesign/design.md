@@ -82,6 +82,14 @@ Fonts are bundled (no network font requests). Mockup: `mockups/Themes.dc.html`.
 
 ## A view is one file
 
+Each `ViewInstrument` includes document-ordered `settings` (control name, editor
+label, constant/values/signal/other kind and optional constant value), ordered
+`rewrites` labels and a known `room` orbit or null; the host caches these facts
+per document. “Moving” means sampled values that differ from note to note:
+Strudel samples a continuous setting signal once per note, so `ViewNote.value`
+carries one value throughout that note, not a sweep within it. Querying the real
+dubstep wobble bass at cycles 10.2 and 10.7 returns the same cutoff, about 1370.
+
 A view's browser test is the shared smoke only, registered with
 `viewSmoke(test, 'view-id')` from `tests/browser/view-smoke.ts`.
 Frame cost and theme sweeps are measured locally with `npm run measure:views`

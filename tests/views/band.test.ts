@@ -30,6 +30,9 @@ const frame = (notes: ViewNote[], count = 1, now = 0.01): ViewFrame => ({
     sounding: true,
     inSection: true,
     muted: false,
+    settings: [],
+    rewrites: [],
+    room: null,
   })),
   theme: {
     name: 'test',
