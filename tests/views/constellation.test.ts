@@ -63,7 +63,7 @@ test('sheet inventory is cached per document, retains order, classifications, co
   expect([...facts.values()][0]).toMatchObject({
     settings: [
       { name: 's' },
-      { name: 'lpf', label: 'cutoff', kind: 'signal' },
+      { name: 'lpf', label: 'Cutoff', kind: 'signal' },
       { name: 'gain', kind: 'values' },
       { name: 'pan', kind: 'constant', value: 0.4 },
       { name: 'orbit', kind: 'constant', value: 3 },
@@ -108,7 +108,7 @@ test('real wobble signal is one cutoff per whole note, also when queried inside 
   });
   expect(built.instruments.find((i) => i.id === bass.id)?.settings).toContainEqual({
     name: 'lpf',
-    label: 'cutoff',
+    label: 'Cutoff',
     kind: 'signal',
   });
   expect(built.instruments.filter((i) => i.inSection)).toHaveLength(6);
@@ -166,14 +166,14 @@ test('500 spans per cycle contribute occupancy, fragments never flash, and scrub
   const light = pulse(notes, 0.4, 0.5);
   pulse(notes, 2, 0.5);
   expect(pulse(notes, 0.4, 0.5)).toBe(light);
-  const setting = { name: 'lpf', label: 'cutoff', kind: 'signal' as const };
+  const setting = { name: 'lpf', label: 'Cutoff', kind: 'signal' as const };
   const steps = [note(0, 1, 100), note(1, 2, 2000)];
   expect(brightness(steps, setting, 0.2)).toBe(brightness(steps, setting, 0.8));
   expect(brightness(steps, setting, 1.2)).toBeGreaterThan(brightness(steps, setting, 0.8));
 });
 
 test('later score fragments cannot replace the setting value that started the voice', () => {
-  const setting = { name: 'lpf', label: 'cutoff', kind: 'signal' as const };
+  const setting = { name: 'lpf', label: 'Cutoff', kind: 'signal' as const };
   const notes = [note(0, 1, 100), { ...note(0, 1, 8000), hasOnset: false }, note(1, 2, 2000)];
   expect(brightness(notes, setting, 0.2)).toBe(0.25);
   expect(brightness(notes, setting, 0.8)).toBe(0.25);

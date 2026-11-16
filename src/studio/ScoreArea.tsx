@@ -1,5 +1,6 @@
 import {
   useEffect,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
@@ -62,7 +63,10 @@ export function ScoreArea({
       observer.disconnect();
     };
   }, []);
-  const lanes = laneRows(score.model?.rows ?? [], size.height, expandedSettings);
+  const lanes = useMemo(
+    () => laneRows(score.model?.rows ?? [], size.height, expandedSettings),
+    [score.model, size.height, expandedSettings],
+  );
   const height = Math.max(size.height, (lanes.at(-1)?.y ?? 0) + (lanes.at(-1)?.height ?? 0));
   const width = Math.max(0, size.width - LABEL_WIDTH);
   const inventory = instrumentInventory(runtime.app.state);
@@ -104,9 +108,12 @@ export function ScoreArea({
         ctx.fillStyle = theme.text;
         ctx.fillRect(x, 0, 2, height);
       }
-      if (playhead.current) playhead.current.style.left = `${String(LABEL_WIDTH + x)}px`;
+      if (playhead.current) {
+        playhead.current.style.visibility = x >= 0 && x < width ? 'visible' : 'hidden';
+        if (x >= 0 && x < width) playhead.current.style.left = `${String(LABEL_WIDTH + x)}px`;
+      }
     });
-  });
+  }, [clock, height, lanes, score, selectedInstrument, size.dpr, theme, width]);
   const drag = useRef<{
     id: number;
     start: number;
@@ -267,10 +274,7 @@ export function ScoreArea({
           />
         </div>
       </div>
-      <footer className="score-caption">
-        {score.error ||
-          'Scored spans · 18 rows fit with six playing at 1080p · resting rows compress before scrolling'}
-      </footer>
+      <footer className="score-caption">{score.error}</footer>
       {children}
     </section>
   );

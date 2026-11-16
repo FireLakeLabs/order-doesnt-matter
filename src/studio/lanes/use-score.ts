@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
-import { sheetModel, type SheetModel } from '../../sheet/model';
+import type { SheetModel } from '../../sheet/model';
 import { createBrowserQueries } from '../../strudel/evaluate-browser';
 import type { EventResult } from '../../contract';
 import type { StudioClock } from '../clock';
 import { runtime } from '../runtime';
 import { createScoreCache } from '../score-cache';
 import { scoreRange } from './model';
-import { trayItems } from '../tray/model';
+import { scoreModel } from './score-model';
 
 export interface StudioScore {
   model: SheetModel | null;
@@ -32,6 +32,7 @@ export function useScore(clock: StudioClock) {
     const queries = createBrowserQueries();
     const cache = createScoreCache(queries.query);
     let previous: unknown[] = [];
+    let retained: { key: string; events: StudioScore['events'] } | null = null;
     let requested: { doc: typeof runtime.app.state.doc; from: number; to: number } | null = null;
     const unsubscribe = clock.subscribe(({ now }) => {
       const state = runtime.app.state;
@@ -48,12 +49,21 @@ export function useScore(clock: StudioClock) {
         requested = { doc: state.doc, ...range };
       }
       cache.request(state, range);
-      const ready =
+      const fresh =
         state.rows.length > 0 &&
         state.rows.every((row) => Object.hasOwn(cache.score.events, row.id)) &&
         cache.score.from === range.from &&
         cache.score.to === range.to;
-      const events = ready ? cache.score.events : emptyEvents;
+      const keyForWindow = JSON.stringify([
+        runtime.app.activation,
+        range.from,
+        range.to,
+        state.rows.map((row) => row.id),
+      ]);
+      if (retained?.key !== keyForWindow) retained = null;
+      if (fresh) retained = { key: keyForWindow, events: cache.score.events };
+      const ready = retained !== null;
+      const events = retained?.events ?? emptyEvents;
       const key = [state.doc, state.sounds, events, range.from, range.to, cache.error];
       // React sees document/window/answer changes only; time drawing uses the clock directly.
       if (key.every((value, i) => value === previous[i])) return;
@@ -68,18 +78,7 @@ export function useScore(clock: StudioClock) {
             playhead: now,
           }
         : null;
-      const model = input ? sheetModel(input) : null;
-      if (model && input) {
-        const section = model.sections.find((section) => section.current);
-        model.rows = model.rows.map((row) => {
-          const { settings, rewrites } = trayItems(input, row, section?.nodeId);
-          return {
-            ...row,
-            cells: [...row.cells.filter((cell) => cell.name === 'rhythm'), ...settings],
-            rewrites,
-          };
-        });
-      }
+      const model = input ? scoreModel(input) : null;
       setScore({ ...range, ready, error: cache.error, events, model });
     });
     return () => {

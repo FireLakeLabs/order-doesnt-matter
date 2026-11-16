@@ -1,42 +1,9 @@
 import { parse } from 'acorn';
 import type * as JS from 'estree';
-import { describeTarget } from '../../document/edit';
 import type { Doc } from '../../document';
-import type { SheetInput } from '../../contract';
-import { makeCell } from '../../sheet/model';
-import type { Cell, Row } from '../../sheet/model';
+import type { Cell } from '../../sheet/model';
 
-const names: Record<string, string> = {
-  rhythm: 'Rhythm',
-  note: 'Notes',
-  n: 'Notes',
-  freq: 'Frequency',
-  s: 'Sound',
-  lpf: 'Cutoff',
-  cutoff: 'Cutoff',
-  hpf: 'High pass',
-  hcutoff: 'High pass',
-  gain: 'Level',
-  resonance: 'Resonance',
-  lpq: 'Resonance',
-  shape: 'Drive',
-  room: 'Reverb',
-  roomsize: 'Room size',
-  size: 'Room size',
-  pan: 'Pan',
-  delay: 'Delay',
-  delaytime: 'Delay time',
-  delayfeedback: 'Delay feedback',
-  attack: 'Attack',
-  release: 'Release',
-  decay: 'Decay',
-  sustain: 'Sustain',
-  speed: 'Speed',
-  orbit: 'Room',
-  fmi: 'FM amount',
-  fm: 'FM amount',
-};
-export const plainName = (name: string) => names[name] ?? name.replace(/([a-z])([A-Z])/g, '$1 $2');
+export { plainName } from '../view-instruments';
 export interface CustomWord {
   name: string;
   nodeId: string;
@@ -87,44 +54,6 @@ export function customWords(doc: Doc): CustomWord[] {
     visit(program);
   }
   return [...new Map(words.map((word) => [word.name, word])).values()];
-}
-/** Sheet owns the inventory. Add its explicit use-site targets instead of
- * silently discarding section-local settings and rewrites. */
-export function trayItems(input: SheetInput, row: Row, sectionId?: string) {
-  const { doc } = input;
-  const answers: Partial<SheetInput['events']> = input.events;
-  const settings = row.cells.filter((cell) => cell.kind !== 'unused' && cell.name !== 'rhythm');
-  const rewrites = [...row.rewrites];
-  const seen = new Set([...settings, ...rewrites].map((item) => item.nodeId));
-  for (const use of row.useTargets) {
-    if (seen.has(use.nodeId)) continue;
-    const target = describeTarget(doc, use.nodeId);
-    if (sectionId && target.section && target.section.id !== sectionId) continue;
-    seen.add(use.nodeId);
-    if (
-      target.kind === 'rewrite' ||
-      (target.kind === 'source' && !(target.node && 'value' in target.node))
-    )
-      rewrites.push({
-        nodeId: use.nodeId,
-        name: target.control,
-        summary: use.text,
-        source: target.kind === 'source',
-      });
-    else
-      settings.push(
-        makeCell(
-          target.control,
-          use.nodeId,
-          answers[row.id]?.error ? [] : (answers[row.id]?.events ?? []),
-          true,
-          target.kind === 'setting-signal',
-          row.status,
-          input,
-        ),
-      );
-  }
-  return { settings, rewrites };
 }
 export function sparkline(cell: Cell): string {
   return cell.marks

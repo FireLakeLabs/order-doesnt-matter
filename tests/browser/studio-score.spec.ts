@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import type {} from '../../src/studio/main';
 
-const shots = '/tmp/odm-studio-score/shots';
+const shots = process.env.ODM_STUDIO_SCORE_SHOTS;
 // Original fixture: two rewrites and seven settings on one line, including a
 // piece-defined rewrite. No third-party music or network assets.
 const nine = `register('ghosts', (amount, pat) => pat.off(1/8, p => p.gain(amount)));
@@ -73,6 +73,7 @@ async function noScroll(page: Page) {
   return sizes;
 }
 async function picture(page: Page, name: string) {
+  if (!shots) return;
   await page.evaluate(async () => {
     await document.fonts.ready;
     await new Promise(requestAnimationFrame);
@@ -175,10 +176,11 @@ test('real dubstep score fits both desktops, follows sections and ruler scrubbin
   await expect.poll(() => page.evaluate(() => window.odmStudio.getPlayhead())).toBeCloseTo(12, 2);
   await tray(page).getByRole('button', { name: 'Show Cutoff as lane', exact: true }).click();
   await expect(page.locator('.lane-label[data-setting]')).toHaveCount(1);
-  await writeFile(
-    `${shots}/measurements.json`,
-    JSON.stringify({ sizes, heights, editorStyle }, null, 2),
-  );
+  if (shots)
+    await writeFile(
+      `${shots}/measurements.json`,
+      JSON.stringify({ sizes, heights, editorStyle }, null, 2),
+    );
 });
 
 test('cutoff edit is pending until its engine acknowledgement; top-bar Undo restores the value', async ({
@@ -238,6 +240,7 @@ test('custom definitions open as source, and nine things fit a 560px tray', asyn
   await page.locator('.lane-label').first().click();
   await tray(page).getByRole('button', { name: 'ghosts custom', exact: true }).click();
   await expect(page.getByLabel('Source text', { exact: true })).toHaveValue(/register\('ghosts'/);
+  await expect(page.locator('#editor header h2')).toHaveText(/^Piece › /);
   // The source kind's draft must survive an unrelated document update (Undo/Redo uses same host).
   await page
     .getByLabel('Source text', { exact: true })
@@ -273,19 +276,19 @@ test('an opaque corpus instrument stays visible and source-editable while playba
   await page.goto('/studio.html?inspect&a=test-card&b=');
   // Both wholly opaque corpus patterns deliberately throw. Remove only this
   // fixture's intentional failure to exercise its otherwise real Pattern query.
-  const source = (
-    await readFile('corpus/programs/micro-query-late-throws.strudel', 'utf8')
-  ).replace(
+  const original = await readFile('corpus/programs/micro-query-late-throws.strudel', 'utf8');
+  const source = original.replace(
     "if (Number(state.span.begin) >= 3) throw new Error('corpus intentional late failure'); ",
     '',
   );
+  expect(source).not.toBe(original);
   await load(page, source);
   await page.locator('.lane-label').first().click();
   await expect(tray(page).locator('.tray-source pre')).toContainText('new Pattern');
-  await tray(page)
-    .locator('.tray-heading')
-    .getByRole('button', { name: 'Edit as source', exact: true })
-    .click();
+  await expect(tray(page).getByRole('button', { name: 'Edit as source', exact: true })).toHaveCount(
+    1,
+  );
+  await tray(page).getByRole('button', { name: 'Edit as source', exact: true }).click();
   await expect(page.getByLabel('Source text', { exact: true })).toHaveValue(/new Pattern/);
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await page.waitForFunction(
@@ -294,4 +297,48 @@ test('an opaque corpus instrument stays visible and source-editable while playba
       window.odmStudio.app.history.some((event) => event.type === 'trigger'),
   );
   await page.evaluate(() => window.odmStudio.stop());
+});
+
+test('editing retains the ready score and native editor notes while replacement questions run', async ({
+  page,
+  context,
+}) => {
+  await assets(context);
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/studio.html?inspect&a=test-card&b=');
+  await load(page, await readFile('corpus/programs/real-dubstep-arranged.strudel', 'utf8'));
+  await seek(page, 9.4);
+  await row(page, 'wobbleBass').click();
+  await tray(page).getByRole('button', { name: 'Edit Cutoff', exact: true }).click();
+  await expect(page.locator('.signal-editor')).toContainText('Real values');
+  await page.evaluate(() => {
+    const root = document.querySelector('[data-region="score"]')!;
+    root.setAttribute('data-lost-ready', 'false');
+    const observer = new MutationObserver((records) => {
+      if (records.some((record) => record.oldValue === 'false'))
+        root.setAttribute('data-lost-ready', 'true');
+    });
+    observer.observe(root, {
+      attributes: true,
+      attributeFilter: ['data-score-ready'],
+      attributeOldValue: true,
+    });
+    const app = window.odmStudio.app,
+      bass = app.state.rows.find((row) => row.name === 'wobbleBass')!;
+    const gain = bass.pattern.layers
+      .flatMap((layer) => (layer.kind === 'settings' ? layer.settings : []))
+      .find((setting) => setting.name === 'gain')!;
+    app.editor!.edit(gain.id, 0.66);
+  });
+  await page.waitForFunction(() => {
+    const app = window.odmStudio.app,
+      bass = app.state.rows.find((row) => row.name === 'wobbleBass')!;
+    return app.state.events[bass.id]?.events.some(
+      (event) => (event.value as { gain?: number }).gain === 0.66,
+    );
+  });
+  await ready(page);
+  await expect(page.locator('[data-region="score"]')).toHaveAttribute('data-lost-ready', 'false');
+  await expect(page.locator('.score-scroll')).not.toContainText('Asking the score');
+  await expect(page.locator('.signal-editor')).toContainText('Real values');
 });

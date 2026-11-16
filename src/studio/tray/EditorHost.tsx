@@ -36,6 +36,7 @@ export function EditorHost({
   close: () => void;
 }) {
   const body = useRef<HTMLDivElement>(null);
+  const error = useRef<HTMLParagraphElement>(null);
   const mounted = useRef<{
     id: string;
     kind: EditorKind;
@@ -47,6 +48,7 @@ export function EditorHost({
     if (!el) return;
     let current = mounted.current;
     if (!current || current.id !== context.target.nodeId || current.kind !== kind) {
+      if (error.current) error.current.textContent = '';
       current?.handle.destroy();
       el.replaceChildren();
       current = { id: context.target.nodeId, kind, handle: kind.mount(el, context) };
@@ -63,7 +65,6 @@ export function EditorHost({
   const offers = editorKinds.flatMap(
     (kind) => kind.conversions?.(context.target, context.doc) ?? [],
   );
-  const error = useRef<HTMLParagraphElement>(null);
   return (
     <section
       id="editor"

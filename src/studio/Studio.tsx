@@ -115,7 +115,7 @@ export function Studio() {
             </div>
           )}
         </ScoreArea>
-        <Tray score={score} theme={theme.name} context={context} />
+        <Tray score={score} theme={theme.name} context={context} editorName={editorName} />
       </div>
     </main>
   );

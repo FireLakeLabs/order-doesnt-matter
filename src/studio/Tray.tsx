@@ -16,10 +16,12 @@ export function Tray({
   score,
   theme,
   context,
+  editorName,
 }: {
   score: StudioScore;
   theme: string;
   context: EditorContext | null;
+  editorName: string;
 }) {
   const { selectedInstrument, expandedSettings } = useSyncExternalStore(
     session.subscribe,
@@ -41,7 +43,7 @@ export function Tray({
       <aside className="tray region" data-region="tray">
         <EditorHost
           context={context}
-          name={name || 'Piece'}
+          name={editorName}
           entry={runtime.app.editor?.state.entries[context.target.nodeId]}
           close={close}
         />
@@ -67,13 +69,15 @@ export function Tray({
       <header className="tray-heading">
         <span className="lane-dot" />
         <h2>{name}</h2>
-        <button
-          onClick={() => {
-            session.openEditor(`${instrument.pattern.id}:source`);
-          }}
-        >
-          Edit as source
-        </button>
+        {!sourceOnly && (
+          <button
+            onClick={() => {
+              session.openEditor(`${instrument.pattern.id}:source`);
+            }}
+          >
+            Edit as source
+          </button>
+        )}
       </header>
       <div className="tray-content">
         {sourceOnly && (

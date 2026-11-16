@@ -14,7 +14,9 @@ import {
   settingLaneId,
   rulerTicks,
 } from '../src/studio/lanes/model';
-import { customWords, trayItems } from '../src/studio/tray/model';
+import { customWords } from '../src/studio/tray/model';
+import { scoreModel } from '../src/studio/lanes/score-model';
+import { instrumentDetails, instrumentFacts } from '../src/studio/view-instruments';
 
 const state = loadPiece(
   initialState(),
@@ -105,8 +107,8 @@ test('the tray retains custom source and section-local settings from the sheet i
     toCycle: 20,
     playhead: 16,
   };
-  const items = trayItems(input, pad, sheetModel(input).sections[3].nodeId);
-  const local = items.settings.find(
+  const items = scoreModel(input).rows.find((row) => row.id === pad.id)!;
+  const local = items.cells.find(
     (s) => s.name === 'lpf' && s.nodeId !== pad.cells.find((s) => s.name === 'lpf')?.nodeId,
   )!;
   expect(local.label).toBe('1200');
@@ -136,4 +138,30 @@ test('ruler labels remain whole-cycle addresses in fractional and long sections'
   const ticks = rulerTicks(0, 300, 1200);
   expect(ticks.length).toBeLessThanOrEqual(24);
   expect(ticks.every(Number.isInteger)).toBe(true);
+});
+
+test('views and tray use the same setting inventory, labels and ordered rewrites', () => {
+  const doc = importStrudel(
+    'const part = s("bd").gain(0.4).fast(2); arrange([4, part.rev()], [4, part.slow(2)])',
+  ).doc;
+  const model = scoreModel({ doc, events: {}, sounds: [], fromCycle: 0, toCycle: 4, playhead: 0 });
+  const row = model.rows[0],
+    details = instrumentDetails(doc).get(row.id)!;
+  const facts = instrumentFacts(doc).get(row.id)!;
+  expect(details.settings.map((setting) => setting.name)).toEqual(['s', 'gain']);
+  expect(facts.settings).toContainEqual({
+    name: 'gain',
+    label: 'Level',
+    kind: 'constant',
+    value: 0.4,
+  });
+  expect(row.cells.filter((cell) => cell.name !== 'rhythm').map((cell) => cell.nodeId)).toEqual(
+    details.settings.map((setting) => setting.nodeId),
+  );
+  expect(row.rewrites.map((rewrite) => rewrite.summary)).toEqual(
+    details.rewrites
+      .filter((rewrite) => !rewrite.sectionId || rewrite.sectionId === model.sections[0].nodeId)
+      .map((rewrite) => rewrite.label),
+  );
+  expect(facts.rewrites).toEqual(details.rewrites.map((rewrite) => rewrite.label));
 });
