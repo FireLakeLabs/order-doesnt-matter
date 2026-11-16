@@ -26,6 +26,16 @@ export function viewSmoke(test: typeof import('@playwright/test').test, id: stri
     await page.setViewportSize({ width: 1920, height: 1080 });
     const stage = page.locator('[data-region="stage-a"]');
     const canvas = stage.locator('canvas');
+    // Capture the presented view within its canvas bounds.
+    const picture = async () => {
+      const clip = await canvas.boundingBox();
+      if (!clip) throw Error('The view canvas is not visible');
+      return page.screenshot({ clip });
+    };
+    const presented = () =>
+      page.evaluate(async () => {
+        for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
+      });
     const ready = () =>
       page.waitForFunction(
         () =>
@@ -53,8 +63,14 @@ export function viewSmoke(test: typeof import('@playwright/test').test, id: stri
     await expect(canvas).toHaveCount(1);
     await page.getByRole('button', { name: 'Play', exact: true }).click();
     await page.getByRole('button', { name: 'Pause', exact: true }).waitFor({ timeout: 0 });
-    const before = await canvas.screenshot();
-    await expect.poll(async () => (await canvas.screenshot()).equals(before)).toBe(false);
+    await expect(page.getByRole('status', { name: 'Cycle', exact: true })).toHaveText(
+      /^cycle (?!0\.00$)\d+\.\d{2}$/,
+    );
+    const before = await picture();
+    // Synchronize with drawn frames; software WebGL screenshot encoding can
+    // itself exceed expect.poll's deadline even while the view is animating.
+    await presented();
+    expect((await picture()).equals(before)).toBe(false);
     await page.getByRole('button', { name: 'Stop', exact: true }).click();
     await page.getByRole('button', { name: 'Play', exact: true }).waitFor({ timeout: 0 });
     await choose('test-card');
@@ -62,7 +78,7 @@ export function viewSmoke(test: typeof import('@playwright/test').test, id: stri
     await page.getByRole('button', { name: 'Theme riso', exact: true }).click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'riso');
     // Wait for the new theme to be presented before checking draw errors.
-    await canvas.screenshot();
+    await presented();
     await ready();
     expect(errors).toEqual([]);
   });
