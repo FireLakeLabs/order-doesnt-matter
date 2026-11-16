@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Harmonograph</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.mn{fill:none;stroke:#6FA0FF;stroke-width:1.2;opacity:.75}
+.hl{font-family:'JetBrains Mono',monospace;font-size:11px;fill:#A49EC4;text-anchor:middle}
+.rt{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;fill:#F4F1FF;text-anchor:middle}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="A harmonograph drawing made from the lowest and highest sounding pitches, A flat 2 and E flat 4, close to a three to one ratio: a closed three-lobed figure winding inward. Three smaller figures on the right show the other sounding pairs: a fifth, a sixth and a tenth." style="position: absolute; left: 0; top: 0; display: block">
+
+<path d="{{mainOld}}" style="fill: none; stroke: #6FA0FF; stroke-width: 1; opacity: .35"></path>
+<path d="{{mainNew}}" style="fill: none; stroke: #FF9EC0; stroke-width: 1.6; filter: drop-shadow(0 0 6px #FF9EC0)"></path>
+<circle cx="456.8" cy="285.1" r="6" style="fill: #FFFFFF; filter: drop-shadow(0 0 8px #FF9EC0)"></circle>
+
+<text x="390" y="580" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; fill: #A49EC4; text-anchor: middle">A♭2 darkPad × E♭4 lead · 2.997 ≈ 3 : 1 · a twelfth</text>
+
+<line x1="700" y1="90" x2="700" y2="560" style="stroke: #2A2545"></line>
+<text x="800" y="100" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: .08em; fill: #A49EC4; text-anchor: middle">OTHER PAIRS</text>
+<path class="mn" d="{{fifth}}"></path>
+<text class="rt" x="800" y="240">3 : 2</text>
+<text class="hl" x="800" y="256">A♭2 · E♭3 · fifth</text>
+<path class="mn" d="{{sixth}}"></path>
+<text class="rt" x="800" y="390">5 : 3</text>
+<text class="hl" x="800" y="406">E♭3 · C4 · sixth</text>
+<path class="mn" d="{{tenth}}"></path>
+<text class="rt" x="800" y="540">5 : 2</text>
+<text class="hl" x="800" y="556">A♭2 · C4 · tenth</text>
+</svg>
+
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">07</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Harmonograph</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">intervals</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 18 · 30% · breakdown</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div>
+<p class="sp">Shows</p>
+<p class="tx">Intervals made visible. Two sounding pitches drive a two-pendulum drawing: simple ratios close into calm figures, clashes tangle.</p>
+</div>
+<div>
+<p class="sp">Mapping</p>
+<ul class="mp">
+<li>lowest and highest sounding pitch → the two pendulum rates</li>
+<li>their real ratio → the figure; a slight detune → slow drift</li>
+<li>the pen winds inward over the shorter note's scored span</li>
+<li>other sounding pairs → small figures beside it</li>
+<li>colours → the two instruments that own the pitches</li>
+</ul>
+</div>
+<div>
+<p class="sp">Build</p>
+<ul class="mp">
+<li>Canvas 2D · score · window</li>
+<li>rates from scored pitch, never from audio</li>
+<li>under two pitches → "no interval now", in words</li>
+</ul>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+const ph = Math.PI / 4;
+const make = (cx, cy, A, r, turns, n, decay) => {
+const T = 2 * Math.PI * turns;
+const d = Math.log(1 / decay) / T;
+const p = [];
+for (let i = 0; i <= n; i++) {
+const t = T * i / n;
+const e = A * Math.exp(-d * t);
+p.push([cx + e * Math.sin(t + ph), cy + e * Math.sin(r * t)]);
+}
+return p;
+};
+const path = (p) => 'M' + p.map((q) => q[0].toFixed(1) + ' ' + q[1].toFixed(1)).join(' L');
+const m = make(390, 325, 225, 311.13 / 103.83, 20, 900, 0.42);
+return {
+mainOld: path(m.slice(0, 601)),
+mainNew: path(m.slice(600)),
+fifth: path(make(800, 170, 46, 155.56 / 103.83, 10, 260, 0.5)),
+sixth: path(make(800, 320, 46, 261.63 / 155.56, 10, 260, 0.5)),
+tenth: path(make(800, 470, 46, 261.63 / 103.83, 10, 260, 0.5))
+};
+}
+}
+</script>
+</body>
+</html>

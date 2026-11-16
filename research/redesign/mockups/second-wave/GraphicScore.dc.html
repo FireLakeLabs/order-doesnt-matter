@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Graphic score</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.ink{fill:none;stroke-linecap:round;mix-blend-mode:multiply}
+.bl{stroke:#1D1B2F;stroke-width:1.2;opacity:.45}
+.st{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;fill:#1D1B2F;text-anchor:middle}
+.pl{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#4A4760;text-anchor:end}
+.kl{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#4A4760}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="A printable graphic score of the whole song on cream paper in the Riso theme. Time runs left to right across 28 bars, pitch runs up. Pad chords are stacked blue lines with soft halos, the bass is orange lines, wobbleBass is a violet zigzag whose width follows its cutoff, and the lead is short pink dashes. Drums are dots, crosses and ticks on rows below. Sections are marked I to V; a red line marks bar 11." style="position: absolute; left: 0; top: 0; display: block">
+<rect x="0" y="0" width="960" height="600" style="fill: #F6F0E4"></rect>
+<rect x="14" y="62" width="932" height="530" rx="4" style="fill: none; stroke: #1D1B2F; stroke-width: 1; opacity: .25"></rect>
+
+<text x="936" y="44" style="font-family: 'Bricolage Grotesque', sans-serif; font-weight: 700; font-size: 26px; fill: #1D1B2F; text-anchor: end">Dubstep, arranged</text>
+
+<circle cx="66" cy="96" r="4" style="fill: #00A0C6"></circle><text class="kl" x="76" y="100">darkPad</text>
+<circle cx="140" cy="96" r="4" style="fill: #FF7A1A"></circle><text class="kl" x="150" y="100">subBass</text>
+<circle cx="214" cy="96" r="4" style="fill: #8A4FFF"></circle><text class="kl" x="224" y="100">wobbleBass</text>
+<circle cx="306" cy="96" r="4" style="fill: #FF8FA8"></circle><text class="kl" x="316" y="100">lead</text>
+<circle cx="360" cy="96" r="4" style="fill: #FFA060"></circle><text class="kl" x="370" y="100">riser</text>
+<text class="kl" x="430" y="100">zigzag width = cutoff · halo = room · dashes = carried over</text>
+
+<text class="st" x="120" y="130">I intro</text>
+<text class="st" x="240" y="130">II build</text>
+<text class="st" x="420" y="130">III drop</text>
+<text class="st" x="600" y="130">IV break</text>
+<text class="st" x="780" y="130">V drop</text>
+<path class="bl" d="M 180 138 V 594 M 183 138 V 594 M 300 138 V 594 M 303 138 V 594 M 540 138 V 594 M 543 138 V 594 M 660 138 V 594 M 663 138 V 594"></path>
+
+<text class="pl" x="54" y="463">C1</text>
+<text class="pl" x="54" y="379">C2</text>
+<text class="pl" x="54" y="295">C3</text>
+<text class="pl" x="54" y="211">C4</text>
+<line x1="60" y1="494" x2="900" y2="494" style="stroke: #1D1B2F; stroke-width: 1; opacity: .2"></line>
+
+<path class="ink" d="{{pad}}" style="stroke: #00A0C6; stroke-width: 11; opacity: .14"></path>
+<path class="ink" d="{{pad}}" style="stroke: #00A0C6; stroke-width: 3"></path>
+<path class="ink" d="{{riser}}" style="stroke: #FFA060; stroke-width: 2"></path>
+<path class="ink" d="{{sub}}" style="stroke: #FF7A1A; stroke-width: 4.5"></path>
+<path class="ink" d="{{wob}}" style="stroke: #8A4FFF; stroke-width: 1.6; stroke-linejoin: round"></path>
+<path class="ink" d="{{lead}}" style="stroke: #FF8FA8; stroke-width: 11; opacity: .2"></path>
+<path class="ink" d="{{lead}}" style="stroke: #FF4F7B; stroke-width: 3"></path>
+
+<text class="pl" x="54" y="508">kick</text>
+<text class="pl" x="54" y="521">snare</text>
+<text class="pl" x="54" y="533">hats</text>
+<text class="pl" x="54" y="545">open</text>
+<text class="pl" x="54" y="563">roll</text>
+<text class="pl" x="54" y="578">chant</text>
+<text class="pl" x="54" y="590">vocal</text>
+<path class="ink" d="{{kick}}" style="fill: #FF4F7B; stroke: none"></path>
+<path class="ink" d="{{snare}}" style="stroke: #2F5BEA; stroke-width: 1.6"></path>
+<path class="ink" d="{{hats}}" style="stroke: #E0A800; stroke-width: 1.4"></path>
+<path class="ink" d="{{oh}}" style="stroke: #00A66C; stroke-width: 1.4"></path>
+<path class="ink" d="{{ih}}" style="stroke: #E0A800; stroke-width: 1.4"></path>
+<path class="ink" d="{{roll}}" style="stroke: #6F8FF0; stroke-width: 1.6"></path>
+<path class="ink" d="{{chant}}" style="stroke: #FF8FA8; stroke-width: 1.6"></path>
+<path class="ink" d="{{vocal}}" style="stroke: #C2185B; stroke-width: 2.5; stroke-dasharray: 2 5"></path>
+<path class="ink" d="{{vocalOn}}" style="fill: #C2185B; stroke: none"></path>
+
+<line x1="372" y1="138" x2="372" y2="594" style="stroke: #FF4F7B; stroke-width: 2"></line>
+<text x="378" y="150" style="font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #C2185B">now</text>
+</svg>
+
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #4A4760">16</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px; color: #1D1B2F">Graphic score</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid rgba(29,27,47,.3); border-radius: 999px; color: #4A4760">poster · Riso theme</span>
+</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div>
+<p class="sp">Shows</p>
+<p class="tx">The whole song as a graphic score you could print and hang. Time and pitch are real; each kind of sound gets its own mark.</p>
+</div>
+<div>
+<p class="sp">Mapping</p>
+<ul class="mp">
+<li>time → across, proportional · pitch → up · section → a numbered panel</li>
+<li>pitched note → a line at its pitch and length; gain → weight</li>
+<li>unpitched note → a mark on its own row: dot, cross or tick by length</li>
+<li>moving setting → a zigzag whose width follows the value per note</li>
+<li>room send → a soft halo · note carried over → dashes</li>
+</ul>
+</div>
+<div>
+<p class="sp">Build</p>
+<ul class="mp">
+<li>Canvas 2D · score · whole song</li>
+<li>Download as PNG or SVG at poster size</li>
+<li>marks drawn with multiply, so inks overprint</li>
+</ul>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+const X0 = 60, BW = 30;
+const X = (t) => X0 + t * BW;
+const Y = (m) => 460 - (m - 24) * 7;
+const f = (v) => v.toFixed(1);
+const H = (t0, t1, y) => ' M' + f(X(t0) + 2) + ' ' + f(y) + ' H' + f(X(t1) - 2);
+const dot = (x, y, r) => ' M' + f(x - r) + ' ' + f(y) + ' a' + r + ' ' + r + ' 0 1 0 ' + 2 * r + ' 0 a' + r + ' ' + r + ' 0 1 0 ' + (-2 * r) + ' 0';
+const range = (a, b) => { const r = []; for (let c = a; c < b; c++) r.push(c); return r; };
+const chords = [[48, 55, 63], [44, 51, 60], [41, 48, 56], [43, 50, 59]];
+const subP = [[24], [24], [27], [29, 31]];
+const wobP = [[36], [36], [39], [41, 43]];
+const cut = [0.5, 0.8, 0.3, 0.9, 0.6, 0.4, 0.75, 0.2];
+const o = { pad: '', sub: '', wob: '', lead: '', riser: '', kick: '', snare: '', hats: '', oh: '', ih: '', roll: '', chant: '', vocal: '', vocalOn: '' };
+range(0, 8).concat(range(16, 20)).forEach((c) => chords[c % 4].forEach((m) => { o.pad += H(c, c + 1, Y(m)); }));
+range(8, 16).concat(range(20, 28)).forEach((c) => {
+const sp = subP[c % 4];
+const wp = wobP[c % 4];
+sp.forEach((m, j) => { o.sub += H(c + j / sp.length, c + (j + 1) / sp.length, Y(m)); });
+wp.forEach((m, j) => {
+const a = X(c + j / wp.length) + 2, b = X(c + (j + 1) / wp.length) - 2;
+const amp = 2 + cut[c % 8] * 6;
+let p = ' M' + f(a) + ' ' + f(Y(m));
+let k = 0;
+for (let x = a + 2.5; x < b; x += 2.5) { p += ' L' + f(x) + ' ' + f(Y(m) + (k % 2 ? amp : -amp)); k++; }
+o.wob += p;
+});
+o.kick += dot(X(c) + 3, 505, 3.5);
+o.snare += ' M' + f(X(c + 0.5) - 3) + ' 515 l6 6 m0 -6 l-6 6';
+for (let k = 0; k < 8; k++) o.hats += ' M' + f(X(c + k / 8)) + ' 526 v7';
+[0.25, 0.75].forEach((t) => { o.oh += dot(X(c + t), 542, 2.5); });
+});
+range(16, 20).forEach((c) => [[67, 0], [63, 0.25], [62, 0.5], [60, 0.75]].forEach((n) => { o.lead += H(c + n[1], c + n[1] + 0.125, Y(n[0])); }));
+range(4, 8).forEach((c) => { o.riser += H(c, c + 1, Y(48) + 4); });
+range(0, 4).forEach((c) => { for (let k = 0; k < 4; k++) o.ih += ' M' + f(X(c + k / 4)) + ' 556 v8'; });
+range(4, 8).forEach((c, i) => { for (let k = 0; k < 8; k++) { const h = 2 + ((i * 8 + k) / 32) * 10; o.roll += ' M' + f(X(c + k / 8)) + ' ' + f(566 - h) + ' v' + f(h); } });
+o.chant = ' M' + f(X(7.75)) + ' 575 q2 -4 4 0 t4 0 t4 0';
+o.vocal = ' M' + f(X(0) + 8) + ' 587 H' + f(X(4) - 2) + ' M' + f(X(16) + 8) + ' 587 H' + f(X(20) - 2);
+o.vocalOn = dot(X(0) + 4, 587, 3) + dot(X(16) + 4, 587, 3);
+return o;
+}
+}
+</script>
+</body>
+</html>

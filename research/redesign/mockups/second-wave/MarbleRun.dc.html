@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Marble run</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.arc{fill:none;stroke-width:1.5;stroke-dasharray:2 6;stroke-linecap:round;opacity:.45}
+.nm{font-family:'JetBrains Mono',monospace;font-size:13px;text-anchor:middle;fill:#A49EC4}
+.pl{font-family:'JetBrains Mono',monospace;font-size:11px;text-anchor:end;fill:#A49EC4}
+.st{stroke:#2A2545;stroke-width:3}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="A marble machine. Marbles arc from a hopper at the top to drums, cymbals and pitched bars. A snare marble is about to land; a stream of hats marbles is in flight; subBass and wobbleBass marbles roll along their bars." style="position: absolute; left: 0; top: 0; display: block">
+
+<path class="arc" d="M 480 96 Q 315 10 150 458" style="stroke: #FF4D8D"></path>
+<path class="arc" d="M 480 96 Q 390 10 300 430" style="stroke: #FFD23F"></path>
+<path class="arc" d="M 480 96 Q 455 10 430 372" style="stroke: #3DDCFF"></path>
+<path class="arc" d="M 480 96 Q 520 10 560 322" style="stroke: #5BFF8F"></path>
+<path class="arc" d="M 480 96 Q 590 10 700 512" style="stroke: #B388FF"></path>
+<path class="arc" d="M 480 96 Q 590 10 700 417" style="stroke: #FF8A3D"></path>
+
+<polygon points="446,52 514,52 494,98 466,98" style="fill: #12101F; stroke: #2A2545; stroke-width: 2"></polygon>
+<circle cx="470" cy="66" r="6" style="fill: #3DDCFF; opacity: .5"></circle>
+<circle cx="486" cy="64" r="7" style="fill: #FFD23F; opacity: .5"></circle>
+<circle cx="478" cy="80" r="6" style="fill: #3DDCFF; opacity: .5"></circle>
+
+<line class="st" x1="0" y1="548" x2="640" y2="548"></line>
+
+<ellipse cx="150" cy="526" rx="64" ry="14" style="fill: #12101F; stroke: #FF4D8D; stroke-width: 1.5; opacity: .6"></ellipse>
+<rect x="86" y="466" width="128" height="60" style="fill: #12101F"></rect>
+<line x1="86" y1="466" x2="86" y2="526" style="stroke: #FF4D8D; stroke-width: 1.5; opacity: .6"></line>
+<line x1="214" y1="466" x2="214" y2="526" style="stroke: #FF4D8D; stroke-width: 1.5; opacity: .6"></line>
+<ellipse cx="150" cy="466" rx="64" ry="14" style="fill: #1A1730; stroke: #FF4D8D; stroke-width: 2"></ellipse>
+
+<rect x="254" y="436" width="92" height="40" style="fill: #12101F"></rect>
+<line x1="254" y1="436" x2="254" y2="476" style="stroke: #FFD23F; stroke-width: 1.5; opacity: .6"></line>
+<line x1="346" y1="436" x2="346" y2="476" style="stroke: #FFD23F; stroke-width: 1.5; opacity: .6"></line>
+<ellipse cx="300" cy="476" rx="46" ry="11" style="fill: none; stroke: #FFD23F; stroke-width: 1.5; opacity: .6"></ellipse>
+<ellipse cx="300" cy="436" rx="46" ry="11" style="fill: #1A1730; stroke: #FFD23F; stroke-width: 2"></ellipse>
+<line class="st" x1="300" y1="476" x2="300" y2="548"></line>
+
+<line class="st" x1="430" y1="378" x2="430" y2="548"></line>
+<ellipse cx="430" cy="378" rx="64" ry="11" style="fill: none; stroke: #3DDCFF; stroke-width: 1.5; opacity: .35"></ellipse>
+<ellipse cx="430" cy="378" rx="42" ry="6" style="fill: #3DDCFF; filter: drop-shadow(0 0 10px #3DDCFF)"></ellipse>
+
+<line class="st" x1="560" y1="328" x2="560" y2="548"></line>
+<ellipse cx="560" cy="328" rx="46" ry="7" style="fill: #1A1730; stroke: #5BFF8F; stroke-width: 2"></ellipse>
+
+<text x="700" y="382" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; fill: #A49EC4">wobbleBass</text>
+<rect x="700" y="390" width="130" height="12" rx="4" style="fill: none; stroke: #FF8A3D; stroke-width: 1.5; opacity: .45"></rect>
+<rect x="700" y="418" width="145" height="12" rx="4" style="fill: none; stroke: #FF8A3D; stroke-width: 1.5; opacity: .45"></rect>
+<rect x="700" y="446" width="160" height="12" rx="4" style="fill: #FF8A3D; filter: drop-shadow(0 0 10px #FF8A3D)"></rect>
+<text class="pl" x="690" y="400">G2</text>
+<text class="pl" x="690" y="428">F2</text>
+<text class="pl" x="690" y="456">E♭2</text>
+
+<text x="700" y="478" style="font-family: 'JetBrains Mono', monospace; font-size: 12px; fill: #A49EC4">subBass</text>
+<rect x="700" y="486" width="180" height="12" rx="4" style="fill: none; stroke: #B388FF; stroke-width: 1.5; opacity: .45"></rect>
+<rect x="700" y="514" width="200" height="12" rx="4" style="fill: none; stroke: #B388FF; stroke-width: 1.5; opacity: .45"></rect>
+<rect x="700" y="542" width="220" height="12" rx="4" style="fill: #B388FF; filter: drop-shadow(0 0 10px #B388FF)"></rect>
+<text class="pl" x="690" y="496">G1</text>
+<text class="pl" x="690" y="524">F1</text>
+<text class="pl" x="690" y="552">E♭1</text>
+
+<line x1="700" y1="438" x2="764" y2="438" style="stroke: #FF8A3D; stroke-width: 3; opacity: .35; stroke-linecap: round"></line>
+<circle cx="764" cy="438" r="8" style="fill: #FFFFFF; stroke: #FF8A3D; stroke-width: 3"></circle>
+<line x1="700" y1="534" x2="788" y2="534" style="stroke: #B388FF; stroke-width: 3; opacity: .35; stroke-linecap: round"></line>
+<circle cx="788" cy="534" r="9.5" style="fill: #FFFFFF; stroke: #B388FF; stroke-width: 3"></circle>
+
+<circle cx="249" cy="237.3" r="10" style="fill: #FF4D8D"></circle>
+<circle cx="309" cy="389.3" r="10" style="fill: #FFD23F; filter: drop-shadow(0 0 8px #FFD23F)"></circle>
+<circle cx="399" cy="121.1" r="10" style="fill: #FFD23F; opacity: .8"></circle>
+<circle cx="546" cy="225" r="6.5" style="fill: #5BFF8F"></circle>
+<circle cx="526" cy="128.7" r="6.5" style="fill: #5BFF8F; opacity: .75"></circle>
+<circle cx="506" cy="82.1" r="6.5" style="fill: #5BFF8F; opacity: .5"></circle>
+<circle cx="634" cy="263.7" r="9.5" style="fill: #B388FF"></circle>
+<circle cx="634" cy="217.2" r="8" style="fill: #FF8A3D"></circle>
+
+<circle cx="432.5" cy="336.9" r="6" style="fill: #3DDCFF"></circle>
+<circle cx="435.6" cy="296.2" r="5" style="fill: #3DDCFF"></circle>
+<circle cx="438.8" cy="259" r="6.5" style="fill: #3DDCFF; opacity: .95"></circle>
+<circle cx="441.9" cy="225.3" r="5.5" style="fill: #3DDCFF; opacity: .9"></circle>
+<circle cx="445" cy="195.1" r="5" style="fill: #3DDCFF; opacity: .85"></circle>
+<circle cx="448.1" cy="168.4" r="6" style="fill: #3DDCFF; opacity: .8"></circle>
+<circle cx="451.2" cy="145.2" r="5.5" style="fill: #3DDCFF; opacity: .75"></circle>
+<circle cx="454.4" cy="125.5" r="6.5" style="fill: #3DDCFF; opacity: .7"></circle>
+<circle cx="457.5" cy="109.3" r="5" style="fill: #3DDCFF; opacity: .62"></circle>
+<circle cx="460.6" cy="96.6" r="6" style="fill: #3DDCFF; opacity: .55"></circle>
+<circle cx="463.8" cy="87.4" r="5.5" style="fill: #3DDCFF; opacity: .48"></circle>
+<circle cx="466.9" cy="81.7" r="5" style="fill: #3DDCFF; opacity: .42"></circle>
+
+<text x="326" y="384" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #FFD23F">lands in 0.1</text>
+
+<text class="nm" x="150" y="574">kick</text>
+<text class="nm" x="300" y="574">snare</text>
+<text class="nm" x="430" y="574" style="fill: #F4F1FF">hats</text>
+<text class="nm" x="560" y="574">open hat</text>
+</svg>
+
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">02</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Marble run</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">landing</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 11 · 40% · window 2</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div>
+<p class="sp">Shows</p>
+<p class="tx">Every note is a marble, launched one window ahead and landing exactly when it sounds. Held notes roll along their bar.</p>
+</div>
+<div>
+<p class="sp">Mapping</p>
+<ul class="mp">
+<li>onset → the marble lands on its drum, cymbal or bar</li>
+<li>pitched instrument → one bar per pitch it uses, lower is longer</li>
+<li>held note → the marble rolls along its bar for the real span</li>
+<li>gain → marble size</li>
+<li>Window → how early marbles leave the hopper</li>
+</ul>
+</div>
+<div>
+<p class="sp">Build</p>
+<ul class="mp">
+<li>Canvas 2D · score · window</li>
+<li>drum or bars chosen from the notes, never names</li>
+<li>dense parts → marbles merge into a stream</li>
+</ul>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

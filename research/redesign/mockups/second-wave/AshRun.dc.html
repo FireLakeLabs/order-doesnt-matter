@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ash Run</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.bk{fill:#0A090C}
+.an{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#8A6E66}
+.al{stroke:#8A6E66;stroke-width:1;opacity:.6}
+.hud{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.14em;fill:#C9876A}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="A dark post-apocalyptic rooftop chase. A silhouetted runner with an amber visor sprints across a long roof toward a debris barrier. Ahead, the roofs step up for the next bar's two bass notes. Behind, ruined towers, a broken ring structure and a giant walker on the horizon whose searchlight sweeps low. Ash drifts through a rust-coloured haze." style="position: absolute; left: 0; top: 0; display: block">
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" style="stop-color: #08070B"></stop>
+<stop offset=".55" style="stop-color: #1C1215"></stop>
+<stop offset="1" style="stop-color: #3A2018"></stop>
+</linearGradient>
+<linearGradient id="beam" x1="1" y1="0" x2="0" y2="1">
+<stop offset="0" style="stop-color: #FF8A3D; stop-opacity: .35"></stop>
+<stop offset="1" style="stop-color: #FF8A3D; stop-opacity: 0"></stop>
+</linearGradient>
+</defs>
+
+<rect x="0" y="0" width="960" height="600" style="fill: url(#sky)"></rect>
+<circle cx="690" cy="262" r="130" style="fill: #5A2A1C; opacity: .45"></circle>
+<rect x="0" y="230" width="960" height="10" style="fill: #2A1A18; opacity: .6"></rect>
+<rect x="0" y="262" width="960" height="6" style="fill: #2A1A18; opacity: .5"></rect>
+
+<path d="M 120 380 A 380 320 0 0 1 520 74 L 540 70 L 534 92 A 360 300 0 0 0 150 382 Z" style="fill: #1A1418"></path>
+<path d="M 600 66 L 640 62 L 652 70 L 628 84 Z" style="fill: #1A1418"></path>
+
+<path d="M 0 360 L 0 300 L 30 300 L 30 250 L 44 240 L 52 252 L 52 300 L 90 300 L 90 210 L 104 196 L 110 214 L 118 205 L 118 300 L 150 300 L 150 268 L 190 268 L 190 230 L 200 222 L 212 236 L 212 300 L 260 300 L 260 180 L 270 160 L 276 176 L 284 150 L 290 180 L 290 300 L 330 300 L 330 256 L 370 256 L 370 300 L 420 300 L 420 200 L 436 206 L 448 186 L 448 300 L 500 300 L 500 240 L 540 236 L 548 300 L 600 300 L 600 150 L 612 130 L 620 150 L 626 140 L 632 168 L 632 300 L 680 300 L 680 260 L 720 255 L 720 300 L 960 300 L 960 360 Z" style="fill: #17131A"></path>
+
+<g style="fill: #120F14">
+<rect x="800" y="236" width="44" height="34" rx="4"></rect>
+<rect x="836" y="244" width="22" height="12" rx="3"></rect>
+<path d="M 806 268 L 778 300 L 786 300 L 812 270 Z M 838 268 L 866 300 L 874 300 L 844 270 Z M 820 268 L 812 300 L 820 300 L 826 270 Z"></path>
+</g>
+<circle cx="856" cy="250" r="3" style="fill: #FF8A3D; filter: drop-shadow(0 0 6px #FF8A3D)"></circle>
+<polygon points="856,250 560,330 640,352" style="fill: url(#beam)"></polygon>
+
+<path d="M 0 600 L 0 380 L 60 380 L 60 340 L 80 334 L 80 380 L 180 380 L 180 352 L 230 352 L 230 380 L 400 380 L 400 330 L 420 318 L 440 330 L 440 380 L 560 380 L 560 360 L 700 360 L 700 380 L 960 380 L 960 600 Z" style="fill: #110E12"></path>
+<circle cx="70" cy="336" r="2" style="fill: #FF3D3D; opacity: .8"></circle>
+<circle cx="420" cy="320" r="2" style="fill: #FF3D3D; opacity: .8"></circle>
+
+<rect class="bk" x="0" y="464" width="84" height="136"></rect>
+<rect class="bk" x="100" y="422" width="504" height="178"></rect>
+<rect class="bk" x="620" y="394" width="244" height="206"></rect>
+<rect class="bk" x="880" y="366" width="80" height="234"></rect>
+<line x1="100" y1="422" x2="604" y2="422" style="stroke: #B388FF; stroke-width: 2; opacity: .55"></line>
+<line x1="0" y1="464" x2="84" y2="464" style="stroke: #B388FF; stroke-width: 2; opacity: .2"></line>
+<line x1="620" y1="394" x2="864" y2="394" style="stroke: #B388FF; stroke-width: 2; opacity: .3"></line>
+<line x1="880" y1="366" x2="960" y2="366" style="stroke: #B388FF; stroke-width: 2; opacity: .3"></line>
+<rect x="160" y="470" width="10" height="6" style="fill: #3A2A22"></rect>
+<rect x="420" y="500" width="10" height="6" style="fill: #3A2A22"></rect>
+<rect x="700" y="440" width="10" height="6" style="fill: #3A2A22"></rect>
+<rect x="520" y="540" width="10" height="6" style="fill: #3A2A22"></rect>
+
+<ellipse cx="96" cy="414" rx="34" ry="10" style="fill: #6E5A55; opacity: .14"></ellipse>
+<ellipse cx="157" cy="418" rx="12" ry="4" style="fill: #6E5A55; opacity: .15"></ellipse>
+<ellipse cx="222" cy="418" rx="12" ry="4" style="fill: #6E5A55; opacity: .22"></ellipse>
+<ellipse cx="287" cy="418" rx="14" ry="5" style="fill: #6E5A55; opacity: .35"></ellipse>
+
+<line x1="196" y1="422" x2="196" y2="300" style="stroke: #0A090C; stroke-width: 5"></line>
+<path d="M 196 304 Q 240 326 290 300" style="fill: none; stroke: #0A090C; stroke-width: 2"></path>
+<path d="M 222 316 L 218 334 M 224 318 L 230 338 M 226 316 L 236 326" style="stroke: #5BFF8F; stroke-width: 1.5; opacity: .45; stroke-linecap: round"></path>
+
+<path d="M 336 422 L 340 404 L 352 410 L 356 396 L 366 402 L 370 422 Z" style="fill: #050407"></path>
+<line x1="352" y1="396" x2="360" y2="372" style="stroke: #050407; stroke-width: 3"></line>
+<circle cx="360" cy="372" r="3.5" style="fill: #FFD23F; filter: drop-shadow(0 0 8px #FFD23F)"></circle>
+
+<rect x="476" y="410" width="12" height="12" style="fill: #050407"></rect>
+<circle cx="482" cy="414" r="1.5" style="fill: #5BFF8F; opacity: .6"></circle>
+
+<g style="stroke: #050407; stroke-linecap: round; stroke-linejoin: round; fill: none">
+<path d="M 298 386 L 312 400 L 306 420" style="stroke-width: 7"></path>
+<path d="M 298 386 L 286 402 L 272 398" style="stroke-width: 7"></path>
+<path d="M 298 386 L 308 356" style="stroke-width: 11"></path>
+<path d="M 308 358 L 320 370 L 328 362" style="stroke-width: 5"></path>
+<path d="M 306 360 L 294 368 L 286 380" style="stroke-width: 5"></path>
+</g>
+<path d="M 304 352 L 296 382 L 268 396 L 280 382 L 288 360 Z" style="fill: #050407"></path>
+<circle cx="313" cy="346" r="8" style="fill: #050407"></circle>
+<path d="M 300 356 L 293 384 L 270 395" style="fill: none; stroke: #C9876A; stroke-width: 1; opacity: .5"></path>
+<line x1="315" y1="345" x2="321" y2="345" style="stroke: #FFB347; stroke-width: 2.5; stroke-linecap: round; filter: drop-shadow(0 0 5px #FFB347)"></line>
+
+<path d="{{ash}}" style="fill: #8A7A76; opacity: .5"></path>
+
+<line class="al" x1="366" y1="370" x2="392" y2="346"></line><text class="an" x="396" y="344">snare · barrier, hits in 0.1</text>
+<line class="al" x1="96" y1="404" x2="96" y2="380" style="opacity: .3"></line><text class="an" x="60" y="374">kick · dust</text>
+<text class="an" x="150" y="440">hats · footfalls</text>
+<text class="an" x="626" y="414">next bar: F1 · G1</text>
+<text class="an" x="700" y="226">wobble · searchlight</text>
+
+<text class="hud" x="936" y="72" style="text-anchor: end">DROP DISTRICT</text>
+<text class="hud" x="936" y="90" style="text-anchor: end; fill: #8A6E66">BAR 11 / 28</text>
+</svg>
+
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A6E66">21</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px; color: #E8DCD6">Ash Run</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #3A2A26; border-radius: 999px; color: #C9876A">runner</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #8A6E66">bar 11 · 40% · window 1</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div>
+<p class="sp">Shows</p>
+<p class="tx">A lone runner crossing a dead city at full tilt. The bass builds the rooftops, the drums set the stride and the obstacles, the tempo is the speed.</p>
+</div>
+<div>
+<p class="sp">Mapping</p>
+<ul class="mp">
+<li>lowest pitched part → rooftops, one per note, its real length; pitch → height</li>
+<li>bass onset → a leap to the next roof · bass rest → a chasm</li>
+<li>most regular drum → footfalls · snare → a barrier smashed on its onset</li>
+<li>kick → dust off the roof · open hat → sparks from dead cables</li>
+<li>moving setting → the walker's searchlight, one angle per note</li>
+</ul>
+</div>
+<div>
+<p class="sp">Build</p>
+<ul class="mp">
+<li>Canvas 2D, four parallax layers · score · window</li>
+<li>section → a district with its own ruins</li>
+<li>tempo after Speed → run speed</li>
+</ul>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+let seed = 7;
+const rnd = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+let ash = '';
+for (let i = 0; i < 70; i++) {
+const x = rnd() * 960, y = 60 + rnd() * 520, r = 0.6 + rnd() * 1.4;
+ash += ' M' + (x - r).toFixed(1) + ' ' + y.toFixed(1) + ' a' + r.toFixed(1) + ' ' + r.toFixed(1) + ' 0 1 0 ' + (2 * r).toFixed(1) + ' 0 a' + r.toFixed(1) + ' ' + r.toFixed(1) + ' 0 1 0 ' + (-2 * r).toFixed(1) + ' 0';
+}
+return { ash: ash };
+}
+}
+</script>
+</body>
+</html>

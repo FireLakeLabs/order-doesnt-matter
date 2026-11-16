@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Tubes</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.gl{fill:none;stroke:#5A5480;stroke-width:2}
+.k{font-family:'JetBrains Mono',monospace;font-size:11px;fill:#A49EC4;text-anchor:middle}
+.v{font-family:'JetBrains Mono',monospace;font-size:12px;fill:#F4F1FF;text-anchor:middle}
+.rk{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;fill:#F4F1FF}
+.tk{stroke:#F4F1FF;stroke-width:2}
+.bb{fill:none;stroke:#F4F1FF;stroke-width:1.2}
+.mv{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#07060D;text-anchor:middle}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="Racks of test tubes, one tube per setting, grouped by instrument. wobbleBass's cutoff tube is marked moving, with bubbles and ticks for its earlier values; its other settings sit flat. The hats gain tube is also moving. Snare, kick and open hat are resting, so their liquid is dimmed." style="position: absolute; left: 0; top: 0; display: block">
+
+<rect x="40" y="200" width="880" height="12" rx="4" style="fill: #12101F; stroke: #2A2545; stroke-width: 2"></rect>
+<rect x="40" y="500" width="880" height="14" rx="4" style="fill: #12101F; stroke: #2A2545; stroke-width: 2"></rect>
+
+<circle cx="64" cy="122" r="5" style="fill: #FF8A3D"></circle><text class="rk" x="76" y="127">wobbleBass</text>
+<circle cx="390" cy="122" r="5" style="fill: #FFD23F"></circle><text class="rk" x="402" y="127" style="fill: #A49EC4">snare</text>
+<circle cx="610" cy="122" r="5" style="fill: #3DDCFF"></circle><text class="rk" x="622" y="127">hats</text>
+<circle cx="710" cy="122" r="5" style="fill: #A49EC4"></circle><text class="rk" x="722" y="127" style="fill: #A49EC4">kick · open hat · sub</text>
+
+<rect x="56" y="140" width="58" height="18" rx="9" style="fill: #FF8A3D"></rect><text class="mv" x="85" y="153">moving</text>
+<path d="M 72 370 L 98 370 L 98 437 A 13 13 0 0 1 72 437 Z" style="fill: #FF8A3D; opacity: .9"></path>
+<path class="gl" d="M 70 170 L 70 437 A 15 15 0 0 0 100 437 L 100 170"></path>
+<line class="tk" x1="100" y1="314" x2="110" y2="314" style="opacity: .35"></line>
+<line class="tk" x1="100" y1="259" x2="110" y2="259" style="opacity: .6"></line>
+<line class="tk" x1="100" y1="370" x2="112" y2="370" style="stroke: #FF8A3D; stroke-width: 3"></line>
+<circle class="bb" cx="82" cy="350" r="3"></circle>
+<circle class="bb" cx="90" cy="322" r="2.5"></circle>
+<circle class="bb" cx="80" cy="296" r="2"></circle>
+<text class="k" x="85" y="474">lpf</text><text class="v" x="85" y="492">940</text>
+
+<path d="M 117 380 L 143 380 L 143 437 A 13 13 0 0 1 117 437 Z" style="fill: #FF8A3D; opacity: .9"></path>
+<path class="gl" d="M 115 170 L 115 437 A 15 15 0 0 0 145 437 L 145 170"></path>
+<text class="k" x="130" y="474">res</text><text class="v" x="130" y="492">11</text>
+
+<path d="M 162 268 L 188 268 L 188 437 A 13 13 0 0 1 162 437 Z" style="fill: #FF8A3D; opacity: .9"></path>
+<path class="gl" d="M 160 170 L 160 437 A 15 15 0 0 0 190 437 L 190 170"></path>
+<text class="k" x="175" y="474">shape</text><text class="v" x="175" y="492">.65</text>
+
+<path d="M 207 400 L 233 400 L 233 437 A 13 13 0 0 1 207 437 Z" style="fill: #FF8A3D; opacity: .9"></path>
+<path class="gl" d="M 205 170 L 205 437 A 15 15 0 0 0 235 437 L 235 170"></path>
+<text class="k" x="220" y="474">hpf</text><text class="v" x="220" y="492">110</text>
+
+<path d="M 252 380 L 278 380 L 278 437 A 13 13 0 0 1 252 437 Z" style="fill: #FF8A3D; opacity: .9"></path>
+<path class="gl" d="M 250 170 L 250 437 A 15 15 0 0 0 280 437 L 280 170"></path>
+<text class="k" x="265" y="474">room</text><text class="v" x="265" y="492">.25</text>
+
+<path d="M 297 240 L 323 240 L 323 437 A 13 13 0 0 1 297 437 Z" style="fill: #FF8A3D; opacity: .9"></path>
+<path class="gl" d="M 295 170 L 295 437 A 15 15 0 0 0 325 437 L 325 170"></path>
+<text class="k" x="310" y="474">gain</text><text class="v" x="310" y="492">.75</text>
+
+<path d="M 392 330 L 418 330 L 418 437 A 13 13 0 0 1 392 437 Z" style="fill: #FFD23F; opacity: .4"></path>
+<path class="gl" d="M 390 170 L 390 437 A 15 15 0 0 0 420 437 L 420 170"></path>
+<text class="k" x="405" y="474">shape</text><text class="v" x="405" y="492">.35</text>
+
+<path d="M 437 310 L 463 310 L 463 437 A 13 13 0 0 1 437 437 Z" style="fill: #FFD23F; opacity: .4"></path>
+<path class="gl" d="M 435 170 L 435 437 A 15 15 0 0 0 465 437 L 465 170"></path>
+<text class="k" x="450" y="474">room</text><text class="v" x="450" y="492">.45</text>
+
+<path d="M 482 250 L 508 250 L 508 437 A 13 13 0 0 1 482 437 Z" style="fill: #FFD23F; opacity: .4"></path>
+<path class="gl" d="M 480 170 L 480 437 A 15 15 0 0 0 510 437 L 510 170"></path>
+<text class="k" x="495" y="474">size</text><text class="v" x="495" y="492">.7</text>
+
+<path d="M 527 176 L 553 176 L 553 437 A 13 13 0 0 1 527 437 Z" style="fill: #FFD23F; opacity: .4"></path>
+<path class="gl" d="M 525 170 L 525 437 A 15 15 0 0 0 555 437 L 555 170"></path>
+<text class="k" x="540" y="474">gain</text><text class="v" x="540" y="492">1</text>
+
+<rect x="596" y="140" width="58" height="18" rx="9" style="fill: #3DDCFF"></rect><text class="mv" x="625" y="153">moving</text>
+<path d="M 612 290 L 638 290 L 638 437 A 13 13 0 0 1 612 437 Z" style="fill: #3DDCFF; filter: drop-shadow(0 0 8px #3DDCFF)"></path>
+<path class="gl" d="M 610 170 L 610 437 A 15 15 0 0 0 640 437 L 640 170"></path>
+<line class="tk" x1="640" y1="232" x2="650" y2="232" style="opacity: .2"></line>
+<line class="tk" x1="640" y1="388" x2="650" y2="388" style="opacity: .25"></line>
+<line class="tk" x1="640" y1="262" x2="650" y2="262" style="opacity: .3"></line>
+<line class="tk" x1="640" y1="356" x2="650" y2="356" style="opacity: .35"></line>
+<line class="tk" x1="640" y1="210" x2="650" y2="210" style="opacity: .4"></line>
+<line class="tk" x1="640" y1="330" x2="650" y2="330" style="opacity: .5"></line>
+<line class="tk" x1="640" y1="404" x2="650" y2="404" style="opacity: .6"></line>
+<line class="tk" x1="640" y1="246" x2="650" y2="246" style="opacity: .7"></line>
+<line class="tk" x1="640" y1="290" x2="652" y2="290" style="stroke: #3DDCFF; stroke-width: 3"></line>
+<circle class="bb" cx="621" cy="270" r="3"></circle>
+<circle class="bb" cx="629" cy="246" r="2.2"></circle>
+<text class="k" x="625" y="474">gain</text><text class="v" x="625" y="492">.52</text>
+
+<path d="M 712 320 L 738 320 L 738 437 A 13 13 0 0 1 712 437 Z" style="fill: #FF4D8D; opacity: .4"></path>
+<path class="gl" d="M 710 170 L 710 437 A 15 15 0 0 0 740 437 L 740 170"></path>
+<text class="k" x="725" y="474">shape</text><text class="v" x="725" y="492">.45</text>
+
+<path d="M 757 176 L 783 176 L 783 437 A 13 13 0 0 1 757 437 Z" style="fill: #FF4D8D; opacity: .4"></path>
+<path class="gl" d="M 755 170 L 755 437 A 15 15 0 0 0 785 437 L 785 170"></path>
+<text class="k" x="770" y="474">gain</text><text class="v" x="770" y="492">1</text>
+
+<path d="M 802 332 L 828 332 L 828 437 A 13 13 0 0 1 802 437 Z" style="fill: #5BFF8F; opacity: .4"></path>
+<path class="gl" d="M 800 170 L 800 437 A 15 15 0 0 0 830 437 L 830 170"></path>
+<text class="k" x="815" y="474">gain</text><text class="v" x="815" y="492">.4</text>
+
+<path d="M 847 186 L 873 186 L 873 437 A 13 13 0 0 1 847 437 Z" style="fill: #B388FF; filter: drop-shadow(0 0 8px #B388FF)"></path>
+<path class="gl" d="M 845 170 L 845 437 A 15 15 0 0 0 875 437 L 875 170"></path>
+<text class="k" x="860" y="474">gain</text><text class="v" x="860" y="492">.95</text>
+
+<text x="725" y="540" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #FF4D8D; text-anchor: middle">kick</text>
+<text x="770" y="540" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #FF4D8D; text-anchor: middle">kick</text>
+<text x="815" y="540" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #5BFF8F; text-anchor: middle">open</text>
+<text x="860" y="540" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #B388FF; text-anchor: middle">sub</text>
+
+<line x1="112" y1="370" x2="150" y2="548" style="stroke: #A49EC4; stroke-width: 1; opacity: .5"></line>
+<text x="156" y="552" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #A49EC4">one value per note: 1340 → 1820 → 940, jumps at each onset</text>
+<text x="40" y="584" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #A49EC4">dimmed liquid = resting, last value kept</text>
+</svg>
+
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">10</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Tubes</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">settings</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 11 · 40%</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div>
+<p class="sp">Shows</p>
+<p class="tx">Every setting in use as a test tube. Constants sit still; moving ones jump once per note, because a signal is sampled when each note starts.</p>
+</div>
+<div>
+<p class="sp">Mapping</p>
+<ul class="mp">
+<li>setting in use → one tube, racked by instrument</li>
+<li>level → value on the note sounding now, within its range in the song</li>
+<li>moving value → jumps at each onset and bubbles; constants stay flat</li>
+<li>ticks on the glass → its last 16 values</li>
+<li>instrument resting → liquid dims, keeps its last value</li>
+</ul>
+</div>
+<div>
+<p class="sp">Build</p>
+<ul class="mp">
+<li>Canvas 2D · score · window</li>
+<li>tubes from ViewInstrument.settings, in order</li>
+<li>crowded rack → constants fold into chips</li>
+</ul>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

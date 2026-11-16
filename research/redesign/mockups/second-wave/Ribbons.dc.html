@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Ribbons</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.nm{font-family:'JetBrains Mono',monospace;font-size:11px;fill:#A49EC4}
+.on{fill:#F4F1FF}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="Six silk ribbons stream from the distance on the right through a vertical curtain of light and trail off to the left. Each ribbon opens wide where its instrument plays and thins to a thread where it rests. subBass and wobbleBass are wide through the curtain; wobbleBass changes its turn at each bar line. Hats ribbon is a chain of short petals." style="position: absolute; left: 0; top: 0; display: block">
+<defs>
+<linearGradient id="fade" gradientUnits="userSpaceOnUse" x1="60" y1="0" x2="930" y2="0">
+<stop offset="0" style="stop-color: #FFFFFF; stop-opacity: .15"></stop>
+<stop offset=".38" style="stop-color: #FFFFFF; stop-opacity: .6"></stop>
+<stop offset=".415" style="stop-color: #FFFFFF; stop-opacity: 1"></stop>
+<stop offset=".45" style="stop-color: #FFFFFF; stop-opacity: .55"></stop>
+<stop offset="1" style="stop-color: #FFFFFF; stop-opacity: .2"></stop>
+</linearGradient>
+<mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="960" height="600">
+<rect x="0" y="0" width="960" height="600" style="fill: url(#fade)"></rect>
+</mask>
+</defs>
+
+<polygon points="420,60 470,110 470,520 420,566" style="fill: #F4F1FF; opacity: .04"></polygon>
+<line x1="420" y1="60" x2="420" y2="566" style="stroke: #F4F1FF; stroke-width: 3; filter: drop-shadow(0 0 12px #FFFFFF)"></line>
+<text x="420" y="584" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #F4F1FF; text-anchor: middle">now</text>
+<text x="900" y="584" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #A49EC4; text-anchor: end">coming →</text>
+<text x="60" y="584" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #A49EC4">← played</text>
+
+<g style="mask: url(#m)">
+<polygon points="{{hats}}" style="fill: #3DDCFF"></polygon>
+<polygon points="{{oh}}" style="fill: #5BFF8F"></polygon>
+<polygon points="{{snare}}" style="fill: #FFD23F"></polygon>
+<polygon points="{{kick}}" style="fill: #FF4D8D"></polygon>
+<polygon points="{{wob}}" style="fill: #FF8A3D"></polygon>
+<polygon points="{{sub}}" style="fill: #B388FF"></polygon>
+</g>
+
+<circle cx="420" cy="{{hy}}" r="5" style="fill: #FFFFFF; filter: drop-shadow(0 0 10px #3DDCFF)"></circle>
+<circle cx="420" cy="380" r="6" style="fill: #FFFFFF; filter: drop-shadow(0 0 12px #FF8A3D)"></circle>
+<circle cx="420" cy="450" r="6" style="fill: #FFFFFF; filter: drop-shadow(0 0 12px #B388FF)"></circle>
+
+<text class="nm on" x="24" y="128">hats</text>
+<text class="nm" x="24" y="178">open hat</text>
+<text class="nm" x="24" y="228">snare</text>
+<text class="nm" x="24" y="278">kick</text>
+<text class="nm on" x="24" y="362">wobbleBass</text>
+<text class="nm on" x="24" y="432">subBass</text>
+<path d="M 600 330 L 640 300" style="stroke: #A49EC4; stroke-width: 1"></path>
+<text x="646" y="298" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #A49EC4">turns at the bar: cutoff 940 → 2210</text>
+</svg>
+
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">19</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Ribbons</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">3D</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 11 · 40% · window 2</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div>
+<p class="sp">Shows</p>
+<p class="tx">Each instrument is a silk ribbon streaming through a curtain of light at now. Ribbons open where they play and turn when a setting moves.</p>
+</div>
+<div>
+<p class="sp">Mapping</p>
+<ul class="mp">
+<li>time → right to left; the future recedes, the past trails off</li>
+<li>note → the ribbon opens for its real span; gain → width</li>
+<li>resting → a thread, never a gap</li>
+<li>moving setting → a new turn at each onset, held for the note</li>
+<li>height → pitch; unpitched instruments stack above</li>
+</ul>
+</div>
+<div>
+<p class="sp">Build</p>
+<ul class="mp">
+<li>three.js · score · window</li>
+<li>camera drifts slowly; Window sets the reach</li>
+<li>20 instruments → ribbons fan out in depth</li>
+</ul>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+const NOW = 10.4, CX = 420, K = 300, HOR = 300;
+const eighth = [0, 1, 2, 3, 4, 5, 6, 7].map((i) => [i / 8, (i + 1) / 8]);
+const hatsGain = [0.55, 0.45, 0.62, 0.5, 0.6, 0.4, 0.55, 0.47];
+const turn = { 9: 0.75, 10: 0.35, 11: 0.95, 12: 0.55 };
+const I = {
+hats: { y: 140, w: 16, notes: eighth, gain: (c, i) => hatsGain[(c * 3 + i) % 8] },
+oh: { y: 190, w: 16, notes: [[0.25, 0.375], [0.75, 0.875]], gain: () => 0.55 },
+snare: { y: 240, w: 22, notes: [[0.5, 0.625]], gain: () => 1 },
+kick: { y: 290, w: 24, notes: [[0, 0.125]], gain: () => 1 },
+wob: { y: 380, w: 34, notes: [[0, 1]], gain: (c) => turn[c] || 0.6 },
+sub: { y: 450, w: 34, notes: [[0, 1]], gain: () => 0.95 }
+};
+const out = {};
+Object.keys(I).forEach((name) => {
+const ins = I[name];
+const top = [];
+const bot = [];
+for (let x = 60; x <= 930; x += 3) {
+const t = NOW + (x - CX) / K;
+const c = Math.floor(t);
+const ph = t - c;
+let w = 1.4;
+ins.notes.forEach((n, i) => { if (ph >= n[0] && ph < n[1]) w = Math.max(w, ins.w * ins.gain(c, i)); });
+const s = x <= CX ? 1 : 1 - 0.5 * ((x - CX) / (930 - CX));
+const yc = HOR + (ins.y - HOR) * s;
+const hw = (w * s) / 2;
+top.push(x + ',' + (yc - hw).toFixed(1));
+bot.unshift(x + ',' + (yc + hw).toFixed(1));
+}
+out[name] = top.concat(bot).join(' ');
+});
+out.hy = 140;
+return out;
+}
+}
+</script>
+</body>
+</html>

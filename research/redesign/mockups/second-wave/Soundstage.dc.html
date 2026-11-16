@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Soundstage</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.dl{stroke:#2A2545;stroke-width:1;stroke-dasharray:3 6}
+.ax{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#A49EC4;text-anchor:end}
+.hl{stroke:#A49EC4;stroke-width:1;opacity:.6}
+.nm{font-family:'JetBrains Mono',monospace;font-size:11px;fill:#A49EC4;text-anchor:middle}
+.au{fill:#2A2545}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="A stage seen from above. Left to right is pan, distance back is room send. Every instrument in this song sits on the centre line; kick, hats, open hat and subBass are dry in the front row, fanned out with hairlines to their true spot. wobbleBass and snare stand further back on a shared room rug." style="position: absolute; left: 0; top: 0; display: block">
+
+<rect x="120" y="110" width="720" height="390" rx="14" style="fill: #0E0C1A; stroke: #2A2545; stroke-width: 2"></rect>
+<line class="dl" x1="140" y1="470" x2="820" y2="470"></line>
+<line class="dl" x1="140" y1="385" x2="820" y2="385"></line>
+<line class="dl" x1="140" y1="300" x2="820" y2="300"></line>
+<line class="dl" x1="140" y1="215" x2="820" y2="215"></line>
+<line class="dl" x1="140" y1="130" x2="820" y2="130"></line>
+<line x1="480" y1="118" x2="480" y2="492" style="stroke: #2A2545; stroke-width: 2; stroke-dasharray: 8 6"></line>
+<text class="ax" x="110" y="474">dry</text>
+<text class="ax" x="110" y="389">.25</text>
+<text class="ax" x="110" y="304">.5</text>
+<text class="ax" x="110" y="219">.75</text>
+<text class="ax" x="110" y="134">wet</text>
+<text x="140" y="100" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #A49EC4">← left</text>
+<text x="820" y="100" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #A49EC4; text-anchor: end">right →</text>
+<text x="480" y="100" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #F4F1FF; text-anchor: middle">centre</text>
+
+<rect x="400" y="268" width="160" height="150" rx="40" style="fill: #FFD23F; opacity: .07; stroke: #FFD23F; stroke-width: 1.5; stroke-opacity: .35"></rect>
+<text x="572" y="286" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #FFD23F">room 1 · size .7</text>
+<text x="572" y="302" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #A49EC4">size set by snare</text>
+
+<circle cx="480" cy="317" r="26" style="fill: #FFD23F; opacity: .35"></circle>
+<circle cx="480" cy="317" r="26" style="fill: none; stroke: #FFD23F; stroke-width: 2"></circle>
+<text class="nm" x="480" y="360">snare</text>
+
+<circle cx="480" cy="385" r="22" style="fill: #FF8A3D; filter: drop-shadow(0 0 12px #FF8A3D)"></circle>
+<text class="nm" x="534" y="389" style="fill: #F4F1FF; text-anchor: start">wobbleBass</text>
+
+<circle cx="480" cy="470" r="4" style="fill: none; stroke: #F4F1FF; stroke-width: 1.5"></circle>
+<line class="hl" x1="480" y1="470" x2="396" y2="452"></line>
+<line class="hl" x1="480" y1="470" x2="448" y2="452"></line>
+<line class="hl" x1="480" y1="470" x2="512" y2="452"></line>
+<line class="hl" x1="480" y1="470" x2="566" y2="452"></line>
+
+<circle cx="396" cy="440" r="80" style="fill: none; stroke: #FF4D8D; stroke-width: 1.5; opacity: .18"></circle>
+<circle cx="396" cy="440" r="26" style="fill: #FF4D8D; opacity: .55"></circle>
+<text class="nm" x="396" y="482">kick</text>
+<circle cx="448" cy="440" r="16" style="fill: #3DDCFF; filter: drop-shadow(0 0 10px #3DDCFF)"></circle>
+<circle cx="448" cy="440" r="28" style="fill: none; stroke: #3DDCFF; stroke-width: 2; opacity: .6"></circle>
+<text class="nm" x="448" y="482" style="fill: #F4F1FF">hats</text>
+<circle cx="512" cy="440" r="14" style="fill: #5BFF8F; opacity: .55"></circle>
+<text class="nm" x="512" y="482">open</text>
+<circle cx="566" cy="440" r="25" style="fill: #B388FF; filter: drop-shadow(0 0 12px #B388FF)"></circle>
+<text class="nm" x="566" y="482" style="fill: #F4F1FF">subBass</text>
+
+<rect x="650" y="400" width="176" height="76" rx="10" style="fill: #12101F; stroke: #2A2545"></rect>
+<text x="662" y="422" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #F4F1FF">pan used by: nobody</text>
+<text x="662" y="442" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #A49EC4">same spot → fanned,</text>
+<text x="662" y="460" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #A49EC4">hairline to true place</text>
+
+<circle class="au" cx="200" cy="534" r="7"></circle><circle class="au" cx="240" cy="534" r="7"></circle><circle class="au" cx="280" cy="534" r="7"></circle><circle class="au" cx="320" cy="534" r="7"></circle><circle class="au" cx="360" cy="534" r="7"></circle><circle class="au" cx="400" cy="534" r="7"></circle><circle class="au" cx="440" cy="534" r="7"></circle><circle class="au" cx="480" cy="534" r="7"></circle><circle class="au" cx="520" cy="534" r="7"></circle><circle class="au" cx="560" cy="534" r="7"></circle><circle class="au" cx="600" cy="534" r="7"></circle><circle class="au" cx="640" cy="534" r="7"></circle><circle class="au" cx="680" cy="534" r="7"></circle><circle class="au" cx="720" cy="534" r="7"></circle><circle class="au" cx="760" cy="534" r="7"></circle>
+<circle class="au" cx="180" cy="560" r="7"></circle><circle class="au" cx="220" cy="560" r="7"></circle><circle class="au" cx="260" cy="560" r="7"></circle><circle class="au" cx="300" cy="560" r="7"></circle><circle class="au" cx="340" cy="560" r="7"></circle><circle class="au" cx="380" cy="560" r="7"></circle><circle class="au" cx="420" cy="560" r="7"></circle><circle class="au" cx="460" cy="560" r="7"></circle><circle class="au" cx="500" cy="560" r="7"></circle><circle class="au" cx="540" cy="560" r="7"></circle><circle class="au" cx="580" cy="560" r="7"></circle><circle class="au" cx="620" cy="560" r="7"></circle><circle class="au" cx="660" cy="560" r="7"></circle><circle class="au" cx="700" cy="560" r="7"></circle><circle class="au" cx="740" cy="560" r="7"></circle><circle class="au" cx="780" cy="560" r="7"></circle>
+<text x="480" y="592" style="font-family: 'JetBrains Mono', monospace; font-size: 10px; fill: #A49EC4; text-anchor: middle">you are here</text>
+</svg>
+
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">11</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Soundstage</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">where it sits</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 11 · 40%</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div>
+<p class="sp">Shows</p>
+<p class="tx">Where each sound is placed, from above. This song pans nothing, so everyone stands on the centre line and only depth tells them apart.</p>
+</div>
+<div>
+<p class="sp">Mapping</p>
+<ul class="mp">
+<li>pan → left to right · room send → distance back · gain → size</li>
+<li>onset → a ring pops where it stands; held notes glow</li>
+<li>instruments sharing a room stand on one rug; it names who set it</li>
+<li>same spot → fanned out with a hairline to the true place</li>
+<li>scored settings only; nothing here is measured sound</li>
+</ul>
+</div>
+<div>
+<p class="sp">Build</p>
+<ul class="mp">
+<li>Canvas 2D · score · window</li>
+<li>patterned pan or jux → moves per note</li>
+<li>no room setting → the front row</li>
+</ul>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

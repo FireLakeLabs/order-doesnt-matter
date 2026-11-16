@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Light rig</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.fx{fill:#1A1730;stroke:#5A5480;stroke-width:1.5}
+.nm{font-family:'JetBrains Mono',monospace;font-size:11px;fill:#A49EC4;text-anchor:middle}
+.on{fill:#F4F1FF}
+.cr{fill:#030207}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="A concert stage seen from the crowd. A lighting truss carries fixtures for each instrument. The hats strobe is flashing, two orange wobbleBass beams cross over the stage, and the subBass washes the floor purple. Kick blinders glow faintly after their hit; the snare heads are dark, about to fire." style="position: absolute; left: 0; top: 0; display: block">
+<defs>
+<linearGradient id="bo" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" style="stop-color: #FF8A3D; stop-opacity: .75"></stop>
+<stop offset="1" style="stop-color: #FF8A3D; stop-opacity: 0"></stop>
+</linearGradient>
+<linearGradient id="bc" x1="0" y1="0" x2="0" y2="1">
+<stop offset="0" style="stop-color: #CFF6FF; stop-opacity: .5"></stop>
+<stop offset="1" style="stop-color: #3DDCFF; stop-opacity: 0"></stop>
+</linearGradient>
+<radialGradient id="wash" cx=".5" cy="1" r=".7">
+<stop offset="0" style="stop-color: #B388FF; stop-opacity: .8"></stop>
+<stop offset="1" style="stop-color: #B388FF; stop-opacity: 0"></stop>
+</radialGradient>
+</defs>
+
+<rect x="0" y="0" width="960" height="600" style="fill: #0A0716"></rect>
+<rect x="0" y="470" width="960" height="130" style="fill: #110D22"></rect>
+<ellipse cx="480" cy="520" rx="520" ry="110" style="fill: url(#wash)"></ellipse>
+
+<polygon points="404,72 556,72 760,470 200,470" style="fill: url(#bc)"></polygon>
+<polygon points="322,126 338,126 640,470 520,470" style="fill: url(#bo)"></polygon>
+<polygon points="622,126 638,126 440,470 320,470" style="fill: url(#bo)"></polygon>
+<polygon points="72,126 88,126 70,470 30,470" style="fill: #FF4D8D; opacity: .07"></polygon>
+<polygon points="872,126 888,126 930,470 890,470" style="fill: #FF4D8D; opacity: .07"></polygon>
+
+<line x1="30" y1="80" x2="930" y2="80" style="stroke: #5A5480; stroke-width: 3"></line>
+<line x1="30" y1="98" x2="930" y2="98" style="stroke: #5A5480; stroke-width: 3"></line>
+<path d="M 30 80 L 48 98 L 66 80 L 84 98 L 102 80 L 120 98 L 138 80 L 156 98 L 174 80 L 192 98 L 210 80 L 228 98 L 246 80 L 264 98 L 282 80 L 300 98 L 318 80 L 336 98 L 354 80 L 372 98 L 390 80 L 408 98 L 426 80 L 444 98 L 462 80 L 480 98 L 498 80 L 516 98 L 534 80 L 552 98 L 570 80 L 588 98 L 606 80 L 624 98 L 642 80 L 660 98 L 678 80 L 696 98 L 714 80 L 732 98 L 750 80 L 768 98 L 786 80 L 804 98 L 822 80 L 840 98 L 858 80 L 876 98 L 894 80 L 912 98 L 930 80" style="fill: none; stroke: #2A2545; stroke-width: 1.5"></path>
+
+<rect x="400" y="58" width="160" height="16" rx="3" style="fill: #E9FBFF; filter: drop-shadow(0 0 16px #3DDCFF)"></rect>
+<path d="M 380 52 L 360 40 M 580 52 L 600 40 M 480 50 L 480 34 M 430 52 L 422 38 M 530 52 L 538 38" style="stroke: #CFF6FF; stroke-width: 2; stroke-linecap: round"></path>
+
+<rect class="fx" x="60" y="100" width="40" height="28" rx="4"></rect>
+<circle cx="72" cy="114" r="5" style="fill: #FF4D8D; opacity: .35"></circle><circle cx="88" cy="114" r="5" style="fill: #FF4D8D; opacity: .35"></circle>
+<rect class="fx" x="860" y="100" width="40" height="28" rx="4"></rect>
+<circle cx="872" cy="114" r="5" style="fill: #FF4D8D; opacity: .35"></circle><circle cx="888" cy="114" r="5" style="fill: #FF4D8D; opacity: .35"></circle>
+
+<rect class="fx" x="208" y="100" width="24" height="18" rx="3"></rect><circle cx="220" cy="126" r="9" style="fill: #1A1730; stroke: #FFD23F; stroke-width: 1.5"></circle><circle cx="223" cy="123" r="2" style="fill: #FFD23F"></circle>
+<rect class="fx" x="728" y="100" width="24" height="18" rx="3"></rect><circle cx="740" cy="126" r="9" style="fill: #1A1730; stroke: #FFD23F; stroke-width: 1.5"></circle><circle cx="743" cy="123" r="2" style="fill: #FFD23F"></circle>
+
+<rect class="fx" x="318" y="100" width="24" height="18" rx="3"></rect><circle cx="330" cy="126" r="9" style="fill: #FF8A3D; filter: drop-shadow(0 0 10px #FF8A3D)"></circle>
+<rect class="fx" x="618" y="100" width="24" height="18" rx="3"></rect><circle cx="630" cy="126" r="9" style="fill: #FF8A3D; filter: drop-shadow(0 0 10px #FF8A3D)"></circle>
+
+<rect class="fx" x="408" y="100" width="24" height="18" rx="3"></rect><circle cx="420" cy="126" r="9" style="fill: #1A1730; stroke: #5BFF8F; stroke-width: 1.5; opacity: .7"></circle>
+<rect class="fx" x="528" y="100" width="24" height="18" rx="3"></rect><circle cx="540" cy="126" r="9" style="fill: #1A1730; stroke: #5BFF8F; stroke-width: 1.5; opacity: .7"></circle>
+
+<rect x="120" y="462" width="720" height="10" rx="3" style="fill: #1A1730"></rect>
+<rect x="150" y="464" width="16" height="6" rx="2" style="fill: #B388FF; filter: drop-shadow(0 0 8px #B388FF)"></rect>
+<rect x="320" y="464" width="16" height="6" rx="2" style="fill: #B388FF; filter: drop-shadow(0 0 8px #B388FF)"></rect>
+<rect x="472" y="464" width="16" height="6" rx="2" style="fill: #B388FF; filter: drop-shadow(0 0 8px #B388FF)"></rect>
+<rect x="624" y="464" width="16" height="6" rx="2" style="fill: #B388FF; filter: drop-shadow(0 0 8px #B388FF)"></rect>
+<rect x="794" y="464" width="16" height="6" rx="2" style="fill: #B388FF; filter: drop-shadow(0 0 8px #B388FF)"></rect>
+
+<text class="nm" x="80" y="148">kick</text>
+<text class="nm" x="220" y="152">snare</text>
+<text class="nm on" x="330" y="152">wobble</text>
+<text class="nm" x="420" y="152">open</text>
+<text class="nm on" x="480" y="30" style="text-anchor: middle">hats strobe</text>
+<text class="nm" x="540" y="152">open</text>
+<text class="nm on" x="630" y="152">wobble</text>
+<text class="nm" x="740" y="152">snare</text>
+<text class="nm" x="880" y="148">kick</text>
+<text class="nm on" x="480" y="492">subBass floor wash</text>
+
+<path class="cr" d="M 0 600 L 0 560 Q 20 540 40 556 Q 52 528 74 548 Q 96 534 112 556 Q 128 524 150 546 L 156 506 L 162 546 Q 184 532 200 552 Q 222 526 244 550 Q 264 536 282 556 Q 304 530 326 550 Q 346 522 366 548 Q 384 536 402 556 Q 420 528 444 550 L 452 512 L 458 548 Q 480 532 498 556 Q 520 528 540 550 Q 560 534 580 556 Q 600 526 622 550 Q 642 536 660 556 Q 680 528 702 548 L 708 508 L 714 546 Q 736 532 754 556 Q 774 526 796 550 Q 816 536 834 556 Q 856 528 878 550 Q 900 534 920 556 Q 940 532 960 552 L 960 600 Z"></path>
+</svg>
+
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">18</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Light rig</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">show</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 11 · 40%</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div>
+<p class="sp">Shows</p>
+<p class="tx">A concert lighting rig run by the score. Each instrument owns fixtures: held notes keep their beams on, short ones flash, the bass washes the floor.</p>
+</div>
+<div>
+<p class="sp">Mapping</p>
+<ul class="mp">
+<li>most regular unpitched part → strobe · lowest pitched part → floor wash</li>
+<li>every other instrument → a pair of moving heads in its colour</li>
+<li>onset → flash · held note → beam stays on for its span</li>
+<li>gain → brightness · pitch → beam angle, higher aims wider</li>
+<li>section change → the whole rig switches look</li>
+</ul>
+</div>
+<div>
+<p class="sp">Build</p>
+<ul class="mp">
+<li>three.js for haze and beams · score · window</li>
+<li>roles chosen from the notes, never names</li>
+<li>over 8 instruments → heads share fixtures</li>
+</ul>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

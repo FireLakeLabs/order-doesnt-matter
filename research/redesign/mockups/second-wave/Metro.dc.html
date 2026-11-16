@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Metro</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.ln{fill:none;stroke-width:8;stroke-linecap:round;stroke-linejoin:round}
+.rs{fill:none;stroke-width:3;stroke-dasharray:4 6;stroke-linecap:round;stroke-linejoin:round;opacity:.7}
+.tm{fill:#F4F1FF;stroke-width:3}
+.stn{fill:#F4F1FF;stroke:#07060D;stroke-width:3}
+.sn{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:15px;fill:#F4F1FF;text-anchor:middle}
+.br{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#A49EC4;text-anchor:middle}
+.lg{font-family:'JetBrains Mono',monospace;font-size:11px;fill:#D9D4F2}
+.bk{font-family:'JetBrains Mono',monospace;font-size:15px;letter-spacing:.06em;fill:#A49EC4}
+.bv{font-family:'JetBrains Mono',monospace;font-size:15px;letter-spacing:.06em;fill:#FFD23F}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="The whole song as a transit map. Stations are the sections Intro, Build, Drop, Breakdown, Drop and End. Each instrument is a coloured line, solid where it plays and a thin dashed bypass where it rests. The train is in the first Drop at bar 11. A departure board says the next stop is Breakdown in 5.6 bars, with six instruments leaving and three joining." style="position: absolute; left: 0; top: 0; display: block">
+
+<circle cx="30" cy="76" r="5" style="fill: #6FA0FF"></circle><text class="lg" x="40" y="80">darkPad</text>
+<circle cx="110" cy="76" r="5" style="fill: #E8A0D8"></circle><text class="lg" x="120" y="80">vocal</text>
+<circle cx="176" cy="76" r="5" style="fill: #8FE9FF"></circle><text class="lg" x="186" y="80">intro hats</text>
+<circle cx="276" cy="76" r="5" style="fill: #FFE680"></circle><text class="lg" x="286" y="80">snare roll</text>
+<circle cx="376" cy="76" r="5" style="fill: #FFB27A"></circle><text class="lg" x="386" y="80">riser</text>
+<circle cx="442" cy="76" r="5" style="fill: #FF8FB8"></circle><text class="lg" x="452" y="80">chant</text>
+<circle cx="508" cy="76" r="5" style="fill: #FF9EC0"></circle><text class="lg" x="518" y="80">lead</text>
+<circle cx="30" cy="98" r="5" style="fill: #FF4D8D"></circle><text class="lg" x="40" y="102">kick</text>
+<circle cx="90" cy="98" r="5" style="fill: #FFD23F"></circle><text class="lg" x="100" y="102">snare</text>
+<circle cx="160" cy="98" r="5" style="fill: #3DDCFF"></circle><text class="lg" x="170" y="102">hats</text>
+<circle cx="220" cy="98" r="5" style="fill: #5BFF8F"></circle><text class="lg" x="230" y="102">open hat</text>
+<circle cx="310" cy="98" r="5" style="fill: #B388FF"></circle><text class="lg" x="320" y="102">subBass</text>
+<circle cx="390" cy="98" r="5" style="fill: #FF8A3D"></circle><text class="lg" x="400" y="102">wobbleBass</text>
+
+<text class="sn" x="80" y="186">Intro</text>
+<text class="sn" x="194.3" y="186">Build</text>
+<text class="sn" x="308.6" y="186">Drop</text>
+<text class="sn" x="537.1" y="186">Breakdown</text>
+<text class="sn" x="651.4" y="186">Drop</text>
+<text class="sn" x="880" y="186">End</text>
+
+<path class="rs" d="M 308.6 296 L 372.6 232 L 537.1 232" style="stroke: #6FA0FF"></path>
+<path class="rs" d="M 194.3 320 L 298.3 216 L 537.1 216" style="stroke: #E8A0D8"></path>
+<path class="rs" d="M 537.1 280 L 651.4 280" style="stroke: #FF4D8D"></path>
+<path class="rs" d="M 537.1 296 L 651.4 296" style="stroke: #FFD23F"></path>
+<path class="rs" d="M 537.1 312 L 651.4 312" style="stroke: #3DDCFF"></path>
+<path class="rs" d="M 537.1 328 L 651.4 328" style="stroke: #5BFF8F"></path>
+<path class="rs" d="M 537.1 344 L 651.4 344" style="stroke: #B388FF"></path>
+<path class="rs" d="M 537.1 360 L 651.4 360" style="stroke: #FF8A3D"></path>
+
+<path class="ln" d="M 80 304 L 194.3 304 L 202.3 296 L 308.6 296" style="stroke: #6FA0FF"></path>
+<path class="ln" d="M 537.1 232 L 651.4 232" style="stroke: #6FA0FF"></path>
+<path class="ln" d="M 80 320 L 194.3 320" style="stroke: #E8A0D8"></path>
+<path class="ln" d="M 537.1 216 L 651.4 216" style="stroke: #E8A0D8"></path>
+<path class="ln" d="M 80 336 L 194.3 336" style="stroke: #8FE9FF"></path>
+<path class="ln" d="M 194.3 312 L 308.6 312" style="stroke: #FFE680"></path>
+<path class="ln" d="M 194.3 328 L 308.6 328" style="stroke: #FFB27A"></path>
+<path class="ln" d="M 280 344 L 308.6 344" style="stroke: #FF8FB8"></path>
+<path class="ln" d="M 537.1 248 L 651.4 248" style="stroke: #FF9EC0"></path>
+<path class="ln" d="M 308.6 280 L 537.1 280 M 651.4 280 L 880 280" style="stroke: #FF4D8D"></path>
+<path class="ln" d="M 308.6 296 L 537.1 296 M 651.4 296 L 880 296" style="stroke: #FFD23F"></path>
+<path class="ln" d="M 308.6 312 L 537.1 312 M 651.4 312 L 880 312" style="stroke: #3DDCFF"></path>
+<path class="ln" d="M 308.6 328 L 537.1 328 M 651.4 328 L 880 328" style="stroke: #5BFF8F"></path>
+<path class="ln" d="M 308.6 344 L 537.1 344 M 651.4 344 L 880 344" style="stroke: #B388FF"></path>
+<path class="ln" d="M 308.6 360 L 537.1 360 M 651.4 360 L 880 360" style="stroke: #FF8A3D"></path>
+
+<circle class="tm" cx="194.3" cy="336" r="6" style="stroke: #8FE9FF"></circle>
+<circle class="tm" cx="280" cy="344" r="6" style="stroke: #FF8FB8"></circle>
+<circle class="tm" cx="651.4" cy="232" r="6" style="stroke: #6FA0FF"></circle>
+<circle class="tm" cx="651.4" cy="216" r="6" style="stroke: #E8A0D8"></circle>
+<circle class="tm" cx="651.4" cy="248" r="6" style="stroke: #FF9EC0"></circle>
+
+<rect class="stn" x="71" y="294" width="18" height="52" rx="9"></rect>
+<rect class="stn" x="185.3" y="292" width="18" height="56" rx="9"></rect>
+<rect class="stn" x="299.6" y="270" width="18" height="100" rx="9"></rect>
+<rect class="stn" x="528.1" y="206" width="18" height="164" rx="9"></rect>
+<rect class="stn" x="642.4" y="206" width="18" height="164" rx="9"></rect>
+<rect class="stn" x="871" y="270" width="18" height="100" rx="9"></rect>
+
+<rect x="364" y="262" width="26" height="116" rx="8" style="fill: #FFD23F; fill-opacity: .18; stroke: #FFD23F; stroke-width: 2; filter: drop-shadow(0 0 10px #FFD23F)"></rect>
+
+<text class="br" x="80" y="394">bar 1</text>
+<text class="br" x="194.3" y="394">bar 5</text>
+<text class="br" x="308.6" y="394">bar 9</text>
+<text x="377" y="394" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #FFD23F; text-anchor: middle">now · 11</text>
+<text class="br" x="537.1" y="394">bar 17</text>
+<text class="br" x="651.4" y="394">bar 21</text>
+<text class="br" x="880" y="394">bar 28</text>
+
+<rect x="60" y="420" width="840" height="166" rx="12" style="fill: #12101F; stroke: #2A2545; stroke-width: 2"></rect>
+<line x1="72" y1="443" x2="888" y2="443" style="stroke: #07060D; stroke-width: 1.5"></line>
+<line x1="72" y1="495" x2="888" y2="495" style="stroke: #07060D; stroke-width: 1.5"></line>
+<line x1="72" y1="547" x2="888" y2="547" style="stroke: #07060D; stroke-width: 1.5"></line>
+<text class="bk" x="84" y="449">NEXT STOP</text>
+<text class="bv" x="220" y="449" style="fill: #F4F1FF">BREAKDOWN</text>
+<text class="bv" x="884" y="449" style="text-anchor: end">IN 5.6 BARS</text>
+<text class="bk" x="84" y="501">LEAVING</text>
+<text class="bv" x="220" y="501">KICK  SNARE  HATS  OPEN HAT  SUBBASS  WOBBLEBASS</text>
+<text class="bk" x="84" y="553">JOINING</text>
+<text class="bv" x="220" y="553">DARKPAD  VOCAL  LEAD</text>
+</svg>
+
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">13</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Metro</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">whole song</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 11 of 28</div>
+
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div>
+<p class="sp">Shows</p>
+<p class="tx">The song as a transit map. Sections are stations, instruments are lines, and the board says who gets on and off at the next stop.</p>
+</div>
+<div>
+<p class="sp">Mapping</p>
+<ul class="mp">
+<li>section → a station, spaced by its length in bars</li>
+<li>instrument → a line: solid where it plays, a dashed bypass where it rests</li>
+<li>joining or leaving → the line enters or peels off at 45°</li>
+<li>the train → the playhead; drag it to scrub</li>
+<li>board → next station, how far, who leaves, who joins</li>
+</ul>
+</div>
+<div>
+<p class="sp">Build</p>
+<ul class="mp">
+<li>Canvas 2D · score · whole song</li>
+<li>no sections → a station every four cycles</li>
+<li>over 12 lines → resting ones share one grey bypass</li>
+</ul>
+</div>
+</div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
