@@ -200,12 +200,38 @@ export function viewEvidence(test: typeof Test, id: string) {
       el.style.height = '1080px';
       handle.frame({ ...frame, width: 1920, height: 1080 });
     }, saved);
-    await page.screenshot({ path: `${shots}/arcade-1920x1080.png` });
+    const resized = await page.screenshot({ path: `${shots}/arcade-1920x1080.png` });
+    // A resized cached view must match a fresh mount at the same size.
+    const fresh = await page.evaluateHandle(
+      async (frame) => {
+        const el = document.createElement('div');
+        el.style.cssText = 'position:fixed;inset:0;width:1920px;height:1080px;z-index:10000';
+        document.body.append(el);
+        const handle = await window.viewProbe.definition.mount(el);
+        handle.frame({ ...frame, width: 1920, height: 1080 });
+        return { el, handle };
+      },
+      await saved.jsonValue(),
+    );
+    expect((await page.screenshot()).equals(resized)).toBe(true);
+    await fresh.evaluate(({ el, handle }) => {
+      handle.dispose();
+      el.remove();
+    });
+    await fresh.dispose();
     await standalone.evaluate(({ el, handle }, frame) => {
       el.style.width = '1300px';
       el.style.height = '760px';
       handle.frame(frame);
     }, saved);
+    const validSize = await page.screenshot({ clip: { x: 0, y: 0, width: 1300, height: 760 } });
+    await standalone.evaluate(
+      ({ handle }, frame) => handle.frame({ ...frame, width: 0, height: 0 }),
+      saved,
+    );
+    expect(
+      (await page.screenshot({ clip: { x: 0, y: 0, width: 1300, height: 760 } })).equals(validSize),
+    ).toBe(true);
     if (id === 'coil') {
       const before = await page.screenshot({ clip: { x: 0, y: 0, width: 1300, height: 760 } });
       await page.mouse.move(650, 380);

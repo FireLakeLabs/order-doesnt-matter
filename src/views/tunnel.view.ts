@@ -29,6 +29,7 @@ const view: ViewDefinition = {
     let last: ViewFrame | undefined;
     return {
       frame(frame) {
+        if (frame.width <= 0 || frame.height <= 0) return;
         const key = scoreInventory(frame);
         if (
           last?.now === frame.now &&
@@ -44,9 +45,10 @@ const view: ViewDefinition = {
         )
           return;
         last = { ...frame };
-        stage.resize(frame);
+        const resized = stage.resize(frame);
         const cycles = tunnelCycles(frame.now, frame.lookAhead);
-        const changed = notes !== frame.notes || inventory !== key || theme !== frame.theme;
+        const changed =
+          resized || notes !== frame.notes || inventory !== key || theme !== frame.theme;
         for (const [cycle, ring] of rings)
           if (!cycles.includes(cycle)) {
             ring.dispose();

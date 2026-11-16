@@ -64,6 +64,7 @@ const view: ViewDefinition = {
     const point = new THREE.Vector3();
     return {
       frame(frame) {
+        if (frame.width <= 0 || frame.height <= 0) return;
         const key = scoreInventory(frame);
         if (
           last?.now === frame.now &&
@@ -80,7 +81,7 @@ const view: ViewDefinition = {
         )
           return;
         last = { ...frame };
-        stage.resize(frame);
+        const resized = stage.resize(frame);
         const range = coilRange(frame);
         const sectionsKey = frame.sections
           .map((s) => `${s.name}:${String(s.from)}:${String(s.to)}`)
@@ -88,6 +89,7 @@ const view: ViewDefinition = {
         const nextRangeKey = `${String(range.from)}:${String(range.length)}:${sectionsKey}`;
         const cycle = Math.floor(frame.now);
         const changed =
+          resized ||
           notes !== frame.notes ||
           inventory !== key ||
           theme !== frame.theme ||
@@ -153,6 +155,7 @@ const view: ViewDefinition = {
           }
           rangeKey = nextRangeKey;
         }
+        // Cosmetic release is deliberately frame-based; it never moves score time.
         if (!drag) rotation = Math.abs(rotation) < 0.001 ? 0 : rotation * 0.82;
         body.rotation.x = rotation;
         const aspect = frame.width / frame.height;

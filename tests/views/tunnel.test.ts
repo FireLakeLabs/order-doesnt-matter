@@ -12,8 +12,8 @@ test('successive rings project at .64 with bright future cycles and a quarter-cy
   expect(tunnelPose(9, 10, 6).brightness).toBe(1);
   expect(tunnelPose(9, 10.125, 6).brightness).toBe(0.5);
   expect(tunnelPose(9, 10.25, 6).brightness).toBe(0);
-  expect(tunnelCycles(10.4, 6)).toEqual([9, 10, 11, 12, 13, 14, 15, 16]);
-  expect(tunnelCycles(0, 1)).toEqual([0, 1]);
+  expect(tunnelCycles(10.4, 6)).toEqual([9, 10, 11, 12, 13, 14, 15, 16, 17]);
+  expect(tunnelCycles(0, 1)).toEqual([0, 1, 2]);
 });
 test('forward travel, slow travel and reverse scrubbing are continuous and deterministic', () => {
   const before = tunnelPose(11, 10.99999, 6).depth;
@@ -22,6 +22,26 @@ test('forward travel, slow travel and reverse scrubbing are continuous and deter
   expect(tunnelPose(11, 10.5, 6).depth).toBeLessThan(tunnelPose(11, 10.4, 6).depth);
   expect(tunnelPose(11, 10.425, 6).depth).toBeGreaterThan(tunnelPose(11, 10.5, 6).depth);
   expect(tunnelPose(11, 10.4, 6)).toEqual(tunnelPose(11, 10.4, 6));
+});
+test('every visible ring keeps continuous brightness at cycle seams, including horizon entry', () => {
+  for (const lookAhead of [1, 2, 4, 6, 8]) {
+    const before = 11 - 1e-5,
+      after = 11 + 1e-5;
+    const beforeCycles = tunnelCycles(before, lookAhead),
+      afterCycles = tunnelCycles(after, lookAhead);
+    for (const cycle of new Set([...beforeCycles, ...afterCycles])) {
+      const brightnessBefore = beforeCycles.includes(cycle)
+        ? tunnelPose(cycle, before, lookAhead).brightness
+        : 0;
+      const brightnessAfter = afterCycles.includes(cycle)
+        ? tunnelPose(cycle, after, lookAhead).brightness
+        : 0;
+      expect(Math.abs(brightnessAfter - brightnessBefore)).toBeLessThan(0.0001);
+    }
+    expect(tunnelPose(11, 11, lookAhead).brightness).toBe(1);
+    expect(tunnelPose(11 + lookAhead, 11.4, lookAhead).brightness).toBeGreaterThanOrEqual(0.4);
+    expect(tunnelPose(11 + lookAhead + 1, 11, lookAhead).brightness).toBe(0);
+  }
 });
 test('future section membership comes from its own score, including 1 and 20 instruments', () => {
   for (const count of [1, 20]) {
