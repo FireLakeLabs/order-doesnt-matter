@@ -1,10 +1,12 @@
 import { expect } from '@playwright/test';
 import { mkdir, writeFile } from 'node:fs/promises';
-import { test, openProgram, play, selectNode, scoreReady } from './helpers';
+import { test, openProgram, play, selectNode, scoreReady, appSignal } from './helpers';
 
 async function start(page: import('@playwright/test').Page) {
   await page.locator('#take-tour').click();
   await page.getByRole('button', { name: 'Start practice', exact: true }).click();
+  // The first lesson asks the visitor to load Kiln; unhiding follows session preparation.
+  await appSignal(page, () => document.getElementById('tour-guide')?.hidden === false);
   await expect(page.locator('#tour-guide')).toBeVisible();
   await expect(page.locator('#driver-popover-title')).toContainText('1 of 8');
 }
@@ -332,6 +334,7 @@ test('practice entry waits for submitted source validation, cancels, and keeps v
   ).toBeVisible();
   await page.locator('#take-tour').click();
   await page.locator('#tour-start').click();
+  await appSignal(page, () => document.getElementById('tour-guide')?.hidden === false);
   await lesson(page, 1);
   await page.evaluate(() =>
     (
@@ -477,6 +480,7 @@ test('practice completes through native keyboard navigation with editable arrows
   await page.keyboard.press('Enter');
   await expect(page.locator('#tour-start')).toBeFocused();
   await page.keyboard.press('Enter');
+  await appSignal(page, () => document.getElementById('tour-guide')?.hidden === false);
   await lesson(page, 1);
   await keyboardTo(page, '#examples button');
   await page.keyboard.press('Enter');
@@ -570,6 +574,7 @@ test('practice preserves parked instrument, values, signal and rhythm forms, and
   const welcome = page.locator('.welcome [data-take-tour]');
   await welcome.click();
   await page.locator('#tour-start').click();
+  await appSignal(page, () => document.getElementById('tour-guide')?.hidden === false);
   await lesson(page, 1);
   await page.locator('#tour-end').click();
   await expect(welcome).toBeFocused();
