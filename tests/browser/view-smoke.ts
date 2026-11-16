@@ -29,6 +29,48 @@ export function viewSmoke(test: typeof import('@playwright/test').test, id: stri
     if (id === 'coil') {
       await page.addInitScript(() => {
         (globalThis as { coilEvidence?: boolean }).coilEvidence = true;
+        const NativeWorker = window.Worker;
+        let sequence = 0;
+        window.Worker = class extends NativeWorker {
+          private readonly evidenceId = ++sequence;
+          private sent = 0;
+          constructor(url: string | URL, options?: WorkerOptions) {
+            super(url, options);
+            this.addEventListener('message', () => {
+              console.info(
+                'COIL_EVIDENCE ' +
+                  JSON.stringify({
+                    kind: 'worker-result',
+                    epoch: Date.now(),
+                    worker: this.evidenceId,
+                    ms: performance.now() - this.sent,
+                  }),
+              );
+            });
+          }
+          override postMessage(
+            message: unknown,
+            options?: Transferable[] | StructuredSerializeOptions,
+          ) {
+            this.sent = performance.now();
+            const question = message as Record<string, unknown>;
+            console.info(
+              'COIL_EVIDENCE ' +
+                JSON.stringify({
+                  kind: 'worker-send',
+                  epoch: Date.now(),
+                  worker: this.evidenceId,
+                  from: question.from,
+                  to: question.to,
+                }),
+            );
+            Reflect.apply(
+              NativeWorker.prototype.postMessage,
+              this,
+              options === undefined ? [message] : [message, options],
+            );
+          }
+        };
       });
       page.on('console', (m) => {
         if (m.text().startsWith('COIL_EVIDENCE')) console.log(m.text());
