@@ -144,7 +144,7 @@ function signal(doc: SheetInput['doc'], p: Pattern): boolean {
 }
 
 /** Geometry uses scored whole spans; part only clips query visibility. No grid. */
-function makeCell(
+export function makeCell(
   name: string,
   nodeId: string,
   events: SheetInput['events'][string]['events'],
