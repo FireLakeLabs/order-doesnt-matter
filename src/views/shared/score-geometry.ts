@@ -16,14 +16,19 @@ export interface LightRange {
   first: number;
   count: number;
 }
-/** Indexed ribbons share edge vertices,
- * with exact note endpoints at every tessellation level. */
-export function scoreGeometry(strips: ScoreStrip[], rgb: (colour: string) => readonly number[]) {
+/** Indexed ribbons share edge vertices. Helix trigonometry is static score data,
+ * so the GPU only applies the playing-loop enlargement each frame. */
+export function scoreGeometry(
+  strips: ScoreStrip[],
+  rgb: (colour: string) => readonly number[],
+  helix = false,
+) {
   const positions: number[] = [],
     timing: number[] = [],
     bands: number[] = [],
     inks: number[] = [],
-    quiet: number[] = [];
+    quiet: number[] = [],
+    curves: number[] = [];
   const lods = [1, 2, 4].map((stride) => ({
     stride,
     indices: [] as number[],
@@ -32,11 +37,13 @@ export function scoreGeometry(strips: ScoreStrip[], rgb: (colour: string) => rea
   for (const strip of strips) {
     const ink = rgb(strip.colour);
     for (const arc of strip.arcs) {
-      const perCycle = strip.segments ?? 128;
+      const perCycle = helix ? Math.min(strip.segments ?? 128, 64) : (strip.segments ?? 128);
       const steps = Math.max(1, Math.ceil((arc.to - arc.from) * perCycle));
       const firstVertex = positions.length / 3;
       for (let i = 0; i <= steps; i++) {
         const time = strip.cycle + arc.from + ((arc.to - arc.from) * i) / steps;
+        const sin = Math.sin(time * Math.PI * 2),
+          cos = Math.cos(time * Math.PI * 2);
         for (const radial of [-0.5, 0.5]) {
           positions.push(time, radial, strip.track ? -0.003 : 0.003);
           timing.push(
@@ -47,6 +54,10 @@ export function scoreGeometry(strips: ScoreStrip[], rgb: (colour: string) => rea
           bands.push(strip.radius, strip.width, arc.coverage ?? 1);
           inks.push(ink[0], ink[1], ink[2]);
           quiet.push(strip.muted ? 0.23 : 1);
+          if (helix) {
+            const r = strip.radius + radial * strip.width;
+            curves.push(sin * r, cos * r, sin);
+          }
         }
       }
       for (const lod of lods) {
@@ -78,6 +89,7 @@ export function scoreGeometry(strips: ScoreStrip[], rgb: (colour: string) => rea
     bands: new Float32Array(bands),
     inks: new Float32Array(inks),
     quiet: new Float32Array(quiet),
+    curves: new Float32Array(curves),
     indices: layouts[0].indices,
     lights: layouts[0].lights,
     lods: layouts,
