@@ -154,18 +154,18 @@ export function ViewStage({
   onSelect: (stage: Stage, id: string | null) => void;
   choices: Pick<Layout, 'a' | 'b'>;
 }) {
-  // Scores belong to the stage; drawings own only their view resources.
-  // Effect setup/cleanup also gives Strict Mode a fresh query owner on remount.
-  const [cache, setCache] = useState<ReturnType<typeof createScoreCache> | null>(null);
-  useEffect(() => {
+  // Allocation is inert; workers start only when a drawing requests a score.
+  const [{ cache, queries }] = useState(() => {
     const queries = createBrowserQueries();
-    const owned = createScoreCache(queries.query);
-    setCache(owned);
-    return () => {
-      owned.dispose();
+    return { cache: createScoreCache(queries.query), queries };
+  });
+  useEffect(
+    () => () => {
+      cache.dispose();
       queries.cancel();
-    };
-  }, []);
+    },
+    [cache, queries],
+  );
   const [metadata, setMetadata] = useState({ id: '', name: '', tag: '' });
   const [shelfOpen, setShelfOpen] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -264,18 +264,16 @@ export function ViewStage({
         </div>
       </header>
       {viewId ? (
-        cache && (
-          <Drawing
-            key={viewId}
-            viewId={viewId}
-            theme={theme}
-            lookAhead={lookAhead}
-            trails={trails}
-            clock={clock}
-            metadata={metadataCallback}
-            cache={cache}
-          />
-        )
+        <Drawing
+          key={viewId}
+          viewId={viewId}
+          theme={theme}
+          lookAhead={lookAhead}
+          trails={trails}
+          clock={clock}
+          metadata={metadataCallback}
+          cache={cache}
+        />
       ) : (
         <div className="empty-stage">
           <span>{stage.toUpperCase()}</span>
