@@ -1,0 +1,40 @@
+import type { ViewFrame } from '../../src/views/types';
+export function scoreFrame(count = 1): ViewFrame {
+  return {
+    now: 10.4,
+    playing: true,
+    cps: 140 / 240,
+    from: 0,
+    to: 28,
+    notes: [],
+    instruments: Array.from({ length: count }, (_, index) => ({
+      id: String(index),
+      name: String(index),
+      index,
+      colour: '#FF4D8D',
+      inSection: true,
+      sounding: false,
+      muted: false,
+    })),
+    sections: [],
+    rooms: [],
+    lookAhead: 6,
+    trails: 1,
+    width: 1300,
+    height: 760,
+    dpr: 1,
+    theme: {
+      name: 'arcade',
+      ground: '#07060D',
+      panel: '#12101F',
+      line: '#2A2545',
+      text: '#F4F1FF',
+      muted: '#A49EC4',
+      accent: '#FFD23F',
+      fontDisplay: 'Space Grotesk',
+      fontMono: 'JetBrains Mono',
+      radius: 10,
+      glow: true,
+    },
+  };
+}

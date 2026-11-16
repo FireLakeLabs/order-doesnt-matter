@@ -1,3 +1,4 @@
+import { createThreeStage } from './shared/three-stage';
 import type { ViewDefinition, ViewFrame, ViewNote, ViewTheme } from './types';
 import {
   arcVertices,
@@ -86,25 +87,9 @@ const view: ViewDefinition = {
   name: 'Ring',
   tag: 'now',
   async mount(element) {
-    // Both the renderer and its postprocessing graph are loaded only on mount.
-    const THREE = await import('three');
-    const [{ EffectComposer }, { RenderPass }, { ShaderPass }, { FullScreenQuad }, { OutputPass }] =
-      await Promise.all([
-        import('three/addons/postprocessing/EffectComposer.js'),
-        import('three/addons/postprocessing/RenderPass.js'),
-        import('three/addons/postprocessing/ShaderPass.js'),
-        import('three/addons/postprocessing/Pass.js'),
-        import('three/addons/postprocessing/OutputPass.js'),
-      ]);
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
-    renderer.setPixelRatio(1);
-    renderer.setSize(1, 1);
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
-    const canvas = renderer.domElement;
-    canvas.dataset.ring = '';
-    canvas.style.display = 'block';
-    const root = document.createElement('div');
-    root.style.cssText = 'position:relative;width:100%;height:100%;overflow:hidden';
+    const stage = await createThreeStage(element, 'ring');
+    const { THREE, scene, camera, root } = stage;
+    camera.far = 20;
     const centre = document.createElement('div');
     centre.style.cssText =
       'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;line-height:1';
@@ -112,53 +97,9 @@ const view: ViewDefinition = {
     const section = document.createElement('div');
     section.style.cssText = 'margin-top:10px;white-space:nowrap;letter-spacing:.08em';
     centre.append(count, section);
-    root.append(canvas, centre);
-    element.append(root);
-    const scene = new THREE.Scene();
-    const black = new THREE.Color(0);
-    const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 20);
+    root.append(centre);
     const disc = new THREE.Group();
     scene.add(disc);
-    const composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    // Selective, finite-support bloom: only sounding notes emit. Its kernel reaches
-    // about 5% of the ring radius diagonally; max composition preserves the score ink.
-    const lightA = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType });
-    const lightB = lightA.clone();
-    const blurStep = new THREE.Vector2();
-    const blurMaterial = new THREE.ShaderMaterial({
-      uniforms: { source: { value: lightA.texture }, stepSize: { value: blurStep } },
-      vertexShader:
-        'varying vec2 uvOut; void main(){uvOut=uv;gl_Position=vec4(position.xy,0.,1.);}',
-      fragmentShader: `
-        uniform sampler2D source; uniform vec2 stepSize; varying vec2 uvOut;
-        void main(){
-          vec3 light=vec3(0.);
-          float total=0.;
-          for(int i=-4;i<=4;i++){
-            float weight=exp(-float(i*i)/5.0);
-            light+=texture2D(source,uvOut+float(i)*stepSize).rgb*weight;
-            total+=weight;
-          }
-          gl_FragColor=vec4(light/total,1.);
-        }`,
-    });
-    const blurQuad = new FullScreenQuad(blurMaterial);
-    const bloom = new ShaderPass(
-      new THREE.ShaderMaterial({
-        uniforms: { tDiffuse: { value: null }, light: { value: lightA.texture } },
-        vertexShader:
-          'varying vec2 uvOut; void main(){uvOut=uv;gl_Position=vec4(position.xy,0.,1.);}',
-        fragmentShader: `
-        uniform sampler2D tDiffuse; uniform sampler2D light; varying vec2 uvOut;
-        void main(){
-          vec4 base=texture2D(tDiffuse,uvOut);
-          gl_FragColor=vec4(max(base.rgb,texture2D(light,uvOut).rgb*0.65),base.a);
-        }`,
-      }),
-    );
-    composer.addPass(bloom);
-    composer.addPass(new OutputPass());
     // A radial gate belongs to the stationary disc, not the rotating score.
     const gateGeometry = new THREE.BoxGeometry(0.006, 0.56, 0.009);
     const gateMaterial = new THREE.MeshBasicMaterial();
@@ -221,8 +162,7 @@ const view: ViewDefinition = {
     let lastInventory = '';
     let lastTheme: ViewTheme | undefined;
     let width = 0,
-      height = 0,
-      dpr = 0;
+      height = 0;
     let layout = new Map<string, ReturnType<typeof bandLayout>[number]>();
     let previous = layout;
     let lastDraw: ViewFrame | undefined;
@@ -331,19 +271,10 @@ const view: ViewDefinition = {
           return;
         lastDraw = { ...frame };
         lastDrawInventory = drawInventory;
-        const resized = width !== frame.width || height !== frame.height || dpr !== frame.dpr;
+        const resized = stage.resize(frame);
         if (resized) {
           width = frame.width;
           height = frame.height;
-          dpr = frame.dpr;
-          renderer.setPixelRatio(dpr);
-          renderer.setSize(width, height);
-          lightA.setSize(Math.ceil((width * dpr) / 2), Math.ceil((height * dpr) / 2));
-          lightB.setSize(Math.ceil((width * dpr) / 2), Math.ceil((height * dpr) / 2));
-          composer.setPixelRatio(dpr);
-          composer.setSize(width, height);
-          camera.aspect = width / height;
-          camera.updateProjectionMatrix();
         }
         const scoreChanged = lastNotes !== frame.notes || lastInventory !== inventory;
         const cycleChanged = lastCycle !== cycle;
@@ -389,8 +320,6 @@ const view: ViewDefinition = {
         }
         const theme = frame.theme;
         if (lastTheme !== theme) {
-          renderer.setClearColor(theme.ground);
-          scene.background = new THREE.Color(theme.ground);
           gateMaterial.color.set(theme.text);
           tickMaterial.color.set(theme.text);
           count.style.fontFamily = `"${theme.fontDisplay}", sans-serif`;
@@ -451,37 +380,14 @@ const view: ViewDefinition = {
             layer.highlight.set(theme.text);
           }
         }
-        if (theme.glow) {
-          const background = scene.background;
-          scene.background = black;
-          gate.visible = bead.visible = quarterTicks.visible = false;
+        stage.render(frame, (enabled) => {
+          gate.visible = bead.visible = quarterTicks.visible = !enabled;
           for (const band of bands) {
-            band.track.visible = false;
-            band.current.material.uniforms.lightPass.value = 1;
-            band.next.material.uniforms.lightPass.value = 1;
+            band.track.visible = !enabled;
+            band.current.material.uniforms.lightPass.value = enabled ? 1 : 0;
+            band.next.material.uniforms.lightPass.value = enabled ? 1 : 0;
           }
-          renderer.setRenderTarget(lightA);
-          renderer.render(scene, camera);
-          // Two bounded Gaussian passes, with a diagonal support of 5% radius.
-          const support = size * 0.42 * 0.035;
-          blurMaterial.uniforms.source.value = lightA.texture;
-          blurStep.set(support / (4 * width), 0);
-          renderer.setRenderTarget(lightB);
-          blurQuad.render(renderer);
-          blurMaterial.uniforms.source.value = lightB.texture;
-          blurStep.set(0, support / (4 * height));
-          renderer.setRenderTarget(lightA);
-          blurQuad.render(renderer);
-          renderer.setRenderTarget(null);
-          scene.background = background;
-          gate.visible = bead.visible = quarterTicks.visible = true;
-          for (const band of bands) {
-            band.track.visible = true;
-            band.current.material.uniforms.lightPass.value = 0;
-            band.next.material.uniforms.lightPass.value = 0;
-          }
-          composer.render();
-        } else renderer.render(scene, camera);
+        });
       },
       dispose() {
         bands.forEach(releaseBand);
@@ -492,15 +398,7 @@ const view: ViewDefinition = {
         gateMaterial.dispose();
         tickGeometry.dispose();
         tickMaterial.dispose();
-        for (const pass of composer.passes) pass.dispose();
-        composer.dispose();
-        lightA.dispose();
-        lightB.dispose();
-        blurMaterial.dispose();
-        blurQuad.dispose();
-        renderer.dispose();
-        renderer.forceContextLoss();
-        root.remove();
+        stage.dispose();
       },
     };
   },
