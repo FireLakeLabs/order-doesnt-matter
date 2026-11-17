@@ -12,12 +12,14 @@ export function seed(note: ViewNote) {
     hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
   return hash;
 }
-export function enemySize(note: ViewNote) {
+export function enemySize(note: ViewNote, width = 1300) {
   const gain = note.value.gain;
-  return (
-    7 + 9 * Math.sqrt(clamp(typeof gain === 'number' && Number.isFinite(gain) ? gain : 1, 0, 2))
+  const level = Math.sqrt(
+    clamp(typeof gain === 'number' && Number.isFinite(gain) ? gain : 1, 0, 2),
   );
+  return Math.max(9, (Math.max(22, (38 * width) / 1300) * (0.8 + 0.2 * level)) / 2);
 }
+export const playerWidth = (width: number) => Math.max(18, (42 * width) / 1300);
 /** Longer than an eighth is a carrier; fragments/signals retain their span without a hit. */
 export const isCarrier = (note: ViewNote) => !note.hasOnset || note.end - note.start > 1 / 8;
 export function wave(frame: Pick<ViewFrame, 'now' | 'sections'>) {
@@ -58,8 +60,8 @@ export function formation(frame: ViewFrame) {
   const bar = Math.floor(frame.now);
   const left = Math.min(105, frame.width * 0.18),
     right = frame.width - 35;
-  const top = 100,
-    bottom = frame.height * 0.58;
+  const top = Math.max(85, frame.height * 0.13),
+    bottom = frame.height * 0.72;
   const visible = frame.instruments.filter(
     (i) =>
       i.inSection ||
@@ -73,7 +75,7 @@ export function formation(frame: ViewFrame) {
   visible.sort(
     (a, b) => Number(carriers.has(b.id)) - Number(carriers.has(a.id)) || a.index - b.index,
   );
-  const spacing = Math.min(58, Math.max(10, (bottom - top) / Math.max(1, visible.length - 1)));
+  const spacing = (bottom - top) / Math.max(1, visible.length - 1);
   const x = (time: number) => left + clamp(time - bar) * (right - left);
   const rows = visible.map((instrument, index) => {
     const notes = frame.notes.filter(
@@ -92,15 +94,17 @@ export function formation(frame: ViewFrame) {
         const previous = ordered[i - 1];
         if (isCarrier(previous)) return n.start < previous.end;
         return (
-          x(n.start - offset) - x(previous.start - offset) < enemySize(n) + enemySize(previous) + 6
+          x(n.start - offset) - x(previous.start - offset) <
+          enemySize(n, frame.width) + enemySize(previous, frame.width) + 6
         );
       });
     };
-    const crowded = spacing < 22 || overlaps(currentEnemies, 0);
-    const nextCrowded = spacing < 22 || overlaps(nextEnemies, 1);
+    const cramped = spacing < Math.max(22, (40 * frame.width) / 1300);
+    const crowded = cramped || overlaps(currentEnemies, 0);
+    const nextCrowded = cramped || overlaps(nextEnemies, 1);
     return {
       instrument,
-      y: top + index * spacing,
+      y: visible.length === 1 ? (top + bottom) / 2 : top + index * spacing,
       notes,
       next,
       enemies: currentEnemies,

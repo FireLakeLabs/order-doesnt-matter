@@ -2,15 +2,24 @@ import type { ViewDefinition, ViewFrame, ViewNote } from './types';
 import { mount2d, line } from './shared/retro-2d';
 import { burst, spark, star, type Particle } from './shared/particles';
 import { clamp } from './shared/math';
-import { enemyPose, enemySize, formation, hitCount, isCarrier, seed, wave } from './swarm/model';
+import {
+  enemyPose,
+  enemySize,
+  formation,
+  hitCount,
+  isCarrier,
+  playerWidth,
+  seed,
+  wave,
+} from './swarm/model';
 
 function hull(c: CanvasRenderingContext2D, x: number, y: number, radius: number, variant: number) {
   // Original split-pod scouts: two pods joined by an offset diamond spine.
   c.beginPath();
   c.moveTo(x, y - radius);
-  c.lineTo(x + radius * 0.45, y);
+  c.lineTo(x + radius * 0.9, y);
   c.lineTo(x, y + radius * 0.7);
-  c.lineTo(x - radius * 0.45, y);
+  c.lineTo(x - radius * 0.9, y);
   c.closePath();
   c.fill();
   if (variant % 2) {
@@ -79,14 +88,14 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame) {
     c.fillStyle = t.muted;
     c.textAlign = 'right';
     c.font = `10px "${t.fontMono}"`;
-    c.fillText(row.instrument.name, g.left - 14, row.y + 4, g.left - 24);
+    c.fillText(row.instrument.name, g.left - 28, row.y + 4, g.left - 35);
     c.strokeStyle = t.line;
     c.globalAlpha = 0.35;
     line(c, g.left, row.y, g.right, row.y);
     // The actual next bar's notes, rather than clones of this bar's destroyed slots.
     c.fillStyle = col;
     c.strokeStyle = col;
-    c.globalAlpha = 0.19;
+    c.globalAlpha = 0.3;
     if (row.nextCrowded) {
       for (const n of row.nextEnemies)
         c.fillRect(g.x(n.start - 1), row.y - 5, Math.max(1, g.x(n.end - 1) - g.x(n.start - 1)), 10);
@@ -94,7 +103,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame) {
       for (const n of row.nextEnemies) {
         const x = g.x(n.start - 1);
         if (isCarrier(n)) c.fillRect(x, row.y - 5, Math.max(1, g.x(n.end - 1) - x), 10);
-        else hull(c, x, row.y, enemySize(n) * 0.7, row.instrument.index);
+        else hull(c, x, row.y, enemySize(n, w), row.instrument.index);
       }
     c.globalAlpha = row.instrument.muted ? 0.35 : 1;
     c.fillStyle = col;
@@ -122,7 +131,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame) {
       c.strokeStyle = col;
       c.globalAlpha = row.instrument.muted ? 0.35 : 1;
       if (carrier) {
-        const halfHeight = enemySize(n) * 0.55;
+        const halfHeight = enemySize(n, w) * 0.55;
         const end = g.x(n.end),
           burn = g.x(Math.max(n.start, f.now));
         c.globalAlpha *= 0.15;
@@ -154,14 +163,14 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame) {
           c.shadowColor = col;
           c.shadowBlur = t.glow ? 8 : 0;
         }
-        hull(c, pose.x, pose.y, enemySize(n), row.instrument.index);
+        hull(c, pose.x, pose.y, enemySize(n, w), row.instrument.index);
         c.shadowBlur = 0;
       }
       if (carrier && pose.diving) {
         // The carrier's nose dives; its scored hull remains in formation to show duration.
         c.fillStyle = col;
         c.globalAlpha = row.instrument.muted ? 0.35 : 1;
-        hull(c, pose.x, pose.y, enemySize(n), row.instrument.index);
+        hull(c, pose.x, pose.y, enemySize(n, w), row.instrument.index);
       }
       if (!row.instrument.muted) {
         c.fillStyle = col;
@@ -183,19 +192,24 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame) {
   c.globalAlpha = 1;
   c.fillStyle = t.text;
   // Asymmetric twin sails around an open central cockpit.
+  c.save();
+  c.translate(g.shipX, g.shipY);
+  const playerScale = playerWidth(w) / 37;
+  c.scale(playerScale, playerScale);
   c.beginPath();
-  c.moveTo(g.shipX - 4, g.shipY - 19);
-  c.lineTo(g.shipX - 21, g.shipY + 15);
-  c.lineTo(g.shipX - 5, g.shipY + 8);
-  c.lineTo(g.shipX + 5, g.shipY + 8);
-  c.lineTo(g.shipX + 16, g.shipY + 20);
-  c.lineTo(g.shipX + 8, g.shipY - 10);
+  c.moveTo(-4, -19);
+  c.lineTo(-21, 15);
+  c.lineTo(-5, 8);
+  c.lineTo(5, 8);
+  c.lineTo(16, 20);
+  c.lineTo(8, -10);
   c.closePath();
   c.fill();
   c.fillStyle = t.accent;
-  c.fillRect(g.shipX - 2, g.shipY - 4, 5, 10);
+  c.fillRect(-2, -4, 5, 10);
   c.globalAlpha = 0.6 + Math.sin(f.now * 75) * 0.25;
-  c.fillRect(g.shipX - 3, g.shipY + 16, 6, 6 + 4 * Math.sin(f.now * 41));
+  c.fillRect(-3, 16, 6, 6 + 4 * Math.sin(f.now * 41));
+  c.restore();
   c.globalAlpha = 1;
   c.strokeStyle = t.line;
   line(c, g.left, h - 31, g.right, h - 31);

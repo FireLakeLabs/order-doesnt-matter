@@ -14,6 +14,7 @@ import {
   formation,
   hitCount,
   isCarrier,
+  playerWidth,
   wave,
 } from '../../src/views/swarm/model';
 
@@ -197,4 +198,21 @@ it('fragment-only chords preserve distinct pitches as separate carriers', () => 
   const chord = [60, 64, 67].map((pitch) => ({ ...n, hasOnset: false, value: { note: pitch } }));
   expect(enemies(chord)).toHaveLength(3);
   expect(enemies([...chord, { ...chord[0], value: { note: 60, lpf: 400 } }])).toHaveLength(3);
+});
+
+it('scales ships to the desktop field and keeps Stage B silhouettes legible', () => {
+  const n = frame.notes.find((n) => !isCarrier(n))!;
+  for (const gain of [0.35, 0.5, 1]) {
+    const normal = { ...n, value: { gain } };
+    expect(enemySize(normal, 1300) * 2).toBeGreaterThanOrEqual(34);
+    expect(enemySize(normal, 1300) * 2).toBeLessThanOrEqual(40);
+    expect(enemySize(normal, 560) * 2).toBeGreaterThanOrEqual(18);
+    expect(enemySize(normal, 560)).toBeLessThan(enemySize(normal, 1300));
+  }
+  expect(playerWidth(1300)).toBe(42);
+  expect(playerWidth(560)).toBeGreaterThanOrEqual(18);
+  const wide = formation({ ...frame, height: 760 });
+  expect(wide.rows.at(-1)!.y).toBeCloseTo(760 * 0.72);
+  expect(wide.rows.at(-1)!.y - wide.rows[0].y).toBeGreaterThan(760 * 0.55);
+  expect(wide.rows.every((row) => row.y < wide.shipY)).toBe(true);
 });
