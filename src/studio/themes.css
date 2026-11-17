@@ -60,6 +60,7 @@
 }
 /* Shared shadcn aliases also reach Radix portals under the themed html root. */
 html[data-theme] {
+  --studio-text-small: 12px;
   --background: var(--ground);
   --foreground: var(--text);
   --primary: var(--accent);

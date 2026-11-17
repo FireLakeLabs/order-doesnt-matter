@@ -50,9 +50,7 @@ export function TopBar({
   );
   return (
     <header className="top-bar" data-region="top-bar">
-      <h1>
-        ORDER DOESN’T MATTER <span>STUDIO</span>
-      </h1>
+      <h1>ORDER DOESN’T MATTER</h1>
       <div className="transport">
         <Button
           className="play-button"

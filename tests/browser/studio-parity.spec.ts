@@ -177,6 +177,9 @@ test('About and source links match the legal notice and the pinned packages; exa
   await page.getByRole('button', { name: 'About / AGPL' }).click();
   const about = page.getByRole('dialog');
   await expect(about).toContainText('AGPL');
+  expect(
+    await about.locator('small').evaluate((el) => parseFloat(getComputedStyle(el).fontSize)),
+  ).toBeGreaterThanOrEqual(12);
   const licences = await page.request.get('/licenses.txt');
   expect(licences.ok()).toBe(true);
   expect(await licences.text()).toContain('GNU AFFERO GENERAL PUBLIC LICENSE');
@@ -282,6 +285,10 @@ test('Practice teaches real Studio controls and restores the mounted draft, hist
   const guide = page.getByRole('complementary', { name: 'Guided practice' });
   await appSignal(page, () => !!document.querySelector('[data-practice-ready="true"]'));
   await expect(guide).toContainText('Make it move');
+  await expect(page.locator('.instrument-row[data-selected="true"]')).toHaveCount(1);
+  await expect(page.locator('.tray-empty')).toHaveCount(0);
+  await expect(page.locator('.setting-tile')).not.toHaveCount(0);
+  await expect(page.locator('#editor')).toHaveCount(0);
   await pictures(page, 'practice');
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect(guide).toContainText('Take it slow');
