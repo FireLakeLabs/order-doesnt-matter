@@ -10,17 +10,19 @@ port, runs the `studio`, `views` and `engine` projects in sequence with one work
 and shuts down the server. Their playback clocks never overlap locally. CI runs
 `test:browser:studio`, `test:browser:views` and `test:browser:engine` on separate
 runners, each with one worker. The views project includes every `view-*.spec.ts`,
-including Scope’s smoke and feed test, and uses Playwright shards. Studio and views share a shard list in both workflow
-matrices, starting with `shard: ['1/2', '2/2']`; expand that one line to add shards.
+including Scope’s smoke and feed test, and uses Playwright shards. Studio and
+views share a shard list in both workflow matrices, starting with
+`shard: ['1/2', '2/2']`; expand that one line to add shards.
 Studio excludes those view files; engine selects `engine.spec.ts` and
-`silent-swap.spec.ts`. Every job retains separately named timing and failure evidence.
-The Check aggregator requires the complete browser matrix. Engine and silent-swap
-canaries retain their real PCM, scheduling, discovery and acknowledgement proofs.
+`silent-swap.spec.ts`. Every job retains separately named timing and failure
+evidence. The Check aggregator requires the complete browser matrix. Engine and
+silent-swap canaries retain their real PCM, scheduling, discovery and acknowledgement proofs.
 Individual audio tests may use separate pages to isolate voices.
 
 Only `online.spec.ts` belongs to the optional project; use
 `npm run test:browser:online` for its network sample checks. View measurements are
-separate, through `npm run measure:views`. Tests target the built Studio; the redirect test checks `/studio.html`.
+separate, through `npm run measure:views`. Tests target the built Studio; the
+redirect test checks `/studio.html`.
 
 A 60 s per-test timeout protects against hangs. Retries remain off. Suite and
 completed-case durations are informational: the Node command warns above 60 s,

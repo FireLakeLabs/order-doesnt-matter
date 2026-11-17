@@ -13,8 +13,8 @@ including local development; two copies must run together.
 
 Locally, Studio, view and shared real-engine browser projects run serially with
 one worker, so their audio clocks never compete. CI isolates them on separate
-runners: sharded Studio, sharded views (including Scope feed), and engine. Each job uses
-one worker, and the Check aggregator requires every browser job.
+runners: sharded Studio, sharded views (including Scope feed), and engine. Each
+job uses one worker, and the Check aggregator requires every browser job.
 
 A 60 s per-test hard timeout protects against hangs; retries remain off. Worker
 execution deadlines still apply. `npm run check` keeps format check, lint,
