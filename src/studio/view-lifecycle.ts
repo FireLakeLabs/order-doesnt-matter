@@ -30,10 +30,12 @@ export function mountView(
     .then(load)
     .then(async (view) => {
       if (disposed) return;
-      definition = view;
       const mounted = await view.mount(element);
       if (isDisposed()) mounted.dispose();
-      else handle = mounted;
+      else {
+        handle = mounted;
+        definition = view;
+      }
     })
     .catch(fail);
   return {

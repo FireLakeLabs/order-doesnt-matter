@@ -30,7 +30,13 @@ function fixture() {
     outputLatency: () => 0,
     time: () => 10,
     seek: () => {},
-    tap: { sampleRate: 48000, rms: async () => 0 },
+    tap: {
+      sampleRate: 48000,
+      analyse: () => {
+        throw Error('Unused fake analysis');
+      },
+      rms: async () => 0,
+    },
   };
   const events: EngineEvent[] = [];
   const engine = engineWith(audio, (fn, failed) => {

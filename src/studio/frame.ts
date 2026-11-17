@@ -1,5 +1,5 @@
 import type { AppState } from '../app/state';
-import type { EventResult } from '../contract';
+import type { EventResult, OutputTap } from '../contract';
 import { liveModel } from '../live/model';
 import type { ViewDefinition, ViewFrame, ViewNote, ViewTheme } from '../views/types';
 import { instrumentColour, viewTheme } from './themes';
@@ -62,6 +62,7 @@ export interface FrameInput {
   width: number;
   height: number;
   dpr: number;
+  audio?: ViewFrame['audio'];
 }
 /** DOM-free host adapter. now has already been corrected at the runtime boundary. */
 export function buildFrame(input: FrameInput): ViewFrame {
@@ -81,6 +82,7 @@ export function buildFrame(input: FrameInput): ViewFrame {
   const facts = instrumentFacts(state.doc);
   return {
     now,
+    audio: input.audio,
     playing: input.playing,
     cps: input.cps,
     notes,
@@ -156,4 +158,20 @@ export function noteLevel(notes: ViewNote[], instrument: string, now: number): n
     return sum + gain * gain;
   }, 0);
   return Math.min(1, Math.sqrt(power));
+}
+
+/** Called only by mounted audio views. The clock sample identifies one shared
+ * RAF, even while stopped: transport time alone would keep returning stale PCM. */
+export function createAudioFrames() {
+  let tick: object | undefined;
+  let source: OutputTap | undefined;
+  let audio: ViewFrame['audio'];
+  return (tap: OutputTap | undefined, sample: object) => {
+    if (tick !== sample || source !== tap) {
+      tick = sample;
+      source = tap;
+      audio = tap?.analyse();
+    }
+    return audio;
+  };
 }

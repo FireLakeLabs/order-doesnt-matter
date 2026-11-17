@@ -41,7 +41,28 @@ registerProcessor('odm-output-tap', ODMTap);
     chunks.push(data);
     while (chunks[0]?.frame < data.frame - context.sampleRate * 60) chunks.shift();
   };
+  let analyser: AnalyserNode;
+  let timeDomain: Float32Array<ArrayBuffer>;
+  let analysis: { wave: Float32Array<ArrayBuffer>; spectrum: Uint8Array<ArrayBuffer> } | undefined;
   return {
+    analyse() {
+      if (!analysis) {
+        const node = context.createAnalyser();
+        node.fftSize = 2 ** Math.ceil(Math.log2(context.sampleRate * 0.1));
+        node.smoothingTimeConstant = 0;
+        output.connect(node);
+        analyser = node;
+        timeDomain = new Float32Array(node.fftSize);
+        analysis = {
+          // Keep the newest 100 ms of the FFT capture, without copying it.
+          wave: timeDomain.subarray(node.fftSize - Math.round(context.sampleRate * 0.1)),
+          spectrum: new Uint8Array(node.frequencyBinCount),
+        };
+      }
+      analyser.getFloatTimeDomainData(timeDomain);
+      analyser.getByteFrequencyData(analysis.spectrum);
+      return analysis;
+    },
     sampleRate: context.sampleRate,
     async rms(from, to) {
       if (!Number.isFinite(to) || to - context.currentTime > 10)
