@@ -203,22 +203,39 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
   text('CHORDS BY BAR', sx, sy, Math.max(11, 11 * scale));
   text('longest held set · window', sx, sy + 18, 10, theme.muted, wide ? w * 0.18 : w - margin * 2);
   const barWidth = wide ? w * 0.18 : (w - margin * 2) / 4 - 8;
+  const maxClassRows = Math.max(
+    1,
+    ...state.bars.map((entry) =>
+      entry.chord && !entry.chord.root ? Math.ceil(entry.chord.classes.length / 4) : 1,
+    ),
+  );
+  const barBoxHeight = Math.max(
+    47 * scale,
+    maxClassRows > 1 ? 16 * scale + 18 + (maxClassRows - 1) * 13 : 0,
+  );
+  const barStep = Math.max(56 * scale, barBoxHeight + 8 * scale);
   for (const [index, entry] of state.bars.entries()) {
     const x = wide ? sx : margin + (index * (w - margin * 2)) / 4;
-    const y = wide ? sy + 48 + index * 56 * scale : sy + 45;
+    const y = wide ? sy + 48 + index * barStep : sy + 45;
     if (entry.bar === Math.floor(f.now)) {
       c.fillStyle = theme.panel;
       c.strokeStyle = theme.accent;
       c.lineWidth = 1.5;
       c.beginPath();
-      c.roundRect(x - 6, y - 16, barWidth, wide ? 47 * scale : 61, theme.radius);
+      c.roundRect(
+        x - 6,
+        y - (wide ? 16 * scale : 16),
+        barWidth,
+        wide ? barBoxHeight : 61,
+        theme.radius,
+      );
       c.fill();
       c.stroke();
     }
     text(
       `bar ${String(entry.bar + 1)}`,
       x,
-      y - 2,
+      y - (wide ? 2 * scale : 2),
       Math.max(11, 11 * scale),
       theme.muted,
       barWidth - 8,
