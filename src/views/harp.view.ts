@@ -110,8 +110,8 @@ const view: ViewDefinition = {
           const line = stringGeometry(g, i, strings.length),
             length = line.bottom - line.top;
           const bright = usesSection(slot.voices, section);
-          c.globalAlpha = 1;
-          c.strokeStyle = bright ? theme.muted : theme.line;
+          c.globalAlpha = bright ? 1 : 0.25;
+          c.strokeStyle = theme.muted;
           c.lineWidth = Math.max(1.2, (bright ? 1.8 : 1.2) * g.scale);
           c.beginPath();
           c.moveTo(line.x, line.top);
