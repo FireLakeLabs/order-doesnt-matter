@@ -131,16 +131,17 @@ test('metronomes: exact drop moment, five themes, crowd rule and CPU frame cost'
   await page
     .locator('#metronomes-evidence canvas')
     .screenshot({ path: `${shots}/arcade-1300x760.png` });
-  for (const [name, count, density] of [
-    ['single', 1, 1],
-    ['twenty', 20, 8],
-    ['fan-500', 1, 500],
+  for (const [name, count, density, width] of [
+    ['single', 1, 1, 1300],
+    ['twenty', 20, 8, 1300],
+    ['fan-500', 1, 500, 1300],
+    ['twenty-stage-b', 20, 40, 560],
   ] as const) {
     await standalone.evaluate(
-      ({ el, handle }, { saved, count, density }) => {
+      ({ el, handle }, { saved, count, density, width }) => {
         const frame: ViewFrame = {
           ...saved,
-          width: 1300,
+          width,
           height: 760,
           dpr: 1,
           instruments: Array.from({ length: count }, (_, i) => ({
@@ -159,14 +160,15 @@ test('metronomes: exact drop moment, five themes, crowd rule and CPU frame cost'
             })),
           ).flat(),
         };
-        el.style.width = '1300px';
+        el.style.width = `${width}px`;
         handle.frame(frame);
       },
-      { saved, count, density },
+      { saved, count, density, width },
     );
     await page.locator('#metronomes-evidence canvas').screenshot({ path: `${shots}/${name}.png` });
   }
   const deterministic = await standalone.evaluate(({ el, handle }, saved) => {
+    el.style.width = '1300px';
     const frame = { ...saved, width: 1300, height: 760, dpr: 1 };
     handle.frame(frame);
     const picture = el.querySelector('canvas')!.toDataURL();

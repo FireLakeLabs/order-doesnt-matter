@@ -2,6 +2,14 @@ import type { ViewDefinition, ViewFrame } from './types';
 import { line, mount2d } from './shared/retro-2d';
 import { analyse, EXTREME, inStep, layout, poses, swing, type Pose } from './metronomes/model';
 
+function fitText(c: CanvasRenderingContext2D, text: string, width: number): string {
+  if (c.measureText(text).width <= width) return text;
+  const letters = Array.from(text);
+  do {
+    letters.pop();
+  } while (letters.length && c.measureText(`${letters.join('')}…`).width > width);
+  return `${letters.join('')}…`;
+}
 function metronome(
   c: CanvasRenderingContext2D,
   f: ViewFrame,
@@ -178,20 +186,20 @@ function drawMetronomes(
     c.font = `${String(slot.nameSize)}px "${t.fontMono}"`;
     c.textAlign = 'center';
     c.fillStyle = p.held ? t.text : t.muted;
-    let name = p.instrument.name;
-    if (c.measureText(name).width > slot.width - 14) {
-      const letters = Array.from(name);
-      do {
-        letters.pop();
-      } while (letters.length && c.measureText(`${letters.join('')}…`).width > slot.width - 14);
-      name = `${letters.join('')}…`;
-    }
-    c.fillText(name, slot.x, floor + (slot.compact ? 16 : slot.nameSize + 4));
+    c.fillText(
+      fitText(c, p.instrument.name, slot.width - 14),
+      slot.x,
+      floor + (slot.compact ? 16 : slot.nameSize + 4),
+    );
     if (!slot.compact) {
       c.font = `12px "${t.fontMono}"`;
       c.fillStyle = t.muted;
       c.fillText(
-        p.resting ? 'rest' : `${String(p.hits)} hits / cycle${p.fan ? ' · fan' : ''}`,
+        fitText(
+          c,
+          p.resting ? 'rest' : `${String(p.hits)} hits / cycle${p.fan ? ' · fan' : ''}`,
+          slot.width - 14,
+        ),
         slot.x,
         floor + 36,
       );
