@@ -14,6 +14,7 @@ import { editorContext } from './tray/context';
 import { EditorHost, kindFor } from './tray/EditorHost';
 import { instrumentInventory } from './instrument-names';
 import { createFrameClock } from './clock';
+import { playingSplit } from './frame';
 import { session, consumeRestoredSelection, type Stage } from './session';
 
 // All subscribers receive one latency-corrected sample from one page RAF.
@@ -39,17 +40,18 @@ export function Studio() {
   const editorName =
     editorIndex >= 0 ? instrumentInventory(snapshot.state).names[editorIndex] : 'Piece';
   const activation = useRef(runtime.app.activation);
+  const { doc, rows, sections } = snapshot.state;
   useEffect(() => {
     if (activation.current !== runtime.app.activation) {
       activation.current = runtime.app.activation;
       if (!consumeRestoredSelection()) session.resetSelection();
     }
-  }, [snapshot.state.doc]);
-  useEffect(() => {
     const selected = session.getSnapshot().selectedInstrument;
-    if (selected && !snapshot.state.rows.some((row) => row.id === selected))
-      session.selectInstrument(null);
-  }, [snapshot.state.rows]);
+    if (selected && rows.some((row) => row.id === selected)) return;
+    const first =
+      playingSplit({ rows, sections }, runtime.getPlayhead()).playing.at(0) ?? rows.at(0);
+    session.selectInstrument(first?.id ?? null);
+  }, [doc, rows, sections]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme.name;

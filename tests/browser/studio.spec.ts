@@ -95,6 +95,52 @@ async function noScroll(page: Page) {
   expect(layout.scrollHeight).toBe(layout.height);
   return layout;
 }
+async function readableInterface(page: Page) {
+  const sizes = await page.evaluate(() => {
+    const result: number[] = [];
+    for (const element of Array.from(document.querySelectorAll('body *'))) {
+      // A view owns its rendered content, including any DOM captions.
+      if (element.closest('.view-host')) continue;
+      if (
+        !Array.from(element.childNodes).some(
+          (node) => node.nodeType === Node.TEXT_NODE && node.textContent?.trim(),
+        ) ||
+        !element.checkVisibility({ checkVisibilityCSS: true, checkOpacity: true })
+      )
+        continue;
+      const rect = element.getBoundingClientRect();
+      if (
+        rect.width <= 0 ||
+        rect.height <= 0 ||
+        rect.bottom <= 0 ||
+        rect.right <= 0 ||
+        rect.top >= innerHeight ||
+        rect.left >= innerWidth
+      )
+        continue;
+      let clipped = false;
+      for (let parent = element.parentElement; parent; parent = parent.parentElement) {
+        const style = getComputedStyle(parent);
+        if (!/hidden|clip|auto|scroll/.test(style.overflow + style.overflowX + style.overflowY))
+          continue;
+        const bounds = parent.getBoundingClientRect();
+        if (
+          rect.bottom <= bounds.top ||
+          rect.top >= bounds.bottom ||
+          rect.right <= bounds.left ||
+          rect.left >= bounds.right
+        ) {
+          clipped = true;
+          break;
+        }
+      }
+      if (!clipped) result.push(parseFloat(getComputedStyle(element).fontSize));
+    }
+    return result;
+  });
+  expect(sizes.length).toBeGreaterThan(50);
+  expect(Math.min(...sizes)).toBeGreaterThanOrEqual(12);
+}
 async function startAt(page: Page, cycle: number) {
   await page.evaluate(async (cycle) => {
     window.odmStudio.stop();
@@ -689,6 +735,11 @@ test('fresh Studio defaults to Ring and Loom', async ({ page, context }) => {
   await appSignal(page, () => window.odmStudio?.app.canPlay);
   await expect(page.locator('[data-region="stage-a"] .stage-header h2')).toHaveText('Ring');
   await expect(page.locator('[data-region="stage-b"] .stage-header h2')).toHaveText('Loom');
+  await expect(page.locator('.instrument-row[data-selected="true"]')).toHaveCount(1);
+  await expect(page.locator('.tray-empty')).toHaveCount(0);
+  await expect(page.locator('.setting-tile')).not.toHaveCount(0);
+  await expect(page.locator('#editor')).toHaveCount(0);
+  await expect(page.locator('.top-bar h1')).toHaveText('ORDER DOESN’T MATTER');
   await page.evaluate(
     (source) => window.odmStudio.load(source),
     await readFile('corpus/programs/real-dubstep-arranged.strudel', 'utf8'),
@@ -720,6 +771,32 @@ test('fresh Studio defaults to Ring and Loom', async ({ page, context }) => {
       (el) => el.getAttribute('data-score-ready') === 'true',
     ),
   );
+
+  const firstPlaying = await page
+    .locator('.instrument-row')
+    .first()
+    .getAttribute('data-instrument');
+  await expect(page.locator('.instrument-row[data-selected="true"]')).toHaveAttribute(
+    'data-instrument',
+    firstPlaying!,
+  );
+  await expect(page.locator('.tray-heading h2')).toHaveText('darkPad');
+  await expect(page.locator('#editor')).toHaveCount(0);
+  await expect(page.locator('.lane-counts small').filter({ hasText: /^1 rewrites$/ })).toHaveCount(
+    0,
+  );
+  for (const width of [2560, 1920]) {
+    await page.setViewportSize({ width, height: width === 2560 ? 1440 : 1080 });
+    for (const theme of ['arcade', 'riso', 'pocket', 'sunset', 'phosphor']) {
+      await page.getByRole('button', { name: `Theme ${theme}`, exact: true }).click();
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+      await page.evaluate(() => document.fonts.ready);
+      await readableInterface(page);
+      await noScroll(page);
+    }
+  }
+  await page.setViewportSize({ width: 2560, height: 1440 });
+  await page.getByRole('button', { name: 'Theme arcade', exact: true }).click();
   await page.screenshot({ path: `${shots}/shelf-first-2560x1440.png` });
   for (const header of await shelf.locator('.view-group-toggle').all())
     if ((await header.getAttribute('aria-expanded')) === 'false') await header.click();
@@ -772,4 +849,16 @@ test('fresh Studio defaults to Ring and Loom', async ({ page, context }) => {
   await expect(pitch).toHaveAttribute('aria-expanded', 'false');
   await pitch.click();
   await expect(pitch).toHaveAttribute('aria-expanded', 'true');
+  // A silent opening still selects the first row, without opening its editor.
+  await page.evaluate(() => window.odmStudio.load('arrange([4, silence], [4, s("sine").rev()])'));
+  await expect(page.locator('.resting-chip[data-selected="true"]')).toHaveCount(1);
+  await expect(page.locator('.tray-heading h2')).toHaveText('sine');
+  await expect(page.locator('#editor')).toHaveCount(0);
+  await page.evaluate(() => window.odmStudio.seek(4));
+  await expect(page.locator('.lane-counts')).toContainText('1 rewrite');
+  await expect(page.locator('.lane-counts')).toContainText('1 setting');
+  await expect(page.locator('.lane-counts small').filter({ hasText: /^1 rewrites$/ })).toHaveCount(
+    0,
+  );
+  await expect(page.locator('.lane-counts')).not.toContainText('1 settings');
 });
