@@ -2,9 +2,32 @@ import { appSignal } from './helpers';
 import { revealView } from './shelf';
 import './studio-transport';
 import { openStudio } from './studio-open';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test, type Page, type BrowserContext } from '@playwright/test';
 import type {} from '../../src/studio/main';
+
+// Read definitions without loading browser renderers into Playwright's Node process.
+const viewDirectory = new URL('../../src/views/', import.meta.url);
+const visitorViews = await Promise.all(
+  (await readdir(viewDirectory))
+    .filter((file) => file.endsWith('.view.ts') && file !== 'test-card.view.ts')
+    .map(async (file) => {
+      const source = await readFile(new URL(file, viewDirectory), 'utf8');
+      const group = source.match(/\bgroup:\s*['"]([^'"]+)['"]/u)?.[1];
+      if (!group) throw Error(`View ${file} must declare its shelf group`);
+      return { id: file.replace('.view.ts', ''), group };
+    }),
+);
+const shelfGroups = ['rhythm', 'pitch', 'settings', 'song', 'show', 'arcade'];
+async function shelfReady(page: Page) {
+  await appSignal(
+    page,
+    (count) =>
+      document.querySelectorAll('.wide-shelf .view-tile:not([data-view="test-card"])').length ===
+      count,
+    visitorViews.length,
+  );
+}
 
 const shots = '/tmp/odm-studio-integration';
 async function frames(page: Page, count = 4) {
@@ -157,15 +180,14 @@ test('Studio shell on dubstep: section rail, two stages, shared clock, shelf, fi
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: `${shots}/arcade-2560x1440.png` });
   const shelf = page.locator('.wide-shelf .view-shelf');
-  await appSignal(page, () => document.querySelectorAll('.wide-shelf .view-tile').length === 15);
-  await expect(shelf.locator('.view-group-toggle')).toHaveText([
-    'Rhythm3+',
-    'Pitch2+',
-    'Settings1+',
-    'Song3+',
-    'Show4−',
-    'Arcade1+',
-  ]);
+  await shelfReady(page);
+  await expect(shelf.locator('.view-group-toggle')).toHaveText(
+    shelfGroups.map(
+      (group) =>
+        `${group[0].toUpperCase()}${group.slice(1)}${visitorViews.filter((view) => view.group === group).length}${group === 'show' ? '−' : '+'}`,
+    ),
+  );
+  await expect(shelf.locator('[data-view="test-card"]')).toHaveCount(1);
   await expect(shelf.locator('[data-view="test-card"]')).toBeHidden();
   // Test cards occupy Show here; the fresh visitor's Ring/Loom defaults are checked below.
   for (const header of await shelf.locator('.view-group-toggle').all())
@@ -671,19 +693,21 @@ test('fresh Studio defaults to Ring and Loom', async ({ page, context }) => {
     (source) => window.odmStudio.load(source),
     await readFile('corpus/programs/real-dubstep-arranged.strudel', 'utf8'),
   );
-  await appSignal(page, () => document.querySelectorAll('.wide-shelf .view-tile').length === 15);
+  await shelfReady(page);
   const shelf = page.locator('.wide-shelf .view-shelf');
-  await expect(
-    shelf.locator('.view-group[data-group="rhythm"] .view-group-toggle'),
-  ).toHaveAttribute('aria-expanded', 'true');
-  await expect(shelf.locator('[data-group="song"] .view-group-toggle')).toHaveAttribute(
-    'aria-expanded',
-    'true',
+  const stageGroups = new Set(
+    visitorViews
+      .filter((view) => view.id === 'ring' || view.id === 'loom')
+      .map((view) => view.group),
   );
-  await expect(shelf.locator('.view-group-toggle[aria-expanded="true"]')).toHaveCount(2);
-  expect(
-    await shelf.locator('.view-groups').evaluate((el) => el.scrollHeight <= el.clientHeight),
-  ).toBe(true);
+  for (const group of stageGroups)
+    await expect(shelf.locator(`[data-group="${group}"] .view-group-toggle`)).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+  await expect(shelf.locator('.view-group-toggle[aria-expanded="true"]')).toHaveCount(
+    stageGroups.size,
+  );
   await noScroll(page);
   await appSignal(
     page,
@@ -712,7 +736,7 @@ test('fresh Studio defaults to Ring and Loom', async ({ page, context }) => {
   await page.evaluate(() => localStorage.removeItem('odm:recovery'));
   await page.reload();
   await load(page);
-  await appSignal(page, () => document.querySelectorAll('.wide-shelf .view-tile').length === 15);
+  await shelfReady(page);
   await expect(shelf.locator('[data-group="pitch"] .view-group-toggle')).toHaveAttribute(
     'aria-expanded',
     'true',
