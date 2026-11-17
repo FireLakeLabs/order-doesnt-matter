@@ -220,7 +220,7 @@ it('fills Stage A height at card scale and keeps 40 strings distinct on Stage B'
       const s = stringGeometry(g, i, 40);
       expect(s.top).toBeGreaterThanOrEqual(94);
       expect(s.bottom).toBeGreaterThan(s.top);
-      expect(shimmerWidth(10, g) * 2).toBeLessThan(g.spacing);
+      expect(shimmerWidth(10, g) * 3.6).toBeLessThan(g.spacing);
     }
     const heads = layout(w, h, 19, 20);
     expect(heads.drumTop + heads.rows * 34 + 14).toBeLessThanOrEqual(h);

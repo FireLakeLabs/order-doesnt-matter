@@ -162,16 +162,17 @@ const view: ViewDefinition = {
             }
           }
           c.save();
-          c.translate(line.x, line.bottom + 17);
+          c.translate(line.x, line.bottom + 26);
           const angled = g.spacing < 32;
           if (angled) c.rotate(Math.PI / 3);
           c.textAlign = angled ? 'left' : 'center';
+          c.globalAlpha = bright || parts.length ? 1 : 0.65;
           text(
             score.grouped ? `${slot.label} · ${String(slot.pitches.length)}` : slot.label,
             0,
             0,
             Math.max(10, Math.min(13, 10 * g.scale)),
-            parts.length ? theme.text : bright ? theme.muted : theme.line,
+            parts.length ? theme.text : theme.muted,
             angled ? 55 : g.spacing - 2,
           );
           c.restore();

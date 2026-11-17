@@ -132,7 +132,7 @@ export function motion(part: Part, now: number, phase: number) {
 /** Triangular initial displacement peaks exactly one third down; endpoints stay anchored. */
 export function displacement(u: number, state: ReturnType<typeof motion>) {
   const triangle = u < 1 / 3 ? u * 3 : (1 - u) * 1.5;
-  return state.a * triangle + 0.35 * state.b * Math.sin(Math.PI * 6 * u);
+  return state.a * triangle + 0.8 * state.b * Math.sin(Math.PI * 6 * u);
 }
 export function layout(width: number, height: number, stringCount: number, drumCount: number) {
   const left = width * 0.085,
@@ -169,4 +169,4 @@ export function stringGeometry(g: ReturnType<typeof layout>, index: number, coun
   };
 }
 export const shimmerWidth = (gain: number, g: ReturnType<typeof layout>) =>
-  clamp(12 * gain * g.scale, 0, g.spacing * 0.38);
+  clamp(20 * gain * g.scale, 0, g.spacing * 0.26);
