@@ -60,6 +60,10 @@ test('deja-vu: two real comparisons, five themes, crowd and CPU frame cost', asy
   }
   await page.getByRole('button', { name: 'Theme arcade', exact: true }).click();
   await page.getByRole('button', { name: 'Déjà vu on Stage B', exact: true }).click();
+  await expect(page.locator('[data-region="stage-b"] .view-host')).toHaveAttribute(
+    'data-score-ready',
+    'true',
+  );
   await presented();
   await page.screenshot({ path: `${shots}/studio-stage-b-2560x1440.png` });
   await page
