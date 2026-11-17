@@ -196,6 +196,21 @@ test('harp: real arrangement, five themes, both stages and CPU cost', async ({ p
     }
     handle.frame({ ...frame, ...scenarios[4], now: 17.3, width: 560, height: 471, dpr: 1 });
     pictures.push(el.querySelector('canvas')!.toDataURL());
+    handle.frame({
+      ...frame,
+      notes: [0, 1].map((i) => ({
+        instrument: frame.instruments[i].id,
+        start: 17,
+        end: 18,
+        hasOnset: true,
+        value: { note: 60, gain: 0.6 },
+      })),
+      now: 17.3,
+      width: 560,
+      height: 471,
+      dpr: 1,
+    });
+    pictures.push(el.querySelector('canvas')!.toDataURL());
     handle.dispose();
     el.remove();
     return {
@@ -209,7 +224,7 @@ test('harp: real arrangement, five themes, both stages and CPU cost', async ({ p
   }, frame);
   for (const [i, picture] of pictures.entries())
     await writeFile(
-      `${shots}/${['real-1300x760', 'dense-500-staggered-1300x760', 'dense-500-staggered-560x471', 'drums-only-20-560x471'][i]}.png`,
+      `${shots}/${['real-1300x760', 'dense-500-staggered-1300x760', 'dense-500-staggered-560x471', 'drums-only-20-560x471', 'two-part-braid-560x471'][i]}.png`,
       Buffer.from(picture.split(',')[1], 'base64'),
     );
   sizes.push({

@@ -178,7 +178,7 @@ it('groups strictly above 40 pitches by octave without losing any pitch, voice o
     for (const parts of [1, 20]) {
       const dense = Array.from({ length: count }, (_, i) => ({
         ...n,
-        instrument: ids[i % Math.min(parts, ids.length)],
+        instrument: String(i % parts),
         start: 0,
         end: 1,
         hasOnset: true,
@@ -191,7 +191,12 @@ it('groups strictly above 40 pitches by octave without losing any pitch, voice o
       expect(score.strings.reduce((sum, s) => sum + s.voices.length, 0)).toBe(count);
       expect(
         score.strings.reduce(
-          (sum, s) => sum + partsAt(s.voices, frame(0.4)).reduce((n, p) => n + p.voices.length, 0),
+          (sum, s) =>
+            sum +
+            partsAt(s.voices, { ...frame(0.4), instruments: scoreFrame(parts).instruments }).reduce(
+              (n, p) => n + p.voices.length,
+              0,
+            ),
           0,
         ),
       ).toBe(count);
