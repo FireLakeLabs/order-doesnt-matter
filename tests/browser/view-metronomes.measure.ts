@@ -38,6 +38,8 @@ test('metronomes: exact drop moment, five themes, crowd rule and CPU frame cost'
     costs[theme] = await page.evaluate(async () => {
       const frame = { ...window.viewProbe.frame!, width: 1300, height: 760, dpr: 1 };
       const el = document.createElement('div');
+      el.style.cssText = 'position:fixed;inset:0;width:1300px;height:760px;z-index:9999';
+      document.body.append(el);
       const handle = await window.viewProbe.definition.mount(el);
       const samples: number[] = [];
       for (let i = 0; i < 310; i++) {
@@ -48,6 +50,7 @@ test('metronomes: exact drop moment, five themes, crowd rule and CPU frame cost'
       }
       samples.sort((a, b) => a - b);
       handle.dispose();
+      el.remove();
       return {
         frames: samples.length,
         medianMs: (samples[149] + samples[150]) / 2,
