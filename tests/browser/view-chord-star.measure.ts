@@ -108,6 +108,7 @@ test('chord-star: real arrangement, five themes, both stages and CPU cost', asyn
       const samples: number[] = [];
       let cold = 0;
       for (let i = 0; i < 310; i++) {
+        await new Promise(requestAnimationFrame);
         const start = performance.now();
         handle.frame({
           ...frame,
