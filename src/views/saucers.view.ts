@@ -254,19 +254,20 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, parts: ReturnType<typeo
             100,
         )
       : undefined;
-    const status = ship.lit
-      ? progress === undefined
-        ? 'zap'
-        : `${String(progress)}% lifted${heldNotes.length > 1 ? ` ×${String(heldNotes.length)}` : ''}`
-      : 'lights off';
+    const status =
+      ship.lit && ship.active.length
+        ? progress === undefined
+          ? 'zap'
+          : `${String(progress)}% lifted${heldNotes.length > 1 ? ` ×${String(heldNotes.length)}` : ''}`
+        : '';
     const compact = f.height < 600 && fleet.ships.length > 5;
     c.fillText(
-      compact && ship.lit ? `${ship.instrument.name} · ${status}` : ship.instrument.name,
+      compact && status ? `${ship.instrument.name} · ${status}` : ship.instrument.name,
       ship.x,
       ship.y - ship.size * 0.34 - (compact ? 8 : 23),
       Math.max(40, ship.size * (compact ? 1.9 : 1.35)),
     );
-    if (!compact) {
+    if (!compact && status) {
       c.fillStyle = t.muted;
       c.fillText(status, ship.x, ship.y - ship.size * 0.34 - 10, Math.max(40, ship.size * 1.35));
     }
@@ -281,6 +282,11 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, parts: ReturnType<typeo
     `BAR ${String(Math.floor(f.now) + 1)} · ${String(Math.round((f.now % 1) * 100))}% · ${section.name}`,
     18,
     51,
+  );
+  c.fillText(
+    `${String(f.instruments.filter((i) => !i.inSection).length)} sit out this section`,
+    18,
+    69,
   );
   c.fillText(
     `${String(fleet.ships.length)} saucers${fleet.squadron ? ` · ${String(Math.ceil(fleet.ships.length / 5))} squadrons` : ''} · ${String(lifts)} lift${lifts === 1 ? '' : 's'} · ${String(zaps)} zap${zaps === 1 ? '' : 's'}`,

@@ -63,7 +63,7 @@ export function formation(frame: ViewFrame, parts: ReturnType<typeof analyse>) {
   const ships = instruments.map((instrument, index) => {
     const events = parts.get(instrument.id) ?? [];
     const active = events.filter((e) => e.note.start <= frame.now && frame.now < e.note.end);
-    const lit = !instrument.muted && active.length > 0;
+    const lit = instrument.inSection && !instrument.muted;
     const pitches = active.flatMap((e) => (e.midi === undefined ? [] : [e.midi]));
     const midi = pitches.length ? pitches.reduce((a, b) => a + b, 0) / pitches.length : undefined;
     const row = Math.floor(index / columns),
@@ -73,7 +73,7 @@ export function formation(frame: ViewFrame, parts: ReturnType<typeof analyse>) {
     const baseY = frame.height * (rows === 1 ? 0.48 : 0.34 + (row / (rows - 1)) * 0.32);
     const altitude =
       midi === undefined ? 0 : ((clamp(midi, 24, 96) - 60) / 72) * frame.height * 0.2;
-    const drift = lit ? 0 : Math.sin(frame.now * 0.43 + instrument.index * 1.7);
+    const drift = instrument.inSection ? 0 : Math.sin(frame.now * 0.43 + instrument.index * 1.7);
     return {
       instrument,
       events,

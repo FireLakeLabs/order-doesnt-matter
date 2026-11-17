@@ -54,10 +54,33 @@ it('keeps all thirteen corpus saucers in three squadrons with two lifts and one 
   expect(fleet.ships).toHaveLength(13);
   expect(fleet.squadron).toBe(true);
   expect(new Set(fleet.ships.map((s) => s.squad)).size).toBe(3);
-  expect(fleet.ships.filter((s) => s.lit)).toHaveLength(3);
+  expect(fleet.ships.filter((s) => s.lit)).toHaveLength(6);
   const sounding = fleet.ships.flatMap((s) => s.active);
   expect(sounding.filter((e) => held(e.note))).toHaveLength(2);
   expect(sounding.filter((e) => !held(e.note))).toHaveLength(1);
+});
+it('keeps section participants lit and stationary between hits while only section rests drift', () => {
+  const parts = analyse(frame.notes);
+  const fleet = formation(frame, parts);
+  const later = formation({ ...frame, now: 10.45 }, parts);
+  const idle = fleet.ships.filter((s) => s.instrument.inSection && !s.active.length);
+  expect(idle).toHaveLength(3);
+  expect(idle.map((s) => s.instrument.name)).toEqual(['bd', 'sd · drop', 'oh']);
+  for (const ship of idle) {
+    const next = later.ships.find((s) => s.instrument.id === ship.instrument.id)!;
+    expect(ship.lit).toBe(true);
+    expect(next.lit).toBe(true);
+    expect(next.active).toEqual([]);
+    expect([next.x, next.y]).toEqual([ship.x, ship.y]);
+  }
+  const sittingOut = fleet.ships.filter((s) => !s.instrument.inSection);
+  expect(sittingOut).toHaveLength(7);
+  for (const ship of sittingOut) {
+    const next = later.ships.find((s) => s.instrument.id === ship.instrument.id)!;
+    expect(ship.lit).toBe(false);
+    expect(next.lit).toBe(false);
+    expect(next.x).not.toBe(ship.x);
+  }
 });
 it('lifts cargo over the whole scored bass span, scales beam width by gain and stops exactly at its end', () => {
   const fleet = formation(frame, analyse(frame.notes));
@@ -95,7 +118,10 @@ it('lifts cargo over the whole scored bass span, scales beam width by gain and s
 });
 it('uses sounding pitch for altitude, row for unpitched altitude and row index for cargo regardless of names', () => {
   const source = frame.notes.find((n) => n.hasOnset && n.value.note === 'c3')!;
-  const instrument = frame.instruments.find((i) => i.id === source.instrument)!;
+  const instrument = {
+    ...frame.instruments.find((i) => i.id === source.instrument)!,
+    inSection: true,
+  };
   const f = { ...frame, instruments: [instrument], now: 0.4 };
   const low = formation(f, analyse([source])).ships[0];
   const high = formation(f, analyse([{ ...source, value: { note: 'c5' } }])).ships[0];
@@ -107,7 +133,10 @@ it('uses sounding pitch for altitude, row for unpitched altitude and row index f
     analyse([unpitched]),
   ).ships[0];
   expect([renamed.x, renamed.y, renamed.cargo]).toEqual([row.x, row.y, row.cargo]);
-  const rested = formation({ ...f, now: 2 }, analyse([unpitched])).ships[0];
+  const rested = formation(
+    { ...f, now: 2, instruments: [{ ...instrument, inSection: false }] },
+    analyse([unpitched]),
+  ).ships[0];
   expect(rested.lit).toBe(false);
   expect(rested.x).not.toBe(row.x);
   expect(formation(f, analyse([unpitched])).ships[0]).toEqual(row);
