@@ -64,3 +64,65 @@ test('cleanup followed by setup can re-ask a canceled request at the same range'
   await vi.waitFor(() => expect(Object.keys(cache.score.events)).toHaveLength(1));
   cache.dispose();
 });
+
+test('ahead cannot replace the current answer; promotion reuses completed and in-flight requests', async () => {
+  const replies: ((result: EventResult) => void)[] = [];
+  const query = vi.fn(() => new Promise<EventResult>((resolve) => replies.push(resolve)));
+  const cancelCurrent = vi.fn(),
+    cancelAhead = vi.fn();
+  const cache = createScoreCache(query, {
+    cancel: cancelCurrent,
+    ahead: { query, cancel: cancelAhead },
+  });
+  const state = piece('s("bd")');
+  const first = { from: 0, to: 4 },
+    second = { from: 4, to: 8 },
+    third = { from: 8, to: 16 };
+  cache.request(state, first, second);
+  const currentCancellations = cancelCurrent.mock.calls.length;
+  // Replacing an ahead request must leave the visible request alive.
+  cache.request(state, first, third);
+  expect(cancelCurrent).toHaveBeenCalledTimes(currentCancellations);
+  replies[0](result);
+  await setImmediate();
+  expect(cache.score.from).toBe(0);
+  expect(Object.keys(cache.score.events)).toHaveLength(1);
+  replies[2](result);
+  await setImmediate();
+  expect(cache.score.from).toBe(0);
+  cache.request(state, third, second);
+  expect(cache.score.from).toBe(8);
+  expect(query).toHaveBeenCalledTimes(4);
+  // Promote a pending answer without canceling or repeating its worker batch.
+  const aheadCancellations = cancelCurrent.mock.calls.length;
+  cache.request(state, second);
+  expect(cancelCurrent).toHaveBeenCalledTimes(aheadCancellations);
+  expect(query).toHaveBeenCalledTimes(4);
+  replies[3](result);
+  await setImmediate();
+  expect(cache.score.from).toBe(4);
+  // An obsolete ahead answer cannot replace the promoted current request.
+  replies[1]({ ...result, error: { phase: 'evaluation', message: 'obsolete' } });
+  await setImmediate();
+  expect(cache.score.from).toBe(4);
+  expect(cache.error).toBe('');
+  cache.dispose();
+});
+
+test('document replacement and disposal invalidate both request purposes', async () => {
+  const replies: ((result: EventResult) => void)[] = [];
+  const cache = createScoreCache(() => new Promise((resolve) => replies.push(resolve)));
+  const range = { from: 0, to: 4 },
+    next = { from: 4, to: 8 };
+  cache.request(piece('s("bd")'), range, next);
+  cache.request(piece('s("sd")'), range, next);
+  replies[0](result);
+  replies[1](result);
+  await setImmediate();
+  expect(cache.score.events).toEqual({});
+  cache.dispose();
+  replies[2](result);
+  replies[3](result);
+  await setImmediate();
+  expect(cache.score.events).toEqual({});
+});

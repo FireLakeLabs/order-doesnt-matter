@@ -6,6 +6,7 @@ import type { StudioClock } from '../clock';
 import { runtime } from '../runtime';
 import { createScoreCache } from '../score-cache';
 import { scoreRange } from './model';
+import { scoreAheadRange } from './ask-ahead';
 import { scoreModel } from './score-model';
 
 export interface StudioScore {
@@ -30,11 +31,16 @@ export function useScore(clock: StudioClock) {
   });
   useEffect(() => {
     const queries = createBrowserQueries();
-    const cache = createScoreCache(queries.query);
+    const ahead = createBrowserQueries();
+    const cache = createScoreCache(queries.query, {
+      cancel: () => {
+        queries.cancel();
+      },
+      ahead,
+    });
     let previous: unknown[] = [];
     let retained: { key: string; events: StudioScore['events'] } | null = null;
-    let requested: { doc: typeof runtime.app.state.doc; from: number; to: number } | null = null;
-    const unsubscribe = clock.subscribe(({ now }) => {
+    const unsubscribe = clock.subscribe(({ now, playing }) => {
       const state = runtime.app.state;
       const range = state.follow
         ? scoreRange(state.sections, now)
@@ -43,18 +49,11 @@ export function useScore(clock: StudioClock) {
             to: state.toCycle,
             name: state.sections.find((part) => part.id === state.selected)?.name ?? 'Score',
           };
-      if (
-        !requested ||
-        requested.doc !== state.doc ||
-        requested.from !== range.from ||
-        requested.to !== range.to
-      ) {
-        // Rapid scrubbing abandons obsolete questions instead of queuing every
-        // section crossed. This pool belongs only to the score region.
-        queries.cancel();
-        requested = { doc: state.doc, ...range };
-      }
-      cache.request(state, range);
+      cache.request(
+        state,
+        range,
+        scoreAheadRange(state, now, playing, runtime.transport.getSnapshot().loop),
+      );
       const fresh =
         state.rows.length > 0 &&
         state.rows.every((row) => Object.hasOwn(cache.score.events, row.id)) &&
@@ -90,7 +89,6 @@ export function useScore(clock: StudioClock) {
     return () => {
       unsubscribe();
       cache.dispose();
-      queries.cancel();
     };
   }, [clock]);
   return score;

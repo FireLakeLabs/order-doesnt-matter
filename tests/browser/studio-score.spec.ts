@@ -1,5 +1,5 @@
 import { openStudio } from './studio-open';
-import { waitForPending } from './helpers';
+import { appSignal, waitForPending } from './helpers';
 import { generate } from '../../src/generate';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
@@ -194,6 +194,31 @@ test('real dubstep score fits both desktops, follows sections and ruler scrubbin
       `${shots}/measurements.json`,
       JSON.stringify({ sizes, heights, editorStyle }, null, 2),
     );
+  // Follow must promote the next section without exposing an unqueried score.
+  await ready(page);
+  await page.evaluate(() => {
+    const root = document.querySelector('[data-region="score"]')!;
+    root.setAttribute('data-lost-ready', 'false');
+    new MutationObserver((records) => {
+      if (
+        root.getAttribute('data-score-ready') !== 'true' ||
+        records.some((record) => record.oldValue === 'false')
+      )
+        root.setAttribute('data-lost-ready', 'true');
+    }).observe(root, {
+      attributes: true,
+      attributeFilter: ['data-score-ready'],
+      attributeOldValue: true,
+    });
+  });
+  await page.getByRole('button', { name: 'Play', exact: true }).click();
+  await appSignal(page, function crossedSectionBoundary() {
+    return window.odmStudio.app.state.playing && window.odmStudio.getPlayhead() >= 16.2;
+  });
+  await expect(page.locator('[data-region="score"]')).toHaveAttribute('data-score-ready', 'true');
+  await expect(page.locator('[data-region="score"]')).toHaveAttribute('data-lost-ready', 'false');
+  await expect(tray(page)).not.toContainText('Not queried');
+  await page.evaluate(() => window.odmStudio.stop());
 });
 
 test('cutoff edit is pending until its engine acknowledgement; top-bar Undo restores the value', async ({
