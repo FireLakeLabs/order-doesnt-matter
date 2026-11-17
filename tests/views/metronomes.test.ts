@@ -163,3 +163,16 @@ it('does not label a passing polyrhythm crossing or muted part as locked', () =>
   f.instruments[2].muted = true;
   expect(inStep(poses(f, analyse(f.notes)))).toEqual([]);
 });
+
+it('recognizes a lock through a held note even in a bar without fresh onsets', () => {
+  const f = scoreFrame(2);
+  f.now = 2.4;
+  f.notes = ['0', '1'].flatMap((instrument) => [
+    { ...note(0, 4), instrument },
+    { ...note(4, 8), instrument },
+  ]);
+  const cast = poses(f, analyse(f.notes));
+  expect(cast.every((p) => p.held && p.hits === 0 && !p.resting)).toBe(true);
+  expect(cast[0].angle).toBe(cast[1].angle);
+  expect(inStep(cast).map((g) => g.map((p) => p.instrument.id))).toEqual([['0', '1']]);
+});

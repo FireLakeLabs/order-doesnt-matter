@@ -100,7 +100,7 @@ export function poses(frame: ViewFrame, parts: Map<string, Part>): Pose[] {
         // Matching current-bar onset trains plus bracketing onsets and direction
         // identify a lock; crossing angles alone are only a momentary coincidence.
         signature:
-          resting || !cycle.length
+          resting || !part.onsets.length
             ? ''
             : JSON.stringify([
                 [...new Set(cycle.map((n) => n.start))],
