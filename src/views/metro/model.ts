@@ -157,11 +157,12 @@ export function metroLayout(score: MetroScore, width: number, height: number, co
   const legendBottom = 58 + (Math.ceil(count / legendColumns) - 1) * 18;
   const bottomLimit = height * 0.71 - 90;
   const topLimit = Math.min(bottomLimit - 28, legendBottom + 48);
-  // Even two diagonals must fit within the shortest station interval.
+  // Two diagonals must fit inside the shortest rest. Separate bypasses are
+  // only 0.34 pitches away; the shared bypass can span half the line stack.
   const pitch = Math.min(
     22,
     Math.min(height * 0.25, bottomLimit - topLimit) / Math.max(1, count),
-    (minimumSpan * 0.8) / Math.max(1, count),
+    (minimumSpan * 0.8) / (shared ? count : 0.68),
   );
   const half = Math.max((pitch * count) / 2, 14);
   const center = clamp(height * 0.46, topLimit + half, bottomLimit - half);

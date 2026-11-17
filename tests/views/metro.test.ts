@@ -149,25 +149,55 @@ it('keeps one and twenty lines, shares only crowded rests, and fits true 45 degr
       expect(box.ys).toHaveLength(count);
       expect(box.shared).toBe(count > 12);
       for (let row = 0; row < count; row++) {
-        for (const station of score.stations) {
-          const points = bypass(
-            box.x(station.from),
-            box.x(station.to),
-            box.rest(row),
-            box.ys[row],
-            true,
-            true,
-          );
-          expect(points[1].x).toBeLessThanOrEqual(points[2].x);
-          expect(Math.abs(points[1].x - points[0].x)).toBeCloseTo(
-            Math.abs(points[1].y - points[0].y),
-          );
-          expect(Math.abs(points[3].x - points[2].x)).toBeCloseTo(
-            Math.abs(points[3].y - points[2].y),
-          );
+        for (const runs of score.routes.values()) {
+          runs.forEach((run, index) => {
+            if (run.active) return;
+            const points = bypass(
+              box.x(run.from),
+              box.x(run.to),
+              box.rest(row),
+              box.ys[row],
+              index > 0 && (runs.at(index - 1)?.active ?? false),
+              runs.at(index + 1)?.active ?? false,
+            );
+            expect(points[1].x).toBeLessThanOrEqual(points[2].x);
+            expect(Math.abs(points[1].x - points[0].x)).toBeCloseTo(
+              Math.abs(points[1].y - points[0].y),
+            );
+            expect(Math.abs(points[3].x - points[2].x)).toBeCloseTo(
+              Math.abs(points[3].y - points[2].y),
+            );
+          });
         }
       }
     }
+  }
+});
+
+it('keeps separate bypass lines readable through a one-bar rest in a 64-bar corpus score', () => {
+  const source = corpus.get('real-techno')!;
+  const frame = scoreFrame(6);
+  frame.to = 64;
+  frame.sections = [{ name: 'Long section', from: 0, to: 64 }];
+  frame.notes = frame.instruments.flatMap((instrument, row) =>
+    Array.from({ length: 4 }, (_, repeat) =>
+      source.notes
+        .filter(
+          (note) => note.instrument === source.instruments[row % source.instruments.length].id,
+        )
+        .flatMap((note) => {
+          const start = note.start + repeat * 16;
+          if (row === 0 && start >= 32 && start < 33) return [];
+          return [{ ...note, instrument: instrument.id, start, end: note.end + repeat * 16 }];
+        }),
+    ).flat(),
+  );
+  const score = indexMetro(frame);
+  expect(score.minimumRest).toBe(1);
+  const box = metroLayout(score, 1000, 760, 6);
+  expect(box.pitch).toBeGreaterThanOrEqual(4);
+  for (let row = 0; row < 6; row++) {
+    expect(2 * Math.abs(box.rest(row) - box.ys[row])).toBeLessThan(box.scale);
   }
 });
 
