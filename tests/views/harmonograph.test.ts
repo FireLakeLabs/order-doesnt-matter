@@ -100,8 +100,8 @@ it('reads real scaled degrees, frequency, microtones and fragments through the s
   expect(analyse(scaled).map((t) => t.midi)).toEqual([48, 52, 55]);
   const real = notes.find((n) => n.value.note !== undefined)!;
   const tones = analyse([
-    { ...real, start: 0, end: 1, hasOnset: false, value: { freq: 440, n: 0 } },
-    { ...real, start: 0, end: 1, value: { note: 69.03 } },
+    { ...real, start: -1, end: 1, hasOnset: false, value: { freq: 440, n: 0 } },
+    { ...real, start: 0, end: 1, hasOnset: true, value: { note: 69.03 } },
   ]);
   expect(tones.map((t) => t.midi)).toEqual([69, 69.03]);
   expect(pairing(tones).main?.interval).toBe('unison +3.0¢');
