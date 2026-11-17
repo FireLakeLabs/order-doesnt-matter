@@ -1,16 +1,23 @@
 import { beforeAll, expect, it } from 'vitest';
 import type { ViewFrame, ViewNote } from '../../src/views/types';
-import { indexStage, placement, roomRugs, stageMarks } from '../../src/views/soundstage/model';
+import {
+  indexStage,
+  placement,
+  roomRugs,
+  roomCaptions,
+  stageMarks,
+} from '../../src/views/soundstage/model';
 import { radiusOf, stageBox, stageLayout, truePlace } from '../../src/views/soundstage/geometry';
 import { scoreFrame } from './score-fixture';
 import { soundstageCorpusFrame } from './soundstage.fixture';
 
-let real: ViewFrame, pan: ViewFrame, jux: ViewFrame;
+let real: ViewFrame, pan: ViewFrame, jux: ViewFrame, delay: ViewFrame;
 beforeAll(async () => {
-  [real, pan, jux] = await Promise.all([
+  [real, pan, jux, delay] = await Promise.all([
     soundstageCorpusFrame(),
     soundstageCorpusFrame('micro-signal-lanes'),
     soundstageCorpusFrame('mms-jux'),
+    soundstageCorpusFrame('micro-orbit-delay'),
   ]);
 });
 const note = (
@@ -91,9 +98,12 @@ it('counts all 500 coincident voices and shows all scattered placements in a cou
   expect(current(f)[0].count).toBe(500);
   f.notes.forEach((n, i) => {
     n.value.pan = i / 499;
+    n.value.room = i / 499;
   });
   expect(current(f)).toHaveLength(1);
   expect(current(f)[0].positions).toHaveLength(500);
+  expect(current(f)[0].pan).toBeCloseTo(0.5, 10);
+  expect(current(f)[0].room).toBeCloseTo(0.5, 10);
   expect(current(f)[0].count).toBe(500);
 });
 it('fans overlapping real markers with unchanged true positions at both desktop sizes and Stage B', () => {
@@ -106,10 +116,9 @@ it('fans overlapping real markers with unchanged true positions at both desktop 
       marks = current(f);
     const { box, spots } = stageLayout(f, marks, (s) => s.length * 7);
     expect(spots).toHaveLength(6);
-    for (const s of spots.filter((s) => s.mark.room > 0))
-      expect(Math.hypot(s.x - s.trueX, s.y - s.trueY)).toBeLessThan(2);
+
     for (const s of spots.filter((s) => s.mark.room === 0))
-      expect(Math.abs(s.y - s.trueY)).toBeLessThan(35);
+      expect(Math.abs(s.y - s.trueY)).toBeLessThan(2);
     for (const s of spots) {
       expect(s.trueX).toBe(truePlace(box, s.mark.pan, s.mark.room).x);
       expect(s.trueY).toBe(truePlace(box, s.mark.pan, s.mark.room).y);
@@ -165,4 +174,37 @@ it('keeps one and twenty in-section instruments inside a narrow stage', () => {
           spots[i].radius + spots[j].radius,
         );
   }
+});
+
+it('draws a lone dry instrument exactly on the front row at every gain and stage size', () => {
+  for (const [width, height] of [
+    [1299, 673],
+    [1131.25, 467.59],
+    [559, 673],
+  ])
+    for (const gain of [0, 0.5, 1, 2]) {
+      const f = { ...scoreFrame(), width, height };
+      f.notes = [note(10, 11, { gain })];
+      const { spots } = stageLayout(f, current(f), (s) => s.length * 7);
+      expect(spots[0].x).toBeCloseTo(spots[0].trueX, 10);
+      expect(spots[0].y).toBeCloseTo(spots[0].trueY, 10);
+    }
+});
+it('labels delay-only corpus rugs without inventing a size requester and bounds header rows', () => {
+  const rugs = roomRugs(delay, current(delay));
+  expect(roomCaptions(rugs)).toEqual([
+    'room 1 · size not specified',
+    'room 2 · size not specified',
+  ]);
+  const crowded = roomCaptions([...rugs, { ...rugs[0], orbit: 3 }]);
+  expect(crowded).toHaveLength(2);
+  expect(crowded[1]).toContain('+1 more rug');
+});
+it('omits out-of-section rests but preserves an out-of-section scored hold', () => {
+  const f = scoreFrame(3);
+  f.instruments[0].inSection = false;
+  f.instruments[1].inSection = false;
+  f.notes = [note(10, 11, {}, '0'), note(9, 10, {}, '1')];
+  expect(current(f).map((m) => m.instruments[0].id)).toEqual(['0', '2']);
+  expect(current(f)[0].held).toBe(true);
 });

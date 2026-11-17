@@ -1,6 +1,12 @@
 import type { ViewDefinition, ViewFrame } from './types';
 import { line, mount2d, flash } from './shared/retro-2d';
-import { indexStage, stageMarks, roomRugs, type StageIndex } from './soundstage/model';
+import {
+  indexStage,
+  stageMarks,
+  roomRugs,
+  roomCaptions,
+  type StageIndex,
+} from './soundstage/model';
 import { stageLayout, truePlace } from './soundstage/geometry';
 
 const number = (n: number) => String(Number(n.toFixed(2))).replace(/^0\./, '.');
@@ -55,7 +61,9 @@ function drawStage(c: CanvasRenderingContext2D, f: ViewFrame, index: StageIndex)
   c.textAlign = 'left';
 
   // Rugs enclose both the true positions and their fanned markers.
-  for (const [i, rug] of roomRugs(f, marks).entries()) {
+  const rugs = roomRugs(f, marks);
+  const captions = roomCaptions(rugs);
+  for (const [i, rug] of rugs.entries()) {
     const members = spots.filter((s) => rug.marks.includes(s.mark));
     const places = members.flatMap((s) => [
       { x: s.x, y: s.y },
@@ -81,14 +89,12 @@ function drawStage(c: CanvasRenderingContext2D, f: ViewFrame, index: StageIndex)
     c.stroke();
     c.restore();
     // Requests identify who supplied the scored room size, not an audible winner.
-    const title = `room ${String(rug.orbit)}`;
-    const requests = rug.requests.length
-      ? rug.requests.map((r) => `${r.instrument.name} ${number(r.size)}`).join(' · ')
-      : 'size not specified';
-    const rowY = 76 + i * 16;
-    c.font = `10px "${theme.fontMono}"`;
-    c.fillStyle = theme.text;
-    c.fillText(`${title} · size requested by ${requests}`, box.left, rowY, box.right - box.left);
+    const caption = captions[i];
+    if (caption) {
+      c.font = `10px "${theme.fontMono}"`;
+      c.fillStyle = theme.text;
+      c.fillText(caption, box.left, 76 + i * 14, box.right - box.left);
+    }
   }
   // Hairlines and tiny crosses always expose the unshifted scored placement.
   for (const spot of spots) {
@@ -183,7 +189,11 @@ function drawStage(c: CanvasRenderingContext2D, f: ViewFrame, index: StageIndex)
   c.fillText('you are here', centre, box.bottom + 44);
   c.textAlign = 'left';
   c.fillText(
-    panUsers.length ? 'pan sampled per note' : 'all at centre · pan 0.5',
+    marks.some((m) => m.unknown)
+      ? '? unsampled setting uses defaults'
+      : panUsers.length
+        ? 'pan sampled per note'
+        : 'all at centre · pan 0.5',
     20,
     h - 14,
     w * 0.48,
@@ -191,15 +201,6 @@ function drawStage(c: CanvasRenderingContext2D, f: ViewFrame, index: StageIndex)
   c.textAlign = 'right';
   c.fillText('hairlines → true place · gain 0–2', w - 20, h - 14, w * 0.48);
   c.textAlign = 'left';
-  if (marks.some((m) => m.unknown)) {
-    c.fillStyle = theme.text;
-    c.fillText(
-      '? unsampled setting uses defaults',
-      box.left + 6,
-      box.bottom - 7,
-      box.right - box.left - 12,
-    );
-  }
   if (!marks.length) {
     c.fillStyle = theme.muted;
     c.textAlign = 'center';

@@ -134,6 +134,7 @@ test('Soundstage: bar 11, five themes, Stage B, playing, panning corpus and fram
   for (const [file, times] of [
     ['micro-signal-lanes', [10.05, 10.55]],
     ['mms-jux', [10.4]],
+    ['micro-orbit-delay', [10.4]],
   ] as const) {
     await page.evaluate(
       async (source) => {

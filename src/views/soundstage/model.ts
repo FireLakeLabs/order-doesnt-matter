@@ -142,6 +142,16 @@ export interface Rug {
   marks: Mark[];
   requests: RoomRequest[];
 }
+/** Keep room captions clear of the stage axes. Every rug still draws. */
+export function roomCaptions(rugs: readonly Rug[]): string[] {
+  return rugs.slice(0, 2).map((rug, i) => {
+    const request = rug.requests.length
+      ? `size requested by ${rug.requests.map((r) => `${r.instrument.name} ${String(Number(r.size.toFixed(2)))}`).join(' · ')}`
+      : 'size not specified';
+    const more = rugs.length - 2;
+    return `room ${String(rug.orbit)} · ${request}${i === 1 && more > 0 ? ` · +${String(more)} more ${more === 1 ? 'rug' : 'rugs'}` : ''}`;
+  });
+}
 /** Membership is the host's sampled room inventory. Requests name authors,
  * never claim to measure a shared room's winning or audible state. */
 export function roomRugs(frame: ViewFrame, marks: Mark[]): Rug[] {

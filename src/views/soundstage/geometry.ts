@@ -29,7 +29,8 @@ export function stageBox(frame: Pick<ViewFrame, 'width' | 'height'>): StageBox {
 export function truePlace(box: StageBox, pan: number, room: number) {
   return {
     x: box.left + 42 + pan * (box.right - box.left - 84),
-    y: box.bottom - 42 - room * (box.bottom - box.top - 84),
+    // Enough clearance for the largest circle (gain 2) and its two label lines.
+    y: box.bottom - 80 - room * (box.bottom - box.top - 122),
   };
 }
 export function radiusOf(frame: Pick<ViewFrame, 'width' | 'height'>, gain: number): number {
