@@ -88,6 +88,7 @@ test('real house tray: values, source, rhythm, signal, ordered rewrites and inst
   await page.getByRole('button', { name: 'Remove rewrite', exact: true }).click();
   await page.getByRole('button', { name: 'Edit fast', exact: true }).click();
   await page.getByRole('button', { name: 'Remove rewrite', exact: true }).click();
+  expect(await document(page)).toEqual(original);
   await done(page);
   await selectNode(page, { breadcrumb: ['bass'] });
   const name = page.getByLabel('Instrument name', { exact: true });

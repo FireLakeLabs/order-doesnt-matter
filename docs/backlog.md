@@ -8,6 +8,10 @@ Everything known to be outstanding, in one place. The [model](model.md) and
 - **Done:** the Studio is the main page, saved documents survive the switch, and
   the retired interface and its separate browser job are removed.
 
+- **Retired editor shell cleanup:** `src/editor/panel.ts` is unreferenced;
+  `src/editor/style.css` retains inert selectors for the retired shell. These
+  files were outside cutover ownership and need an editor-owner cleanup.
+
 ## Editor and retention boundaries
 
 - **Source fallbacks:** patterned per-cycle counts, legacy/opaque mini chunks and
@@ -17,6 +21,9 @@ Everything known to be outstanding, in one place. The [model](model.md) and
   `superimpose` remain source-first. Supported branches have navigation and edits.
 - **Dependent deletion:** unsafe removal remains refused. Verified dependents are
   navigable; unknown dependencies retain source/mute guidance.
+- **Startup recovery failure:** an unplayable saved document stays recoverable
+  in Keep work, with its load error visible. A disposable example fallback would
+  need to preserve the saved candidate through the replacement flow.
 - **Recovery:** one latest browser-managed document, latest writer wins across
   tabs, browser clearing can remove it, and Undo/transport are not persisted.
   Portable JSON and generated Strudel are available; broader persistence is future

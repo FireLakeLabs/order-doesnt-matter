@@ -1,4 +1,6 @@
 import { openStudio } from './studio-open';
+import { waitForPending } from './helpers';
+import { generate } from '../../src/generate';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import type {} from '../../src/studio/main';
@@ -244,7 +246,9 @@ test('cutoff edit is pending until its engine acknowledgement; top-bar Undo rest
   await page.evaluate(() => window.odmStudio.stop());
   await page.getByLabel('Low bound', { exact: true }).fill('210');
   await page.getByLabel('Low bound', { exact: true }).press('Enter');
-  const saved = await page.evaluate(() => window.odmStudio.app.state.doc);
+  await waitForPending(page);
+  const saved = await page.evaluate(() => window.odmStudio.app.state.doc!);
+  expect(generate(saved)).toMatch(/\.range\(210,\s*2600\)/);
   await page.reload();
   await ready(page);
   expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(saved);
