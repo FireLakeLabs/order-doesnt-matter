@@ -3,12 +3,10 @@ import { beforeAll, expect, it } from 'vitest';
 import { initialState, loadPiece } from '../../src/app/state';
 import { importStrudel } from '../../src/import';
 import { generate } from '../../src/generate';
-import { buildFrame, viewNotes } from '../../src/studio/frame';
+import { buildFrame, neededRange, viewNotes } from '../../src/studio/frame';
 import type { ViewFrame, ViewNote } from '../../src/views/types';
 import {
   cameraPose,
-  futureReach,
-  gateX,
   indexRibbons,
   noteHeight,
   noteTurn,
@@ -19,16 +17,18 @@ import {
   ribbonGeometry,
   ribbonParts,
   scoredPitch,
-  timeScale,
 } from '../../src/views/ribbons/model';
 import { pitch } from '../../src/views/shared/pitch';
 import { queryEventsNode } from '../node-query';
 import { scoreFrame } from './score-fixture';
 
 let frame: ViewFrame;
+let state: ReturnType<typeof loadPiece>;
+let programs: Map<string, string>;
 beforeAll(async () => {
   const source = readFileSync('corpus/programs/real-dubstep-arranged.strudel', 'utf8');
-  const state = loadPiece(initialState(), source, importStrudel(source));
+  state = loadPiece(initialState(), source, importStrudel(source));
+  programs = new Map(state.rows.map((row) => [row.id, generate(state.doc!, { only: row.id })]));
   const entries = await Promise.all(
     state.rows.map(
       async (row) =>
@@ -52,14 +52,12 @@ const only = (note: ViewNote): ViewFrame => ({
 });
 const partAt = (note: ViewNote) => ribbonParts(only(note))[0];
 
-it('puts the past to the left and the future to the right, with Window setting reach', () => {
-  const x = (time: number, window: number) => gateX + ((time - frame.now) / window) * timeScale;
-  expect(x(10, 1)).toBeLessThan(gateX);
-  expect(x(11, 1)).toBeGreaterThan(gateX);
-  expect(x(frame.now, 8)).toBe(gateX);
-  expect(x(11, 2) - gateX).toBeCloseTo((x(11, 1) - gateX) / 2);
-  expect(pastReach * 8).toBeLessThanOrEqual(4);
-  expect(futureReach).toBeGreaterThan(pastReach);
+it('keeps every allowed Window within the host history at four-cycle block edges', () => {
+  for (const now of [8, 8.25, 11.99, 12])
+    for (const window of [1, 2, 4, 8]) {
+      const range = neededRange('window', now, window, state.sections);
+      expect(now - pastReach * window).toBeGreaterThanOrEqual(range.from);
+    }
 });
 it('opens exactly for the scored span and makes gain set the note width', () => {
   const note = frame.notes.find((n) => n.hasOnset && n.start === 10.375)!;
@@ -165,10 +163,19 @@ it('fans all twenty in depth, retains one full ribbon with one instrument, and k
       index,
     })),
   };
+  input.notes = input.instruments.flatMap((instrument, i) =>
+    frame.notes
+      .filter((n) => n.instrument === frame.instruments[i % 13].id)
+      .map((n) => ({ ...n, instrument: instrument.id })),
+  );
   const parts = ribbonParts(input);
   expect(parts).toHaveLength(20);
   expect(new Set(parts.map((p) => p.depth)).size).toBe(20);
   expect(parts[0].depth).toBeLessThan(parts[19].depth);
+  expect(parts.every((p) => p.notes.length > 0)).toBe(true);
+  expect(ribbonGeometry(input, parts).spans).toBe(
+    parts.reduce((sum, p) => sum + p.notes.length, 0),
+  );
   const single = ribbonParts({ ...input, instruments: input.instruments.slice(0, 1) });
   expect(single).toHaveLength(1);
   expect(single[0].depth).toBe(0);
@@ -177,7 +184,42 @@ it('fans all twenty in depth, retains one full ribbon with one instrument, and k
     sections: [{ name: 'test', from: 0, to: 28 }],
     instruments: input.instruments.map((i, index) => ({ ...i, inSection: index === 10 })),
   });
-  expect(changed[0].depth).toBe(parts[10].depth);
+  for (const part of changed)
+    expect(part.depth).toBe(parts.find((p) => p.instrument.id === part.instrument.id)!.depth);
+});
+it('keeps unpitched slots steady across real host windows, section changes and empty pitched lanes', async () => {
+  const slots = new Map<string, number>();
+  for (const now of [7.9, 10.4, 15.9, 16]) {
+    const range = neededRange('window', now, 1, state.sections);
+    const entries = await Promise.all(
+      state.rows.map(
+        async (row) =>
+          [row.id, await queryEventsNode(programs.get(row.id)!, range.from, range.to)] as const,
+      ),
+    );
+    for (const [, result] of entries) expect(result.error).toBeNull();
+    const score = { ...range, events: Object.fromEntries(entries) };
+    const current = buildFrame({ ...frame, state, score, notes: viewNotes(score), now });
+    for (const part of ribbonParts(current))
+      if (part.unpitched) {
+        if (slots.has(part.instrument.id))
+          expect(part.baseline).toBe(slots.get(part.instrument.id));
+        else slots.set(part.instrument.id, part.baseline);
+      }
+  }
+  expect(slots.size).toBeGreaterThanOrEqual(6);
+  const all = { ...frame, sections: [] };
+  const original = ribbonParts(all);
+  const silentPitch = frame.instruments.find((i) => i.name === 'darkPad')!;
+  const changed = ribbonParts({
+    ...all,
+    notes: frame.notes.filter((n) => n.instrument !== silentPitch.id),
+  });
+  expect(changed.find((p) => p.instrument.id === silentPitch.id)!.unpitched).toBe(false);
+  for (const part of original.filter((p) => p.unpitched))
+    expect(changed.find((p) => p.instrument.id === part.instrument.id)!.baseline).toBe(
+      part.baseline,
+    );
 });
 it('coalesces repeated real eight-cycle carry-ins, while retaining every genuine onset', async () => {
   const states: ReturnType<typeof ribbonAt>[] = [];

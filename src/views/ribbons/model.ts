@@ -67,6 +67,8 @@ export function scoredPitch(note: ViewNote, instrument: ViewInstrument) {
     return undefined;
   return pitch(note.value);
 }
+const hasPitchControl = (instrument: ViewInstrument) =>
+  instrument.settings.some((s) => ['note', 'n', 'freq'].includes(s.name));
 export function ribbonParts(frame: ViewFrame, score = indexRibbons(frame.notes)) {
   const from = frame.now - frame.lookAhead * pastReach;
   const to = frame.now + frame.lookAhead * futureReach;
@@ -83,21 +85,20 @@ export function ribbonParts(frame: ViewFrame, score = indexRibbons(frame.notes))
       instrument.inSection ||
       notes.some((n) => n.start < to && n.end > from),
   );
-  const drums = shown.filter(
-    ({ notes, instrument }) => !notes.some((n) => scoredPitch(n, instrument) !== undefined),
-  );
+  // Reserve slots from the document inventory, never from the current window.
+  // An opaque source may later reveal pitched notes; its reserved slot still
+  // remains empty rather than shifting every other unpitched ribbon.
+  const drums = all.filter((instrument) => !hasPitchControl(instrument));
   return shown.map(({ instrument, notes }) => {
     const pitches = notes
       .map((n) => scoredPitch(n, instrument))
       .filter((p): p is number => p !== undefined);
-    const unpitched = pitches.length === 0;
+    const unpitched = pitches.length === 0 && !hasPitchControl(instrument);
     const baseline = unpitched
       ? 0.02 +
         0.4 *
-          (1 -
-            (drums.findIndex((p) => p.instrument.id === instrument.id) + 0.5) /
-              Math.max(1, drums.length))
-      : pitchHeight(pitches[Math.floor(pitches.length / 2)]);
+          (1 - (drums.findIndex((i) => i.id === instrument.id) + 0.5) / Math.max(1, drums.length))
+      : pitchHeight(pitches[Math.floor(pitches.length / 2)] ?? 36);
     return {
       instrument,
       notes,
