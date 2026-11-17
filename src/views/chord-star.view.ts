@@ -139,17 +139,22 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
     c.fillStyle = points.length ? theme.text : theme.muted;
     c.fillText(className(pc), lx, ly + 6);
   }
-  // A ground-coloured label keeps crossed polygons from obscuring the chord name.
-  c.fillStyle = theme.ground;
-  c.globalAlpha = 0.94;
-  c.fillRect(cx - r * 0.59, cy - 53, r * 1.18, 111);
-  c.globalAlpha = 1;
+  // Outline the letters rather than covering the chord's geometry with a panel.
+  const centreLabel = (label: string, y: number) => {
+    c.save();
+    c.strokeStyle = theme.ground;
+    c.lineWidth = 4;
+    c.lineJoin = 'round';
+    c.strokeText(label, cx, y, r * 1.15);
+    c.restore();
+    c.fillText(label, cx, y, r * 1.15);
+  };
   c.textAlign = 'center';
   const current = state.current;
   if (current.root) {
     c.font = `700 ${String(Math.min(76, r * 0.4))}px "${theme.fontDisplay}"`;
     c.fillStyle = theme.text;
-    c.fillText(current.root, cx, cy + 2);
+    centreLabel(current.root, cy + 2);
     text(current.quality ?? '', cx, cy + 29, 15, theme.muted, r * 1.15);
   } else {
     const perLine = r < 150 ? 3 : 6;
@@ -165,7 +170,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
     c.font = `600 ${String(Math.max(12, Math.min(25, r * 0.13)))}px "${theme.fontDisplay}"`;
     c.fillStyle = theme.text;
     lines.forEach((label, i) => {
-      c.fillText(label, cx, cy + (i - (lines.length - 1) / 2) * 17, r * 1.15);
+      centreLabel(label, cy + (i - (lines.length - 1) / 2) * 17);
     });
     if (lines.length < 3 && current.pitches.length)
       text('sounding pitches', cx, cy + 26, 11, theme.muted, r * 1.1);
