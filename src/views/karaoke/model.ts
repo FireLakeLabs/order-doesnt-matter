@@ -91,8 +91,8 @@ export function layout(f: Pick<ViewFrame, 'width' | 'height'>, count: number) {
     right = Math.max(left + 1, f.width - Math.max(20, 60 * scale));
   const top = compact
     ? Math.min(105, f.height * 0.22)
-    : Math.min(Math.max(100, 158 * scale), f.height * 0.32);
-  const bottom = f.height - (compact ? 80 : Math.max(110, 86 * scale));
+    : Math.min(Math.max(100, 158 * scale), f.height * 0.2);
+  const bottom = f.height - (compact ? 80 : Math.min(Math.max(110, 86 * scale), f.height * 0.18));
   const rowHeight = Math.max(1, (bottom - top) / Math.max(1, count));
   const boost = Math.min(2.5, Math.max(1, Math.sqrt(6 / Math.max(1, count))));
   return {
@@ -115,14 +115,35 @@ export function fontSize(g: Geometry, value: number) {
 export function previewFontSize(g: Geometry, value: number) {
   return Math.max(12, fontSize({ ...g, boost: 1 }, value) * 0.55);
 }
+/** Shared drawing geometry for glyphs, underline and the ball at its landing. */
+export function wordBox(g: Geometry, size: number, stroke = Math.max(2, 4 * g.scale)) {
+  const radius = Math.max(3, 7 * g.scale * Math.min(1, g.rowHeight / 36));
+  return {
+    ascent: size * 0.72,
+    underline: size * 0.25,
+    stroke,
+    height: size * 0.97 + stroke,
+    radius,
+    landing: size * 0.72 + radius + 2,
+  };
+}
+/** Spread coincident dots over the available band; even a crowd keeps distinct time-pure positions. */
+export function stackOffset(index: number, count: number, span: number) {
+  return (index - (count - 1) / 2) * Math.min(2.5, Math.max(0, span) / count);
+}
 export function crowded(
   words: readonly Word[],
   bar: number,
   g: Geometry,
   measure: (text: string, size: number) => number,
   sizeForGain: (value: number) => number = (value) => fontSize(g, value),
+  stroke = Math.max(2, 4 * g.scale),
 ) {
-  if (g.rowHeight < 22 || words.some((w) => sizeForGain(w.gain) > g.rowHeight * 1.8)) return true;
+  if (
+    g.rowHeight < 22 ||
+    words.some((w) => wordBox(g, sizeForGain(w.gain), stroke).height > g.rowHeight)
+  )
+    return true;
   const starts = words.filter((w) => w.note.start >= bar);
   for (let i = 0; i < starts.length; i++) {
     const word = starts[i],

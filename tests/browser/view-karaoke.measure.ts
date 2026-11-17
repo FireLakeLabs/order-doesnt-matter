@@ -2,7 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { prepare } from './view-evidence';
 import { noteProgress } from '../../src/views/shared/timing';
-import { analyse, crowded, fontSize, layout, lyrics } from '../../src/views/karaoke/model';
+import { analyse, crowded, fontSize, layout, lyrics, wordBox } from '../../src/views/karaoke/model';
 import type { ViewFrame } from '../../src/views/types';
 // Local evidence only. CI runs the shared smoke.
 test('karaoke: lyrics, five themes, crowded hats and CPU frame cost', async ({ page }) => {
@@ -97,7 +97,8 @@ test('karaoke: lyrics, five themes, crowded hats and CPU frame cost', async ({ p
     { label: 'Stage B', width: 560, height: 760 },
     { label: 'Stage B host', ...stageB },
   ].map((size) => {
-    const g = layout(size, song.rows.length);
+    const g = layout(size, song.rows.length),
+      box = wordBox(g, fontSize(g, 1));
     return {
       ...size,
       wordAtGain1: fontSize(g, 1),
@@ -105,6 +106,10 @@ test('karaoke: lyrics, five themes, crowded hats and CPU frame cost', async ({ p
       requiredWordPx: (26 * size.width) / 960,
       nameSize: g.nameSize,
       rowHeight: g.rowHeight,
+      wordAndUnderlineHeight: box.height,
+      landedBallHeight: box.landing + box.radius,
+      rowClearance: g.rowHeight - box.height,
+      landingClearance: g.rowHeight - box.landing - box.radius,
       rows: song.rows.map((r) => ({
         name: r.instrument.name,
         crowded: crowded(r.words, song.bar, g, (s, font) => s.length * font * 0.6),

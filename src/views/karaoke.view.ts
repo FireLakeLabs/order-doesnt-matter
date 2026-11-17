@@ -10,6 +10,8 @@ import {
   layout,
   lyrics,
   previewFontSize,
+  wordBox,
+  stackOffset,
 } from './karaoke/model';
 import type { Part, Word } from './karaoke/model';
 function fit(c: CanvasRenderingContext2D, text: string, width: number) {
@@ -101,7 +103,11 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Map<string, Part
     if (g.rowHeight > 50 && carried.length) {
       c.font = `12px "${t.fontMono}"`;
       c.fillText(
-        fit(c, `held ${carried.map((w) => w.text).join(' ')}`, g.left - 38),
+        fit(
+          c,
+          `held ${carried.map((w) => w.text).join(' ')}`,
+          g.left - Math.max(28, 42 * g.scale) - 10,
+        ),
         Math.max(28, 42 * g.scale),
         baseline + 18,
       );
@@ -111,9 +117,9 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Map<string, Part
     c.rect(g.left, 0, g.right - g.left, g.bottom);
     c.clip();
     const ball = hop(row.part, row.instrument.id, f.now, g);
-    const radius = Math.max(3, 7 * g.scale * Math.min(1, g.rowHeight / 36));
+    const radius = wordBox(g, 0).radius;
     const landing = (n: Word['note']) =>
-      dense ? baseline - 3 - radius - 2 : baseline - fontSize(g, gain(n)) * 0.85 - radius - 3;
+      dense ? baseline - 3 - radius - 2 : baseline - wordBox(g, fontSize(g, gain(n))).landing;
     if (!dense) {
       const onsets = row.part.onsets.filter((n, j, all) => !j || n.start !== all[j - 1].start);
       c.strokeStyle = t.muted;
@@ -147,9 +153,9 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Map<string, Part
         x = g.x(n.start, song.bar),
         end = g.x(n.end, song.bar),
         p = noteProgress(n, f.now),
-        under = baseline + (dense ? 7 : size * 0.25);
+        under = baseline + (dense ? 7 : wordBox(g, size).underline);
       c.strokeStyle = t.line;
-      c.lineWidth = dense ? 1 : Math.max(2, 4 * g.scale);
+      c.lineWidth = dense ? 1 : wordBox(g, size).stroke;
       line(c, x, under, end, under);
       if (p > 0) {
         c.strokeStyle = colour;
@@ -208,7 +214,10 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Map<string, Part
   c.globalAlpha = 1;
   c.strokeStyle = t.line;
   line(c, g.left, g.bottom + 15, g.right, g.bottom + 15);
-  const previewY = g.compact ? f.height - 26 : g.bottom + (f.height - g.bottom) * 0.63;
+  const previewTop = g.bottom + 39,
+    previewBottom = g.compact ? f.height - 8 : f.height - 24;
+  const previewHeight = Math.max(1, previewBottom - previewTop);
+  const previewY = (previewTop + previewBottom) / 2;
   c.font = `${String(g.compact ? 12 : g.nameSize)}px "${t.fontMono}"`;
   c.fillStyle = t.muted;
   c.fillText(
@@ -227,9 +236,10 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Map<string, Part
     const dense = crowded(
       next.map((n) => n.word),
       song.bar + 1,
-      { ...g, rowHeight: 32 },
+      { ...g, rowHeight: previewHeight },
       previewMeasure,
       (value) => previewFontSize(g, value),
+      1,
     );
     const groups = new Map<number, typeof next>();
     for (const n of next) {
@@ -240,21 +250,16 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Map<string, Part
     }
     c.save();
     c.beginPath();
-    c.rect(
-      g.left,
-      g.bottom + 39,
-      g.right - g.left,
-      (g.compact ? f.height - 8 : f.height - 24) - (g.bottom + 39),
-    );
+    c.rect(g.left, previewTop, g.right - g.left, previewHeight);
     c.clip();
     c.globalAlpha = 0.4;
     for (const group of groups.values())
       for (const [i, { word, colour }] of group.entries()) {
         const offset = dense
-          ? ((i % Math.min(7, group.length)) - (Math.min(7, group.length) - 1) / 2) * 2.5
+          ? stackOffset(i, group.length, Math.min(18, Math.max(0, previewHeight - 12)))
           : 0;
         const x = g.x(word.note.start, song.bar + 1),
-          y = previewY + offset;
+          y = (dense ? previewY : previewBottom - 5) + offset;
         c.fillStyle = colour;
         c.strokeStyle = colour;
         c.lineWidth = 1;

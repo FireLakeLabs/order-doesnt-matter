@@ -15,6 +15,8 @@ import {
   layout,
   lyrics,
   previewFontSize,
+  wordBox,
+  stackOffset,
   text,
 } from '../../src/views/karaoke/model';
 import { scoreFrame } from './score-fixture';
@@ -189,12 +191,15 @@ it('uses only the frame when scrubbing in any order and does not alter the score
   ).toBe(real.notes.length);
 });
 
-it('keeps long-gap hops within the line budget instead of sending a ball off stage', () => {
+it('keeps a long-gap hop visible on the stage', () => {
   const g = layout(scoreFrame(), 1),
-    part = analyse([note(0, 64), note(64, 65)]).get('0')!;
-  expect(hop(part, '0', 32, g)!.height).toBeLessThanOrEqual(g.rowHeight * 0.6);
+    part = analyse([note(0, 64), note(64, 65)]).get('0')!,
+    box = wordBox(g, fontSize(g, 1));
+  const ball = hop(part, '0', 32, g)!;
+  const center = g.top + 0.75 * g.rowHeight - box.landing - ball.rise;
+  expect(center - box.radius).toBeGreaterThanOrEqual(0);
+  expect(center + box.radius).toBeLessThan(g.bottom);
 });
-
 it('sets the combined next cue at real starts and applies the same crowd rule to overlapping instruments', () => {
   const song = lyrics(real, analyse(real.notes)),
     next = song.rows.flatMap((r) => r.next).sort((a, b) => a.note.start - b.note.start),
@@ -209,4 +214,26 @@ it('sets the combined next cue at real starts and applies the same crowd rule to
   expect(
     song.rows.find((r) => r.instrument.name === 'subBass')!.next.map((w) => g.x(w.note.start, 11)),
   ).toEqual([g.left, g.left + (g.right - g.left) / 2]);
+});
+
+it('fits real words, their underlines and complete landings between lines at the default 1920 host size', () => {
+  const song = lyrics(real, analyse(real.notes)),
+    g = layout({ width: 1131.25, height: 467.59375 }, song.rows.length);
+  for (const row of song.rows) {
+    expect(crowded(row.words, 10, g, metrics)).toBe(false);
+    for (const word of row.words) {
+      const box = wordBox(g, fontSize(g, word.gain));
+      expect(box.ascent + box.underline + box.stroke).toBeLessThanOrEqual(g.rowHeight);
+      expect(box.landing + box.radius).toBeLessThanOrEqual(g.rowHeight);
+    }
+  }
+  const shorter = { ...g, rowHeight: 34 };
+  expect(crowded(song.rows[0].words, 10, shorter, metrics)).toBe(true);
+});
+it('does not reuse preview positions when twenty or five hundred notes share a start', () => {
+  for (const count of [20, 500]) {
+    const offsets = Array.from({ length: count }, (_, i) => stackOffset(i, count, 18));
+    expect(new Set(offsets).size).toBe(count);
+    expect(Math.max(...offsets) - Math.min(...offsets)).toBeLessThanOrEqual(18);
+  }
 });
