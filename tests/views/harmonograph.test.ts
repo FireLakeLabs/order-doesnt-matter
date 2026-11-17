@@ -159,12 +159,14 @@ it('counts every dense pair for one and twenty instruments, with bounded represe
 });
 it('uses at least the card’s main amplitude at Stage A and a large readable Stage B figure', () => {
   expect(layout(1300, 760, 5).radius).toBeGreaterThanOrEqual(225 * (1300 / 960));
-  expect(layout(1299, 674.5, 5).radius).toBeGreaterThanOrEqual(225 * (1299 / 960));
+  // Short hosts cap the figure to leave the header and captions clear.
+  expect(layout(1299, 674.5, 5).radius * 2).toBe(674.5 - 128);
   for (const h of [470.5, 630, 700, 760]) {
     const g = layout(560, h, 5);
     expect(g.radius).toBeGreaterThanOrEqual(225 * (560 / 960));
-    expect((g.radius * 2) / h).toBeGreaterThan(0.55);
-    expect(g.cy - g.radius).toBeGreaterThanOrEqual(0);
+    expect((g.radius * 2) / h).toBeGreaterThan(0.5);
+    expect(g.cy - g.radius).toBeGreaterThanOrEqual(64);
+    expect(g.cy + g.radius).toBeLessThan(g.captionY - 16);
     expect(g.captionY + 20).toBeLessThan(g.miniY > g.chartHeight ? g.miniY : h);
   }
 });

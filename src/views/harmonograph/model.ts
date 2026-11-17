@@ -190,10 +190,10 @@ export function trace(pair: Pair, now: number, small = false) {
   return { points, progress, turns, envelope: 0.42 ** progress };
 }
 export function layout(width: number, height: number, others: number) {
-  const below = width < 900 && others > 0 && (height - 300) / 2 > width * 0.73 * 0.47;
+  const below = width < 900 && others > 0 && (height - 364) / 2 > width * 0.73 * 0.47;
   const side = others > 0 && !below;
   const mainWidth = side ? width * 0.73 : width;
-  const chartHeight = height - (below ? 300 : 64);
+  const chartHeight = height - (below ? 300 : 64) - 64;
   const radius = Math.max(
     20,
     Math.min(chartHeight / 2, mainWidth * 0.47, Math.max((225 * width) / 960, height * 0.36)),
@@ -205,12 +205,12 @@ export function layout(width: number, height: number, others: number) {
     mainWidth,
     radius,
     cx: side ? width * 0.4 : width / 2,
-    cy: chartHeight / 2,
-    captionY: chartHeight + 28,
+    cy: 64 + chartHeight / 2,
+    captionY: 64 + chartHeight + 28,
     chartHeight,
     miniColumns,
     miniX: below ? 16 : width * 0.755,
-    miniY: below ? chartHeight + 78 : 82,
+    miniY: below ? 64 + chartHeight + 78 : 82,
     miniWidth: below ? width - 32 : width * 0.23,
     miniHeight: below ? 200 : height - 96,
     miniRows: Math.max(1, Math.ceil(others / miniColumns)),
