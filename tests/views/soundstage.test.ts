@@ -45,6 +45,7 @@ it('uses host room membership and names the actual scored room-size requester', 
   const rugs = roomRugs(real, current(real));
   expect(rugs).toHaveLength(1);
   expect(rugs[0].orbit).toBe(1);
+  expect(roomCaptions(rugs)).toEqual(['room 1 · size requested by sd · drop .7']);
   expect(rugs[0].marks.map((m) => m.instruments[0].name)).toEqual(['sd · drop', 'wobbleBass']);
   expect(rugs[0].requests.map((r) => [r.instrument.name, r.size])).toEqual([['sd · drop', 0.7]]);
   expect(roomRugs({ ...real, rooms: [] }, current(real))).toEqual([]);

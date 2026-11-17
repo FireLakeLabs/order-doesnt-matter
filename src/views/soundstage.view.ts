@@ -5,11 +5,11 @@ import {
   stageMarks,
   roomRugs,
   roomCaptions,
+  settingText,
   type StageIndex,
 } from './soundstage/model';
 import { stageLayout, truePlace } from './soundstage/geometry';
 
-const number = (n: number) => String(Number(n.toFixed(2))).replace(/^0\./, '.');
 function drawStage(c: CanvasRenderingContext2D, f: ViewFrame, index: StageIndex) {
   const { width: w, height: h, theme } = f;
   const marks = stageMarks(f, index);
@@ -45,7 +45,7 @@ function drawStage(c: CanvasRenderingContext2D, f: ViewFrame, index: StageIndex)
     c.setLineDash([]);
     c.fillStyle = theme.muted;
     c.textAlign = 'right';
-    c.fillText(room === 0 ? 'dry' : room === 1 ? 'wet' : number(room), box.left - 9, p.y + 4);
+    c.fillText(room === 0 ? 'dry' : room === 1 ? 'wet' : settingText(room), box.left - 9, p.y + 4);
   }
   const centre = truePlace(box, 0.5, 0).x;
   c.setLineDash([8, 6]);
@@ -159,8 +159,8 @@ function drawStage(c: CanvasRenderingContext2D, f: ViewFrame, index: StageIndex)
         new Set(mark.positions.map((p) => `${String(p.pan)}:${String(p.room)}`)).size > 1;
       c.fillText(
         range
-          ? `${String(mark.positions.length)} placements · gain ≤${number(mark.gain)}`
-          : `p ${number(mark.pan)} · r ${number(mark.room)} · g ${number(mark.gain)}${mark.unknown ? ' ?' : ''}`,
+          ? `${String(mark.positions.length)} placements · gain ≤${settingText(mark.gain)}`
+          : `p ${settingText(mark.pan)} · r ${settingText(mark.room)} · g ${settingText(mark.gain)}${mark.unknown ? ' ?' : ''}`,
         labelX,
         labelY + 14,
         spot.labelWidth,
