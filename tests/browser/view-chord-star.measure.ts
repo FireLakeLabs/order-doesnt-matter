@@ -96,6 +96,12 @@ test('chord-star: real arrangement, five themes, both stages and CPU cost', asyn
         })),
       })),
     ];
+    const dense = scenarios[2];
+    scenarios.push({
+      ...dense,
+      name: '500-staggered-20-parts',
+      notes: dense.notes.map((note, i) => ({ ...note, start: 17 + i / 500, end: 18 + i / 500 })),
+    });
     const result = [];
     for (const scenario of scenarios) {
       const samples: number[] = [];

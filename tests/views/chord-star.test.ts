@@ -109,6 +109,13 @@ it('aggregates every dense note into counted instrument/class occupancy for one 
     expect(state.classes).toHaveLength(12);
     expect(state.points.length).toBeLessThanOrEqual(12 * count);
     expect(at({ ...f, now: 1 }, analyse(dense)).current.pitches).toEqual([]);
+    const staggered = analyse(dense.map((n, i) => ({ ...n, start: i / 500, end: 1 + i / 500 })));
+    expect(at({ ...f, now: 0.4 }, staggered).current.points.reduce((n, p) => n + p.count, 0)).toBe(
+      201,
+    );
+    expect(
+      at({ ...f, now: 0.999 }, staggered).current.points.reduce((n, p) => n + p.count, 0),
+    ).toBe(500);
   }
 });
 it('honours muted parts without changing unpitched inventory and lists non-chords rather than guessing', () => {
