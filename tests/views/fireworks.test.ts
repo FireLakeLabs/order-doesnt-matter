@@ -218,3 +218,44 @@ it('matches the card burst widths at Stage A and keeps Stage B bursts readable',
     expect(Math.min(...tops) - caption).toBeLessThanOrEqual(height / 4);
   }
 });
+
+it('draws one long willow across per-cycle query fragments at a host block edge', async () => {
+  const scenes: ReturnType<typeof sky>[] = [];
+  for (const from of [0, 4]) {
+    const result = await queryEventsNode('note("c3").slow(8)', from, 13);
+    expect(result.error).toBeNull();
+    const instrument = frame.instruments[0];
+    const notes = viewNotes({ from, to: 13, events: { [instrument.id]: result } });
+    const copies = notes.filter((n) => n.start === 0 && n.end === 8);
+    if (from === 4) {
+      expect(copies).toHaveLength(4);
+      expect(copies.every((n) => !n.hasOnset)).toBe(true);
+    }
+    const input = { ...frame, now: 6, from, to: 13, notes, instruments: [instrument] };
+    const scene = sky(input);
+    expect(scene.shells).toHaveLength(1);
+    expect(scene.bursting).toBe(1);
+    expect(scene.flying).toBe(0);
+    scenes.push(scene);
+    if (from === 4) {
+      // Different values and genuine unison onsets retain their own occupancy.
+      const carry = copies[0];
+      expect(
+        sky({ ...input, notes: [carry, { ...carry, value: { ...carry.value, gain: 0.5 } }] })
+          .bursting,
+      ).toBe(2);
+      expect(
+        sky({
+          ...input,
+          notes: [
+            { ...carry, hasOnset: true },
+            { ...carry, hasOnset: true },
+          ],
+        }).bursting,
+      ).toBe(2);
+    }
+  }
+  expect(Array.from({ length: 22 }, (_, i) => shellSpark(scenes[0].shells[0], i))).toEqual(
+    Array.from({ length: 22 }, (_, i) => shellSpark(scenes[1].shells[0], i)),
+  );
+});

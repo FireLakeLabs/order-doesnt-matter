@@ -12,7 +12,20 @@ interface Event {
 }
 export function indexShells(notes: ViewNote[]) {
   const groups = new Map<string, Event[]>();
+  const fragments = new Set<string>();
   for (const note of notes) {
+    if (!note.hasOnset) {
+      // The host queries cycle by cycle, repeating the same whole carry-in.
+      // Only fragments coalesce; genuine coincident onsets keep their count.
+      const key = JSON.stringify([
+        note.instrument,
+        note.start,
+        note.end,
+        Object.entries(note.value).sort(([a], [b]) => a.localeCompare(b)),
+      ]);
+      if (fragments.has(key)) continue;
+      fragments.add(key);
+    }
     const midi = pitch(note.value);
     let seed = 2166136261;
     for (const char of `${note.instrument}/${String(note.start)}/${String(note.end)}/${String(midi)}`)
@@ -68,32 +81,36 @@ export function sky(frame: ViewFrame, groups = indexShells(frame.notes)) {
     bursting = 0;
   const floor = frame.height - Math.max(62, frame.height * 0.1);
   const linger = [0.12, 0.45, 1][frame.trails];
-  // The host preserves whole scored spans for carry-ins. A signal has only its
-  // clipped query span, so it cannot start before frame.from. Never relaunch it.
-  const knownOnset = (note: ViewNote) => note.hasOnset || note.start < frame.from;
-  // Resting pads return when their first shell enters the launch window. No note is hidden.
-  const pads = frame.instruments.filter(
-    (instrument) =>
-      instrument.inSection ||
-      (groups.get(instrument.id) ?? []).some(({ note }) => {
-        const duration = Math.max(0, note.end - note.start);
-        const life = (duration >= 0.25 ? duration : 0) + linger;
+  const parts = frame.instruments
+    .map((instrument) => {
+      const events: {
+        event: Event;
+        age: number;
+        duration: number;
+        willow: boolean;
+        life: number;
+      }[] = [];
+      for (const event of groups.get(instrument.id) ?? []) {
+        const { note } = event;
+        // A signal has only its clipped query span; carry-ins preserve the whole.
+        if (!note.hasOnset && note.start >= frame.from) continue;
         const age = frame.now - note.start;
-        return knownOnset(note) && age >= -frame.lookAhead && age < life;
-      }),
-  );
+        const duration = Math.max(0, note.end - note.start);
+        const willow = duration >= 0.25;
+        const life = (willow ? duration : 0) + linger;
+        if (age >= -frame.lookAhead && age < life)
+          events.push({ event, age, duration, willow, life });
+      }
+      return { instrument, events };
+    })
+    .filter(({ instrument, events }) => instrument.inSection || events.length > 0);
+  const pads = parts.map(({ instrument }) => instrument);
   const step = (frame.width * 0.8) / Math.max(1, pads.length);
-  pads.forEach((instrument, i) => {
+  parts.forEach(({ instrument, events }, i) => {
     const pad = frame.width * 0.1 + step * (i + 0.5);
     const visible: Shell[] = [];
-    for (const event of groups.get(instrument.id) ?? []) {
+    for (const { event, age, duration, willow, life } of events) {
       const { note } = event;
-      if (!knownOnset(note)) continue;
-      const age = frame.now - note.start;
-      const duration = Math.max(0, note.end - note.start);
-      const willow = duration >= 0.25;
-      const life = willow ? duration + linger : linger;
-      if (age < -frame.lookAhead || age >= life) continue;
       const phase = ((note.start % 1) + 1) % 1;
       const targetX = pad + (phase - 0.5) * Math.min(step * 0.7, frame.width * 0.075);
       // Absolute pitch keeps a given note at the same height when the queried window changes.

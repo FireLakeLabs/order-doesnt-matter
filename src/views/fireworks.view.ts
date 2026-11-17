@@ -68,9 +68,9 @@ export function drawFireworks(
       c.fill();
     } else {
       // Glow on the tips only avoids a full-canvas blur for every willow strand.
+      const sparks = Array.from({ length: sparkCount }, (_, i) => shellSpark(shell, i));
       c.beginPath();
-      for (let i = 0; i < sparkCount; i++) {
-        const p = shellSpark(shell, i);
+      for (const p of sparks) {
         c.moveTo(shell.targetX, shell.targetY);
         c.quadraticCurveTo(p.cx, p.cy, p.x, p.y);
       }
@@ -80,9 +80,8 @@ export function drawFireworks(
       c.shadowColor = colour;
       c.shadowBlur = theme.glow ? Math.max(5, 8 * scale) : 0;
       c.beginPath();
-      for (let i = 0; i < sparkCount; i++) {
-        const p = shellSpark(shell, i);
-        const r = Math.max(2, (shell.willow ? 2.2 : 2) * scale);
+      const r = Math.max(2, (shell.willow ? 2.2 : 2) * scale);
+      for (const p of sparks) {
         c.moveTo(p.x + r, p.y);
         c.arc(p.x, p.y, r, 0, Math.PI * 2);
       }
