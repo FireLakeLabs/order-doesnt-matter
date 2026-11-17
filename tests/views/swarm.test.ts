@@ -105,17 +105,21 @@ it('counts bar onsets inclusively, independent of cache window, fragments and or
   expect(
     hitCount({ ...frame, instruments: frame.instruments.map((i) => ({ ...i, muted: true })) }),
   ).toBe(0);
-  expect(wave(frame)).toEqual({ number: 3, name: frame.sections[2].name });
-  expect(wave({ ...frame, now: 38.4 })).toEqual(wave(frame));
-  expect(wave({ now: 99, sections: [] })).toEqual({ number: 1, name: 'Open space' });
 });
-it('warps in the actual next bar instead of assuming a repeat', () => {
-  const f = { ...frame, now: 3.4 };
-  const next = formation(f).rows.flatMap((r) => r.next);
-  expect(next).toEqual(
-    expect.arrayContaining(frame.notes.filter((n) => n.start >= 4 && n.start < 5)),
-  );
-  expect(next.every((n) => n.start >= 4 && n.start < 5)).toBe(true);
+it('warps actual next-bar notes across section changes rather than assuming a repeat', () => {
+  for (const now of [3.4, 15.4]) {
+    const g = formation({ ...frame, now });
+    const bar = Math.floor(now) + 1;
+    const next = g.rows.flatMap((r) => r.next);
+    const expected = frame.notes.filter((n) => n.start >= bar && n.start < bar + 1);
+    expect(next.length).toBeGreaterThan(0);
+    expect(next).toHaveLength(expected.length);
+    expect(next).toEqual(expect.arrayContaining(expected));
+    expect(next.every((n) => n.start >= bar && n.start < bar + 1)).toBe(true);
+    expect(new Set(next.map((n) => n.instrument))).not.toEqual(
+      new Set(g.rows.flatMap((r) => r.notes).map((n) => n.instrument)),
+    );
+  }
 });
 it('retains all 500 corpus-derived notes in shielded rows at one and twenty instruments', () => {
   const source = frame.notes.find((n) => !isCarrier(n))!;
@@ -133,10 +137,13 @@ it('retains all 500 corpus-derived notes in shielded rows at one and twenty inst
       expect(g.rows).toHaveLength(count);
       expect(g.rows.reduce((sum, r) => sum + r.notes.length, 0)).toBe(500);
       expect(g.rows.every((r) => r.crowded)).toBe(true);
+      expect(new Set(g.rows.map((r) => r.y)).size).toBe(count);
     }
     expect(hitCount(f)).toBe(201);
+    expect(hitCount({ ...f, now: 0.999 })).toBe(500);
   }
   expect(formation({ ...scoreFrame(1), notes: [] }).rows).toHaveLength(1);
+  expect(formation({ ...frame, notes: [], instruments: [] }).rows).toEqual([]);
 });
 
 it('names waves at section boundaries and later song passes', () => {
@@ -145,38 +152,6 @@ it('names waves at section boundaries and later song passes', () => {
   expect(wave({ ...frame, now: 38.4 })).toEqual(wave(frame));
   expect(wave({ ...frame, sections: [] }).name).toBe('Open space');
 });
-it('warps actual next-bar slots rather than repeating played notes', () => {
-  const g = formation({ ...frame, now: 15.4 });
-  const next = g.rows.flatMap((r) => r.next);
-  expect(next.length).toBeGreaterThan(0);
-  expect(next.every((n) => n.start >= 16 && n.start < 17)).toBe(true);
-  expect(new Set(next.map((n) => n.instrument))).not.toEqual(
-    new Set(g.rows.flatMap((r) => r.notes).map((n) => n.instrument)),
-  );
-});
-it('retains all 500 notes with one or twenty instruments as counted shield occupancy', () => {
-  const base = frame.notes.find((n) => n.start === 10 && !isCarrier(n))!;
-  for (const count of [1, 20]) {
-    const dense = {
-      ...scoreFrame(count),
-      now: 0.4,
-      notes: Array.from({ length: 500 }, (_, i) => ({
-        ...base,
-        instrument: String(i % count),
-        start: i / 500,
-        end: (i + 1) / 500,
-      })),
-    };
-    const g = formation(dense);
-    expect(g.rows).toHaveLength(count);
-    expect(g.rows.every((r) => r.crowded)).toBe(true);
-    expect(g.rows.reduce((n, r) => n + r.notes.length, 0)).toBe(500);
-    expect(hitCount({ ...dense, now: 0.999 })).toBe(500);
-    expect(new Set(g.rows.map((r) => r.y)).size).toBe(count);
-  }
-  expect(formation({ ...frame, notes: [], instruments: [] }).rows).toEqual([]);
-});
-
 it('setting fragments continue real bass carriers without inventing enemies or crowding', () => {
   const g = formation(frame);
   const bass = g.rows.filter((r) => r.enemies.some((n) => n.start === 10 && n.end === 11));

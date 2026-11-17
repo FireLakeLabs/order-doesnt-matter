@@ -36,7 +36,6 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame) {
   const g = formation(f),
     currentWave = wave(f);
   const particle: Particle = { x: 0, y: 0, alpha: 0 };
-  c.font = `11px "${t.fontMono}"`;
   for (let i = 0; i < Math.min(100, w / 9); i++) {
     star(i + currentWave.number * 101, f.now, particle);
     c.globalAlpha = particle.alpha * 0.4;
@@ -119,6 +118,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame) {
       c.fillStyle = t.text;
       c.textAlign = 'right';
       c.fillText(`×${String(row.enemies.length)}`, g.right - 5, row.y - 13);
+      c.fillStyle = col;
       if (!row.instrument.muted) for (const n of row.enemies) effect(n, g.x(n.start), row.y);
       continue;
     }
