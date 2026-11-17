@@ -674,7 +674,7 @@ test('fresh Studio defaults to Ring and Loom', async ({ page, context }) => {
   await appSignal(page, () => document.querySelectorAll('.wide-shelf .view-tile').length === 15);
   const shelf = page.locator('.wide-shelf .view-shelf');
   await expect(
-    shelf.locator('.view-group[ data-group="rhythm"] .view-group-toggle'),
+    shelf.locator('.view-group[data-group="rhythm"] .view-group-toggle'),
   ).toHaveAttribute('aria-expanded', 'true');
   await expect(shelf.locator('[data-group="song"] .view-group-toggle')).toHaveAttribute(
     'aria-expanded',

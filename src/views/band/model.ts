@@ -18,24 +18,8 @@ export interface Part {
 }
 import { clamp } from '../shared/math';
 export { clamp } from '../shared/math';
-export function pitch(value: ViewNote['value']): number | undefined {
-  const note = value.note ?? value.n;
-  if (typeof note === 'number' && Number.isFinite(note)) return note;
-  if (typeof note === 'string') {
-    if (note.trim() && Number.isFinite(Number(note))) return Number(note);
-    const match = /^([a-g])([#b]?)(-?\d+)?$/i.exec(note);
-    if (match) {
-      const semitone = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 }[match[1].toLowerCase()];
-      return (
-        (Number(match[3] || 3) + 1) * 12 +
-        (semitone ?? 0) +
-        (match[2] === '#' ? 1 : match[2] === 'b' ? -1 : 0)
-      );
-    }
-  }
-  const freq = Number(value.freq);
-  return freq > 0 && Number.isFinite(freq) ? 69 + 12 * Math.log2(freq / 440) : undefined;
-}
+import { pitch } from '../shared/pitch';
+export { pitch } from '../shared/pitch';
 const level = (note: ViewNote) => {
   const gain = Number(note.value.gain ?? 1);
   return Number.isFinite(gain) ? clamp(gain, 0, 4) : 1;

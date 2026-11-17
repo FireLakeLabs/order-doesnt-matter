@@ -1,4 +1,5 @@
 import type { ViewDefinition, ViewFrame } from './types';
+import { clamp } from './shared/math';
 import { createThreeStage } from './shared/three-stage';
 import {
   hillDriver,
@@ -320,7 +321,7 @@ const view: ViewDefinition = {
           } else if (mark.pitch !== undefined) {
             const side = voice.slot % 2 ? 1 : -1;
             const x = side * (4.8 + Math.floor(voice.slot / 2) * 0.55);
-            const y = 0.7 + Math.max(0, Math.min(1, (mark.pitch - 24) / 60)) * 4;
+            const y = 0.7 + clamp((mark.pitch - 24) / 60) * 4;
             quad(x, y, mark.start, x + side * 1.25, y + 0.14, mark.start, mark);
             // The light bar's length is the note's true duration, including fragments.
             quad(x, y, mark.start, x + side * 0.16, y, mark.end, mark, 0.8);

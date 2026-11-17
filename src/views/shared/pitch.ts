@@ -26,17 +26,16 @@ const names = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 /** Conventional sharp note spelling of the nearest MIDI semitone, including octave. */
 export const noteName = (midi: number) =>
   `${names[pitchClass(midi)]}${String(Math.floor(Math.round(midi) / 12) - 1)}`;
+// Symmetric augmented triads and diminished sevenths have no unique root.
 const chords: readonly [string, readonly number[]][] = [
   ['', [0, 4, 7]],
   ['m', [0, 3, 7]],
   ['dim', [0, 3, 6]],
-  ['aug', [0, 4, 8]],
   ['7', [0, 4, 7, 10]],
   ['maj7', [0, 4, 7, 11]],
   ['m7', [0, 3, 7, 10]],
   ['mMaj7', [0, 3, 7, 11]],
   ['m7b5', [0, 3, 6, 10]],
-  ['dim7', [0, 3, 6, 9]],
 ];
 /** Name an exact, uniquely rooted triad or seventh (within 1e−6 semitone); ambiguous/incomplete sets return undefined. */
 export function chordName(pitches: readonly number[]): string | undefined {
