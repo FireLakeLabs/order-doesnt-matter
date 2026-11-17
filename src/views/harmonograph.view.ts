@@ -107,10 +107,10 @@ function draw(
   figure(main, g.cx, g.cy, g.radius, false);
   c.textAlign = 'center';
   text(
-    `${main.ratio.toFixed(6)} ≈ ${main.approximation} · ${main.interval}`,
+    `${main.ratio.toFixed(6)}${main.approximation ? ` ≈ ${main.approximation}` : ''} · ${main.interval}`,
     g.cx,
     g.captionY,
-    Math.max(13, 16 * scale),
+    Math.max(13, Math.min(22, 16 * scale)),
     theme.text,
     g.mainWidth - 28,
   );
@@ -118,7 +118,7 @@ function draw(
     `${pitchLabel(main.low.midi)} ${owner(main.low)?.name ?? main.low.note.instrument} × ${pitchLabel(main.high.midi)} ${owner(main.high)?.name ?? main.high.note.instrument}`,
     g.cx,
     g.captionY + 20,
-    Math.max(11, 12 * scale),
+    Math.max(11, Math.min(14, 12 * scale)),
     theme.muted,
     g.mainWidth - 28,
   );
@@ -141,7 +141,16 @@ function draw(
     const cy = top + (cellH - 47) / 2;
     figure(other.pair, cx, cy, radius, true);
     c.textAlign = 'center';
-    text(`≈ ${other.pair.approximation}`, cx, top + cellH - 30, 12, theme.text, cellW - 8);
+    text(
+      other.pair.approximation
+        ? `≈ ${other.pair.approximation.replaceAll(' ', '')}`
+        : other.pair.ratio.toFixed(3),
+      cx,
+      top + cellH - 30,
+      12,
+      theme.text,
+      cellW - 8,
+    );
     text(
       `${pitchLabel(other.pair.low.midi)} · ${pitchLabel(other.pair.high.midi)}`,
       cx,

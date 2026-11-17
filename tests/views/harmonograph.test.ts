@@ -91,6 +91,7 @@ it('never snaps a slightly imperfect scored ratio to the simple ratio printed be
   expect(Math.abs(exactTrace.points.at(-1)!)).toBeLessThan(1e-5);
   expect(Math.abs(realTrace.points.at(-1)!)).toBeGreaterThan(0.1);
   expect(main.ratio).not.toBe(3);
+  expect(pair(main.low, { ...main.high, midi: main.low.midi + 1 }).approximation).toBeUndefined();
 });
 it('reads real scaled degrees, frequency, microtones and fragments through the shared pitch reader', async () => {
   const result = await queryEventsNode('n("0 2 4").scale("C:major").s("sine")', 0, 1);
@@ -105,6 +106,15 @@ it('reads real scaled degrees, frequency, microtones and fragments through the s
   expect(tones.map((t) => t.midi)).toEqual([69, 69.03]);
   expect(pairing(tones).main?.interval).toBe('unison +3.0¢');
   expect(sounding(frame(0.4), tones)).toHaveLength(2);
+  const onset = { ...real, start: 0, end: 1, hasOnset: true, value: { note: 60 } };
+  expect(
+    analyse([onset, { ...onset, hasOnset: false, value: { note: 84 } }]).map((t) => t.midi),
+  ).toEqual([60]);
+  expect(
+    analyse([48, 52, 55].map((note) => ({ ...onset, hasOnset: false, value: { note } }))).map(
+      (t) => t.midi,
+    ),
+  ).toEqual([48, 52, 55]);
 });
 it('makes fewer-than-two-pitches explicit, supports unison, and follows mute changes', () => {
   const f = frame(17.3),

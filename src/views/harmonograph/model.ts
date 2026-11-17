@@ -11,7 +11,7 @@ export interface Pair {
   low: Tone;
   high: Tone;
   ratio: number;
-  approximation: string;
+  approximation: string | undefined;
   interval: string;
   shortName: string;
   shorter: ViewNote;
@@ -37,24 +37,22 @@ export const unpitched = (notes: readonly ViewNote[]) =>
     notes.filter((note) => readPitch(note.value) === undefined).map((note) => note.instrument),
   );
 export function analyse(notes: readonly ViewNote[]): Tone[] {
-  const groups = new Map<string, { onsets: Tone[]; continuation?: Tone }>();
+  const groups = new Map<string, { onsets: Tone[]; continuations: Map<number, Tone> }>();
   for (const note of notes) {
     const midi = readPitch(note.value);
     if (midi === undefined) continue;
     const hz = 440 * 2 ** ((midi - 69) / 12);
     if (!(hz > 0 && Number.isFinite(hz))) continue;
-    const key = JSON.stringify([note.instrument, midi, note.start, note.end]);
+    const key = JSON.stringify([note.instrument, note.start, note.end]);
     let group = groups.get(key);
-    if (!group) groups.set(key, (group = { onsets: [] }));
+    if (!group) groups.set(key, (group = { onsets: [], continuations: new Map() }));
     const tone = { note, midi, hz };
     if (note.hasOnset) group.onsets.push(tone);
-    else group.continuation ??= tone;
+    else if (!group.continuations.has(midi)) group.continuations.set(midi, tone);
   }
   // Repeated whole-span fragments continue one voice; distinct onsets remain distinct.
   return [...groups.values()]
-    .flatMap((group) =>
-      group.onsets.length ? group.onsets : group.continuation ? [group.continuation] : [],
-    )
+    .flatMap((group) => (group.onsets.length ? group.onsets : [...group.continuations.values()]))
     .sort(
       (a, b) =>
         a.midi - b.midi ||
@@ -121,7 +119,7 @@ export function approximate(ratio: number) {
       error = delta;
     }
   }
-  return `${String(numerator)} : ${String(denominator)}`;
+  return error / ratio <= 0.015 ? `${String(numerator)} : ${String(denominator)}` : undefined;
 }
 export function pair(low: Tone, high: Tone): Pair {
   const ratio = 2 ** ((high.midi - low.midi) / 12);
