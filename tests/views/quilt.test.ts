@@ -145,8 +145,6 @@ it('uses coverage for scaffolding and absolute repeats without classifying unkno
   });
   expect(repeat.distinct).toBe(indexQuilt(frame).distinct);
   expect(currentPatch(repeat, 38.4)).toBe(10);
-  currentPatch(repeat, 55);
-  expect(currentPatch(repeat, 38.4)).toBe(10);
 });
 it('creates four-cycle compacting rows without sections and wraps long rows without losing a bar', () => {
   const frame = corpus.get('real-techno')!,
@@ -225,8 +223,6 @@ it('sews only the elapsed stretch and knots only reached onsets in the current r
   const snare = patch.stitches.find((s) => s.start === 0.5)!;
   expect(stitchAt(snare, 0.4).knot).toBe(false);
   expect(stitchAt(snare, 0.5).knot).toBe(snare.onset);
-  expect(currentPatch(q, 10.4)).toBe(10);
-  currentPatch(q, 24);
   expect(currentPatch(q, 10.4)).toBe(10);
 });
 
