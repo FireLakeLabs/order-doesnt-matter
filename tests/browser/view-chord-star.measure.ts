@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test';
 import { prepare } from './view-evidence';
 import { revealView } from './shelf';
 import type { ViewFrame } from '../../src/views/types';
+import { layout } from '../../src/views/chord-star/layout';
 
 declare global {
   interface Window {
@@ -36,16 +37,34 @@ test('chord-star: real arrangement, five themes, both stages and CPU cost', asyn
   );
   await mkdir(shots, { recursive: true });
   const canvas = page.locator('[data-region="stage-a"] canvas');
+  const sizes: {
+    name: string;
+    width: number;
+    height: number;
+    geometry: ReturnType<typeof layout>;
+  }[] = [];
+  const recordSize = async (name: string, target = canvas) => {
+    const size = await target.evaluate((c) => {
+      const r = c.getBoundingClientRect();
+      return { width: r.width, height: r.height };
+    });
+    sizes.push({ name, ...size, geometry: layout(size) });
+  };
   const snapshot = async (name: string) => {
     await presented(page);
     await page.screenshot({ path: `${shots}/${name}.png` });
     await canvas.screenshot({ path: `${shots}/${name}-stage.png` });
+    await recordSize(name);
   };
   await page.setViewportSize({ width: 2560, height: 1440 });
   await snapshot('bar18-arcade-2560x1440');
   await page.setViewportSize({ width: 1920, height: 1080 });
   await snapshot('bar18-arcade-1920x1080');
   const original = await canvas.evaluate((c: HTMLCanvasElement) => c.toDataURL());
+  await page.getByRole('button', { name: 'Fill window with Stage A', exact: true }).click();
+  await snapshot('bar18-arcade-1920x1080-filled');
+  await page.getByRole('button', { name: 'Restore Stage A', exact: true }).click();
+  await presented(page);
   await page.evaluate(() => {
     window.chordStarTime = 10.4;
   });
@@ -132,7 +151,8 @@ test('chord-star: real arrangement, five themes, both stages and CPU cost', asyn
         max: samples[299],
       });
     }
-    const pictures = [];
+    handle.frame({ ...frame, now: 17.3, width: 1300, height: 760, dpr: 1 });
+    const pictures = [el.querySelector('canvas')!.toDataURL()];
     for (const [width, height] of [
       [1300, 760],
       [560, 471],
@@ -153,9 +173,15 @@ test('chord-star: real arrangement, five themes, both stages and CPU cost', asyn
   }, frame);
   for (const [i, picture] of pictures.entries())
     await writeFile(
-      `${shots}/dense-500-staggered-${i ? '560x471' : '1300x760'}.png`,
+      `${shots}/${['real-1300x760', 'dense-500-staggered-1300x760', 'dense-500-staggered-560x471'][i]}.png`,
       Buffer.from(picture.split(',')[1], 'base64'),
     );
+  sizes.push({
+    name: 'canonical-stage-a',
+    width: 1300,
+    height: 760,
+    geometry: layout({ width: 1300, height: 760 }),
+  });
   console.log('chord-star CPU frame submission:', JSON.stringify(costs));
   await writeFile(`${shots}/frame-cost.json`, JSON.stringify(costs, null, 2));
   const stageB = page.locator('[data-region="stage-b"]');
@@ -171,6 +197,7 @@ test('chord-star: real arrangement, five themes, both stages and CPU cost', asyn
   await presented(page);
   await expect(stageB.locator('canvas')).toHaveJSProperty('clientWidth', 560);
   await stageB.screenshot({ path: `${shots}/bar18-stage-b-560.png` });
+  await recordSize('stage-b-560', stageB.locator('canvas'));
   await stageStyle.evaluate((style) => {
     style.parentNode?.removeChild(style);
   });
@@ -184,5 +211,7 @@ test('chord-star: real arrangement, five themes, both stages and CPU cost', asyn
   );
   await snapshot('bar18-playing');
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
+  await writeFile(`${shots}/sizes.json`, JSON.stringify(sizes, null, 2));
+  console.log('chord-star sizes:', JSON.stringify(sizes));
   expect(errors).toEqual([]);
 });

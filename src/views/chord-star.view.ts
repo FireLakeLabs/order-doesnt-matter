@@ -2,23 +2,15 @@ import type { ViewDefinition, ViewFrame } from './types';
 import { mount2d } from './shared/retro-2d';
 import { analyse, at, className, fifths, position, spelling } from './chord-star/model';
 import type { Chord } from './chord-star/model';
+import { layout } from './chord-star/layout';
 
 function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeof analyse>) {
   const { width: w, height: h, theme } = f;
-  const state = at(f, score),
-    wide = w >= 900;
-  const margin = Math.max(16, Math.min(32, w * 0.025));
+  const state = at(f, score);
+  const { wide, r, cx, cy, scale, dot, bass, rootFont, labelFont, labelRadius, chartHeight } =
+    layout(f);
+  const margin = Math.max(16, w * 0.025);
   const legend = f.instruments.filter((i) => score.pitched.has(i.id) || score.unpitched.has(i.id));
-  const columns = Math.max(wide ? 5 : 3, Math.ceil(legend.length / 4));
-  const footerHeight = 35 + Math.ceil(legend.length / columns) * 23;
-  const stripHeight = wide ? 0 : 102;
-  const top = 86,
-    bottom = Math.max(top + 100, h - footerHeight - stripHeight - 18);
-  const circleWidth = wide ? w * 0.76 : w;
-  const r = Math.max(30, Math.min(circleWidth * 0.36, (bottom - top) * 0.44));
-  const cx = circleWidth / 2,
-    cy = (top + bottom) / 2;
-  const dot = Math.max(6, Math.max(10, Math.min(12, r * 0.06)));
   const xy = (pc: number, radius = r) => [
     cx + Math.cos(position(pc)) * radius,
     cy + Math.sin(position(pc)) * radius,
@@ -33,7 +25,12 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
   ) => {
     c.fillStyle = colour;
     c.font = `${String(size)}px "${theme.fontMono}"`;
-    c.fillText(label, x, y, Math.max(1, max));
+    let shown = label;
+    if (c.measureText(shown).width > max) {
+      while (shown.length && c.measureText(`${shown}…`).width > max) shown = shown.slice(0, -1);
+      shown += '…';
+    }
+    c.fillText(shown, x, y);
   };
   const circle = (x: number, y: number, radius: number) => {
     c.beginPath();
@@ -44,7 +41,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
     c.save();
     c.globalAlpha = alpha;
     c.setLineDash(dash);
-    c.lineWidth = fill ? 2.5 : 1.5;
+    c.lineWidth = Math.max(1.5, (fill ? 2.5 : 1.5) * scale);
     const colour =
       f.instruments.find(
         (i) => i.id === chord.points.find((p) => p.lowest === chord.lowest)?.instrument,
@@ -70,7 +67,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
   c.fillStyle = theme.text;
   c.font = `600 24px "${theme.fontDisplay}"`;
   c.fillText('Chord star', margin, 36);
-  text('CIRCLE OF FIFTHS', margin, 58, 10);
+  text('CIRCLE OF FIFTHS', margin, 58, 11);
   c.textAlign = 'right';
   text(
     `bar ${String(Math.floor(f.now) + 1)} · ${String(Math.floor((f.now % 1) * 100))}%`,
@@ -106,8 +103,8 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
       const lowest = point.lowest === state.current.lowest;
       c.strokeStyle = instrument?.colour ?? theme.accent;
       c.fillStyle = instrument?.colour ?? theme.accent;
-      c.lineWidth = lowest ? 4 : 2;
-      const radius = dot + (lowest ? 3 : 0);
+      c.lineWidth = Math.max(2, (lowest ? 4 : 2) * scale);
+      const radius = lowest ? bass : dot;
       if (theme.glow && index === 0) {
         c.shadowColor = c.fillStyle;
         c.shadowBlur = 13;
@@ -118,12 +115,12 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
       } else {
         const angle = (index * Math.PI * 2) / points.length - Math.PI / 2;
         c.beginPath();
-        c.arc(x, y, radius + 5, angle, angle + ((Math.PI * 2) / points.length) * 0.8);
+        c.arc(x, y, radius + 5 * scale, angle, angle + ((Math.PI * 2) / points.length) * 0.8);
         c.stroke();
       }
       c.shadowBlur = 0;
       if (lowest && points.length === 1) {
-        circle(x, y, radius + 6);
+        circle(x, y, radius + 6 * scale);
         c.stroke();
       }
     }
@@ -133,17 +130,17 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
       const [countX, countY] = xy(pc, r - dot - 21);
       text(`×${String(count)}`, countX, countY + 4, 10, theme.text);
     }
-    const [lx, ly] = xy(pc, r + Math.max(25, dot + 16));
+    const [lx, ly] = xy(pc, labelRadius);
     c.textAlign = 'center';
-    c.font = `600 ${String(Math.max(13, Math.min(19, r * 0.085)))}px "${theme.fontDisplay}"`;
+    c.font = `600 ${String(labelFont)}px "${theme.fontDisplay}"`;
     c.fillStyle = points.length ? theme.text : theme.muted;
-    c.fillText(className(pc), lx, ly + 6);
+    c.fillText(className(pc), lx, ly + labelFont * 0.35);
   }
   // Outline the letters rather than covering the chord's geometry with a panel.
   const centreLabel = (label: string, y: number) => {
     c.save();
     c.strokeStyle = theme.ground;
-    c.lineWidth = 4;
+    c.lineWidth = Math.max(3, 4 * scale);
     c.lineJoin = 'round';
     c.strokeText(label, cx, y, r * 1.15);
     c.restore();
@@ -152,12 +149,19 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
   c.textAlign = 'center';
   const current = state.current;
   if (current.root) {
-    c.font = `700 ${String(Math.min(76, r * 0.4))}px "${theme.fontDisplay}"`;
+    c.font = `700 ${String(rootFont)}px "${theme.fontDisplay}"`;
     c.fillStyle = theme.text;
-    centreLabel(current.root, cy + 2);
-    text(current.quality ?? '', cx, cy + 29, 15, theme.muted, r * 1.15);
+    centreLabel(current.root, cy + 2 * scale);
+    text(
+      current.quality ?? '',
+      cx,
+      cy + 35 * scale,
+      Math.max(13, 18 * scale),
+      theme.muted,
+      r * 1.25,
+    );
   } else {
-    const perLine = r < 150 ? 3 : 6;
+    const perLine = r < 150 ? 4 : 6;
     const lines: string[] = [];
     for (let i = 0; i < current.classes.length; i += perLine)
       lines.push(
@@ -167,71 +171,117 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
           .join(' · '),
       );
     if (!lines.length) lines.push(current.name);
-    c.font = `600 ${String(Math.max(12, Math.min(25, r * 0.13)))}px "${theme.fontDisplay}"`;
+    c.font = `600 ${String(Math.max(14, 17 * scale))}px "${theme.fontDisplay}"`;
     c.fillStyle = theme.text;
     lines.forEach((label, i) => {
-      centreLabel(label, cy + (i - (lines.length - 1) / 2) * 17);
+      centreLabel(label, cy + (i - (lines.length - 1) / 2) * Math.max(18, 21 * scale));
     });
     if (lines.length < 3 && current.pitches.length)
-      text('sounding pitches', cx, cy + 26, 11, theme.muted, r * 1.1);
+      text(
+        'sounding pitches',
+        cx,
+        cy + 35 * scale,
+        Math.max(11, 12 * scale),
+        theme.muted,
+        r * 1.25,
+      );
   }
   const total = current.points.reduce((sum, point) => sum + point.count, 0);
   const octaves =
     total <= 8
       ? current.pitches.map(spelling).join(' ')
       : `${String(total)} notes${r >= 150 ? ` · ${String(current.classes.length)} classes` : ''}`;
-  text(octaves, cx, cy + 50, Math.max(10, Math.min(12, r * 0.06)), theme.muted, r * 1.12);
-  const sx = wide ? w * 0.79 : margin,
-    sy = wide ? cy - 90 : bottom + 26;
+  text(octaves, cx, cy + Math.max(50, 62 * scale), Math.max(11, 12 * scale), theme.muted, r * 1.25);
+  const sx = wide ? w * 0.8 : margin;
+  const sy = wide ? cy - 110 * scale : chartHeight + 12;
   c.textAlign = 'left';
-  text('CHORDS BY BAR', sx, sy, 11);
-  text('longest held set · window', sx, sy + 19, 9, theme.muted, wide ? w * 0.19 : w - margin * 2);
+  text('CHORDS BY BAR', sx, sy, Math.max(11, 11 * scale));
+  text('longest held set · window', sx, sy + 18, 10, theme.muted, wide ? w * 0.18 : w - margin * 2);
+  const barWidth = wide ? w * 0.18 : (w - margin * 2) / 4 - 8;
   for (const [index, entry] of state.bars.entries()) {
     const x = wide ? sx : margin + (index * (w - margin * 2)) / 4;
-    const y = wide ? sy + 54 + index * 43 : sy + 46;
-    const width = wide ? w * 0.19 : (w - margin * 2) / 4 - 8;
+    const y = wide ? sy + 48 + index * 56 * scale : sy + 45;
     if (entry.bar === Math.floor(f.now)) {
       c.fillStyle = theme.panel;
       c.strokeStyle = theme.accent;
-      c.lineWidth = 1;
+      c.lineWidth = 1.5;
       c.beginPath();
-      c.roundRect(x - 6, y - 16, width, wide ? 36 : 47, theme.radius);
+      c.roundRect(x - 6, y - 16, barWidth, wide ? 47 * scale : 61, theme.radius);
       c.fill();
       c.stroke();
     }
-    text(`bar ${String(entry.bar + 1)}`, x, y - 2, 10, theme.muted, width - 10);
     text(
-      entry.chord?.name ?? 'outside window',
+      `bar ${String(entry.bar + 1)}`,
       x,
-      y + 14,
-      11,
-      entry.bar === Math.floor(f.now) ? theme.text : theme.muted,
-      width - 10,
+      y - 2,
+      Math.max(11, 11 * scale),
+      theme.muted,
+      barWidth - 8,
     );
+    const colour = entry.bar === Math.floor(f.now) ? theme.text : theme.muted;
+    if (entry.chord && !entry.chord.root && entry.chord.classes.length > 4) {
+      for (let row = 0; row < Math.ceil(entry.chord.classes.length / 4); row++)
+        text(
+          entry.chord.classes
+            .slice(row * 4, row * 4 + 4)
+            .map(className)
+            .join(' · '),
+          x,
+          y + 14 + row * 13,
+          11,
+          colour,
+          barWidth - 8,
+        );
+    } else
+      text(
+        entry.chord?.name ?? 'outside window',
+        x,
+        y + 16,
+        Math.max(11, 12 * scale),
+        colour,
+        barWidth - 8,
+      );
   }
+  // Instruments live beside the circle instead of taking its height away.
+  const legendFont = wide ? Math.max(11, 11 * scale) : 11;
+  const rowHeight = legendFont + 7;
+  const sideWidth = Math.max(90, cx - labelRadius - margin - 12);
+  const rows = wide
+    ? Math.min(legend.length, Math.max(1, Math.floor((h - 125) / rowHeight)))
+    : Math.ceil(legend.length / 2);
+  const columns = Math.max(1, Math.ceil(legend.length / Math.max(1, rows)));
+  const columnWidth = wide ? sideWidth / columns : sideWidth;
+  const legendTop = wide ? h - margin - rows * rowHeight : 78;
   c.textAlign = 'left';
-  const footerTop = h - footerHeight;
-  c.strokeStyle = theme.line;
-  c.beginPath();
-  c.moveTo(margin, footerTop);
-  c.lineTo(w - margin, footerTop);
-  c.stroke();
-  text(
-    'solid: now   dashed: previous   dotted: next',
-    margin,
-    footerTop + 20,
-    10,
-    theme.muted,
-    w - margin * 2,
-  );
+  if (wide) {
+    text('— unpitched', margin, legendTop - 18, legendFont, theme.muted, sideWidth);
+    text(
+      'solid: now · dashed: previous · dotted: next',
+      margin,
+      h - 10,
+      11,
+      theme.muted,
+      w - margin * 2,
+    );
+  } else
+    text(
+      'solid: now · dashed: previous · dotted: next · — unpitched',
+      margin,
+      chartHeight - 12,
+      11,
+      theme.muted,
+      w - margin * 2,
+    );
   for (const [index, instrument] of legend.entries()) {
-    const x = margin + ((index % columns) * (w - margin * 2)) / columns;
-    const y = footerTop + 43 + Math.floor(index / columns) * 23;
+    const col = Math.floor(index / Math.max(1, rows));
+    const x = wide ? margin + col * columnWidth : col ? w - margin - sideWidth : margin;
+    const y = legendTop + (index % Math.max(1, rows)) * rowHeight;
     c.fillStyle = instrument.colour;
     circle(x + 4, y - 4, 4);
     c.fill();
-    const label = `${score.unpitched.has(instrument.id) ? (score.pitched.has(instrument.id) ? 'mixed: ' : 'not pitched: ') : ''}${instrument.name}${instrument.muted ? ' (muted)' : ''}`;
-    text(label, x + 15, y, 11, theme.text, (w - margin * 2) / columns - 25);
+    const unpitched = score.unpitched.has(instrument.id);
+    const label = `${unpitched ? (score.pitched.has(instrument.id) ? 'mixed: ' : '— ') : ''}${instrument.name}${instrument.muted ? ' (muted)' : ''}`;
+    text(label, x + 14, y, legendFont, theme.text, columnWidth - 20);
   }
 }
 const view: ViewDefinition = {
