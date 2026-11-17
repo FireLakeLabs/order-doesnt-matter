@@ -41,6 +41,7 @@ test('metronomes: exact drop moment, five themes, crowd rule and CPU frame cost'
       const handle = await window.viewProbe.definition.mount(el);
       const samples: number[] = [];
       for (let i = 0; i < 310; i++) {
+        await new Promise(requestAnimationFrame);
         const start = performance.now();
         handle.frame({ ...frame, now: 10.4 + (i * frame.cps) / 60 });
         if (i >= 10) samples.push(performance.now() - start);
