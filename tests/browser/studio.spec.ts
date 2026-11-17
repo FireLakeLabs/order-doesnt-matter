@@ -1,3 +1,5 @@
+import { appSignal } from './helpers';
+import { revealView } from './shelf';
 import './studio-transport';
 import { openStudio } from './studio-open';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
@@ -154,6 +156,34 @@ test('Studio shell on dubstep: section rail, two stages, shared clock, shelf, fi
   await mkdir(shots, { recursive: true });
   await page.evaluate(() => document.fonts.ready);
   await page.screenshot({ path: `${shots}/arcade-2560x1440.png` });
+  const shelf = page.locator('.wide-shelf .view-shelf');
+  await appSignal(page, () => document.querySelectorAll('.wide-shelf .view-tile').length === 15);
+  await expect(shelf.locator('.view-group-toggle')).toHaveText([
+    'Rhythm3+',
+    'Pitch2+',
+    'Settings1+',
+    'Song3+',
+    'Show4−',
+    'Arcade1+',
+  ]);
+  await expect(shelf.locator('[data-view="test-card"]')).toBeHidden();
+  // Test cards occupy Show here; the fresh visitor's Ring/Loom defaults are checked below.
+  for (const header of await shelf.locator('.view-group-toggle').all())
+    if ((await header.getAttribute('aria-expanded')) === 'false') await header.click();
+  await expect(shelf.locator('.view-group-toggle[aria-expanded="true"]')).toHaveCount(6);
+  expect(
+    await shelf.locator('.view-groups').evaluate((el) => el.scrollHeight > el.clientHeight),
+  ).toBe(true);
+  await noScroll(page);
+  await shelf.locator('.view-groups').evaluate((el) => {
+    el.scrollTop = 0;
+  });
+  await page.screenshot({ path: `${shots}/shelf-all-2560x1440.png` });
+  await shelf.locator('[data-group="pitch"] .view-group-toggle').click();
+  await expect(shelf.locator('[data-view="rain"]')).toBeHidden();
+  await shelf.locator('[data-group="pitch"] .view-group-toggle').click();
+  await expect(shelf.locator('[data-view="rain"]')).toBeVisible();
+
   await page.setViewportSize({ width: 1920, height: 1080 });
   await frames(page);
   expect(
@@ -165,7 +195,12 @@ test('Studio shell on dubstep: section rail, two stages, shared clock, shelf, fi
   await a.getByRole('button', { name: 'Views', exact: true }).click();
   await expect(a.locator('.shelf-popover')).toBeVisible();
   await page.screenshot({ path: `${shots}/shelf-1920x1080.png` });
-  await a.getByRole('button', { name: 'Loom on Stage B', exact: true }).click();
+  await revealView(
+    a.getByRole('button', { name: 'Loom on Stage B', exact: true, includeHidden: true }),
+  );
+  await a
+    .getByRole('button', { name: 'Loom on Stage B', exact: true, includeHidden: true })
+    .click();
   await expect(a.locator('.shelf-popover')).toHaveCount(0);
   for (const name of ['phosphor', 'pocket', 'riso', 'sunset']) {
     await page.getByRole('button', { name: `Theme ${name}`, exact: true }).click();
@@ -192,6 +227,7 @@ test('Studio shell on dubstep: section rail, two stages, shared clock, shelf, fi
   await expect(page.locator('.view-host canvas')).toHaveCount(1);
   await a.getByRole('button', { name: 'Views', exact: true }).click();
   const tile = a.locator('[data-view="loom"]');
+  await revealView(tile);
   // Real HTML drag payload and drop handling; a tile can target either stage.
   await tile.dragTo(page.locator('[data-region="stage-b"]'));
   await expect(page.locator('.view-host canvas')).toHaveCount(2);
@@ -295,7 +331,11 @@ test('links override persisted layout; optional storage and a dense rail remain 
     .locator('[data-region="stage-b"]')
     .getByRole('button', { name: 'Views', exact: true })
     .click();
-  await page.getByRole('button', { name: 'Loom on Stage B', exact: true }).click();
+  const loomChoice = page
+    .locator('.shelf-popover')
+    .getByRole('button', { name: 'Loom on Stage B', exact: true, includeHidden: true });
+  await revealView(loomChoice);
+  await loomChoice.click();
   await page.reload();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'riso');
   await expect(page.locator('.view-host canvas')).toHaveCount(2);
@@ -619,9 +659,93 @@ test('one page sample drives both real test cards, strip and rail through scrub,
 });
 
 // The visitor's real defaults are covered separately from timing-sensitive tests.
-test('fresh Studio defaults to Ring and Loom', async ({ page }) => {
+test('fresh Studio defaults to Ring and Loom', async ({ page, context }) => {
+  await assets(context);
+  await page.setViewportSize({ width: 2560, height: 1440 });
   await page.addInitScript(() => localStorage.removeItem('odm-studio-layout'));
-  await page.goto('/');
+  await page.goto('/?inspect');
+  await appSignal(page, () => window.odmStudio?.app.canPlay);
   await expect(page.locator('[data-region="stage-a"] .stage-header h2')).toHaveText('Ring');
   await expect(page.locator('[data-region="stage-b"] .stage-header h2')).toHaveText('Loom');
+  await page.evaluate(
+    (source) => window.odmStudio.load(source),
+    await readFile('corpus/programs/real-dubstep-arranged.strudel', 'utf8'),
+  );
+  await appSignal(page, () => document.querySelectorAll('.wide-shelf .view-tile').length === 15);
+  const shelf = page.locator('.wide-shelf .view-shelf');
+  await expect(
+    shelf.locator('.view-group[data-group="rhythm"] .view-group-toggle'),
+  ).toHaveAttribute('aria-expanded', 'true');
+  await expect(shelf.locator('[data-group="song"] .view-group-toggle')).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  await expect(shelf.locator('.view-group-toggle[aria-expanded="true"]')).toHaveCount(2);
+  expect(
+    await shelf.locator('.view-groups').evaluate((el) => el.scrollHeight <= el.clientHeight),
+  ).toBe(true);
+  await noScroll(page);
+  await appSignal(
+    page,
+    () =>
+      document.querySelector('[data-region="score"]')?.getAttribute('data-score-ready') === 'true',
+  );
+  await page.evaluate(() => document.fonts.ready);
+  await appSignal(page, () =>
+    Array.from(document.querySelectorAll('.view-host')).every(
+      (el) => el.getAttribute('data-score-ready') === 'true',
+    ),
+  );
+  await page.screenshot({ path: `${shots}/shelf-first-2560x1440.png` });
+  for (const header of await shelf.locator('.view-group-toggle').all())
+    if ((await header.getAttribute('aria-expanded')) === 'false') await header.click();
+  await shelf.locator('.view-groups').evaluate((el) => {
+    el.scrollTop = 0;
+  });
+  await page.screenshot({ path: `${shots}/shelf-all-2560x1440.png` });
+  for (const group of ['pitch', 'settings', 'show', 'arcade'])
+    await shelf.locator(`[data-group="${group}"] .view-group-toggle`).click();
+  await shelf.locator('[data-group="pitch"] .view-group-toggle').click();
+  await shelf.locator('[data-view="rain"] .view-choice').click();
+  await expect(page.locator('[data-region="stage-a"] .stage-header h2')).toHaveText('Rain');
+  await expect(shelf.locator('[data-view="rain"] .stage-marks')).toHaveText('A');
+  await page.evaluate(() => localStorage.removeItem('odm:recovery'));
+  await page.reload();
+  await load(page);
+  await appSignal(page, () => document.querySelectorAll('.wide-shelf .view-tile').length === 15);
+  await expect(shelf.locator('[data-group="pitch"] .view-group-toggle')).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  await expect(shelf.locator('[data-group="song"] .view-group-toggle')).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page
+    .locator('[data-region="stage-a"]')
+    .getByRole('button', { name: 'Views', exact: true })
+    .click();
+  const popover = page.locator('.shelf-popover');
+  await expect(popover.locator('[data-group="pitch"] .view-group-toggle')).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  );
+  await expect(popover.locator('.view-group-toggle')).toHaveCount(6);
+  await noScroll(page);
+  expect(
+    await popover.locator('.view-groups').evaluate((el) => el.scrollHeight > el.clientHeight),
+  ).toBe(true);
+  await page.screenshot({ path: `${shots}/shelf-1920x1080.png` });
+  // Storage failures leave collapse/expand usable for the current visit.
+  await page.evaluate(() => {
+    Storage.prototype.setItem = () => {
+      throw Error('Storage blocked');
+    };
+  });
+  const pitch = popover.locator('[data-group="pitch"] .view-group-toggle');
+  await pitch.click();
+  await expect(pitch).toHaveAttribute('aria-expanded', 'false');
+  await pitch.click();
+  await expect(pitch).toHaveAttribute('aria-expanded', 'true');
 });

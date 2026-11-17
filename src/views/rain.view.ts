@@ -288,6 +288,7 @@ export function drawRain(
 
 const view: ViewDefinition = {
   id: 'rain',
+  group: 'pitch',
   name: 'Rain',
   tag: "what's coming",
   mount(element) {

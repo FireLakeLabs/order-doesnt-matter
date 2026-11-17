@@ -154,6 +154,7 @@ export interface ViewHandle {
 }
 export interface ViewDefinition {
   id: string;
+  group: 'rhythm' | 'pitch' | 'settings' | 'song' | 'show' | 'arcade';
   name: string;
   tag: string; // one or two words for the shelf, e.g. "whole song"
   needs?: 'score' | 'audio'; // default 'score'

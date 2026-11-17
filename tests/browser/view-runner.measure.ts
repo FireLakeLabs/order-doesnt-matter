@@ -1,3 +1,4 @@
+import { revealView } from './shelf';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { prepare } from './view-evidence';
@@ -12,7 +13,12 @@ test('runner: exact-time pixels, themes, corpus, lifetime and frame cost', async
   await prepare(page, 'runner');
   const second = page.locator('[data-region="stage-b"]');
   await second.getByRole('button', { name: 'Views', exact: true }).click();
-  await second.getByRole('button', { name: 'Runner on Stage B', exact: true }).click();
+  await revealView(
+    second.getByRole('button', { name: 'Runner on Stage B', exact: true, includeHidden: true }),
+  );
+  await second
+    .getByRole('button', { name: 'Runner on Stage B', exact: true, includeHidden: true })
+    .click();
   await expect(second.locator('.view-host')).toHaveAttribute('data-score-ready', 'true');
   await expect(second.locator('canvas')).toHaveCount(1);
   const at = async (now: number) => {

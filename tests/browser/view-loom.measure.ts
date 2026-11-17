@@ -1,3 +1,4 @@
+import { revealView } from './shelf';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import type { ViewDefinition, ViewFrame, ViewHandle } from '../../src/views/types';
@@ -26,10 +27,11 @@ async function select(page: Page, name: string) {
     .locator('[data-region="stage-a"]')
     .getByRole('button', { name: 'Views', exact: true })
     .click();
-  await page
+  const choice = page
     .locator('[data-region="stage-a"] .shelf-popover')
-    .getByRole('button', { name, exact: true })
-    .click();
+    .getByRole('button', { name, exact: true, includeHidden: true });
+  await revealView(choice);
+  await choice.click();
   await expect(page.locator('[data-region="stage-a"] .shelf-popover')).toHaveCount(0);
   if (previous) {
     await page.waitForFunction((canvas) => !canvas.isConnected, previous);

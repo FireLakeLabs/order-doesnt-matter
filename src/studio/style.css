@@ -723,13 +723,40 @@ html[data-theme] body,
   font-size: 10px;
   color: var(--muted);
 }
+.view-groups {
+  min-height: 0;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+.view-group-toggle {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+  padding: 10px 0;
+  color: var(--text);
+  font:
+    600 13px var(--font-display),
+    sans-serif;
+  text-align: left;
+  cursor: pointer;
+}
+.view-group-toggle small {
+  color: var(--muted);
+}
+.view-group-toggle > :last-child {
+  margin-left: auto;
+  color: var(--muted);
+}
 .view-tiles {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
-  overflow: auto;
-  scrollbar-width: thin;
+  padding-bottom: 4px;
   align-content: start;
+}
+.view-tiles[hidden] {
+  display: none;
 }
 .view-tile {
   position: relative;
@@ -892,12 +919,12 @@ html[data-theme] body,
   right: 12px;
   width: 400px;
   max-width: calc(100% - 24px);
-  max-height: calc(100% - 74px);
+  height: calc(100% - 74px);
   z-index: 5;
   box-shadow: var(--control-shadow);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  overflow: auto;
+  overflow: hidden;
 }
 
 @media (height < 1200px) {

@@ -1,22 +1,9 @@
 import type { ViewDefinition, ViewFrame, ViewNote } from '../types';
 
-export const clamp = (n: number, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, n));
-export function pitch(value: ViewNote['value']): number | undefined {
-  const raw = value.note ?? value.n;
-  if (typeof raw === 'number' && Number.isFinite(raw)) return raw;
-  if (typeof raw === 'string') {
-    if (raw.trim() && Number.isFinite(Number(raw))) return Number(raw);
-    const m = /^([a-g])([#b]?)(-?\d+)?$/i.exec(raw.trim());
-    if (m) {
-      const key = 'c d ef g a b'.indexOf(m[1].toLowerCase());
-      return (Number(m[3] || 3) + 1) * 12 + key + (m[2] === '#' ? 1 : m[2] === 'b' ? -1 : 0);
-    }
-  }
-  const freq = Number(value.freq);
-  return freq > 0 && Number.isFinite(freq) ? 69 + 12 * Math.log2(freq / 440) : undefined;
-}
-export const pitchName = (p: number) =>
-  `${['C-', 'C#', 'D-', 'D#', 'E-', 'F-', 'F#', 'G-', 'G#', 'A-', 'A#', 'B-'][((Math.round(p) % 12) + 12) % 12]}${String(Math.floor(Math.round(p) / 12) - 1)}`;
+import { clamp } from './math';
+import { pitch } from './pitch';
+export { clamp } from './math';
+export { pitch, pitchName } from './pitch';
 export interface Event {
   note: ViewNote;
   pitch: number | undefined;

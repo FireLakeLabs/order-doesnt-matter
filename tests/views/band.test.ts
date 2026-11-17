@@ -211,3 +211,9 @@ test('old held spans do not invent previous-section participation at an entrance
   };
   expect(poses(f, analyse(notes))[0].floor).toBeCloseTo(760 * 0.925);
 });
+
+// Band uses the same reader as other views, including trimmed note names.
+test('Band shares named pitch normalization and frequency fallback', () => {
+  expect(pitch({ note: ' eb1 ' })).toBe(27);
+  expect(pitch({ note: ' invalid ', freq: '440' })).toBe(69);
+});

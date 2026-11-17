@@ -1,3 +1,4 @@
+import { revealView } from './shelf';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
@@ -30,17 +31,21 @@ async function startAt(page: Page, cycle: number) {
 }
 async function select(page: Page, name: string) {
   const wide = page.locator('.wide-shelf');
-  if (await wide.isVisible())
-    await wide.getByRole('button', { name: `${name} on Stage A`, exact: true }).click();
-  else {
+  let shelf = wide;
+  if (!(await wide.isVisible())) {
     const stage = page.locator('[data-region="stage-a"]');
     await stage.getByRole('button', { name: 'Views', exact: true }).click();
-    await stage
-      .locator('.shelf-popover')
-      .getByRole('button', { name: `${name} on Stage A`, exact: true })
-      .click();
+    shelf = stage.locator('.shelf-popover');
   }
+  const choice = shelf.getByRole('button', {
+    name: `${name} on Stage A`,
+    exact: true,
+    includeHidden: true,
+  });
+  await revealView(choice);
+  await choice.click();
 }
+
 async function prepare(page: Page, source: string) {
   await page.context().route('https://raw.githubusercontent.com/**', async (route) => {
     const map: Record<string, unknown> = {
@@ -107,7 +112,9 @@ async function prepare(page: Page, source: string) {
   ).toBe(false);
   const stage = page.locator('[data-region="stage-a"]');
   await stage.getByRole('button', { name: 'Views', exact: true }).click();
-  await stage.locator('.shelf-popover [data-view="ring"] .view-choice').click();
+  const choice = stage.locator('.shelf-popover [data-view="ring"] .view-choice');
+  await revealView(choice);
+  await choice.click();
   await page.evaluate(async (source) => {
     await window.odmStudio.load(source);
     window.ringTest.frame = undefined;

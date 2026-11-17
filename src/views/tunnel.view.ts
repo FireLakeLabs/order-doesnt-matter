@@ -7,6 +7,7 @@ import { nextSection, tunnelCycles, tunnelPose } from './tunnel/model';
 
 const view: ViewDefinition = {
   id: 'tunnel',
+  group: 'show',
   name: 'Fly-through',
   tag: "what's coming",
   async mount(element) {

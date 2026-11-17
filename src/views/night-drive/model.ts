@@ -1,5 +1,7 @@
 import type { ViewFrame, ViewInstrument, ViewNote } from '../types';
 import { clamp, pitch } from '../shared/retro-2d';
+import { roleEvidence, drumEvidence, mostRegularDrum } from '../shared/roles';
+import { settingRanges } from '../shared/settings';
 
 export { pitch };
 export const ROAD_LENGTH = 96;
@@ -35,33 +37,20 @@ export function roadVoices(frame: Pick<ViewFrame, 'notes' | 'instruments'>): Roa
       const notes = (grouped.get(instrument.id) ?? []).slice().sort((a, b) => a.start - b.start);
       return { instrument, notes, role: 'lights' as Role, slot, dense: false };
     });
+  const evidence = roleEvidence(frame.notes);
   const drums = voices.flatMap((voice) => {
-    const starts = [
-      ...new Set(
-        voice.notes.filter((n) => n.hasOnset && pitch(n.value) === undefined).map((n) => n.start),
-      ),
-    ];
-    if (!starts.length) return [];
-    const gaps = starts.slice(1).map((t, i) => t - starts[i]);
-    const mean = gaps.reduce((sum, n) => sum + n, 0) / Math.max(1, gaps.length);
-    const variation = gaps.reduce((sum, n) => sum + (n - mean) ** 2, 0) / Math.max(1, gaps.length);
-    const density = mean > 0 ? 1 / mean : 1;
-    voice.dense = density > 128;
-    const downbeats =
-      starts.filter((t) => Math.abs(t - Math.round(t)) < 1e-6).length / starts.length;
-    const regularity = mean ? Math.round((Math.sqrt(variation) / mean) * 1e6) / 1e6 : 1;
-    return [{ voice, density, regularity, downbeats }];
+    const part = evidence.get(voice.instrument.id);
+    const drum = part && drumEvidence(part);
+    if (!drum) return [];
+    voice.dense = drum.density > 128;
+    return [{ voice, ...drum }];
   });
-  const regular = drums
-    .slice()
-    .sort(
-      (a, b) =>
-        a.regularity - b.regularity ||
-        b.downbeats - a.downbeats ||
-        a.density - b.density ||
-        a.voice.slot - b.voice.slot,
-    );
-  const gate = regular.at(0);
+  const gateId = mostRegularDrum(
+    evidence,
+    'regular',
+    voices.map((v) => v.instrument.id),
+  );
+  const gate = drums.find((d) => d.id === gateId);
   if (gate) gate.voice.role = 'gates';
   const remaining = drums.filter((d) => d !== gate);
   const dense = remaining
@@ -107,8 +96,8 @@ export function hillDriver(voices: RoadVoice[]): HillDriver | undefined {
   let best = 0;
   for (const voice of voices) {
     if (voice.instrument.muted) continue;
-    const settings = new Set(voice.notes.flatMap((n) => Object.keys(n.value)));
-    for (const setting of settings) {
+    const settings = settingRanges(voice.notes);
+    for (const [setting, range] of settings) {
       if (identity.has(setting)) continue;
       const samples = voice.notes.flatMap((n) => {
         const value = n.value[setting];
@@ -117,8 +106,8 @@ export function hillDriver(voices: RoadVoice[]): HillDriver | undefined {
           : [];
       });
       if (samples.length < 2) continue;
-      const min = Math.min(...samples.map((s) => s.value));
-      const max = Math.max(...samples.map((s) => s.value));
+      const { min, max } = range;
+      if (min === undefined || max === undefined) continue;
       if (max === min) continue;
       const values = samples.map((s) => (s.value - min) / (max - min));
       const mean = values.reduce((a, b) => a + b, 0) / values.length;

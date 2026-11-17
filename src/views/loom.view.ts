@@ -339,6 +339,7 @@ function appearance(frame: ViewFrame) {
 
 const view: ViewDefinition = {
   id: 'loom',
+  group: 'song',
   name: 'Loom',
   tag: 'whole song',
   span: 'song',

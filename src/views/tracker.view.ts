@@ -119,6 +119,7 @@ export function drawTracker(
 }
 const view: ViewDefinition = {
   id: 'tracker',
+  group: 'rhythm',
   name: 'Tracker',
   tag: 'retro',
   mount: (el) => mount2d(el, analyse, drawTracker),

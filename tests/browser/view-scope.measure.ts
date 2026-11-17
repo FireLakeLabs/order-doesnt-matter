@@ -1,3 +1,4 @@
+import { revealView } from './shelf';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import type { ViewDefinition, ViewFrame } from '../../src/views/types';
@@ -127,7 +128,12 @@ test('Scope: real output, two-stage screenshots and 300-frame CPU measurement', 
   await page.getByRole('button', { name: 'Clear Stage A', exact: true }).click();
   const stage = page.locator('[data-region="stage-b"]');
   await stage.getByRole('button', { name: 'Views', exact: true }).click();
-  await stage.getByRole('button', { name: 'Scope on Stage B', exact: true }).click();
+  await revealView(
+    stage.getByRole('button', { name: 'Scope on Stage B', exact: true, includeHidden: true }),
+  );
+  await stage
+    .getByRole('button', { name: 'Scope on Stage B', exact: true, includeHidden: true })
+    .click();
   await expect(stage.locator('[data-scope]')).toHaveCount(1);
   await page.waitForFunction(() => (window.scopeMeasure.frame?.width ?? 9999) < 900, undefined, {
     timeout: 0,

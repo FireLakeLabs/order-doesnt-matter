@@ -1,3 +1,4 @@
+import { revealView } from './shelf';
 import { expect, test } from '@playwright/test';
 
 declare global {
@@ -56,11 +57,13 @@ test('switching between whole-song drawings reuses the stage score', async ({ pa
     );
   const stage = page.locator('[data-region="stage-a"]');
   await stage.getByRole('button', { name: 'Views', exact: true }).click();
+  await revealView(stage.locator('[data-view="loom"] .view-choice'));
   await stage.locator('[data-view="loom"] .view-choice').click();
   await stage.getByRole('heading', { name: 'Loom', exact: true }).waitFor();
   await ready();
   const before = await page.evaluate(() => window.scoreCacheQuestions.sent);
   await stage.getByRole('button', { name: 'Views', exact: true }).click();
+  await revealView(stage.locator('[data-view="band"] .view-choice'));
   await stage.locator('[data-view="band"] .view-choice').click();
   await stage.getByRole('heading', { name: 'The band', exact: true }).waitFor();
   await ready();

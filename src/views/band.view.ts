@@ -269,6 +269,7 @@ export function drawBand(c: CanvasRenderingContext2D, frame: ViewFrame, parts: M
 }
 const view: ViewDefinition = {
   id: 'band',
+  group: 'show',
   name: 'The band',
   tag: 'silly',
   span: 'song',

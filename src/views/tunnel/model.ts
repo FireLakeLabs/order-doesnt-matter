@@ -1,4 +1,5 @@
 import type { ViewFrame } from '../types';
+import { clamp } from '../shared/math';
 
 /** Exponential spacing keeps successive projected rings at a constant .64 ratio.
  * Camera travel is continuous in absolute score time, in either direction. */
@@ -12,7 +13,7 @@ export function tunnelPose(cycle: number, now: number, lookAhead: number) {
       ? 1 - ahead * 0.12
       : Math.max(0.4, 0.88 - (0.48 * (ahead - 1)) / Math.max(1, lookAhead - 1));
   // One entering horizon ring fades in beyond the lookAhead fully visible rings.
-  const entry = Math.max(0, Math.min(1, lookAhead + 1 - ahead));
+  const entry = clamp(lookAhead + 1 - ahead);
   return {
     depth:
       Math.pow(1 / 0.64, distance + 0.4) *
