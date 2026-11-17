@@ -4,9 +4,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import packageJson from '../../package.json' with { type: 'json' };
 const { dependencies } = packageJson;
 import type {} from '../../src/studio/main';
-import type {} from '../../src/app/main';
 
-const url = '/studio.html?inspect&a=test-card&b=test-card';
+const url = '/?inspect&a=test-card&b=test-card';
 const shots = process.env.ODM_PARITY_SHOTS;
 const ready = (page: Page) =>
   expect(page.locator('[data-region="score"]')).toHaveAttribute('data-score-ready', 'true');
@@ -55,46 +54,46 @@ async function download(page: Page, name: string) {
   return readFile((await (await pending).path())!, 'utf8');
 }
 
-test('Keep work shares edited recovery across old page, Studio and reload, with portable exports and replacement protection', async ({
+test('Keep work retains edited Studio work across reload, with portable exports and replacement protection', async ({
   page,
   context,
 }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/?inspect');
-  await page.getByLabel('Your Strudel program').fill('note("c4 e4").s("sine").gain(0.5)');
-  await page.getByRole('button', { name: 'Load', exact: true }).click();
-  await page.waitForFunction(() => window.odmApp.canPlay);
-  await page.evaluate(() => {
-    const app = window.odmApp;
-    const gain = app.state.rows[0].pattern.layers
-      .flatMap((layer) => (layer.kind === 'settings' ? layer.settings : []))
-      .find((setting) => setting.name === 'gain')!;
-    app.editor!.edit(gain.id, 0.7);
-  });
-  const oldDoc = await page.evaluate(() => window.odmApp.state.doc);
   await page.goto(url);
-  await page.getByRole('button', { name: /^Keep work/ }).click();
-  await expect(page.getByRole('button', { name: 'Recover last work' })).toBeVisible();
-  expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toBeNull();
-  await page.getByRole('button', { name: 'Recover last work' }).click();
   await ready(page);
-  expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(oldDoc);
-  await page.getByRole('dialog').getByRole('button', { name: 'Close', exact: true }).click();
+  await page.getByRole('button', { name: 'Paste', exact: true }).click();
+  await page.getByLabel('Strudel program').fill('note("c4 e4").s("sine").gain(0.7)');
+  await page.getByRole('button', { name: 'Import program', exact: true }).click();
+  await expect(page.getByLabel('Strudel program')).toBeHidden();
+  await ready(page);
+  const oldDoc = await page.evaluate(() => window.odmStudio.app.state.doc);
   await page.locator('.lane-label').first().click();
   await page.getByRole('button', { name: 'Edit Level', exact: true }).click();
   await page.getByRole('spinbutton').fill('0.8');
   await page.getByRole('spinbutton').press('Enter');
   await page.locator('#editor').getByRole('button', { name: 'Done', exact: true }).click();
+  await ready(page);
   const studioDoc = await page.evaluate(() => window.odmStudio.app.state.doc);
+  await appSignal(page, function editedGainQueried() {
+    const events = Object.values(window.odmStudio.app.state.events).flatMap((r) => r.events);
+    return events.length > 0 && events.every((e) => (e.value as { gain?: number }).gain === 0.8);
+  });
+  const values = await page.evaluate(() =>
+    Object.values(window.odmStudio.app.state.events)
+      .flatMap((r) => r.events)
+      .map((e) => e.value),
+  );
   expect(studioDoc).not.toEqual(oldDoc);
   await page.keyboard.press('Control+z');
   expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(oldDoc);
   await page.keyboard.press('Control+Shift+z');
   expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(studioDoc);
   await page.getByRole('button', { name: /^Keep work/ }).click();
-  expect(JSON.parse(await download(page, 'Download document'))).toEqual(studioDoc);
-  expect(await download(page, 'Export Strudel')).toContain('0.8');
+  const json = await download(page, 'Download document');
+  const generated = await download(page, 'Export Strudel');
+  expect(JSON.parse(json)).toEqual(studioDoc);
+  expect(generated).toContain('0.8');
   await page.getByRole('button', { name: 'Copy Strudel code' }).click();
   await expect(page.getByText('Strudel copied.', { exact: true })).toBeVisible();
   expect(await page.evaluate(() => navigator.clipboard.readText())).toContain('0.8');
@@ -118,25 +117,50 @@ test('Keep work shares edited recovery across old page, Studio and reload, with 
   await pictures(page, 'replace');
   await page.getByRole('button', { name: 'Keep current', exact: true }).click();
   expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(studioDoc);
+  for (const text of ['{', '{"version":99,"body":[]}', '{"version":2,"body":[{}]}']) {
+    await page
+      .getByLabel('Document file')
+      .setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from(text) });
+    await expect(page.getByRole('dialog')).toContainText('Could not open document');
+    expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(studioDoc);
+  }
+  await page
+    .getByLabel('Document file')
+    .setInputFiles({ name: 'saved.json', mimeType: 'application/json', buffer: Buffer.from(json) });
+  await page.getByRole('button', { name: 'Replace', exact: true }).click();
+  await appSignal(page, function reopenedWithoutHistory() {
+    return window.odmStudio.app.canPlay && !window.odmStudio.app.editor!.canUndo;
+  });
+  expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(studioDoc);
   await page.reload();
-  await page.getByRole('button', { name: /^Keep work/ }).click();
-  await page.getByRole('button', { name: 'Recover last work' }).click();
   await ready(page);
   expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(studioDoc);
   expect(await page.evaluate(() => window.odmStudio.app.state.playing)).toBe(false);
-  await page.goto('/?inspect');
-  await page.getByRole('button', { name: 'Recover last work' }).click();
-  await page.waitForFunction(() => window.odmApp.canPlay);
-  expect(await page.evaluate(() => window.odmApp.state.doc)).toEqual(studioDoc);
+  await page.getByRole('button', { name: 'Paste', exact: true }).click();
+  await page.getByLabel('Strudel program').fill(generated);
+  await page.getByRole('button', { name: 'Import program', exact: true }).click();
+  await page.getByRole('button', { name: 'Replace', exact: true }).click();
+  await appSignal(
+    page,
+    function generatedProgramRestored(code) {
+      return window.odmStudio.app.canPlay && window.odmStudio.app.state.source === code;
+    },
+    generated,
+  );
+  await ready(page);
+  expect(
+    await page.evaluate(() =>
+      Object.values(window.odmStudio.app.state.events)
+        .flatMap((r) => r.events)
+        .map((e) => e.value),
+    ),
+  ).toEqual(values);
 });
 
-test('About and source links match the old legal notice and the pinned packages; examples and import notes stay available', async ({
+test('About and source links match the legal notice and the pinned packages; examples and import notes stay available', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/?inspect');
-  await page.getByRole('button', { name: 'About', exact: true }).click();
-  const legal = await page.locator('#about-dialog p').nth(1).innerText();
   await page.goto(url);
   await ready(page);
   await expect(page.getByRole('link', { name: 'Our source', exact: true })).toHaveAttribute(
@@ -151,9 +175,10 @@ test('About and source links match the old legal notice and the pinned packages;
   );
   await page.getByRole('button', { name: 'About / AGPL' }).click();
   const about = page.getByRole('dialog');
-  expect((await about.locator('p').nth(1).innerText()).replace(/\s+/g, ' ')).toBe(
-    legal.replace(/\s+/g, ' '),
-  );
+  await expect(about).toContainText('AGPL');
+  const licences = await page.request.get('/licenses.txt');
+  expect(licences.ok()).toBe(true);
+  expect(await licences.text()).toContain('GNU AFFERO GENERAL PUBLIC LICENSE');
   for (const name of ['core', 'mini', 'tonal', 'transpiler', 'web', 'webaudio', 'superdough']) {
     const pkg = name === 'superdough' ? name : `@strudel/${name}`;
     const tag = `${pkg}@${dependencies[pkg as keyof typeof dependencies]}`;
@@ -430,4 +455,74 @@ test('Practice teaches real Studio controls and restores the mounted draft, hist
   });
   await page.getByRole('spinbutton').press('Enter');
   expect(await page.evaluate(() => window.odmStudio.app.exportStrudel())).toContain('0.91');
+});
+
+test('saved pre-Studio dubstep document restores at home with its edited cutoff', async ({
+  page,
+}) => {
+  const payload = await readFile('tests/fixtures/legacy-recovery.json', 'utf8');
+  await page.addInitScript((payload) => localStorage.setItem('odm:recovery', payload), payload);
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/?inspect&a=test-card&b=');
+  await ready(page);
+  expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(JSON.parse(payload));
+  await expect(page.locator('.lane-label:not([data-setting])')).toHaveCount(13);
+  await page
+    .locator('.lane-label')
+    .filter({ has: page.locator('strong', { hasText: /^darkPad$/ }) })
+    .click();
+  await page.getByRole('button', { name: 'Edit Cutoff', exact: true }).click();
+  await expect(page.getByRole('spinbutton')).toHaveValue('910');
+  expect(await page.evaluate(() => window.odmStudio.app.engine)).toBeNull();
+  expect(await page.evaluate(() => window.odmStudio.app.state.playing)).toBe(false);
+});
+
+test('old Studio link replaces itself at home with its layout, query and hash intact', async ({
+  page,
+}) => {
+  const response = await page.request.get('/studio.html');
+  const html = await response.text();
+  expect(html).toContain('location.replace');
+  expect(html).toContain('http-equiv="refresh"');
+  expect(html).not.toMatch(/<script[^>]+src=|modulepreload|audio/i);
+  await page.goto('/studio.html?a=loom&b=&theme=riso#saved-layout');
+  await expect(page).toHaveURL(/\/\?a=loom&b=&theme=riso#saved-layout$/);
+  await ready(page);
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'riso');
+  await expect(page.locator('[data-region="stage-a"] h2')).toHaveText('Loom');
+  await expect(page.locator('[data-region="stage-b"] canvas')).toHaveCount(0);
+});
+
+test('Keep work exports remain usable with denied, quota and corrupt browser storage', async ({
+  browser,
+}) => {
+  for (const failure of ['denied', 'quota', 'corrupt']) {
+    const context = await browser.newContext({
+      baseURL: process.env.ODM_URL,
+      viewport: { width: 1920, height: 1080 },
+    });
+    const page = await context.newPage();
+    try {
+      await page.addInitScript((failure) => {
+        if (failure === 'corrupt') localStorage.setItem('odm:recovery', '{');
+        if (failure === 'denied')
+          Storage.prototype.getItem = () => {
+            throw Error('denied');
+          };
+        if (failure !== 'corrupt')
+          Storage.prototype.setItem = () => {
+            throw Error('quota');
+          };
+      }, failure);
+      await page.goto(url);
+      await ready(page);
+      await page.getByRole('button', { name: /^Keep work/ }).click();
+      if (failure !== 'corrupt')
+        await expect(page.getByRole('dialog')).toContainText('could not be saved');
+      expect(JSON.parse(await download(page, 'Download document')).version).toBe(2);
+      expect(await download(page, 'Export Strudel')).toContain('s(');
+    } finally {
+      await context.close();
+    }
+  }
 });

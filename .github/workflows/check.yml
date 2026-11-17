@@ -30,13 +30,17 @@ jobs:
         working-directory: infra
 
   browser:
-    name: Browser (${{ matrix.suite }})
+    name: Browser (${{ matrix.suite }} ${{ matrix.shard }})
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        suite: [legacy, studio]
+        suite: [studio, views]
+        shard: ['1/2', '2/2']
+        include:
+          - suite: engine
+            shard: '1/1'
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -45,13 +49,13 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:browser:${{ matrix.suite }}
+      - run: npm run test:browser:${{ matrix.suite }} -- --shard=${{ matrix.shard }}
         env:
-          ODM_PROFILE_PATH: browser-results/${{ matrix.suite }}.json
+          ODM_PROFILE_PATH: browser-results/${{ matrix.suite }}-${{ strategy.job-index }}.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: browser-${{ matrix.suite }}-evidence
+          name: browser-${{ matrix.suite }}-${{ strategy.job-index }}-evidence
           path: |
             browser-results/
             .browser-build-*/

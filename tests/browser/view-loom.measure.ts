@@ -109,7 +109,7 @@ test('Loom: real arrangement, cache cost, five themes, lifecycle, no-section and
     route.fulfill({ path: 'tests/fixtures/sounds/burst.wav', contentType: 'audio/wav' }),
   );
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/studio.html?a=loom&theme=arcade&b=&inspect');
+  await page.goto('/?a=loom&theme=arcade&b=&inspect');
   await page.waitForFunction(() => window.odmStudio.app.canPlay);
   await expect(page.locator('[data-region="stage-a"] canvas')).toHaveCount(1);
   await page.evaluate(async () => {

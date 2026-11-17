@@ -1,6 +1,6 @@
 import { play, openProgram } from './helpers';
 import { expect, test } from '@playwright/test';
-import type {} from '../../src/app/main';
+import type {} from '../../src/studio/main';
 
 test.use({ launchOptions: { args: ['--autoplay-policy=no-user-gesture-required'] } });
 for (const drum of ['bd', 'hh', 'cp'])
@@ -32,7 +32,7 @@ for (const drum of ['bd', 'hh', 'cp'])
     await play(page);
     await expect(page.getByText(`${drum}: ready`, { exact: true })).toBeVisible();
     const measured = await page.evaluate(async (drum) => {
-      const app = window.odmApp,
+      const app = window.odmStudio.app,
         e = app.engine!,
         tap = e.tap();
       const trigger = app.history.find((t) => t.type === 'trigger')!;

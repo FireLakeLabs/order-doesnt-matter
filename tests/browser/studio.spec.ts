@@ -1,3 +1,4 @@
+import './studio-transport';
 import { openStudio } from './studio-open';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test, type Page, type BrowserContext } from '@playwright/test';
@@ -280,7 +281,7 @@ test('links override persisted layout; optional storage and a dense rail remain 
   page,
 }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/studio.html?inspect&a=test-card');
+  await page.goto('/?inspect&a=test-card');
   await page.getByRole('button', { name: 'Theme riso', exact: true }).click();
   await page
     .getByRole('group', { name: 'Window', exact: true })
@@ -309,7 +310,7 @@ test('links override persisted layout; optional storage and a dense rail remain 
       .getByRole('button', { name: 'long', exact: true }),
   ).toHaveAttribute('aria-pressed', 'true');
   const saved = await page.evaluate(() => localStorage.getItem('odm-studio-layout'));
-  await page.goto('/studio.html?inspect&a=test-card&b=&theme=phosphor');
+  await page.goto('/?inspect&a=test-card&b=&theme=phosphor');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'phosphor');
   await expect(page.locator('.view-host canvas')).toHaveCount(1);
   expect(await page.evaluate(() => localStorage.getItem('odm-studio-layout'))).toBe(saved);
@@ -320,7 +321,7 @@ test('links override persisted layout; optional storage and a dense rail remain 
       },
     }),
   );
-  await page.goto('/studio.html?inspect&a=test-card');
+  await page.goto('/?inspect&a=test-card');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'arcade');
   await page.getByRole('button', { name: 'Theme pocket', exact: true }).click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'pocket');
@@ -350,7 +351,7 @@ test('a test-only registered failure is visible, retries, and leaves the other s
 }) => {
   await assets(context);
   let registered = false;
-  await page.route('**/assets/studio-*.js', async (route) => {
+  await page.route('**/assets/*.js', async (route) => {
     const response = await route.fetch();
     let body = await response.text();
     if (body.includes('"./test-card.view.ts":')) {
@@ -620,7 +621,7 @@ test('one page sample drives both real test cards, strip and rail through scrub,
 // The visitor's real defaults are covered separately from timing-sensitive tests.
 test('fresh Studio defaults to Ring and Loom', async ({ page }) => {
   await page.addInitScript(() => localStorage.removeItem('odm-studio-layout'));
-  await page.goto('/studio.html');
+  await page.goto('/');
   await expect(page.locator('[data-region="stage-a"] .stage-header h2')).toHaveText('Ring');
   await expect(page.locator('[data-region="stage-b"] .stage-header h2')).toHaveText('Loom');
 });

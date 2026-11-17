@@ -4,8 +4,7 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 import { deployedCommit, licencePlugins } from './scripts/licenses';
 const licences = licencePlugins();
-// Every harness/*.html is built as its own page, so a browser test can load one
-// part of the app (harness/engine.html, harness/sheet.html) without the others.
+// Build the shared engine harness separately from the Studio.
 const harness = readdirSync('harness')
   .filter((name) => name.endsWith('.html'))
   .map((name) => `harness/${name}`);

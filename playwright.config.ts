@@ -1,14 +1,13 @@
 import { defineConfig } from '@playwright/test';
-const optional = /\/(demo|edit-demo|shots|measure|online)\.spec\.ts$/;
-const audio = /\/(engine|silent-swap)\.spec\.ts$/;
-const delivery = /@audio-delivery/;
-const studio = /\/(studio[^/]*|view-[^/]+)\.spec\.ts$/;
+const optional = /\/online\.spec\.ts$/;
+const engine = /\/(engine|silent-swap)\.spec\.ts$/;
+const views = /\/view-[^/]+\.spec\.ts$/;
 export default defineConfig({
   testDir: './tests/browser',
   timeout: 60_000,
   retries: 0,
-  // Keep the existing concurrency; CI gives each page its own runner.
-  workers: 3,
+  // One audio clock workload at a time, including Studio transport checks.
+  workers: 1,
   use: {
     browserName: 'chromium',
     baseURL: process.env.ODM_URL,
@@ -18,23 +17,9 @@ export default defineConfig({
   },
   reporter: 'line',
   projects: [
-    { name: 'default', testIgnore: [optional, audio, studio], grepInvert: delivery },
-    {
-      name: 'audio',
-      testMatch: [audio, /\/rewrite\.spec\.ts$/],
-      grep: [/(engine|silent-swap)\.spec\.ts/, delivery],
-      workers: 1,
-      dependencies: ['default'],
-    },
-    {
-      name: 'studio',
-      testMatch: studio,
-      // Studio pages draw WebGL on a software renderer in CI; three at once on
-      // one runner starve each other into 60 s timeouts.
-      workers: 1,
-      // The complete local command runs both pages without overlapping their clocks.
-      dependencies: process.env.ODM_BROWSER_MODE === 'ci' ? ['audio'] : [],
-    },
+    { name: 'studio', testMatch: /\.spec\.ts$/, testIgnore: [optional, engine, views] },
+    { name: 'views', testMatch: views },
+    { name: 'engine', testMatch: engine, workers: 1 },
     { name: 'optional', testMatch: optional },
     { name: 'measure-views', testMatch: /\/view-[^/]+\.measure\.ts$/, workers: 1 },
   ],

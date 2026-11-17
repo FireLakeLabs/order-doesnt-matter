@@ -45,28 +45,22 @@ A Strudel program does not describe sound flowing through boxes. It describes a
 
 ## How we draw it
 
-Three views of one piece, each with one job.
+The Studio draws one piece through live views, a score and an editor tray.
 
-| View              | Job                                                                                                    |
-| ----------------- | ------------------------------------------------------------------------------------------------------ |
-| **Score sheet**   | Find and edit. One row per instrument, one column per setting in use, a song strip of sections on top. |
-| **Constellation** | Overview. Active instruments and sampled room sends. Not an editor.                                    |
-| **Spiral**        | Watch. One turn per cycle, with "now" as a bright gate. Not an editor.                                 |
+| Thing in Strudel      | What you see                                                          |
+| --------------------- | --------------------------------------------------------------------- |
+| An instrument         | A score lane and rail entry; marks in the chosen live views           |
+| A setting over time   | A tile drawn from real values; a **lane** when opened                 |
+| What drives a setting | Nested under it in the editor                                         |
+| A rewrite             | A numbered chain in the tray; branch controls in its editor           |
+| A note                | A mark with its real start and end, never a step in an assumed grid   |
+| A continuous signal   | A curve only, never a note                                            |
+| A section of the song | A block in the scrub strip; resting instruments collapse in the score |
+| An orbit              | **Room**: shared sends shown by views that use room information       |
+| Code we do not model  | Still visible, playable, and editable as text                         |
 
-| Thing in Strudel      | What you see                                                            |
-| --------------------- | ----------------------------------------------------------------------- |
-| An instrument         | A row in the sheet; a planet in the constellation; a band in the spiral |
-| A setting over time   | A cell drawn from its real values; a **lane** when opened               |
-| What drives a setting | Nested under it in the editor                                           |
-| A rewrite             | An ordered chip in the sheet; branch controls in its editor             |
-| A note                | A mark with its real start and end, never a step in an assumed grid     |
-| A continuous signal   | A curve only, never a note                                              |
-| A section of the song | A block in the song strip; instruments not in it say so                 |
-| An orbit              | **Room**: a region around the instruments that send into it             |
-| Code we do not model  | Still visible, playable, and editable as text                           |
-
-Selecting a target opens **one editor**, named by a breadcrumb. Choosing another
-target reuses it.
+Selecting a target opens **one editor** in the tray or wide rhythm area.
+Choosing another target reuses it.
 
 ## Rules that follow
 
@@ -80,23 +74,21 @@ target reuses it.
 - Nothing in the interface may suggest that a setting processes the sound that
   came before it.
 
-## Current interface (2026-11-15)
+## Current interface (2026-11-16)
 
-- One in-page editor replaces D34's placement. Now and Watch follow playback;
-  the score can stay pinned, with explicit playing/editing labels.
-- Paper is default; Fern and Night are alternatives. Instrument navigation
-  reaches settings; phone List starts with four rows and More.
+- The Studio at `/` has two live stages, a view shelf, instrument rail, score and
+  tray. Arcade is default; Sunset, Phosphor, Riso and Pocket are alternatives.
+- Play/pause, Stop, speed, stepping, scrubbing and whole-cycle loops share one
+  transport. The score follows playback or stays pinned to an editing section.
 - Supported mini forms and callback branches have structural controls;
   unproven forms keep source editing.
-- Now shows all sampled rooms. Watch defaults to Ring, with optional Fly-through;
-  both share scored times. Reduced motion holds depth still within each turn;
-  perspective overlaps can obscure notes.
-- Keep work offers explicit local recovery, JSON download/reopening and generated
-  Strudel export. Keep current/Replace protects edits; storage failures are visible.
-  Recovery is one latest browser document, not saved history or transport.
-- Guided practice is an opt-in eight-lesson Kiln tour. It retains the original
-  session and mounted drafts in memory, excludes practice from recovery, and
-  restores stopped playback. See its [specification](../research/guided-tour-spec.md).
+- Keep work offers browser recovery, JSON download/reopening and generated
+  Strudel export. Startup restores the latest saved document, including work
+  saved before the Studio switch. Keep current/Replace protects later edits;
+  storage failures are visible. Undo and transport are not persisted.
+- Guided practice uses Studio controls. It retains the original session and
+  mounted drafts in memory, excludes practice from recovery, and restores stopped
+  playback.
 
 ## Not yet settled
 

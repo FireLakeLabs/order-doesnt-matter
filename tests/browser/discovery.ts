@@ -1,5 +1,14 @@
+import { chooseSection } from './helpers';
 import { expect, type Page } from '@playwright/test';
-import { test, openProgram, play, selectNode, waitForPending, appSignal } from './helpers';
+import {
+  test,
+  scoreReady,
+  openProgram,
+  play,
+  selectNode,
+  waitForPending,
+  appSignal,
+} from './helpers';
 
 declare global {
   interface Window {
@@ -37,7 +46,7 @@ async function edit(page: Page, name: string, value: number | string) {
   const before = await page.evaluate(() => window.discoveryAccepted);
   await page.evaluate(
     ({ name, value }) => {
-      const app = window.odmApp;
+      const app = window.odmStudio.app;
       const doc = structuredClone(app.state.doc!);
       let found = false;
       const visit = (n: unknown): void => {
@@ -62,17 +71,17 @@ export async function kilnDiscovery(page: Page) {
   await observe(page);
   const start = performance.now();
   await openProgram(page, { example: 'Kiln' });
-  await page.getByRole('button', { name: 'Section 2', exact: true }).click();
+  await chooseSection(page, 'Section 2');
   await selectNode(page, { breadcrumb: ['bass', 'lpf'] });
   await play(page);
   const setupMs = performance.now() - start;
-  const sounds = await page.evaluate(() => window.odmApp.engine!.sounds());
+  const sounds = await page.evaluate(() => window.odmStudio.app.engine!.sounds());
   const begin = performance.now();
   await page.getByRole('spinbutton').fill('900');
   await page.getByRole('spinbutton').press('Tab');
   await waitForPending(page);
   const edited = await page.evaluate(() =>
-    window.odmApp.history.some(
+    window.odmStudio.app.history.some(
       (e) => e.type === 'trigger' && (e.value as { cutoff?: number }).cutoff === 900,
     ),
   );
@@ -81,11 +90,11 @@ export async function kilnDiscovery(page: Page) {
   await waitForPending(page);
   const result = await page.evaluate(() => ({
     work: window.discoveryWork,
-    sounds: window.odmApp.engine!.sounds(),
+    sounds: window.odmStudio.app.engine!.sounds(),
     latestRevision: Math.max(
-      ...window.odmApp.history.filter((e) => e.type === 'swapped').map((e) => e.revision),
+      ...window.odmStudio.app.history.filter((e) => e.type === 'swapped').map((e) => e.revision),
     ),
-    last: window.odmApp.history
+    last: window.odmStudio.app.history
       .filter((e) => e.type === 'trigger' && (e.value as { cutoff?: number }).cutoff === 700)
       .at(-1),
   }));
@@ -139,7 +148,7 @@ export async function assetDiscovery(page: Page) {
   expect(requests).toContain('/discovery-a.wav');
   await page.evaluate(() => {
     window.discoveryAccepted = 0;
-    const engine = window.odmApp.engine!,
+    const engine = window.odmStudio.app.engine!,
       play = engine.play.bind(engine);
     engine.play = async (...args) => {
       const revision = await play(...args);
@@ -148,7 +157,7 @@ export async function assetDiscovery(page: Page) {
     };
   });
   await edit(page, 'gain', 0.7);
-  expect(await page.evaluate(() => window.odmApp.engine!.sounds())).toContainEqual({
+  expect(await page.evaluate(() => window.odmStudio.app.engine!.sounds())).toContainEqual({
     name: 'fixture_late',
     state: 'ready',
   });
@@ -162,47 +171,50 @@ export async function assetDiscovery(page: Page) {
     expect(requests).toContain(`/discovery-${file}.wav`);
     expect(await page.evaluate(() => window.discoveryWork.at(-1)!.starts)).toEqual([0, 40]);
   }
-  const before = await page.evaluate(() => window.odmApp.engine!.sounds());
+  const before = await page.evaluate(() => window.odmStudio.app.engine!.sounds());
   expect(
     await page.evaluate(async () => {
       try {
-        await window.odmApp.engine!.play('note(');
+        await window.odmStudio.app.engine!.play('note(');
         return false;
       } catch {
         return true;
       }
     }),
   ).toBe(true);
-  expect(await page.evaluate(() => window.odmApp.engine!.sounds())).toEqual(before);
+  expect(await page.evaluate(() => window.odmStudio.app.engine!.sounds())).toEqual(before);
   await edit(page, 'gain', 0.8);
   expect(await page.evaluate(() => window.discoveryWork.at(-1)!.starts)).toEqual([0, 40]);
   const count = await page.evaluate(() => window.discoveryAccepted);
   await page.evaluate(() => {
-    const doc = structuredClone(window.odmApp.state.doc!);
+    const doc = structuredClone(window.odmStudio.app.state.doc!);
     const node = doc.body.find((n) => n.kind === 'voice')!;
     if (node.pattern.core.kind !== 'group') throw Error('Expected arrangement');
     node.pattern.core.parts[0].cycles = 41;
-    window.odmApp.editor!.apply(doc);
+    window.odmStudio.app.editor!.apply(doc);
   });
   await appSignal(page, (n) => window.discoveryAccepted > n, count);
   expect(await page.evaluate(() => window.discoveryWork.at(-1)!.starts)).toEqual([0, 41]);
-  const json = await page.evaluate(() => window.odmApp.downloadDocument()!);
+  const json = await page.evaluate(() => window.odmStudio.app.downloadDocument()!);
   await page.evaluate((json) => {
-    window.odmApp.stop();
-    void window.odmApp.openDocument(json);
+    window.odmStudio.app.stop();
+    void window.odmStudio.app.openDocument(json);
   }, json);
   await page.getByRole('button', { name: 'Replace', exact: true }).click();
-  await appSignal(page, () => !window.odmApp.editor!.canUndo && window.odmApp.canPlay);
+  await appSignal(
+    page,
+    () => !window.odmStudio.app.editor!.canUndo && window.odmStudio.app.canPlay,
+  );
   await play(page);
   expect(await page.evaluate(() => window.discoveryWork.at(-1)!.starts)).toEqual([0, 41]);
   await page.reload();
-  await page.getByRole('button', { name: 'Recover last work' }).click();
+  await scoreReady(page);
   await play(page);
   expect(await page.evaluate(() => window.discoveryWork.at(-1)!.starts)).toEqual([0, 41]);
-  const ready = await page.evaluate(() => window.odmApp.engine!.sounds());
+  const ready = await page.evaluate(() => window.odmStudio.app.engine!.sounds());
   expect(ready).toContainEqual({ name: 'other_late', state: 'ready' });
   const revision = await page.evaluate(async () =>
-    window.odmApp.engine!.play(window.odmApp.exportStrudel()!, {
+    window.odmStudio.app.engine!.play(window.odmStudio.app.exportStrudel()!, {
       fromCycle: 41,
       discoverCycles: [0, 41],
     }),
@@ -210,7 +222,7 @@ export async function assetDiscovery(page: Page) {
   await appSignal(
     page,
     (revision) =>
-      window.odmApp.history.some(
+      window.odmStudio.app.history.some(
         (e) =>
           e.type === 'trigger' &&
           e.revision === revision &&
@@ -220,11 +232,11 @@ export async function assetDiscovery(page: Page) {
   );
   const value = await page.evaluate(
     (revision) =>
-      window.odmApp.history.find((e) => e.type === 'trigger' && e.revision === revision)!,
+      window.odmStudio.app.history.find((e) => e.type === 'trigger' && e.revision === revision)!,
     revision,
   );
   expect(value).toMatchObject({ value: { s: 'late', n: 1, note: 60, bank: 'other', gain: 0.8 } });
-  await page.evaluate(() => window.odmApp.stop());
+  await page.evaluate(() => window.odmStudio.app.stop());
 }
 
 export async function opaqueDiscovery(page: Page) {
@@ -236,7 +248,7 @@ export async function opaqueDiscovery(page: Page) {
   await openProgram(page, { source });
   await play(page);
   const result = await page.evaluate(async () => {
-    const app = window.odmApp,
+    const app = window.odmStudio.app,
       code = app.exportStrudel()!;
     const first = window.discoveryEffects;
     await app.engine!.play(code);
@@ -247,5 +259,5 @@ export async function opaqueDiscovery(page: Page) {
   expect(result.code).toContain('samples(');
   expect(result.sounds).toEqual([{ name: 'registered', state: 'ready' }]);
   expect(await page.evaluate(() => window.discoveryWork)).toHaveLength(2);
-  await page.evaluate(() => window.odmApp.stop());
+  await page.evaluate(() => window.odmStudio.app.stop());
 }

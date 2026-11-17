@@ -1,4 +1,6 @@
 import { openStudio } from './studio-open';
+import { waitForPending } from './helpers';
+import { generate } from '../../src/generate';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test, type BrowserContext, type Page } from '@playwright/test';
 import type {} from '../../src/studio/main';
@@ -242,6 +244,15 @@ test('cutoff edit is pending until its engine acknowledgement; top-bar Undo rest
   await tray(page).getByRole('button', { name: 'Edit Cutoff', exact: true }).click();
   await expect(page.getByLabel('Low bound', { exact: true })).toHaveValue('140');
   await page.evaluate(() => window.odmStudio.stop());
+  await page.getByLabel('Low bound', { exact: true }).fill('210');
+  await page.getByLabel('Low bound', { exact: true }).press('Enter');
+  await waitForPending(page);
+  const saved = await page.evaluate(() => window.odmStudio.app.state.doc!);
+  expect(generate(saved)).toMatch(/\.range\(210,\s*2600\)/);
+  await page.reload();
+  await ready(page);
+  expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(saved);
+  expect(await page.evaluate(() => window.odmStudio.app.engine)).toBeNull();
 });
 
 test('custom definitions open as source, and nine things fit a 560px tray', async ({ page }) => {

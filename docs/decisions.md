@@ -161,3 +161,5 @@ Keep each entry to a few lines.
   file behind a shared view contract. 3D views use three.js loaded on demand,
   others Canvas 2D; the interface moves to React with shadcn/ui. Details land
   with the wave.
+- **D48 (2026-11-16) Studio is home.** The Studio replaces the old page at `/`,
+  restoring its saved document; `/studio.html` redirects with query and hash intact.

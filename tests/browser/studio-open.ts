@@ -5,5 +5,5 @@ import type { Page } from '@playwright/test';
 export function openStudio(page: Page, choices = '') {
   const params = new URLSearchParams({ inspect: '', a: 'test-card', b: '' });
   for (const [key, value] of new URLSearchParams(choices)) params.set(key, value);
-  return page.goto(`/studio.html?${params.toString()}`);
+  return page.goto(`/?${params.toString()}`);
 }

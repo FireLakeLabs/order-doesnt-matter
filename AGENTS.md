@@ -15,11 +15,11 @@ you play with the score directly, without making Strudel's syntax the subject.
 
 ## Current phase
 
-The redesign wave is next; [D44–D47](docs/decisions.md) set the process,
-desktop scope and design direction. Details land with its briefs. Preserve the
-visitor's session and recovery state through guided practice.
+The Studio is the main page at `/`; [D44–D48](docs/decisions.md) set the process,
+desktop scope and design direction. Preserve the visitor's session and recovery
+state through guided practice. Studio views share `src/live/model.ts`; the score
+and tray reuse the document models and editor kinds.
 
-Now (`src/live/`) and Watch (`src/spiral/`) share `src/live/model.ts`.
 The app is live at odm.firelakelabs.com
 and every merge to `main` publishes. An editor is one file in `src/editor/kinds/`;
 a document change is one file in `src/document/edits/`. Production code lives

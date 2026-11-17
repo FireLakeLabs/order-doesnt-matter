@@ -1,3 +1,4 @@
+import { chooseSection } from './helpers';
 import { mkdir } from 'node:fs/promises';
 import { expect, type BrowserContext, type Page } from '@playwright/test';
 import { openProgram, scoreReady, play, appSignal, throughCycle } from './helpers';
@@ -6,7 +7,7 @@ import {
   MAX_WINDOW_STARTS,
   PREFLIGHT_TIMEOUT,
 } from '../../src/engine/playback-limits';
-import type {} from '../../src/app/main';
+import type {} from '../../src/studio/main';
 import type { EngineEvent } from '../../src/contract';
 
 type Note = { cycle: number; value: unknown };
@@ -27,17 +28,17 @@ export async function playbackSafety(context: BrowserContext) {
       openProgram(running, { example: 'Kiln' }),
       openProgram(page, { source: runaway }),
     ]);
-    await running.getByRole('button', { name: 'Section 2', exact: true }).click();
+    await chooseSection(running, 'Section 2');
     await Promise.all([
       play(running),
       page.getByRole('button', { name: 'Play', exact: true }).click(),
     ]);
-    await appSignal(page, () => !!window.odmApp.engine);
+    await appSignal(page, () => !!window.odmStudio.app.engine);
     // Observe real scheduler questions before the guard/output path. Late windows
     // never queried by Cyclist are absent from both sides; a dropped real onset
     // inside an answered window still fails exact equality below.
     const capture = await running.evaluateHandle(async () => {
-      const app = window.odmApp;
+      const app = window.odmStudio.app;
       window.odmSafetyScheduled = [];
       const delivered: Extract<EngineEvent, { type: 'trigger' }>[] = [];
       const off = app.engine!.subscribe((e) => {
@@ -54,37 +55,42 @@ export async function playbackSafety(context: BrowserContext) {
 ${app.exportStrudel()}`);
       return { revision, delivered, off };
     });
-    await running.getByLabel('Your Strudel program').fill(runaway);
-    await running.getByRole('button', { name: 'Load', exact: true }).click();
+    await running.getByRole('button', { name: 'Paste', exact: true }).click();
+    await running.getByLabel('Strudel program').fill(runaway);
+    await running.getByRole('button', { name: 'Import program', exact: true }).click();
     await scoreReady(running);
     for (const tab of [page, running]) {
-      await tab.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
-      await expect(tab.getByLabel('Your Strudel program')).toBeHidden();
+      const paste = tab.getByRole('dialog', { name: 'Paste Strudel', exact: true });
+      if (await paste.isVisible())
+        await paste.getByRole('button', { name: 'Close', exact: true }).click();
+      await expect(tab.getByLabel('Strudel program')).toBeHidden();
     }
     await Promise.all(
       [page, running].map((tab) =>
         appSignal(
           tab,
-          (message) => document.getElementById('message')!.textContent === message,
+          (message) => window.odmStudio.app.state.message === message,
           PREFLIGHT_TIMEOUT,
         ),
       ),
     );
-    expect(await page.evaluate(() => window.odmApp.engine!.playing)).toBe(false);
+    for (const tab of [page, running])
+      await expect(tab.locator('.top-message')).toContainText(PREFLIGHT_TIMEOUT);
+    expect(await page.evaluate(() => window.odmStudio.app.engine!.playing)).toBe(false);
     expect(
-      await page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'trigger')),
+      await page.evaluate(() => window.odmStudio.app.history.filter((e) => e.type === 'trigger')),
     ).toEqual([]);
     const cdp = await context.newCDPSession(running);
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: 4 });
-    const errorMark = await running.evaluate(() => window.odmApp.history.length);
-    const cycle = await running.evaluate(() => Math.ceil(window.odmApp.engine!.now()!));
+    const errorMark = await running.evaluate(() => window.odmStudio.app.history.length);
+    const cycle = await running.evaluate(() => Math.ceil(window.odmStudio.app.engine!.now()!));
     await shots(page, 'timeout');
     // Cover repeated Kiln positions while another tab floods. Require delivery
     // of every onset in every answered window, without demanding one lucky cycle
     // in which a shared runner never skips a scheduler question.
     await flood(page);
     const end = await running.evaluate(
-      (minimum) => Math.max(minimum, Math.ceil(window.odmApp.engine!.now()!)),
+      (minimum) => Math.max(minimum, Math.ceil(window.odmStudio.app.engine!.now()!)),
       cycle + 2,
     );
     await throughCycle(running, end);
@@ -113,13 +119,13 @@ ${app.exportStrudel()}`);
     expect(positions('bd')).toEqual([0, 0.25, 0.5, 0.75]);
     expect(positions('hh')).toEqual(Array.from({ length: 16 }, (_, i) => i / 16));
     expect(notes.delivered.some((e) => (e.value as { s: string }).s === 'triangle')).toBe(true);
-    expect(await running.evaluate(() => window.odmApp.engine!.playing)).toBe(true);
+    expect(await running.evaluate(() => window.odmStudio.app.engine!.playing)).toBe(true);
     expect(
-      await running.evaluate(() => window.odmApp.history.filter((e) => e.type === 'error')),
+      await running.evaluate(() => window.odmStudio.app.history.filter((e) => e.type === 'error')),
     ).toEqual([{ type: 'error', message: PREFLIGHT_TIMEOUT }]);
     expect(
       await running.evaluate(
-        (offset) => window.odmApp.history.slice(offset).filter((e) => e.type === 'error'),
+        (offset) => window.odmStudio.app.history.slice(offset).filter((e) => e.type === 'error'),
         errorMark,
       ),
     ).toEqual([]);
@@ -131,42 +137,40 @@ ${app.exportStrudel()}`);
 }
 
 async function flood(page: Page) {
-  await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
-  await page.getByLabel('Your Strudel program').fill(
+  await page.getByRole('button', { name: 'Paste', exact: true }).click();
+  await page.getByLabel('Strudel program').fill(
     `note("[${Array(MAX_WINDOW_STARTS + 1)
       .fill(60)
       .join(',')}]").s("sine").clip(0.001).release(0.005).gain(0.0002)`,
   );
-  await page.getByRole('button', { name: 'Load', exact: true }).click();
+  await page.getByRole('button', { name: 'Import program', exact: true }).click();
   await scoreReady(page);
   await page.evaluate((message) => {
     const errors: unknown[] = [],
       values: unknown[] = [];
-    const off = window.odmApp.engine!.subscribe((e) => {
+    const off = window.odmStudio.app.engine!.subscribe((e) => {
       if (e.type === 'trigger') values.push(e.value);
       if (e.type === 'error') errors.push(e);
       if (e.type !== 'error' || e.message !== message) return;
       const start = performance.now();
       setTimeout(() => {
-        document.getElementById('paste')!.click();
+        document
+          .querySelector<HTMLButtonElement>('.top-bar button:has(svg.lucide-clipboard-paste)')!
+          .click();
         off();
         performance.measure('ODM:cap-click', {
           start,
           end: performance.now(),
-          detail: { errors, values, playing: window.odmApp.engine!.playing },
+          detail: { errors, values, playing: window.odmStudio.app.engine!.playing },
         });
       }, 0);
     });
   }, FLOOD_MESSAGE);
   await page.getByRole('button', { name: 'Play', exact: true }).click();
-  await appSignal(
-    page,
-    (message) => document.getElementById('message')!.textContent === message,
-    FLOOD_MESSAGE,
-  );
-  await expect(page.locator('#message')).toHaveText(FLOOD_MESSAGE);
+  await appSignal(page, (message) => window.odmStudio.app.state.message === message, FLOOD_MESSAGE);
+  await expect(page.locator('.top-message')).toHaveText(FLOOD_MESSAGE);
   await appSignal(page, () => performance.getEntriesByName('ODM:cap-click').length > 0);
-  await expect(page.getByLabel('Your Strudel program')).toBeHidden();
+  await expect(page.getByLabel('Strudel program')).toBeVisible();
   const result = await page.evaluate(() => {
     const entry = performance.getEntriesByName('ODM:cap-click')[0] as PerformanceMeasure;
     return {
@@ -176,24 +180,25 @@ async function flood(page: Page) {
   });
   console.log('CAP RESPONSIVENESS MEASURED', { cap: MAX_WINDOW_STARTS, clickMs: result.clickMs });
   expect(result.playing).toBe(true);
-  await expect(page.locator('#message')).toHaveAttribute('data-kind', 'warning');
-  expect(await page.evaluate(() => window.odmApp.engine!.playing)).toBe(true);
+  expect(await page.evaluate(() => window.odmStudio.app.warning)).toBe(true);
+  expect(await page.evaluate(() => window.odmStudio.app.engine!.playing)).toBe(true);
   expect(result.errors).toEqual([
     { type: 'error', message: FLOOD_MESSAGE, reason: 'notes-left-out' },
   ]);
   expect(result.values).toHaveLength(MAX_WINDOW_STARTS);
   for (const value of result.values) expect(value).toMatchObject({ note: 60, s: 'sine' });
   await shots(page, 'flood');
+  await page
+    .getByRole('dialog', { name: 'Paste Strudel', exact: true })
+    .getByRole('button', { name: 'Close', exact: true })
+    .click();
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
 }
 
 async function shots(page: Page, name: string) {
   if (!process.env.ODM_SAFETY_SHOTS) return;
   await mkdir('test-results/runaway', { recursive: true });
-  for (const size of [
-    { width: 1440, height: 900 },
-    { width: 390, height: 844 },
-  ]) {
+  for (const size of [{ width: 1920, height: 1080 }]) {
     await page.setViewportSize(size);
     await page.screenshot({
       path: `test-results/runaway/${name}-${size.width}.png`,

@@ -1,4 +1,4 @@
-# Harness pages
+# Engine harness
 
-One HTML page per part of the app, for browser tests only. Each is built
-alongside the app and served at `/harness/<name>.html`.
+`engine.html` loads the shared real engine for browser checks without the Studio.
+It is built alongside the app and served at `/harness/engine.html`.

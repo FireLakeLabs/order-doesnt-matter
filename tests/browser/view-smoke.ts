@@ -52,7 +52,7 @@ export function viewSmoke(test: typeof import('@playwright/test').test, id: stri
       await ready();
       await expect(canvas).toHaveCount(1);
     };
-    await page.goto(`/studio.html?a=${encodeURIComponent(id)}`);
+    await page.goto(`/?a=${encodeURIComponent(id)}`);
     await page.getByRole('button', { name: 'Paste', exact: true }).click();
     await page
       .getByLabel('Strudel program')

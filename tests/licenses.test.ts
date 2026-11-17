@@ -6,7 +6,7 @@ test('bundle notices include Strudel and the AGPL, without installed dev depende
   const text = generateLicenses([
     resolve('node_modules/@strudel/core/dist/index.mjs'),
     resolve('node_modules/acorn/dist/acorn.mjs'),
-    resolve('src/app/main.ts'),
+    resolve('src/studio/main.tsx'),
   ]);
   expect(text).toContain('@strudel/core@1.2.6 — AGPL-3.0-or-later');
   expect(text).toContain('acorn@8.15.0 — MIT');
