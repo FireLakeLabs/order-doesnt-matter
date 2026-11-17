@@ -80,7 +80,7 @@ function draw(
   c.fillText('Harmonograph', 20, 33);
   c.textAlign = 'right';
   text(
-    `bar ${String(Math.floor(f.now) + 1)} · ${String(Math.floor((f.now % 1) * 100))}%`,
+    `bar ${String(Math.floor(f.now) + 1)} · ${String(Math.floor((f.now % 1) * 100 + 1e-9))}%`,
     w - 20,
     33,
     11,
