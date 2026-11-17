@@ -18,6 +18,7 @@ import {
   ribbonAt,
   ribbonGeometry,
   ribbonParts,
+  scoredPitch,
   timeScale,
 } from '../../src/views/ribbons/model';
 import { pitch } from '../../src/views/shared/pitch';
@@ -128,6 +129,31 @@ it('shows section members plus notes reaching in from an adjacent section, witho
   expect(
     parts.some((p) => !p.instrument.inSection && p.notes.some((n) => n.start < 8 && n.end > 7.5)),
   ).toBe(true);
+});
+it('keeps real colon-selected samples unpitched while retaining an authored n control', async () => {
+  const parts = ribbonParts({ ...frame, sections: [] });
+  for (const name of ['vocalAtmos', 'preDropVocal']) {
+    const part = parts.find((p) => p.instrument.name === name)!;
+    const note = part.notes.find((n) => typeof n.value.n === 'number')!;
+    expect(note).toBeDefined();
+    expect(scoredPitch(note, part.instrument)).toBeUndefined();
+    expect(part.unpitched).toBe(true);
+    expect(noteHeight(part, note)).toBe(part.baseline);
+  }
+  const result = await queryEventsNode('n("36 39").s("sawtooth")', 0, 1);
+  expect(result.error).toBeNull();
+  const input = {
+    ...scoreFrame(),
+    now: 0.1,
+    from: 0,
+    to: 1,
+    sections: [],
+    notes: viewNotes({ from: 0, to: 1, events: { '0': result } }),
+  };
+  input.instruments[0].settings = [{ name: 'n', label: 'Notes', kind: 'values' }];
+  const part = ribbonParts(input)[0];
+  expect(part.unpitched).toBe(false);
+  expect(part.notes.map((n) => scoredPitch(n, part.instrument))).toEqual([36, 39]);
 });
 it('fans all twenty in depth, retains one full ribbon with one instrument, and keeps depth stable as section membership changes', () => {
   const input = {

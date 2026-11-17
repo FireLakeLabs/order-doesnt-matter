@@ -56,6 +56,17 @@ export function noteTurn(note: ViewNote, instrument: ViewInstrument) {
   return 0;
 }
 export const pitchHeight = (midi: number) => -0.2 + 0.2 * Math.tanh((midi - 36) / 16);
+/** Admit n as pitch only when authored as a control: s("speech:2") produces a
+ * sample index. The shared pitch reader cannot make that distinction alone. */
+export function scoredPitch(note: ViewNote, instrument: ViewInstrument) {
+  if (
+    note.value.note === undefined &&
+    note.value.freq === undefined &&
+    !instrument.settings.some((s) => s.name === 'n')
+  )
+    return undefined;
+  return pitch(note.value);
+}
 export function ribbonParts(frame: ViewFrame, score = indexRibbons(frame.notes)) {
   const from = frame.now - frame.lookAhead * pastReach;
   const to = frame.now + frame.lookAhead * futureReach;
@@ -72,9 +83,13 @@ export function ribbonParts(frame: ViewFrame, score = indexRibbons(frame.notes))
       instrument.inSection ||
       notes.some((n) => n.start < to && n.end > from),
   );
-  const drums = shown.filter(({ notes }) => !notes.some((n) => pitch(n.value) !== undefined));
+  const drums = shown.filter(
+    ({ notes, instrument }) => !notes.some((n) => scoredPitch(n, instrument) !== undefined),
+  );
   return shown.map(({ instrument, notes }) => {
-    const pitches = notes.map((n) => pitch(n.value)).filter((p): p is number => p !== undefined);
+    const pitches = notes
+      .map((n) => scoredPitch(n, instrument))
+      .filter((p): p is number => p !== undefined);
     const unpitched = pitches.length === 0;
     const baseline = unpitched
       ? 0.02 +
@@ -98,7 +113,7 @@ export function ribbonParts(frame: ViewFrame, score = indexRibbons(frame.notes))
 }
 export type RibbonPart = ReturnType<typeof ribbonParts>[number];
 export function noteHeight(part: RibbonPart, note: ViewNote) {
-  const midi = pitch(note.value);
+  const midi = scoredPitch(note, part.instrument);
   return midi === undefined ? part.baseline : pitchHeight(midi);
 }
 export const noteWidth = (part: RibbonPart, note: ViewNote) =>
