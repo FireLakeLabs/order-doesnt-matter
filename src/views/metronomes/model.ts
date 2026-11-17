@@ -17,7 +17,7 @@ export function analyse(notes: ViewNote[]) {
   }
   for (const part of parts.values()) {
     part.notes.sort((a, b) => a.start - b.start || a.end - b.end);
-    // A chord is one swing, but every voice still counts towards density and hold.
+    // A chord is one swing. Keep every voice in notes for its held span.
     const starts = new Set<number>();
     part.onsets = part.notes.filter((n) => {
       if (!n.hasOnset || starts.has(n.start)) return false;
@@ -25,13 +25,17 @@ export function analyse(notes: ViewNote[]) {
       return true;
     });
     const first = part.onsets.at(0);
-    const second = part.onsets.at(1);
-    const gap = first && second ? second.start - first.start : 1;
-    // Window frames cannot supply a lifetime onset ordinal. Anchor regular trains
-    // to absolute time so moving the query window does not flip their polarity.
-    part.anchor = first ? Math.round(first.start / (gap || 1)) : 0;
+    const cycle = Math.floor(first?.start ?? 0);
+    const count = part.onsets.filter((n) => n.start >= cycle && n.start < cycle + 1).length;
+    // Windows start on cycle boundaries. Counting the first occupied cycle keeps
+    // uneven rhythms with a constant onset count per cycle in phase across windows.
+    // Varying cycle counts still need an onset ordinal from outside this window.
+    part.anchor = cycle * count;
   }
   return parts;
+}
+function returnEnd(note: ViewNote): number {
+  return note.end > note.start ? note.end : note.start + 1 / 8;
 }
 export function swing(part: Part, now: number): number {
   const id = part.notes[0]?.instrument ?? '';
@@ -46,7 +50,10 @@ export function swing(part: Part, now: number): number {
   }
   // At the edge of available evidence ease out of / into the parked position,
   // rather than inventing another onset outside the score window.
-  if (previous) return side * EXTREME * (1 - noteProgress(previous, now));
+  if (previous)
+    return (
+      side * EXTREME * (1 - noteProgress({ start: previous.start, end: returnEnd(previous) }, now))
+    );
   return next ? -side * EXTREME * clamp(1 - (next.start - now)) : 0;
 }
 export interface Pose {
@@ -67,7 +74,7 @@ export function poses(frame: ViewFrame, parts: Map<string, Part>): Pose[] {
     .sort((a, b) => a.index - b.index)
     .map((instrument) => {
       const part = parts.get(instrument.id) ?? { notes: [], onsets: [], anchor: 0 };
-      const cycle = part.notes.filter((n) => n.hasOnset && n.start >= bar && n.start < bar + 1);
+      const cycle = part.onsets.filter((n) => n.start >= bar && n.start < bar + 1);
       const held = part.notes.filter((n) => n.start <= frame.now && frame.now < n.end);
       const resting = !cycle.length && !held.length;
       const angle = resting ? 0 : swing(part, frame.now);
@@ -103,10 +110,10 @@ export function poses(frame: ViewFrame, parts: Map<string, Part>): Pose[] {
           resting || !part.onsets.length
             ? ''
             : JSON.stringify([
-                [...new Set(cycle.map((n) => n.start))],
+                cycle.map((n) => n.start),
                 previous?.start,
                 next?.start,
-                next ? null : previous?.end,
+                next || !previous ? null : returnEnd(previous),
                 side,
               ]),
       };
@@ -122,15 +129,12 @@ export function inStep(cast: Pose[]): Pose[][] {
   }
   return [...groups.values()].filter((group) => group.length > 1);
 }
-export function layout(frame: Pick<ViewFrame, 'width' | 'height'>, count: number) {
+export function layout(frame: Pick<ViewFrame, 'width'>, count: number) {
   const columns = Math.min(
     Math.max(1, count),
     count > 16 ? 5 : count > 6 ? Math.ceil(count / 2) : frame.width < 700 ? 3 : 6,
   );
   const rows = Math.max(1, Math.ceil(count / columns));
-  const top = 100,
-    bottom = 38;
   const cellWidth = (frame.width - 32) / columns;
-  const cellHeight = Math.max(1, (frame.height - top - bottom) / rows);
-  return { columns, rows, cellWidth, cellHeight, top };
+  return { columns, rows, cellWidth, top: 100 };
 }

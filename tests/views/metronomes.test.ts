@@ -93,7 +93,7 @@ it('centres a single part and places twenty in a five by four grid', () => {
   expect(single.rows).toBe(1);
   expect(twenty.columns).toBe(5);
   expect(twenty.rows).toBe(4);
-  expect(layout({ width: 560, height: 760 }, 6).rows).toBe(2);
+  expect(layout({ width: 560 }, 6).rows).toBe(2);
 });
 it('finds the real drop lock from timing, keeps rests visible, and ignores names and playback flags', () => {
   const parts = analyse(real.notes),
@@ -184,4 +184,38 @@ it('does not call different unbracketed returns to rest an in-step swing', () =>
   const cast = poses(f, analyse(f.notes));
   expect(cast[0].angle).not.toBe(cast[1].angle);
   expect(inStep(cast)).toEqual([]);
+});
+
+it('keeps an uneven tresillo in phase when the score window moves four cycles', () => {
+  const notes = Array.from({ length: 32 }, (_, cycle) =>
+    [0, 0.375, 0.75].map((phase) => note(cycle + phase, cycle + phase + 0.1)),
+  ).flat();
+  const window = (from: number, to: number) =>
+    analyse(notes.filter((n) => n.start >= from && n.start < to)).get('0')!;
+  const earlier = window(8, 24),
+    later = window(12, 28);
+  for (const now of [16, 16.1, 16.375, 16.5, 16.75, 17, 19.9])
+    expect(swing(later, now)).toBeCloseTo(swing(earlier, now));
+});
+it('counts a chord once for the weight and fan, preserving every held voice', () => {
+  const f = scoreFrame();
+  f.notes = Array.from({ length: 33 }, (_, i) => ({ ...note(10, 11), value: { note: 48 + i } }));
+  const chord = poses(f, analyse(f.notes))[0];
+  const single = poses({ ...f, notes: [f.notes[0]] }, analyse([f.notes[0]]))[0];
+  expect(chord.hits).toBe(1);
+  expect(chord.weight).toBe(single.weight);
+  expect(chord.fan).toBe(false);
+  expect(chord.part.notes).toHaveLength(33);
+  expect(chord.held).toBe(true);
+  const pad = poses({ ...real, now: 4.4 }, analyse(real.notes)).find(
+    (p) => p.instrument.name === 'darkPad',
+  )!;
+  expect(pad.part.notes.filter((n) => n.hasOnset && n.start === 4)).toHaveLength(3);
+  expect(pad.hits).toBe(1);
+});
+it('reaches an extreme for a final zero-length onset before easing back upright', () => {
+  const part = analyse([note(0, 0)]).get('0')!;
+  expect(swing(part, 0)).toBe(-EXTREME);
+  expect(swing(part, 1 / 16)).toBeCloseTo(-EXTREME / 2);
+  expect(swing(part, 1 / 8)).toBeCloseTo(0);
 });
