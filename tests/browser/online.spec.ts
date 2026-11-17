@@ -1,4 +1,4 @@
-import { scoreReady, play, openProgram } from './helpers';
+import { play, openProgram } from './helpers';
 import { expect, test } from '@playwright/test';
 import type {} from '../../src/app/main';
 
@@ -13,7 +13,7 @@ for (const drum of ['bd', 'hh', 'cp'])
     try {
       const probe = await request.get(
         'https://raw.githubusercontent.com/tidalcycles/dirt-samples/main/strudel.json',
-        { timeout: 6500 },
+        { timeout: test.info().timeout },
       );
       test.skip(!probe.ok(), 'Offline: default sample host unavailable');
     } catch {
@@ -25,11 +25,10 @@ for (const drum of ['bd', 'hh', 'cp'])
     await play(page);
     for (const name of ['bd', 'hh', 'cp'])
       await expect(page.getByText(`${name}: ready`, { exact: true })).toBeVisible();
-    await page.goto('/?inspect');
-    await page.getByLabel('Your Strudel program').fill(`stack(s("${drum}*4"),s("~"),s("~"))`);
-    await page.getByRole('button', { name: 'Load', exact: true }).click();
-    await scoreReady(page);
-    await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
+    await openProgram(page, {
+      source: `stack(s("${drum}*4"),s("~"),s("~"))`,
+      offline: false,
+    });
     await play(page);
     await expect(page.getByText(`${drum}: ready`, { exact: true })).toBeVisible();
     const measured = await page.evaluate(async (drum) => {

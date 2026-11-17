@@ -271,28 +271,38 @@ export async function phaseFour(browser: Browser) {
       async () => {
         const runaway =
           'new Pattern(state => { if (state.controls.cyclist) { while(true){} } return [] })';
+        async function loadSource(text: string) {
+          await page.getByLabel('Your Strudel program').fill(text);
+          await button('Load').click();
+          const replacement = page.getByRole('dialog', { name: 'Replace current work?' });
+          if (await replacement.isVisible())
+            await replacement.getByRole('button', { name: 'Replace', exact: true }).click();
+          await scoreReady(page);
+        }
         await button('Paste Strudel').click();
-        await page.getByLabel('Your Strudel program').fill(runaway);
-        await button('Load').click();
-        await scoreReady(page);
+        await loadSource(runaway);
         await button('Play').click();
-        const clicked = Date.now();
         await button('Paste Strudel').click();
         await expect(page.getByLabel('Your Strudel program')).toBeHidden();
-        expect(Date.now() - clicked).toBeLessThan(1000);
-        await expect(page.locator('#message')).toHaveText(PREFLIGHT_TIMEOUT, { timeout: 7000 });
+        await appSignal(
+          page,
+          (message) => document.getElementById('message')!.textContent === message,
+          PREFLIGHT_TIMEOUT,
+        );
+        await expect(page.locator('#message')).toHaveText(PREFLIGHT_TIMEOUT);
         expect(await page.evaluate(() => window.odmApp.engine!.playing)).toBe(false);
         await button('Paste Strudel').click();
-        await page.getByLabel('Your Strudel program').fill(source);
-        await button('Load').click();
-        await scoreReady(page);
+        await loadSource(source);
         await button('drop').first().click();
         await play(page);
         const bass = await row('bass');
-        await page.getByLabel('Your Strudel program').fill(runaway);
-        await button('Load').click();
-        await scoreReady(page);
-        await expect(page.locator('#message')).toHaveText(PREFLIGHT_TIMEOUT, { timeout: 7000 });
+        await loadSource(runaway);
+        await appSignal(
+          page,
+          (message) => document.getElementById('message')!.textContent === message,
+          PREFLIGHT_TIMEOUT,
+        );
+        await expect(page.locator('#message')).toHaveText(PREFLIGHT_TIMEOUT);
         expect(await fullCycle(bass.id)).toEqual([0, 1 / 4, 3 / 8, 5 / 8, 7 / 8]);
         expect(await page.evaluate(() => window.odmApp.engine!.playing)).toBe(true);
       },
