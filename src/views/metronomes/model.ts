@@ -106,6 +106,7 @@ export function poses(frame: ViewFrame, parts: Map<string, Part>): Pose[] {
                 [...new Set(cycle.map((n) => n.start))],
                 previous?.start,
                 next?.start,
+                next ? null : previous?.end,
                 side,
               ]),
       };

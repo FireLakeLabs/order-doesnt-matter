@@ -176,3 +176,12 @@ it('recognizes a lock through a held note even in a bar without fresh onsets', (
   expect(cast[0].angle).toBe(cast[1].angle);
   expect(inStep(cast).map((g) => g.map((p) => p.instrument.id))).toEqual([['0', '1']]);
 });
+
+it('does not call different unbracketed returns to rest an in-step swing', () => {
+  const f = scoreFrame(2);
+  f.now = 0.4;
+  f.notes = [note(0, 0.1), { ...note(0, 1), instrument: '1' }];
+  const cast = poses(f, analyse(f.notes));
+  expect(cast[0].angle).not.toBe(cast[1].angle);
+  expect(inStep(cast)).toEqual([]);
+});
