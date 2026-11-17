@@ -160,7 +160,7 @@ function draw(
       cellW - 8,
     );
     text(
-      other.band ? `${other.band} · ×${String(other.count)}` : other.pair.shortName,
+      other.band ? `×${String(other.count)} · ${other.band}` : other.pair.shortName,
       cx,
       top + cellH - 3,
       11,
