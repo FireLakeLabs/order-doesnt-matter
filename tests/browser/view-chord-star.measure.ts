@@ -149,7 +149,9 @@ test('chord-star: real arrangement, five themes, both stages and CPU cost', asyn
   await presented(page);
   await expect(stageB.locator('canvas')).toHaveJSProperty('clientWidth', 560);
   await stageB.screenshot({ path: `${shots}/bar18-stage-b-560.png` });
-  await stageStyle.evaluate((style) => style.remove());
+  await stageStyle.evaluate((style) => {
+    style.parentNode?.removeChild(style);
+  });
   await page.evaluate(async () => {
     window.odmStudio.getPlayhead = window.chordStarOriginal;
     await window.odmStudio.seek(17.3);
