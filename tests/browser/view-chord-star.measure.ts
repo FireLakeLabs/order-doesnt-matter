@@ -20,7 +20,7 @@ async function presented(page: import('@playwright/test').Page) {
 test('chord-star: real arrangement, five themes, both stages and CPU cost', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', (error) => errors.push(String(error)));
-  await page.setViewportSize({ width: 2560, height: 1440 });
+  await page.setViewportSize({ width: 1920, height: 1080 });
   await prepare(page, 'chord-star');
   await page.evaluate(() => {
     history.replaceState(null, '', '/?inspect&a=chord-star&b=');
@@ -41,6 +41,7 @@ test('chord-star: real arrangement, five themes, both stages and CPU cost', asyn
     await page.screenshot({ path: `${shots}/${name}.png` });
     await canvas.screenshot({ path: `${shots}/${name}-stage.png` });
   };
+  await page.setViewportSize({ width: 2560, height: 1440 });
   await snapshot('bar18-arcade-2560x1440');
   await page.setViewportSize({ width: 1920, height: 1080 });
   await snapshot('bar18-arcade-1920x1080');
