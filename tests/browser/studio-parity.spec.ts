@@ -1,6 +1,6 @@
 import { revealView } from './shelf';
 import { expect, test, type Page } from '@playwright/test';
-import { appSignal } from './helpers';
+import { appSignal, scoreReady } from './helpers';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import packageJson from '../../package.json' with { type: 'json' };
 const { dependencies } = packageJson;
@@ -466,7 +466,7 @@ test('saved pre-Studio dubstep document restores at home with its edited cutoff'
   await page.addInitScript((payload) => localStorage.setItem('odm:recovery', payload), payload);
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/?inspect&a=test-card&b=');
-  await ready(page);
+  await scoreReady(page);
   expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(JSON.parse(payload));
   await expect(page.locator('.lane-label:not([data-setting])')).toHaveCount(13);
   await page
