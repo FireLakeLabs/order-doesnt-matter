@@ -1,3 +1,4 @@
+import { revealView } from './shelf';
 import { expect, test, type Page } from '@playwright/test';
 import { appSignal } from './helpers';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
@@ -296,10 +297,11 @@ test('Practice teaches real Studio controls and restores the mounted draft, hist
     .locator('[data-region="stage-b"]')
     .getByRole('button', { name: 'Views', exact: true })
     .click();
-  await page
+  const loom = page
     .locator('.shelf-popover')
-    .getByRole('button', { name: 'Loom on Stage B', exact: true })
-    .click();
+    .getByRole('button', { name: 'Loom on Stage B', exact: true, includeHidden: true });
+  await revealView(loom);
+  await loom.click();
   await expect(guide).toContainText('Pick your colours');
   await page.getByRole('button', { name: 'Theme riso', exact: true }).click();
   await expect(guide).toContainText('Make a little change');

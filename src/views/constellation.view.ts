@@ -191,6 +191,7 @@ function regions(c: CanvasRenderingContext2D, drawing: Layout, frame: ViewFrame)
 
 const view: ViewDefinition = {
   id: 'constellation',
+  group: 'settings',
   name: 'Constellation',
   tag: 'settings, rooms',
   span: 'song',

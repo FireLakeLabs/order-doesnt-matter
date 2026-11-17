@@ -2,6 +2,7 @@ import type { ViewDefinition } from './types';
 
 const view: ViewDefinition = {
   id: 'test-card',
+  group: 'show',
   name: 'Test card',
   tag: 'diagnostic',
   span: 'window',

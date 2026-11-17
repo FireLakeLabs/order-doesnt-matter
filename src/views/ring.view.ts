@@ -84,6 +84,7 @@ void main() {
 
 const view: ViewDefinition = {
   id: 'ring',
+  group: 'rhythm',
   name: 'Ring',
   tag: 'now',
   async mount(element) {

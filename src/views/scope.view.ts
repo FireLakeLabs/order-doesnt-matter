@@ -3,6 +3,7 @@ import { bandLevel, logBands, risingTrigger } from './scope/model';
 
 const view: ViewDefinition = {
   id: 'scope',
+  group: 'show',
   name: 'Scope',
   tag: 'the sound',
   needs: 'audio',

@@ -7,6 +7,7 @@ import type { ScoreStrip } from './shared/score-mesh';
 
 const view: ViewDefinition = {
   id: 'coil',
+  group: 'song',
   name: 'Coil',
   tag: 'whole song',
   span: 'song',

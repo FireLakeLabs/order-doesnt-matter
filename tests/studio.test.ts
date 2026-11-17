@@ -185,7 +185,13 @@ test('late async mounts dispose exactly once and never draw after removal', asyn
         resolve = done;
       }),
   );
-  const definition: ViewDefinition = { id: 'test', name: 'Test', tag: 'test', mount };
+  const definition: ViewDefinition = {
+    id: 'test',
+    name: 'Test',
+    tag: 'test',
+    group: 'show',
+    mount,
+  };
   const lifecycle = mountView(async () => definition, {} as HTMLElement, failed);
   await vi.waitFor(() => expect(mount).toHaveBeenCalledTimes(1));
   lifecycle.dispose();
@@ -330,6 +336,7 @@ test('a failed frame releases once even if dispose also fails; a synchronous mou
       id: 'bad',
       name: 'Bad',
       tag: 'test',
+      group: 'show',
       mount: () => ({
         frame() {
           throw error;

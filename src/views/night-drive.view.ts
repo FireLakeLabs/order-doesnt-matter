@@ -87,6 +87,7 @@ void main(){
 
 const view: ViewDefinition = {
   id: 'night-drive',
+  group: 'show',
   name: 'Night drive',
   tag: 'retro',
   async mount(element) {

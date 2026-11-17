@@ -355,6 +355,7 @@ function drawHud(
 
 const view: ViewDefinition = {
   id: 'runner',
+  group: 'arcade',
   name: 'Runner',
   tag: 'game',
   span: 'song',

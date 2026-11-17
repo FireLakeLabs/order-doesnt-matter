@@ -1,3 +1,4 @@
+import { revealView } from './shelf';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test, type Page } from '@playwright/test';
 import type {} from '../../src/studio/main';
@@ -31,10 +32,11 @@ const pixels = (page: Page) =>
 async function choose(page: Page, name: string) {
   const stage = page.locator('[data-region="stage-a"]');
   await stage.getByRole('button', { name: 'Views', exact: true }).click();
-  await stage
+  const choice = stage
     .locator('.shelf-popover')
-    .getByRole('button', { name: `${name} on Stage A`, exact: true })
-    .click();
+    .getByRole('button', { name: `${name} on Stage A`, exact: true, includeHidden: true });
+  await revealView(choice);
+  await choice.click();
   await expect(stage.locator('.view-host')).toHaveAttribute('data-score-ready', 'true');
   await frames(page);
 }

@@ -122,6 +122,7 @@ export function drawPunchcard(c: CanvasRenderingContext2D, f: ViewFrame, score: 
 }
 const view: ViewDefinition = {
   id: 'punchcard',
+  group: 'rhythm',
   name: 'Punchcard',
   tag: 'classic',
   mount: (el) => mount2d(el, indexScore, drawPunchcard),

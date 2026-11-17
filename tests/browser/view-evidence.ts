@@ -1,3 +1,4 @@
+import { revealView } from './shelf';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect } from '@playwright/test';
 import type { Page, test as Test } from '@playwright/test';
@@ -85,7 +86,9 @@ export async function prepare(page: Page, id: string, file = 'real-dubstep-arran
   // rather than silently replacing the first page's saved draft.
   const stage = page.locator('[data-region="stage-a"]');
   await stage.getByRole('button', { name: 'Views', exact: true }).click();
-  await stage.locator(`.shelf-popover [data-view="${id}"] .view-choice`).click();
+  const choice = stage.locator(`.shelf-popover [data-view="${id}"] .view-choice`);
+  await revealView(choice);
+  await choice.click();
   await page.evaluate(
     async (source) => {
       await window.odmStudio.load(source);

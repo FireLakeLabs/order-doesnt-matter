@@ -1,3 +1,4 @@
+import { revealView } from './shelf';
 import { readFile } from 'node:fs/promises';
 import { expect } from '@playwright/test';
 
@@ -48,7 +49,9 @@ export function viewSmoke(test: typeof import('@playwright/test').test, id: stri
       );
     const choose = async (view: string) => {
       await stage.getByRole('button', { name: 'Views', exact: true }).click();
-      await stage.locator(`.shelf-popover [data-view="${view}"] .view-choice`).click();
+      const choice = stage.locator(`.shelf-popover [data-view="${view}"] .view-choice`);
+      await revealView(choice);
+      await choice.click();
       await ready();
       await expect(canvas).toHaveCount(1);
     };

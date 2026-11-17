@@ -1,5 +1,6 @@
 import type { ViewFrame, ViewNote } from '../types';
 import { clamp, indexScore, pitch, pitchName } from '../shared/retro-2d';
+import { settingRanges } from '../shared/settings';
 export const hex = (n: number) => Math.round(n).toString(16).toUpperCase().padStart(2, '0');
 const effects = [
   ['lpf', 'C'],
@@ -10,14 +11,7 @@ const effects = [
   ['shape', 'S'],
 ] as const;
 export function analyse(notes: ViewNote[]) {
-  const ranges = new Map<string, [number, number]>();
-  for (const note of notes)
-    for (const [key] of effects) {
-      const v = note.value[key];
-      if (typeof v !== 'number' || !Number.isFinite(v)) continue;
-      const r = ranges.get(key);
-      ranges.set(key, r ? [Math.min(r[0], v), Math.max(r[1], v)] : [v, v]);
-    }
+  const ranges = settingRanges(notes);
   const rows = new Map<
     string,
     Map<number, { note: ViewNote; count: number; off: boolean; label: string; effect: string }>
@@ -45,9 +39,15 @@ export function analyse(notes: ViewNote[]) {
     for (const [key, code] of effects) {
       const value = note.value[key],
         r = ranges.get(key);
-      if (typeof value !== 'number' || !Number.isFinite(value) || !r) continue;
+      if (
+        typeof value !== 'number' ||
+        !Number.isFinite(value) ||
+        r?.min === undefined ||
+        r.max === undefined
+      )
+        continue;
       // Constant ranges use their sole value as the upper bound; zero remains zero.
-      const scaled = r[1] === r[0] ? (value === 0 ? 0 : 1) : (value - r[0]) / (r[1] - r[0]);
+      const scaled = r.max === r.min ? (value === 0 ? 0 : 1) : (value - r.min) / (r.max - r.min);
       effect = code + hex(clamp(scaled) * 255);
       break;
     }

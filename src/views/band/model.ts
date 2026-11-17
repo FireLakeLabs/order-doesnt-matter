@@ -16,7 +16,8 @@ export interface Part {
   maxPitch: number;
   ripple: number;
 }
-export const clamp = (n: number, low = 0, high = 1) => Math.max(low, Math.min(high, n));
+import { clamp } from '../shared/math';
+export { clamp } from '../shared/math';
 export function pitch(value: ViewNote['value']): number | undefined {
   const note = value.note ?? value.n;
   if (typeof note === 'number' && Number.isFinite(note)) return note;

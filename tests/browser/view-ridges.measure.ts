@@ -1,3 +1,4 @@
+import { revealView } from './shelf';
 import { expect, test } from '@playwright/test';
 import { viewEvidence, prepare } from './view-evidence';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -57,7 +58,12 @@ test('ridges: section approach and continuous cycle slide', async ({ page }) => 
   await mount.dispose();
   const second = page.locator('[data-region="stage-b"]');
   await second.getByRole('button', { name: 'Views', exact: true }).click();
-  await second.getByRole('button', { name: 'Ridges on Stage B', exact: true }).click();
+  await revealView(
+    second.getByRole('button', { name: 'Ridges on Stage B', exact: true, includeHidden: true }),
+  );
+  await second
+    .getByRole('button', { name: 'Ridges on Stage B', exact: true, includeHidden: true })
+    .click();
   await expect(second.locator('.view-host')).toHaveAttribute('data-score-ready', 'true');
   await expect(second.locator('canvas[data-ridges]')).toHaveCount(1);
   await page.screenshot({ path: `${path}/both-stages.png` });

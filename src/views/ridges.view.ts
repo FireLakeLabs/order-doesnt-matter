@@ -102,6 +102,7 @@ void main(){
 
 const view: ViewDefinition = {
   id: 'ridges',
+  group: 'song',
   name: 'Ridges',
   tag: 'landscape',
   async mount(element) {

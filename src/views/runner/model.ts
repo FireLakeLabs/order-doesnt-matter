@@ -1,94 +1,39 @@
 import type { ViewFrame, ViewNote } from '../types';
-import { clamp, indexScore, type Event } from '../shared/retro-2d';
+import { clamp, type Event } from '../shared/retro-2d';
+
+import {
+  roleEvidence,
+  lowestPitchedPart,
+  mostRegularDrum,
+  type RoleEvidence,
+} from '../shared/roles';
 
 export type Role = 'ground' | 'platform' | 'block' | 'crate' | 'coin';
-export interface Part {
-  id: string;
-  events: Event[];
-  hits: Event[];
-  low: number;
-  high: number;
-  density: number;
-  duration: number;
-  regularity: number;
-  phase: number;
-  meanPitch: number;
+export interface Part extends RoleEvidence {
   role: Role;
 }
-/** Static score evidence only. Names, sound names and row order cannot pick roles. */
+/** Static score evidence only; sparse drum policy preserves Runner's terrain and blocks. */
 export function analyse(notes: ViewNote[], active?: ReadonlySet<string>): Map<string, Part> {
+  const evidence = roleEvidence(notes);
+  const ground = lowestPitchedPart(evidence, active);
+  const block = mostRegularDrum(evidence, 'sparse', active ? [...active] : undefined);
   const parts = new Map<string, Part>();
-  for (const [id, events] of indexScore(notes)) {
+  for (const [id, part] of evidence)
     parts.set(id, {
-      id,
-      events,
-      hits: [],
-      low: Infinity,
-      high: -Infinity,
-      density: 0,
-      duration: 0,
-      regularity: 0,
-      phase: 0,
-      meanPitch: Infinity,
-      role: 'crate',
+      ...part,
+      role:
+        id === ground
+          ? 'ground'
+          : Number.isFinite(part.meanPitch)
+            ? 'platform'
+            : id === block
+              ? 'block'
+              : 'crate',
     });
-  }
-  for (const part of parts.values()) {
-    part.events.sort((a, b) => a.note.start - b.note.start || a.note.end - b.note.end);
-    part.hits = part.events.filter((e) => e.note.hasOnset);
-    const cycles = new Set<number>();
-    let pitched = 0,
-      totalPitch = 0,
-      gap = 0,
-      gapSquare = 0,
-      gaps = 0;
-    for (const e of part.events) {
-      if (e.pitch !== undefined) {
-        part.low = Math.min(part.low, e.pitch);
-        part.high = Math.max(part.high, e.pitch);
-        totalPitch += e.pitch;
-        pitched++;
-      }
-    }
-    part.meanPitch = pitched ? totalPitch / pitched : Infinity;
-    for (let i = 0; i < part.hits.length; i++) {
-      const n = part.hits[i].note;
-      cycles.add(Math.floor(n.start));
-      part.duration += Math.max(0, n.end - n.start);
-      part.phase += ((n.start % 1) + 1) % 1;
-      const delta = i ? n.start - part.hits[i - 1].note.start : 0;
-      // Section gaps are silence, not irregular drum timing.
-      if (delta > 0 && delta <= 1) {
-        gap += delta;
-        gapSquare += delta * delta;
-        gaps++;
-      }
-    }
-    part.density = part.hits.length / Math.max(1, cycles.size);
-    part.duration /= Math.max(1, part.hits.length);
-    part.phase /= Math.max(1, part.hits.length);
-    const mean = gap / Math.max(1, gaps);
-    part.regularity =
-      gaps && mean ? Math.sqrt(Math.max(0, gapSquare / gaps - mean * mean)) / mean : 1;
-    part.role = pitched ? 'platform' : 'crate';
-  }
-  const pitched = [...parts.values()].filter(
-    (p) => Number.isFinite(p.meanPitch) && (!active || active.has(p.id)),
-  );
-  pitched.sort((a, b) => a.meanPitch - b.meanPitch || a.low - b.low || a.id.localeCompare(b.id));
-  if (pitched[0]) pitched[0].role = 'ground';
   const drums = [...parts.values()].filter(
     (p) => !Number.isFinite(p.meanPitch) && p.hits.length && (!active || active.has(p.id)),
   );
-  // Short, regular and sparse: long atmosphere cannot win over percussive evidence.
-  drums.sort(
-    (a, b) =>
-      Number(a.duration > 0.5) - Number(b.duration > 0.5) ||
-      a.density * (1 + a.regularity) - b.density * (1 + b.regularity) ||
-      a.phase - b.phase ||
-      a.id.localeCompare(b.id),
-  );
-  if (drums[0]) drums[0].role = 'block';
+  drums.sort((a, b) => Number(b.id === block) - Number(a.id === block));
   const coins = drums
     .filter((p) => p !== drums[0])
     .sort((a, b) => b.density - a.density || a.duration - b.duration || a.id.localeCompare(b.id));

@@ -1,3 +1,4 @@
+import { revealView } from './shelf';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
@@ -20,7 +21,12 @@ async function frames(page: Page, count = 3) {
 async function select(page: Page, name: string) {
   const stage = page.locator('[data-region="stage-a"]');
   await stage.getByRole('button', { name: 'Views', exact: true }).click();
-  await stage.getByRole('button', { name: `${name} on Stage A`, exact: true }).click();
+  await revealView(
+    stage.getByRole('button', { name: `${name} on Stage A`, exact: true, includeHidden: true }),
+  );
+  await stage
+    .getByRole('button', { name: `${name} on Stage A`, exact: true, includeHidden: true })
+    .click();
   await expect(stage.getByRole('heading', { name, exact: true })).toBeVisible();
   await expect(stage.locator('canvas')).toHaveCount(1);
 }

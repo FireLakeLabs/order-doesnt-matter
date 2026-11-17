@@ -1,28 +1,11 @@
 import type { ViewFrame, ViewInstrument, ViewNote } from '../types';
 
-export const clamp = (n: number, min = 0, max = 1) => Math.max(min, Math.min(max, n));
+import { clamp } from '../shared/math';
+import { pitch as readPitch } from '../shared/pitch';
+export { clamp } from '../shared/math';
 
-/** MIDI coordinates, preserving the contract's precedence without guessing drum pitches. */
-export function pitch(value: ViewNote['value']): number | undefined {
-  const raw = value.note ?? value.n;
-  if (typeof raw === 'number' && Number.isFinite(raw)) return raw;
-  if (typeof raw === 'string') {
-    if (raw.trim() && Number.isFinite(Number(raw))) return Number(raw);
-    const match = /^([a-g])([#b]?)(-?\d+)?$/i.exec(raw.trim());
-    if (match) {
-      const semitone = { c: 0, d: 2, e: 4, f: 5, g: 7, a: 9, b: 11 }[match[1].toLowerCase() as 'c'];
-      return (
-        (Number(match[3] || '3') + 1) * 12 +
-        semitone +
-        (match[2] === '#' ? 1 : match[2] === 'b' ? -1 : 0)
-      );
-    }
-  }
-  const frequency = value.freq;
-  if (typeof frequency === 'number' && frequency > 0 && Number.isFinite(frequency))
-    return 69 + 12 * Math.log2(frequency / 440);
-  return undefined;
-}
+// Rain historically accepts only numeric frequencies.
+export const pitch = (value: ViewNote['value']) => readPitch(value, true);
 
 export interface RainEvent {
   note: ViewNote;

@@ -144,6 +144,7 @@ export function drawPianoRoll(c: CanvasRenderingContext2D, f: ViewFrame, score: 
 }
 const view: ViewDefinition = {
   id: 'piano-roll',
+  group: 'pitch',
   name: 'Piano roll',
   tag: 'classic',
   mount: (el) => mount2d(el, indexScore, drawPianoRoll),

@@ -1,6 +1,7 @@
 import type { ViewFrame, ViewNote } from '../types';
 
-export const clamp = (value: number, low = 0, high = 1) => Math.max(low, Math.min(high, value));
+import { clamp } from '../shared/math';
+export { clamp } from '../shared/math';
 
 function parsePitch(note: unknown): number | undefined {
   if (typeof note === 'number' && Number.isFinite(note)) return note;
