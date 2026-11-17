@@ -258,7 +258,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
       text(
         entry.chord?.name ?? 'outside window',
         x,
-        y + 16,
+        y + (wide ? 20 * scale : 16),
         Math.max(11, 12 * scale),
         colour,
         barWidth - 8,
