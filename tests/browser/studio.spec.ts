@@ -849,6 +849,57 @@ test('fresh Studio defaults to Ring and Loom', async ({ page, context }) => {
   await expect(pitch).toHaveAttribute('aria-expanded', 'false');
   await pitch.click();
   await expect(pitch).toHaveAttribute('aria-expanded', 'true');
+  // Render each loader state on a deliberately long sound name, without fetching audio.
+  const soundName = 'a_very_long_sound_name_for_the_instrument_rail';
+  await page.evaluate((name) => window.odmStudio.load(`s("${name}")`), soundName);
+  await expect(page.locator('.instrument-row')).toHaveCount(1);
+  await expect(page.locator('.lane-label:not([data-setting])')).toHaveCount(1);
+  await expect(page.locator('[data-region="score"]')).toHaveAttribute('data-score-ready', 'true');
+  for (const width of [2560, 1920]) {
+    await page.setViewportSize({ width, height: width === 2560 ? 1440 : 1080 });
+    for (const theme of ['arcade', 'riso', 'pocket', 'sunset', 'phosphor']) {
+      await page.getByRole('button', { name: `Theme ${theme}`, exact: true }).click();
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+      await page.evaluate(() => document.fonts.ready);
+      for (const [state, label] of [
+        ['not-loaded', 'not loaded'],
+        ['loading', 'loading'],
+        ['ready', 'ready'],
+        ['missing', 'failed'],
+      ] as const) {
+        await page.evaluate(
+          ({ state, name }) => {
+            const app = window.odmStudio.app;
+            app.state.sounds = [{ name, state }];
+            app.stop();
+          },
+          { state, name: soundName },
+        );
+        await expect(page.locator('.instrument-status')).toHaveText(`· ${label}`);
+        const fit = await page.locator('.instrument-row').evaluate((row) => {
+          const line = row.querySelector<HTMLElement>('.instrument-name small')!;
+          const sound = row.querySelector<HTMLElement>('.instrument-sound')!;
+          const status = row.querySelector<HTMLElement>('.instrument-status')!;
+          return {
+            rowHeight: row.getBoundingClientRect().height,
+            lineHeight: line.getBoundingClientRect().height,
+            fontSize: parseFloat(getComputedStyle(line).fontSize),
+            statusFits:
+              status.scrollWidth === status.clientWidth &&
+              status.getBoundingClientRect().right <= line.getBoundingClientRect().right,
+            soundClipped: sound.scrollWidth > sound.clientWidth && sound.clientWidth > 0,
+            ellipsis: getComputedStyle(sound).textOverflow,
+          };
+        });
+        expect(fit.rowHeight).toBe(width === 2560 ? 64 : 44);
+        expect(fit.lineHeight).toBe(12);
+        expect(fit.fontSize).toBeGreaterThanOrEqual(12);
+        expect(fit.statusFits).toBe(true);
+        expect(fit.soundClipped).toBe(true);
+        expect(fit.ellipsis).toBe('ellipsis');
+      }
+    }
+  }
   // A zero-length pickup gives the later instrument the first row identity.
   await page.evaluate(() =>
     window.odmStudio.load(

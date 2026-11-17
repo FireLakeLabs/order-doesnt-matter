@@ -377,6 +377,7 @@ html[data-theme] body,
 }
 .instrument-name {
   min-width: 0;
+  flex: 1;
 }
 .instrument-name strong {
   display: block;
@@ -388,13 +389,24 @@ html[data-theme] body,
   white-space: nowrap;
 }
 .instrument-name small {
-  display: block;
+  display: flex;
+  gap: 4px;
+  white-space: nowrap;
   font:
     var(--studio-text-small) var(--font-mono),
     monospace;
   color: var(--muted);
   line-height: 1;
   margin-top: 3px;
+}
+.instrument-sound {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.instrument-status {
+  flex: none;
 }
 .instrument-dot {
   width: 14px;
