@@ -187,6 +187,7 @@ test('Studio shell on dubstep: section rail, two stages, shared clock, shelf, fi
         `${group[0].toUpperCase()}${group.slice(1)}${visitorViews.filter((view) => view.group === group).length}${group === 'show' ? '−' : '+'}`,
     ),
   );
+  await expect(shelf.locator('[data-view="test-card"]')).toHaveCount(1);
   await expect(shelf.locator('[data-view="test-card"]')).toBeHidden();
   // Test cards occupy Show here; the fresh visitor's Ring/Loom defaults are checked below.
   for (const header of await shelf.locator('.view-group-toggle').all())
