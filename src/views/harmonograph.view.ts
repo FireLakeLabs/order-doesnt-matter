@@ -80,14 +80,14 @@ function draw(
   c.fillText('Harmonograph', 20, 33);
   c.textAlign = 'right';
   text(
-    `bar ${String(Math.floor(f.now) + 1)} · ${String(Math.round((f.now % 1) * 100))}%`,
+    `bar ${String(Math.floor(f.now) + 1)} · ${String(Math.floor((f.now % 1) * 100))}%`,
     w - 20,
     33,
     11,
   );
   const main = pairs.main;
   const unpitchedNames = f.instruments.filter((i) => unpitchedIds.has(i.id)).map((i) => i.name);
-  const status = `${main ? `pen ${String(Math.round(noteProgress(main.shorter, f.now) * 100))}% of shorter span` : 'scored pitches'} · ${String(active.length)} pitched spans · ${String(pairs.count)} pairs${unpitchedNames.length ? ` · unpitched (${String(unpitchedNames.length)}): ${unpitchedNames.join(' · ')}` : ''}`;
+  const status = `${main ? `pen ${String(Math.round(noteProgress(main.shorter, f.now) * 100))}% of shorter span` : 'scored pitches'} · ${String(active.length)} pitched spans · ${String(pairs.count)} pairs${unpitchedNames.length ? ` · unpitched (${String(unpitchedNames.length)}): ${unpitchedNames.join(', ')}` : ''}`;
   c.textAlign = 'left';
   text(status, 20, 57, 11);
 
@@ -152,7 +152,7 @@ function draw(
       cellW - 8,
     );
     text(
-      `${pitchLabel(other.pair.low.midi)} · ${pitchLabel(other.pair.high.midi)}`,
+      other.band ?? `${pitchLabel(other.pair.low.midi)} · ${pitchLabel(other.pair.high.midi)}`,
       cx,
       top + cellH - 16,
       11,
@@ -160,7 +160,7 @@ function draw(
       cellW - 8,
     );
     text(
-      other.band ? `×${String(other.count)} · ${other.band}` : other.pair.shortName,
+      other.band ? `×${String(other.count)}` : other.pair.shortName,
       cx,
       top + cellH - 3,
       11,

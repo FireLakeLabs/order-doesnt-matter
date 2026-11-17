@@ -99,20 +99,21 @@ export function intervalName(semitones: number) {
   const nearest = Math.round(semitones),
     cents = (semitones - nearest) * 100;
   const base = intervals[nearest] ?? [
-    `${String(Math.floor(nearest / 12))} octaves + ${intervals[nearest % 12][0]}`,
+    `${String(Math.floor(nearest / 12))} octaves${nearest % 12 ? ` + ${intervals[nearest % 12][0]}` : ''}`,
     `${String(nearest)} st`,
   ];
   const detune = Math.abs(cents) >= 0.05 ? ` ${cents >= 0 ? '+' : ''}${cents.toFixed(1)}¢` : '';
   return { name: base[0] + detune, short: base[1] + detune };
 }
-/** Display only: small rational approximations never set the pendulum rates. */
+/** Display only: harmonic numbers 1–8 keep labels simple; they never set the rates. */
 export function approximate(ratio: number) {
-  let numerator = Math.round(ratio),
+  let numerator = 0,
     denominator = 1,
-    error = Math.abs(ratio - numerator);
-  for (let d = 2; d <= 8; d++) {
+    error = Infinity;
+  for (let d = 1; d <= 8; d++) {
     const n = Math.round(ratio * d),
       delta = Math.abs(ratio - n / d);
+    if (n > 8) continue;
     if (delta < error - 1e-12) {
       numerator = n;
       denominator = d;

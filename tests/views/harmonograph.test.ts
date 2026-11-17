@@ -93,6 +93,17 @@ it('never snaps a slightly imperfect scored ratio to the simple ratio printed be
   expect(main.ratio).not.toBe(3);
   expect(pair(main.low, { ...main.high, midi: main.low.midi + 1 }).approximation).toBeUndefined();
 });
+it('labels only small harmonic ratios, including compound consonances', () => {
+  const main = pairing(sounding(frame(17.3), analyse(notes))).main!;
+  const label = (semitones: number) =>
+    pair(main.low, { ...main.high, midi: main.low.midi + semitones }).approximation;
+  for (const semitones of [13, 25, 47]) expect(label(semitones)).toBeUndefined();
+  expect(label(19)).toBe('3 : 1');
+  expect(label(24)).toBe('4 : 1');
+  expect(label(28)).toBe('5 : 1');
+  expect(label(31)).toBe('6 : 1');
+  expect(intervalName(36).name).toBe('3 octaves');
+});
 it('reads real scaled degrees, frequency, microtones and fragments through the shared pitch reader', async () => {
   const result = await queryEventsNode('n("0 2 4").scale("C:major").s("sine")', 0, 1);
   expect(result.error).toBeNull();
