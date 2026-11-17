@@ -197,7 +197,9 @@ function drawMetronomes(
       c.fillText(
         fitText(
           c,
-          p.resting ? 'rest' : `${String(p.hits)} ${p.hits === 1 ? 'hit' : 'hits'} / cycle${p.fan ? ' · fan' : ''}`,
+          p.resting
+            ? 'rest'
+            : `${String(p.hits)} ${p.hits === 1 ? 'hit' : 'hits'} / cycle${p.fan ? ' · fan' : ''}`,
           slot.width - 14,
         ),
         slot.x,
