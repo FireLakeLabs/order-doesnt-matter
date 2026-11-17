@@ -135,10 +135,15 @@ test('chord-star: real arrangement, five themes, both stages and CPU cost', asyn
   const choice = stageB.locator('[data-view="chord-star"] .view-choice');
   await revealView(choice);
   await choice.click();
-  await page.addStyleTag({ content: '[data-region="stage-b"] {width:560px; flex:none}' });
+  const stageStyle = await page.addStyleTag({
+    content:
+      '[data-region="stage-b"] {position:fixed;right:0;top:108px;width:560px;height:555px;z-index:50;border:0}',
+  });
   await expect(stageB.locator('.view-host')).toHaveAttribute('data-score-ready', 'true');
   await presented(page);
+  await expect(stageB.locator('canvas')).toHaveJSProperty('clientWidth', 560);
   await stageB.screenshot({ path: `${shots}/bar18-stage-b-560.png` });
+  await stageStyle.evaluate((style) => style.remove());
   await page.evaluate(async () => {
     window.odmStudio.getPlayhead = window.chordStarOriginal;
     await window.odmStudio.seek(17.3);
