@@ -65,16 +65,13 @@ test('deja-vu: two real comparisons, five themes, crowd and CPU frame cost', asy
     'true',
   );
   await presented();
-  const stageBSize = await page
-    .locator('[data-region="stage-b"] canvas')
-    .evaluate((canvas) => ({
-      width: parseFloat((canvas as HTMLCanvasElement).style.width),
-      height: parseFloat((canvas as HTMLCanvasElement).style.height),
-    }));
+  const stageBCanvas = page.locator('[data-region="stage-b"] canvas');
+  const stageBSize = await stageBCanvas.evaluate((canvas) => ({
+    width: parseFloat((canvas as HTMLCanvasElement).style.width),
+    height: parseFloat((canvas as HTMLCanvasElement).style.height),
+  }));
   await page.screenshot({ path: `${shots}/studio-stage-b-2560x1440.png` });
-  await page
-    .locator('[data-region="stage-b"] canvas')
-    .screenshot({ path: `${shots}/stage-b-in-host.png` });
+  await stageBCanvas.screenshot({ path: `${shots}/stage-b-in-host.png` });
   await page.getByRole('button', { name: 'Clear Stage B', exact: true }).click();
   await page.setViewportSize({ width: 1920, height: 1080 });
   await presented();
