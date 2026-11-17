@@ -159,7 +159,7 @@ test('chord-star: real arrangement, five themes, both stages and CPU cost', asyn
   await writeFile(`${shots}/frame-cost.json`, JSON.stringify(costs, null, 2));
   const stageB = page.locator('[data-region="stage-b"]');
   await stageB.getByRole('button', { name: 'Views', exact: true }).click();
-  const choice = stageB.locator('[data-view="chord-star"] .view-choice');
+  const choice = stageB.getByRole('button', { name: 'Chord star on Stage B', exact: true });
   await revealView(choice);
   await choice.click();
   const stageStyle = await page.addStyleTag({
