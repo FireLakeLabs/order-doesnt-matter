@@ -297,6 +297,9 @@ export function ScoreArea({
               const cell = lane.row.cells.find(
                 (cell) => settingLaneId(lane.row.id, cell) === lane.setting,
               );
+              const settingCount = lane.row.cells.filter(
+                (cell) => cell.name !== 'rhythm' && cell.kind !== 'unused',
+              ).length;
               return (
                 <button
                   key={lane.setting ?? lane.row.id}
@@ -329,14 +332,12 @@ export function ScoreArea({
                     </span>
                   ) : (
                     <span className="lane-counts">
-                      <small>{lane.row.rewrites.length} rewrites</small>
                       <small>
-                        {
-                          lane.row.cells.filter(
-                            (cell) => cell.name !== 'rhythm' && cell.kind !== 'unused',
-                          ).length
-                        }{' '}
-                        settings
+                        {lane.row.rewrites.length}{' '}
+                        {lane.row.rewrites.length === 1 ? 'rewrite' : 'rewrites'}
+                      </small>
+                      <small>
+                        {settingCount} {settingCount === 1 ? 'setting' : 'settings'}
                       </small>
                     </span>
                   )}

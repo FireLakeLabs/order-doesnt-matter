@@ -59,6 +59,7 @@ export async function openProgram(
     const replacement = page.getByRole('dialog', { name: 'Replace current work?' });
     if (await replacement.isVisible())
       await replacement.getByRole('button', { name: 'Replace', exact: true }).click();
+    await importFinished(page);
     await expect(page.getByLabel('Strudel program')).toBeHidden();
     await scoreReady(page);
     await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
@@ -98,6 +99,22 @@ export async function scoreReady(page: Page) {
             'true')
       );
     });
+  });
+}
+// Paste closes only after the worker accepts the replacement document.
+export async function importFinished(page: Page) {
+  await appSignal(page, function pasteImportFinished() {
+    return (
+      window.odmStudio.app.canPlay &&
+      document.querySelector('.paste-dialog')?.getAttribute('data-state') !== 'open'
+    );
+  });
+}
+// Source validation runs before an edit can create coordinator pending entries.
+export async function sourceChecked(page: Page) {
+  await appSignal(page, function sourceValidationFinished() {
+    const form = document.querySelector('#editor .source-text')?.closest('form');
+    return form?.querySelector('button')?.disabled === false;
   });
 }
 export async function swap(page: Page, action: () => Promise<unknown>) {

@@ -1,6 +1,7 @@
 import { createThreeStage } from './shared/three-stage';
 import type { ViewDefinition, ViewFrame, ViewNote, ViewTheme } from './types';
 import {
+  ringColours,
   arcVertices,
   bandLayout,
   ghostBand,
@@ -35,6 +36,8 @@ const fragmentShader = `
 uniform vec3 ink;
 uniform vec3 ground;
 uniform vec3 highlight;
+uniform vec3 played;
+uniform float paper;
 uniform float now;
 uniform float flashDuration;
 uniform float trail;
@@ -73,7 +76,9 @@ void main() {
       float brightness = age <= 0.0 ? (shortHit ? 1.0 : 0.7) :
         (trail > 0.0 ? mix(0.3, 1.0, max(0.0, 1.0 - age / trail)) : 0.3);
       brightness = max(brightness, sounding);
-      vec3 colour = mix(ground, ink, pow(brightness, 2.2) * muted);
+      vec3 fade = ground;
+      if (paper > 0.5 && age > 0.0 && sounding < 0.5) fade = played;
+      vec3 colour = mix(fade, ink, pow(brightness, 2.2) * muted);
       colour = mix(colour, highlight, flash * 0.85 * muted);
       float bevel = mix(0.86, 1.0, smoothstep(0.0, 0.08, min(vSurface.y, 1.0-vSurface.y)));
       gl_FragColor = vec4(mix(ground, colour, vSurface.z * bevel), coverage);
@@ -145,6 +150,7 @@ const view: ViewDefinition = {
       ink: InstanceType<typeof THREE.Color>;
       ground: InstanceType<typeof THREE.Color>;
       highlight: InstanceType<typeof THREE.Color>;
+      played: InstanceType<typeof THREE.Color>;
     }
     interface RenderBand {
       id: string;
@@ -180,7 +186,8 @@ const view: ViewDefinition = {
     function layer(ghost: boolean): Layer {
       const ink = new THREE.Color(),
         ground = new THREE.Color(),
-        highlight = new THREE.Color();
+        highlight = new THREE.Color(),
+        played = new THREE.Color();
       const material = new THREE.ShaderMaterial({
         vertexShader,
         fragmentShader,
@@ -192,6 +199,8 @@ const view: ViewDefinition = {
           ink: { value: ink },
           ground: { value: ground },
           highlight: { value: highlight },
+          played: { value: played },
+          paper: { value: 0 },
           flashDuration: { value: 0.075 },
           trail: { value: 0.25 },
           muted: { value: 1 },
@@ -207,7 +216,7 @@ const view: ViewDefinition = {
       const mesh = new THREE.Mesh(new THREE.BufferGeometry(), material);
       mesh.frustumCulled = false; // Angles in the vertex buffer are mapped to a disc in the shader.
       disc.add(mesh);
-      return { mesh, material, ink, ground, highlight };
+      return { mesh, material, ink, ground, highlight, played };
     }
     function releaseBand(band: RenderBand) {
       for (const layer of [band.current, band.next]) {
@@ -320,6 +329,7 @@ const view: ViewDefinition = {
           previous = new Map(bandLayout(frame, true).map((band) => [band.id, band]));
         }
         const theme = frame.theme;
+        const colours = ringColours(theme);
         if (lastTheme !== theme) {
           gateMaterial.color.set(theme.text);
           tickMaterial.color.set(theme.text);
@@ -363,8 +373,8 @@ const view: ViewDefinition = {
           const { radius, width: thickness } = target;
           const ghost = ghostBand(target, easedBands, size * 0.42);
           band.track.scale.set(radius, radius, 1);
-          band.track.material.color.set(target.resting ? theme.muted : theme.line);
-          band.track.material.opacity = target.resting ? 0.32 : 0.24;
+          band.track.material.color.set(target.resting ? colours.resting : theme.line);
+          band.track.material.opacity = target.resting ? colours.restingOpacity : 0.24;
           band.current.mesh.visible = !target.resting;
           band.next.mesh.visible = ghost.width > 0;
           for (const layer of [band.current, band.next]) {
@@ -379,6 +389,8 @@ const view: ViewDefinition = {
             layer.ink.set(instrument.colour);
             layer.ground.set(theme.ground);
             layer.highlight.set(theme.text);
+            layer.played.set(colours.played);
+            u.paper.value = colours.paper ? 1 : 0;
           }
         }
         stage.render(frame, (enabled) => {

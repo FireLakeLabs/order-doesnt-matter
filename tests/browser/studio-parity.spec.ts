@@ -1,6 +1,6 @@
 import { revealView } from './shelf';
 import { expect, test, type Page } from '@playwright/test';
-import { appSignal } from './helpers';
+import { appSignal, scoreReady } from './helpers';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import packageJson from '../../package.json' with { type: 'json' };
 const { dependencies } = packageJson;
@@ -177,6 +177,9 @@ test('About and source links match the legal notice and the pinned packages; exa
   await page.getByRole('button', { name: 'About / AGPL' }).click();
   const about = page.getByRole('dialog');
   await expect(about).toContainText('AGPL');
+  expect(
+    await about.locator('small').evaluate((el) => parseFloat(getComputedStyle(el).fontSize)),
+  ).toBeGreaterThanOrEqual(12);
   const licences = await page.request.get('/licenses.txt');
   expect(licences.ok()).toBe(true);
   expect(await licences.text()).toContain('GNU AFFERO GENERAL PUBLIC LICENSE');
@@ -282,6 +285,10 @@ test('Practice teaches real Studio controls and restores the mounted draft, hist
   const guide = page.getByRole('complementary', { name: 'Guided practice' });
   await appSignal(page, () => !!document.querySelector('[data-practice-ready="true"]'));
   await expect(guide).toContainText('Make it move');
+  await expect(page.locator('.instrument-row[data-selected="true"]')).toHaveCount(1);
+  await expect(page.locator('.tray-empty')).toHaveCount(0);
+  await expect(page.locator('.setting-tile')).not.toHaveCount(0);
+  await expect(page.locator('#editor')).toHaveCount(0);
   await pictures(page, 'practice');
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await expect(guide).toContainText('Take it slow');
@@ -466,7 +473,7 @@ test('saved pre-Studio dubstep document restores at home with its edited cutoff'
   await page.addInitScript((payload) => localStorage.setItem('odm:recovery', payload), payload);
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/?inspect&a=test-card&b=');
-  await ready(page);
+  await scoreReady(page);
   expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(JSON.parse(payload));
   await expect(page.locator('.lane-label:not([data-setting])')).toHaveCount(13);
   await page
