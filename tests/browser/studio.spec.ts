@@ -30,6 +30,11 @@ async function shelfReady(page: Page) {
 }
 
 const shots = '/tmp/odm-studio-integration';
+// Instrumented module routes can still be fetching lazy imports after the last
+// assertion. Drain them while the page is alive, before fixture teardown.
+test.afterEach(async ({ page }) => {
+  await page.unrouteAll({ behavior: 'wait' });
+});
 async function frames(page: Page, count = 4) {
   await page.evaluate(async (count) => {
     await new Promise<void>((resolve) => {
