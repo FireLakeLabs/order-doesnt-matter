@@ -2,6 +2,7 @@ import { mkdir, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { prepare } from './view-evidence';
 import { revealView } from './shelf';
+import { scoreReady } from './helpers';
 
 test('Catwalk: exact bar 11, five themes, Stage B, playback and frame cost', async ({ page }) => {
   const dir = `${process.env.ODM_VIEW_MEASURE_DIR}/catwalk`;
@@ -13,6 +14,7 @@ test('Catwalk: exact bar 11, five themes, Stage B, playback and frame cost', asy
   await page.waitForFunction(
     () => window.viewProbe.frame?.now === 10.4 && window.viewProbe.frame.lookAhead === 1,
   );
+  await scoreReady(page);
   await writeFile(
     `${dir}/frame.json`,
     JSON.stringify(await page.evaluate(() => window.viewProbe.frame), null, 2),
@@ -26,7 +28,10 @@ test('Catwalk: exact bar 11, five themes, Stage B, playback and frame cost', asy
       await page.getByRole('button', { name: `Theme ${theme}`, exact: true }).click();
       await page.waitForFunction((name) => window.viewProbe.frame?.theme.name === name, theme);
       await page.evaluate(() => document.fonts.ready);
-      await page.screenshot({ path: `${dir}/${theme}-${String(width)}x${String(height)}.png` });
+      await page.screenshot({
+        animations: 'disabled',
+        path: `${dir}/${theme}-${String(width)}x${String(height)}.png`,
+      });
     }
   }
   await page.setViewportSize({ width: 2560, height: 1440 });
@@ -40,13 +45,13 @@ test('Catwalk: exact bar 11, five themes, Stage B, playback and frame cost', asy
   await revealView(choice);
   await choice.click();
   await expect(b.locator('.view-host')).toHaveAttribute('data-score-ready', 'true');
-  await b.screenshot({ path: `${dir}/stage-b.png` });
+  await b.screenshot({ animations: 'disabled', path: `${dir}/stage-b.png` });
   const stageB = await b.locator('canvas').boundingBox();
   await page.evaluate(() => window.odmStudio.play());
   await page.waitForFunction(
     () => window.viewProbe.frame?.playing && window.viewProbe.frame.now > 10.4,
   );
-  await page.screenshot({ path: `${dir}/playing-2560x1440.png` });
+  await page.screenshot({ animations: 'disabled', path: `${dir}/playing-2560x1440.png` });
   await page.evaluate(() => window.odmStudio.pause());
 
   const costs = await page.evaluate(async () => {

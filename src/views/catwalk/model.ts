@@ -113,11 +113,16 @@ export function figures(frame: ViewFrame, notes = scoredNotes(frame.notes)): Fig
       (n.start <= frame.now || n.hasOnset) &&
       instruments.has(n.instrument),
   );
-  const ids = [...new Set(visible.map((n) => n.instrument))].sort(
-    (a, b) => (instruments.get(a)?.index ?? 0) - (instruments.get(b)?.index ?? 0),
-  );
+  // The document inventory fixes the fan and crowd policy throughout a hold.
+  // Notes entering/leaving the Window must never move an unrelated poser.
+  const ids = [...frame.instruments].sort((a, b) => a.index - b.index).map((i) => i.id);
+  // Alternate outward from the centre, keeping adjacent parts on opposite
+  // sides even when an arrangement leaves a long run of earlier rows resting.
   const slots = new Map(
-    ids.map((id, i) => [id, ids.length === 1 ? 0 : (i / (ids.length - 1)) * 2 - 1]),
+    ids.map((id, i) => [
+      id,
+      i === 0 ? 0 : ((i % 2 ? 1 : -1) * Math.ceil(i / 2)) / Math.ceil((ids.length - 1) / 2),
+    ]),
   );
   const r = runway(frame);
   const capacity = Math.max(2, Math.min(6, Math.floor(frame.width / 180)));
@@ -135,7 +140,7 @@ export function figures(frame: ViewFrame, notes = scoredNotes(frame.notes)): Fig
     const breadth = r.backWidth + (r.frontWidth - r.backWidth) * progress;
     const x = frame.width / 2 + side * breadth * 0.5;
     const depth = posing ? 'front' : String(Math.floor(progress * 8));
-    const crowded = ids.length > capacity || visible.length > 64;
+    const crowded = ids.length > capacity;
     const lane = crowded
       ? String(Math.floor(((side + 1) / 2) * capacity))
       : `${note.instrument}:${String(Math.floor(pan * 4))}`;
@@ -158,8 +163,12 @@ export function figures(frame: ViewFrame, notes = scoredNotes(frame.notes)): Fig
     const existing = groups.get(key);
     if (existing) {
       existing.members.push(note);
-      // A crowd wears one real bag, with that same note's gain and pan.
-      if (items.length > existing.outfit.length)
+      // The earliest arrival anchors a crowd; equally timed notes feature the
+      // richest real bag, with that same note's gain and pan.
+      if (
+        note.start < existing.note.start ||
+        (note.start === existing.note.start && items.length > existing.outfit.length)
+      )
         Object.assign(existing, candidate, { members: existing.members });
     } else groups.set(key, candidate);
   }

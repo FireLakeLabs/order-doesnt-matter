@@ -10,6 +10,8 @@ import {
   type Figure,
 } from './catwalk/model';
 
+const instrumentCount = (f: Figure) => new Set(f.members.map((n) => n.instrument)).size;
+
 function figure(c: CanvasRenderingContext2D, f: Figure, frame: ViewFrame) {
   const { theme } = frame;
   c.save();
@@ -140,7 +142,12 @@ function figure(c: CanvasRenderingContext2D, f: Figure, frame: ViewFrame) {
     c.textAlign = 'center';
     c.fillStyle = theme.text;
     c.font = `12px "${theme.fontDisplay}"`;
-    c.fillText(f.instrument.name, f.x, f.y + (f.members.length > 1 ? 43 : 23), frame.width * 0.21);
+    c.fillText(
+      instrumentCount(f) > 1 ? `${String(instrumentCount(f))} instruments` : f.instrument.name,
+      f.x,
+      f.y + (f.members.length > 1 ? 24 * f.scale + 18 : 23),
+      frame.width * 0.21,
+    );
     c.restore();
   }
 }
@@ -168,7 +175,13 @@ function tag(c: CanvasRenderingContext2D, f: Figure, frame: ViewFrame, index: nu
     }
     rows.push(row);
   }
-  if (f.members.length > 1) rows.unshift(`×${String(f.members.length)} · representative bag`);
+  if (f.members.length > 1) {
+    rows.unshift('representative bag');
+    const count = instrumentCount(f);
+    rows.unshift(
+      `×${String(f.members.length)} · ${String(count)} ${count === 1 ? 'instrument' : 'instruments'}`,
+    );
+  }
   const header = `${f.instrument.name} ${noteTitle(f.note)}`.trim();
   const rowHeight = Math.min(font * 1.65, (h * 0.51 - 50) / Math.max(1, rows.length));
   const height = 46 + rows.length * rowHeight;
@@ -232,22 +245,24 @@ function draw(c: CanvasRenderingContext2D, frame: ViewFrame, notes: ViewNote[]) 
   }
   c.globalAlpha = 1;
   for (const f of cast) figure(c, f, frame);
-  for (const [i, f] of featured(cast, w).entries()) tag(c, f, frame, i);
+  for (const [i, f] of featured(cast, w)
+    .sort((a, b) => a.x - b.x)
+    .entries())
+    tag(c, f, frame, i);
   c.fillStyle = theme.text;
   c.font = `bold 26px "${theme.fontDisplay}"`;
   c.fillText('Catwalk', 20, 39);
   c.font = `12px "${theme.fontMono}"`;
   c.fillStyle = theme.muted;
-  c.fillText('WHAT NOTES WEAR', 21, 63);
+  c.fillText('WHAT NOTES WEAR · ANY ORDER, SAME OUTFIT', 21, 63, w - 180);
   c.textAlign = 'right';
   c.fillText(
-    `bar ${String(Math.floor(frame.now) + 1)} · ${String(Math.round((frame.now % 1) * 100))}%`,
+    `bar ${String(Math.floor(frame.now) + 1)} · ${String(Math.floor((frame.now % 1) * 100))}%`,
     w - 20,
     36,
   );
   c.fillText(`window ${String(frame.lookAhead)}`, w - 20, 57);
   c.textAlign = 'left';
-  c.fillText('same settings · any order · same outfit', 20, h - 14, w - 40);
   if (!cast.length) {
     c.textAlign = 'center';
     c.fillText('The runway is waiting for notes.', w / 2, h * 0.6);

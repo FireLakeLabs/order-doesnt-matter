@@ -151,7 +151,7 @@ it('real bar 11 bags use sampled values, including keys beyond the mockup; host 
     (c) => typeof c.note.value.cutoff === 'number' || typeof c.note.value.lpf === 'number',
   )!;
   expect(bass).toBeDefined();
-  expect(bass.members).toHaveLength(1);
+  expect(bass.members.filter((n) => n.instrument === bass.instrument.id)).toHaveLength(1);
   const earlier = figures({ ...real, now: 10.2 }).find((c) => c.note === bass.note);
   const later = figures({ ...real, now: 10.7 }).find((c) => c.note === bass.note);
   expect(earlier?.outfit).toEqual(bass.outfit);
@@ -191,4 +191,39 @@ it('moderate pan values keep their side even at the extremes of the instrument f
   const cast = figures(f);
   expect(cast.find((c) => c.instrument.id === '0')!.x).toBeGreaterThan(f.width / 2);
   expect(cast.find((c) => c.instrument.id === '1')!.x).toBeLessThan(f.width / 2);
+});
+
+it('held positions and crowd membership survive other instruments and dense notes entering the Window (R1)', () => {
+  const held = note(1, 3, { gain: 0.8, lpf: 900 }, '1');
+  const f = {
+    ...scoreFrame(3),
+    lookAhead: 1,
+    notes: [note(1, 3), held, ...Array.from({ length: 80 }, () => note(2.5, 3, {}, '2'))],
+  };
+  for (const width of [1300, 560]) {
+    const poseAt = (now: number) =>
+      figures({ ...f, now, width }).find((c) => c.members.includes(held))!;
+    const before = poseAt(1.4);
+    const after = poseAt(1.6);
+    expect(after.x).toBe(before.x);
+    expect(after.y).toBe(before.y);
+    expect(after.scale).toBe(before.scale);
+    expect(after.members).toEqual(before.members);
+    expect(poseAt(1.4)).toEqual(before);
+  }
+});
+
+it('a walking crowd is anchored by its earliest onset rather than a richer later outfit (R2)', () => {
+  const earlier = note(1.55, 2, { gain: 1 });
+  const later = note(1.6, 2, { lpf: 900, shape: 0.6 });
+  for (const notes of [
+    [later, earlier],
+    [earlier, later],
+  ]) {
+    const cast = figures(frame(notes));
+    expect(cast).toHaveLength(1);
+    expect(cast[0].note).toBe(earlier);
+    expect(cast[0].members).toHaveLength(2);
+    expect(cast[0].y).toBe(figures(frame([earlier]))[0].y);
+  }
 });
