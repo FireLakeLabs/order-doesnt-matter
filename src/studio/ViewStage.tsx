@@ -5,12 +5,14 @@ import { createBrowserQueries } from '../strudel/evaluate-browser';
 import { views } from '../views';
 import type { ViewTheme } from '../views/types';
 import type { StudioClock } from './clock';
-import { buildFrame, neededRange } from './frame';
+import { buildFrame, createAudioFrames, neededRange } from './frame';
 import { runtime } from './runtime';
 import { createScoreCache } from './score-cache';
 import { mountView } from './view-lifecycle';
 import { ViewShelf, viewDragType } from './ViewShelf';
 import type { Layout, Stage } from './session';
+
+const audioFrame = createAudioFrames();
 
 function Drawing({
   viewId,
@@ -65,7 +67,8 @@ function Drawing({
       size = { width: entry.contentRect.width, height: entry.contentRect.height };
     });
     observer.observe(container);
-    const unsubscribe = clock.subscribe(({ now, cps, playing }) => {
+    const unsubscribe = clock.subscribe((sample) => {
+      const { now, cps, playing } = sample;
       if (broken || !mounted.definition || size.width <= 0 || size.height <= 0) return;
       try {
         const { theme, lookAhead, trails } = options.current;
@@ -79,6 +82,10 @@ function Drawing({
         mounted.frame(
           buildFrame({
             state,
+            audio:
+              mounted.definition.needs === 'audio'
+                ? audioFrame(runtime.app.engine?.tap(), sample)
+                : undefined,
             score: cache.score,
             notes: cache.notes,
             now,

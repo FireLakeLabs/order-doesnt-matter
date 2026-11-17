@@ -43,7 +43,13 @@ test('controller scopes Kiln reuse across edit/Undo, solo, Stop/Play, open and r
     time: () => 0,
     outputLatency: () => 0,
     seek() {},
-    tap: { sampleRate: 48000, rms: async () => 0 },
+    tap: {
+      sampleRate: 48000,
+      analyse: () => {
+        throw Error('Unused fake analysis');
+      },
+      rms: async () => 0,
+    },
   };
   port.create = async () => engineWith(audio, () => {});
   const retention = createRetention({ storage: () => ({ getItem: () => null, setItem() {} }) });

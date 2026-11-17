@@ -27,7 +27,13 @@ it('acknowledges a current silent scheduling window once, ignoring old/stopped r
     now: () => 4,
     outputLatency: () => 0,
     time: () => 10,
-    tap: { sampleRate: 48000, rms: async () => 0 },
+    tap: {
+      sampleRate: 48000,
+      analyse: () => {
+        throw Error('Unused fake analysis');
+      },
+      rms: async () => 0,
+    },
   };
   const events: EngineEvent[] = [];
   const engine = engineWith(audio, (dispatch, _error, silent) => {

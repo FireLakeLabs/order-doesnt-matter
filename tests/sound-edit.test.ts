@@ -49,7 +49,13 @@ function backend() {
     now: () => 0,
     outputLatency: () => 0,
     time: () => 0,
-    tap: { sampleRate: 48000, rms: async () => 0 },
+    tap: {
+      sampleRate: 48000,
+      analyse: () => {
+        throw Error('Unused fake analysis');
+      },
+      rms: async () => 0,
+    },
   };
   engine = engineWith(audio, (schedule) => {
     dispatch = schedule;

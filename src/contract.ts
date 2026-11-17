@@ -88,6 +88,10 @@ export interface OutputTap {
   /** Stereo RMS of rendered output between two audio-clock times, in seconds. */
   rms(fromTime: number, toTime: number): Promise<number>;
   sampleRate: number;
+  /** Lazy live analysis. Reuses one result and its buffers: wave is 100 ms of
+   * mono PCM (length / 0.1 gives sample rate); spectrum is the linear FFT's
+   * byte magnitudes across [0, sampleRate / 2). Read at most once per RAF. */
+  analyse(): { wave: Float32Array; spectrum: Uint8Array };
 }
 export type PlaybackSpeed = 0.25 | 0.5 | 0.75 | 1;
 export interface CycleLoop {

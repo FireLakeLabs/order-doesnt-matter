@@ -46,7 +46,13 @@ const audio = vi.hoisted(() => {
     audioTime: () => 0,
     outputLatency: () => 0,
     sounds: () => [],
-    tap: () => ({ sampleRate: 48000, rms: async () => 0 }),
+    tap: () => ({
+      sampleRate: 48000,
+      analyse: () => {
+        throw Error('Unused fake analysis');
+      },
+      rms: async () => 0,
+    }),
     subscribe(fn) {
       listeners.add(fn);
       return () => {
