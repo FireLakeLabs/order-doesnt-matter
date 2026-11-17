@@ -10,6 +10,7 @@ import {
   differenceLabel,
   lanes,
   voiceCount,
+  isDense,
 } from './deja-vu/model';
 import type { Entry, Score, Slice } from './deja-vu/model';
 
@@ -106,7 +107,11 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Score) {
     c.fillStyle = t.muted;
     c.textAlign = 'center';
     c.fillText(
-      view.known ? 'Both bars are resting' : 'This bar has not been asked about',
+      view.known
+        ? 'Both bars are resting'
+        : view.currentKnown
+          ? 'This bar is resting · previous bar unasked'
+          : 'This bar has not been asked about',
       (g.left + g.right) / 2,
       (g.top + g.bottom) / 2,
     );
@@ -150,12 +155,13 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Score) {
         .filter((e) => e.kind === 'changed')
         .map((e) => annotations(e).length * annotationFont + 4),
     );
-    // Crowds retain every solid/ghost span and exact counts, while value text becomes a density band.
-    const dense =
-      row.entries.length > width / 20 ||
-      g.rowHeight < 30 ||
-      simultaneous > 4 ||
-      annotationHeight > (g.rowHeight * 0.55) / simultaneous;
+    const dense = isDense({
+      count: row.entries.length,
+      width,
+      rowHeight: g.rowHeight,
+      voices: simultaneous,
+      annotationHeight,
+    });
     const voices = dense ? 1 : simultaneous;
     const positions = lanes(row.entries);
     const pitchChanged = row.entries.some((e) => e.differences.some((d) => d.key === 'pitch'));
@@ -268,7 +274,9 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Score) {
     legendY = footerY - 21;
   c.fillStyle = t.muted;
   c.fillText(
-    `solid ${String(view.bar + 1)} · dashed ${String(view.bar)}${rest ? ` · ${String(rest)} resting` : ''}`,
+    view.currentKnown
+      ? `solid ${String(view.bar + 1)}${view.known ? ` · dashed ${String(view.bar)}` : ''}${rest ? ` · ${String(rest)} resting${view.known ? '' : ' this bar'}` : ''}`
+      : `bar ${String(view.bar + 1)} unasked`,
     g.left,
     legendY,
   );
@@ -276,7 +284,9 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Score) {
   const counts = view.counts;
   const summary = view.known
     ? `${String(counts.new)} new · ${String(counts.vanished)} vanished · ${String(counts.changed)} changed`
-    : 'Previous bar unasked — comparison unavailable';
+    : view.currentKnown
+      ? 'Previous bar unasked — comparison unavailable'
+      : 'This bar unasked — comparison unavailable';
   c.fillText(fit(c, summary, g.right - g.left), g.left, footerY);
   c.fillStyle = t.accent;
   c.textAlign = 'right';

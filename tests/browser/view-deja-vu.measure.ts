@@ -65,6 +65,12 @@ test('deja-vu: two real comparisons, five themes, crowd and CPU frame cost', asy
     'true',
   );
   await presented();
+  const stageBSize = await page
+    .locator('[data-region="stage-b"] canvas')
+    .evaluate((canvas) => ({
+      width: parseFloat((canvas as HTMLCanvasElement).style.width),
+      height: parseFloat((canvas as HTMLCanvasElement).style.height),
+    }));
   await page.screenshot({ path: `${shots}/studio-stage-b-2560x1440.png` });
   await page
     .locator('[data-region="stage-b"] canvas')
@@ -98,6 +104,7 @@ test('deja-vu: two real comparisons, five themes, crowd and CPU frame cost', asy
     { label: 'Stage A', width: 1300, height: 760 },
     { label: '1920 host', width: saved.width, height: saved.height },
     { label: 'Stage B', width: 560, height: 760 },
+    { label: 'Stage B host', ...stageBSize },
   ].map((size) => {
     const g = layout(size, 6);
     const titleBottom = Math.max(29, 32 * g.scale) + Math.max(24, 24 * g.scale) / 2;
@@ -196,6 +203,38 @@ test('deja-vu: two real comparisons, five themes, crowd and CPU frame cost', asy
     });
   }, saved);
   await page.locator('#deja-vu-evidence canvas').screenshot({ path: `${shots}/unasked.png` });
+  for (const [name, now, from, to] of [
+    ['unasked-predecessor-rest', 28.4, 28, 56],
+    ['unasked-current', 28.4, 0, 28],
+  ] as const) {
+    await standalone.evaluate(
+      ({ handle }, { saved, now, from, to }) =>
+        handle.frame({ ...saved, width: 1300, height: 760, dpr: 1, now, from, to, notes: [] }),
+      { saved, now, from, to },
+    );
+    await page.locator('#deja-vu-evidence canvas').screenshot({ path: `${shots}/${name}.png` });
+  }
+  await standalone.evaluate(
+    ({ handle }, saved) =>
+      handle.frame({
+        ...saved,
+        width: 1300,
+        height: 760,
+        dpr: 1,
+        instruments: [saved.instruments[0]],
+        notes: [9, 10].map((start) => ({
+          instrument: saved.instruments[0].id,
+          start,
+          end: start + 1,
+          hasOnset: true,
+          value: { note: start === 9 ? 48 : 48.3 },
+        })),
+      }),
+    saved,
+  );
+  await page
+    .locator('#deja-vu-evidence canvas')
+    .screenshot({ path: `${shots}/fractional-pitch.png` });
   const deterministic = await standalone.evaluate(({ el, handle }, saved) => {
     const f = { ...saved, width: 1300, height: 760, dpr: 1 };
     handle.frame(f);

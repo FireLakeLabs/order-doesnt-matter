@@ -13,6 +13,7 @@ import {
   voiceCount,
   lanes,
   differenceLabel,
+  isDense,
 } from '../../src/views/deja-vu/model';
 import { songSummary } from '../../src/views/shared/song';
 import { scoreFrame } from './score-fixture';
@@ -47,7 +48,7 @@ it('matches exact pitches first, pairs one leftover pitch change, and refuses am
   expect(voiceCount(unambiguous.rows[0].entries)).toBe(2);
   expect(unambiguous.counts).toEqual({ same: 1, changed: 1, new: 0, vanished: 0 });
   expect(unambiguous.rows[0].entries.find((e) => e.kind === 'changed')!.differences).toEqual([
-    { key: 'pitch', before: 'C3', after: 'G3' },
+    { key: 'pitch', before: 48, after: 55 },
   ]);
   const ambiguous = compare([
     note(0, 48),
@@ -124,6 +125,7 @@ it('hatches unknown bars and predecessors rather than inventing silence', () => 
     result = comparison(f, score),
     cells = strip(f, score);
   expect(result.known).toBe(false);
+  expect(result.currentKnown).toBe(true);
   expect(result.counts.new).toBe(0);
   expect(result.change).toBeUndefined();
   expect(result.rows[0].entries[0].kind).toBe('unasked');
@@ -203,6 +205,7 @@ it('sizes six main note rows from the mockup and keeps Stage B type readable', (
     { width: 1300, height: 760 },
     { width: 1131.25, height: 469.09375 },
     { width: 560, height: 760 },
+    { width: 560, height: 675 },
   ]) {
     const g = layout(size, 6);
     expect(g.noteHeight).toBeGreaterThanOrEqual((28 * size.width) / 960);
@@ -235,3 +238,63 @@ it('gives simultaneous equal-pitch voices distinct lanes and keeps small changes
   const d = entries.find((e) => e.kind === 'changed')!.differences[0];
   expect(differenceLabel(d)).toEqual({ key: 'gain', before: '0.5001', after: '0.5002' });
 });
+
+it('preserves sub-semitone changes before formatting pitch names', () => {
+  for (const notes of [
+    [note(0, 48), note(1, 48.3)],
+    [
+      { ...note(0), value: { freq: 440 } },
+      { ...note(1), value: { freq: 441 } },
+    ],
+  ]) {
+    const result = compare(notes),
+      d = result.rows[0].entries[0].differences.find((d) => d.key === 'pitch')!;
+    expect(result.counts.changed).toBe(1);
+    expect(typeof d.before).toBe('number');
+    const label = differenceLabel(d);
+    expect(label.before).not.toBe(label.after);
+  }
+  expect(differenceLabel({ key: 'pitch', before: 48, after: 55 })).toEqual({
+    key: 'pitch',
+    before: 'C3',
+    after: 'G3',
+  });
+});
+it('distinguishes an unasked current bar from an unasked predecessor', () => {
+  const f = { ...scoreFrame(), now: 28.4, from: 28, to: 56, notes: [] };
+  expect(comparison(f, analyse([]))).toMatchObject({ known: false, currentKnown: true });
+  expect(comparison({ ...f, from: 0, to: 28 }, analyse([]))).toMatchObject({
+    known: false,
+    currentKnown: false,
+  });
+});
+it.each(['entry spacing', 'row height', 'voices', 'annotation fit'])(
+  'uses the %s density boundary without dropping real-corpus entries',
+  (threshold) => {
+    const row = comparison(real, analyse(real.notes)).rows.find(
+      (r) => r.instrument.name === 'hh · drop',
+    )!;
+    const base = {
+      count: row.entries.length,
+      width: row.entries.length * 20,
+      rowHeight: 40,
+      voices: 1,
+      annotationHeight: 22,
+    };
+    expect(isDense(base)).toBe(false);
+    const crowded =
+      threshold === 'entry spacing'
+        ? { ...base, width: base.width - 0.1 }
+        : threshold === 'row height'
+          ? { ...base, rowHeight: 29.9, annotationHeight: 0 }
+          : threshold === 'voices'
+            ? { ...base, voices: 5, annotationHeight: 0 }
+            : { ...base, annotationHeight: 22.1 };
+    expect(isDense(crowded)).toBe(true);
+    expect(row.entries).toHaveLength(8);
+    if (threshold === 'row height')
+      expect(isDense({ ...base, rowHeight: 30, annotationHeight: 0 })).toBe(false);
+    if (threshold === 'voices')
+      expect(isDense({ ...base, voices: 4, annotationHeight: 0 })).toBe(false);
+  },
+);

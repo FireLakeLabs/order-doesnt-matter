@@ -60,6 +60,7 @@ export function analyse(notes: ViewNote[]) {
 }
 export type Score = ReturnType<typeof analyse>;
 const signature = (s: Slice) => canonical([s.end, s.onset, s.note.value]);
+/** Matched notes compare normalized pitch and setting values (missing and undefined coincide); the shared change score compares raw bags. */
 function differences(before: Slice, after: Slice): Difference[] {
   const result: Difference[] = [];
   const pitched = before.pitch !== undefined && after.pitch !== undefined;
@@ -68,8 +69,8 @@ function differences(before: Slice, after: Slice): Difference[] {
   if (before.pitch !== after.pitch)
     result.push({
       key: 'pitch',
-      before: before.pitch === undefined ? '∅' : noteName(before.pitch),
-      after: after.pitch === undefined ? '∅' : noteName(after.pitch),
+      before: before.pitch,
+      after: after.pitch,
     });
   for (const key of new Set(
     [...Object.keys(before.note.value), ...Object.keys(after.note.value)].sort(),
@@ -148,7 +149,8 @@ export function knownBar(f: Pick<ViewFrame, 'from' | 'to'>, bar: number) {
 }
 export function comparison(f: ViewFrame, score: Score) {
   const bar = Math.floor(f.now),
-    known = knownBar(f, bar) && (bar === 0 || knownBar(f, bar - 1));
+    currentKnown = knownBar(f, bar),
+    known = currentKnown && (bar === 0 || knownBar(f, bar - 1));
   const current = score.bars.get(bar) ?? [],
     previous = bar === 0 ? [] : (score.bars.get(bar - 1) ?? []);
   const entries: Entry[] = known
@@ -160,7 +162,14 @@ export function comparison(f: ViewFrame, score: Score) {
   }));
   const counts = { new: 0, vanished: 0, changed: 0, same: 0 };
   for (const e of entries) if (e.kind !== 'unasked') counts[e.kind]++;
-  return { bar, known, rows, counts, change: known ? (score.summaries.get(bar) ?? 0) : undefined };
+  return {
+    bar,
+    known,
+    currentKnown,
+    rows,
+    counts,
+    change: known ? (score.summaries.get(bar) ?? 0) : undefined,
+  };
 }
 export function strip(f: ViewFrame, score: Score) {
   const length = f.sections.at(-1)?.to ?? 16;
@@ -222,13 +231,40 @@ export function lanes(entries: readonly Entry[]) {
   return result;
 }
 export function differenceLabel(d: Difference) {
-  let before = valueText(d.before),
+  const label = (value: unknown) =>
+    d.key === 'pitch' && typeof value === 'number' ? noteName(value) : valueText(value);
+  let before = label(d.before),
+    after = label(d.after);
+  if (before === after && d.key === 'pitch') {
+    before = valueText(d.before);
     after = valueText(d.after);
+  }
   if (before === after && canonical(d.before) !== canonical(d.after)) {
     before = String(d.before);
     after = String(d.after);
   }
   return { key: d.key, before, after };
+}
+/** Crowds retain every span and exact counts; only per-note value text gives way to the density band. */
+export function isDense({
+  count,
+  width,
+  rowHeight,
+  voices,
+  annotationHeight,
+}: {
+  count: number;
+  width: number;
+  rowHeight: number;
+  voices: number;
+  annotationHeight: number;
+}) {
+  return (
+    count > width / 20 ||
+    rowHeight < 30 ||
+    voices > 4 ||
+    annotationHeight > (rowHeight * 0.55) / voices
+  );
 }
 export function layout(f: Pick<ViewFrame, 'width' | 'height'>, count: number) {
   const scale = f.width / 960;
