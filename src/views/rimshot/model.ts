@@ -30,11 +30,12 @@ export function analyse(notes: ViewNote[]): Map<string, Part> {
       let seed = Math.round(note.start * 1e6);
       for (const char of id + identity) seed = Math.imul(seed ^ char.charCodeAt(0), 16777619);
       // Address unpitched lanes from the note itself, never from a query-prefix
-      // counter. Equal subdivisions cycle in order; sparse whole-cycle notes
-      // advance on each cycle too. Whole spans also survive as fragments.
-      const cycle = Math.floor(note.start);
-      const rank =
-        cycle + Math.floor((note.start - cycle) / Math.max(1e-9, note.end - note.start) + 1e-7);
+      // counter. Equal subdivisions cycle in order; longer notes advance per
+      // scored span instead of skipping lanes. Whole spans survive as fragments.
+      const duration = Math.max(1e-9, note.end - note.start);
+      const period = Math.max(1, duration);
+      const block = Math.floor(note.start / period + 1e-7);
+      const rank = block + Math.floor((note.start - block * period) / duration + 1e-7);
       prepared.push({
         note,
         rank: midi === undefined ? rank : pitchClass(midi),

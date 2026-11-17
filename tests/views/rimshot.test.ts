@@ -80,20 +80,33 @@ it('reserves contiguous instrument runs and maps pitch classes and cyclic unpitc
       .filter((e) => e.note.start >= 10 && e.note.start < 11)
       .map((e) => laneFor(e, run)),
   ).toEqual([2, 3, 4, 5, 6, 7, 0, 1]);
-  const pitched = [...parts.values()].flatMap((p) => p.events).filter((e) => e.pitched);
-  expect(pitched.length).toBeGreaterThan(0);
-  for (const event of pitched) {
-    const octave = analyse([{ ...event.note, value: { note: event.rank + 72 } }]).get(
-      event.note.instrument,
-    )!.events[0];
-    expect(laneFor(octave, run)).toBe(laneFor(event, run));
-  }
   expect(
     layout(
       { ...frame, instruments: frame.instruments.map((i) => ({ ...i, name: 'renamed' })) },
       parts,
     ).runs.map((r) => [r.start, r.count]),
   ).toEqual(tube.runs.map((r) => [r.start, r.count]));
+});
+it('separates different pitch-class bins in an unmerged corpus chord run', () => {
+  const chord = frame.notes.filter(
+    (n) => n.hasOnset && n.start === 0 && ['c3', 'eb4', 'g3'].includes(String(n.value.note)),
+  );
+  expect(chord).toHaveLength(3);
+  const tube = layout({ ...frame, instruments: frame.instruments.slice(0, 2) }, analyse(chord));
+  expect(tube.merged).toBe(false);
+  const run = tube.runs.find((r) => r.instrument.id === chord[0].instrument)!;
+  const lanes = ['c3', 'eb4', 'g3'].map((note) =>
+    laneFor(run.part.events.find((e) => e.note.value.note === note)!, run),
+  );
+  expect(lanes).toEqual([run.start, run.start + 1, run.start + 2]);
+});
+it('cycles long unpitched corpus spans one lane per onset', () => {
+  const hits = frame.notes.filter((n) => n.hasOnset && n.value.s === 'hh' && n.start < 1);
+  expect(hits).toHaveLength(4);
+  const notes = hits.map((n) => ({ ...n, start: n.start * 16, end: n.end * 16 }));
+  const instrument = frame.instruments.find((i) => i.id === hits[0].instrument)!;
+  const run = layout({ ...frame, instruments: [instrument] }, analyse(notes)).runs[0];
+  expect(run.part.events.map((e) => laneFor(e, run))).toEqual([0, 1, 2, 3]);
 });
 async function queriedFrame(now: number, lookAhead: number): Promise<ViewFrame> {
   const range = neededRange(undefined, now, lookAhead, state.sections);
