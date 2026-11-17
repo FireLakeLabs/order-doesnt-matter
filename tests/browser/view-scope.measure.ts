@@ -1,11 +1,11 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
-import type { ViewFrame } from '../../src/views/types';
+import type { ViewDefinition, ViewFrame } from '../../src/views/types';
 import type {} from '../../src/studio/main';
 
 declare global {
   interface Window {
-    scopeMeasure: { frame?: ViewFrame; costs: number[] };
+    scopeMeasure: { frame?: ViewFrame; costs: number[]; definition: ViewDefinition };
   }
 }
 
@@ -34,7 +34,7 @@ test('Scope: real output, two-stage screenshots and 300-frame CPU measurement', 
       body:
         body +
         `
-      window.scopeMeasure = { costs: [] };
+      window.scopeMeasure = { costs: [], definition: ${name} };
       const mountScopeMeasure = ${name}.mount;
       ${name}.mount = (element) => {
         const handle = mountScopeMeasure(element);
@@ -144,4 +144,14 @@ test('Scope: real output, two-stage screenshots and 300-frame CPU measurement', 
     { timeout: 0 },
   );
   await page.screenshot({ path: `${dir}/stopped-stage-b-1920x1080.png` });
+  // A short desktop window must not send a negative radius to Canvas.arc.
+  await page.evaluate(async () => {
+    const element = document.createElement('div');
+    const handle = await window.scopeMeasure.definition.mount(element);
+    try {
+      handle.frame({ ...window.scopeMeasure.frame!, width: 900, height: 100 });
+    } finally {
+      handle.dispose();
+    }
+  });
 });

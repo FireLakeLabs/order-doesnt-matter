@@ -136,7 +136,7 @@ const view: ViewDefinition = {
           c.font = `22px "${theme.fontDisplay}", sans-serif`;
           c.fillText('ODM', cx, y + 26);
           c.fillText('SC-140', cx, y + 49);
-          const step = Math.min(92, (sh - 100) / 4);
+          const step = Math.max(0, Math.min(92, (sh - 100) / 4));
           for (let i = 0; i < 4; i++) {
             const cy = y + 80 + i * step,
               r = Math.min(25, step * 0.3);
