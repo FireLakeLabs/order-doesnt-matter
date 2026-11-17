@@ -160,6 +160,11 @@ test('harp: real arrangement, five themes, both stages and CPU cost', async ({ p
       name: '500-unpitched-20-parts',
       notes: dense.notes.map((note) => ({ ...note, value: { s: 'bd', n: 0 } })),
     });
+    scenarios.push({
+      ...dense,
+      name: '500-distinct-microtones-20-parts',
+      notes: dense.notes.map((note, i) => ({ ...note, value: { note: 48 + i / 100 } })),
+    });
     const result = [];
     for (const scenario of scenarios) {
       const samples: number[] = [];
@@ -215,6 +220,8 @@ test('harp: real arrangement, five themes, both stages and CPU cost', async ({ p
       dpr: 1,
     });
     pictures.push(el.querySelector('canvas')!.toDataURL());
+    handle.frame({ ...frame, ...scenarios[5], now: 17.3, width: 560, height: 471, dpr: 1 });
+    pictures.push(el.querySelector('canvas')!.toDataURL());
     handle.dispose();
     el.remove();
     return {
@@ -228,7 +235,7 @@ test('harp: real arrangement, five themes, both stages and CPU cost', async ({ p
   }, frame);
   for (const [i, picture] of pictures.entries())
     await writeFile(
-      `${shots}/${['real-1300x760', 'dense-500-staggered-1300x760', 'dense-500-staggered-560x471', 'drums-only-20-560x471', 'two-part-braid-560x471'][i]}.png`,
+      `${shots}/${['real-1300x760', 'dense-500-staggered-1300x760', 'dense-500-staggered-560x471', 'drums-only-20-560x471', 'two-part-braid-560x471', 'dense-500-distinct-560x471'][i]}.png`,
       Buffer.from(picture.split(',')[1], 'base64'),
     );
   sizes.push({

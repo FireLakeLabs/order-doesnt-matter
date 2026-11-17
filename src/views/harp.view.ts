@@ -37,8 +37,14 @@ const view: ViewDefinition = {
         c.fillStyle = colour;
         let label = value;
         if (c.measureText(label).width > width) {
-          while (label && c.measureText(label + '…').width > width) label = label.slice(0, -1);
-          label += '…';
+          let lo = 0,
+            hi = value.length;
+          while (lo < hi) {
+            const mid = Math.ceil((lo + hi) / 2);
+            if (c.measureText(value.slice(0, mid) + '…').width <= width) lo = mid;
+            else hi = mid - 1;
+          }
+          label = value.slice(0, lo) + '…';
         }
         c.fillText(label, x, y);
       };
@@ -117,8 +123,8 @@ const view: ViewDefinition = {
           c.moveTo(line.x, line.top);
           c.lineTo(line.x, line.bottom);
           c.stroke();
-          for (const [n, part] of parts.entries()) {
-            const state = motion(part, f.now, (n * Math.PI * 2) / parts.length);
+          for (const part of parts) {
+            const state = motion(part, f.now);
             const width = shimmerWidth(state.gain, g),
               colour = owner(part.instrument)?.colour ?? theme.accent;
             c.fillStyle = colour;
@@ -165,7 +171,7 @@ const view: ViewDefinition = {
           }
           c.save();
           c.translate(line.x, line.bottom + 26);
-          const angled = g.spacing < 32;
+          const angled = g.angled;
           if (angled) c.rotate(Math.PI / 3);
           c.textAlign = angled ? 'left' : 'center';
           c.globalAlpha = bright || parts.length ? 1 : 0.65;
@@ -175,7 +181,7 @@ const view: ViewDefinition = {
             0,
             Math.max(10, Math.min(13, 10 * g.scale)),
             parts.length ? theme.text : theme.muted,
-            angled ? 55 : g.spacing - 2,
+            g.labelWidth,
           );
           c.restore();
         }

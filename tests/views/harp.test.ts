@@ -84,16 +84,16 @@ it('shimmers on exact half-open scored spans and returns the same motion after a
   expect([note.start, note.end]).toEqual([17.25, 17.375]);
   expect(partsAt(slot.voices, frame(note.start))).toHaveLength(1);
   expect(partsAt(slot.voices, frame(note.end))).toHaveLength(0);
-  const at = motion(p, 17.3, 0);
-  motion(p, -20, 0);
-  motion(p, 50, 0);
-  expect(motion(p, 17.3, 0)).toEqual(at);
-  const onset = motion(p, note.start, 0);
+  const at = motion(p, 17.3);
+  motion(p, -20);
+  motion(p, 50);
+  expect(motion(p, 17.3)).toEqual(at);
+  const onset = motion(p, note.start);
   expect(displacement(0, onset)).toBe(0);
   expect(displacement(1, onset)).toBeCloseTo(0);
   expect(displacement(1 / 3, onset)).toBeCloseTo(onset.gain);
   expect(onset.pluck).toBe(1);
-  expect(motion(p, note.end, 0).pluck).toBe(0);
+  expect(motion(p, note.end).pluck).toBe(0);
 });
 it('gain controls width and two parts on one string keep both braiding owners', () => {
   const n = notes.find((n) => n.value.note !== undefined)!;
@@ -114,7 +114,8 @@ it('gain controls width and two parts on one string keep both braiding owners', 
   expect(score.strings).toHaveLength(1);
   const parts = partsAt(score.strings[0].voices, f);
   expect(parts.map((p) => p.instrument).sort()).toEqual([ids[0], ids[1]].sort());
-  const a = motion(parts[0], 0, 0),
+  expect(parts.map((p) => p.phase)).toEqual([0, Math.PI]);
+  const a = motion(parts[0], 0),
     b = motion(
       {
         ...parts[0],
@@ -124,11 +125,10 @@ it('gain controls width and two parts on one string keep both braiding owners', 
         })),
       },
       0,
-      0,
     );
   expect(shimmerWidth(b.gain, g)).toBeCloseTo(shimmerWidth(a.gain, g) * 2);
-  expect(displacement(1 / 3, motion(parts[0], 0, 0))).toBeCloseTo(
-    -displacement(1 / 3, motion(parts[0], 0, Math.PI)),
+  expect(displacement(1 / 3, motion(parts[0], 0)) / motion(parts[0], 0).gain).toBeCloseTo(
+    -displacement(1 / 3, motion(parts[1], 0)) / motion(parts[1], 0).gain,
   );
   f.instruments.find((i) => i.id === ids[0])!.muted = true;
   expect(partsAt(score.strings[0].voices, f).map((p) => p.instrument)).toEqual([ids[1]]);
@@ -163,7 +163,7 @@ it('reads real scaled n, frequency and microtones while coalescing continuation 
   ).toBe(1);
   const carried = analyse([48, 52, 55].map((note) => ({ ...n, hasOnset: false, value: { note } })));
   expect(carried.pitchCount).toBe(3);
-  expect(motion(partsAt(carried.strings[0].voices, frame(0.4))[0], 0.4, 0).pluck).toBe(0);
+  expect(motion(partsAt(carried.strings[0].voices, frame(0.4))[0], 0.4).pluck).toBe(0);
   expect(
     analyse([
       { ...n, value: { freq: 440 } },
@@ -230,4 +230,42 @@ it('fills Stage A height at card scale and keeps 40 strings distinct on Stage B'
     const heads = layout(w, h, 19, 20);
     expect(heads.drumTop + heads.rows * 34 + 14).toBeLessThanOrEqual(h);
   }
+});
+
+it('clears the base heads and canvas with angled labels, including the no-drum case', () => {
+  for (const [w, h, count, drums] of [
+    [560, 470.5, 19, 0],
+    [560, 470.5, 19, 3],
+    [560, 470.5, 19, 4],
+    [1131, 469, 40, 4],
+    [700, 500, 24, 3],
+    [560, 470.5, 16, 3],
+  ]) {
+    const g = layout(w, h, count, drums);
+    expect(g.angled).toBe(true);
+    expect(g.strip).toBe(true);
+    expect(g.labelWidth).toBeGreaterThan(18);
+    for (let i = 0; i < count; i++) {
+      const line = stringGeometry(g, i, count);
+      const labelBottom = line.bottom + 26 + g.labelWidth * Math.sin(Math.PI / 3) + 2;
+      expect(labelBottom).toBeLessThan(h);
+      if (drums) expect(labelBottom).toBeLessThan(g.drumTop);
+    }
+  }
+});
+it('groups microtones in the octave of their displayed nearest note', () => {
+  const n = notes.find((n) => n.value.note !== undefined)!;
+  const score = analyse([
+    ...Array.from({ length: 40 }, (_, i) => ({
+      ...n,
+      start: i,
+      end: i + 1,
+      hasOnset: true,
+      value: { note: 24 + i },
+    })),
+    { ...n, start: 0, end: 1, hasOnset: true, value: { note: 71.6 } },
+  ]);
+  expect(score.grouped).toBe(true);
+  expect(pitchLabel(71.6)).toBe('C5-40¢');
+  expect(score.strings.find((s) => s.pitches.includes(71.6))?.label).toBe('oct 5');
 });

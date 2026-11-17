@@ -54,7 +54,7 @@ export function analyse(notes: readonly ViewNote[]): HarpScore {
     grouped = sorted.length > 40;
   const slots = new Map<number, StringSlot>();
   for (const [midi, voices] of sorted) {
-    const key = grouped ? Math.floor(midi / 12) : midi;
+    const key = grouped ? Math.floor(Math.round(midi) / 12) : midi;
     let slot = slots.get(key);
     if (!slot)
       slots.set(
@@ -88,6 +88,7 @@ export function sectionAt(f: Pick<ViewFrame, 'sections' | 'now' | 'from' | 'to'>
 export interface Part {
   instrument: string;
   voices: Voice[];
+  phase: number;
 }
 /** Half-open scored spans, independent of playing; all overlapping voices contribute. */
 export function partsAt(
@@ -105,11 +106,16 @@ export function partsAt(
   }
   return [...owners]
     .sort(([a], [b]) => a.localeCompare(b))
-    .map(([instrument, voices]) => ({ instrument, voices }));
+    .map(([instrument, voices], i) => ({
+      instrument,
+      voices,
+      phase: (i * Math.PI * 2) / owners.size,
+    }));
 }
 export const usesSection = (voices: readonly Voice[], section: { from: number; to: number }) =>
   voices.some(({ note }) => note.start < section.to && note.end > section.from);
-export function motion(part: Part, now: number, phase: number) {
+export function motion(part: Part, now: number) {
+  const phase = part.phase;
   let a = 0,
     b = 0,
     power = 0,
@@ -139,21 +145,35 @@ export function layout(width: number, height: number, stringCount: number, drumC
     right = width * 0.93,
     top = 94;
   const sideColumns = Math.max(1, Math.floor((width * 0.43) / 52));
-  const strip = drumCount > sideColumns || height < 450;
+  const spacing = stringCount > 1 ? (right - left) / (stringCount - 1) : right - left;
+  const angled = spacing < 32;
+  const strip = drumCount > sideColumns || height < 450 || angled;
   const columns = strip ? Math.max(1, Math.floor((width - 40) / 44)) : sideColumns;
   const rows = Math.ceil(drumCount / columns);
   const drumHeight = drumCount ? rows * 34 + 18 : 0;
-  const bottom = Math.max(top + 60, height - (strip && drumCount ? drumHeight + 38 : 30));
+  const bottom = Math.max(
+    top + 60,
+    height - (strip && drumCount ? drumHeight + 38 : 30) - (angled ? 16 : 0),
+  );
+  const drumTop = height - drumHeight - 4;
+  // Baseline is 26 px below the beam. Keep the rotated text, including its
+  // descent, above the heads or canvas edge; long pitch labels get an ellipsis.
+  const labelBottom = drumCount && strip ? drumTop - 2 : height - 1;
+  const labelWidth = angled
+    ? Math.max(0, Math.min(55, (labelBottom - bottom - 28) / Math.sin(Math.PI / 3)))
+    : spacing - 2;
   return {
     left,
     right,
     top,
     bottom,
-    spacing: stringCount > 1 ? (right - left) / (stringCount - 1) : right - left,
+    spacing,
+    angled,
+    labelWidth,
     scale: Math.max(0.65, width / 960),
     drumLeft: strip ? 20 : width * 0.52,
     drumWidth: strip ? width - 40 : width * 0.43,
-    drumTop: height - drumHeight - 4,
+    drumTop,
     columns,
     rows,
     strip,
