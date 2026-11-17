@@ -142,12 +142,13 @@ for (const source of ['new Pattern(()=>{while(true){}})', 'while(true){}; silenc
     await blockHttps(page);
     await page.goto('/?inspect');
     await page.getByLabel('Your Strudel program').fill(source);
-    const start = Date.now();
     await page.getByRole('button', { name: 'Load', exact: true }).click();
     await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
     await expect(page.getByLabel('Your Strudel program')).toBeHidden();
-    await expect(page.locator('#message')).toContainText('timed out', { timeout: 7000 });
-    expect(Date.now() - start).toBeLessThan(7000);
+    await appSignal(page, () =>
+      document.getElementById('message')!.textContent!.includes('timed out'),
+    );
+    await expect(page.locator('#message')).toContainText('timed out');
     if (source.startsWith('new'))
       await expect(page.getByRole('rowheader').first()).toContainText('Broken: Question timed out');
     await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();

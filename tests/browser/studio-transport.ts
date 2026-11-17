@@ -1,4 +1,5 @@
 import { openStudio } from './studio-open';
+import { appSignal } from './helpers';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
@@ -28,7 +29,7 @@ async function load(page: Page, piece = 'real-dubstep-arranged') {
     );
   await page.setViewportSize({ width: 1920, height: 1080 });
   await openStudio(page);
-  await page.waitForFunction(() => window.odmStudio.app.canPlay);
+  await appSignal(page, () => window.odmStudio.app.canPlay);
   await page.evaluate(
     async (source) => {
       await window.odmStudio.load(source);
@@ -36,23 +37,49 @@ async function load(page: Page, piece = 'real-dubstep-arranged') {
     await readFile(`corpus/programs/${piece}.strudel`, 'utf8'),
   );
   await page.getByRole('button', { name: 'Play', exact: true }).click();
-  await page.waitForFunction(
-    () => window.odmStudio.app.state.playing && window.odmStudio.app.canPlay,
-  );
+  await appSignal(page, () => window.odmStudio.app.state.playing && window.odmStudio.app.canPlay);
 }
 async function revisionAt(page: Page, cycle: number) {
-  return page.evaluate(async (cycle) => {
-    await window.odmStudio.seek(cycle);
-    return Math.max(
-      ...window.odmStudio.app.history
-        .filter((event) => event.type === 'swapped')
-        .map((event) => event.revision),
-    );
+  const before = await page.evaluate(() =>
+    Math.max(
+      0,
+      ...window.odmStudio.app.history.filter((e) => e.type === 'swapped').map((e) => e.revision),
+    ),
+  );
+  const target = await page.evaluate(async (cycle) => {
+    const studio = window.odmStudio;
+    const engine = studio.app.engine!;
+    const play = engine.play;
+    let target: number | undefined;
+    engine.play = (code, options) => {
+      target = options?.fromCycle;
+      return play(code, options);
+    };
+    try {
+      await studio.seek(cycle);
+      return target;
+    } finally {
+      engine.play = play;
+    }
   }, cycle);
+  expect(target, 'live seek must restart at the requested score position').toBe(cycle);
+  await appSignal(
+    page,
+    (before) =>
+      window.odmStudio.app.history.some((e) => e.type === 'swapped' && e.revision > before),
+    before,
+  );
+  return page.evaluate(() =>
+    Math.max(
+      ...window.odmStudio.app.history.filter((e) => e.type === 'swapped').map((e) => e.revision),
+    ),
+  );
 }
 async function passage(page: Page) {
   const revision = await revisionAt(page, 8);
-  await page.waitForFunction(
+  // Leave a full cycle for the seek to settle before comparing scheduled notes.
+  await appSignal(
+    page,
     (revision) =>
       window.odmStudio.app.history.some(
         (e): e is Extract<EngineEvent, { type: 'trigger' }> =>
@@ -64,7 +91,7 @@ async function passage(page: Page) {
     (revision) =>
       window.odmStudio.app.history.filter(
         (e): e is Extract<EngineEvent, { type: 'trigger' }> =>
-          e.type === 'trigger' && e.revision === revision && e.cycle >= 8 && e.cycle < 10,
+          e.type === 'trigger' && e.revision === revision && e.cycle >= 9 && e.cycle < 10,
       ),
     revision,
   );
@@ -76,18 +103,29 @@ test('Studio real arrangement: half-speed trigger rate, live seek, scrub and bea
   await load(page);
   const document = await page.evaluate(() => window.odmStudio.app.exportStrudel());
   const full = await passage(page);
-  const beforeSpeed = await page.evaluate(() => ({
-    cycle: window.odmStudio.getPlayhead(),
-    transports: window.odmStudio.app.history.filter((e) => e.type === 'transport').length,
-  }));
-  await page.getByRole('button', { name: 'Speed 0.5', exact: true }).click();
-  const afterSpeed = await page.evaluate(() => ({
-    cycle: window.odmStudio.getPlayhead(),
-    transports: window.odmStudio.app.history.filter((e) => e.type === 'transport').length,
-  }));
-  expect(afterSpeed.cycle).toBeGreaterThanOrEqual(beforeSpeed.cycle);
-  expect(afterSpeed.cycle).toBeLessThan(beforeSpeed.cycle + 0.5);
-  expect(afterSpeed.transports).toBe(beforeSpeed.transports);
+  // Sample both sides inside the same UI handler turn: driver latency is unbounded.
+  const speed = await page
+    .getByRole('button', { name: 'Speed 0.5', exact: true })
+    .evaluate((button) => {
+      const studio = window.odmStudio;
+      // Studio also changes its output-latency correction with speed; inspect
+      // the engine position to check transport continuity independently of that.
+      const before = studio.app.engine!.now()!;
+      const time = studio.app.engine!.audioTime();
+      const cps = studio.getCps();
+      const transports = studio.app.history.filter((e) => e.type === 'transport').length;
+      (button as HTMLButtonElement).click();
+      return {
+        before,
+        after: studio.app.engine!.now()!,
+        elapsedCycles: (studio.app.engine!.audioTime() - time) * cps,
+        transports,
+        afterTransports: studio.app.history.filter((e) => e.type === 'transport').length,
+      };
+    });
+  expect(speed.after).toBeGreaterThanOrEqual(speed.before - 1e-8);
+  expect(speed.after).toBeLessThanOrEqual(speed.before + speed.elapsedCycles + 0.01);
+  expect(speed.afterTransports).toBe(speed.transports);
   await expect(page.locator('.tempo')).toContainText('written at 140');
   const half = await passage(page);
   expect(half.map((e) => [e.cycle, e.value])).toEqual(full.map((e) => [e.cycle, e.value]));
@@ -99,7 +137,8 @@ test('Studio real arrangement: half-speed trigger rate, live seek, scrub and bea
     expect(half[i].time - half[0].time).toBeCloseTo((full[i].time - full[0].time) * 2, 4);
   expect(await page.evaluate(() => window.odmStudio.app.exportStrudel())).toBe(document);
   const revision = await revisionAt(page, 16);
-  await page.waitForFunction(
+  await appSignal(
+    page,
     (revision) =>
       window.odmStudio.app.history.some(
         (e): e is Extract<EngineEvent, { type: 'trigger' }> =>
@@ -166,7 +205,7 @@ test('Studio real arrangement: half-speed trigger rate, live seek, scrub and bea
     ),
   ).toBe(before);
   await page.mouse.up();
-  await page.waitForFunction(() => window.odmStudio.app.state.playing);
+  await appSignal(page, () => window.odmStudio.app.state.playing);
   expect(await page.evaluate(() => window.odmStudio.getPlayhead())).toBeGreaterThan(17.8);
   await page.getByRole('button', { name: 'Pause', exact: true }).click();
   await page.evaluate(async () => {
@@ -209,16 +248,20 @@ test('Studio whole-cycle loop repeats boundary notes exactly, clears in place an
   await page.mouse.move(rect.x + (rect.width * 10) / 28, rect.y + 20);
   await page.mouse.up();
   await page.keyboard.up('Shift');
-  await page.waitForFunction(() => window.odmStudio.transport.getSnapshot().loop?.to === 10);
+  await appSignal(page, () => window.odmStudio.transport.getSnapshot().loop?.to === 10);
   await expect(page.getByTestId('loop-range')).toBeVisible();
   const revision = await revisionAt(page, 8);
-  await page.waitForFunction((revision) => {
-    const events = window.odmStudio.app.history.filter(
-      (e): e is Extract<EngineEvent, { type: 'trigger' }> =>
-        e.type === 'trigger' && e.revision === revision,
-    );
-    return events.length > 0 && events.at(-1)!.time - events[0].time >= 6 / (140 / 240) - 0.001;
-  }, revision);
+  await appSignal(
+    page,
+    (revision) => {
+      const events = window.odmStudio.app.history.filter(
+        (e): e is Extract<EngineEvent, { type: 'trigger' }> =>
+          e.type === 'trigger' && e.revision === revision,
+      );
+      return events.length > 0 && events.at(-1)!.time - events[0].time >= 8 / (140 / 240) - 0.001;
+    },
+    revision,
+  );
   const events = await page.evaluate(
     (revision) =>
       window.odmStudio.app.history.filter(
@@ -231,12 +274,15 @@ test('Studio whole-cycle loop repeats boundary notes exactly, clears in place an
     (a, b) => a.time - b.time || JSON.stringify(a.value).localeCompare(JSON.stringify(b.value)),
   );
   const period = 2 / (140 / 240);
-  const passes = [0, 1, 2].map((pass) =>
+  // Derive the loop origin from score position, even if its first callback was late.
+  // Discard that initial traversal; compare three complete later traversals.
+  const origin = events[0].time - (events[0].cycle - 8) / (140 / 240);
+  const passes = [1, 2, 3].map((pass) =>
     events
       .filter(
         (e) =>
-          e.time >= events[0].time + pass * period - 0.00001 &&
-          e.time < events[0].time + (pass + 1) * period - 0.00001,
+          e.time >= origin + pass * period - 0.00001 &&
+          e.time < origin + (pass + 1) * period - 0.00001,
       )
       .map((e) => ({ cycle: e.cycle, value: e.value })),
   );
@@ -251,12 +297,34 @@ test('Studio whole-cycle loop repeats boundary notes exactly, clears in place an
     expect(now).toBeGreaterThanOrEqual(8);
     expect(now).toBeLessThan(10);
   }
-  const before = await page.evaluate(() => window.odmStudio.getPlayhead());
+  // Observe the actual restart target and playhead in the same turn. A loop may
+  // wrap while the driver clicks or preflight runs, so two driver reads cannot
+  // establish whether clearing retained its position.
+  const clearing = await page.evaluateHandle(() => {
+    const engine = window.odmStudio.app.engine!;
+    const play = engine.play;
+    const targets: { before: number; target: number | undefined }[] = [];
+    engine.play = (code, options) => {
+      targets.push({ before: engine.now()!, target: options?.fromCycle });
+      return play(code, options);
+    };
+    return {
+      targets,
+      restore: () => {
+        engine.play = play;
+      },
+    };
+  });
   await page.getByRole('button', { name: 'Clear loop', exact: true }).click();
-  await page.waitForFunction(() => window.odmStudio.transport.getSnapshot().loop === null);
-  const after = await page.evaluate(() => window.odmStudio.getPlayhead());
-  expect(after).toBeGreaterThan(before - 0.2);
-  expect(after).toBeLessThan(before + 0.6);
+  await appSignal(page, () => window.odmStudio.transport.getSnapshot().loop === null);
+  const targets = await clearing.evaluate((capture) => {
+    capture.restore();
+    return capture.targets;
+  });
+  await clearing.dispose();
+  expect(targets).toHaveLength(1);
+  expect(targets[0].target).toBeCloseTo(targets[0].before, 2);
+  await appSignal(page, () => window.odmStudio.getPlayhead() >= 10);
   await page.getByRole('button', { name: 'Speed 0.5', exact: true }).click();
   await page.evaluate(async () => {
     await window.odmStudio.setLoop({ from: 8, to: 10 });
