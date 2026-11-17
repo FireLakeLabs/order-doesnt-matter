@@ -134,7 +134,12 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
     c.textAlign = 'center';
     c.font = `600 ${String(labelFont)}px "${theme.fontDisplay}"`;
     c.fillStyle = points.length ? theme.text : theme.muted;
-    c.fillText(className(pc), lx, ly + labelFont * 0.35);
+    const horizontal = Math.cos(position(pc));
+    const labelOffset =
+      points.some((point) => point.lowest === state.current.lowest) && Math.abs(horizontal) > 0.3
+        ? Math.sign(horizontal) * 14 * scale
+        : 0;
+    c.fillText(className(pc), lx + labelOffset, ly + labelFont * 0.35);
   }
   // Outline the letters rather than covering the chord's geometry with a panel.
   const centreLabel = (label: string, y: number) => {
@@ -245,7 +250,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
   // Instruments live beside the circle instead of taking its height away.
   const legendFont = wide ? Math.max(11, 11 * scale) : 11;
   const rowHeight = legendFont + 7;
-  const sideWidth = Math.max(90, cx - labelRadius - margin - 12);
+  const sideWidth = Math.max(90, cx - labelRadius - 14 * scale - margin - 12);
   const rows = wide
     ? Math.min(legend.length, Math.max(1, Math.floor((h - 125) / rowHeight)))
     : Math.ceil(legend.length / 2);
