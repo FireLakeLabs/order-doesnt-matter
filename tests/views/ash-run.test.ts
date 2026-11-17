@@ -19,16 +19,21 @@ import { queryEventsNode } from '../node-query';
 import { scoreFrame } from './score-fixture';
 let state: AppState;
 let frame: ViewFrame;
-let programs: { id: string; source: string }[];
-async function queried(now: number, range?: { from: number; to: number }) {
-  const span = range ?? neededRange(undefined, now, 1, state.sections);
+async function queried(now: number, range?: { from: number; to: number }, piece = state) {
+  const span = range ?? neededRange(undefined, now, 1, piece.sections);
   const entries = await Promise.all(
-    programs.map(async (p) => [p.id, await queryEventsNode(p.source, span.from, span.to)] as const),
+    piece.rows.map(
+      async (row) =>
+        [
+          row.id,
+          await queryEventsNode(generate(piece.doc!, { only: row.id }), span.from, span.to),
+        ] as const,
+    ),
   );
   for (const [, r] of entries) expect(r.error).toBeNull();
   const score = { ...span, events: Object.fromEntries(entries) };
   return buildFrame({
-    state,
+    state: piece,
     score,
     notes: viewNotes(score),
     now,
@@ -45,11 +50,41 @@ async function queried(now: number, range?: { from: number; to: number }) {
 beforeAll(async () => {
   const source = readFileSync('corpus/programs/real-dubstep-arranged.strudel', 'utf8');
   state = loadPiece(initialState(), source, importStrudel(source));
-  programs = state.rows.map((row) => ({
-    id: row.id,
-    source: generate(state.doc!, { only: row.id }),
-  }));
   frame = await queried(10.4);
+});
+
+it('recognises four-beat backbeats and strong-beat kicks in the other real drum grooves', async () => {
+  for (const program of ['real-synthwave', 'real-dnb', 'real-future-bass', 'real-dnb-arranged']) {
+    const source = readFileSync(`corpus/programs/${program}.strudel`, 'utf8');
+    const piece = loadPiece(initialState(), source, importStrudel(source));
+    const f = await queried(2.4, undefined, piece),
+      chosen = roles(f, analyse(f.notes));
+    expect(f.instruments.find((i) => i.id === chosen.snare)?.name, program).toBe('sd');
+    expect(chosen.openHat, program).not.toBe(chosen.snare);
+    if (program === 'real-synthwave')
+      expect(f.instruments.find((i) => i.id === chosen.kick)?.name).toBe('bd');
+  }
+  const bd = frame.instruments.find((i) => i.name === 'bd')!;
+  const source = frame.notes.find((n) => n.instrument === bd.id && n.hasOnset)!;
+  const notes = Array.from({ length: 16 }, (_, i) => ({
+    ...source,
+    start: i / 4,
+    end: (i + 1) / 4,
+  }));
+  const f = { ...frame, notes, instruments: [bd] };
+  expect(roles(f, analyse(notes)).kick).toBe(bd.id);
+});
+
+it('starts a touching-roof leap at the old height and lands on the new roof', () => {
+  const data = analyse(frame.notes);
+  const before = scene({ ...frame, now: 11 - 1e-8 }, data);
+  const onset = scene({ ...frame, now: 11 }, data);
+  expect(onset.current?.note.value.note).toBe('f1');
+  expect(onset.feet).toBeCloseTo(before.feet, 5);
+  expect(onset.feet).toBeCloseTo(roofY(27, frame.height));
+  expect(scene({ ...frame, now: 11 + 1e-8 }, data).feet).toBeCloseTo(onset.feet, 4);
+  const landing = scene({ ...frame, now: 11.25 }, data);
+  expect(landing.feet).toBeCloseTo(roofY(29, frame.height));
 });
 it('chooses scored bass, downbeat footfalls, backbeat barriers, kick dust and offbeat cables without names', () => {
   const data = analyse(frame.notes),
@@ -174,6 +209,7 @@ it('uses four parallax rates and scales actual world speed with cps after Speed 
   expect(slow.x(11)).toBe(s.x(11));
   expect(scene({ ...frame, now: 18.4 }, data).district.name).toBe('breakdown');
   expect(scene({ ...frame, now: 38.4 }, data).district.name).toBe('drop');
+  expect(scene({ ...frame, sections: [] }, data).district.name).toBe('Uncharted');
   scene({ ...frame, now: 20 }, data);
   scene({ ...frame, now: 0 }, data);
   expect(scene(frame, data).feet).toBe(s.feet);

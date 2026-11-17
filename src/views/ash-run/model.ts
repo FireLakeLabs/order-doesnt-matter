@@ -45,7 +45,7 @@ export function district(frame: Pick<ViewFrame, 'now' | 'sections'>) {
   const length = frame.sections.at(-1)?.to ?? 0;
   const local = length > 0 ? ((frame.now % length) + length) % length : frame.now;
   const index = frame.sections.findIndex((s) => s.from <= local && local < s.to);
-  return { index: Math.max(0, index), name: frame.sections[index]?.name ?? 'Uncharted district' };
+  return { index: Math.max(0, index), name: frame.sections[index]?.name ?? 'Uncharted' };
 }
 /** Majority backbeats/downbeats/offbeats earn drum roles; unmatched notes become generic debris. */
 export function roles(frame: ViewFrame, data: Data) {
@@ -60,6 +60,7 @@ export function roles(frame: ViewFrame, data: Data) {
     const p = data.evidence.get(id),
       d = p && drumEvidence(p);
     if (!p || !d) return [];
+    // Mirror drumEvidence's unique unpitched onsets for the local beat-phase rules.
     const starts = [
       ...new Set(
         p.events.filter((e) => e.note.hasOnset && e.pitch === undefined).map((e) => e.note.start),
@@ -72,29 +73,40 @@ export function roles(frame: ViewFrame, data: Data) {
         ...d,
         regularity: p.regularity,
         duration: p.duration,
-        back: ratio((p) => Math.abs(p - 0.5) < 1e-6),
-        off: ratio((p) => Math.abs(p - 0.25) < 1e-6 || Math.abs(p - 0.75) < 1e-6),
+        strong: ratio((p) => Math.abs(p) < 1e-6 || Math.abs(p - 0.5) < 1e-6),
+        halfBack: ratio((p) => Math.abs(p - 0.5) < 1e-6),
+        back: ratio((p) => [0.25, 0.5, 0.75].some((beat) => Math.abs(p - beat) < 1e-6)),
+        off: ratio(
+          (p) => Math.abs(p * 8 - Math.round(p * 8)) < 1e-6 && Math.round(p * 8) % 2 === 1,
+        ),
+        halfOff: ratio((p) => Math.abs(p - 0.25) < 1e-6 || Math.abs(p - 0.75) < 1e-6),
       },
     ];
   });
   const kick = drums
-    .filter((d) => d.downbeats >= 0.6 && d.regularity <= 0.15)
+    .filter((d) => d.strong >= 0.5 && d.regularity <= 0.15)
     .sort(
-      (a, b) => a.regularity - b.regularity || b.downbeats - a.downbeats || a.density - b.density,
+      (a, b) =>
+        a.regularity - b.regularity ||
+        b.strong - a.strong ||
+        b.downbeats - a.downbeats ||
+        a.density - b.density,
     )
     .at(0)?.id;
   const snare = drums
     .filter((d) => d.id !== kick && d.back >= 0.6)
     .sort((a, b) => b.back - a.back || a.density - b.density)
     .at(0)?.id;
+  const halfTime = (drums.find((d) => d.id === snare)?.halfBack ?? 0) >= 0.6;
+  const offbeats = (d: (typeof drums)[number]) => Math.max(d.off, halfTime ? d.halfOff : 0);
   const openHat = drums
     .filter(
       (d) =>
         d.id !== kick &&
         d.id !== snare &&
-        (d.off >= 0.6 || (d.duration > 0.2 && d.downbeats < 0.5)),
+        (offbeats(d) >= 0.5 || (d.duration > 0.2 && d.strong < 0.5)),
     )
-    .sort((a, b) => b.off - a.off || b.duration - a.duration || a.density - b.density)
+    .sort((a, b) => offbeats(b) - offbeats(a) || b.duration - a.duration || a.density - b.density)
     .at(0)?.id;
   return { rooftops, footfalls, kick, snare, openHat };
 }
@@ -184,17 +196,16 @@ export function scene(frame: ViewFrame, data: Data) {
   let feet: number, leap: number;
   if (current) {
     const duration = Math.min(0.25, Math.max(0.001, (current.note.end - current.note.start) / 2));
-    leap =
-      Math.sin(
-        Math.PI *
-          noteProgress(
-            { start: current.note.start, end: current.note.start + duration },
-            frame.now,
-          ),
-      ) *
-      size *
-      0.65;
-    feet = roofY(current.midi, frame.height) - leap;
+    const u = noteProgress(
+      { start: current.note.start, end: current.note.start + duration },
+      frame.now,
+    );
+    const before = roofAt(roofs, current.note.start - 1e-7);
+    leap = Math.sin(Math.PI * u) * size * 0.65;
+    feet =
+      roofY(before?.midi ?? current.midi, frame.height) * (1 - u) +
+      roofY(current.midi, frame.height) * u -
+      leap;
   } else {
     const before = roofs
       .filter((e) => e.note.end <= frame.now)
