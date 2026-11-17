@@ -48,8 +48,10 @@ export function Studio() {
     }
     const selected = session.getSnapshot().selectedInstrument;
     if (selected && rows.some((row) => row.id === selected)) return;
+    // Keep the tray populated when an edit removes its selected row, too.
     const first =
       playingSplit({ rows, sections }, runtime.getPlayhead()).playing.at(0) ?? rows.at(0);
+    if (!first && !selected) return;
     session.selectInstrument(first?.id ?? null);
   }, [doc, rows, sections]);
 

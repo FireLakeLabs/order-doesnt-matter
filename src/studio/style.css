@@ -1553,7 +1553,7 @@ html[data-theme] body,
 }
 
 /* Native small text must not shrink below the shared Studio text floor. */
-html[data-theme] small:not(.view-host *) {
+:where(html[data-theme] small:not(.view-host *)) {
   font-size: var(--studio-text-small);
 }
 /* These editor kinds have their own important small-text rules. */

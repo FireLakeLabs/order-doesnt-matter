@@ -849,6 +849,19 @@ test('fresh Studio defaults to Ring and Loom', async ({ page, context }) => {
   await expect(pitch).toHaveAttribute('aria-expanded', 'false');
   await pitch.click();
   await expect(pitch).toHaveAttribute('aria-expanded', 'true');
+  // A zero-length pickup gives the later instrument the first row identity.
+  await page.evaluate(() =>
+    window.odmStudio.load(
+      'const later = s("sine"); arrange([0, later], [4, s("triangle")], [4, later])',
+    ),
+  );
+  const firstRow = await page.evaluate(() => window.odmStudio.app.state.rows[0].id);
+  await expect(page.locator(`.resting-chip[data-instrument="${firstRow}"]`)).toBeVisible();
+  const selectedPlaying = page.locator('.instrument-row[data-selected="true"]');
+  await expect(selectedPlaying).toHaveCount(1);
+  await expect(selectedPlaying).not.toHaveAttribute('data-instrument', firstRow);
+  await expect(page.locator('.tray-heading h2')).toHaveText('triangle');
+  await expect(page.locator('#editor')).toHaveCount(0);
   // A silent opening still selects the first row, without opening its editor.
   await page.evaluate(() => window.odmStudio.load('arrange([4, silence], [4, s("sine").rev()])'));
   await expect(page.locator('.resting-chip[data-selected="true"]')).toHaveCount(1);
