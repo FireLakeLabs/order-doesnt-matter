@@ -12,13 +12,15 @@ import {
 
 const vertexShader = `
 attribute vec3 edge, mark, ink;
-uniform float now, reach, height, distanceToCamera, origin;
+uniform float now, reach, height, distanceToCamera, origin, renderRatio;
+uniform vec2 resolution;
 varying vec3 vInk,vMark;
 varying float vPhase,vSide,vTurn,vTime;
 void main(){
   float phase=(position.x-now)/reach;
   float side=edge.x;
   float width=max(1.8,height/673.*1.8)+edge.y;
+  if(mark.x<.5)width=0.;
   float y=position.y*height+sin((position.x+origin)*.9+mark.y*.83)*height*.008;
   float z=position.z*height-max(0.,phase)*height*.55;
   y+=side*width*.5*cos(edge.z);
@@ -26,6 +28,10 @@ void main(){
   z+=mark.x>.5?.3:-2.5;
   float x=(${String(gateX)}.+phase*${String(timeScale)}.)*(1.-z/distanceToCamera);
   gl_Position=projectionMatrix*modelViewMatrix*vec4(x,y,z,1.);
+  // A rest stays a continuous thread even when the shared stage reduces its
+  // backing resolution. Note widths still come from their scored gain.
+  float threadPixels=max(2.2,max(1.8,1.8*resolution.x/960.)*renderRatio);
+  if(mark.x<.5)gl_Position.y+=side*threadPixels/resolution.y/renderRatio*gl_Position.w;
   vInk=ink;vMark=mark;vPhase=phase;vSide=side;vTurn=edge.z;vTime=position.x+origin;
 }`;
 const fragmentShader = `
@@ -66,6 +72,8 @@ const view: ViewDefinition = {
       height: { value: 600 },
       distanceToCamera: { value: 700 },
       origin: { value: 0 },
+      renderRatio: { value: 1 },
+      resolution: { value: new THREE.Vector2(1, 1) },
       ground: { value: new THREE.Color() },
       highlight: { value: new THREE.Color() },
       lightPass: { value: 0 },
@@ -218,6 +226,8 @@ const view: ViewDefinition = {
         uniforms.origin.value = frame.from;
         uniforms.reach.value = Math.max(0.001, frame.lookAhead);
         uniforms.height.value = height;
+        uniforms.renderRatio.value = Math.max(0.1, frame.dpr * stage.quality.scale);
+        uniforms.resolution.value.set(frame.width, frame.height);
         uniforms.distanceToCamera.value = distance;
         uniforms.ground.value.set(frame.theme.ground);
         uniforms.highlight.value.set(frame.theme.text);
