@@ -122,7 +122,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
         c.stroke();
       }
       c.shadowBlur = 0;
-      if (lowest) {
+      if (lowest && points.length === 1) {
         circle(x, y, radius + 6);
         c.stroke();
       }
