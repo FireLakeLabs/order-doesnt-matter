@@ -119,8 +119,8 @@ export function InstrumentRail({
                       : sound?.state === 'loading'
                         ? 'loading'
                         : sound?.state === 'missing'
-                          ? 'missing'
-                          : 'not loaded yet';
+                          ? 'failed'
+                          : 'not loaded';
                   const muted = state.doc ? definitionMuted(state.doc, row.id) : false;
                   return (
                     <li
@@ -142,8 +142,11 @@ export function InstrumentRail({
                         <span className="instrument-dot" />
                         <span className="instrument-name">
                           <strong>{names[index]}</strong>
-                          <small title={sound?.detail}>
-                            {sounds[index] ?? 'sound'} · {soundState}
+                          <small
+                            title={`${sounds[index] ?? 'sound'} · ${sound?.detail ?? soundState}`}
+                          >
+                            <span className="instrument-sound">{sounds[index] ?? 'sound'}</span>
+                            <span className="instrument-status"> · {soundState}</span>
                           </small>
                         </span>
                       </button>
