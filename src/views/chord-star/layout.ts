@@ -1,6 +1,6 @@
 import type { ViewFrame } from '../types';
 
-/** Card: 960 px wide, 200 px circle, 12/17 px note/bass radii, 76 px root.
+/** Card: 960 px wide, 200 px radius (400 px circle), 12/17 px note/bass radii, 76 px root.
  * Side legends free the full height for the circle. Short host canvases cap only
  * the circle; note marks and text retain their width-scaled minimum. */
 export function layout(frame: Pick<ViewFrame, 'width' | 'height'>) {
