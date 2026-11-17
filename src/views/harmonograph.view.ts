@@ -87,7 +87,7 @@ function draw(
   );
   const main = pairs.main;
   const unpitchedNames = f.instruments.filter((i) => unpitchedIds.has(i.id)).map((i) => i.name);
-  const status = `${main ? `pen ${String(Math.round(noteProgress(main.shorter, f.now) * 100))}% of shorter span` : 'scored pitches'}${unpitchedNames.length ? ` · unpitched (${String(unpitchedNames.length)}): ${unpitchedNames.join(' · ')}` : ''}`;
+  const status = `${main ? `pen ${String(Math.round(noteProgress(main.shorter, f.now) * 100))}% of shorter span` : 'scored pitches'} · ${String(active.length)} pitched spans · ${String(pairs.count)} pairs${unpitchedNames.length ? ` · unpitched (${String(unpitchedNames.length)}): ${unpitchedNames.join(' · ')}` : ''}`;
   c.textAlign = 'left';
   text(status, 20, 57, 11);
 
@@ -122,11 +122,7 @@ function draw(
     theme.muted,
     g.mainWidth - 28,
   );
-  if (!pairs.others.length) {
-    c.textAlign = 'left';
-    text('Only this pair now', 20, h - 12, 11);
-    return;
-  }
+  if (!pairs.others.length) return;
   const cellW = g.miniWidth / g.miniColumns,
     cellH = g.miniHeight / g.miniRows;
   c.textAlign = 'center';
@@ -163,15 +159,6 @@ function draw(
       cellW - 8,
     );
   }
-  c.textAlign = 'right';
-  text(
-    `${String(active.length)} pitched spans · ${String(pairs.count - 1)} other pairs${pairs.aggregated ? ' · representative per band' : ''}`,
-    w - 16,
-    h - 8,
-    11,
-    theme.muted,
-    w - 32,
-  );
 }
 const view: ViewDefinition = {
   id: 'harmonograph',

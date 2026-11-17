@@ -192,7 +192,7 @@ export function trace(pair: Pair, now: number, small = false) {
   return { points, progress, turns, envelope: 0.42 ** progress };
 }
 export function layout(width: number, height: number, others: number) {
-  const below = width < 900 && height / width > 1.1 && others > 0;
+  const below = width < 900 && others > 0 && (height - 300) / 2 > width * 0.73 * 0.47;
   const side = others > 0 && !below;
   const mainWidth = side ? width * 0.73 : width;
   const chartHeight = height - (below ? 300 : 64);
