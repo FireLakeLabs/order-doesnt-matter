@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test';
 import { test, openProgram, play, appSignal } from './helpers';
-import type {} from '../../src/app/main';
+import type {} from '../../src/studio/main';
 
 // Original fixtures pass the worker's preflight unchanged. The last
 // diverges only after its four narrow scheduler windows, despite 16 broad cycles.
@@ -20,24 +20,26 @@ test('late authored loops: failed evaluation retains Kiln; late query stops and 
   for (const source of [topLevel, microtasks]) {
     const rejected = await page.evaluate(async (source) => {
       try {
-        await window.odmApp.engine!.play(source);
+        await window.odmStudio.app.engine!.play(source);
         return false;
       } catch {
         return true;
       }
     }, source);
     expect(rejected).toBe(true);
-    await expect(page.locator('#message')).toHaveText('This program exceeded its execution limit.');
+    await expect(page.locator('.top-message')).toHaveText(
+      'This program exceeded its execution limit.',
+    );
   }
-  expect(await page.evaluate(() => window.odmApp.engine!.playing)).toBe(true);
-  const mark = await page.evaluate(() => window.odmApp.history.length);
+  expect(await page.evaluate(() => window.odmStudio.app.engine!.playing)).toBe(true);
+  const mark = await page.evaluate(() => window.odmStudio.app.history.length);
   await appSignal(
     page,
-    (mark) => window.odmApp.history.slice(mark!).some((event) => event.type === 'trigger'),
+    (mark) => window.odmStudio.app.history.slice(mark!).some((event) => event.type === 'trigger'),
     mark,
   );
   const retained = await page.evaluate(
-    (mark) => window.odmApp.history.slice(mark).filter((event) => event.type === 'trigger'),
+    (mark) => window.odmStudio.app.history.slice(mark).filter((event) => event.type === 'trigger'),
     mark,
   );
   expect(retained.length).toBeGreaterThan(0);
@@ -45,17 +47,19 @@ test('late authored loops: failed evaluation retains Kiln; late query stops and 
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
 
   // Start at zero after Stop, so preflight cannot see the later narrow query.
-  await page.evaluate((source) => window.odmApp.engine!.play(source), lateQuery);
-  await appSignal(page, () => !window.odmApp.engine!.playing);
-  await expect(page.locator('#message')).toHaveText(
+  await page.evaluate((source) => window.odmStudio.app.engine!.play(source), lateQuery);
+  await appSignal(page, () => !window.odmStudio.app.engine!.playing);
+  await expect(page.locator('.top-message')).toHaveText(
     'This program is taking too long to answer, so playback was stopped.',
   );
   const click = Date.now();
-  await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
-  await expect(page.getByLabel('Your Strudel program')).toBeHidden();
+  await page.getByRole('button', { name: 'Paste', exact: true }).click();
+  await expect(page.getByLabel('Strudel program')).toBeVisible();
   const clickMs = Date.now() - click;
   expect(clickMs).toBeLessThan(1000);
-  const errors = await page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'error'));
+  const errors = await page.evaluate(() =>
+    window.odmStudio.app.history.filter((e) => e.type === 'error'),
+  );
   expect(errors).toEqual([
     { type: 'error', message: 'This program exceeded its execution limit.' },
     { type: 'error', message: 'This program exceeded its execution limit.' },

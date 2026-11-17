@@ -36,7 +36,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        suite: [legacy, studio]
+        suite: [studio]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

@@ -76,7 +76,7 @@ export function retroMeasure(test: typeof import('@playwright/test').test, id: s
       route.fulfill({ path: 'tests/fixtures/sounds/burst.wav', contentType: 'audio/wav' }),
     );
     await page.setViewportSize({ width: 1920, height: 1080 });
-    await page.goto(`/studio.html?inspect&a=${id}&b=${id}&theme=arcade`);
+    await page.goto(`/?inspect&a=${id}&b=${id}&theme=arcade`);
     await page.waitForFunction(() => window.odmStudio.app.canPlay);
     const load = async (name: string) => {
       const source = await readFile(`corpus/programs/${name}.strudel`, 'utf8');

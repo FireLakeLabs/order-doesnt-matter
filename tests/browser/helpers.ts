@@ -1,9 +1,11 @@
 import { blockHttps } from './offline';
 import { readFile } from 'node:fs/promises';
 import { expect, test as base, type Page } from '@playwright/test';
-import { describeTarget } from '../../src/document/edit';
-import type { Engine, EngineEvent } from '../../src/contract';
-import type {} from '../../src/app/main';
+import { describeTarget, instrumentTargets } from '../../src/document/edit';
+import type { Engine } from '../../src/contract';
+import type {} from '../../src/studio/main';
+import { walk } from '../../src/document';
+import { openStudio } from './studio-open';
 
 // Collect browser performance marks after the test, outside its assertions.
 export const test = base.extend<{ timings: void }>({
@@ -34,36 +36,41 @@ export const test = base.extend<{ timings: void }>({
 
 export async function openProgram(
   page: Page,
-  input: { example?: string; path?: string; source?: string; offline?: boolean } = {},
+  input: {
+    example?: string;
+    path?: string;
+    source?: string;
+    offline?: boolean;
+  } = {},
 ) {
   if (input.offline !== false) await blockHttps(page);
-  await page.goto('/?inspect');
-  await test.step('ODM:import', async () => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await openStudio(page);
+  await scoreReady(page);
+  if (input.example || input.path || input.source) {
+    await page.getByRole('button', { name: 'Paste', exact: true }).click();
     if (input.example) await page.getByRole('button', { name: input.example, exact: true }).click();
-    else if (input.path || input.source) {
+    else {
       await page
-        .getByLabel('Your Strudel program')
+        .getByLabel('Strudel program')
         .fill(input.path ? await readFile(input.path, 'utf8') : input.source!);
-      await page.getByRole('button', { name: 'Load', exact: true }).click();
+      await page.getByRole('button', { name: 'Import program', exact: true }).click();
     }
-    if (input.example || input.path || input.source) {
-      // Setup explicitly chooses its requested piece, including in sibling tabs
-      // that share the parent's recovery snapshot.
-      const replacement = page.getByRole('dialog', { name: 'Replace current work?' });
-      if (await replacement.isVisible())
-        await replacement.getByRole('button', { name: 'Replace', exact: true }).click();
-      await scoreReady(page);
-      await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
-    }
-  });
+    const replacement = page.getByRole('dialog', { name: 'Replace current work?' });
+    if (await replacement.isVisible())
+      await replacement.getByRole('button', { name: 'Replace', exact: true }).click();
+    await expect(page.getByLabel('Strudel program')).toBeHidden();
+    await scoreReady(page);
+    await expect(page.getByRole('button', { name: 'Play', exact: true })).toBeEnabled();
+  }
 }
 export async function play(page: Page) {
   return test.step('ODM:playback', async () => {
     await swap(page, () => page.getByRole('button', { name: 'Play', exact: true }).click());
     await appSignal(page, function playbackReady() {
-      return window.odmApp.canPlay && window.odmApp.state.playing;
+      return window.odmStudio.app.canPlay && window.odmStudio.app.state.playing;
     });
-    await expect(page.locator('#message')).toBeEmpty();
+    await expect(page.locator('.top-message')).toBeEmpty();
   });
 }
 
@@ -81,10 +88,14 @@ export async function appSignal<A>(page: Page, predicate: (arg: A) => unknown, a
 }
 export async function scoreReady(page: Page) {
   return test.step('ODM:import', async () => {
-    await appSignal(page, function scoreRowsReady() {
+    await appSignal(page, function studioScoreReady() {
+      const app = window.odmStudio.app;
+      // Whole-program setup can be playable without modeled instrument rows.
       return (
-        window.odmApp.canPlay &&
-        Object.keys(window.odmApp.state.events).length === window.odmApp.state.rows.length
+        app.canPlay &&
+        (app.state.rows.length === 0 ||
+          document.querySelector('[data-region="score"]')?.getAttribute('data-score-ready') ===
+            'true')
       );
     });
   });
@@ -94,7 +105,7 @@ export async function swap(page: Page, action: () => Promise<unknown>) {
     const before = await page.evaluate(() =>
       Math.max(
         0,
-        ...window.odmApp.history.filter((e) => e.type === 'swapped').map((e) => e.revision),
+        ...window.odmStudio.app.history.filter((e) => e.type === 'swapped').map((e) => e.revision),
       ),
     );
     await action();
@@ -102,7 +113,9 @@ export async function swap(page: Page, action: () => Promise<unknown>) {
       page,
       // History is capped: an older swap can disappear while this one arrives.
       function newerRevisionTriggered(revision) {
-        return window.odmApp.history.some((e) => e.type === 'swapped' && e.revision > revision);
+        return window.odmStudio.app.history.some(
+          (e) => e.type === 'swapped' && e.revision > revision,
+        );
       },
       before,
     );
@@ -112,7 +125,7 @@ export async function throughCycle(page: Page, cycle: number) {
   await appSignal(
     page,
     function cycleTriggered(c) {
-      return window.odmApp.history.some((e) => e.type === 'trigger' && e.cycle >= c);
+      return window.odmStudio.app.history.some((e) => e.type === 'trigger' && e.cycle >= c);
     },
     cycle,
   );
@@ -190,26 +203,47 @@ export async function selectNode(
   let id: string;
   if ('nodeId' in target) id = target.nodeId;
   else {
-    const { doc, ids } = await page.evaluate(() => ({
-      doc: window.odmApp.state.doc!,
-      ids: Array.from(document.querySelectorAll<HTMLElement>('[data-editor-target]')).map(
-        (n) => n.dataset.editorTarget!,
-      ),
-    }));
+    const doc = await page.evaluate(() => window.odmStudio.app.state.doc!);
+    const ids: string[] = [];
+    walk(doc, (node) => {
+      ids.push(node.id);
+      if ('core' in node) ids.push(`${node.id}:rhythm`, `${node.id}:rewrites`);
+    });
     const breadcrumb = Array.isArray(target.breadcrumb)
       ? target.breadcrumb.join(' › ')
       : target.breadcrumb;
     id = ids.find((id) => describeTarget(doc, id).breadcrumb.join(' › ') === breadcrumb) ?? '';
     if (!id) throw Error(`No selectable node at ${breadcrumb}`);
   }
-  const selected = page.locator(`[data-editor-target=${JSON.stringify(id)}]`).first();
-  await selected.click();
-  return selected;
+  // Enter through the Studio tray, then the instrument editor's real navigation.
+  const doc = await page.evaluate(() => window.odmStudio.app.state.doc!);
+  const targetInfo = describeTarget(doc, id);
+  const rowId = targetInfo.instrumentId ?? (targetInfo.kind === 'instrument' ? id : null);
+  if (!rowId) throw Error(`No instrument for ${id}`);
+  if (await page.locator('#editor').isVisible())
+    await page.locator('#editor').getByRole('button', { name: 'Done', exact: true }).click();
+  const row = page.locator(
+    `.lane-label[data-instrument=${JSON.stringify(rowId)}]:not([data-setting])`,
+  );
+  await row.click();
+  await page
+    .locator('[data-region="tray"]')
+    .getByRole('button', { name: 'Instrument', exact: true })
+    .click();
+  if (targetInfo.kind !== 'instrument') {
+    const label = instrumentTargets(doc, rowId).find((target) => target.nodeId === id)?.text;
+    if (!label) throw Error(`No instrument navigation target ${id}`);
+    await page
+      .getByRole('navigation', { name: 'Instrument settings and rewrites' })
+      .getByRole('button', { name: label, exact: true })
+      .click();
+  }
+  return row;
 }
 export async function waitForPending(page: Page) {
   return test.step('ODM:swap', async () => {
     await appSignal(page, function editorEntriesSettled() {
-      return Object.values(window.odmApp.editor!.state.entries).every(
+      return Object.values(window.odmStudio.app.editor!.state.entries).every(
         (e) => e.status !== 'pending',
       );
     });
@@ -217,17 +251,6 @@ export async function waitForPending(page: Page) {
     await expect(page.locator('#editor-status')).not.toContainText('Change failed');
   });
 }
-export async function triggerValues(page: Page, after = 0) {
-  return page.evaluate(
-    (offset) =>
-      window.odmApp.history
-        .slice(offset)
-        .filter((e): e is Extract<EngineEvent, { type: 'trigger' }> => e.type === 'trigger')
-        .map((e) => e.value),
-    after,
-  );
-}
-
 /** Poll only an observable signal, sharing the enclosing test deadline. Keep
  * assertions about the resulting score/UI outside this readiness wait. */
 export function signal<T>(read: () => T | Promise<T>, options: { timeout?: number } = {}) {
@@ -239,100 +262,8 @@ export function signal<T>(read: () => T | Promise<T>, options: { timeout?: numbe
   });
 }
 
-/** Share only identical piece setup. Every case restores the document, answers,
- * selection, transport, editor, paste panel and viewport through existing ports.
- * A failed case restarts Playwright's worker, so later cases get a fresh setup. */
-export function sharedProgram<T>(setup: (page: Page) => Promise<T>) {
-  let page: Page | undefined, value: T;
-  let baseline: {
-    doc: string;
-    events: string;
-    selected: string | null;
-    fromCycle: number;
-    toCycle: number;
-    follow: boolean;
-    pasteHidden: boolean;
-  };
-  test.use({
-    page: async ({ browser }, use) => {
-      void browser;
-      if (!page) throw Error('Shared piece was not initialized');
-      await use(page);
-    },
-  });
-  test.beforeAll(async ({ browser }) => {
-    const start = performance.now();
-    try {
-      page = await browser.newPage({ baseURL: process.env.ODM_URL });
-      value = await setup(page);
-      baseline = await page.evaluate(() => ({
-        doc: JSON.stringify(window.odmApp.state.doc),
-        events: JSON.stringify(window.odmApp.state.events),
-        selected: window.odmApp.state.selected,
-        fromCycle: window.odmApp.state.fromCycle,
-        toCycle: window.odmApp.state.toCycle,
-        follow: window.odmApp.state.follow,
-        pasteHidden: document.getElementById('paste-panel')!.hidden,
-      }));
-    } finally {
-      await test.info().attach('browser-shared-setup', {
-        body: JSON.stringify({ ms: performance.now() - start }),
-        contentType: 'application/json',
-      });
-    }
-  });
-  test.afterEach(async ({ page }) => {
-    await page.keyboard.press('Escape');
-    if (await page.locator('#editor').isVisible()) await page.keyboard.press('Escape');
-    const context = {
-      selected: baseline.selected,
-      fromCycle: baseline.fromCycle,
-      toCycle: baseline.toCycle,
-      follow: baseline.follow,
-    };
-    const restored = await page.evaluate((original) => {
-      const app = window.odmApp;
-      app.stop();
-      app.solo(null);
-      while (app.editor!.canUndo) app.editor!.undo();
-      // Re-selecting an unchanged section cancels the Undo row question and,
-      // before its answer arrives, starts every instrument again. Preserve that
-      // in-flight proof when the score context already matches the baseline.
-      if (
-        original.selected &&
-        (app.state.selected !== original.selected ||
-          app.state.fromCycle !== original.fromCycle ||
-          app.state.toCycle !== original.toCycle)
-      )
-        app.select(original.selected);
-      if (app.state.follow !== original.follow) app.follow(original.follow);
-      app.history.length = 0;
-      return JSON.stringify(app.state.doc);
-    }, context);
-    expect(restored, 'shared piece must restore its exact original document').toBe(baseline.doc);
-    await appSignal(
-      page,
-      function sharedContextRestored({ events, context }) {
-        const state = window.odmApp.state;
-        return (
-          JSON.stringify(state.events) === events &&
-          state.selected === context.selected &&
-          state.fromCycle === context.fromCycle &&
-          state.toCycle === context.toCycle &&
-          state.follow === context.follow
-        );
-      },
-      { events: baseline.events, context },
-    );
-    if (
-      (await page.locator('#paste-panel').evaluate((n: HTMLElement) => n.hidden)) !==
-      baseline.pasteHidden
-    )
-      await page.getByRole('button', { name: 'Paste Strudel', exact: true }).click();
-    await page.setViewportSize({ width: 1280, height: 720 });
-  });
-  test.afterAll(async () => {
-    await page?.close();
-  });
-  return () => value;
+export async function chooseSection(page: Page, name: string) {
+  await page.getByRole('button', { name: 'Sections', exact: true }).click();
+  await page.getByRole('menuitem', { name, exact: true }).first().click();
+  await scoreReady(page);
 }

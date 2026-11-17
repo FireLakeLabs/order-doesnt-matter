@@ -42,7 +42,7 @@ test('switching between whole-song drawings reuses the stage score', async ({ pa
     };
   });
   await page.setViewportSize({ width: 1920, height: 1080 });
-  await page.goto('/studio.html?inspect&a=&b=');
+  await page.goto('/?inspect&a=&b=');
   await page.waitForFunction(() => window.odmStudio.app.canPlay);
   await page.evaluate(() => window.odmStudio.load('stack(s("bd"), s("sd"))'));
   const ready = () =>

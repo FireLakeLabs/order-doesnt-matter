@@ -14,16 +14,12 @@
     "format:check": "prettier --check .",
     "test": "node scripts/node-tests.mjs",
     "test:browser": "node scripts/browser.mjs",
-    "test:browser:legacy": "node scripts/browser.mjs legacy",
     "test:browser:studio": "node scripts/browser.mjs studio",
     "check:docs": "node scripts/docs.mjs",
     "check:boundaries": "node scripts/boundaries.mjs",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run check:docs && npm run check:boundaries && npm run build",
     "test:browser:online": "node scripts/browser.mjs online",
-    "demo": "node scripts/browser.mjs demo",
-    "measure:edit": "node scripts/browser.mjs measure",
-    "measure:views": "node scripts/browser.mjs measure-views",
-    "shots:editors": "ODM_EDITOR_SHOTS=1 playwright test tests/browser/shots.spec.ts --project=optional --workers=1 --output=.browser-build-shots-results"
+    "measure:views": "node scripts/browser.mjs measure-views"
   },
   "dependencies": {
     "@strudel/core": "1.2.6",

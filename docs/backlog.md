@@ -1,19 +1,12 @@
 # Backlog
 
 Everything known to be outstanding, in one place. The [model](model.md) and
-[decisions](decisions.md) record what is settled. Updated 2026-11-15 against the
-integrated remaining-work branch. Implemented packages in PRs #56–67 are reviewed
-and pass CI; they remain unmerged. Implementation status does not imply deployment.
+[decisions](decisions.md) record what is settled. Updated 2026-11-16.
 
-## Finish the current wave
+## Studio cutover
 
-- **Release approval.** The reviewed feature stack remains open and unmerged.
-  Every merge to main publishes; final merge/release needs owner authorization.
-- **Final combined acceptance.** The combined implementation including guided
-  practice passed 668 Node tests and 119 browser tests, with three existing skips,
-  in 216.887 s under the owner-approved limits in [standards](standards.md).
-  Current tour-head CI and release verification remain. Full evidence is in the
-  [wave record](../research/remaining-work/plan.md).
+- **Done:** the Studio is the main page, saved documents survive the switch, and
+  the retired interface and its separate browser job are removed.
 
 ## Editor and retention boundaries
 
@@ -42,9 +35,6 @@ and pass CI; they remain unmerged. Implementation status does not imply deployme
   with deliberate-load measurements that count skipped windows.
 - **Speaker sync:** only the browser's reported output delay was measured (D40).
   Physical output measurement remains owner evidence.
-- **Watch headroom:** frame-submission measurements are machine-dependent, and
-  perspective overlaps can obscure individual notes. GPU completion and motion
-  readability are not established by screenshots or submission timing.
 
 ## Tests and process
 
@@ -52,8 +42,7 @@ and pass CI; they remain unmerged. Implementation status does not imply deployme
   remain without an established compatible remedy. The last recorded
   production-only audit reported none; dependency changes need fresh checks.
 - **Redesign wave:** in progress per the [Studio design](../research/redesign/design.md).
-  Left: Scope (with the Studio audio tap), the switch to the Studio as the main
-  page, and a polish pass.
+  Left: Scope (with the Studio audio tap) and a polish pass.
 - **Timing-dependent browser tests:** the Studio transport comparisons, the
   practice start-up wait, the flood delivery count and a Kiln rhythm wait that
   hangs to the 60 s limit failed CI and deploys without a product defect. Being
@@ -72,16 +61,3 @@ and pass CI; they remain unmerged. Implementation status does not imply deployme
 
 Any AWS or DNS change needs a fresh owner go-ahead; the original approval covered
 first setup only.
-
-## Last implementation wave
-
-**Guided tour — implement last.** The owner approved the
-[desktop/phone mockup](../research/guided-tour/mockup.html) on 2026-11-15.
-The optional, replayable Driver.js practice flow is implemented through actual loading,
-playback, editing/Undo, sections/Follow, Now/Watch and Keep work controls.
-Preserve the original session, drafts and recovery state; practice must never
-replace the visitor's saved work. Follow the
-[specification](../research/guided-tour-spec.md) and
-[source-grounded brief](../research/guided-tour/implementation-brief.md).
-Session preservation and cancellation preceded visible tour integration. Final-head CI and release approval remain; manual screen-reader and
-real mobile-keyboard behavior are unverified.

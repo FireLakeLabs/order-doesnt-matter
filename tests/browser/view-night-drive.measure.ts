@@ -155,7 +155,7 @@ test('night-drive: themes, section approach, exact hits, resize, scrubbing and l
   expect(lifetime.canvases).toBe(0);
   expect(errors).toEqual([]);
   // Exercise the second stage through the actual shelf and retain its host screenshot.
-  await page.goto('/studio.html?inspect&a=night-drive&b=night-drive&theme=sunset');
+  await page.goto('/?inspect&a=night-drive&b=night-drive&theme=sunset');
   await page.waitForFunction(() => window.odmStudio.app.canPlay);
   await page.evaluate(
     async (source) => {

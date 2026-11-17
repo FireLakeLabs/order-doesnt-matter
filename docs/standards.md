@@ -11,6 +11,9 @@ Suite durations and completed case durations do not fail a run (D44). Each run g
 its own build directory. Every server asks the OS for a free port with port 0,
 including local development; two copies must run together.
 
+Studio and shared real-engine browser projects run serially with one worker,
+so their audio clocks never compete.
+
 A 60 s per-test hard timeout protects against hangs; retries remain off. Worker
 execution deadlines still apply. `npm run check` keeps format check, lint,
 typecheck, Node tests, docs check, boundaries and build as deterministic gates.
@@ -21,11 +24,11 @@ Directory ownership keeps later implementers apart:
 | --------------- | ---------------------------------------------------------- |
 | `src/document/` | Plain JSON contract, traversal, validation, shared fixture |
 | `src/strudel/`  | Strudel seam and its canaries                              |
-| `src/app/`      | Page shell and later composition                           |
+| `src/app/`      | Shared controller, state and recovery                      |
 | `src/import/`   | Reserved: source to document                               |
 | `src/generate/` | Reserved: document to source                               |
 | `src/engine/`   | Reserved: playback and sound state                         |
-| `src/sheet/`    | Reserved: score sheet and song strip                       |
+| `src/sheet/`    | Shared score model                                         |
 
 Only the seam imports Strudel or superdough. Private behavior gets a named wrapper,
 a dependency comment, and a canary whose failure names the changed behavior.

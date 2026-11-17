@@ -1,3 +1,4 @@
+import { chooseSection } from './helpers';
 import { blockHttps } from './offline';
 import { test } from './helpers';
 import { expect } from '@playwright/test';
@@ -109,26 +110,34 @@ for (const code of [
 test('Kiln: mute the only sounding instrument and clear pending', async ({ page }) => {
   await openProgram(page, { example: 'Kiln' });
   const { id, section } = await page.evaluate(() => ({
-    id: window.odmApp.state.rows.find((row) => row.name === 'bass')!.id,
-    section: window.odmApp.state.sections[1].name,
+    id: window.odmStudio.app.state.rows.find((row) => row.name === 'bass')!.id,
+    section: window.odmStudio.app.state.sections[1].name,
   }));
-  await page.getByRole('button', { name: section, exact: true }).first().click();
+  await chooseSection(page, section);
   await selectNode(page, { nodeId: id });
   await page.getByRole('checkbox', { name: 'Solo', exact: true }).click();
   await play(page);
   const count = await page.evaluate(
-    () => window.odmApp.history.filter((e) => e.type === 'committed').length,
+    () => window.odmStudio.app.history.filter((e) => e.type === 'committed').length,
   );
   await page.getByRole('checkbox', { name: 'Mute everywhere', exact: true }).click();
   await signal(
-    () => page.evaluate(() => window.odmApp.history.filter((e) => e.type === 'committed').length),
+    () =>
+      page.evaluate(
+        () => window.odmStudio.app.history.filter((e) => e.type === 'committed').length,
+      ),
     { timeout: BOUND_MS },
   ).toBeGreaterThan(count);
   await waitForPending(page);
   await expect(page.locator('#editor')).not.toHaveAttribute('data-edit-state', 'pending');
-  expect(await page.evaluate(() => Object.keys(window.odmApp.editor!.state.entries))).toEqual([]);
   expect(
-    await page.evaluate((id) => window.odmApp.state.rows.find((row) => row.id === id)!.muted, id),
+    await page.evaluate(() => Object.keys(window.odmStudio.app.editor!.state.entries)),
+  ).toEqual([]);
+  expect(
+    await page.evaluate(
+      (id) => window.odmStudio.app.state.rows.find((row) => row.id === id)!.muted,
+      id,
+    ),
   ).toBe(true);
   await page.getByRole('button', { name: 'Stop', exact: true }).click();
 });

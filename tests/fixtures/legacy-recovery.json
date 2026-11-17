@@ -1,0 +1,2966 @@
+{
+  "version": 2,
+  "body": [
+    {
+      "id": "n1",
+      "tier": 1,
+      "role": "setup",
+      "span": {
+        "start": 0,
+        "end": 15
+      },
+      "kind": "tempo",
+      "cpm": 35
+    },
+    {
+      "id": "n18",
+      "tier": 1,
+      "span": {
+        "start": 122,
+        "end": 301
+      },
+      "kind": "shared",
+      "name": "vocalAtmos",
+      "nameSource": "author",
+      "pattern": {
+        "id": "n3",
+        "tier": 1,
+        "role": "instrument",
+        "span": {
+          "start": 141,
+          "end": 151
+        },
+        "core": {
+          "kind": "generator",
+          "name": "s",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n2",
+                "tier": 1,
+                "role": "rhythm",
+                "span": {
+                  "start": 143,
+                  "end": 150
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "other",
+                      "notation": "ade:0"
+                    }
+                  ],
+                  "notation": "ade:0"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n4",
+            "tier": 1,
+            "role": "rewrite",
+            "span": {
+              "start": 141,
+              "end": 162
+            },
+            "kind": "rewrite",
+            "name": "slow",
+            "args": [
+              {
+                "kind": "literal",
+                "value": 4
+              }
+            ]
+          },
+          {
+            "id": "n7",
+            "tier": 1,
+            "role": "setting",
+            "span": {
+              "start": 141,
+              "end": 176
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n8",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 141,
+                  "end": 244
+                },
+                "name": "cutoff",
+                "value": {
+                  "id": "n9",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 239,
+                    "end": 243
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 1800
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n14",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 141,
+                  "end": 287
+                },
+                "name": "delay",
+                "value": {
+                  "id": "n15",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 281,
+                    "end": 286
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.375
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n16",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 141,
+                  "end": 301
+                },
+                "name": "gain",
+                "value": {
+                  "id": "n17",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 296,
+                    "end": 300
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.75
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n10",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 141,
+                  "end": 257
+                },
+                "name": "room",
+                "value": {
+                  "id": "n11",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 253,
+                    "end": 256
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.9
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n12",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 141,
+                  "end": 271
+                },
+                "name": "roomsize",
+                "value": {
+                  "id": "n13",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 266,
+                    "end": 270
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.95
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n5",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 141,
+                  "end": 176
+                },
+                "name": "speed",
+                "value": {
+                  "id": "n6",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 172,
+                    "end": 175
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.8
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          }
+        ],
+        "comment": "1. Eerie, pitched-down vocal atmosphere for the intro & breakdown",
+        "label": "vocalAtmos"
+      },
+      "purpose": "instrument"
+    },
+    {
+      "id": "n34",
+      "tier": 1,
+      "span": {
+        "start": 373,
+        "end": 505
+      },
+      "kind": "shared",
+      "name": "preDropVocal",
+      "nameSource": "author",
+      "pattern": {
+        "id": "n20",
+        "tier": 1,
+        "role": "instrument",
+        "span": {
+          "start": 394,
+          "end": 413
+        },
+        "core": {
+          "kind": "generator",
+          "name": "s",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n19",
+                "tier": 1,
+                "role": "rhythm",
+                "span": {
+                  "start": 396,
+                  "end": 412
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "rest"
+                    },
+                    {
+                      "kind": "rest"
+                    },
+                    {
+                      "kind": "rest"
+                    },
+                    {
+                      "kind": "other",
+                      "notation": "speech:2"
+                    }
+                  ],
+                  "notation": "~ ~ ~ speech:2"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n23",
+            "tier": 1,
+            "role": "setting",
+            "span": {
+              "start": 394,
+              "end": 427
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n26",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 394,
+                  "end": 456
+                },
+                "name": "delay",
+                "value": {
+                  "id": "n27",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 451,
+                    "end": 455
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.25
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n28",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 394,
+                  "end": 478
+                },
+                "name": "delayfeedback",
+                "value": {
+                  "id": "n29",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 474,
+                    "end": 477
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.5
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n32",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 394,
+                  "end": 505
+                },
+                "name": "gain",
+                "value": {
+                  "id": "n33",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 500,
+                    "end": 504
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.95
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n30",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 394,
+                  "end": 491
+                },
+                "name": "room",
+                "value": {
+                  "id": "n31",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 487,
+                    "end": 490
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.6
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n24",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 394,
+                  "end": 441
+                },
+                "name": "shape",
+                "value": {
+                  "id": "n25",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 437,
+                    "end": 440
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.3
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n21",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 394,
+                  "end": 427
+                },
+                "name": "speed",
+                "value": {
+                  "id": "n22",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 423,
+                    "end": 426
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.9
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          }
+        ],
+        "comment": "2. Classic Dubstep pre-drop vocal chant right before the bass hits",
+        "label": "preDropVocal"
+      },
+      "purpose": "instrument"
+    },
+    {
+      "id": "n69",
+      "tier": 1,
+      "span": {
+        "start": 594,
+        "end": 817
+      },
+      "kind": "shared",
+      "name": "dubstepDrums",
+      "nameSource": "author",
+      "pattern": {
+        "id": "n68",
+        "tier": 1,
+        "role": "section",
+        "span": {
+          "start": 615,
+          "end": 817
+        },
+        "core": {
+          "kind": "group",
+          "how": "stack",
+          "parts": [
+            {
+              "id": "n35",
+              "pattern": {
+                "id": "n37",
+                "tier": 1,
+                "role": "instrument",
+                "span": {
+                  "start": 624,
+                  "end": 645
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "s",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n36",
+                        "tier": 1,
+                        "role": "rhythm",
+                        "span": {
+                          "start": 626,
+                          "end": 644
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "bd"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "rest"
+                            }
+                          ],
+                          "notation": "bd ~ ~ ~ ~ ~ ~ ~"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": [
+                  {
+                    "id": "n40",
+                    "tier": 1,
+                    "role": "setting",
+                    "span": {
+                      "start": 624,
+                      "end": 657
+                    },
+                    "kind": "settings",
+                    "settings": [
+                      {
+                        "id": "n41",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 624,
+                          "end": 667
+                        },
+                        "name": "gain",
+                        "value": {
+                          "id": "n42",
+                          "tier": 1,
+                          "role": "argument",
+                          "span": {
+                            "start": 663,
+                            "end": 666
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 1
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n38",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 624,
+                          "end": 657
+                        },
+                        "name": "shape",
+                        "value": {
+                          "id": "n39",
+                          "tier": 1,
+                          "role": "argument",
+                          "span": {
+                            "start": 652,
+                            "end": 656
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.45
+                          },
+                          "layers": []
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "n43",
+              "pattern": {
+                "id": "n45",
+                "tier": 1,
+                "role": "instrument",
+                "span": {
+                  "start": 671,
+                  "end": 692
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "s",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n44",
+                        "tier": 1,
+                        "role": "rhythm",
+                        "span": {
+                          "start": 673,
+                          "end": 691
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "sd"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "rest"
+                            }
+                          ],
+                          "notation": "~ ~ ~ ~ sd ~ ~ ~"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": [
+                  {
+                    "id": "n48",
+                    "tier": 1,
+                    "role": "setting",
+                    "span": {
+                      "start": 671,
+                      "end": 704
+                    },
+                    "kind": "settings",
+                    "settings": [
+                      {
+                        "id": "n53",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 671,
+                          "end": 735
+                        },
+                        "name": "gain",
+                        "value": {
+                          "id": "n54",
+                          "tier": 1,
+                          "role": "argument",
+                          "span": {
+                            "start": 731,
+                            "end": 734
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 1
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n49",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 671,
+                          "end": 715
+                        },
+                        "name": "room",
+                        "value": {
+                          "id": "n50",
+                          "tier": 1,
+                          "role": "argument",
+                          "span": {
+                            "start": 710,
+                            "end": 714
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.45
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n51",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 671,
+                          "end": 725
+                        },
+                        "name": "roomsize",
+                        "value": {
+                          "id": "n52",
+                          "tier": 1,
+                          "role": "argument",
+                          "span": {
+                            "start": 721,
+                            "end": 724
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.7
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n46",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 671,
+                          "end": 704
+                        },
+                        "name": "shape",
+                        "value": {
+                          "id": "n47",
+                          "tier": 1,
+                          "role": "argument",
+                          "span": {
+                            "start": 699,
+                            "end": 703
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.35
+                          },
+                          "layers": []
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "n55",
+              "pattern": {
+                "id": "n57",
+                "tier": 1,
+                "role": "instrument",
+                "span": {
+                  "start": 739,
+                  "end": 748
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "s",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n56",
+                        "tier": 1,
+                        "role": "rhythm",
+                        "span": {
+                          "start": 741,
+                          "end": 747
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "other",
+                              "notation": "hh*8",
+                              "expression": {
+                                "step": {
+                                  "kind": "value",
+                                  "value": "hh"
+                                },
+                                "marks": [
+                                  {
+                                    "name": "faster",
+                                    "amount": {
+                                      "kind": "value",
+                                      "value": "8"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ],
+                          "notation": "hh*8"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": [
+                  {
+                    "id": "n61",
+                    "tier": 1,
+                    "role": "setting",
+                    "span": {
+                      "start": 739,
+                      "end": 779
+                    },
+                    "kind": "settings",
+                    "settings": [
+                      {
+                        "id": "n58",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 739,
+                          "end": 779
+                        },
+                        "name": "gain",
+                        "value": {
+                          "id": "n59",
+                          "tier": 1,
+                          "role": "driver",
+                          "span": {
+                            "start": 754,
+                            "end": 760
+                          },
+                          "core": {
+                            "kind": "signal",
+                            "shape": "perlin"
+                          },
+                          "layers": [
+                            {
+                              "id": "n60",
+                              "tier": 1,
+                              "role": "driver",
+                              "span": {
+                                "start": 754,
+                                "end": 778
+                              },
+                              "kind": "rewrite",
+                              "name": "range",
+                              "args": [
+                                {
+                                  "kind": "literal",
+                                  "value": 0.35
+                                },
+                                {
+                                  "kind": "literal",
+                                  "value": 0.65
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "n62",
+              "pattern": {
+                "id": "n64",
+                "tier": 1,
+                "role": "instrument",
+                "span": {
+                  "start": 783,
+                  "end": 805
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "s",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n63",
+                        "tier": 1,
+                        "role": "rhythm",
+                        "span": {
+                          "start": 785,
+                          "end": 804
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "oh"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "oh"
+                            },
+                            {
+                              "kind": "rest"
+                            }
+                          ],
+                          "notation": "~ ~ oh ~ ~ ~ oh ~"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": [
+                  {
+                    "id": "n67",
+                    "tier": 1,
+                    "role": "setting",
+                    "span": {
+                      "start": 783,
+                      "end": 815
+                    },
+                    "kind": "settings",
+                    "settings": [
+                      {
+                        "id": "n65",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 783,
+                          "end": 815
+                        },
+                        "name": "gain",
+                        "value": {
+                          "id": "n66",
+                          "tier": 1,
+                          "role": "argument",
+                          "span": {
+                            "start": 811,
+                            "end": 814
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.4
+                          },
+                          "layers": []
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "layers": [],
+        "comment": "Heavy half-time Dubstep beat (Kick on 1, Snare on 3)",
+        "label": "dubstepDrums"
+      }
+    },
+    {
+      "id": "n77",
+      "tier": 1,
+      "span": {
+        "start": 939,
+        "end": 1009
+      },
+      "kind": "shared",
+      "name": "subBass",
+      "nameSource": "author",
+      "pattern": {
+        "id": "n71",
+        "tier": 1,
+        "role": "instrument",
+        "span": {
+          "start": 955,
+          "end": 982
+        },
+        "core": {
+          "kind": "generator",
+          "name": "note",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n70",
+                "tier": 1,
+                "role": "rhythm",
+                "span": {
+                  "start": 960,
+                  "end": 981
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "alternate",
+                      "steps": [
+                        {
+                          "kind": "value",
+                          "value": "c1"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "c1"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "eb1"
+                        },
+                        {
+                          "kind": "sub",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "f1"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "g1"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "notation": "<c1 c1 eb1 [f1 g1]>"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n74",
+            "tier": 1,
+            "role": "setting",
+            "span": {
+              "start": 955,
+              "end": 995
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n75",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 955,
+                  "end": 1009
+                },
+                "name": "gain",
+                "value": {
+                  "id": "n76",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 1004,
+                    "end": 1008
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.95
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n72",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 955,
+                  "end": 995
+                },
+                "name": "s",
+                "value": {
+                  "id": "n73",
+                  "tier": 1,
+                  "role": "rhythm",
+                  "span": {
+                    "start": 988,
+                    "end": 994
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "sine"
+                      }
+                    ],
+                    "notation": "sine"
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          }
+        ],
+        "comment": "1. Pure, chest-rattling sine wave sub-bass (stays clean below 100 Hz)",
+        "label": "subBass"
+      },
+      "purpose": "instrument"
+    },
+    {
+      "id": "n98",
+      "tier": 1,
+      "span": {
+        "start": 1083,
+        "end": 1373
+      },
+      "kind": "shared",
+      "name": "wobbleBass",
+      "nameSource": "author",
+      "pattern": {
+        "id": "n79",
+        "tier": 1,
+        "role": "instrument",
+        "span": {
+          "start": 1102,
+          "end": 1129
+        },
+        "core": {
+          "kind": "generator",
+          "name": "note",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n78",
+                "tier": 1,
+                "role": "rhythm",
+                "span": {
+                  "start": 1107,
+                  "end": 1128
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "alternate",
+                      "steps": [
+                        {
+                          "kind": "value",
+                          "value": "c2"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "c2"
+                        },
+                        {
+                          "kind": "value",
+                          "value": "eb2"
+                        },
+                        {
+                          "kind": "sub",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "f2"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "g2"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "notation": "<c2 c2 eb2 [f2 g2]>"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n82",
+            "tier": 1,
+            "role": "setting",
+            "span": {
+              "start": 1102,
+              "end": 1146
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n83",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 1102,
+                  "end": 1194
+                },
+                "name": "cutoff",
+                "value": {
+                  "id": "n84",
+                  "tier": 1,
+                  "role": "driver",
+                  "span": {
+                    "start": 1154,
+                    "end": 1158
+                  },
+                  "core": {
+                    "kind": "signal",
+                    "shape": "sine"
+                  },
+                  "layers": [
+                    {
+                      "id": "n85",
+                      "tier": 1,
+                      "role": "driver",
+                      "span": {
+                        "start": 1154,
+                        "end": 1175
+                      },
+                      "kind": "rewrite",
+                      "name": "range",
+                      "args": [
+                        {
+                          "kind": "literal",
+                          "value": 140
+                        },
+                        {
+                          "kind": "literal",
+                          "value": 2600
+                        }
+                      ]
+                    },
+                    {
+                      "id": "n86",
+                      "tier": 1,
+                      "role": "rewrite",
+                      "span": {
+                        "start": 1154,
+                        "end": 1193
+                      },
+                      "kind": "rewrite",
+                      "name": "fast",
+                      "args": [
+                        {
+                          "kind": "pattern",
+                          "pattern": {
+                            "id": "n87",
+                            "tier": 1,
+                            "role": "rhythm",
+                            "span": {
+                              "start": 1181,
+                              "end": 1192
+                            },
+                            "core": {
+                              "kind": "sequence",
+                              "steps": [
+                                {
+                                  "kind": "alternate",
+                                  "steps": [
+                                    {
+                                      "kind": "value",
+                                      "value": "2"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "4"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "3"
+                                    },
+                                    {
+                                      "kind": "value",
+                                      "value": "8"
+                                    }
+                                  ]
+                                }
+                              ],
+                              "notation": "<2 4 3 8>"
+                            },
+                            "layers": []
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              },
+              {
+                "id": "n96",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 1102,
+                  "end": 1373
+                },
+                "name": "gain",
+                "value": {
+                  "id": "n97",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 1368,
+                    "end": 1372
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.75
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n92",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 1102,
+                  "end": 1270
+                },
+                "name": "hcutoff",
+                "value": {
+                  "id": "n93",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 1266,
+                    "end": 1269
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 110
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n88",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 1102,
+                  "end": 1243
+                },
+                "name": "resonance",
+                "value": {
+                  "id": "n89",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 1240,
+                    "end": 1242
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 11
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n94",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 1102,
+                  "end": 1359
+                },
+                "name": "room",
+                "value": {
+                  "id": "n95",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 1354,
+                    "end": 1358
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.25
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n80",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 1102,
+                  "end": 1146
+                },
+                "name": "s",
+                "value": {
+                  "id": "n81",
+                  "tier": 1,
+                  "role": "rhythm",
+                  "span": {
+                    "start": 1135,
+                    "end": 1145
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "sawtooth"
+                      }
+                    ],
+                    "notation": "sawtooth"
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n90",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 1102,
+                  "end": 1258
+                },
+                "name": "shape",
+                "value": {
+                  "id": "n91",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 1253,
+                    "end": 1257
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.65
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          }
+        ],
+        "comment": "2. Aggressive mid-range wobble bass with changing LFO speeds per bar",
+        "label": "wobbleBass"
+      },
+      "purpose": "instrument"
+    },
+    {
+      "id": "n114",
+      "tier": 1,
+      "span": {
+        "start": 1407,
+        "end": 1568
+      },
+      "kind": "shared",
+      "name": "darkPad",
+      "nameSource": "author",
+      "pattern": {
+        "id": "n100",
+        "tier": 1,
+        "role": "instrument",
+        "span": {
+          "start": 1423,
+          "end": 1480
+        },
+        "core": {
+          "kind": "generator",
+          "name": "note",
+          "args": [
+            {
+              "kind": "pattern",
+              "pattern": {
+                "id": "n99",
+                "tier": 1,
+                "role": "rhythm",
+                "span": {
+                  "start": 1428,
+                  "end": 1479
+                },
+                "core": {
+                  "kind": "sequence",
+                  "steps": [
+                    {
+                      "kind": "alternate",
+                      "steps": [
+                        {
+                          "kind": "together",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "c3"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "g3"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "eb4"
+                            }
+                          ]
+                        },
+                        {
+                          "kind": "together",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "ab2"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "eb3"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "c4"
+                            }
+                          ]
+                        },
+                        {
+                          "kind": "together",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "f2"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "c3"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "ab3"
+                            }
+                          ]
+                        },
+                        {
+                          "kind": "together",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "g2"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "d3"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "b3"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ],
+                  "notation": "<[c3,g3,eb4] [ab2,eb3,c4] [f2,c3,ab3] [g2,d3,b3]>"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [
+          {
+            "id": "n103",
+            "tier": 1,
+            "role": "setting",
+            "span": {
+              "start": 1423,
+              "end": 1497
+            },
+            "kind": "settings",
+            "settings": [
+              {
+                "id": "n106",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 1423,
+                  "end": 1524
+                },
+                "name": "attack",
+                "value": {
+                  "id": "n107",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 1520,
+                    "end": 1523
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.4
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n104",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 1423,
+                  "end": 1509
+                },
+                "name": "cutoff",
+                "value": {
+                  "id": "n105",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 1505,
+                    "end": 1508
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 910
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n112",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 1423,
+                  "end": 1568
+                },
+                "name": "gain",
+                "value": {
+                  "id": "n113",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 1563,
+                    "end": 1567
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.45
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n108",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 1423,
+                  "end": 1540
+                },
+                "name": "release",
+                "value": {
+                  "id": "n109",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 1536,
+                    "end": 1539
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 1.2
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n110",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 1423,
+                  "end": 1554
+                },
+                "name": "room",
+                "value": {
+                  "id": "n111",
+                  "tier": 1,
+                  "role": "argument",
+                  "span": {
+                    "start": 1549,
+                    "end": 1553
+                  },
+                  "core": {
+                    "kind": "constant",
+                    "value": 0.85
+                  },
+                  "layers": []
+                }
+              },
+              {
+                "id": "n101",
+                "tier": 1,
+                "role": "setting",
+                "span": {
+                  "start": 1423,
+                  "end": 1497
+                },
+                "name": "s",
+                "value": {
+                  "id": "n102",
+                  "tier": 1,
+                  "role": "rhythm",
+                  "span": {
+                    "start": 1486,
+                    "end": 1496
+                  },
+                  "core": {
+                    "kind": "sequence",
+                    "steps": [
+                      {
+                        "kind": "value",
+                        "value": "supersaw"
+                      }
+                    ],
+                    "notation": "supersaw"
+                  },
+                  "layers": []
+                }
+              }
+            ]
+          }
+        ],
+        "comment": "--- ATMOSPHERE & MELODY ---",
+        "label": "darkPad"
+      },
+      "purpose": "instrument"
+    },
+    {
+      "id": "n128",
+      "tier": 1,
+      "span": {
+        "start": 1677,
+        "end": 1757
+      },
+      "kind": "shared",
+      "name": "intro",
+      "nameSource": "author",
+      "pattern": {
+        "id": "n127",
+        "tier": 1,
+        "role": "section",
+        "span": {
+          "start": 1691,
+          "end": 1757
+        },
+        "core": {
+          "kind": "group",
+          "how": "stack",
+          "parts": [
+            {
+              "id": "n115",
+              "pattern": {
+                "id": "n116",
+                "tier": 1,
+                "span": {
+                  "start": 1700,
+                  "end": 1707
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "darkPad"
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n117",
+              "pattern": {
+                "id": "n118",
+                "tier": 1,
+                "span": {
+                  "start": 1711,
+                  "end": 1721
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "vocalAtmos"
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n119",
+              "pattern": {
+                "id": "n121",
+                "tier": 1,
+                "role": "instrument",
+                "span": {
+                  "start": 1725,
+                  "end": 1734
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "s",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n120",
+                        "tier": 1,
+                        "role": "rhythm",
+                        "span": {
+                          "start": 1727,
+                          "end": 1733
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "other",
+                              "notation": "hh*4",
+                              "expression": {
+                                "step": {
+                                  "kind": "value",
+                                  "value": "hh"
+                                },
+                                "marks": [
+                                  {
+                                    "name": "faster",
+                                    "amount": {
+                                      "kind": "value",
+                                      "value": "4"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ],
+                          "notation": "hh*4"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": [
+                  {
+                    "id": "n124",
+                    "tier": 1,
+                    "role": "setting",
+                    "span": {
+                      "start": 1725,
+                      "end": 1745
+                    },
+                    "kind": "settings",
+                    "settings": [
+                      {
+                        "id": "n122",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 1725,
+                          "end": 1745
+                        },
+                        "name": "gain",
+                        "value": {
+                          "id": "n123",
+                          "tier": 1,
+                          "role": "argument",
+                          "span": {
+                            "start": 1740,
+                            "end": 1744
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.35
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n125",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 1725,
+                          "end": 1755
+                        },
+                        "name": "room",
+                        "value": {
+                          "id": "n126",
+                          "tier": 1,
+                          "role": "argument",
+                          "span": {
+                            "start": 1751,
+                            "end": 1754
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.6
+                          },
+                          "layers": []
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "layers": [],
+        "comment": "1. Intro: Moody dark pads, deep vocal atmosphere, and sparse hi-hats (4 bars)",
+        "label": "intro"
+      },
+      "purpose": "section"
+    },
+    {
+      "id": "n169",
+      "tier": 1,
+      "span": {
+        "start": 1848,
+        "end": 2142
+      },
+      "kind": "shared",
+      "name": "buildSection",
+      "nameSource": "author",
+      "pattern": {
+        "id": "n168",
+        "tier": 1,
+        "role": "section",
+        "span": {
+          "start": 1869,
+          "end": 2142
+        },
+        "core": {
+          "kind": "group",
+          "how": "stack",
+          "parts": [
+            {
+              "id": "n129",
+              "pattern": {
+                "id": "n130",
+                "tier": 1,
+                "span": {
+                  "start": 1878,
+                  "end": 1885
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "darkPad"
+                },
+                "layers": [
+                  {
+                    "id": "n135",
+                    "tier": 1,
+                    "role": "setting",
+                    "span": {
+                      "start": 1878,
+                      "end": 1919
+                    },
+                    "kind": "settings",
+                    "settings": [
+                      {
+                        "id": "n131",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 1878,
+                          "end": 1919
+                        },
+                        "name": "cutoff",
+                        "value": {
+                          "id": "n132",
+                          "tier": 1,
+                          "role": "driver",
+                          "span": {
+                            "start": 1890,
+                            "end": 1893
+                          },
+                          "core": {
+                            "kind": "signal",
+                            "shape": "saw"
+                          },
+                          "layers": [
+                            {
+                              "id": "n133",
+                              "tier": 1,
+                              "role": "driver",
+                              "span": {
+                                "start": 1890,
+                                "end": 1910
+                              },
+                              "kind": "rewrite",
+                              "name": "range",
+                              "args": [
+                                {
+                                  "kind": "literal",
+                                  "value": 600
+                                },
+                                {
+                                  "kind": "literal",
+                                  "value": 2200
+                                }
+                              ]
+                            },
+                            {
+                              "id": "n134",
+                              "tier": 1,
+                              "role": "rewrite",
+                              "span": {
+                                "start": 1890,
+                                "end": 1918
+                              },
+                              "kind": "rewrite",
+                              "name": "slow",
+                              "args": [
+                                {
+                                  "kind": "literal",
+                                  "value": 4
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "n136",
+              "pattern": {
+                "id": "n138",
+                "tier": 1,
+                "role": "instrument",
+                "span": {
+                  "start": 1923,
+                  "end": 1932
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "s",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n137",
+                        "tier": 1,
+                        "role": "rhythm",
+                        "span": {
+                          "start": 1925,
+                          "end": 1931
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "other",
+                              "notation": "sd*8",
+                              "expression": {
+                                "step": {
+                                  "kind": "value",
+                                  "value": "sd"
+                                },
+                                "marks": [
+                                  {
+                                    "name": "faster",
+                                    "amount": {
+                                      "kind": "value",
+                                      "value": "8"
+                                    }
+                                  }
+                                ]
+                              }
+                            }
+                          ],
+                          "notation": "sd*8"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": [
+                  {
+                    "id": "n143",
+                    "tier": 1,
+                    "role": "setting",
+                    "span": {
+                      "start": 1923,
+                      "end": 1967
+                    },
+                    "kind": "settings",
+                    "settings": [
+                      {
+                        "id": "n139",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 1923,
+                          "end": 1967
+                        },
+                        "name": "gain",
+                        "value": {
+                          "id": "n140",
+                          "tier": 1,
+                          "role": "driver",
+                          "span": {
+                            "start": 1938,
+                            "end": 1941
+                          },
+                          "core": {
+                            "kind": "signal",
+                            "shape": "saw"
+                          },
+                          "layers": [
+                            {
+                              "id": "n141",
+                              "tier": 1,
+                              "role": "driver",
+                              "span": {
+                                "start": 1938,
+                                "end": 1958
+                              },
+                              "kind": "rewrite",
+                              "name": "range",
+                              "args": [
+                                {
+                                  "kind": "literal",
+                                  "value": 0.2
+                                },
+                                {
+                                  "kind": "literal",
+                                  "value": 0.95
+                                }
+                              ]
+                            },
+                            {
+                              "id": "n142",
+                              "tier": 1,
+                              "role": "rewrite",
+                              "span": {
+                                "start": 1938,
+                                "end": 1966
+                              },
+                              "kind": "rewrite",
+                              "name": "slow",
+                              "args": [
+                                {
+                                  "kind": "literal",
+                                  "value": 4
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "n144",
+              "pattern": {
+                "id": "n146",
+                "tier": 1,
+                "role": "instrument",
+                "span": {
+                  "start": 1971,
+                  "end": 1981
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "note",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n145",
+                        "tier": 1,
+                        "role": "rhythm",
+                        "span": {
+                          "start": 1976,
+                          "end": 1980
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "c3"
+                            }
+                          ],
+                          "notation": "c3"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": [
+                  {
+                    "id": "n149",
+                    "tier": 1,
+                    "role": "setting",
+                    "span": {
+                      "start": 1971,
+                      "end": 1995
+                    },
+                    "kind": "settings",
+                    "settings": [
+                      {
+                        "id": "n154",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 1971,
+                          "end": 2036
+                        },
+                        "name": "cutoff",
+                        "value": {
+                          "id": "n155",
+                          "tier": 1,
+                          "role": "argument",
+                          "span": {
+                            "start": 2031,
+                            "end": 2035
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 1500
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n156",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 1971,
+                          "end": 2047
+                        },
+                        "name": "gain",
+                        "value": {
+                          "id": "n157",
+                          "tier": 1,
+                          "role": "argument",
+                          "span": {
+                            "start": 2042,
+                            "end": 2046
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.35
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n147",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 1971,
+                          "end": 1995
+                        },
+                        "name": "s",
+                        "value": {
+                          "id": "n148",
+                          "tier": 1,
+                          "role": "rhythm",
+                          "span": {
+                            "start": 1984,
+                            "end": 1994
+                          },
+                          "core": {
+                            "kind": "sequence",
+                            "steps": [
+                              {
+                                "kind": "value",
+                                "value": "sawtooth"
+                              }
+                            ],
+                            "notation": "sawtooth"
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n150",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 1971,
+                          "end": 2026
+                        },
+                        "name": "speed",
+                        "value": {
+                          "id": "n151",
+                          "tier": 1,
+                          "role": "driver",
+                          "span": {
+                            "start": 2002,
+                            "end": 2005
+                          },
+                          "core": {
+                            "kind": "signal",
+                            "shape": "saw"
+                          },
+                          "layers": [
+                            {
+                              "id": "n152",
+                              "tier": 1,
+                              "role": "driver",
+                              "span": {
+                                "start": 2002,
+                                "end": 2017
+                              },
+                              "kind": "rewrite",
+                              "name": "range",
+                              "args": [
+                                {
+                                  "kind": "literal",
+                                  "value": 1
+                                },
+                                {
+                                  "kind": "literal",
+                                  "value": 2
+                                }
+                              ]
+                            },
+                            {
+                              "id": "n153",
+                              "tier": 1,
+                              "role": "rewrite",
+                              "span": {
+                                "start": 2002,
+                                "end": 2025
+                              },
+                              "kind": "rewrite",
+                              "name": "slow",
+                              "args": [
+                                {
+                                  "kind": "literal",
+                                  "value": 4
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "n158",
+              "pattern": {
+                "id": "n167",
+                "tier": 1,
+                "role": "section",
+                "span": {
+                  "start": 2051,
+                  "end": 2095
+                },
+                "core": {
+                  "kind": "group",
+                  "how": "cat",
+                  "parts": [
+                    {
+                      "id": "n159",
+                      "pattern": {
+                        "id": "n160",
+                        "tier": 1,
+                        "span": {
+                          "start": 2055,
+                          "end": 2062
+                        },
+                        "core": {
+                          "kind": "generator",
+                          "name": "silence",
+                          "args": []
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "id": "n161",
+                      "pattern": {
+                        "id": "n162",
+                        "tier": 1,
+                        "span": {
+                          "start": 2064,
+                          "end": 2071
+                        },
+                        "core": {
+                          "kind": "generator",
+                          "name": "silence",
+                          "args": []
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "id": "n163",
+                      "pattern": {
+                        "id": "n164",
+                        "tier": 1,
+                        "span": {
+                          "start": 2073,
+                          "end": 2080
+                        },
+                        "core": {
+                          "kind": "generator",
+                          "name": "silence",
+                          "args": []
+                        },
+                        "layers": []
+                      }
+                    },
+                    {
+                      "id": "n165",
+                      "pattern": {
+                        "id": "n166",
+                        "tier": 1,
+                        "span": {
+                          "start": 2082,
+                          "end": 2094
+                        },
+                        "core": {
+                          "kind": "ref",
+                          "name": "preDropVocal"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [],
+        "comment": "2. Build-up: Accelerating snare roll, rising pitch synth, and pre-drop vocal (4 bars)",
+        "label": "buildSection"
+      },
+      "purpose": "section"
+    },
+    {
+      "id": "n177",
+      "tier": 1,
+      "span": {
+        "start": 2221,
+        "end": 2282
+      },
+      "kind": "shared",
+      "name": "drop",
+      "nameSource": "author",
+      "pattern": {
+        "id": "n176",
+        "tier": 1,
+        "role": "section",
+        "span": {
+          "start": 2234,
+          "end": 2282
+        },
+        "core": {
+          "kind": "group",
+          "how": "stack",
+          "parts": [
+            {
+              "id": "n170",
+              "pattern": {
+                "id": "n171",
+                "tier": 1,
+                "span": {
+                  "start": 2243,
+                  "end": 2255
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "dubstepDrums"
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n172",
+              "pattern": {
+                "id": "n173",
+                "tier": 1,
+                "span": {
+                  "start": 2259,
+                  "end": 2266
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "subBass"
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n174",
+              "pattern": {
+                "id": "n175",
+                "tier": 1,
+                "span": {
+                  "start": 2270,
+                  "end": 2280
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "wobbleBass"
+                },
+                "layers": []
+              }
+            }
+          ]
+        },
+        "layers": [],
+        "comment": "3. Drop: Half-time drums, pure sub-bass, and dynamic wobble bass (8 bars)",
+        "label": "drop"
+      },
+      "purpose": "section"
+    },
+    {
+      "id": "n198",
+      "tier": 1,
+      "span": {
+        "start": 2373,
+        "end": 2532
+      },
+      "kind": "shared",
+      "name": "breakdown",
+      "nameSource": "author",
+      "pattern": {
+        "id": "n197",
+        "tier": 1,
+        "role": "section",
+        "span": {
+          "start": 2391,
+          "end": 2532
+        },
+        "core": {
+          "kind": "group",
+          "how": "stack",
+          "parts": [
+            {
+              "id": "n178",
+              "pattern": {
+                "id": "n179",
+                "tier": 1,
+                "span": {
+                  "start": 2400,
+                  "end": 2407
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "darkPad"
+                },
+                "layers": [
+                  {
+                    "id": "n182",
+                    "tier": 1,
+                    "role": "setting",
+                    "span": {
+                      "start": 2400,
+                      "end": 2417
+                    },
+                    "kind": "settings",
+                    "settings": [
+                      {
+                        "id": "n180",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 2400,
+                          "end": 2417
+                        },
+                        "name": "cutoff",
+                        "value": {
+                          "id": "n181",
+                          "tier": 1,
+                          "role": "argument",
+                          "span": {
+                            "start": 2412,
+                            "end": 2416
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 1200
+                          },
+                          "layers": []
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "id": "n183",
+              "pattern": {
+                "id": "n184",
+                "tier": 1,
+                "span": {
+                  "start": 2421,
+                  "end": 2431
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "vocalAtmos"
+                },
+                "layers": []
+              }
+            },
+            {
+              "id": "n185",
+              "pattern": {
+                "id": "n187",
+                "tier": 1,
+                "role": "instrument",
+                "span": {
+                  "start": 2435,
+                  "end": 2463
+                },
+                "core": {
+                  "kind": "generator",
+                  "name": "note",
+                  "args": [
+                    {
+                      "kind": "pattern",
+                      "pattern": {
+                        "id": "n186",
+                        "tier": 1,
+                        "role": "rhythm",
+                        "span": {
+                          "start": 2440,
+                          "end": 2462
+                        },
+                        "core": {
+                          "kind": "sequence",
+                          "steps": [
+                            {
+                              "kind": "value",
+                              "value": "g4"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "eb4"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "d4"
+                            },
+                            {
+                              "kind": "rest"
+                            },
+                            {
+                              "kind": "value",
+                              "value": "c4"
+                            },
+                            {
+                              "kind": "rest"
+                            }
+                          ],
+                          "notation": "g4 ~ eb4 ~ d4 ~ c4 ~"
+                        },
+                        "layers": []
+                      }
+                    }
+                  ]
+                },
+                "layers": [
+                  {
+                    "id": "n190",
+                    "tier": 1,
+                    "role": "setting",
+                    "span": {
+                      "start": 2435,
+                      "end": 2482
+                    },
+                    "kind": "settings",
+                    "settings": [
+                      {
+                        "id": "n191",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 2435,
+                          "end": 2500
+                        },
+                        "name": "delay",
+                        "value": {
+                          "id": "n192",
+                          "tier": 1,
+                          "role": "argument",
+                          "span": {
+                            "start": 2494,
+                            "end": 2499
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.375
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n195",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 2435,
+                          "end": 2530
+                        },
+                        "name": "gain",
+                        "value": {
+                          "id": "n196",
+                          "tier": 1,
+                          "role": "argument",
+                          "span": {
+                            "start": 2526,
+                            "end": 2529
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.4
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n193",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 2435,
+                          "end": 2515
+                        },
+                        "name": "room",
+                        "value": {
+                          "id": "n194",
+                          "tier": 1,
+                          "role": "argument",
+                          "span": {
+                            "start": 2511,
+                            "end": 2514
+                          },
+                          "core": {
+                            "kind": "constant",
+                            "value": 0.9
+                          },
+                          "layers": []
+                        }
+                      },
+                      {
+                        "id": "n188",
+                        "tier": 1,
+                        "role": "setting",
+                        "span": {
+                          "start": 2435,
+                          "end": 2482
+                        },
+                        "name": "s",
+                        "value": {
+                          "id": "n189",
+                          "tier": 1,
+                          "role": "rhythm",
+                          "span": {
+                            "start": 2471,
+                            "end": 2481
+                          },
+                          "core": {
+                            "kind": "sequence",
+                            "steps": [
+                              {
+                                "kind": "value",
+                                "value": "triangle"
+                              }
+                            ],
+                            "notation": "triangle"
+                          },
+                          "layers": []
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "layers": [],
+        "comment": "4. Breakdown: Bass cuts out; eerie pads and high haunting synth notes return (4 bars)",
+        "label": "breakdown"
+      },
+      "purpose": "section"
+    },
+    {
+      "id": "n210",
+      "tier": 1,
+      "role": "instrument",
+      "span": {
+        "start": 2578,
+        "end": 2666
+      },
+      "kind": "voice",
+      "name": "Instrument 1",
+      "nameSource": "generated",
+      "muted": false,
+      "pattern": {
+        "id": "n209",
+        "tier": 1,
+        "role": "section",
+        "span": {
+          "start": 2578,
+          "end": 2666
+        },
+        "core": {
+          "kind": "group",
+          "how": "arrange",
+          "parts": [
+            {
+              "id": "n199",
+              "pattern": {
+                "id": "n200",
+                "tier": 1,
+                "span": {
+                  "start": 2593,
+                  "end": 2598
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "intro"
+                },
+                "layers": []
+              },
+              "cycles": 4
+            },
+            {
+              "id": "n201",
+              "pattern": {
+                "id": "n202",
+                "tier": 1,
+                "span": {
+                  "start": 2607,
+                  "end": 2619
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "buildSection"
+                },
+                "layers": []
+              },
+              "cycles": 4
+            },
+            {
+              "id": "n203",
+              "pattern": {
+                "id": "n204",
+                "tier": 1,
+                "span": {
+                  "start": 2628,
+                  "end": 2632
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "drop"
+                },
+                "layers": []
+              },
+              "cycles": 8
+            },
+            {
+              "id": "n205",
+              "pattern": {
+                "id": "n206",
+                "tier": 1,
+                "span": {
+                  "start": 2641,
+                  "end": 2650
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "breakdown"
+                },
+                "layers": []
+              },
+              "cycles": 4
+            },
+            {
+              "id": "n207",
+              "pattern": {
+                "id": "n208",
+                "tier": 1,
+                "span": {
+                  "start": 2659,
+                  "end": 2663
+                },
+                "core": {
+                  "kind": "ref",
+                  "name": "drop"
+                },
+                "layers": []
+              },
+              "cycles": 8
+            }
+          ]
+        },
+        "layers": [],
+        "comment": "--- FULL ARRANGEMENT (28 Bars Total) ---"
+      }
+    }
+  ]
+}

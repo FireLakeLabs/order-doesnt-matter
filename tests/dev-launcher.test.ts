@@ -32,7 +32,7 @@ test('two development copies serve their printed OS ports and release them on si
       expect(Number(new URL(url).port)).toBeGreaterThan(0);
       const page = await fetch(url);
       expect(page.status).toBe(200);
-      expect(await page.text()).toContain('/src/app/main.ts');
+      expect(await page.text()).toContain('/src/studio/main.tsx');
       // HMR must use this listener too, rather than its fixed default port.
       const client = await fetch(new URL('/@vite/client', url));
       expect(client.status).toBe(200);

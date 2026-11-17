@@ -77,7 +77,7 @@ test('The band: real score, reversible motion, five themes, frame cost and lifet
     };
   });
   await page.setViewportSize({ width: 2560, height: 1440 });
-  await page.goto('/studio.html?inspect&a=band&b=&theme=arcade');
+  await page.goto('/?inspect&a=band&b=&theme=arcade');
   await page.waitForFunction(() => window.odmStudio.app.canPlay);
   await load(page, 'real-dubstep-arranged');
   await page.waitForFunction(() =>

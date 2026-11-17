@@ -242,6 +242,13 @@ test('cutoff edit is pending until its engine acknowledgement; top-bar Undo rest
   await tray(page).getByRole('button', { name: 'Edit Cutoff', exact: true }).click();
   await expect(page.getByLabel('Low bound', { exact: true })).toHaveValue('140');
   await page.evaluate(() => window.odmStudio.stop());
+  await page.getByLabel('Low bound', { exact: true }).fill('210');
+  await page.getByLabel('Low bound', { exact: true }).press('Enter');
+  const saved = await page.evaluate(() => window.odmStudio.app.state.doc);
+  await page.reload();
+  await ready(page);
+  expect(await page.evaluate(() => window.odmStudio.app.state.doc)).toEqual(saved);
+  expect(await page.evaluate(() => window.odmStudio.app.engine)).toBeNull();
 });
 
 test('custom definitions open as source, and nine things fit a 560px tray', async ({ page }) => {

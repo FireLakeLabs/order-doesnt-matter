@@ -15,16 +15,11 @@ import { forwardBrowserSignals } from './browser-process.mjs';
 import { cacheBuiltAssets } from './browser-assets.mjs';
 const start = performance.now();
 const mode = process.argv[2] ?? 'ci';
-if (
-  !['ci', 'legacy', 'studio', 'online', 'demo', 'measure', 'measure-views', 'edit-demo'].includes(
-    mode,
-  )
-)
+if (!['ci', 'studio', 'online', 'measure-views'].includes(mode))
   throw Error('Unknown browser mode');
-const suite = ['ci', 'legacy', 'studio'].includes(mode);
+const suite = ['ci', 'studio'].includes(mode);
 const project =
-  { ci: 'studio', legacy: 'audio', studio: 'studio', 'measure-views': 'measure-views' }[mode] ??
-  'optional';
+  { ci: 'audio', studio: 'audio', 'measure-views': 'measure-views' }[mode] ?? 'optional';
 const measureDir =
   mode === 'measure-views' ? mkdtempSync(join(tmpdir(), 'odm-view-measurements-')) : undefined;
 if (measureDir) console.log(`View measurements and screenshots: ${measureDir}`);

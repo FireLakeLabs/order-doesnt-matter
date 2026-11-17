@@ -1,4 +1,4 @@
-/* Imported only by studio/main.tsx; neither reset nor utilities enter index.html. */
+/* Studio entry styles; native editor controls are scoped by EditorHost. */
 @import 'tailwindcss' source(none);
 @import 'tw-animate-css';
 @import './themes.css';

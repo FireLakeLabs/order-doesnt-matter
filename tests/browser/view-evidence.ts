@@ -74,7 +74,7 @@ export async function prepare(page: Page, id: string, file = 'real-dubstep-arran
       };`,
     });
   });
-  await page.goto('/studio.html?inspect&a=test-card&b=&theme=arcade');
+  await page.goto('/?inspect&a=test-card&b=&theme=arcade');
   await page.waitForFunction(() => window.odmStudio.app.canPlay);
   expect(
     await page.evaluate(() =>

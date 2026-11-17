@@ -150,5 +150,5 @@ export const runtime = {
     return this.replaceWork(() => app.openDocument(text));
   },
 };
-// Recovery is explicit, exactly as on the original page. Never overwrite a candidate.
-export const ready = app.retention.candidate ? Promise.resolve() : runtime.load(examples[0].source);
+// Restore the visitor’s saved document before loading any example.
+export const ready = app.retention.candidate ? runtime.recover() : runtime.load(examples[0].source);

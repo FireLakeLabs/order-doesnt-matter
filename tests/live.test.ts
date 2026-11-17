@@ -1,3 +1,4 @@
+import { livePlayhead } from '../src/live/playhead';
 import { liveObservationWindow } from './browser/live-window';
 import { readFileSync } from 'node:fs';
 import { expect, it } from 'vitest';
@@ -329,4 +330,25 @@ it('ties/default orbit, private FX, unknown orbit and broken/unasked rows never 
   expect(m.instruments[0]).toMatchObject({ room: 1, roomUnknown: true });
   expect(m.instruments[1]).toMatchObject({ noteStarts: null, error: 'broken' });
   expect(m.instruments[2].noteStarts).toBeNull();
+});
+
+it('one live playhead correction uses reported seconds and tempo, preserving stopped and unavailable clocks', () => {
+  expect(livePlayhead(4, 0.55, 0.0426666667)).toBeCloseTo(3.9765333333);
+  expect(livePlayhead(null, 0.55, 0.04)).toBeNull();
+  expect(livePlayhead(4, 0.55)).toBe(4);
+  expect(livePlayhead(4, 0.55, NaN)).toBe(4);
+  expect(livePlayhead(4, 0.55, -1)).toBe(4);
+  const input: LiveInput = {
+    rows: [],
+    sections: [],
+    events: { a: { cps: 0.55, events: [], error: null, opaqueValues: false } },
+    sounds: [],
+    solo: null,
+    playhead: 4,
+    fromCycle: 0,
+    toCycle: 8,
+    outputLatency: 0.04,
+  };
+  expect(liveModel(input).cycle).toBeCloseTo(3.978);
+  expect(input.playhead).toBe(4);
 });
