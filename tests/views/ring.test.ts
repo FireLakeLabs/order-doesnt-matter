@@ -1,6 +1,7 @@
 import { expect, test } from 'vitest';
 import type { ViewFrame, ViewNote } from '../../src/views/types';
 import {
+  ringColours,
   arcVertices,
   bandLayout,
   ghostBand,
@@ -242,4 +243,17 @@ test('short hits stay separated and legible while retaining their actual soundin
   }
   const held = cycleArcs([note(10, 11), note(10.3, 10.8, '0', false)], 10);
   expect(displayArcs(held)).toEqual(held);
+});
+
+test('only paper themes use line ink for played arcs and opaque resting tracks', () => {
+  for (const name of ['arcade', 'sunset', 'phosphor', 'riso', 'pocket']) {
+    const theme = { ...frame().theme, name };
+    const paper = name === 'riso' || name === 'pocket';
+    expect(ringColours(theme)).toEqual({
+      paper,
+      played: paper ? theme.line : theme.ground,
+      resting: paper ? theme.line : theme.muted,
+      restingOpacity: paper ? 1 : 0.32,
+    });
+  }
 });
