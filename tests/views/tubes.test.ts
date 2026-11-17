@@ -30,6 +30,16 @@ const at = (notes: ViewNote[], now: number, s = setting) => {
   const part = indexTubes(notes).get('0');
   return tubeAt(part, s, sampleRack(part, now));
 };
+it('reads the hpq alias from Strudel’s sampled hresonance field', () => {
+  const tube = at([note(0, 1, { hresonance: 2 })], 0.5, {
+    name: 'hpq',
+    label: 'High-pass resonance',
+    kind: 'constant',
+  });
+  expect(tube.text).toBe('2');
+  expect(tube.range?.min).toBe(2);
+  expect(tube.level).toBe(0.5);
+});
 it('uses sampled song ranges, excluding numerical phase noise: the real wobble cutoff is flat at 1370', () => {
   const index = indexTubes(real.notes);
   const bass = racks(real, index).find((r) => r.instrument.name === 'wobbleBass')!;

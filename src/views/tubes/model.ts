@@ -8,6 +8,7 @@ const aliases: Record<string, string> = {
   hpf: 'hcutoff',
   roomsize: 'size',
   lpq: 'resonance',
+  hpq: 'hresonance',
   sound: 's',
 };
 export const keyFor = (name: string) => (Object.hasOwn(aliases, name) ? aliases[name] : name);

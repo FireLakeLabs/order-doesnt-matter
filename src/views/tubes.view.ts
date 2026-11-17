@@ -222,7 +222,8 @@ function drawTubes(c: CanvasRenderingContext2D, f: ViewFrame, index: TubeIndex) 
   }
   for (const label of layout.labels) {
     c.font = `${label.dense ? '11' : '12'}px "${theme.fontDisplay}"`;
-    c.fillStyle = label.rack.sample.active.length ? theme.text : theme.muted;
+    c.fillStyle =
+      label.rack.sample.active.length && !label.rack.instrument.muted ? theme.text : theme.muted;
     const rows = wrappedName(
       c,
       label.dense
