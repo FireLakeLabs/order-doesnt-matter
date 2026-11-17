@@ -130,7 +130,8 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
     const count = points.reduce((sum, p) => sum + p.count, 0);
     if (count > 4) {
       c.textAlign = 'center';
-      text(`×${String(count)}`, x, y + dot + 25, 10, theme.text);
+      const [countX, countY] = xy(pc, r - dot - 21);
+      text(`×${String(count)}`, countX, countY + 4, 10, theme.text);
     }
     const [lx, ly] = xy(pc, r + Math.max(25, dot + 16));
     c.textAlign = 'center';
