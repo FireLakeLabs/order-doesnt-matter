@@ -1,5 +1,13 @@
 import { expect, type Page } from '@playwright/test';
-import { test, openProgram, selectNode, waitForPending, appSignal, chooseSection } from './helpers';
+import {
+  test,
+  openProgram,
+  selectNode,
+  waitForPending,
+  appSignal,
+  chooseSection,
+  sourceChecked,
+} from './helpers';
 import { callbackPiece } from '../fixtures/callback-rewrite';
 
 const editor = (page: Page) => page.locator('#editor');
@@ -24,6 +32,16 @@ test('real house tray: values, source, rhythm, signal, ordered rewrites and inst
   await expect(editor(page)).toHaveAttribute('data-editor-kind', 'constant');
   await page.getByRole('button', { name: 'Change over time', exact: true }).click();
   await number(page, 'Value 2 (Hz)', '900');
+  await appSignal(page, function editedValuesQueried() {
+    const app = window.odmStudio.app;
+    const bass = app.state.rows.find((row) => row.name === 'bass');
+    return (
+      bass &&
+      app.state.events[bass.id]?.events.some(
+        (event) => (event.value as { cutoff?: number }).cutoff === 900,
+      )
+    );
+  });
   await expect(page.locator('.values-lane')).toContainText('900');
   await undo(page);
   await expect(page.getByRole('spinbutton', { name: 'Value 2 (Hz)', exact: true })).toHaveValue(
@@ -36,10 +54,12 @@ test('real house tray: values, source, rhythm, signal, ordered rewrites and inst
   const source = page.getByLabel('Source text', { exact: true });
   await source.fill('.lpf(900)');
   await page.getByRole('button', { name: 'Apply', exact: true }).click();
+  await sourceChecked(page);
   await expect(editor(page)).toContainText('Applied.');
   await waitForPending(page);
   await source.fill('.lpf(');
   await page.getByRole('button', { name: 'Apply', exact: true }).click();
+  await sourceChecked(page);
   await expect(editor(page).getByRole('alert').filter({ visible: true })).toContainText(
     'Check the source text',
   );
@@ -68,6 +88,11 @@ test('real house tray: values, source, rhythm, signal, ordered rewrites and inst
   await page.locator('.signal-editor summary').click();
   await page.getByRole('button', { name: 'saw', exact: true }).click();
   await number(page, 'One sweep every N cycles', '2');
+  await appSignal(page, function signalValuesDrawn() {
+    return !!window.document
+      .querySelector('#editor .signal-curve polyline')
+      ?.getAttribute('points');
+  });
   await expect(
     page
       .getByRole('img', { name: 'Real setting values over the current window' })
@@ -79,6 +104,9 @@ test('real house tray: values, source, rhythm, signal, ordered rewrites and inst
   await selectNode(page, { breadcrumb: ['kick', 'Rewrites'] });
   await page.getByRole('button', { name: 'Add fast', exact: true }).click();
   await number(page, 'Time factor', '2');
+  await appSignal(page, function rewriteComparisonQueried() {
+    return !!window.document.querySelector('#editor [aria-label="Without fast"]');
+  });
   await expect(page.getByRole('img', { name: 'Without fast' })).toBeVisible();
   await done(page);
   await selectNode(page, { breadcrumb: ['kick', 'Rewrites'] });
