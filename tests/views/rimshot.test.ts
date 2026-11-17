@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { beforeAll, expect, it } from 'vitest';
-import { initialState, loadPiece } from '../../src/app/state';
+import { type AppState, initialState, loadPiece } from '../../src/app/state';
 import { importStrudel } from '../../src/import';
 import { generate } from '../../src/generate';
-import { viewNotes } from '../../src/studio/frame';
+import { neededRange, sectionMembership, viewNotes } from '../../src/studio/frame';
 import { queryEventsNode } from '../node-query';
 import { scoreFrame } from './score-fixture';
 import type { ViewFrame } from '../../src/views/types';
@@ -20,9 +20,15 @@ import {
   tubePoint,
 } from '../../src/views/rimshot/model';
 let frame: ViewFrame;
+let state: AppState;
+let programs: { id: string; source: string }[];
 beforeAll(async () => {
   const source = readFileSync('corpus/programs/real-dubstep-arranged.strudel', 'utf8');
-  const state = loadPiece(initialState(), source, importStrudel(source));
+  state = loadPiece(initialState(), source, importStrudel(source));
+  programs = state.rows.map((row) => ({
+    id: row.id,
+    source: generate(state.doc!, { only: row.id }),
+  }));
   const entries = await Promise.all(
     state.rows.map(
       async (row) =>
@@ -44,11 +50,12 @@ beforeAll(async () => {
     );
   });
 });
-it('assigns actual drop instruments contiguous runs, pitched order and cycling unpitched lanes without names', () => {
+it('reserves contiguous instrument runs and maps pitch classes and cyclic unpitched lanes without names', () => {
   const parts = analyse(frame.notes),
     tube = layout(frame, parts);
-  expect(tube.runs).toHaveLength(6);
-  expect(tube.lanes).toBe(18);
+  expect(tube.runs).toHaveLength(frame.instruments.length);
+  expect(tube.lanes).toBe(32);
+  expect(tube.logical).toBe(52);
   let start = 0;
   for (const run of tube.runs) {
     expect(run.start).toBe(start);
@@ -57,32 +64,95 @@ it('assigns actual drop instruments contiguous runs, pitched order and cycling u
       expect(laneFor(event, run)).toBeGreaterThanOrEqual(run.start);
       expect(laneFor(event, run)).toBeLessThan(run.start + run.count);
     }
-    if (run.part.pitches.length) {
-      const hits = run.part.events.filter(
-        (e) => e.note.start >= 8 && e.note.start < 16 && e.pitched,
-      );
-      expect(new Set(hits.map((e) => laneFor(e, run))).size).toBe(run.part.pitches.length);
-    }
   }
-  const hats = tube.runs.find((r) => !r.part.pitches.length && r.count === 4)!;
-  const lanes = hats.part.events
-    .filter((e) => e.note.start >= 10 && e.note.start < 11)
-    .map((e) => laneFor(e, hats) - hats.start);
-  expect(lanes).toEqual([0, 1, 2, 3, 0, 1, 2, 3]);
-  const sparse = tube.runs.find(
-    (r) => !r.part.pitches.length && r.part.events.some((e) => e.note.start === 8) && r.count === 2,
+  // Use an actual eight-onset corpus part in isolation: equal subdivisions
+  // advance around its run, independent of earlier queried cycles.
+  const hats = [...parts.entries()].find(
+    ([, p]) =>
+      p.events.filter(
+        (e) => !e.pitched && e.note.hasOnset && e.note.start >= 10 && e.note.start < 11,
+      ).length === 8,
   )!;
+  const instrument = frame.instruments.find((i) => i.id === hats[0])!;
+  const run = layout({ ...frame, instruments: [instrument] }, parts).runs[0];
   expect(
-    sparse.part.events
-      .filter((e) => e.note.start >= 8 && e.note.start < 12)
-      .map((e) => laneFor(e, sparse) - sparse.start),
-  ).toEqual([0, 1, 0, 1]);
+    run.part.events
+      .filter((e) => e.note.start >= 10 && e.note.start < 11)
+      .map((e) => laneFor(e, run)),
+  ).toEqual([2, 3, 4, 5, 6, 7, 0, 1]);
+  const pitched = [...parts.values()].flatMap((p) => p.events).filter((e) => e.pitched);
+  expect(pitched.length).toBeGreaterThan(0);
+  for (const event of pitched) {
+    const octave = analyse([{ ...event.note, value: { note: event.rank + 72 } }]).get(
+      event.note.instrument,
+    )!.events[0];
+    expect(laneFor(octave, run)).toBe(laneFor(event, run));
+  }
   expect(
     layout(
       { ...frame, instruments: frame.instruments.map((i) => ({ ...i, name: 'renamed' })) },
       parts,
     ).runs.map((r) => [r.start, r.count]),
   ).toEqual(tube.runs.map((r) => [r.start, r.count]));
+});
+async function queriedFrame(now: number, lookAhead: number): Promise<ViewFrame> {
+  const range = neededRange(undefined, now, lookAhead, state.sections);
+  const entries = await Promise.all(
+    programs.map(
+      async (p) => [p.id, await queryEventsNode(p.source, range.from, range.to)] as const,
+    ),
+  );
+  for (const [, result] of entries) expect(result.error).toBeNull();
+  const members = sectionMembership(state, now);
+  return {
+    ...frame,
+    ...range,
+    now,
+    lookAhead,
+    notes: viewNotes({ ...range, events: Object.fromEntries(entries) }),
+    instruments: frame.instruments.map((i) => ({
+      ...i,
+      inSection: members?.has(i.id) ?? i.inSection,
+    })),
+  };
+}
+it('keeps in-flight corpus enemies in their lanes when the real host query window slides', async () => {
+  for (const lookAhead of [1, 2])
+    for (const boundary of [8, 12, 20]) {
+      const before = await queriedFrame(boundary - 0.05, lookAhead);
+      const after = await queriedFrame(boundary, lookAhead);
+      expect(after.from).toBe(before.from + 4);
+      const old = layout(before, analyse(before.notes)),
+        next = layout(after, analyse(after.notes));
+      expect(next.runs.map((r) => [r.instrument.id, r.start, r.count])).toEqual(
+        old.runs.map((r) => [r.instrument.id, r.start, r.count]),
+      );
+      const addresses = (tube: ReturnType<typeof layout>) =>
+        tube.runs.flatMap((r) =>
+          r.part.events
+            .filter(
+              (e) =>
+                e.note.hasOnset &&
+                e.note.start >= boundary &&
+                e.note.start <= before.now + lookAhead,
+            )
+            .map((e) => [
+              JSON.stringify([r.instrument.id, e.note.start, e.note.end, e.note.value]),
+              laneFor(e, r),
+            ]),
+        );
+      expect(addresses(old).length).toBeGreaterThan(0);
+      expect(addresses(next)).toEqual(addresses(old));
+    }
+});
+it('keeps a held unpitched lane when its onset cycle falls outside the query', () => {
+  const source = frame.notes.find((n) => n.hasOnset && n.value.s === 'hh')!;
+  const held = { ...source, start: 3.75, end: 13.75 };
+  const before = layout(frame, analyse([{ ...source, start: 3.5, end: 3.6 }, held]));
+  const after = layout({ ...frame, now: 12 }, analyse([{ ...held, hasOnset: false }]));
+  const oldRun = before.runs.find((r) => r.instrument.id === held.instrument)!;
+  const newRun = after.runs.find((r) => r.instrument.id === held.instrument)!;
+  expect(laneFor(oldRun.part.events[1], oldRun)).toBe(laneFor(newRun.part.events[0], newRun));
 });
 it('places the far end one Window ahead and reaches the rim exactly on onset at every Window size', () => {
   for (const lookAhead of [1, 2, 4, 8]) {
@@ -149,6 +219,10 @@ it('changes tube shape by section and previews the real next boundary including 
   expect(sectionAt({ ...frame, now: 38.4 }).index).toBe(2);
   expect(sectionAt({ ...frame, now: 27.9 }).next).toMatchObject({ index: 0, at: 28 });
   expect(sectionAt({ ...frame, sections: [] }).next).toBeUndefined();
+  expect(
+    sectionAt({ ...frame, sections: [{ name: 'only', from: 0, to: 28 }] }).next,
+  ).toBeUndefined();
+  expect(tubePoint({ ...g, shape: 4 }, 2, 0)).not.toEqual(tubePoint({ ...g, shape: 0 }, 2, 0));
 });
 it('merges over 32 lanes, shrinks enemies and keeps all 500 corpus-derived onsets at one and twenty instruments', () => {
   const source = frame.notes.find((n) => n.hasOnset && n.start === 10)!;
@@ -162,8 +236,8 @@ it('merges over 32 lanes, shrinks enemies and keeps all 500 corpus-derived onset
       value: count === 1 ? { note: i } : {},
     }));
     const tube = layout(f, analyse(f.notes));
-    expect(tube.merged).toBe(true);
-    expect(tube.lanes).toBe(32);
+    expect(tube.merged).toBe(count === 20);
+    expect(tube.lanes).toBe(count === 20 ? 32 : 8);
     expect(tube.runs).toHaveLength(count);
     expect(tube.runs.reduce((n, r) => n + r.part.events.length, 0)).toBe(500);
     expect(tube.runs.every((r) => r.count >= 1)).toBe(true);

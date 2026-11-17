@@ -1,6 +1,6 @@
 import type { ViewFrame, ViewInstrument, ViewNote } from '../types';
-import { roleEvidence } from '../shared/roles';
-import { pitch } from '../shared/pitch';
+import { indexScore } from '../shared/retro-2d';
+import { pitch, pitchClass } from '../shared/pitch';
 import { clamp } from '../shared/math';
 import { flightProgress } from '../shared/timing';
 
@@ -11,22 +11,17 @@ export interface TubeEvent {
   seed: number;
 }
 export interface Part {
-  slots: number;
-  pitches: number[];
   events: TubeEvent[];
 }
 export function analyse(notes: ViewNote[]): Map<string, Part> {
   const result = new Map<string, Part>();
-  for (const [id, evidence] of roleEvidence(notes)) {
-    const pitches = [
-      ...new Set(evidence.events.flatMap((e) => (e.pitch === undefined ? [] : [e.pitch]))),
-    ].sort((a, b) => a - b);
+  for (const [id, events] of indexScore(notes)) {
+    events.sort((a, b) => a.note.start - b.note.start || a.note.end - b.note.end);
     const key = (n: ViewNote) => JSON.stringify([n.start, n.end, pitch(n.value), n.value.s]);
-    const onsets = new Set(evidence.hits.map((e) => key(e.note)));
+    const onsets = new Set(events.filter((e) => e.note.hasOnset).map((e) => key(e.note)));
     const fragments = new Set<string>();
-    let ordinal = 0;
-    const events: TubeEvent[] = [];
-    for (const { note, pitch: midi } of evidence.events) {
+    const prepared: TubeEvent[] = [];
+    for (const { note, pitch: midi } of events) {
       const identity = key(note);
       if (!note.hasOnset) {
         if (onsets.has(identity) || fragments.has(identity)) continue;
@@ -34,19 +29,20 @@ export function analyse(notes: ViewNote[]): Map<string, Part> {
       }
       let seed = Math.round(note.start * 1e6);
       for (const char of id + identity) seed = Math.imul(seed ^ char.charCodeAt(0), 16777619);
-      events.push({
+      // Address unpitched lanes from the note itself, never from a query-prefix
+      // counter. Equal subdivisions cycle in order; sparse whole-cycle notes
+      // advance on each cycle too. Whole spans also survive as fragments.
+      const cycle = Math.floor(note.start);
+      const rank =
+        cycle + Math.floor((note.start - cycle) / Math.max(1e-9, note.end - note.start) + 1e-7);
+      prepared.push({
         note,
-        rank: midi === undefined ? ordinal : pitches.indexOf(midi),
+        rank: midi === undefined ? rank : pitchClass(midi),
         pitched: midi !== undefined,
         seed,
       });
-      if (note.hasOnset && midi === undefined) ordinal++;
     }
-    result.set(id, {
-      pitches,
-      slots: pitches.length ? Math.max(2, pitches.length) : evidence.density >= 4 ? 4 : 2,
-      events,
-    });
+    result.set(id, { events: prepared });
   }
   return result;
 }
@@ -60,7 +56,7 @@ export function sectionAt(frame: Pick<ViewFrame, 'now' | 'sections'>) {
     index: Math.max(0, index),
     name: frame.sections[index]?.name ?? 'Open tube',
     next:
-      index >= 0
+      index >= 0 && nextIndex !== index
         ? {
             ...next,
             index: nextIndex,
@@ -76,49 +72,31 @@ export interface Run {
   count: number;
   logical: number;
 }
-/** Fair lane merging keeps each of up to 32 instruments its own contiguous run. */
+/** Runs use only the document-ordered instrument inventory. Query windows,
+ * section membership and event density may change brightness, never geometry. */
 export function layout(frame: ViewFrame, parts: Map<string, Part>) {
-  const visible = frame.instruments.filter(
-    (i) =>
-      i.inSection ||
-      parts
-        .get(i.id)
-        ?.events.some(({ note: n }) => n.end > frame.now && n.start <= frame.now + frame.lookAhead),
-  );
-  const runs: Run[] = visible.map((instrument) => {
-    const part = parts.get(instrument.id) ?? { slots: 2, pitches: [], events: [] };
-    const logical = Math.max(part.slots, Math.ceil(8 / Math.max(1, visible.length)));
-    return { instrument, part, start: 0, count: logical, logical };
+  const instruments = [...frame.instruments].sort((a, b) => a.index - b.index);
+  const count = instruments.length;
+  const slots = Math.max(4, Math.ceil(8 / Math.max(1, count)));
+  const logical = count * slots;
+  const lanes = Math.max(8, Math.min(32, logical));
+  const runs: Run[] = instruments.map((instrument, index) => {
+    const start = Math.floor((index * lanes) / count);
+    const end = Math.floor(((index + 1) * lanes) / count);
+    return {
+      instrument,
+      part: parts.get(instrument.id) ?? { events: [] },
+      start,
+      count: Math.max(1, end - start),
+      logical: slots,
+    };
   });
-  const logical = runs.reduce((sum, r) => sum + r.logical, 0);
-  if (logical > 32 && runs.length <= 32) {
-    for (const run of runs) run.count = 1;
-    for (let spare = 32 - runs.length; spare > 0; spare--) {
-      const target = runs
-        .filter((r) => r.count < r.logical)
-        .sort((a, b) => b.logical / (b.count + 1) - a.logical / (a.count + 1))[0];
-      target.count++;
-    }
-  }
-  let total = 0;
-  for (const run of runs) {
-    run.start = total;
-    total += run.count;
-  }
-  const lanes = Math.max(8, Math.min(32, total));
-  // Beyond 32 instruments, adjacent runs share display lanes; events remain explicit.
-  if (runs.length > 32)
-    for (const run of runs) {
-      const end = Math.ceil(((run.start + run.count) * 32) / total);
-      run.start = Math.floor((run.start * 32) / total);
-      run.count = Math.max(1, end - run.start);
-    }
   return { runs, lanes, logical, merged: logical > 32 };
 }
 export function laneFor(event: TubeEvent, run: Run) {
   const slot = event.pitched
-    ? Math.floor((event.rank * run.count) / Math.max(1, run.part.pitches.length))
-    : event.rank % run.count;
+    ? Math.floor((event.rank * run.count) / 12)
+    : ((event.rank % run.count) + run.count) % run.count;
   return run.start + slot;
 }
 export const depth = (time: number, frame: Pick<ViewFrame, 'now' | 'lookAhead'>) =>
@@ -148,14 +126,15 @@ export function geometry(
 export function tubePoint(g: Geometry, boundary: number, d: number) {
   const angle = -Math.PI / 2 + ((boundary - 0.5) * Math.PI * 2) / g.lanes;
   const mode = g.shape % 4;
+  const phase = g.shape * 0.37;
   const radius =
     mode === 0
-      ? 1
+      ? 0.94 + 0.06 * Math.cos(2 * angle + phase)
       : mode === 1
-        ? 0.88 + 0.12 * Math.cos(4 * angle)
+        ? 0.88 + 0.12 * Math.cos(4 * angle + phase)
         : mode === 2
-          ? 0.84 + 0.16 * Math.cos(5 * angle)
-          : 0.88 + 0.12 * Math.cos(3 * angle + 0.4);
+          ? 0.84 + 0.16 * Math.cos(5 * angle + phase)
+          : 0.88 + 0.12 * Math.cos(3 * angle + 0.4 + phase);
   const scale = 1 / (1 + 4.5 * clamp(d));
   return {
     x: g.cx + Math.cos(angle) * g.rx * radius * scale,

@@ -193,8 +193,8 @@ test('rimshot: exact-time tube, themes, shape preview and frame cost', async ({ 
     incoming,
     lanes: tube.lanes,
     logicalLanes: tube.logical,
-    rimEnemyDiameter: enemyRadius(saved, 0, false) * 2,
-    stageBEnemyDiameter: enemyRadius({ ...saved, width: 560 }, 0, false) * 2,
+    rimEnemyDiameter: enemyRadius(saved, 0, tube.merged) * 2,
+    stageBEnemyDiameter: enemyRadius({ ...saved, width: 560 }, 0, tube.merged) * 2,
     nextSection: sectionAt({ ...saved, now: 15.9 }).next,
     userAgent: await page.evaluate(() => navigator.userAgent),
   };

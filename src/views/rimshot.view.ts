@@ -64,10 +64,13 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, parts: ReturnType<typeo
   // Every run owns a contiguous coloured wall, including unoccupied lanes.
   for (const run of tube.runs) {
     const col = run.instrument.muted ? t.muted : run.instrument.colour;
+    const present =
+      run.instrument.inSection ||
+      run.part.events.some(({ note: n }) => n.end > f.now && n.start <= f.now + f.lookAhead);
     c.fillStyle = col;
-    c.globalAlpha = run.instrument.muted ? 0.025 : 0.07;
+    c.globalAlpha = run.instrument.muted ? 0.02 : present ? 0.07 : 0.015;
     for (let lane = run.start; lane < run.start + run.count; lane++) quad(c, g, lane, 1);
-    c.globalAlpha = 0.65;
+    c.globalAlpha = present ? 0.65 : 0.15;
     c.strokeStyle = col;
     c.lineWidth = 1.2;
     for (let lane = run.start; lane < run.start + run.count; lane++) {
@@ -75,6 +78,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, parts: ReturnType<typeo
         b = tubePoint(g, lane, 1);
       line(c, a.x, a.y, b.x, b.y);
     }
+    if (!present) continue;
     const p = lanePoint(g, run.start + (run.count - 1) / 2, 0);
     const dx = p.x - g.cx,
       dy = p.y - g.cy,
