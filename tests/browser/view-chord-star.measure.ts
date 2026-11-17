@@ -31,8 +31,8 @@ test('chord-star: real arrangement, five themes, both stages and CPU cost', asyn
   await page.waitForFunction(
     () =>
       window.viewProbe.frame?.now === 17.3 &&
-      window.viewProbe.frame.from <= 16 &&
-      window.viewProbe.frame.to >= 20,
+      window.viewProbe.frame.from === 12 &&
+      window.viewProbe.frame.to === 28,
   );
   await mkdir(shots, { recursive: true });
   const canvas = page.locator('[data-region="stage-a"] canvas');
@@ -49,14 +49,20 @@ test('chord-star: real arrangement, five themes, both stages and CPU cost', asyn
     window.chordStarTime = 10.4;
   });
   await page.waitForFunction(
-    () => window.viewProbe.frame?.now === 10.4 && window.viewProbe.frame.to >= 12,
+    () =>
+      window.viewProbe.frame?.now === 10.4 &&
+      window.viewProbe.frame.from === 4 &&
+      window.viewProbe.frame.to === 20,
   );
   await snapshot('bar11-arcade-1920x1080');
   await page.evaluate(() => {
     window.chordStarTime = 17.3;
   });
   await page.waitForFunction(
-    () => window.viewProbe.frame?.now === 17.3 && window.viewProbe.frame.to >= 20,
+    () =>
+      window.viewProbe.frame?.now === 17.3 &&
+      window.viewProbe.frame.from === 12 &&
+      window.viewProbe.frame.to === 28,
   );
   await presented(page);
   expect(await canvas.evaluate((c: HTMLCanvasElement) => c.toDataURL())).toBe(original);
