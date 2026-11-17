@@ -210,9 +210,9 @@ export function layout(width: number, height: number, others: number) {
     chartHeight,
     miniColumns,
     miniX: below ? 16 : width * 0.755,
-    miniY: below ? 64 + chartHeight + 78 : 82,
+    miniY: below ? 64 + chartHeight + 78 : 94,
     miniWidth: below ? width - 32 : width * 0.23,
-    miniHeight: below ? 200 : height - 96,
+    miniHeight: below ? 200 : height - 108,
     miniRows: Math.max(1, Math.ceil(others / miniColumns)),
   };
 }
