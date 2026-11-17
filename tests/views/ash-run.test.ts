@@ -61,8 +61,10 @@ it('recognises four-beat backbeats and strong-beat kicks in the other real drum 
       chosen = roles(f, analyse(f.notes));
     expect(f.instruments.find((i) => i.id === chosen.snare)?.name, program).toBe('sd');
     expect(chosen.openHat, program).not.toBe(chosen.snare);
-    if (program === 'real-synthwave')
+    if (program === 'real-synthwave') {
       expect(f.instruments.find((i) => i.id === chosen.kick)?.name).toBe('bd');
+      expect(chosen.openHat).toBeUndefined();
+    }
   }
   const bd = frame.instruments.find((i) => i.name === 'bd')!;
   const source = frame.notes.find((n) => n.instrument === bd.id && n.hasOnset)!;
@@ -73,6 +75,34 @@ it('recognises four-beat backbeats and strong-beat kicks in the other real drum 
   }));
   const f = { ...frame, notes, instruments: [bd] };
   expect(roles(f, analyse(notes)).kick).toBe(bd.id);
+});
+
+it('keeps a half-time snare out of the kick role when the kick is syncopated', () => {
+  const bd = frame.instruments.find((i) => i.name === 'bd')!;
+  const sd = frame.instruments.find((i) => i.name === 'sd · drop')!;
+  const source = frame.notes.find((n) => n.instrument === bd.id && n.hasOnset)!;
+  const snares = frame.notes.filter((n) => n.instrument === sd.id && n.start >= 8 && n.start < 16);
+  for (const phases of [
+    [0, 0.375],
+    [0, 0.625],
+    [0, 0.75, 0.875],
+  ]) {
+    const notes = [
+      ...snares,
+      ...Array.from({ length: 8 }, (_, i) =>
+        phases.map((phase) => ({
+          ...source,
+          start: 8 + i + phase,
+          end: 8 + i + phase + 0.125,
+        })),
+      ).flat(),
+    ];
+    const f = { ...frame, notes, instruments: [bd, sd] };
+    const chosen = roles(f, analyse(notes));
+    expect(chosen.snare, String(phases)).toBe(sd.id);
+    expect(chosen.kick, String(phases)).toBeUndefined();
+    expect(kind(bd.id, chosen)).toBe('generic');
+  }
 });
 
 it('starts a touching-roof leap at the old height and lands on the new roof', () => {

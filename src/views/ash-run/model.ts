@@ -84,7 +84,7 @@ export function roles(frame: ViewFrame, data: Data) {
     ];
   });
   const kick = drums
-    .filter((d) => d.strong >= 0.5 && d.regularity <= 0.15)
+    .filter((d) => d.downbeats > 0 && d.strong >= 0.5 && d.regularity <= 0.15)
     .sort(
       (a, b) =>
         a.regularity - b.regularity ||
@@ -104,7 +104,7 @@ export function roles(frame: ViewFrame, data: Data) {
       (d) =>
         d.id !== kick &&
         d.id !== snare &&
-        (offbeats(d) >= 0.5 || (d.duration > 0.2 && d.strong < 0.5)),
+        (offbeats(d) > 0.5 || (d.duration > 0.2 && d.strong < 0.5)),
     )
     .sort((a, b) => offbeats(b) - offbeats(a) || b.duration - a.duration || a.density - b.density)
     .at(0)?.id;
