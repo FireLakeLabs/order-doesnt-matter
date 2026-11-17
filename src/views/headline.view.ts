@@ -67,7 +67,7 @@ function drawHeadline(
     c.transform(fit.scaleX, 0, word.slant, fit.scaleY, 0, 0);
     c.fillStyle = word.instrument.colour;
     c.strokeStyle = word.instrument.colour;
-    c.globalAlpha = word.instrument.muted ? 0.35 : word.instrument.inSection ? 1 : 0.58;
+    c.globalAlpha = word.instrument.muted ? 0.35 : 1;
     c.lineJoin = 'round';
     // Gain remains visible with fonts that only ship a single native weight.
     const thickness = ((word.weight - 300) / 500) * Math.max(1, word.fontSize * 0.025);

@@ -2,7 +2,7 @@ import type { ViewFrame, ViewInstrument, ViewNote } from '../types';
 import { clamp } from '../shared/math';
 import { nextOnset, noteProgress, previousOnset } from '../shared/timing';
 
-/** Whole carry-ins can be returned once per queried cycle. They are one voice. */
+/** Coalesce repeated whole carry-ins; ViewNote cannot distinguish identical carried unisons. */
 export function indexWords(notes: ViewNote[]) {
   const groups = new Map<string, ViewNote[]>();
   const fragments = new Set<string>();
@@ -120,6 +120,7 @@ export function poster(frame: ViewFrame, data = indexWords(frame.notes)) {
   const all = [...frame.instruments].sort((a, b) => a.index - b.index);
   const ordered = frame.sections.length ? all.filter((i) => i.inSection) : all;
   const sitOut = frame.sections.length ? all.filter((i) => !i.inSection) : [];
+  // Nine or more names share two columns, keeping twenty readable as two tens.
   const columns = ordered.length > 8 ? 2 : 1;
   const rows = Math.max(1, Math.ceil(ordered.length / columns));
   const gap = Math.max(20, 32 * scale);
