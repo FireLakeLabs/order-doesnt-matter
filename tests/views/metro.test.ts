@@ -160,12 +160,14 @@ it('keeps one and twenty lines, shares only crowded rests, and fits true 45 degr
               index > 0 && (runs.at(index - 1)?.active ?? false),
               runs.at(index + 1)?.active ?? false,
             );
-            expect(points[1].x).toBeLessThanOrEqual(points[2].x);
+            for (let i = 1; i < points.length; i++) {
+              expect(points[i].x).toBeGreaterThanOrEqual(points[i - 1].x);
+            }
             expect(Math.abs(points[1].x - points[0].x)).toBeCloseTo(
               Math.abs(points[1].y - points[0].y),
             );
-            expect(Math.abs(points[3].x - points[2].x)).toBeCloseTo(
-              Math.abs(points[3].y - points[2].y),
+            expect(Math.abs(points[5].x - points[4].x)).toBeCloseTo(
+              Math.abs(points[5].y - points[4].y),
             );
           });
         }
@@ -193,11 +195,53 @@ it('keeps separate bypass lines readable through a one-bar rest in a 64-bar corp
     ).flat(),
   );
   const score = indexMetro(frame);
-  expect(score.minimumRest).toBe(1);
+  expect(score.routes.get(frame.instruments[0].id)).toContainEqual({
+    from: 32,
+    to: 33,
+    active: false,
+  });
   const box = metroLayout(score, 1000, 760, 6);
   expect(box.pitch).toBeGreaterThanOrEqual(4);
   for (let row = 0; row < 6; row++) {
-    expect(2 * Math.abs(box.rest(row) - box.ys[row])).toBeLessThan(box.scale);
+    const points = bypass(box.x(32), box.x(33), box.rest(row), box.ys[row], true, true);
+    expect(points[2].x).toBeLessThanOrEqual(points[3].x);
+    expect(points[5].x).toBe(box.x(33));
+  }
+});
+
+it('fills the main and Stage B map height with substantial strokes and separated lines', () => {
+  const score = indexMetro(corpus.get('real-dubstep-arranged')!);
+  const main = metroLayout(score, 1300, 760, 13);
+  expect(main.lineWidth).toBe(8);
+  expect(main.bottom - main.top).toBeGreaterThan(320);
+  expect(main.pitch - main.lineWidth).toBeGreaterThanOrEqual(main.lineWidth * 1.5);
+  expect(main.stationFont).toBeGreaterThanOrEqual(15);
+  expect(main.stationWidth).toBeGreaterThanOrEqual(18);
+  const secondary = metroLayout(score, 560, 760, 13);
+  expect(secondary.lineWidth).toBeGreaterThanOrEqual(3);
+  expect(secondary.bottom - secondary.top).toBeGreaterThan(250);
+  expect(secondary.pitch - secondary.lineWidth).toBeGreaterThanOrEqual(secondary.lineWidth * 1.5);
+  for (const [width, height] of [
+    [1299, 675],
+    [1131, 471],
+    [559, 675],
+  ]) {
+    const box = metroLayout(score, width, height, 13);
+    expect(box.pitch - box.lineWidth + 1e-9).toBeGreaterThanOrEqual(box.lineWidth * 1.5);
+    expect(box.ys[0]).toBe(box.top);
+    expect(box.ys.at(-1)).toBeCloseTo(box.bottom);
+    expect(box.bottom + 38).toBeLessThan(height * 0.67);
+  }
+});
+
+it('keeps resting dashes open and station labels below the legend in a filled wide stage', () => {
+  const score = indexMetro(corpus.get('real-dubstep-arranged')!);
+  for (const count of [6, 13]) {
+    const box = metroLayout(score, 2600, 1440, count);
+    // A round stroke must remain narrower than the 5px dash gap.
+    expect(box.restWidth).toBeLessThan(5);
+    // Labels have a fixed 22px baseline offset below the legend.
+    expect(box.stationFont).toBeLessThan(22);
   }
 });
 

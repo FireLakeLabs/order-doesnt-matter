@@ -19,7 +19,6 @@ export interface MetroScore {
   stations: Station[];
   routes: Map<string, Service[]>;
   rests: Service[];
-  minimumRest: number;
   terminal: string;
   arranged: boolean;
 }
@@ -87,10 +86,6 @@ export function indexMetro(
   }
   const rests: Service[] = [];
   const quiet = [...routes.values()].flatMap((runs) => runs.filter((run) => !run.active));
-  const minimumRest = quiet.reduce(
-    (minimum, run) => Math.min(minimum, run.to - run.from),
-    to - from,
-  );
   for (const run of quiet.sort((a, b) => a.from - b.from)) {
     const last = rests.at(-1);
     if (last && last.to >= run.from) last.to = Math.max(last.to, run.to);
@@ -102,7 +97,6 @@ export function indexMetro(
     stations,
     routes,
     rests,
-    minimumRest,
     arranged,
     terminal: arranged ? 'End' : 'Window edge',
   };
@@ -129,7 +123,8 @@ export interface Point {
   x: number;
   y: number;
 }
-/** A resting segment peels off/joins at exactly 45 degrees. */
+/** Entry and exit remain 45°; collector legs bridge a tall bundle to its bypass
+ * when a short rest cannot fit the full-height diagonals. Time always runs right. */
 export function bypass(
   x0: number,
   x1: number,
@@ -138,11 +133,20 @@ export function bypass(
   leaves: boolean,
   joins: boolean,
 ): Point[] {
-  const run = Math.abs(activeY - restY);
+  const connections = Number(leaves) + Number(joins);
+  const run = Math.min(
+    Math.abs(activeY - restY),
+    (Math.max(0, x1 - x0) * 0.9) / Math.max(1, connections),
+  );
+  const direction = Math.sign(restY - activeY);
+  const left = x0 + (leaves ? run : 0);
+  const right = x1 - (joins ? run : 0);
   return [
     { x: x0, y: leaves ? activeY : restY },
-    { x: x0 + (leaves ? run : 0), y: restY },
-    { x: x1 - (joins ? run : 0), y: restY },
+    { x: left, y: leaves ? activeY + direction * run : restY },
+    { x: left, y: restY },
+    { x: right, y: restY },
+    { x: right, y: joins ? activeY + direction * run : restY },
     { x: x1, y: joins ? activeY : restY },
   ];
 }
@@ -151,22 +155,30 @@ export function metroLayout(score: MetroScore, width: number, height: number, co
   const left = width * 0.065,
     right = width * 0.935;
   const scale = (right - left) / Math.max(0.001, score.to - score.from);
-  const minimumSpan = score.minimumRest * scale;
   const shared = count > 12;
   const legendColumns = Math.max(1, Math.floor((width - 48) / 170));
   const legendBottom = 58 + (Math.ceil(count / legendColumns) - 1) * 18;
-  const bottomLimit = height * 0.71 - 90;
-  const topLimit = Math.min(bottomLimit - 28, legendBottom + 48);
-  // Two diagonals must fit inside the shortest rest. Separate bypasses are
-  // only 0.34 pitches away; the shared bypass can span half the line stack.
-  const pitch = Math.min(
-    22,
-    Math.min(height * 0.25, bottomLimit - topLimit) / Math.max(1, count),
-    (minimumSpan * 0.8) / (shared ? count : 0.68),
+  const top = legendBottom + 36;
+  const bottom = Math.max(top + 28, height * 0.67 - 52);
+  const center = (top + bottom) / 2;
+  // Fill the space between the unchanged legend and board. At crowded heights
+  // preserve clear gaps of 1.5 stroke widths. On very cramped stages the 3px
+  // stroke floor takes priority over the gap.
+  const lineWidth = Math.max(
+    3,
+    Math.min(
+      10,
+      (width * 8) / 1300,
+      (bottom - top) / (2.5 * Math.max(1, count - 1) + (shared ? 0 : 1.25)),
+    ),
   );
-  const half = Math.max((pitch * count) / 2, 14);
-  const center = clamp(height * 0.46, topLimit + half, bottomLimit - half);
-  const ys = Array.from({ length: count }, (_, i) => center + (i - (count - 1) / 2) * pitch);
+  const restOffset = shared ? 0 : lineWidth * 1.25;
+  const rowTop = top + restOffset;
+  const pitch = (bottom - rowTop) / Math.max(1, count - 1);
+  const ys = Array.from({ length: count }, (_, i) =>
+    count === 1 ? (rowTop + bottom) / 2 : rowTop + i * pitch,
+  );
+  const bypassY = center + (count % 2 ? pitch / 2 : 0);
   return {
     left,
     right,
@@ -176,10 +188,14 @@ export function metroLayout(score: MetroScore, width: number, height: number, co
     legendColumns,
     ys,
     center,
-    bypassY: center + (count % 2 ? pitch / 2 : 0),
-    rest: (row: number) => (shared ? center + (count % 2 ? pitch / 2 : 0) : ys[row] - pitch * 0.34),
+    bypassY,
+    lineWidth,
+    restWidth: Math.max(3, lineWidth * 0.375),
+    stationWidth: Math.max(12, lineWidth * 2 + 2),
+    stationFont: width < 700 ? 12 : Math.min(20, Math.max(15, (width * 16) / 1300)),
+    rest: (row: number) => (shared ? bypassY : ys[row] - restOffset),
     x: (time: number) => left + (time - score.from) * scale,
-    top: center - Math.max((pitch * count) / 2, 14),
-    bottom: center + Math.max((pitch * count) / 2, 14),
+    top: count === 1 ? ys[0] - restOffset : top,
+    bottom: count === 1 ? ys[0] : bottom,
   };
 }

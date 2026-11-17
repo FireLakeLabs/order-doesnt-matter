@@ -54,10 +54,12 @@ function drawMap(ctx: CanvasRenderingContext2D, score: MetroScore, frame: ViewFr
     ctx.fillStyle = theme.muted;
     ctx.fillText(fit(ctx, instrument.name, cell - 22), x + 13, y);
   });
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
   if (box.shared) {
     ctx.setLineDash([3, 6]);
     ctx.strokeStyle = theme.muted;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = box.restWidth;
     const rests =
       score.routes.size < instruments.length ? [{ from: score.from, to: score.to }] : score.rests;
     for (const rest of rests) {
@@ -78,10 +80,8 @@ function drawMap(ctx: CanvasRenderingContext2D, score: MetroScore, frame: ViewFr
       const x0 = box.x(run.from),
         x1 = box.x(run.to);
       ctx.strokeStyle = active ? instrument.colour : box.shared ? theme.muted : instrument.colour;
-      ctx.lineWidth = active ? Math.max(1.5, Math.min(8, box.pitch * 0.42)) : 1.5;
+      ctx.lineWidth = active ? box.lineWidth : box.restWidth;
       ctx.setLineDash(active ? [] : [3, 5]);
-      ctx.lineCap = 'round';
-      ctx.lineJoin = 'round';
       ctx.beginPath();
       if (active) {
         ctx.moveTo(x0, y);
@@ -90,12 +90,14 @@ function drawMap(ctx: CanvasRenderingContext2D, score: MetroScore, frame: ViewFr
         const leaves = index > 0 && (runs.at(index - 1)?.active ?? false);
         const joins = runs.at(index + 1)?.active ?? false;
         const points = bypass(x0, x1, box.rest(row), y, leaves, joins);
-        // Shared horizontal bypass was drawn once; only the two diagonal connections remain.
+        // Shared horizontal bypass was drawn once; draw its entry/exit connections.
         ctx.moveTo(points[0].x, points[0].y);
         ctx.lineTo(points[1].x, points[1].y);
-        if (box.shared) ctx.moveTo(points[2].x, points[2].y);
-        else ctx.lineTo(points[2].x, points[2].y);
-        ctx.lineTo(points[3].x, points[3].y);
+        ctx.lineTo(points[2].x, points[2].y);
+        if (box.shared) ctx.moveTo(points[3].x, points[3].y);
+        else ctx.lineTo(points[3].x, points[3].y);
+        ctx.lineTo(points[4].x, points[4].y);
+        ctx.lineTo(points[5].x, points[5].y);
       }
       ctx.stroke();
     });
@@ -112,19 +114,25 @@ function drawMap(ctx: CanvasRenderingContext2D, score: MetroScore, frame: ViewFr
         next ? box.x(next.from) - x : Infinity,
       ) * 0.92;
     ctx.textAlign = index === 0 ? 'left' : index === stations.length - 1 ? 'right' : 'center';
-    ctx.font = `${String(width < 700 ? 12 : 16)}px "${theme.fontDisplay}"`;
+    ctx.font = `${String(box.stationFont)}px "${theme.fontDisplay}"`;
     ctx.fillStyle = theme.text;
-    ctx.fillText(fit(ctx, station.name, labelWidth), x, box.top - 23);
+    ctx.fillText(fit(ctx, station.name, labelWidth), x, box.top - 14);
     ctx.fillStyle = theme.text;
     ctx.strokeStyle = theme.ground;
     ctx.lineWidth = 2.5;
     ctx.beginPath();
-    ctx.roundRect(x - 6, box.top - 7, 12, box.bottom - box.top + 14, 6);
+    ctx.roundRect(
+      x - box.stationWidth / 2,
+      box.top - 7,
+      box.stationWidth,
+      box.bottom - box.top + 14,
+      box.stationWidth / 2,
+    );
     ctx.fill();
     ctx.stroke();
     ctx.font = `10px "${theme.fontMono}"`;
     ctx.fillStyle = theme.muted;
-    ctx.fillText(`bar ${String(station.from + 1)}`, x, box.bottom + 32);
+    ctx.fillText(`bar ${String(station.from + 1)}`, x, box.bottom + 22);
   });
   ctx.textAlign = 'left';
   if (box.shared) {
@@ -145,14 +153,21 @@ function drawLive(ctx: CanvasRenderingContext2D, score: MetroScore, frame: ViewF
     ctx.shadowBlur = 14;
   }
   ctx.beginPath();
-  ctx.roundRect(x - 9, box.top - 14, 18, box.bottom - box.top + 28, Math.min(6, theme.radius));
+  const trainWidth = box.stationWidth + 8;
+  ctx.roundRect(
+    x - trainWidth / 2,
+    box.top - 14,
+    trainWidth,
+    box.bottom - box.top + 28,
+    Math.min(6, theme.radius),
+  );
   ctx.stroke();
   ctx.shadowBlur = 0;
   ctx.fillStyle = theme.accent;
   ctx.fillRect(x - 3, box.top - 8, 6, 3);
   ctx.font = `11px "${theme.fontMono}"`;
   ctx.textAlign = 'center';
-  ctx.fillText(`now · ${(frame.now + 1).toFixed(1)}`, x, box.bottom + 51);
+  ctx.fillText(`now · ${(frame.now + 1).toFixed(1)}`, x, box.bottom + 38);
   ctx.textAlign = 'left';
 
   const board = departure(score, frame.now, frame.instruments);
