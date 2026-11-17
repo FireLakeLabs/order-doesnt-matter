@@ -51,7 +51,8 @@ test('harp: real arrangement, five themes, both stages and CPU cost', async ({ p
   page.on('pageerror', (error) => errors.push(String(error)));
   await page.setViewportSize({ width: 1920, height: 1080 });
   await prepare(page, 'harp');
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
+    await window.odmStudio.seek(17.3);
     history.replaceState(null, '', '/?inspect&a=harp&b=');
     window.harpTime = 17.3;
     window.harpOriginal = window.odmStudio.getPlayhead.bind(window.odmStudio);
@@ -81,6 +82,7 @@ test('harp: real arrangement, five themes, both stages and CPU cost', async ({ p
   };
   const snapshot = async (name: string) => {
     await presented(page);
+    await expect(page.locator('[data-region="score"]')).toHaveAttribute('data-score-ready', 'true');
     await page.screenshot({ path: `${shots}/${name}.png` });
     await canvas.screenshot({ path: `${shots}/${name}-stage.png` });
     await recordSize(name);
@@ -94,7 +96,8 @@ test('harp: real arrangement, five themes, both stages and CPU cost', async ({ p
   await snapshot('bar18-arcade-1920x1080-filled');
   await page.getByRole('button', { name: 'Restore Stage A', exact: true }).click();
   await presented(page);
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
+    await window.odmStudio.seek(10.4);
     window.harpTime = 10.4;
   });
   await page.waitForFunction(
@@ -104,7 +107,8 @@ test('harp: real arrangement, five themes, both stages and CPU cost', async ({ p
       window.viewProbe.frame.to === 28,
   );
   await snapshot('bar11-arcade-1920x1080');
-  await page.evaluate(() => {
+  await page.evaluate(async () => {
+    await window.odmStudio.seek(17.3);
     window.harpTime = 17.3;
   });
   await page.waitForFunction(
