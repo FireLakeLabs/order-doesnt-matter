@@ -128,7 +128,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
       }
     }
     const count = points.reduce((sum, p) => sum + p.count, 0);
-    if (count > 4) {
+    if (count > 4 && r >= 160) {
       c.textAlign = 'center';
       const [countX, countY] = xy(pc, r - dot - 21);
       text(`×${String(count)}`, countX, countY + 4, 10, theme.text);
@@ -152,22 +152,29 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: ReturnType<typeo
     c.fillText(current.root, cx, cy + 2);
     text(current.quality ?? '', cx, cy + 29, 15, theme.muted, r * 1.15);
   } else {
-    c.font = `600 ${String(Math.min(27, r * 0.13))}px "${theme.fontDisplay}"`;
+    const perLine = r < 150 ? 3 : 6;
+    const lines: string[] = [];
+    for (let i = 0; i < current.classes.length; i += perLine)
+      lines.push(
+        current.classes
+          .slice(i, i + perLine)
+          .map(className)
+          .join(' · '),
+      );
+    if (!lines.length) lines.push(current.name);
+    c.font = `600 ${String(Math.max(12, Math.min(25, r * 0.13)))}px "${theme.fontDisplay}"`;
     c.fillStyle = theme.text;
-    c.fillText(current.name, cx, cy, r * 1.15);
-    text(
-      current.pitches.length ? 'sounding pitches' : 'scored silence',
-      cx,
-      cy + 26,
-      11,
-      theme.muted,
-      r * 1.1,
-    );
+    lines.forEach((label, i) => {
+      c.fillText(label, cx, cy + (i - (lines.length - 1) / 2) * 17, r * 1.15);
+    });
+    if (lines.length < 3 && current.pitches.length)
+      text('sounding pitches', cx, cy + 26, 11, theme.muted, r * 1.1);
   }
+  const total = current.points.reduce((sum, point) => sum + point.count, 0);
   const octaves =
-    current.pitches.length <= 8
+    total <= 8
       ? current.pitches.map(spelling).join(' ')
-      : `${String(current.pitches.length)} pitches · ${String(current.classes.length)} classes`;
+      : `${String(total)} notes${r >= 150 ? ` · ${String(current.classes.length)} classes` : ''}`;
   text(octaves, cx, cy + 50, Math.max(10, Math.min(12, r * 0.06)), theme.muted, r * 1.12);
   const sx = wide ? w * 0.79 : margin,
     sy = wide ? cy - 90 : bottom + 26;

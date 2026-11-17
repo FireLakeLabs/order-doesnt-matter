@@ -75,7 +75,7 @@ test('chord-star: real arrangement, five themes, both stages and CPU cost', asyn
   await presented(page);
   const frame = await page.evaluate(() => window.viewProbe.frame!);
   await writeFile(`${shots}/frame.json`, JSON.stringify(frame, null, 2));
-  const costs = await page.evaluate(async (frame: ViewFrame) => {
+  const { pictures, ...costs } = await page.evaluate(async (frame: ViewFrame) => {
     const el = document.createElement('div');
     document.body.append(el);
     const handle = await window.viewProbe.definition.mount(el);
@@ -131,10 +131,30 @@ test('chord-star: real arrangement, five themes, both stages and CPU cost', asyn
         max: samples[299],
       });
     }
+    const pictures = [];
+    for (const [width, height] of [
+      [1300, 760],
+      [560, 471],
+    ]) {
+      handle.frame({ ...frame, ...scenarios[3], now: 17.999, width, height, dpr: 1 });
+      pictures.push(el.querySelector('canvas')!.toDataURL());
+    }
     handle.dispose();
     el.remove();
-    return { scenarios: result, width: 1300, height: 760, dpr: 1, userAgent: navigator.userAgent };
+    return {
+      pictures,
+      scenarios: result,
+      width: 1300,
+      height: 760,
+      dpr: 1,
+      userAgent: navigator.userAgent,
+    };
   }, frame);
+  for (const [i, picture] of pictures.entries())
+    await writeFile(
+      `${shots}/dense-500-staggered-${i ? '560x471' : '1300x760'}.png`,
+      Buffer.from(picture.split(',')[1], 'base64'),
+    );
   console.log('chord-star CPU frame submission:', JSON.stringify(costs));
   await writeFile(`${shots}/frame-cost.json`, JSON.stringify(costs, null, 2));
   const stageB = page.locator('[data-region="stage-b"]');
