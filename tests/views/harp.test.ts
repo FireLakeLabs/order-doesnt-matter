@@ -245,6 +245,7 @@ it('clears the base heads and canvas with angled labels, including the no-drum c
     expect(g.angled).toBe(true);
     expect(g.strip).toBe(true);
     expect(g.labelWidth).toBeGreaterThan(18);
+    if (!drums) expect(g.labelWidth).toBeGreaterThan(23);
     for (let i = 0; i < count; i++) {
       const line = stringGeometry(g, i, count);
       const labelBottom = line.bottom + 26 + g.labelWidth * Math.sin(Math.PI / 3) + 2;

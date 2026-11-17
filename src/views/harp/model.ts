@@ -153,7 +153,7 @@ export function layout(width: number, height: number, stringCount: number, drumC
   const drumHeight = drumCount ? rows * 34 + 18 : 0;
   const bottom = Math.max(
     top + 60,
-    height - (strip && drumCount ? drumHeight + 38 : 30) - (angled ? 16 : 0),
+    height - (strip && drumCount ? drumHeight + 38 : 30) - (angled ? (drumCount ? 16 : 22) : 0),
   );
   const drumTop = height - drumHeight - 4;
   // Baseline is 26 px below the beam. Keep the rotated text, including its
