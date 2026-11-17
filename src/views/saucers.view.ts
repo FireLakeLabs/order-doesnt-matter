@@ -156,7 +156,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, parts: ReturnType<typeo
     c.fillText(
       `ROOM ${String(m.orbit)} · ${m.arriving ? 'arriving' : 'mothership'}`,
       m.x,
-      Math.max(74, m.y - m.size * 0.12 - 10),
+      Math.max(84, m.y - m.size * 0.12 - 10),
     );
   }
   c.globalAlpha = 1;
@@ -283,11 +283,12 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, parts: ReturnType<typeo
     18,
     51,
   );
-  c.fillText(
-    `${String(f.instruments.filter((i) => !i.inSection).length)} sit out this section`,
-    18,
-    69,
-  );
+  if (f.sections.length)
+    c.fillText(
+      `${String(f.instruments.filter((i) => !i.inSection).length)} sit out this section`,
+      18,
+      69,
+    );
   c.fillText(
     `${String(fleet.ships.length)} saucers${fleet.squadron ? ` · ${String(Math.ceil(fleet.ships.length / 5))} squadrons` : ''} · ${String(lifts)} lift${lifts === 1 ? '' : 's'} · ${String(zaps)} zap${zaps === 1 ? '' : 's'}`,
     18,
