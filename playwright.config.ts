@@ -1,6 +1,7 @@
 import { defineConfig } from '@playwright/test';
 const optional = /\/online\.spec\.ts$/;
-const audio = /\/(engine|silent-swap)\.spec\.ts$/;
+const engine = /\/(engine|silent-swap)\.spec\.ts$/;
+const views = /\/view-[^/]+\.spec\.ts$/;
 export default defineConfig({
   testDir: './tests/browser',
   timeout: 60_000,
@@ -16,8 +17,9 @@ export default defineConfig({
   },
   reporter: 'line',
   projects: [
-    { name: 'studio', testMatch: /\.spec\.ts$/, testIgnore: [optional, audio] },
-    { name: 'audio', testMatch: audio, workers: 1, dependencies: ['studio'] },
+    { name: 'studio', testMatch: /\.spec\.ts$/, testIgnore: [optional, engine, views] },
+    { name: 'views', testMatch: views },
+    { name: 'engine', testMatch: engine, workers: 1 },
     { name: 'optional', testMatch: optional },
     { name: 'measure-views', testMatch: /\/view-[^/]+\.measure\.ts$/, workers: 1 },
   ],

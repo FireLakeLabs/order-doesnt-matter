@@ -15,8 +15,9 @@ Production code lives in `src/`; `spikes/` is frozen reference. Start with
 [the model](docs/model.md).
 
 Run `npm ci`, `npm run check` and `npm run test:browser` with the Node version in
-`.node-version`. The browser suite runs the Studio and shared engine checks in
-sequence against a built copy on an allocated port.
+`.node-version`. The browser suite runs Studio, views and shared engine checks in
+sequence against a built copy on an allocated port. CI runs them on separate
+runners, with two shards each for Studio and views and one worker per job.
 
 ## Transcribing recordings
 

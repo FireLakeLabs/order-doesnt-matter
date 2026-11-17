@@ -15,11 +15,11 @@ import { forwardBrowserSignals } from './browser-process.mjs';
 import { cacheBuiltAssets } from './browser-assets.mjs';
 const start = performance.now();
 const mode = process.argv[2] ?? 'ci';
-if (!['ci', 'studio', 'online', 'measure-views'].includes(mode))
+if (!['ci', 'studio', 'views', 'engine', 'online', 'measure-views'].includes(mode))
   throw Error('Unknown browser mode');
-const suite = ['ci', 'studio'].includes(mode);
-const project =
-  { ci: 'audio', studio: 'audio', 'measure-views': 'measure-views' }[mode] ?? 'optional';
+// One Playwright worker runs all local projects in order; CI selects one per runner.
+const projects =
+  mode === 'ci' ? ['studio', 'views', 'engine'] : [mode === 'online' ? 'optional' : mode];
 const measureDir =
   mode === 'measure-views' ? mkdtempSync(join(tmpdir(), 'odm-view-measurements-')) : undefined;
 if (measureDir) console.log(`View measurements and screenshots: ${measureDir}`);
@@ -64,8 +64,7 @@ try {
       [
         'node_modules/@playwright/test/cli.js',
         'test',
-        `--project=${project}`,
-        ...(suite || mode === 'measure-views' ? [] : [`tests/browser/${mode}.spec.ts`]),
+        ...projects.map((project) => `--project=${project}`),
         ...args,
         '--reporter',
         `${reporters},./scripts/browser-report.mjs`,

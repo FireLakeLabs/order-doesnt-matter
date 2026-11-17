@@ -15,6 +15,8 @@
     "test": "node scripts/node-tests.mjs",
     "test:browser": "node scripts/browser.mjs",
     "test:browser:studio": "node scripts/browser.mjs studio",
+    "test:browser:views": "node scripts/browser.mjs views",
+    "test:browser:engine": "node scripts/browser.mjs engine",
     "check:docs": "node scripts/docs.mjs",
     "check:boundaries": "node scripts/boundaries.mjs",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm test && npm run check:docs && npm run check:boundaries && npm run build",
