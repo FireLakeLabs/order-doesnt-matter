@@ -1,6 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { prepare } from './view-evidence';
+import { analyse, inStep, layout, poses } from '../../src/views/metronomes/model';
 import type { ViewFrame } from '../../src/views/types';
 
 // Local evidence only. CI runs view-metronomes.spec.ts's shared smoke.
@@ -78,6 +79,38 @@ test('metronomes: exact drop moment, five themes, crowd rule and CPU frame cost'
   await presented();
   await page.screenshot({ path: `${shots}/arcade-1920x1080.png` });
   const saved = await page.evaluate(() => window.viewProbe.frame!);
+  const cast = poses(saved, analyse(saved.notes));
+  const moving = cast.filter((p) => !p.resting).length;
+  const sizes = [
+    { label: 'Stage A', width: 1300, height: 760 },
+    { label: '1920 host', width: saved.width, height: saved.height },
+    { label: 'Stage B', width: 560, height: 760 },
+    { label: 'Stage B host', width: 560, height: 675 },
+  ].map((size) => {
+    const slots = layout(size, cast.length, moving).slots;
+    const spans = [{ top: 0, bottom: 64 }, ...slots].sort((a, b) => a.top - b.top);
+    let end = 0,
+      empty = 0;
+    for (const span of spans) {
+      empty = Math.max(empty, span.top - end);
+      end = Math.max(end, span.bottom);
+    }
+    empty = Math.max(empty, size.height - end);
+    const scale = slots[0].scale;
+    return {
+      ...size,
+      armPx: 200 * scale,
+      mockupArmPx: 200,
+      requiredArmPx: (200 * size.width) / 960,
+      bodyWidthPx: 124 * scale,
+      bodyHeightPx: 190 * scale,
+      weightWidthPx: 22 * scale,
+      minimumNamePx: Math.min(...slots.map((s) => s.nameSize)),
+      maximumEmptyBandPx: empty,
+    };
+  });
+  const groups = inStep(cast).map((g) => g.map((p) => p.instrument.name));
+
   await writeFile(`${shots}/frame.json`, JSON.stringify(saved, null, 2));
   const standalone = await page.evaluateHandle(async (frame) => {
     const el = document.createElement('div');
@@ -91,6 +124,13 @@ test('metronomes: exact drop moment, five themes, crowd rule and CPU frame cost'
   await page
     .locator('#metronomes-evidence canvas')
     .screenshot({ path: `${shots}/stage-b-560x760.png` });
+  await standalone.evaluate(({ el, handle }, frame) => {
+    el.style.width = '1300px';
+    handle.frame({ ...frame, width: 1300, height: 760, dpr: 1 });
+  }, saved);
+  await page
+    .locator('#metronomes-evidence canvas')
+    .screenshot({ path: `${shots}/arcade-1300x760.png` });
   for (const [name, count, density] of [
     ['single', 1, 1],
     ['twenty', 20, 8],
@@ -155,7 +195,8 @@ test('metronomes: exact drop moment, five themes, crowd rule and CPU frame cost'
   expect(errors).toEqual([]);
   await writeFile(
     `${shots}/measurements.json`,
-    JSON.stringify({ costs, deterministic, errors }, null, 2),
+    JSON.stringify({ costs, groups, sizes, deterministic, errors }, null, 2),
   );
   console.log('Metronomes CPU frame costs:', JSON.stringify(costs));
+  console.log('Metronomes sizes and lock:', JSON.stringify({ groups, sizes }));
 });

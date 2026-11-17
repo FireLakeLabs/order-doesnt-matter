@@ -93,7 +93,7 @@ it('centres a single part and places twenty in a five by four grid', () => {
   expect(single.rows).toBe(1);
   expect(twenty.columns).toBe(5);
   expect(twenty.rows).toBe(4);
-  expect(layout({ width: 560 }, 6).rows).toBe(2);
+  expect(layout({ width: 560, height: 760 }, 6).rows).toBe(2);
 });
 it('finds the real drop lock from timing, keeps rests visible, and ignores names and playback flags', () => {
   const parts = analyse(real.notes),
@@ -218,4 +218,32 @@ it('reaches an extreme for a final zero-length onset before easing back upright'
   expect(swing(part, 0)).toBe(-EXTREME);
   expect(swing(part, 1 / 16)).toBeCloseTo(-EXTREME / 2);
   expect(swing(part, 1 / 8)).toBeCloseTo(0);
+});
+
+it('scales the six foreground arms from the mockup, retains parked parts and readable Stage B labels', () => {
+  for (const frame of [
+    { width: 1300, height: 760 },
+    { width: 1131.25, height: 469.09375 },
+    { width: 560, height: 760 },
+    { width: 560, height: 675 },
+  ]) {
+    const grid = layout(frame, 13, 6);
+    expect(grid.slots).toHaveLength(13);
+    for (const slot of grid.slots.slice(0, 6)) {
+      expect(200 * slot.scale).toBeGreaterThanOrEqual((200 * frame.width) / 960);
+      expect(slot.nameSize).toBeGreaterThanOrEqual(12);
+    }
+    for (const slot of grid.slots.slice(6)) {
+      expect(slot.compact).toBe(true);
+      expect(slot.nameSize).toBeGreaterThanOrEqual(12);
+    }
+    // Measure empty horizontal bands between actual marks, not their cell boxes.
+    const spans = [{ top: 0, bottom: 64 }, ...grid.slots].sort((a, b) => a.top - b.top);
+    let end = 0;
+    for (const span of spans) {
+      expect(span.top - end).toBeLessThanOrEqual(frame.height / 4);
+      end = Math.max(end, span.bottom);
+    }
+    expect(frame.height - end).toBeLessThanOrEqual(frame.height / 4);
+  }
 });

@@ -129,12 +129,79 @@ export function inStep(cast: Pose[]): Pose[][] {
   }
   return [...groups.values()].filter((group) => group.length > 1);
 }
-export function layout(frame: Pick<ViewFrame, 'width'>, count: number) {
-  const columns = Math.min(
-    Math.max(1, count),
-    count > 16 ? 5 : count > 6 ? Math.ceil(count / 2) : frame.width < 700 ? 3 : 6,
-  );
-  const rows = Math.max(1, Math.ceil(count / columns));
-  const cellWidth = (frame.width - 32) / columns;
-  return { columns, rows, cellWidth, top: 100 };
+export interface Slot {
+  x: number;
+  base: number;
+  scale: number;
+  width: number;
+  nameSize: number;
+  compact: boolean;
+  top: number;
+  bottom: number;
+}
+/** Foreground parts keep the mockup's scale; parked parts use a secondary band.
+ * The card's 20-part crowd rule takes precedence over foreground sizing. */
+export function layout(
+  frame: Pick<ViewFrame, 'width' | 'height'>,
+  count: number,
+  moving = count,
+  top = 76,
+) {
+  const available = Math.max(1, frame.height - top - 16);
+  const columnsFor = (n: number) =>
+    Math.min(Math.max(1, n), n > 16 ? 5 : n > 6 ? Math.ceil(n / 2) : frame.width < 700 ? 3 : 6);
+  const split = moving > 0 && moving < count && count <= 16;
+  const columns = columnsFor(split ? moving : count);
+  const rows = Math.max(1, Math.ceil((split ? moving : count) / columns));
+  const slots: Slot[] = [];
+  const place = (
+    start: number,
+    length: number,
+    cols: number,
+    y: number,
+    height: number,
+    compact: boolean,
+  ) => {
+    const bandRows = Math.max(1, Math.ceil(length / cols));
+    const cellWidth = (frame.width - 32) / cols;
+    const cellHeight = height / bandRows;
+    const labelSpace = compact ? 20 : 40;
+    const nameSize = compact || count > 16 ? 12 : clamp((13 * frame.width) / 960, 12, 18);
+    // The drawing extends 206 units above the pivot and 35 below it.
+    const scale = Math.max(
+      compact ? 0.1 : 0.02,
+      Math.min(cellWidth / 146, (cellHeight - labelSpace - 8) / 241),
+    );
+    for (let i = 0; i < length; i++) {
+      const markTop =
+        y + Math.floor(i / cols) * cellHeight + (cellHeight - 241 * scale - labelSpace) / 2;
+      slots[start + i] = {
+        x: 16 + ((i % cols) + 0.5) * cellWidth,
+        base: markTop + 206 * scale,
+        scale,
+        width: cellWidth,
+        nameSize,
+        compact,
+        top: markTop,
+        bottom: markTop + 241 * scale + labelSpace,
+      };
+    }
+  };
+  let parkedTop: number | undefined;
+  if (split) {
+    const parked = count - moving;
+    const parkColumns = frame.width < 700 && frame.height >= 600 ? Math.min(4, parked) : parked;
+    const parkRows = Math.ceil(parked / parkColumns);
+    const requiredMain = rows * ((241 * frame.width) / 960 + 48);
+    const parkHeight = Math.min(
+      parkRows * 116,
+      available * 0.3,
+      Math.max(44, available - requiredMain - 2),
+    );
+    const mainHeight = available - parkHeight;
+    parkedTop = top + mainHeight;
+    place(0, moving, columns, top, mainHeight, false);
+    place(moving, parked, parkColumns, parkedTop, parkHeight, true);
+  } else place(0, count, columns, top, available, false);
+  return { columns, rows, slots, parkedTop };
 }

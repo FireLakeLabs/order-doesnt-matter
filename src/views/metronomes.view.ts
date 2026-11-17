@@ -18,7 +18,7 @@ function metronome(
   c.globalAlpha = p.instrument.muted ? 0.25 : p.resting ? 0.4 : 1;
   c.fillStyle = t.panel;
   c.strokeStyle = t.line;
-  c.lineWidth = 1.5;
+  c.lineWidth = Math.max(1.5, 0.7 / scale);
   c.beginPath();
   c.moveTo(-62, 35);
   c.lineTo(62, 35);
@@ -54,7 +54,7 @@ function metronome(
   }
   if (p.lit) {
     c.strokeStyle = colour;
-    c.lineWidth = 5;
+    c.lineWidth = Math.max(5, 1 / scale);
     c.lineCap = 'round';
     arc(p.lit[0], p.lit[1]);
     c.beginPath();
@@ -87,7 +87,7 @@ function metronome(
     c.rotate(angle);
     c.globalAlpha *= alpha;
     c.strokeStyle = colour;
-    c.lineWidth = 5;
+    c.lineWidth = Math.max(5, 1 / scale);
     c.lineCap = 'round';
     if (weight && p.held && t.glow && !p.fan) {
       c.shadowColor = colour;
@@ -127,7 +127,6 @@ function drawMetronomes(
   parts: ReturnType<typeof analyse>,
 ) {
   const cast = poses(f, parts).sort((a, b) => Number(a.resting) - Number(b.resting)),
-    grid = layout(f, cast.length),
     t = f.theme;
   c.textAlign = 'left';
   c.fillStyle = t.text;
@@ -160,29 +159,43 @@ function drawMetronomes(
     } else text = text ? `${text} ${word}` : word;
   }
   c.fillText(text, 24, 61 + row * 17);
-  const top = Math.max(grid.top, 78 + row * 17);
-  const cellHeight = Math.max(1, (f.height - top - 38) / grid.rows);
+  const grid = layout(
+    f,
+    cast.length,
+    cast.filter((p) => !p.resting).length,
+    Math.max(76, 73 + row * 17),
+  );
+  if (grid.parkedTop !== undefined) {
+    c.fillStyle = t.line;
+    c.fillRect(16, grid.parkedTop, f.width - 32, 1);
+  }
   for (const [i, p] of cast.entries()) {
-    const column = i % grid.columns,
-      r = Math.floor(i / grid.columns);
-    const cx = 16 + (column + 0.5) * grid.cellWidth;
-    const scale = Math.max(0.01, Math.min(grid.cellWidth / 156, (cellHeight - 68) / 250, 1.5));
-    const base = top + (r + 1) * cellHeight - 35 * scale - 50;
+    const slot = grid.slots[i];
+    const floor = slot.base + 35 * slot.scale;
     c.fillStyle = t.panel;
-    c.fillRect(16 + column * grid.cellWidth + 6, base + 35 * scale, grid.cellWidth - 12, 5);
-    metronome(c, f, p, cx, base, scale);
-    c.font = `12px "${t.fontMono}"`;
+    c.fillRect(slot.x - slot.width / 2 + 6, floor, slot.width - 12, 4);
+    metronome(c, f, p, slot.x, slot.base, slot.scale);
+    c.font = `${String(slot.nameSize)}px "${t.fontMono}"`;
     c.textAlign = 'center';
     c.fillStyle = p.held ? t.text : t.muted;
-    c.fillText(p.instrument.name, cx, base + 35 * scale + 24, grid.cellWidth - 14);
-    c.font = `10px "${t.fontMono}"`;
-    c.fillStyle = t.muted;
-    c.fillText(
-      p.resting ? 'rest' : `${String(p.hits)} hits / cycle${p.fan ? ' · fan' : ''}`,
-      cx,
-      base + 35 * scale + 41,
-      grid.cellWidth - 14,
-    );
+    let name = p.instrument.name;
+    if (c.measureText(name).width > slot.width - 14) {
+      const letters = Array.from(name);
+      do {
+        letters.pop();
+      } while (letters.length && c.measureText(`${letters.join('')}…`).width > slot.width - 14);
+      name = `${letters.join('')}…`;
+    }
+    c.fillText(name, slot.x, floor + (slot.compact ? 16 : slot.nameSize + 4));
+    if (!slot.compact) {
+      c.font = `12px "${t.fontMono}"`;
+      c.fillStyle = t.muted;
+      c.fillText(
+        p.resting ? 'rest' : `${String(p.hits)} hits / cycle${p.fan ? ' · fan' : ''}`,
+        slot.x,
+        floor + 36,
+      );
+    }
   }
   if (!cast.length) {
     c.textAlign = 'center';
@@ -190,9 +203,6 @@ function drawMetronomes(
     c.fillText('Bring a score to set the arms in motion.', f.width / 2, f.height / 2);
   }
   c.textAlign = 'left';
-  c.fillStyle = t.muted;
-  c.font = `10px "${t.fontMono}"`;
-  c.fillText('ONSET → EXTREME     HOLD → LIT SWING', 24, f.height - 14, f.width - 48);
 }
 const view: ViewDefinition = {
   id: 'metronomes',
