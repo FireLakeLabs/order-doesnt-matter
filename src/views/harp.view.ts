@@ -42,6 +42,8 @@ const view: ViewDefinition = {
         }
         c.fillText(label, x, y);
       };
+      const quantity = (n: number, singular: string, plural = singular + 's') =>
+        `${String(n)} ${n === 1 ? singular : plural}`;
       const strings = score.strings.map((slot) => ({ slot, parts: partsAt(slot.voices, f) }));
       const heads = score.drums.map((head) => ({ head, parts: partsAt(head.voices, f) }));
       const sounding = [
@@ -70,7 +72,7 @@ const view: ViewDefinition = {
       );
       c.textAlign = 'left';
       text(
-        `${String(score.pitchCount)} pitches · ${String(score.strings.length)} ${score.grouped ? 'octave groups' : 'strings'} · ${String(activeCount)} pitched notes · ${String(score.drums.length)} drumheads`,
+        `${quantity(score.pitchCount, 'pitch', 'pitches')} · ${quantity(score.strings.length, score.grouped ? 'octave group' : 'string')} · ${quantity(activeCount, 'pitched note')} · ${quantity(score.drums.length, 'drumhead')}`,
         20,
         55,
         11,
