@@ -112,6 +112,7 @@ export function blasts(c: CanvasRenderingContext2D, f: ViewFrame, s: Scene, data
     if (!e.note.hasOnset || age < 0 || age > 1) continue;
     const x = f.width * (0.45 + random(e.seed) * 0.3) - age * s.speed * 0.06;
     const base = f.height * 0.55;
+    c.globalAlpha = 1 - age;
     c.fillStyle = '#55404a';
     for (let puff = 0; puff < 5; puff++) {
       const radius = s.size * (0.16 + 0.16 * age + 0.05 * (5 - puff));
@@ -125,7 +126,6 @@ export function blasts(c: CanvasRenderingContext2D, f: ViewFrame, s: Scene, data
       );
       c.fill();
     }
-    c.globalAlpha = 1 - age;
     c.fillStyle = '#ff8a3d';
     c.beginPath();
     c.ellipse(x, base, s.size * 0.24, s.size * 0.35, 0, 0, Math.PI * 2);
@@ -154,7 +154,7 @@ export function dust(c: CanvasRenderingContext2D, f: ViewFrame, s: Scene, data: 
   c.globalAlpha = 1;
 }
 export function walker(c: CanvasRenderingContext2D, f: ViewFrame, s: Scene) {
-  const x = f.width * 0.83 - ((s.distance * 0.015) % (f.width * 0.04)),
+  const x = f.width * 0.83,
     y = f.height * 0.3,
     size = f.height * 0.24;
   const angle = s.light?.angle ?? 2.65,

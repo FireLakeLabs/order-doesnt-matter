@@ -12,9 +12,10 @@ import {
   district,
   strideAt,
   accented,
+  parallaxRates,
 } from '../../src/views/ash-run/model';
 import { building, buildingAt, crossing, route, world } from '../../src/views/ash-run/city';
-import { crateState } from '../../src/views/ash-run/effects';
+import { crateState, walker } from '../../src/views/ash-run/effects';
 import { runPose } from '../../src/views/ash-run/runner';
 import { skyline, windowLights } from '../../src/views/ash-run/scenery';
 import type { ViewFrame } from '../../src/views/types';
@@ -333,6 +334,66 @@ it('keeps short ballistic jumps at the tall 560 × 760 Stage B size without over
     expect(b.gap).toBeLessThanOrEqual(2.2);
     expect((jump.landing - jump.takeoff) / f.cps).toBeGreaterThanOrEqual(0.3);
     expect((jump.landing - jump.takeoff) / f.cps).toBeLessThanOrEqual(0.45 + 1e-9);
+    expect(route(w, jump.landing).feet).toBeCloseTo(w.y(jump.to));
+  }
+});
+
+it('keeps a held window on the same cell while it moves at its layer parallax', () => {
+  const f = { ...scoreFrame(3), width: 960, height: 600, now: 10 };
+  f.notes = f.instruments.map((i) => ({
+    instrument: i.id,
+    start: 10,
+    end: 11,
+    hasOnset: true,
+    value: { note: 48 + i.index },
+  }));
+  const data = analyse(f.notes);
+  const initial = windowLights(f, scene(f, data), data);
+  const anchor = initial.find((w) => w.layer === 1 && w.x > 150 && w.x < 800 && w.y < 280);
+  expect(anchor).toBeDefined();
+  if (!anchor) throw Error('Expected an unobscured mid-ground window');
+  for (let tick = 1; tick < 100; tick++) {
+    const current = { ...f, now: 10 + tick * 0.01 },
+      s = scene(current, data);
+    const light = windowLights(current, s, data).find(
+      (w) =>
+        w.id === anchor.id &&
+        w.layer === anchor.layer &&
+        w.building === anchor.building &&
+        w.row === anchor.row &&
+        w.column === anchor.column,
+    );
+    expect(light, String(current.now)).toBeDefined();
+    expect(light!.x).toBeCloseTo(anchor.x - s.pace * parallaxRates[anchor.layer] * tick * 0.01);
+    expect(light!.y).toBe(anchor.y);
+  }
+});
+it('keeps the drawn walker on the horizon across its former on-screen wrap', () => {
+  const noop = () => {};
+  const lamps: number[] = [];
+  const c = {
+    beginPath: noop,
+    moveTo: noop,
+    lineTo: noop,
+    stroke: noop,
+    quadraticCurveTo: noop,
+    fill: noop,
+    arc: (x: number) => lamps.push(x),
+  } as unknown as CanvasRenderingContext2D;
+  const f = { ...frame, width: 960, height: 600 },
+    data = analyse(f.notes);
+  for (const now of [4.19, 4.24, 4.25, 4.26, 4.3, 8.49, 8.5]) {
+    const current = { ...f, now };
+    walker(c, current, { ...scene(current, data), lamp: false });
+  }
+  expect(new Set(lamps).size).toBe(1);
+});
+it('lands inside the next roof even in a very wide stage', () => {
+  const w = world({ ...frame, width: 3840, height: 600 });
+  for (let i = 0; i < 60; i++) {
+    const jump = crossing(w, building(i, w.maxGap));
+    expect((jump.landing * w.pace) / w.size).toBeLessThan(jump.to.end);
+    expect(route(w, jump.landing).airborne).toBe(false);
     expect(route(w, jump.landing).feet).toBeCloseTo(w.y(jump.to));
   }
 });

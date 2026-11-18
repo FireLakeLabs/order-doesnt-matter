@@ -55,7 +55,10 @@ export type World = ReturnType<typeof world>;
 export function crossing(w: World, b: ReturnType<typeof building>) {
   const next = building(b.index + 1, w.maxGap);
   const takeoff = (b.end * w.size) / w.pace;
-  const travel = Math.max((b.gap + 0.12) * w.size, w.pace * 0.2);
+  const travel = Math.min(
+    Math.max((b.gap + 0.12) * w.size, w.pace * 0.2),
+    (b.gap + next.end - next.start - 1) * w.size,
+  );
   const landing = takeoff + travel / w.pace;
   return { from: b, to: next, takeoff, landing, drop: b.floors - next.floors >= 3 };
 }

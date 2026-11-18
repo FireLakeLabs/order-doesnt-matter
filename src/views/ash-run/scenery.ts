@@ -31,6 +31,8 @@ export function skyline(f: ViewFrame, s: Scene, layer: number) {
 function facadeWindows(b: ReturnType<typeof skyline>[number]) {
   return Array.from({ length: 5 }, (_, row) =>
     Array.from({ length: Math.max(1, Math.floor((b.width - 20) / 20)) }, (_, column) => ({
+      row,
+      column,
       x: b.x + 10 + column * 20,
       y: b.top + 12 + row * 18,
     })),
@@ -71,51 +73,61 @@ export function background(c: CanvasRenderingContext2D, f: ViewFrame, s: Scene, 
 }
 export function windowLights(f: ViewFrame, s: Scene, data: Data) {
   const near = skyline(f, s, 2);
-  const slots = [1, 2].flatMap((layer) =>
-    skyline(f, s, layer).flatMap((b) =>
-      facadeWindows(b).filter((w) => {
-        if (w.x < 0 || w.x + 10 > f.width) return false;
-        if (
-          layer === 1 &&
-          near.some((n) => w.x < n.x + n.width && w.x + 10 > n.x && w.y + 7 >= n.top - 5)
-        )
-          return false;
-        return !s.buildings.some(
-          (n) => w.x < s.x(n.end) && w.x + 10 > s.x(n.start) && w.y + 7 >= s.y(n),
-        );
-      }),
-    ),
-  );
   const ids = [...data.parts.keys()].filter(
     (id) => ![s.roles.kick, s.roles.snare, s.roles.openHat, s.roles.walker].includes(id),
   );
-  if (!slots.length) return [];
-  return ids.flatMap((id) => {
-    const instrument = f.instruments.find((i) => i.id === id);
-    const colour = instrument?.colour ?? f.theme.accent;
-    const part = instrument?.index ?? 0;
-    // Reserve a disjoint set of existing facade cells for each part. When a
-    // narrow view has fewer cells than parts, split a cell into colour stripes.
-    const count = Math.max(1, f.instruments.length);
-    const own = slots.filter((_, index) => index % count === part % count);
-    const pool = own.length ? own : [slots[part % slots.length]];
-    const stripes = Math.ceil(count / slots.length);
-    return (data.parts.get(id) ?? []).flatMap((e) => {
-      const n = e.note,
-        tail = Math.max(n.end, n.start + f.cps * 0.18);
-      if (f.now < n.start || f.now >= tail) return [];
-      const w = pool[Math.floor(random(e.seed) * pool.length)];
-      return [
-        {
-          id,
-          colour,
-          x: w.x + (Math.floor(part / slots.length) * 10) / stripes,
-          y: w.y,
-          width: 10 / stripes,
-        },
-      ];
-    });
-  });
+  const active = new Map(
+    ids.map((id) => [
+      id,
+      (data.parts.get(id) ?? []).filter(
+        ({ note }) => note.start <= f.now && f.now < Math.max(note.end, note.start + f.cps * 0.18),
+      ),
+    ]),
+  );
+  const count = Math.max(1, f.instruments.length);
+  return [1, 2].flatMap((layer) =>
+    skyline(f, s, layer).flatMap((b) => {
+      // Allocate by a building's fixed row/column cells, before visibility. A
+      // held note keeps its cell as that building scrolls or becomes occluded.
+      const cells = facadeWindows(b);
+      const stripes = Math.ceil(count / cells.length);
+      return ids.flatMap((id) => {
+        const instrument = f.instruments.find((i) => i.id === id);
+        const colour = instrument?.colour ?? f.theme.accent;
+        const part = instrument?.index ?? 0;
+        const own = cells.filter((_, ordinal) => ordinal % count === part % count);
+        const pool = own.length ? own : [cells[part % cells.length]];
+        return (active.get(id) ?? []).flatMap((e) => {
+          const w = pool[Math.floor(random(e.seed + b.index * 773, layer) * pool.length)];
+          const x = w.x + (Math.floor(part / cells.length) * 10) / stripes;
+          const width = 10 / stripes;
+          if (x < 0 || x + width > f.width) return [];
+          if (
+            layer === 1 &&
+            near.some((n) => x < n.x + n.width && x + width > n.x && w.y + 7 >= n.top - 5)
+          )
+            return [];
+          if (
+            s.buildings.some((n) => x < s.x(n.end) && x + width > s.x(n.start) && w.y + 7 >= s.y(n))
+          )
+            return [];
+          return [
+            {
+              id,
+              colour,
+              layer,
+              building: b.index,
+              row: w.row,
+              column: w.column,
+              x,
+              y: w.y,
+              width,
+            },
+          ];
+        });
+      });
+    }),
+  );
 }
 export function windows(c: CanvasRenderingContext2D, f: ViewFrame, s: Scene, data: Data) {
   for (const light of windowLights(f, s, data)) {
@@ -200,7 +212,9 @@ export function roofs(c: CanvasRenderingContext2D, f: ViewFrame, s: Scene) {
     line(c, right - u * 0.02, y + u * 0.4, right - u * 0.02, f.height);
   }
   // District silhouettes: scaffold/crane, office mast, dock gantry or chimneys.
-  const x = f.width * 0.91 - ((s.distance * 0.17) % (f.width * 1.3)),
+  const period = f.width + 240;
+  const travel = s.distance * 0.17 + f.width * 0.09 + 100;
+  const x = f.width + 100 - (((travel % period) + period) % period),
     y = f.height * 0.73;
   c.strokeStyle = p.detail;
   c.fillStyle = p.detail;

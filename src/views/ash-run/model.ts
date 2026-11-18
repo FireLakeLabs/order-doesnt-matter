@@ -62,6 +62,7 @@ export function roles(frame: ViewFrame, data: Data) {
     .map((i) => i.id);
   // Explicit note/frequency evidence disambiguates melodic pitch from sample-index n.
   const walker = lowestPitchedPart(data.evidence, data.explicit.size ? data.explicit : undefined);
+  // Footfalls favour dense subdivisions when drums are equally steady, to keep a running cadence.
   const steady = eligible
     .flatMap((id) => {
       const p = data.evidence.get(id);
