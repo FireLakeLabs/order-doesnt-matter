@@ -15,6 +15,7 @@ import {
   timeScale,
 } from '../../src/views/ribbons/model';
 import { revealView } from './shelf';
+import { labelColour } from '../../src/views/ribbons/labels';
 
 const shots = `${process.env.ODM_VIEW_MEASURE_DIR}/ribbons`;
 declare global {
@@ -501,4 +502,26 @@ test('Ribbons: CPU submission and available GPU timer comparison with Ring and R
   }
   console.log('Ribbons/Ring/Ridges render costs:', JSON.stringify(results));
   await writeFile(`${shots}/performance.json`, JSON.stringify(results, null, 2));
+});
+
+test('Ribbons: sweep label contrast in the Studio', async ({ page }) => {
+  await prepare(page);
+  const host = page.locator('[data-region="stage-a"] .view-host');
+  for (const theme of ['arcade', 'sunset', 'phosphor', 'riso', 'pocket']) {
+    await page.getByRole('button', { name: `Theme ${theme}`, exact: true }).click();
+    await page.evaluate(() => document.fonts.ready);
+    await frames(page);
+    const frame = await page.evaluate(() => window.ribbonsFrame);
+    const css = (hex: string) =>
+      `rgb(${[1, 3, 5].map((offset) => Number.parseInt(hex.slice(offset, offset + 2), 16)).join(', ')})`;
+    for (const { instrument } of ribbonParts(frame)) {
+      const label = host.getByText(instrument.name, { exact: true });
+      await expect(label).toHaveCSS('background-color', css(frame.theme.ground));
+      await expect(label).toHaveCSS('opacity', '1');
+      await expect(label).toHaveCSS('box-shadow', `${css(frame.theme.ground)} 0px 0px 0px 2px`);
+      await expect(label).toHaveCSS('color', css(labelColour(instrument.colour, frame.theme)));
+    }
+    await page.screenshot({ path: `${shots}/sweep-${theme}-studio.png` });
+    await host.screenshot({ path: `${shots}/sweep-${theme}-labels.png` });
+  }
 });

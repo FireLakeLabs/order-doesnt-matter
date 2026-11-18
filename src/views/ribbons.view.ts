@@ -1,5 +1,6 @@
 import type { ViewDefinition, ViewFrame } from './types';
 import { createThreeStage } from './shared/three-stage';
+import { labelColour } from './ribbons/labels';
 import {
   cameraPose,
   gateX,
@@ -249,7 +250,9 @@ const view: ViewDefinition = {
           if (!el) continue;
           el.style.top = `${String(y - 10)}px`;
           el.style.font = `${String(Math.max(12, (11 * frame.width) / 960))}px "${frame.theme.fontMono}"`;
-          el.style.color = part.instrument.colour;
+          el.style.color = labelColour(part.instrument.colour, frame.theme);
+          el.style.backgroundColor = frame.theme.ground;
+          el.style.boxShadow = `0 0 0 2px ${frame.theme.ground}`;
           el.textContent = part.instrument.name;
         }
         const length = frame.sections.at(-1)?.to ?? 0;
