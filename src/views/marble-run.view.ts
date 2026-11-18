@@ -1,136 +1,207 @@
 import type { ViewDefinition, ViewFrame } from './types';
-import { indexMarbles, machineLayout, machineState } from './marble-run/model';
-import type { Machine, MarbleScore } from './marble-run/model';
+import { indexMarbles, machineLayout, machineState, runGeometry } from './marble-run/model';
+import type { MarbleScore, Target } from './marble-run/model';
 import { noteName } from './shared/pitch';
 import { line } from './shared/retro-2d';
 
+interface Label {
+  text: string;
+  x: number;
+  y: number;
+  width: number;
+  complete?: boolean;
+}
+interface Surface {
+  target: Target;
+  colour: string;
+  hit: number;
+  members: number[];
+}
 function fit(ctx: CanvasRenderingContext2D, text: string, width: number) {
   if (ctx.measureText(text).width <= width) return text;
   while (text && ctx.measureText(`${text}…`).width > width) text = text.slice(0, -1);
   return text ? `${text}…` : '';
 }
+function ellipse(ctx: CanvasRenderingContext2D, x: number, y: number, rx: number, ry: number) {
+  ctx.beginPath();
+  ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+}
+function drum(ctx: CanvasRenderingContext2D, surface: Surface, frame: ViewFrame, floor: number) {
+  const { target: t, colour, hit } = surface,
+    r = t.length / 2;
+  const depth = Math.min(58, (floor - t.y) * 0.8);
+  ctx.strokeStyle = frame.theme.muted;
+  ctx.lineWidth = 2;
+  line(ctx, t.x, t.y + depth, t.x, floor);
+  line(ctx, t.x, t.y + depth, t.x - r * 0.55, floor);
+  line(ctx, t.x, t.y + depth, t.x + r * 0.55, floor);
+  ctx.fillStyle = frame.theme.panel;
+  ellipse(ctx, t.x, t.y + depth, r, Math.min(12, r * 0.16));
+  ctx.fillRect(t.x - r, t.y, r * 2, depth);
+  ctx.strokeRect(t.x - r, t.y, r * 2, depth);
+  ctx.strokeStyle = frame.theme.line;
+  for (const dx of [-0.76, -0.3, 0.3, 0.76])
+    line(ctx, t.x + dx * r, t.y + 5, t.x + dx * r, t.y + depth - 3);
+  ctx.fillStyle = hit ? colour : frame.theme.panel;
+  ctx.strokeStyle = frame.theme.muted;
+  ctx.lineWidth = 2;
+  ellipse(ctx, t.x, t.y, r, Math.min(14, r * 0.19));
+  ctx.strokeStyle = colour;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.ellipse(t.x, t.y, r - 4, Math.min(11, r * 0.15), 0, 0, Math.PI * 2);
+  ctx.stroke();
+}
+function cymbal(ctx: CanvasRenderingContext2D, surface: Surface, frame: ViewFrame, floor: number) {
+  const { target: t, colour, hit } = surface,
+    r = t.length / 2;
+  ctx.strokeStyle = frame.theme.muted;
+  ctx.lineWidth = 2;
+  line(ctx, t.x, t.y - 9, t.x, floor);
+  for (const dx of [-0.48, 0.48]) line(ctx, t.x, floor - 18, t.x + dx * r, floor);
+  ctx.fillStyle = hit ? colour : frame.theme.panel;
+  ctx.beginPath();
+  ctx.moveTo(t.x - r, t.y + 2);
+  ctx.quadraticCurveTo(t.x - r * 0.3, t.y - 3, t.x, t.y - 9);
+  ctx.quadraticCurveTo(t.x + r * 0.3, t.y - 3, t.x + r, t.y + 2);
+  ctx.quadraticCurveTo(t.x, t.y + 12, t.x - r, t.y + 2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.strokeStyle = colour;
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.ellipse(t.x, t.y + 2, r * 0.82, 3, 0, 0, Math.PI * 2);
+  ctx.stroke();
+  ctx.fillStyle = frame.theme.text;
+  ellipse(ctx, t.x, t.y - 7, 3, 2);
+}
 function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: MarbleScore) {
-  const { width, height, theme, now } = frame;
+  const { width, height, theme } = frame,
+    box = runGeometry(frame);
   ctx.fillStyle = theme.ground;
   ctx.fillRect(0, 0, width, height);
-  const machines = machineLayout(frame, score);
-  const labels: { text: string; x: number; y: number; width: number }[] = [];
-  const motion: { colour: string; state: ReturnType<typeof machineState>; machine: Machine }[] = [];
-  let total = 0,
-    rolling = 0,
-    carried = 0;
-  for (const machine of machines) {
-    const part = frame.instruments.find((p) => p.id === machine.id);
+  const motions = machineLayout(frame, score).map((machine) => ({
+    machine,
+    part: frame.instruments.find((p) => p.id === machine.id),
+    state: machineState(machine, score, frame),
+  }));
+  const visible = motions.filter(
+    (m) => m.part && (m.part.inSection || m.state.marks.length || m.state.hits.size),
+  );
+  const surfaces = new Map<string, Surface>();
+  for (const { machine, part, state } of visible) {
     if (!part) continue;
-    const colour = part.colour;
-    const state = machineState(machine, score, frame);
-    motion.push({ colour, state, machine });
-    total += state.flying;
-    rolling += state.rolling;
-    carried += state.carried;
-    ctx.fillStyle = theme.panel;
-    ctx.fillRect(machine.x + 3, machine.y, machine.width - 6, machine.height - 4);
-    ctx.strokeStyle = theme.line;
-    ctx.lineWidth = 1;
-    line(
-      ctx,
-      machine.x + 10,
-      machine.y + machine.height - 39,
-      machine.x + machine.width - 10,
-      machine.y + machine.height - 39,
-    );
     for (const target of machine.targets) {
-      ctx.globalAlpha = 0.25;
-      ctx.strokeStyle = colour;
-      ctx.setLineDash([2, 7]);
+      const key =
+        target.kind === 'bar' ? `pitch/${target.key}` : `${target.kind}/${String(target.station)}`;
+      const hit = state.hits.get(target.key) ?? 0,
+        old = surfaces.get(key);
+      if (old) {
+        old.members.push(part.index + 1);
+        if (hit > old.hit) {
+          old.hit = hit;
+          old.colour = part.colour;
+        }
+      } else surfaces.set(key, { target, colour: part.colour, hit, members: [part.index + 1] });
+    }
+  }
+  // Solid, paired rails lead from the funnel to each physical surface.
+  for (const { target: t } of surfaces.values()) {
+    ctx.beginPath();
+    ctx.moveTo(box.hopperX, box.hopperY);
+    ctx.quadraticCurveTo((box.hopperX + t.x) / 2, Math.max(18, box.hopperY - 76), t.x, t.y - 8);
+    ctx.strokeStyle = theme.line;
+    ctx.lineWidth = 6;
+    ctx.stroke();
+    ctx.strokeStyle = theme.muted;
+    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.55;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+  // The bench and the rack's bolted supports tie the machine together.
+  ctx.fillStyle = theme.panel;
+  ctx.fillRect(14, box.floor, width - 28, 8);
+  ctx.strokeStyle = theme.muted;
+  ctx.lineWidth = 2;
+  line(ctx, 14, box.floor, width - 14, box.floor);
+  ctx.strokeStyle = theme.line;
+  ctx.lineWidth = 5;
+  line(ctx, 14, box.floor + 9, width - 14, box.floor + 9);
+  const bars = [...surfaces.values()]
+    .filter((s) => s.target.kind === 'bar')
+    .sort((a, b) => a.target.y - b.target.y);
+  if (bars.length) {
+    const first = bars[0].target,
+      last = bars[bars.length - 1].target;
+    ctx.strokeStyle = theme.line;
+    ctx.lineWidth = 8;
+    line(ctx, box.rackX + 10, first.y - 15, box.rackX + 10, box.floor);
+    ctx.beginPath();
+    ctx.moveTo(first.x + first.length - 10, first.y - 15);
+    for (const { target: t } of bars) ctx.lineTo(t.x + t.length - 10, t.y);
+    ctx.lineTo(last.x + last.length - 10, box.floor);
+    ctx.stroke();
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = theme.muted;
+    line(ctx, box.rackX + 10, last.y + 15, last.x + last.length - 10, box.floor);
+    line(ctx, box.rackX + 10, box.floor, last.x + last.length - 10, last.y + 15);
+  }
+  const labels: Label[] = [];
+  const stationMembers = new Map<number, Set<number>>();
+  for (const surface of surfaces.values()) {
+    const { target: t, colour, hit } = surface;
+    if (t.kind === 'bar') {
+      ctx.fillStyle = theme.line;
+      ctx.fillRect(t.x, t.y + 2, t.length, t.thickness + 2);
+      ctx.fillStyle = colour;
+      ctx.globalAlpha = hit ? 1 : 0.65;
       ctx.beginPath();
-      ctx.moveTo(width / 2, 92);
-      ctx.quadraticCurveTo(
-        (width / 2 + target.x) / 2,
-        Math.min(60, height * 0.12),
-        target.x,
-        target.y,
-      );
-      ctx.stroke();
-      ctx.setLineDash([]);
+      ctx.roundRect(t.x, t.y, t.length, t.thickness, Math.min(2, t.thickness / 2));
+      ctx.fill();
       ctx.globalAlpha = 1;
-      const hit = state.hits.get(target.key)?.strength ?? 0;
-      ctx.strokeStyle = colour;
+      ctx.strokeStyle = theme.muted;
+      ctx.lineWidth = 0.7;
+      ctx.stroke();
+      ctx.fillStyle = theme.ground;
+      for (const x of [t.x + 8, t.x + t.length - 8]) {
+        ctx.beginPath();
+        ctx.arc(x, t.y + t.thickness / 2, Math.min(1, t.thickness * 0.24), 0, Math.PI * 2);
+        ctx.fill();
+      }
+    } else {
+      if (t.kind === 'drum') drum(ctx, surface, frame, box.floor);
+      else cymbal(ctx, surface, frame, box.floor);
+      const ids = stationMembers.get(t.station ?? 0) ?? new Set<number>();
+      surface.members.forEach((id) => ids.add(id));
+      stationMembers.set(t.station ?? 0, ids);
+    }
+    if (hit > 0) {
+      ctx.strokeStyle = theme.text;
       ctx.lineWidth = 2;
-      ctx.fillStyle = hit > 0 ? colour : theme.panel;
+      ctx.globalAlpha = hit;
       ctx.shadowColor = colour;
       ctx.shadowBlur = theme.glow ? hit * 18 : 0;
-      if (target.kind === 'bar') {
-        ctx.fillRect(target.x, target.y, target.length, 2);
-        ctx.strokeRect(target.x, target.y, target.length, 2);
-      } else {
-        const r = target.length / 2;
-        if (target.kind === 'drum') {
-          ctx.fillStyle = theme.panel;
-          ctx.fillRect(target.x - r, target.y, r * 2, 18);
-          ctx.strokeRect(target.x - r, target.y, r * 2, 18);
-          ctx.fillStyle = hit > 0 ? colour : theme.panel;
-        } else {
-          ctx.strokeStyle = theme.line;
-          line(ctx, target.x, target.y, target.x, machine.y + machine.height - 42);
-          ctx.strokeStyle = colour;
-        }
-        ctx.beginPath();
-        ctx.ellipse(target.x, target.y, r, target.kind === 'drum' ? 8 : 4, 0, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.stroke();
-      }
+      ctx.beginPath();
+      ctx.ellipse(t.x, t.y, 13 + (1 - hit) * 18, 8 + (1 - hit) * 8, 0, 0, Math.PI * 2);
+      ctx.stroke();
       ctx.shadowBlur = 0;
-      if (hit > 0) {
-        ctx.strokeStyle = theme.text;
-        ctx.lineWidth = 2;
-        ctx.globalAlpha = hit;
-        ctx.beginPath();
-        ctx.ellipse(target.x, target.y, 13 + (1 - hit) * 20, 8 + (1 - hit) * 9, 0, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.globalAlpha = 1;
-      }
+      ctx.globalAlpha = 1;
     }
-    // Every text plate is painted after every moving mark, below.
-    const pitchTargets = machine.targets.filter((t) => t.pitch !== undefined);
-    let lastY = -Infinity;
-    for (const target of [...pitchTargets].sort((a, b) => a.y - b.y)) {
-      if (target.y - lastY < 15 || target.y > machine.y + machine.height - 43) continue;
-      labels.push({
-        text: noteName(target.pitch ?? 0),
-        x: target.x + target.length + 4,
-        y: target.y + 4,
-        width: Math.max(0, machine.x + machine.width - target.x - target.length - 10),
-      });
-      lastY = target.y;
-    }
-    labels.push({
-      text: part.name,
-      x: machine.x + 10,
-      y: machine.y + machine.height - 24,
-      width: machine.width - 20,
-    });
-    const count = state.flying + state.rolling + state.carried;
-    labels.push({
-      text: state.merged
-        ? `${String(count)} in stream`
-        : `${String(count)} · ${pitchTargets.length ? `${String(pitchTargets.length)} bars` : (machine.targets[0]?.kind ?? 'rest')}`,
-      x: machine.x + 10,
-      y: machine.y + machine.height - 9,
-      width: machine.width - 20,
-    });
   }
-  // Hardware first, all marbles next, all label plates last. A later part's
-  // target panel must never erase a marble crossing it on the way down.
-  for (const { colour, state, machine } of motion) {
+  // No moving marble is painted behind hardware, or over a label.
+  for (const { part, state, machine } of motions) {
+    if (!part) continue;
     if (state.merged) {
-      ctx.strokeStyle = colour;
+      ctx.strokeStyle = part.colour;
       ctx.lineWidth = 5;
+      ctx.globalAlpha = 0.45;
       for (const target of machine.targets) {
         const marks = state.marks
           .filter((m) => m.flying && m.target === target)
           .sort((a, b) => a.y - b.y);
-        ctx.globalAlpha = 0.45;
         ctx.beginPath();
         marks.forEach((m, i) => {
           if (i) ctx.lineTo(m.x, m.y);
@@ -140,76 +211,146 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: MarbleScor
       }
       ctx.globalAlpha = 1;
     }
-    // Coincident continuation records must not cover an onset-bearing marble.
-    for (const marble of [...state.marks].sort((a, b) => Number(b.carried) - Number(a.carried))) {
-      ctx.fillStyle = marble.carried ? theme.panel : colour;
+    for (const m of state.marks) {
+      if (!m.flying && m.target.kind === 'bar') {
+        ctx.strokeStyle = part.colour;
+        ctx.lineWidth = 2;
+        line(ctx, m.target.x, m.target.y - 2, m.x, m.target.y - 2);
+      }
+      const r = m.radius + Math.min(4, Math.log2(m.count));
+      ctx.fillStyle = m.carried ? theme.panel : part.colour;
       ctx.strokeStyle = theme.text;
-      ctx.lineWidth = marble.count > 1 ? 2.5 : 1;
-      const r = marble.radius + Math.min(4, Math.log2(marble.count));
-      ctx.beginPath();
-      ctx.arc(marble.x, marble.y, r, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.stroke();
-      if (!marble.carried) {
+      ctx.lineWidth = m.count > 1 ? 2 : 1;
+      ellipse(ctx, m.x, m.y, r, r);
+      if (!m.carried) {
         ctx.fillStyle = theme.text;
         ctx.beginPath();
-        ctx.arc(marble.x - r * 0.25, marble.y - r * 0.3, r * 0.22, 0, Math.PI * 2);
+        ctx.arc(m.x - r * 0.25, m.y - r * 0.3, r * 0.22, 0, Math.PI * 2);
         ctx.fill();
       }
     }
   }
-  // The hopper and the header have their own clean space above the flights.
+  // The hopper has a lip, funnel walls, outlet and loose stock inside it.
+  const hx = box.hopperX,
+    hy = box.hopperY,
+    rim = Math.min(48, width * 0.065);
   ctx.fillStyle = theme.panel;
   ctx.strokeStyle = theme.muted;
   ctx.lineWidth = 2;
   ctx.beginPath();
-  ctx.moveTo(width / 2 - 28, 65);
-  ctx.lineTo(width / 2 + 28, 65);
-  ctx.lineTo(width / 2 + 10, 92);
-  ctx.lineTo(width / 2 - 10, 92);
+  ctx.moveTo(hx - rim, hy - 43);
+  ctx.lineTo(hx + rim, hy - 43);
+  ctx.lineTo(hx + 10, hy - 5);
+  ctx.lineTo(hx + 10, hy);
+  ctx.lineTo(hx - 10, hy);
+  ctx.lineTo(hx - 10, hy - 5);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
-  ctx.fillStyle = theme.accent;
+  ctx.fillStyle = theme.line;
+  ctx.fillRect(hx - rim - 4, hy - 47, rim * 2 + 8, 5);
   for (const [dx, dy] of [
-    [-12, 73],
-    [5, 73],
-    [-2, 85],
+    [-rim * 0.35, -30],
+    [rim * 0.2, -32],
+    [0, -16],
   ]) {
-    ctx.beginPath();
-    ctx.arc(width / 2 + dx, dy, 4, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.fillStyle = theme.accent;
+    ctx.strokeStyle = theme.text;
+    ctx.lineWidth = 1;
+    ellipse(ctx, hx + dx, hy + dy, 5, 5);
   }
-  ctx.font = `22px "${theme.fontDisplay}"`;
-  ctx.fillStyle = theme.text;
-  ctx.fillText('Marble run', 20, 30);
   ctx.font = `11px "${theme.fontMono}"`;
+  ctx.textAlign = 'left';
+  // A separate label column clears the longest bar and the marble beyond its end.
+  let lastY = -Infinity;
+  for (const { target: t } of bars) {
+    if (t.y - lastY < 15) continue;
+    labels.push({
+      text: noteName(t.pitch ?? 0),
+      x: box.labelX,
+      y: t.y + 4,
+      width: box.labelWidth,
+      complete: true,
+    });
+    lastY = t.y;
+  }
+  const stations = motions.flatMap((m) => m.machine.targets).filter((t) => t.station !== null);
+  for (const [station, ids] of stationMembers) {
+    const t = stations.find((t) => t.station === station);
+    if (t) {
+      const text = [...ids].join('·');
+      labels.push({
+        text,
+        x: t.x - Math.min(50, ctx.measureText(text).width) / 2,
+        y: box.floor + 24,
+        width: 50,
+      });
+    }
+  }
+  const columns = Math.max(1, Math.floor((width - 32) / 200)),
+    rows = width < 700 ? 3 : 2,
+    limit = columns * rows;
+  const legend = visible.length > limit ? visible.slice(0, limit - 1) : visible;
+  legend.forEach(({ part, state }, i) => {
+    if (!part) return;
+    const x = 20 + ((i % columns) * (width - 40)) / columns,
+      y = box.floor + 43 + Math.floor(i / columns) * 17;
+    ctx.fillStyle = part.colour;
+    ctx.beginPath();
+    ctx.arc(x, y - 4, 3, 0, Math.PI * 2);
+    ctx.fill();
+    labels.push({
+      text: `${String(part.index + 1)} · ${String(state.flying + state.rolling + state.carried)}${state.merged ? ' stream' : ''} · ${part.name}`,
+      x: x + 8,
+      y,
+      width: (width - 40) / columns - 20,
+    });
+  });
+  if (visible.length > legend.length) {
+    const i = legend.length;
+    labels.push({
+      text: `+${String(visible.length - legend.length)} parts`,
+      x: 28 + ((i % columns) * (width - 40)) / columns,
+      y: box.floor + 43 + Math.floor(i / columns) * 17,
+      width: (width - 40) / columns - 20,
+    });
+  }
+  const total = motions.reduce((n, m) => n + m.state.flying, 0),
+    landed = motions.reduce((n, m) => n + m.state.rolling, 0),
+    carried = motions.reduce((n, m) => n + m.state.carried, 0);
   labels.push({
-    text: `bar ${String(Math.floor(now) + 1)} · ${String(Math.round((now % 1) * 100))}% · window ${String(frame.lookAhead)}`,
+    text: `bar ${String(Math.floor(frame.now) + 1)} · ${String(Math.round((frame.now % 1) * 100))}% · window ${String(frame.lookAhead)}`,
     x: 20,
     y: 49,
     width: width - 40,
   });
   labels.push({
-    text: `${String(total)} flying · ${String(rolling)} landed · ${String(carried)} carried`,
+    text: 'Gain → size · Window → flight · roll → real span',
     x: 20,
-    y: height - 32,
+    y: height - 28,
     width: width - 40,
   });
   labels.push({
-    text: 'Gain → size · count = marbles · hollow = carried',
+    text: `${String(total)} flying · ${String(landed)} landed · ${String(carried)} carried · ${String(bars.length)} bars`,
     x: 20,
-    y: height - 14,
+    y: height - 11,
     width: width - 40,
   });
-  ctx.textAlign = 'left';
-  for (const label of labels) {
-    const text = fit(ctx, label.text, label.width);
+  ctx.fillStyle = theme.text;
+  ctx.font = `22px "${theme.fontDisplay}"`;
+  ctx.fillText('Marble run', 20, 30);
+  ctx.font = `11px "${theme.fontMono}"`;
+  for (const l of labels) {
+    const text = l.complete
+      ? ctx.measureText(l.text).width <= l.width
+        ? l.text
+        : ''
+      : fit(ctx, l.text, l.width);
     if (!text) continue;
     ctx.fillStyle = theme.ground;
-    ctx.fillRect(label.x - 2, label.y - 11, ctx.measureText(text).width + 4, 14);
+    ctx.fillRect(l.x - 2, l.y - 11, ctx.measureText(text).width + 4, 14);
     ctx.fillStyle = theme.text;
-    ctx.fillText(text, label.x, label.y);
+    ctx.fillText(text, l.x, l.y);
   }
 }
 const view: ViewDefinition = {
@@ -220,8 +361,8 @@ const view: ViewDefinition = {
   needs: 'score',
   span: 'window',
   mount(element) {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
+    const canvas = document.createElement('canvas'),
+      ctx = canvas.getContext('2d');
     if (!ctx) throw Error('Canvas 2D is unavailable');
     element.append(canvas);
     let notes: ViewFrame['notes'] | undefined,
@@ -229,8 +370,8 @@ const view: ViewDefinition = {
     return {
       frame(frame) {
         if (frame.width <= 0 || frame.height <= 0) return;
-        const width = Math.max(1, Math.round(frame.width * frame.dpr));
-        const height = Math.max(1, Math.round(frame.height * frame.dpr));
+        const width = Math.max(1, Math.round(frame.width * frame.dpr)),
+          height = Math.max(1, Math.round(frame.height * frame.dpr));
         if (canvas.width !== width || canvas.height !== height) {
           canvas.width = width;
           canvas.height = height;

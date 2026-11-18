@@ -1,12 +1,12 @@
 import type { ViewFrame, ViewNote } from '../types';
 import { roleEvidence } from '../shared/roles';
 import { clamp } from '../shared/math';
-import { pitchClass } from '../shared/pitch';
+import { scoredNotes } from '../shared/scored-notes';
 import { flightProgress, noteProgress } from '../shared/timing';
 import { flash } from '../shared/retro-2d';
 
 export function indexMarbles(notes: ViewNote[]) {
-  return roleEvidence(notes);
+  return roleEvidence(scoredNotes(notes));
 }
 export type MarbleScore = ReturnType<typeof indexMarbles>;
 export interface Target {
@@ -16,63 +16,91 @@ export interface Target {
   x: number;
   y: number;
   length: number;
+  thickness: number;
+  station: number | null;
 }
 export interface Machine {
   id: string;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
   targets: Target[];
 }
-/** Part slots follow document order, including resting parts. Pitch coordinates use
- * absolute MIDI, never the currently present siblings or a changing pitch range. */
+export function runGeometry(frame: Pick<ViewFrame, 'width' | 'height'>) {
+  const footer = frame.width < 700 ? 112 : 84;
+  const floor = frame.height - footer - 20;
+  const hopperX = frame.width * 0.48;
+  const hopperY = Math.max(86, frame.height * 0.15);
+  const rackX = frame.width * 0.7;
+  const labelX = frame.width - 43;
+  return {
+    footer,
+    floor,
+    hopperX,
+    hopperY,
+    rackX,
+    labelX,
+    labelWidth: 35,
+    barRight: labelX - 19,
+    pitchTop: hopperY + 60,
+    pitchBottom: floor - 24,
+  };
+}
+/** Absolute MIDI has a fixed, continuous height on the xylophone. No octave wrap
+ * or changing sampled pitch extent can move a held marble to another bar. */
+export function pitchY(pitch: number, frame: Pick<ViewFrame, 'width' | 'height'>) {
+  const box = runGeometry(frame);
+  return box.pitchBottom - (box.pitchBottom - box.pitchTop) / (1 + Math.exp(-(pitch - 42) / 12));
+}
+/** Four physical percussion stations and one shared xylophone. Document identity
+ * routes each part to a station; window-local role evidence chooses its surface.
+ * Sharing stations in crowded pieces keeps every routed marble and its count. */
 export function machineLayout(frame: ViewFrame, score: MarbleScore): Machine[] {
-  const parts = [...frame.instruments].sort((a, b) => a.index - b.index);
-  const top = frame.height * 0.33;
-  const available = Math.max(1, frame.height - top - 58);
-  const columns = Math.max(
-    1,
-    Math.min(
-      parts.length,
-      Math.floor(frame.width / 100),
-      Math.ceil(Math.sqrt((parts.length * frame.width) / available)),
-    ),
-  );
-  const rows = Math.ceil(parts.length / columns);
-  const height = Math.max(1, (frame.height - top - 58) / Math.max(1, rows));
-  const width = (frame.width - 32) / columns;
-  return parts.map((part, i) => {
-    const x = 16 + (i % columns) * width;
-    const y = top + Math.floor(i / columns) * height;
-    const evidence = score.get(part.id);
-    const pitches = [
-      ...new Set(evidence?.events.map((e) => e.pitch).filter((p) => p !== undefined)),
-    ].sort((a, b) => b - a);
-    const targets: Target[] = pitches.map((pitch) => ({
-      key: String(pitch),
-      kind: 'bar',
-      pitch,
-      x: x + 18,
-      // Fixed chromatic rows, with octaves slightly staggered: the rack folds
-      // registers instead of recomputing a range from whichever siblings remain.
-      y:
-        y +
-        10 +
-        ((11 - pitchClass(pitch)) / 12) * Math.max(1, height - 58) +
-        (((Math.floor(pitch / 12) % 4) + 4) % 4) * 0.7,
-      length: (width - 40) * (0.15 + 0.8 / (1 + Math.exp((pitch - 36) / 12))),
-    }));
-    if (evidence?.events.some((e) => e.pitch === undefined))
-      targets.push({
-        key: 'unpitched',
-        kind: evidence.density >= 2 && evidence.duration <= 0.15 ? 'cymbal' : 'drum',
-        x: x + width / 2,
-        y: y + height * 0.48,
-        length: Math.max(8, width * 0.56),
-      });
-    return { id: part.id, x, y, width, height, targets };
-  });
+  const box = runGeometry(frame);
+  const depth = clamp((box.floor - box.hopperY) * 0.16, 30, 65);
+  const anchors = [
+    [frame.width * 0.16, box.floor - depth, Math.min(158, frame.width * 0.17)],
+    [frame.width * 0.36, box.floor - depth * 1.8, Math.min(126, frame.width * 0.14)],
+    [
+      frame.width * 0.49,
+      box.floor - (box.floor - box.hopperY) * 0.45,
+      Math.min(132, frame.width * 0.14),
+    ],
+    [
+      frame.width * 0.62,
+      box.floor - (box.floor - box.hopperY) * 0.65,
+      Math.min(116, frame.width * 0.12),
+    ],
+  ];
+  return [...frame.instruments]
+    .sort((a, b) => a.index - b.index)
+    .map((part) => {
+      const evidence = score.get(part.id);
+      const pitches = [
+        ...new Set(evidence?.events.map((e) => e.pitch).filter((p) => p !== undefined)),
+      ].sort((a, b) => b - a);
+      const targets: Target[] = pitches.map((pitch) => ({
+        key: String(pitch),
+        kind: 'bar',
+        pitch,
+        station: null,
+        x: box.rackX,
+        y: pitchY(pitch, frame),
+        length: (box.barRight - box.rackX) * (0.45 + 0.5 / (1 + Math.exp((pitch - 48) / 18))),
+        thickness: clamp((pitchY(pitch - 0.5, frame) - pitchY(pitch + 0.5, frame)) * 0.86, 0.6, 10),
+      }));
+      if (evidence?.events.some((e) => e.pitch === undefined)) {
+        const station = (part.index + 2) % 4;
+        const [x, y, length] = anchors[station];
+        targets.push({
+          key: 'unpitched',
+          kind: evidence.density >= 2 && evidence.duration <= 0.15 ? 'cymbal' : 'drum',
+          station,
+          x,
+          y,
+          length,
+          thickness: 0,
+        });
+      }
+      return { id: part.id, targets };
+    });
 }
 export function marbleRadius(note: ViewNote) {
   const gain = Number(note.value.gain ?? 1);
@@ -88,11 +116,10 @@ export function marbleAt(
   const held = frame.now >= note.start && frame.now < note.end;
   const hit = flash(note, frame);
   const progress = flightProgress(note, frame.now, frame.lookAhead);
-  const startX = frame.width / 2,
-    startY = 92;
+  const { hopperX: startX, hopperY: startY } = runGeometry(frame);
   const endX = target.x,
     endY = target.y - marbleRadius(note);
-  const controlY = Math.min(60, frame.height * 0.12);
+  const controlY = Math.max(18, startY - 76);
   const x = flying
     ? startX + (endX - startX) * progress
     : target.x +
@@ -124,17 +151,13 @@ export function machineState(machine: Machine, score: MarbleScore, frame: ViewFr
     return state.flying || state.held || state.hit > 0 ? [{ ...state, target }] : [];
   });
   const marks = new Map<string, MarbleMark>();
-  const hits = new Map<string, { strength: number; count: number }>();
+  const hits = new Map<string, number>();
   let flying = 0,
     rolling = 0,
     carried = 0;
   live.forEach((state, i) => {
     if (state.hit > 0) {
-      const hit = hits.get(state.target.key);
-      hits.set(state.target.key, {
-        strength: Math.max(hit?.strength ?? 0, state.hit),
-        count: (hit?.count ?? 0) + 1,
-      });
+      hits.set(state.target.key, Math.max(hits.get(state.target.key) ?? 0, state.hit));
     }
     if (!state.flying && !state.held) return;
     if (state.flying) flying++;

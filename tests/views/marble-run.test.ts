@@ -12,7 +12,10 @@ import {
   machineState,
   marbleAt,
   marbleRadius,
+  runGeometry,
+  pitchY,
 } from '../../src/views/marble-run/model';
+import { scoredNotes } from '../../src/views/shared/scored-notes';
 import type { ViewFrame } from '../../src/views/types';
 
 const corpus = new Map<string, ViewFrame>();
@@ -26,18 +29,23 @@ beforeAll(async () => {
       from: s.start,
       to: s.start + s.cycles,
     }));
-    frame.to = frame.sections.at(-1)?.to ?? 16;
+    frame.from = file === 'real-dubstep-arranged' ? 4 : 0;
+    frame.to = file === 'real-dubstep-arranged' ? 18 : 16;
     const entries = await Promise.all(
       state.rows.map(
         async (row) =>
           [
             row.id,
-            await queryEventsNode(generate(state.doc!, { only: row.id }), 0, frame.to),
+            await queryEventsNode(generate(state.doc!, { only: row.id }), frame.from, frame.to),
           ] as const,
       ),
     );
     for (const [, result] of entries) expect(result.error).toBeNull();
-    frame.notes = viewNotes({ from: 0, to: frame.to, events: Object.fromEntries(entries) });
+    frame.notes = viewNotes({
+      from: frame.from,
+      to: frame.to,
+      events: Object.fromEntries(entries),
+    });
     frame.instruments.forEach((i, n) => {
       i.id = state.rows[n].id;
       i.name = state.rows[n].name;
@@ -107,7 +115,16 @@ it('is independent of names and holds the same target when sibling notes leave',
 });
 it('launches exactly one Window early, uses real gain, and never invents fragment onsets', () => {
   const frame = scoreFrame(),
-    target = { key: '60', kind: 'bar' as const, pitch: 60, x: 90, y: 300, length: 100 };
+    target = {
+      key: '60',
+      kind: 'bar' as const,
+      pitch: 60,
+      x: 90,
+      y: 300,
+      length: 100,
+      thickness: 4,
+      station: null,
+    };
   const note = {
     instrument: '0',
     start: 10,
@@ -118,7 +135,11 @@ it('launches exactly one Window early, uses real gain, and never invents fragmen
   for (const window of [1, 2, 4, 8]) {
     const f = { ...frame, lookAhead: window, now: 10 - window };
     expect(marbleAt(note, target, { ...f, now: f.now - 0.001 }).flying).toBe(false);
-    expect(marbleAt(note, target, f)).toMatchObject({ flying: true, x: frame.width / 2, y: 92 });
+    expect(marbleAt(note, target, f)).toMatchObject({
+      flying: true,
+      x: runGeometry(frame).hopperX,
+      y: runGeometry(frame).hopperY,
+    });
   }
   expect(marbleRadius({ ...note, value: { gain: 1 } })).toBeGreaterThan(marbleRadius(note));
   const fragment = { ...note, hasOnset: false };
@@ -158,7 +179,15 @@ it('counts all 500 dense notes as a merged stream and retains simultaneous pitch
     expect(machines).toHaveLength(20);
     expect(machines.slice(1).every((m) => m.targets.length === 0)).toBe(true);
     expect(
-      machines.every((m) => m.x >= 0 && m.x + m.width <= width && m.y + m.height <= height - 57),
+      machines
+        .flatMap((m) => m.targets)
+        .every(
+          (t) =>
+            t.x >= 0 &&
+            t.x + t.length <= width &&
+            t.y >= 0 &&
+            t.y <= runGeometry({ ...f, width, height }).floor,
+        ),
     ).toBe(true);
   }
   const held = {
@@ -184,4 +213,86 @@ it('uses the same mapping on the contrasting real techno piece', () => {
   expect(machines.flatMap((m) => m.targets).some((t) => t.kind === 'bar')).toBe(true);
   expect(machines.flatMap((m) => m.targets).some((t) => t.kind === 'drum')).toBe(true);
   expect(machines.reduce((n, m) => n + machineState(m, score, f).flying, 0)).toBeGreaterThan(0);
+});
+
+it('counts onset notes once while preserving genuine unisons, changed bags and unmatched carries', () => {
+  const f = scoreFrame(),
+    n = { instrument: '0', start: 10, end: 12, hasOnset: true, value: { note: 39, gain: 0.75 } };
+  const repeated = { ...n, hasOnset: false, value: { gain: 0.75, note: 39 } };
+  expect(scoredNotes([n, repeated, repeated])).toEqual([n]);
+  expect(scoredNotes([n, n, repeated])).toEqual([n, n]);
+  const changed = { ...repeated, value: { note: 39, gain: 0.5 } };
+  expect(scoredNotes([n, changed])).toEqual([n, changed]);
+  expect(scoredNotes([repeated])).toEqual([repeated]);
+  f.notes = [n, ...Array.from({ length: 40 }, () => repeated)];
+  const s = indexMarbles(f.notes),
+    m = machineLayout(f, s)[0],
+    state = machineState(m, s, f);
+  expect(state.rolling).toBe(1);
+  expect(state.carried).toBe(0);
+  expect(state.marks).toHaveLength(1);
+  expect(state.merged).toBe(false);
+  const carry = indexMarbles([repeated]);
+  expect(machineState(machineLayout(f, carry)[0], carry, f).carried).toBe(1);
+});
+it('separates octave bars without wrapping and keeps the label column clear of every bar and rolling marble', () => {
+  for (const [width, height] of [
+    [1131, 469],
+    [1300, 760],
+    [560, 675],
+  ]) {
+    const f = { ...scoreFrame(), width, height };
+    f.notes = [24, 27, 36, 39, 48, 51, 60, 72, 84].map((note) => ({
+      instrument: '0',
+      start: 10,
+      end: 11,
+      hasOnset: true,
+      value: { note },
+    }));
+    const s = indexMarbles(f.notes),
+      m = machineLayout(f, s)[0],
+      box = runGeometry(f);
+    expect(Math.abs(pitchY(24, f) - pitchY(72, f))).toBeGreaterThan(40);
+    expect(Math.abs(pitchY(39, f) - pitchY(51, f))).toBeGreaterThan(15);
+    for (const t of m.targets) {
+      expect(box.labelX - 2).toBeGreaterThan(t.x + t.length + 15);
+      expect(t.y).toBeLessThan(box.floor - 20);
+    }
+    const held = f.notes[3],
+      target = m.targets.find((t) => t.pitch === 39)!;
+    const alone = machineLayout({ ...f, notes: [held] }, indexMarbles([held]))[0].targets[0];
+    expect(alone).toEqual(target);
+  }
+});
+it('uses fourteen-cycle evidence for percussion shape without moving the station when that evidence changes', () => {
+  const f = scoreFrame();
+  const sparse = {
+    ...f,
+    from: 0,
+    to: 14,
+    notes: Array.from({ length: 14 }, (_, i) => ({
+      instrument: '0',
+      start: i,
+      end: i + 0.5,
+      hasOnset: true,
+      value: {},
+    })),
+  };
+  const dense = {
+    ...f,
+    from: 8,
+    to: 22,
+    notes: Array.from({ length: 112 }, (_, i) => ({
+      instrument: '0',
+      start: 8 + i / 8,
+      end: 8 + (i + 1) / 8,
+      hasOnset: true,
+      value: {},
+    })),
+  };
+  const a = machineLayout(sparse, indexMarbles(sparse.notes))[0].targets[0],
+    b = machineLayout(dense, indexMarbles(dense.notes))[0].targets[0];
+  expect(a.kind).toBe('drum');
+  expect(b.kind).toBe('cymbal');
+  expect([a.x, a.y, a.length]).toEqual([b.x, b.y, b.length]);
 });
