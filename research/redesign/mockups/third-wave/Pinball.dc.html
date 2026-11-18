@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pinball</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.nm{font-family:'JetBrains Mono',monospace;font-size:11px;fill:#A49EC4}
+.sm{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#A49EC4}
+.hud{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;fill:#F4F1FF}
+.ink{fill:#F4F1FF}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="A tilted pinball table in drop lighting, with hats rollover lanes, kick and snare pop bumpers and two bass ramps. A silver ball travels toward the next hats and snare split while two captive balls ride the held E-flat bass notes." style="position: absolute; left: 0; top: 0; display: block">
+<defs><radialGradient id="ball"><stop offset="0" stop-color="#F4F1FF"></stop><stop offset="1" stop-color="#A49EC4"></stop></radialGradient></defs>
+<path d="M 270 82 Q 480 52 690 82 L 805 537 Q 480 599 155 537 Z" fill="#12101F" stroke="#2A2545" stroke-width="7" ></path>
+<path d="M 286 100 Q 480 75 674 100 L 777 523 Q 480 575 183 523 Z" fill="none" stroke="#FF8A3D" stroke-width="2" ></path>
+<text x="480" y="108" class="hud" text-anchor="middle">MODE III · DROP</text>
+<text x="37" y="122" class="nm" >NOTES THIS BAR</text>
+<text x="34" y="155" class="hud" >08 / 14</text>
+<text x="37" y="181" class="nm" >3 balls · 2 held</text>
+<text x="37" y="209" class="nm" >next .500 · ×2</text>
+<text x="37" y="227" class="nm" >snare + hats</text>
+<path d="M 330 143 Q 347 131 364 143 L 369 220 Q 347 239 325 220 Z" fill="none" stroke="#3DDCFF" stroke-width="2" ></path>
+<circle cx="347" cy="174" r="5" fill="#3DDCFF" opacity=".5"></circle>
+<path d="M 382 143 Q 399 131 416 143 L 421 220 Q 399 239 377 220 Z" fill="none" stroke="#3DDCFF" stroke-width="2" ></path>
+<circle cx="399" cy="174" r="5" fill="#3DDCFF" opacity=".5"></circle>
+<path d="M 434 143 Q 451 131 468 143 L 473 220 Q 451 239 429 220 Z" fill="none" stroke="#3DDCFF" stroke-width="2" ></path>
+<circle cx="451" cy="174" r="5" fill="#3DDCFF" opacity=".5"></circle>
+<path d="M 486 143 Q 503 131 520 143 L 525 220 Q 503 239 481 220 Z" fill="none" stroke="#3DDCFF" stroke-width="2" ></path>
+<circle cx="503" cy="174" r="5" fill="#3DDCFF" opacity=".5"></circle>
+<text x="421" y="128" class="nm" text-anchor="middle">hats · hh ×8</text>
+<path d="M 567 149 Q 620 138 638 184 L 651 239 Q 619 253 588 235 Z" fill="none" stroke="#5BFF8F" stroke-width="3" ></path>
+<text x="636" y="264" class="nm" text-anchor="middle">open hat · oh</text>
+<ellipse cx="339" cy="311" rx="43" ry="28" fill="#07060D" ></ellipse>
+<ellipse cx="339" cy="303" rx="41" ry="28" fill="#FF4D8D" ></ellipse>
+<ellipse cx="339" cy="299" rx="30" ry="20" fill="#12101F" ></ellipse>
+<text x="339" y="303" class="nm ink" text-anchor="middle">kick</text>
+<text x="339" y="352" class="sm" text-anchor="middle">bd</text>
+<ellipse cx="509" cy="326" rx="43" ry="28" fill="#07060D" ></ellipse>
+<ellipse cx="509" cy="318" rx="41" ry="28" fill="#FFD23F" ></ellipse>
+<ellipse cx="509" cy="314" rx="30" ry="20" fill="#12101F" ></ellipse>
+<text x="509" y="318" class="nm ink" text-anchor="middle">snare</text>
+<text x="509" y="367" class="sm" text-anchor="middle">sd</text>
+<path d="M 651 481 C 610 386 735 306 668 193 Q 638 156 650 130" fill="none" stroke="#2A2545" stroke-width="34" ></path>
+<path d="M 651 481 C 610 386 735 306 668 193 Q 638 156 650 130" fill="none" stroke="#B388FF" stroke-width="3" ></path>
+<path d="M 705 484 C 653 389 779 309 710 190 Q 681 152 693 132" fill="none" stroke="#2A2545" stroke-width="31" ></path>
+<path d="M 705 484 C 653 389 779 309 710 190 Q 681 152 693 132" fill="none" stroke="#FF8A3D" stroke-width="3" ></path>
+<circle cx="667" cy="358" r="8" fill="url(#ball)" ></circle>
+<circle cx="713" cy="345" r="8" fill="url(#ball)" ></circle>
+<text x="779" y="326" class="nm" >subBass · E♭1</text>
+<text x="779" y="344" class="nm" >sine · gain .95</text>
+<path d="M 771 336 L 679 356" fill="none" stroke="#A49EC4" stroke-width="1" ></path>
+<text x="779" y="390" class="nm" >wobbleBass · E♭2</text>
+<text x="779" y="408" class="nm" >sawtooth · .75</text>
+<text x="779" y="426" class="nm" >held 0 → 1</text>
+<path d="M 771 398 L 720 352" fill="none" stroke="#A49EC4" stroke-width="1" ></path>
+<path d="M 451 214 C 436 252 451 274 477 291" fill="none" stroke="#3DDCFF" stroke-width="3" ></path>
+<path d="M 477 291 Q 501 287 509 312 Q 536 248 503 215 Q 565 268 613 212" fill="none" stroke="#A49EC4" stroke-width="1.5" stroke-dasharray="3 7"></path>
+<circle cx="477" cy="291" r="9" fill="url(#ball)" ></circle>
+<text x="461" y="271" class="sm" >now</text>
+<text x="92" y="381" class="nm" >.500: multiball ×2</text>
+<path d="M 239 377 L 475 332" fill="none" stroke="#A49EC4" stroke-width="1" ></path>
+<text x="99" y="447" class="nm" >kick → flippers</text>
+<text x="99" y="465" class="nm" >lowest regular drum</text>
+<path d="M 258 439 L 324 489 L 410 513 M 702 439 L 637 489 L 551 513" fill="none" stroke="#2A2545" stroke-width="13" stroke-linecap="round"></path>
+<path d="M 330 519 L 428 538 M 630 519 L 532 538" fill="none" stroke="#FF4D8D" stroke-width="17" stroke-linecap="round"></path>
+<circle cx="330" cy="519" r="6" fill="#F4F1FF" ></circle>
+<circle cx="630" cy="519" r="6" fill="#F4F1FF" ></circle>
+<text x="480" y="581" class="nm" text-anchor="middle">ONSET PATH · held balls rejoin at note end</text>
+</svg>
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">01</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Pinball</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">flipper table</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 11 · 40%</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div><p class="sp">Shows</p><p class="tx">The score becomes a pinball route. Bass notes hold two balls on raised ramps while the next drum targets wait ahead.</p></div>
+<div><p class="sp">Mapping</p><ul class="mp"><li>part → its own target; onset → ball arrives</li><li>drums → bumpers; hats → rollovers; bass → ramps</li><li>held note → captive ramp or spinner for its span</li><li>ties → counted multiball; next onsets → dotted path</li><li>lowest regular drum → flippers; section → lighting</li></ul></div>
+<div><p class="sp">Build</p><ul class="mp"><li>Canvas 2D · score/window · no changes</li><li>effort large · risk: crossing routes</li><li>paths, holds and counts from notes + now</li><li>dense targets → numbered jackpots</li></ul></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>

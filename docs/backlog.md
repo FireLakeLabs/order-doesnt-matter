@@ -57,6 +57,9 @@ Everything known to be outstanding, in one place. The [model](model.md) and
 - **Second wave of views:** 24 more views, planned in
   [second-wave.md](../research/redesign/second-wave.md). Starts after the test
   fixes; Afterglow waits for Scope.
+- **Third wave of views:** fixes to Coil, Ash Run, Swarm, Catwalk and Tubes,
+  then 17 views, planned in [third-wave.md](../research/redesign/third-wave.md).
+  Views needing a framework change wait for that change.
 
 ## Design questions
 

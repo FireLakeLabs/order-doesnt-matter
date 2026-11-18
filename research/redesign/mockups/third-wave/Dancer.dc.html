@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Dancer</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.nm{font-family:'JetBrains Mono',monospace;font-size:11px;fill:#A49EC4}
+.sm{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#A49EC4}
+.hud{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;fill:#F4F1FF}
+.ink{fill:#F4F1FF}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="One original figure stands on a tiled stage with a bass-swayed pelvis, planted drum feet, halfway-raised orange arms and snapping cyan and green hands. Leader labels identify every driving part; a faint kick stomp and an outlined upcoming snare occupy the floor." style="position: absolute; left: 0; top: 0; display: block">
+<defs><radialGradient id="stage"><stop offset="0" stop-color="#B388FF" stop-opacity=".2"></stop><stop offset="1" stop-color="#07060D" stop-opacity="0"></stop></radialGradient></defs>
+<ellipse cx="480" cy="317" rx="359" ry="252" fill="url(#stage)" ></ellipse>
+<path d="M 217 84 L 343 497 L 452 497 L 264 84 Z" fill="#B388FF" stroke="#2A2545" stroke-width="1" opacity=".07"></path>
+<path d="M 696 84 L 532 497 L 631 497 L 743 84 Z" fill="#FF8A3D" stroke="#2A2545" stroke-width="1" opacity=".07"></path>
+<path d="M 233 465 L 727 465 L 913 594 L 47 594 Z" fill="#12101F" stroke="#2A2545" stroke-width="2" ></path>
+<path d="M 203 486 H 757" fill="none" stroke="#2A2545" stroke-width="2" ></path>
+<path d="M 159 516 H 801" fill="none" stroke="#2A2545" stroke-width="2" ></path>
+<path d="M 107 552 H 853" fill="none" stroke="#2A2545" stroke-width="2" ></path>
+<path d="M 47 593 H 913" fill="none" stroke="#2A2545" stroke-width="2" ></path>
+<path d="M 246.2 465 L 47 594" fill="none" stroke="#2A2545" stroke-width="2" ></path>
+<path d="M 339.6 465 L 220 594" fill="none" stroke="#2A2545" stroke-width="2" ></path>
+<path d="M 433.6 465 L 394 594" fill="none" stroke="#2A2545" stroke-width="2" ></path>
+<path d="M 527.0 465 L 567 594" fill="none" stroke="#2A2545" stroke-width="2" ></path>
+<path d="M 620.4 465 L 740 594" fill="none" stroke="#2A2545" stroke-width="2" ></path>
+<path d="M 713.8 465 L 913 594" fill="none" stroke="#2A2545" stroke-width="2" ></path>
+<ellipse cx="410" cy="510" rx="61" ry="13" fill="#FF4D8D" opacity=".12"></ellipse>
+<ellipse cx="410" cy="510" rx="49" ry="9" fill="none" stroke="#FF4D8D" stroke-width="2" opacity=".35"></ellipse>
+<path d="M 592 529 L 640 541 L 597 554 L 550 541 Z" fill="none" stroke="#FFD23F" stroke-width="2" ></path>
+<text x="643" y="551" class="sm" >snare · next .500</text>
+<path d="M 471 365 L 431 421 L 411 493 M 505 362 L 527 416 L 553 487" fill="none" stroke="#FF4D8D" stroke-width="18" stroke-linecap="round"></path>
+<path d="M 411 493 L 385 500 M 553 487 L 580 494" fill="none" stroke="#F4F1FF" stroke-width="14" stroke-linecap="round"></path>
+<path d="M 447 268 Q 479 249 510 271 L 515 341 Q 489 359 459 340 Z" fill="#12101F" stroke="#F4F1FF" stroke-width="3" ></path>
+<path d="M 458 338 Q 484 358 513 339 L 512 367 Q 482 386 461 368 Z" fill="#B388FF" stroke="#B388FF" stroke-width="3" ></path>
+<path d="M 449 278 L 411 299 L 366 260 M 508 278 L 550 296 L 594 258" fill="none" stroke="#FF8A3D" stroke-width="14" stroke-linecap="round"></path>
+<circle cx="366" cy="260" r="10" fill="#3DDCFF" ></circle>
+<circle cx="594" cy="258" r="10" fill="#5BFF8F" ></circle>
+<path d="M 354 245 L 348 231 M 366 243 L 365 226 M 376 247 L 385 232" fill="none" stroke="#3DDCFF" stroke-width="2" ></path>
+<path d="M 472 252 L 474 238" fill="none" stroke="#F4F1FF" stroke-width="10" ></path>
+<ellipse cx="478" cy="211" rx="30" ry="32" fill="#F4F1FF" ></ellipse>
+<path d="M 449 207 Q 478 165 509 207" fill="none" stroke="#3DDCFF" stroke-width="7" ></path>
+<path d="M 463 213 L 472 216 M 487 215 L 496 212" fill="none" stroke="#07060D" stroke-width="3" stroke-linecap="round"></path>
+<path d="M 471 230 Q 480 235 489 229" fill="none" stroke="#07060D" stroke-width="2" ></path>
+<path d="M 448 174 Q 479 159 509 176" fill="none" stroke="#3DDCFF" stroke-width="1.5" stroke-dasharray="2 5"></path>
+<text x="480" y="95" class="hud" text-anchor="middle">ONE BODY · SIX PARTS</text>
+<text x="480" y="117" class="nm" text-anchor="middle">DROP · pose at 10.400 cycles</text>
+<text x="47" y="185" class="nm" >head · hats</text>
+<text x="47" y="203" class="nm" >steadiest drum → nod</text>
+<path d="M 216 197 L 448 213" fill="none" stroke="#A49EC4" stroke-width="1" ></path>
+<text x="47" y="281" class="nm" >left hand · hats</text>
+<text x="47" y="299" class="nm" >hh · snap at .375</text>
+<path d="M 222 291 L 351 262" fill="none" stroke="#A49EC4" stroke-width="1" ></path>
+<text x="47" y="391" class="nm" >hips · subBass</text>
+<text x="47" y="409" class="nm" >E♭1 · held · gain .95</text>
+<path d="M 241 398 L 458 354" fill="none" stroke="#A49EC4" stroke-width="1" ></path>
+<text x="726" y="192" class="nm" >arms · wobbleBass</text>
+<text x="726" y="210" class="nm" >E♭2 · cutoff ≈1370</text>
+<text x="726" y="228" class="nm" >sampled at note onset</text>
+<path d="M 715 221 L 558 292" fill="none" stroke="#A49EC4" stroke-width="1" ></path>
+<text x="726" y="316" class="nm" >right hand · open hat</text>
+<text x="726" y="334" class="nm" >oh · last snap .250</text>
+<path d="M 713 322 L 603 261" fill="none" stroke="#A49EC4" stroke-width="1" ></path>
+<text x="726" y="402" class="nm" >torso · pan absent</text>
+<text x="726" y="420" class="nm" >centre; no invented lean</text>
+<path d="M 715 409 L 505 315" fill="none" stroke="#A49EC4" stroke-width="1" ></path>
+<text x="48" y="555" class="nm" >feet · kick / snare</text>
+<text x="48" y="574" class="nm" >kick planted; snare tile queued</text>
+<path d="M 269 544 L 402 501" fill="none" stroke="#A49EC4" stroke-width="1" ></path>
+</svg>
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">06</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Dancer</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">one body</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 11 · 40%</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div><p class="sp">Shows</p><p class="tx">Six parts share one dancer. The current pose combines held bass, a hats snap and planted feet; nothing depends on a previous frame.</p></div>
+<div><p class="sp">Mapping</p><ul class="mp"><li>low drums → feet; steadiest drum → head nod</li><li>hats/claps → hands; lowest pitched part → hips</li><li>cutoff → arm height, fixed for each scored note</li><li>pan → torso lean; other parts → floor patterns</li><li>collisions → layered poses and counted tile marks</li></ul></div>
+<div><p class="sp">Build</p><ul class="mp"><li>Canvas 2D · score/window · no changes</li><li>effort medium · risk: pose legibility</li><li>note-sampled settings; no F needed</li><li>missing roles → neutral; extra parts → tiles</li></ul></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+return {};
+}
+}
+</script>
+</body>
+</html>
