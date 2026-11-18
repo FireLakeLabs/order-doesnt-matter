@@ -29,12 +29,18 @@ Every wave below ends with a sweep (D50) before the next one starts.
 Each is one pull request with the shared smoke test. Lanes run in parallel;
 views within a lane run in order so lessons carry.
 
-| Lane  | Order                             |
-| ----- | --------------------------------- |
-| Games | Pinball → Bout → Slalom → Stacker |
-| Show  | Dancer → Mobile                   |
-| Pitch | Chord bridge → Staff              |
-| Song  | Orrery → Relay → Garden           |
+| Lane        | Order                                |
+| ----------- | ------------------------------------ |
+| Games       | Pinball → Bout → Slalom → Stacker    |
+| Show        | Dancer → Mobile → Light rig          |
+| Pitch       | Chord bridge → Staff → Graphic score |
+| Song        | Orrery → Relay → Garden              |
+| Second wave | Marble run → Aquarium → Afterglow    |
+
+The owner folded in the five second-wave views that were never started
+(2026-11-18). Their mapping rules are in [second-wave.md](second-wave.md) and
+their mockups in `mockups/second-wave/`. Light rig stays last in its lane
+because of its GPU cost.
 
 - Orrery's orbit for a moving setting's rate (the wobble's `<2 4 3 8>`) needs
   change C; build the note-period orbits now and add that orbit in wave 3.3.

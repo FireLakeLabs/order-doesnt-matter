@@ -54,11 +54,11 @@ Everything known to be outstanding, in one place. The [model](model.md) and
   practice start-up wait, the flood delivery count and a Kiln rhythm wait that
   hangs to the 60 s limit failed CI and deploys without a product defect. Being
   fixed before the second wave.
-- **Second wave of views:** 24 more views, planned in
-  [second-wave.md](../research/redesign/second-wave.md). Starts after the test
-  fixes; Afterglow waits for Scope.
+- **Second wave of views:** 19 of 24 merged, planned in
+  [second-wave.md](../research/redesign/second-wave.md). Marble run, Graphic
+  score, Aquarium, Light rig and Afterglow are folded into the third wave's 3.1.
 - **Third wave of views:** fixes to Coil, Ash Run, Swarm, Catwalk and Tubes,
-  then 17 views, planned in [third-wave.md](../research/redesign/third-wave.md).
+  then 17 views and the five second-wave views, planned in [third-wave.md](../research/redesign/third-wave.md).
   Views needing a framework change wait for that change.
 
 ## Design questions
