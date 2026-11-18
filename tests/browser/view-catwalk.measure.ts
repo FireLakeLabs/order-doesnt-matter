@@ -40,13 +40,69 @@ test('Catwalk: exact bar 11, five themes, Stage B, playback and frame cost', asy
     ['gait-3', 10.16],
     ['camera-onset', 10.001],
   ];
+  const annotations = [];
   for (const [name, now] of moments) {
-    await show.evaluate(({ handle, frame }, now) => handle.frame({ ...frame, now }), now);
+    const painted = await show.evaluate(({ handle, frame, el }, now) => {
+      const c = el.querySelector('canvas')!.getContext('2d')!;
+      const fillText = c.fillText,
+        lineTo = c.lineTo;
+      const text: { text: string; x: number; y: number; left: number; right: number }[] = [];
+      let leader = [0, 0];
+      c.fillText = (value, x, y, maxWidth) => {
+        const bounds = c.measureText(value);
+        text.push({
+          text: value,
+          x,
+          y,
+          left: x - bounds.actualBoundingBoxLeft,
+          right: x + bounds.actualBoundingBoxRight,
+        });
+        if (maxWidth === undefined) fillText.call(c, value, x, y);
+        else fillText.call(c, value, x, y, maxWidth);
+      };
+      c.lineTo = (x, y) => {
+        leader = [x, y];
+        lineTo.call(c, x, y);
+      };
+      handle.frame({ ...frame, now });
+      c.fillText = fillText;
+      c.lineTo = lineTo;
+      const labels = text
+        .filter(
+          (t) =>
+            t.y >= frame.height * 0.34 + 15 &&
+            t.y < frame.height * 0.34 + 55 &&
+            !t.text.startsWith('×'),
+        )
+        .sort((a, b) => a.x - b.x);
+      return { text, labels, leader };
+    }, now);
+    const gaps = painted.labels.slice(1).map((label, i) => label.left - painted.labels[i].right);
+    expect(gaps.every((gap) => gap >= 8 - 1e-6)).toBe(true);
+    if (['gait-1', 'gait-2', 'camera-onset'].includes(name))
+      expect(painted.text.some((t) => t.text === 'subBass')).toBe(false);
+    if (['bar-11-40', 'bar-11-80', 'gait-3'].includes(name))
+      expect(painted.text.some((t) => t.text === 'subBass')).toBe(true);
+    annotations.push({
+      name,
+      minLabelGap: Math.min(...gaps),
+      labels: painted.labels,
+      leader: painted.leader,
+    });
     await page.screenshot({
       path: `${dir}/${name}.png`,
       clip: { x: 0, y: 0, width: 1300, height: 760 },
     });
   }
+  await writeFile(`${dir}/annotations.json`, JSON.stringify(annotations, null, 2));
+  await show.evaluate(
+    ({ handle, frame }) => handle.frame({ ...frame, now: 10, width: 960 }),
+    undefined,
+  );
+  await page.screenshot({
+    path: `${dir}/camera-gain-one-960.png`,
+    clip: { x: 0, y: 0, width: 960, height: 760 },
+  });
   const reversibleFrames = await show.evaluate(({ el, handle, frame }, moments) => {
     return moments.map(([, now]) => {
       handle.frame({ ...frame, now });

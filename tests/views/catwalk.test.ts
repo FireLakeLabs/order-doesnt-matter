@@ -17,7 +17,9 @@ import {
   cameraFlashes,
   gaitAt,
   stepAt,
+  flashAppearance,
 } from '../../src/views/catwalk/model';
+import { ellipsize, torsoAnchor } from '../../src/views/catwalk/figure';
 import type { ViewFrame, ViewNote } from '../../src/views/types';
 import { scoreFrame } from './score-fixture';
 
@@ -312,14 +314,64 @@ it('fires every genuine onset, including coincident and dense notes, and fades i
   const f = { ...frame(notes), cps: 0.5, instruments: scoreFrame(3).instruments };
   const flashes = cameraFlashes(f, score);
   expect(flashes.map((a) => a.instrument)).toEqual(['0', '1']);
-  expect(flashes[0].brightness).toBeLessThan(flashes[1].brightness);
-  expect(cameraFlashes({ ...f, now: 1.0375 }, score)[0].brightness).toBeCloseTo(
-    flashes[0].brightness / 2,
-  );
+  expect(flashes[0].gain).toBeLessThan(flashes[1].gain);
+  expect(cameraFlashes({ ...f, now: 1.0375 }, score)[0].fade).toBeCloseTo(flashes[0].fade / 2);
   expect(cameraFlashes({ ...f, now: 1.076 }, score)).toEqual([]);
   expect(cameraFlashes(f, score)).toEqual(flashes);
   const dense = analyse(Array.from({ length: 500 }, () => note(1, 1.01)));
   const counted = cameraFlashes(f, dense);
   expect(counted.reduce((n, flash) => n + flash.count, 0)).toBe(500);
   expect(counted).toHaveLength(20);
+});
+
+it('keeps waiting models and labels in fixed slots with eight-pixel gutters', () => {
+  for (const width of [559, 960, 1300]) {
+    const f = { ...real, width };
+    const home = new Map(figures(f).map((c) => [c.instrument.id, c.slot]));
+    for (const now of [10.001, 10.1, 10.13, 10.16, 10.4, 11.1]) {
+      const cast = figures({ ...f, now });
+      const slots = cast.map((c) => c.slot).sort((a, b) => a.x - b.x);
+      for (let i = 1; i < slots.length; i++)
+        expect(
+          slots[i].x - slots[i].width / 2 - slots[i - 1].x - slots[i - 1].width / 2,
+        ).toBeGreaterThanOrEqual(8 - 1e-9);
+      for (const c of cast.filter((c) => !c.walking)) {
+        expect(c.slot).toEqual(home.get(c.instrument.id));
+        expect(c.x).toBe(c.slot.x);
+        expect(c.y - c.slot.y).toBeGreaterThanOrEqual(0);
+        expect(c.y - c.slot.y).toBeLessThanOrEqual(8);
+        if (!c.next) expect(c.y).toBe(c.slot.y);
+        expect(c.scale * 100).toBeLessThanOrEqual(c.slot.width + 1e-9);
+        const label = ellipsize(c.instrument.name, c.slot.width, (text) => text.length * 6);
+        expect(label.length * 6).toBeLessThanOrEqual(c.slot.width);
+        if (c.instrument.name.length * 6 > c.slot.width) expect(label.endsWith('…')).toBe(true);
+      }
+    }
+  }
+});
+
+it('anchors the leader inside the jacket through the walk, all poses and the turn', () => {
+  for (const now of [10.001, 10.1, 10.13, 10.4, 10.55, 10.68, 10.8]) {
+    const f = figures({ ...real, now }).find((f) => f.walking)!;
+    const anchor = torsoAnchor(f);
+    expect(anchor.y).toBeGreaterThan(f.y - 84 * f.scale);
+    expect(anchor.y).toBeLessThan(f.y - 45 * f.scale);
+    expect(Math.abs(anchor.x - f.x)).toBeLessThan(18 * f.scale);
+  }
+});
+
+it('sizes gain-one camera cores and halos in pixels, with a bounded floor pool and age fade', () => {
+  const first = flashAppearance({ gain: 1, fade: 1 }, 960);
+  expect(first.core).toBeGreaterThanOrEqual(10);
+  expect(first.halo).toBeGreaterThanOrEqual(40);
+  expect(first.halo).toBeLessThanOrEqual(60);
+  expect(first.pool).toBeGreaterThanOrEqual(0.1);
+  expect(first.pool).toBeLessThanOrEqual(0.15);
+  expect(flashAppearance({ gain: 0.5, fade: 1 }, 960).halo).toBeLessThan(first.halo);
+  expect(flashAppearance({ gain: 2, fade: 1 }, 960).halo).toBeGreaterThan(first.halo);
+  const aged = flashAppearance({ gain: 1, fade: 0.5 }, 960);
+  expect(aged.core).toBe(first.core);
+  expect(aged.halo).toBe(first.halo);
+  expect(aged.alpha).toBe(first.alpha / 2);
+  expect(aged.pool).toBe(first.pool / 2);
 });

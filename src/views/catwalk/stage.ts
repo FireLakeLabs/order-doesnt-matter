@@ -1,6 +1,6 @@
 import type { ViewFrame } from '../types';
 import { line } from '../shared/retro-2d';
-import { cameraFlashes, runway, type ShowScore } from './model';
+import { cameraFlashes, flashAppearance, runway, type Figure, type ShowScore } from './model';
 
 function polygon(c: CanvasRenderingContext2D, points: number[][]) {
   c.beginPath();
@@ -93,7 +93,12 @@ export function photographer(frame: ViewFrame, slot: number) {
     side,
   };
 }
-export function drawPhotographers(c: CanvasRenderingContext2D, frame: ViewFrame, score: ShowScore) {
+export function drawPhotographers(
+  c: CanvasRenderingContext2D,
+  frame: ViewFrame,
+  score: ShowScore,
+  walker?: Figure,
+) {
   const { theme } = frame;
   for (let i = 0; i < 20; i++) {
     const p = photographer(frame, i);
@@ -120,42 +125,61 @@ export function drawPhotographers(c: CanvasRenderingContext2D, frame: ViewFrame,
     c.fillRect(-p.side * 11 - 2, -23, 4, 4);
     c.restore();
   }
-  const flashes = cameraFlashes(frame, score);
-  // Separate coloured rings preserve simultaneous parts sharing a photographer.
-  for (const f of flashes) {
-    const p = photographer(frame, f.slot);
-    const instrument = frame.instruments.find((i) => i.id === f.instrument);
-    if (!instrument) continue;
+  const bursts = cameraFlashes(frame, score).flatMap((flash) => {
+    const instrument = frame.instruments.find((i) => i.id === flash.instrument);
+    if (!instrument) return [];
+    const light = flashAppearance(flash, frame.width);
+    const dim = instrument.muted ? 0.3 : 1;
+    return [
+      {
+        flash,
+        colour: instrument.colour,
+        ...light,
+        alpha: light.alpha * dim,
+        pool: light.pool * dim,
+      },
+    ];
+  });
+  // One bounded pool avoids stacking simultaneous flashes into an opaque floor wash.
+  const pool = bursts.reduce<(typeof bursts)[number] | undefined>(
+    (best, burst) => (!best || burst.pool > best.pool ? burst : best),
+    undefined,
+  );
+  if (walker && pool && pool.pool > 0) {
+    c.save();
+    c.globalAlpha = pool.pool;
+    c.fillStyle = '#ffffff';
+    c.beginPath();
+    c.ellipse(walker.x, walker.y + 3, pool.halo * 1.1, pool.halo * 0.2, 0, 0, Math.PI * 2);
+    c.fill();
+    c.restore();
+  }
+  for (const burst of bursts) {
+    if (burst.alpha <= 0) continue;
+    const p = photographer(frame, burst.flash.slot);
     const x = p.x - p.side * 11 * p.scale,
       y = p.y - 25 * p.scale;
     c.save();
-    c.strokeStyle = instrument.colour;
-    c.fillStyle = instrument.colour;
-    c.globalAlpha = f.brightness * (instrument.muted ? 0.3 : 1);
-    c.shadowColor = instrument.colour;
-    c.shadowBlur = theme.glow ? 18 : 0;
-    c.lineWidth = 1.5;
-    const radius = (5 + f.brightness * 15) * p.scale;
+    c.globalAlpha = burst.alpha * 0.65;
+    const halo = c.createRadialGradient(x, y, 0, x, y, burst.halo);
+    halo.addColorStop(0, burst.colour);
+    halo.addColorStop(0.4, burst.colour);
+    halo.addColorStop(1, 'transparent');
+    c.fillStyle = halo;
     c.beginPath();
-    for (let i = 0; i < 16; i++) {
-      const a = (i * Math.PI) / 8;
-      const r = i % 2 ? radius * 0.28 : radius;
-      const xx = x + Math.cos(a) * r,
-        yy = y + Math.sin(a) * r;
-      if (i) c.lineTo(xx, yy);
-      else c.moveTo(xx, yy);
-    }
-    c.closePath();
+    c.arc(x, y, burst.halo, 0, Math.PI * 2);
     c.fill();
-    c.stroke();
-    c.shadowBlur = 0;
+    c.globalAlpha = burst.alpha;
+    c.fillStyle = '#ffffff';
     c.beginPath();
-    c.arc(x, y, radius + 3 + (instrument.index % 4) * 3, 0, Math.PI * 2);
-    c.stroke();
-    if (f.count > 1) {
-      c.globalAlpha = 1;
+    c.arc(x, y, burst.core, 0, Math.PI * 2);
+    c.fill();
+    if (burst.flash.count > 1) {
       c.font = `bold 10px "${theme.fontMono}"`;
-      c.fillText(`×${String(f.count)}`, x + radius + 3, y - 3);
+      c.textAlign = 'center';
+      c.textBaseline = 'middle';
+      c.fillStyle = '#14111d';
+      c.fillText(`×${String(burst.flash.count)}`, x, y, burst.core * 1.8);
     }
     c.restore();
   }

@@ -9,7 +9,7 @@ import {
   type Figure,
   type ShowScore,
 } from './catwalk/model';
-import { drawFigure } from './catwalk/figure';
+import { drawFigure, torsoAnchor } from './catwalk/figure';
 import { drawPhotographers, drawStage } from './catwalk/stage';
 
 function tag(c: CanvasRenderingContext2D, f: Figure, frame: ViewFrame) {
@@ -56,7 +56,8 @@ function tag(c: CanvasRenderingContext2D, f: Figure, frame: ViewFrame) {
   });
   c.strokeStyle = f.instrument.colour;
   c.globalAlpha = 0.5;
-  line(c, x + width / 2, top + height + 5, f.x, f.y - 150 * f.scale);
+  const torso = torsoAnchor(f);
+  line(c, x + width / 2, top + height + 5, torso.x, torso.y);
   c.restore();
 }
 
@@ -64,7 +65,12 @@ function draw(c: CanvasRenderingContext2D, frame: ViewFrame, score: ShowScore) {
   const { width: w, height: h, theme } = frame;
   const cast = figures(frame, score);
   drawStage(c, frame);
-  drawPhotographers(c, frame, score);
+  drawPhotographers(
+    c,
+    frame,
+    score,
+    cast.find((f) => f.walking),
+  );
   for (const f of cast) drawFigure(c, f, frame);
   for (const f of featured(cast)) tag(c, f, frame);
   c.fillStyle = theme.text;

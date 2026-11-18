@@ -2,6 +2,24 @@ import type { ViewFrame } from '../types';
 import { line } from '../shared/retro-2d';
 import type { Figure } from './model';
 
+const shoulderAngle = (f: Figure) => f.gait.shoulders + (f.posing ? [2, -3, -7][f.pose] : 0);
+
+export function torsoAnchor(f: Figure) {
+  const angle = (shoulderAngle(f) * Math.PI) / 180;
+  return {
+    x: f.x - Math.sin(angle) * 14 * f.scale * (0.22 + Math.abs(f.facing) * 0.78),
+    y: f.y + (-84 + Math.cos(angle) * 14) * f.scale,
+  };
+}
+
+export function ellipsize(text: string, width: number, measure: (text: string) => number) {
+  if (measure(text) <= width) return text;
+  if (measure('…') > width) return '';
+  let end = text.length;
+  while (end > 0 && measure(text.slice(0, end) + '…') > width) end--;
+  return text.slice(0, end) + '…';
+}
+
 export function drawFigure(c: CanvasRenderingContext2D, f: Figure, frame: ViewFrame) {
   const { theme } = frame;
   const { gait: g } = f;
@@ -9,7 +27,7 @@ export function drawFigure(c: CanvasRenderingContext2D, f: Figure, frame: ViewFr
   const colour = f.instrument.colour;
   const build = 1 + (f.instrument.index % 3) * 0.07;
   const hip = g.hips + (f.posing ? [-4, 2, 4][f.pose] : 0);
-  const shoulder = g.shoulders + (f.posing ? [2, -3, -7][f.pose] : 0);
+  const shoulder = shoulderAngle(f);
   c.save();
   c.translate(f.x, f.y);
   c.scale(f.scale, f.scale);
@@ -204,29 +222,30 @@ export function drawFigure(c: CanvasRenderingContext2D, f: Figure, frame: ViewFr
   c.restore();
   c.restore();
 
+  if (f.walking && f.progress < 0.15) return;
   c.save();
   c.textAlign = 'center';
   c.fillStyle = f.next ? theme.accent : theme.text;
-  c.font = `${f.walking ? 'bold 14' : '10'}px "${theme.fontDisplay}"`;
-  const label = f.instrument.name;
-  const labelWidth = f.walking
-    ? frame.width * 0.28
-    : Math.max(12, (frame.width * 0.31) / Math.ceil(frame.instruments.length / 2) - 5) *
-      (f.next ? 0.75 : 1);
+  const labelX = f.walking ? f.x : f.slot.x;
+  const labelY = f.walking ? f.y + Math.min(29, frame.height * 0.035) : f.slot.y + 28;
+  const labelWidth = f.walking ? frame.width * 0.28 : f.slot.width;
+  const measure = (text: string) => {
+    const m = c.measureText(text);
+    return Math.max(m.width, 2 * m.actualBoundingBoxLeft, 2 * m.actualBoundingBoxRight);
+  };
+  const fit = (text: string) => ellipsize(text, labelWidth, measure);
   if (f.next) {
     c.font = `bold 10px "${theme.fontMono}"`;
-    c.fillText('NEXT', f.x, f.y - 155 * f.scale, labelWidth);
-    c.font = `10px "${theme.fontDisplay}"`;
+    c.fillText(fit('NEXT'), f.slot.x, f.y - 155 * f.scale);
   }
-  c.fillText(label, f.x, f.y + (f.walking ? Math.min(29, frame.height * 0.035) : 18), labelWidth);
+  c.font = `${f.walking ? 'bold 14' : '10'}px "${theme.fontDisplay}"`;
+  c.fillText(fit(f.instrument.name), labelX, labelY);
   if (f.members.length) {
+    const count = `×${String(f.members.length)}${f.walking ? ' notes this bar' : ''}`;
     c.font = `10px "${theme.fontMono}"`;
-    c.fillText(
-      `×${String(f.members.length)}${f.walking ? ' notes this bar' : ''}`,
-      f.x,
-      f.y + (f.walking ? Math.min(45, frame.height * 0.06) : 31),
-      labelWidth,
-    );
+    const font = 10 * Math.min(1, labelWidth / Math.max(1, measure(count)));
+    c.font = `${String(font)}px "${theme.fontMono}"`;
+    c.fillText(count, labelX, f.walking ? f.y + Math.min(45, frame.height * 0.06) : labelY + 13);
   }
   c.restore();
 }

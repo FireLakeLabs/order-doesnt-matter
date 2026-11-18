@@ -68,6 +68,7 @@ export interface Gait {
 export interface Figure {
   note: ViewNote | undefined;
   instrument: ViewInstrument;
+  slot: { x: number; y: number; width: number };
   members: ViewNote[];
   outfit: OutfitItem[];
   walking: boolean;
@@ -213,7 +214,6 @@ export function figures(frame: ViewFrame, score = analyse(frame.notes)): Figure[
     phase = frame.now - bar;
   const walking = turn(frame, score);
   const next = turn(frame, score, bar + 1);
-  const previous = turn(frame, score, bar - 1);
   const cast = [...frame.instruments].sort((a, b) => a.index - b.index);
   const r = runway(frame);
   const walkingGait = gaitAt(stepAt(score, frame.now));
@@ -230,26 +230,33 @@ export function figures(frame: ViewFrame, score = analyse(frame.notes)): Figure[
       const progress = !active
         ? 0
         : phase < 0.35
-          ? ease(phase / 0.35)
+          ? ease(clamp((phase - 0.06) / 0.29))
           : phase < 0.65
             ? 1
-            : 1 - ease((phase - 0.65) / 0.35);
+            : 1 - ease(clamp((phase - 0.65) / 0.29));
       const pan = clamp(numeric(note?.value.pan, 0.5));
       const breadth = r.backWidth + (r.frontWidth - r.backWidth) * progress;
-      // Waiting cast line the curtain wings; the next turn has a marked entrance slot.
+      // Each part owns a fixed curtain slot, including its label and NEXT step.
       const side = index % 2 ? 1 : -1;
       const rank = Math.floor(index / 2);
       const wingCount = Math.ceil(cast.length / 2);
       const queueX =
         frame.width / 2 + side * frame.width * (0.115 + (rank * 0.31) / Math.max(1, wingCount));
       const isNext = instrument.id === next && !active;
-      const entrance = frame.width / 2 + r.backWidth * 0.65;
-      const exit = frame.width / 2 - r.backWidth * 0.65;
-      const waitingFrom = instrument.id === previous ? exit : queueX;
-      const waitingTo = isNext ? entrance : queueX;
-      const waitingX = waitingFrom + (waitingTo - waitingFrom) * ease(clamp(phase / 0.3));
+      const slot = {
+        x: queueX,
+        y: r.back,
+        width: Math.max(0, (frame.width * 0.31) / wingCount - 8),
+      };
+      const forward = isNext ? 8 * ease(clamp(phase / 0.2)) : 0;
+      // Walk between the slot and the opening along the curtain before entering the runway.
+      const curtain = returning
+        ? ease(clamp((phase - 0.94) / 0.06))
+        : 1 - ease(clamp(phase / 0.06));
       const gain = clamp(numeric(note?.value.gain, 1), 0, 4);
       const body = Math.min(frame.height / 540, frame.width / 900);
+      const size = 0.7 + Math.sqrt(gain) * 0.3;
+      const waitingScale = Math.min(body * 0.38 * size, slot.width / 100);
       const latestOnset = notes.findLast((n) => n.hasOnset && n.start <= frame.now);
       const flourish = latestOnset
         ? clamp(1 - (frame.now - latestOnset.start) / (Math.max(frame.cps, 0.001) * 0.15))
@@ -275,6 +282,7 @@ export function figures(frame: ViewFrame, score = analyse(frame.notes)): Figure[
       return {
         note,
         instrument,
+        slot,
         members,
         outfit: note ? outfit(note) : [],
         walking: active,
@@ -287,10 +295,15 @@ export function figures(frame: ViewFrame, score = analyse(frame.notes)): Figure[
         x: active
           ? frame.width / 2 +
             (pan - 0.5) * breadth * 0.62 * progress +
-            ((returning && next !== walking ? exit : entrance) - frame.width / 2) * (1 - progress)
-          : waitingX,
-        y: r.back + (active ? (r.front - r.back) * progress : 0),
-        scale: body * (0.38 + (active ? progress * 1.02 : 0)) * (0.7 + Math.sqrt(gain) * 0.3),
+            (slot.x - frame.width / 2) * curtain
+          : slot.x,
+        y: active
+          ? r.back +
+            8 +
+            (r.front - r.back - 8) * progress -
+            (returning && next !== walking ? 8 * curtain : 0)
+          : slot.y + forward,
+        scale: active ? waitingScale + (body * 1.4 * size - waitingScale) * progress : waitingScale,
         facing: returning ? 1 - 2 * ease(clamp((phase - 0.65) / 0.07)) : 1,
         gait,
       };
@@ -302,7 +315,8 @@ export interface CameraFlash {
   slot: number;
   instrument: string;
   count: number;
-  brightness: number;
+  gain: number;
+  fade: number;
 }
 /** Every onset fires. Coincident/dense flashes share a counted photographer badge. */
 export function cameraFlashes(frame: ViewFrame, score: ShowScore): CameraFlash[] {
@@ -314,16 +328,28 @@ export function cameraFlashes(frame: ViewFrame, score: ShowScore): CameraFlash[]
       if (!n.hasOnset || n.start > frame.now || frame.now - n.start >= age) return;
       const slot = mod(index * 3 + i, 20);
       const key = `${id}:${String(slot)}`;
-      const brightness =
-        (clamp(numeric(n.value.gain, 1), 0, 2) / 2) * (1 - (frame.now - n.start) / age);
+      const gain = clamp(numeric(n.value.gain, 1), 0, 2);
+      const fade = 1 - (frame.now - n.start) / age;
       const f = flashes.get(key);
       if (f) {
         f.count++;
-        f.brightness = Math.max(f.brightness, brightness);
-      } else flashes.set(key, { slot, instrument: id, count: 1, brightness });
+        if (gain * fade > f.gain * f.fade) Object.assign(f, { gain, fade });
+      } else flashes.set(key, { slot, instrument: id, count: 1, gain, fade });
     });
   }
   return [...flashes.values()];
+}
+
+/** Pixel dimensions at 960 px width: gain 1 has a 10 px white core and 50 px halo.
+ * Age fades opacity, preserving the camera's physical size throughout the flash. */
+export function flashAppearance(flash: Pick<CameraFlash, 'gain' | 'fade'>, width: number) {
+  const scale = (Math.sqrt(flash.gain) * width) / 960;
+  return {
+    core: 10 * scale,
+    halo: 50 * scale,
+    alpha: Math.min(1, flash.gain) * flash.fade,
+    pool: Math.min(0.15, 0.12 * flash.gain) * flash.fade,
+  };
 }
 
 export function featured(cast: Figure[]): Figure[] {
