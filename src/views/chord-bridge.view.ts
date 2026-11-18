@@ -130,7 +130,7 @@ function draw(
     ctx.fillStyle = instrument.colour;
     ctx.fillRect(sideX + 5, py - 10, 3, 29);
     label(instrument.name + (instrument.muted ? ' · muted' : ''), sideX + 14, py, box.side - 26);
-    label(`${String(count.active)} / ${String(count.total)}`, sideX + 14, py + 18, box.side - 26);
+    label(`${String(count.active)} / ${String(count.total)}`, sideX + 14, py + 20, box.side - 26);
   }
   const omitted = rows.slice(capacity);
   label(
