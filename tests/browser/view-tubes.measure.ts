@@ -326,3 +326,24 @@ test('Tubes: exact bar 11, five themes, Stage B, playback and frame cost', async
     JSON.stringify({ ...costs, stageB, indexing, wobbleCutoff, sizes }),
   );
 });
+
+test('Tubes: sweep label evidence in the Studio at the same moment', async ({ page }) => {
+  const dir = `${process.env.ODM_VIEW_MEASURE_DIR}/tubes`;
+  await mkdir(dir, { recursive: true });
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await prepare(page, 'tubes');
+  await page.getByRole('button', { name: '1', exact: true }).click();
+  await page.evaluate(() => window.odmStudio.seek(10.4));
+  await page.waitForFunction(
+    () => window.viewProbe.frame?.now === 10.4 && window.viewProbe.frame.to === 28,
+  );
+  for (const theme of ['arcade', 'sunset', 'phosphor', 'riso', 'pocket']) {
+    await page.getByRole('button', { name: `Theme ${theme}`, exact: true }).click();
+    await page.waitForFunction((name) => window.viewProbe.frame?.theme.name === name, theme);
+    await page.evaluate(async () => {
+      await document.fonts.ready;
+      await new Promise(requestAnimationFrame);
+    });
+    await page.screenshot({ path: `${dir}/${theme}-studio.png` });
+  }
+});

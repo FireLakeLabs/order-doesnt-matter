@@ -65,26 +65,6 @@ function drawTube(c: CanvasRenderingContext2D, f: ViewFrame, box: TubeBox, index
   c.fillStyle = status === 'moving' ? inkOn(rack.instrument.colour, theme) : theme.muted;
   c.fillText(status, x, body.top - 12);
   c.restore();
-  if (
-    height >= 40 &&
-    tube.range?.min !== undefined &&
-    tube.range.max !== undefined &&
-    tube.moving
-  ) {
-    c.fillStyle = theme.muted;
-    c.font = `9px "${theme.fontMono}"`;
-    const name = tube.setting.name === 'note' ? noteName : valueText;
-    for (const [text, baseline] of [
-      [name(tube.range.max), body.top + 12],
-      [name(tube.range.min), bottom - 8],
-    ] as const) {
-      const textWidth = Math.min(labelWidth, c.measureText(text).width);
-      c.fillStyle = theme.panel;
-      c.fillRect(x - textWidth / 2 - 2, baseline - 8, textWidth + 4, 11);
-      c.fillStyle = theme.text;
-      c.fillText(text, x, baseline, labelWidth);
-    }
-  }
   // Onset bubbles use real seconds, independently of playback frame order.
   const sample = tube.sample;
   if (!rack.instrument.muted && sample && motion.age !== undefined && motion.level !== undefined) {
@@ -113,6 +93,27 @@ function drawTube(c: CanvasRenderingContext2D, f: ViewFrame, box: TubeBox, index
         c.stroke();
       }
       c.restore();
+    }
+  }
+  // Keep the opaque theme plates above every animated layer.
+  if (
+    height >= 40 &&
+    tube.range?.min !== undefined &&
+    tube.range.max !== undefined &&
+    tube.moving
+  ) {
+    c.fillStyle = theme.muted;
+    c.font = `9px "${theme.fontMono}"`;
+    const name = tube.setting.name === 'note' ? noteName : valueText;
+    for (const [text, baseline] of [
+      [name(tube.range.max), body.top + 12],
+      [name(tube.range.min), bottom - 8],
+    ] as const) {
+      const textWidth = Math.min(labelWidth, c.measureText(text).width);
+      c.fillStyle = theme.panel;
+      c.fillRect(x - textWidth / 2 - 2, baseline - 8, textWidth + 4, 11);
+      c.fillStyle = theme.text;
+      c.fillText(text, x, baseline, labelWidth);
     }
   }
   c.fillStyle = theme.muted;
