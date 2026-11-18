@@ -1,7 +1,8 @@
 import type { ViewFrame, ViewNote } from '../types';
 import { pitch } from '../shared/pitch';
 import { clamp } from '../shared/math';
-import { flightProgress, noteProgress } from '../shared/timing';
+import { flightProgress, noteProgress, previousOnset, nextOnset } from '../shared/timing';
+import { mostRegularDrum, roleEvidence } from '../shared/roles';
 import { random } from '../shared/particles';
 
 export function seed(note: ViewNote) {
@@ -26,7 +27,10 @@ export function wave(frame: Pick<ViewFrame, 'now' | 'sections'>) {
   const length = frame.sections.at(-1)?.to ?? 0;
   const local = length > 0 ? ((frame.now % length) + length) % length : frame.now;
   const index = frame.sections.findIndex((s) => s.from <= local && local < s.to);
-  return { number: index + 1 || 1, name: frame.sections[index]?.name ?? 'Open space' };
+  return {
+    number: index < 0 && frame.sections.length ? 0 : index + 1 || 1,
+    name: frame.sections[index]?.name ?? 'Open space',
+  };
 }
 /** Current-bar score count, never an accumulated counter or an invented unseen history. */
 export function hitCount(frame: Pick<ViewFrame, 'now' | 'notes' | 'instruments'>) {
@@ -56,28 +60,102 @@ export function enemies(notes: ViewNote[]) {
     return true;
   });
 }
-export function formation(frame: ViewFrame) {
-  const bar = Math.floor(frame.now);
-  const left = Math.min(105, frame.width * 0.18),
-    right = frame.width - 35;
-  const top = Math.max(85, frame.height * 0.13),
-    bottom = frame.height * 0.72;
+const ease = (u: number) => u * u * (3 - 2 * u);
+const phase = (time: number) => time - Math.floor(time);
+/** An eighth bar at ordinary tempos, bounded to 250–400 ms at other tempos. */
+export function diveDuration(cps: number) {
+  const rate = Math.max(0.001, cps);
+  return clamp(1 / 8 / rate, 0.25, 0.4) * rate;
+}
+export function drumPart(notes: ViewNote[]) {
+  return mostRegularDrum(roleEvidence(notes));
+}
+/** Six percent expansion on the scored drum onset, eased back by its next onset. */
+export function breathing(
+  frame: Pick<ViewFrame, 'notes' | 'now'>,
+  drum: string | null = drumPart(frame.notes) ?? null,
+) {
+  if (!drum) return 1;
+  const previous = previousOnset(frame.notes, drum, frame.now);
+  if (!previous) return 1;
+  const next = nextOnset(frame.notes, drum, previous.start);
+  const span = Math.min(1, next ? next.start - previous.start : 1 / 4);
+  return 1 + 0.06 * (1 - ease(clamp((frame.now - previous.start) / span)));
+}
+/** Simultaneous short notes share a rendezvous. Timing chooses a place, never a playhead. */
+export const hitX = (start: number, width: number) =>
+  width * (0.24 + 0.52 * random(Math.round(start * 1e6), 7));
+export function shipX(frame: Pick<ViewFrame, 'notes' | 'now' | 'width' | 'cps' | 'instruments'>) {
+  const muted = new Set(frame.instruments.filter((i) => i.muted).map((i) => i.id));
+  let before = -Infinity,
+    after = Infinity;
+  for (const n of frame.notes) {
+    if (!n.hasOnset || isCarrier(n) || muted.has(n.instrument)) continue;
+    if (n.start <= frame.now) before = Math.max(before, n.start);
+    else after = Math.min(after, n.start);
+  }
+  const travel = Math.max(0.001, frame.cps) * 0.65;
+  const centre = frame.width / 2;
+  if (after - before <= travel) {
+    return (
+      hitX(before, frame.width) +
+      (hitX(after, frame.width) - hitX(before, frame.width)) *
+        ease(clamp((frame.now - before) / (after - before)))
+    );
+  }
+  if (frame.now - before < travel / 2)
+    return (
+      hitX(before, frame.width) +
+      (centre - hitX(before, frame.width)) * ease(clamp((frame.now - before) / (travel / 2)))
+    );
+  return (
+    centre +
+    (hitX(after, frame.width) - centre) * ease(clamp(1 - (after - frame.now) / (travel / 2)))
+  );
+}
+/** A wave's slots depend on its scored participants, never the current section flag.
+ * Incoming notes retain these slots when the current bar/section changes. */
+function waveRows(frame: ViewFrame, bar: number) {
+  const top = Math.max(90, frame.height * 0.15),
+    bottom = Math.max(top, frame.height * 0.45);
   const visible = frame.instruments.filter(
     (i) =>
-      i.inSection ||
+      (!frame.notes.length && i.inSection) ||
       frame.notes.some((n) => n.instrument === i.id && n.end > bar && n.start < bar + 2),
   );
   const carriers = new Set(
     frame.notes
-      .filter((n) => isCarrier(n) && n.end > bar && n.start < bar + 1)
+      .filter((n) => isCarrier(n) && n.end > bar && n.start < bar + 2)
       .map((n) => n.instrument),
   );
   visible.sort(
     (a, b) => Number(carriers.has(b.id)) - Number(carriers.has(a.id)) || a.index - b.index,
   );
   const spacing = (bottom - top) / Math.max(1, visible.length - 1);
-  const x = (time: number) => left + clamp(time - bar) * (right - left);
-  const rows = visible.map((instrument, index) => {
+  return visible.map((instrument, index) => ({
+    instrument,
+    y: visible.length === 1 ? (top + bottom) / 2 : top + index * spacing,
+  }));
+}
+export function formation(frame: ViewFrame, drum: string | null = drumPart(frame.notes) ?? null) {
+  const bar = Math.floor(frame.now);
+  const left = frame.width * 0.15,
+    right = frame.width * 0.85;
+  const visible = waveRows(frame, bar);
+  const layouts = new Map([[bar, visible]]);
+  const spacing = visible.length > 1 ? visible[1].y - visible[0].y : frame.height * 0.3;
+  const y = (note: ViewNote) => {
+    const waveBar = note.hasOnset ? Math.floor(note.start) : bar;
+    let layout = layouts.get(waveBar);
+    if (!layout) {
+      layout = waveRows(frame, waveBar);
+      layouts.set(waveBar, layout);
+    }
+    return layout.find((row) => row.instrument.id === note.instrument)?.y ?? frame.height * 0.3;
+  };
+  const x = (time: number, now = frame.now) =>
+    frame.width / 2 + (phase(time) - 0.5) * (right - left) * breathing({ ...frame, now }, drum);
+  const rows = visible.map(({ instrument, y: rowY }) => {
     const notes = frame.notes.filter(
       (n) => n.instrument === instrument.id && n.end > bar && n.start < bar + 1,
     );
@@ -86,44 +164,143 @@ export function formation(frame: ViewFrame) {
     );
     const currentEnemies = enemies(notes),
       nextEnemies = enemies(next);
-    // Geometry, not a magic event cap: overlapping enemies or carriers become one counted shield.
-    const overlaps = (events: ViewNote[], offset: number) => {
+    const overlaps = (events: ViewNote[]) => {
       const ordered = [...events].sort((a, b) => a.start - b.start);
-      return ordered.some((n, i) => {
-        if (i === 0) return false;
-        const previous = ordered[i - 1];
-        if (isCarrier(previous)) return n.start < previous.end;
-        return (
-          x(n.start - offset) - x(previous.start - offset) <
-          enemySize(n, frame.width) + enemySize(previous, frame.width) + 6
-        );
-      });
+      return ordered.some(
+        (n, i) =>
+          i > 0 &&
+          Math.abs(x(n.start) - x(ordered[i - 1].start)) <
+            spriteRadius(n, frame.width, frame.height) +
+              spriteRadius(ordered[i - 1], frame.width, frame.height) +
+              6,
+      );
     };
-    const cramped = spacing < Math.max(22, (40 * frame.width) / 1300);
-    const crowded = cramped || overlaps(currentEnemies, 0);
-    const nextCrowded = cramped || overlaps(nextEnemies, 1);
+    const cramped =
+      spacing < Math.max(14, ((28 * frame.width) / 1300) * Math.min(1, frame.height / 760));
     return {
       instrument,
-      y: visible.length === 1 ? (top + bottom) / 2 : top + index * spacing,
+      y: rowY,
       notes,
       next,
       enemies: currentEnemies,
       nextEnemies,
-      crowded,
-      nextCrowded,
+      crowded:
+        cramped ||
+        overlaps(currentEnemies) ||
+        currentEnemies.filter(
+          (n) => n.hasOnset && isCarrier(n) && n.start <= frame.now && frame.now < n.end,
+        ).length > 1,
+      nextCrowded: cramped || overlaps(nextEnemies),
+      recent: enemies(
+        frame.notes.filter(
+          (n) =>
+            n.instrument === instrument.id && n.end <= bar && frame.now - n.start < frame.cps * 0.3,
+        ),
+      ),
     };
   });
-  return { bar, left, right, x, shipX: x(frame.now), shipY: frame.height * 0.85, rows };
+  return { bar, left, right, x, y, shipX: shipX(frame), shipY: frame.height * 0.88, rows };
 }
-export function enemyPose(note: ViewNote, now: number, x: number, y: number, hitY: number) {
-  const progress = flightProgress(note, now, 1 / 8);
-  const diving = note.hasOnset && now < note.start && progress > 0;
-  const u = diving ? Math.sqrt(progress) : 0;
+export const spriteRadius = (note: ViewNote, width: number, height = 760) =>
+  enemySize(note, width) * clamp(height / 760, 0.65, 1) * (isCarrier(note) ? 1.5 : 1);
+export interface Point {
+  x: number;
+  y: number;
+}
+/** One loop from alternating top corners, followed by settling into the true slot. */
+export function entryPoint(
+  u: number,
+  slot: Point,
+  width: number,
+  height: number,
+  side: number,
+): Point {
+  u = clamp(u);
+  const settle = ease(u),
+    loop = Math.sin(Math.PI * u);
   return {
-    x: x + Math.sin(progress * Math.PI) * (random(seed(note)) - 0.5) * 55,
-    y: y + (hitY - y) * u,
-    diving,
-    hit: note.hasOnset && now >= note.start,
-    remaining: 1 - noteProgress(note, now),
+    x:
+      (side < 0 ? width * 0.04 : width * 0.96) * (1 - settle) +
+      slot.x * settle +
+      side * Math.sin(u * Math.PI * 2) * width * 0.2 * loop,
+    y:
+      -35 * (1 - settle) + slot.y * settle + (1 - Math.cos(u * Math.PI * 2)) * height * 0.18 * loop,
+  };
+}
+export function divePoint(u: number, slot: Point, hit: Point, width: number): Point {
+  u = clamp(u);
+  const progress = ease(u),
+    curl = Math.sin(u * Math.PI * 2) * (1 - u);
+  return {
+    x: slot.x + (hit.x - slot.x) * progress + curl * width * 0.16,
+    y: slot.y + (hit.y - slot.y) * progress - curl * width * 0.045,
+  };
+}
+/** All flights and their heading are functions of the note and time, including across a bar line. */
+export function enemyPose(
+  note: ViewNote,
+  frame: ViewFrame,
+  rowY: number,
+  x: (time: number, now?: number) => number,
+) {
+  const flagship = isCarrier(note);
+  const duration = diveDuration(frame.cps),
+    start = flagship ? note.start : note.start - duration;
+  const arrival = flagship ? note.start + Math.min(duration, note.end - note.start) : note.start;
+  const hit = {
+    x: flagship
+      ? frame.width *
+        (0.2 +
+          0.6 *
+            ((frame.instruments.find((i) => i.id === note.instrument)?.index ?? 0) /
+              Math.max(1, frame.instruments.length - 1)))
+      : hitX(note.start, frame.width),
+    y: frame.height * (flagship ? 0.6 : 0.76),
+  };
+  const slot = { x: x(note.start, start), y: rowY };
+  const entryStart = Math.floor(note.start) - 0.5;
+  const entryEnd = Math.min(Math.floor(note.start), start);
+  const position = (now: number): Point => {
+    if (!note.hasOnset) return { x: x(note.start), y: rowY };
+    if (now >= start)
+      return divePoint(
+        flagship
+          ? clamp((now - start) / Math.max(0.001, arrival - start))
+          : flightProgress(note, now, duration),
+        slot,
+        hit,
+        frame.width,
+      );
+    if (now < entryEnd)
+      return entryPoint(
+        (now - entryStart) / (entryEnd - entryStart),
+        { x: x(note.start, entryEnd), y: rowY },
+        frame.width,
+        frame.height,
+        seed(note) % 2 ? -1 : 1,
+      );
+    return { x: x(note.start, now), y: rowY };
+  };
+  const point = position(frame.now),
+    ahead = position(frame.now + 0.0001);
+  const moving =
+    note.hasOnset && frame.now < arrival && (frame.now >= start || frame.now < entryEnd);
+  return {
+    ...point,
+    hitX: flagship ? slot.x : hit.x,
+    hitY: flagship ? slot.y : hit.y,
+    angle: moving ? Math.atan2(ahead.y - point.y, ahead.x - point.x) - Math.PI / 2 : 0,
+    entering: frame.now >= entryStart && frame.now < entryEnd,
+    visible: !note.hasOnset || frame.now >= entryStart,
+    diving: note.hasOnset && frame.now >= start && frame.now < arrival,
+    hit: note.hasOnset && frame.now >= note.start,
+    remaining: 1 - noteProgress(note, frame.now),
+  };
+}
+/** Two scrolling layers, no section resets or accumulated motion. */
+export function starPoint(index: number, now: number, layer: number): Point {
+  return {
+    x: random(index, layer * 2),
+    y: phase(random(index, layer * 2 + 1) + now * (layer ? 0.11 : 0.035)),
   };
 }

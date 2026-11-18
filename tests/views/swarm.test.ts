@@ -8,6 +8,14 @@ import { queryEventsNode } from '../node-query';
 import { scoreFrame } from './score-fixture';
 import type { ViewFrame } from '../../src/views/types';
 import {
+  breathing,
+  diveDuration,
+  drumPart,
+  entryPoint,
+  hitX,
+  shipX,
+  starPoint,
+  spriteRadius,
   enemies,
   enemyPose,
   enemySize,
@@ -49,9 +57,13 @@ it('places real drop notes at proportional columns and one row per participating
   for (const row of g.rows)
     for (const n of row.notes) {
       expect(n.instrument).toBe(row.instrument.id);
-      expect(g.x(n.start)).toBeCloseTo(g.left + Math.max(0, n.start - 10) * (g.right - g.left));
+      expect(g.x(n.start)).toBeCloseTo(
+        frame.width / 2 + ((n.start % 1) - 0.5) * (g.right - g.left) * breathing(frame),
+      );
     }
-  expect(g.shipX).toBeCloseTo(g.left + 0.4 * (g.right - g.left));
+  expect(g.right - g.left).toBeCloseTo(frame.width * 0.7);
+  expect(g.rows[0].y).toBeCloseTo(frame.height * 0.15);
+  expect(g.rows.at(-1)!.y).toBeCloseTo(frame.height * 0.45);
   expect(
     formation({
       ...frame,
@@ -59,35 +71,151 @@ it('places real drop notes at proportional columns and one row per participating
     }).rows.map((r) => r.notes),
   ).toEqual(g.rows.map((r) => r.notes));
 });
-it('dives exactly in the last eighth, is hit on onset, and reverses without history', () => {
+it('curls before the onset, arrives exactly on it and reverses without history', () => {
   const n = frame.notes.find((n) => n.start === 10.5 && !isCarrier(n))!;
-  expect(n).toBeDefined();
-  const pose = (now: number) => enemyPose(n, now, 500, 200, 600);
-  expect(pose(10.375).diving).toBe(false);
+  const g = formation(frame);
+  const pose = (now: number) => enemyPose(n, { ...frame, now }, 200, g.x);
+  const duration = diveDuration(frame.cps);
+  expect(pose(n.start - duration - 0.00001).diving).toBe(false);
   expect(pose(10.4).diving).toBe(true);
-  expect(pose(10.499999).y).toBeCloseTo(600, 2);
+  expect(pose(10.499999).y).toBeCloseTo(frame.height * 0.76, 2);
+  expect(pose(10.499999).x).toBeCloseTo(hitX(n.start, frame.width), 2);
   expect(pose(10.499999).hit).toBe(false);
   expect(pose(10.5).hit).toBe(true);
+  expect(pose(10.5).y).toBe(frame.height * 0.76);
+  const mid = pose(n.start - duration / 2);
+  const quarter = pose(n.start - duration * 0.75);
+  expect(
+    Math.abs(quarter.x - (g.x(n.start, n.start - duration) * 0.75 + mid.x * 0.25)),
+  ).toBeGreaterThan(20);
   const saved = pose(10.4);
   pose(20);
   pose(0);
   expect(pose(10.4)).toEqual(saved);
+  for (const cps of [0.1, 0.4, 0.6, 1, 2]) {
+    expect(diveDuration(cps) / cps).toBeGreaterThanOrEqual(0.25);
+    expect(diveDuration(cps) / cps).toBeLessThanOrEqual(0.4 + Number.EPSILON);
+  }
 });
-it('real held bass carriers burn over their exact scored spans and gain sets size', () => {
+it('held bass flagships hover with exactly their scored remaining span', () => {
   const n = frame.notes.find((n) => n.start === 10 && n.end === 11 && n.value.note !== undefined)!;
-  expect(n).toBeDefined();
   expect(isCarrier(n)).toBe(true);
-  const pose = (now: number) => enemyPose(n, now, 0, 0, 1);
+  const g = formation(frame);
+  const pose = (now: number) => enemyPose(n, { ...frame, now }, 120, g.x);
+  expect(pose(9.999).diving).toBe(false);
+  expect(pose(10).diving).toBe(true);
+  expect(pose(10).y).toBe(120);
   expect(pose(10).remaining).toBe(1);
   expect(pose(10.4).remaining).toBeCloseTo(0.6);
   expect(pose(11).remaining).toBe(0);
+  expect(pose(10.4).y).toBe(frame.height * 0.6);
+  expect(pose(10.4).x).toBe(pose(10.8).x);
+  expect(spriteRadius(n, frame.width)).toBe(enemySize(n, frame.width) * 1.5);
   expect(enemySize({ ...n, value: { gain: 0.4 } })).toBeLessThan(
     enemySize({ ...n, value: { gain: 1 } }),
   );
   expect(enemySize({ ...n, value: { gain: Infinity } })).toBe(enemySize({ ...n, value: {} }));
   const fragment = { ...n, hasOnset: false };
   expect(isCarrier(fragment)).toBe(true);
-  expect(enemyPose(fragment, 10.4, 0, 0, 1).hit).toBe(false);
+  expect(enemyPose(fragment, frame, 120, g.x).hit).toBe(false);
+});
+it('the actual next wave enters only in the second half, loops and settles before peeling off', () => {
+  const n = frame.notes.find((n) => n.start === 11.5 && !isCarrier(n))!;
+  expect(n).toBeDefined();
+  const pose = (now: number) => {
+    const f = { ...frame, now },
+      g = formation(f);
+    return enemyPose(n, f, 240, g.x);
+  };
+  expect(pose(10.49).visible).toBe(false);
+  expect(pose(10.7).entering).toBe(true);
+  expect(pose(11).entering).toBe(false);
+  expect(pose(11).y).toBe(240);
+  expect(entryPoint(1, { x: 600, y: 240 }, 1300, 760, 1)).toEqual({ x: 600, y: 240 });
+  expect(entryPoint(0.5, { x: 600, y: 240 }, 1300, 760, 1).y).toBeGreaterThan(240);
+});
+it('keeps dives and hovering flagships continuous when a part leaves at the bar line', () => {
+  const f = scoreFrame(4);
+  const [leaving, diver, other, held] = [
+    { instrument: '0', start: 0, end: 1, value: { note: 48 }, hasOnset: true },
+    { instrument: '1', start: 1.05, end: 1.1, value: { s: 'sd' }, hasOnset: true },
+    { instrument: '2', start: 1.75, end: 1.8, value: { s: 'hh' }, hasOnset: true },
+    { instrument: '3', start: 0, end: 3, value: { note: 60 }, hasOnset: true },
+  ];
+  const pose = (now: number) => {
+    const current = {
+      ...f,
+      now,
+      notes: [leaving, diver, other, held],
+      instruments: f.instruments.map((i) => ({ ...i, inSection: i.id !== '0' || now < 1 })),
+    };
+    const g = formation(current);
+    const row = (id: string) => g.rows.find((row) => row.instrument.id === id)!;
+    return {
+      rowY: row('1').y,
+      flagshipRowY: row('3').y,
+      slotY: g.y(diver),
+      diver: enemyPose(diver, current, g.y(diver), g.x),
+      flagship: enemyPose(held, current, row('3').y, g.x),
+    };
+  };
+  const before = pose(0.99999999),
+    after = pose(1);
+  expect(before.rowY).not.toBe(after.rowY);
+  expect(before.flagshipRowY).not.toBe(after.flagshipRowY);
+  expect(before.slotY).toBe(after.slotY);
+  expect(before.diver.diving).toBe(true);
+  expect(before.diver.x).toBeCloseTo(after.diver.x, 3);
+  expect(before.diver.y).toBeCloseTo(after.diver.y, 3);
+  expect(before.flagship.x).toBe(after.flagship.x);
+  expect(before.flagship.y).toBe(after.flagship.y);
+  pose(1.5);
+  pose(0.5);
+  expect(pose(1)).toEqual(after);
+});
+it('breathes by six percent on the scored steadiest drum and eases back', () => {
+  const notes = [0, 0.25, 0.5, 0.75, 1].map((start) => ({
+    instrument: 'drum',
+    start,
+    end: start + 0.01,
+    hasOnset: true,
+    value: { s: 'anything' },
+  }));
+  expect(drumPart(notes)).toBe('drum');
+  expect(breathing({ notes, now: 0.25 })).toBe(1.06);
+  expect(breathing({ notes, now: 0.375 })).toBeCloseTo(1.03);
+  expect(breathing({ notes, now: 0.499999 })).toBeCloseTo(1);
+  expect(breathing({ notes: [], now: 0.5 })).toBe(1);
+});
+it('meets successive short-note hit points smoothly, handles simultaneous onsets and centres in rests', () => {
+  const notes = [0, 0.125, 0.25, 2].map((start) => ({
+    instrument: '0',
+    start,
+    end: start + 0.01,
+    hasOnset: true,
+    value: {},
+  }));
+  const x = (now: number) => shipX({ ...frame, notes, now });
+  for (const n of notes) expect(x(n.start)).toBe(hitX(n.start, frame.width));
+  expect(x(1)).toBe(frame.width / 2);
+  expect(shipX({ ...frame, notes: [], now: 1 })).toBe(frame.width / 2);
+  expect(
+    shipX({ ...frame, notes: notes.map((n) => ({ ...n, end: n.start + 1 })), now: 0.25 }),
+  ).toBe(frame.width / 2);
+  expect(shipX({ ...frame, notes: [...notes, { ...notes[1] }], now: 0.125 })).toBe(x(0.125));
+  expect(x(0.125 - 1e-6)).toBeCloseTo(x(0.125 + 1e-6), 3);
+  expect(x(0.06)).not.toBeCloseTo(frame.width * 0.15 + 0.06 * frame.width * 0.7);
+});
+it('scrolls two layers downward at different speeds, with stable seeds across bars', () => {
+  const a = starPoint(7, 10, 0),
+    b = starPoint(7, 10.1, 0),
+    c = starPoint(7, 10.1, 1);
+  expect(b.x).toBe(a.x);
+  expect((b.y - a.y + 1) % 1).toBeCloseTo(0.0035);
+  expect((c.y - starPoint(7, 10, 1).y + 1) % 1).toBeCloseTo(0.011);
+  starPoint(7, 0, 0);
+  starPoint(7, 20, 0);
+  expect(starPoint(7, 10, 0)).toEqual(a);
 });
 it('counts bar onsets inclusively, independent of cache window, fragments and order of travel', () => {
   const expected = frame.notes.filter((n) => n.hasOnset && n.start >= 10 && n.start <= 10.4).length;
@@ -187,7 +315,54 @@ it('scales ships to the desktop field and keeps Stage B silhouettes legible', ()
   expect(playerWidth(1300)).toBe(42);
   expect(playerWidth(560)).toBeGreaterThanOrEqual(18);
   const wide = formation({ ...frame, height: 760 });
-  expect(wide.rows.at(-1)!.y).toBeCloseTo(760 * 0.72);
-  expect(wide.rows.at(-1)!.y - wide.rows[0].y).toBeGreaterThan(760 * 0.55);
+  expect(wide.rows.at(-1)!.y).toBeCloseTo(760 * 0.45);
+  expect(wide.rows.at(-1)!.y - wide.rows[0].y).toBeCloseTo(760 * 0.3);
   expect(wide.rows.every((row) => row.y < wide.shipY)).toBe(true);
+});
+
+it('keeps ordinary six-part rows as sprites in the standard Studio stage', () => {
+  const g = formation({ ...frame, width: 1131, height: 468 });
+  expect(g.rows).toHaveLength(6);
+  expect(g.rows.every((row) => !row.crowded)).toBe(true);
+});
+
+it('counts overlapping flagships after different slots converge on their shared hover point', () => {
+  const n = frame.notes.find((n) => n.start === 10 && n.end === 11 && n.value.note !== undefined)!;
+  const layered = { ...frame, notes: [n, { ...n, start: 10.25, end: 11.25 }] };
+  const row = formation(layered).rows.find((row) => row.instrument.id === n.instrument)!;
+  expect(row.enemies).toHaveLength(2);
+  expect(row.crowded).toBe(true);
+});
+
+it('does not name the first section while the playhead is in a section gap', () => {
+  expect(
+    wave({
+      now: 1.5,
+      sections: [
+        { name: 'first', from: 0, to: 1 },
+        { name: 'second', from: 2, to: 3 },
+      ],
+    }),
+  ).toEqual({ number: 0, name: 'Open space' });
+});
+
+it('keeps onset-free continuations aligned with their current row after another part leaves', () => {
+  const f = scoreFrame(3);
+  const fragment = { instrument: '1', start: 0, end: 3, hasOnset: false, value: { note: 60 } };
+  const notes = [
+    { ...fragment, instrument: '0', end: 1, hasOnset: true },
+    fragment,
+    { instrument: '2', start: 1.5, end: 1.6, hasOnset: true, value: { s: 'hh' } },
+  ];
+  const at = (now: number) => {
+    const current = { ...f, now, notes },
+      g = formation(current);
+    const row = g.rows.find((row) => row.instrument.id === fragment.instrument)!;
+    const pose = enemyPose(fragment, current, g.y(fragment), g.x);
+    expect(pose.hit).toBe(false);
+    expect(pose.diving).toBe(false);
+    expect(pose.y).toBe(row.y);
+    return pose.y;
+  };
+  expect(at(0.99)).not.toBe(at(1));
 });

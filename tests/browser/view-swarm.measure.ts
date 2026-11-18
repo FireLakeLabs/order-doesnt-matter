@@ -14,6 +14,10 @@ test('swarm: exact-time Studio evidence, themes, dense shields and frame cost', 
   await page.setViewportSize({ width: 1920, height: 1080 });
   await prepare(page, 'swarm');
   await page.setViewportSize({ width: 2560, height: 1440 });
+  const presented = async () =>
+    page.evaluate(async () => {
+      for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
+    });
   const at = async (now: number) => {
     await page.evaluate(async (now) => {
       await window.odmStudio.seek(now);
@@ -25,10 +29,20 @@ test('swarm: exact-time Studio evidence, themes, dense shields and frame cost', 
       now,
     );
     await page.evaluate(() => document.fonts.ready);
-    await page.evaluate(async () => {
-      for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
-    });
+    await presented();
   };
+  for (const [label, now] of [
+    ['bar-11-10', 10.1],
+    ['bar-11-40', 10.4],
+    ['bar-11-49', 10.49],
+    ['bar-11-90', 10.9],
+    ['bar-2-40', 1.4],
+  ] as const) {
+    await at(now);
+    await page
+      .locator('[data-region="stage-a"] canvas')
+      .screenshot({ path: `${shots}/${label}.png` });
+  }
   await at(10.4);
   await page.screenshot({ path: `${shots}/arcade-2560x1440.png` });
   const saved = await page.evaluate(() => ({
@@ -55,6 +69,7 @@ test('swarm: exact-time Studio evidence, themes, dense shields and frame cost', 
     await window.odmStudio.endScrub();
   });
   await page.waitForFunction(() => window.viewProbe.frame?.now === 10.4);
+  await presented();
   const a = page.locator('[data-region="stage-a"] canvas');
   const forward = await a.evaluate((canvas: HTMLCanvasElement) => [
     ...canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data,
@@ -63,6 +78,7 @@ test('swarm: exact-time Studio evidence, themes, dense shields and frame cost', 
   await at(10.65);
   await page.evaluate(() => window.odmStudio.step(-1));
   await page.waitForFunction(() => window.viewProbe.frame?.now === 10.4);
+  await presented();
   const backward = await a.evaluate((canvas: HTMLCanvasElement) => [
     ...canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data,
   ]);

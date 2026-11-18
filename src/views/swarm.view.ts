@@ -1,46 +1,94 @@
 import type { ViewDefinition, ViewFrame, ViewNote } from './types';
 import { mount2d, line } from './shared/retro-2d';
-import { burst, spark, star, type Particle } from './shared/particles';
-import { clamp } from './shared/math';
+import { burst, type Particle } from './shared/particles';
 import {
+  drumPart,
   enemyPose,
-  enemySize,
   formation,
   hitCount,
   isCarrier,
   playerWidth,
   seed,
+  spriteRadius,
+  starPoint,
   wave,
 } from './swarm/model';
 
-function hull(c: CanvasRenderingContext2D, x: number, y: number, radius: number, variant: number) {
-  // Original split-pod scouts: two pods joined by an offset diamond spine.
-  c.beginPath();
-  c.moveTo(x, y - radius);
-  c.lineTo(x + radius * 0.9, y);
-  c.lineTo(x, y + radius * 0.7);
-  c.lineTo(x - radius * 0.9, y);
-  c.closePath();
-  c.fill();
-  if (variant % 2) {
-    c.fillRect(x - radius, y - radius * 0.45, radius * 0.3, radius);
-    c.fillRect(x + radius * 0.7, y - radius * 0.45, radius * 0.3, radius);
-  } else {
-    c.strokeRect(x - radius, y - radius * 0.45, radius * 2, radius * 0.9);
+/** Original lantern beetles: split wing cases, articulated legs and a luminous abdomen. */
+function beetle(
+  c: CanvasRenderingContext2D,
+  radius: number,
+  flagship: boolean,
+  now: number,
+  colour: string,
+  light: string,
+  ground: string,
+  variant: number,
+) {
+  const wing = 0.8 + Math.sin(now * 35 + variant) * 0.1;
+  c.strokeStyle = colour;
+  c.lineWidth = Math.max(1.2, radius * 0.09);
+  for (const side of [-1, 1]) {
+    for (let leg = 0; leg < 3; leg++) {
+      const y = radius * (-0.42 + leg * 0.42);
+      c.beginPath();
+      c.moveTo(side * radius * 0.35, y);
+      c.lineTo(side * radius * 0.82, y - radius * 0.2);
+      c.lineTo(side * radius * 1.08, y + radius * (leg === 0 ? -0.55 : 0.12));
+      c.stroke();
+    }
+    c.fillStyle = colour;
+    c.beginPath();
+    c.ellipse(
+      side * radius * 0.43,
+      -radius * 0.12,
+      radius * 0.4 * wing,
+      radius * (flagship ? 0.82 : 0.62),
+      side * -0.28,
+      0,
+      Math.PI * 2,
+    );
+    c.fill();
+    if (flagship) {
+      c.strokeStyle = light;
+      line(c, side * radius * 0.35, -radius * 0.62, side * radius * 0.61, radius * 0.12);
+      c.strokeStyle = colour;
+    }
   }
+  c.fillStyle = ground;
+  c.beginPath();
+  c.ellipse(0, radius * 0.02, radius * 0.23, radius * 0.75, 0, 0, Math.PI * 2);
+  c.fill();
+  c.fillStyle = flagship ? light : colour;
+  for (let i = 0; i < 3; i++)
+    c.fillRect(-radius * 0.13, radius * (i * 0.27 - 0.28), radius * 0.26, radius * 0.15);
+  c.beginPath();
+  c.ellipse(0, radius * 0.65, radius * 0.32, radius * 0.23, 0, 0, Math.PI * 2);
+  c.fill();
+  c.fillStyle = ground;
+  for (const side of [-1, 1]) c.fillRect(side * radius * 0.13 - 1, radius * 0.64, 2, 2);
 }
-function draw(c: CanvasRenderingContext2D, f: ViewFrame) {
+function draw(c: CanvasRenderingContext2D, f: ViewFrame, drum: string | null) {
   const t = f.theme,
     w = f.width,
     h = f.height;
-  const g = formation(f),
+  // Fractional CSS sizes leave a partially painted edge in the host's ground fill.
+  // Paint whole backing pixels so that edge cannot retain earlier frames while scrubbing.
+  c.save();
+  c.resetTransform();
+  c.fillStyle = t.ground;
+  c.fillRect(0, 0, c.canvas.width, c.canvas.height);
+  c.restore();
+  const g = formation(f, drum),
     currentWave = wave(f);
   const particle: Particle = { x: 0, y: 0, alpha: 0 };
-  for (let i = 0; i < Math.min(100, w / 9); i++) {
-    star(i + currentWave.number * 101, f.now, particle);
-    c.globalAlpha = particle.alpha * 0.4;
-    c.fillStyle = t.muted;
-    c.fillRect(particle.x * w, 65 + particle.y * (h - 100), i % 7 ? 1 : 2, 2);
+  for (const layer of [0, 1]) {
+    for (let i = 0; i < Math.min(90, w / 12); i++) {
+      const p = starPoint(i, f.now, layer);
+      c.globalAlpha = layer ? 0.55 : 0.28;
+      c.fillStyle = [t.muted, t.accent, t.text][i % 3];
+      c.fillRect(p.x * w, p.y * h, layer ? 2 : 1, layer ? 3 : 1);
+    }
   }
   c.globalAlpha = 1;
   c.textAlign = 'left';
@@ -57,145 +105,165 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame) {
   );
   c.textAlign = 'right';
   c.fillStyle = t.text;
-  c.fillText(`BAR HITS ${String(hitCount(f))}`, w - 24, 32);
-  c.fillStyle = t.muted;
-  c.fillText(`${String(g.bar + 1)} · ${String(Math.round((f.now - g.bar) * 100))}%`, w - 24, 53);
+  c.fillText(`BAR HITS ${String(hitCount(f))}`, w - 24, 35);
 
-  const effect = (note: ViewNote, x: number, y: number, carrier = false) => {
-    const duration = carrier ? 0.18 : f.trails === 2 ? 0.3 : f.trails === 1 ? 0.18 : 0.045;
+  const effect = (note: ViewNote, x: number, y: number) => {
+    const duration = Math.max(0.001, f.cps) * (f.trails === 2 ? 0.3 : f.trails === 1 ? 0.18 : 0.08);
     const age = (f.now - note.start) / duration;
     if (!note.hasOnset || age < 0 || age >= 1) return;
     c.save();
     c.shadowColor = c.fillStyle as string;
     c.shadowBlur = t.glow ? 8 : 0;
-    for (let bit = 0; bit < 7; bit++) {
-      (carrier ? spark : burst)(seed(note) + bit * 37, age, particle);
+    for (let bit = 0; bit < 12; bit++) {
+      burst(seed(note) + bit * 37, age, particle);
       c.globalAlpha = particle.alpha;
-      c.fillRect(x + particle.x * 38, y + particle.y * 38, 2, 2);
+      c.fillRect(x + particle.x * 45, y + particle.y * 45, 3, 3);
     }
     c.globalAlpha = 1 - age;
+    c.strokeStyle = t.text;
+    c.beginPath();
+    c.arc(x, y, 3 + age * 22, 0, Math.PI * 2);
+    c.stroke();
     c.fillStyle = t.text;
     c.beginPath();
-    c.arc(x, y, 4 * (1 - age), 0, Math.PI * 2);
+    c.arc(x, y, 7 * (1 - age), 0, Math.PI * 2);
     c.fill();
     c.restore();
   };
-
   for (const row of g.rows) {
     const col = row.instrument.muted ? t.muted : row.instrument.colour;
     c.globalAlpha = 1;
     c.fillStyle = t.muted;
     c.textAlign = 'right';
     c.font = `10px "${t.fontMono}"`;
-    c.fillText(row.instrument.name, g.left - 28, row.y + 4, g.left - 35);
-    c.strokeStyle = t.line;
-    c.globalAlpha = 0.35;
-    line(c, g.left, row.y, g.right, row.y);
-    // The actual next bar's notes, rather than clones of this bar's destroyed slots.
-    c.fillStyle = col;
-    c.strokeStyle = col;
-    c.globalAlpha = 0.3;
-    if (row.nextCrowded) {
-      for (const n of row.nextEnemies)
-        c.fillRect(g.x(n.start - 1), row.y - 5, Math.max(1, g.x(n.end - 1) - g.x(n.start - 1)), 10);
-    } else
-      for (const n of row.nextEnemies) {
-        const x = g.x(n.start - 1);
-        if (isCarrier(n)) c.fillRect(x, row.y - 5, Math.max(1, g.x(n.end - 1) - x), 10);
-        else hull(c, x, row.y, enemySize(n, w), row.instrument.index);
-      }
-    c.globalAlpha = row.instrument.muted ? 0.35 : 1;
-    c.fillStyle = col;
-    c.strokeStyle = col;
-    if (row.crowded) {
-      // Every span contributes occupancy; the shield's count preserves stacked unisons too.
-      c.strokeRect(g.left - 7, row.y - 9, g.right - g.left + 14, 18);
-      for (const n of row.enemies) {
-        c.globalAlpha = (n.start <= f.now ? 0.28 : 0.85) * (row.instrument.muted ? 0.35 : 1);
-        c.fillRect(g.x(n.start), row.y - 5, Math.max(1, g.x(n.end) - g.x(n.start)), 10);
-      }
-      c.globalAlpha = 1;
-      c.fillStyle = t.text;
-      c.textAlign = 'right';
-      c.fillText(`×${String(row.enemies.length)}`, g.right - 5, row.y - 13);
-      c.fillStyle = col;
-      if (!row.instrument.muted) for (const n of row.enemies) effect(n, g.x(n.start), row.y);
-      continue;
-    }
-    for (const n of [...row.enemies, ...row.nextEnemies.filter((n) => n.start - f.now <= 1 / 8)]) {
-      const x = g.x(n.start),
-        carrier = isCarrier(n),
-        hitY = g.shipY - 45;
-      const pose = enemyPose(n, f.now, x, row.y, hitY);
-      c.fillStyle = col;
-      c.strokeStyle = col;
-      c.globalAlpha = row.instrument.muted ? 0.35 : 1;
-      if (carrier) {
-        const halfHeight = enemySize(n, w) * 0.55;
-        const end = g.x(n.end),
-          burn = g.x(Math.max(n.start, f.now));
-        c.globalAlpha *= 0.15;
-        c.fillRect(x, row.y - halfHeight, Math.max(1, end - x), halfHeight * 2);
-        c.globalAlpha = row.instrument.muted ? 0.35 : 1;
-        if (pose.remaining > 0) {
-          const start = Math.max(x, burn);
-          c.fillRect(start, row.y - halfHeight, Math.max(1, end - start), halfHeight * 2);
-          c.fillStyle = t.ground;
-          for (let rib = start + 9; rib < end - 3; rib += 22)
-            c.fillRect(rib, row.y - 2, Math.min(12, end - rib), 4);
-          if (pose.hit && !row.instrument.muted) {
+    const rowName =
+      row.crowded && row.enemies.length
+        ? `${row.instrument.name} ×${String(row.enemies.length)}`
+        : row.instrument.name;
+    c.fillText(rowName, w * 0.1, row.y + 4, w * 0.1 - 10);
+    for (const [notes, crowded] of [
+      [row.enemies, row.crowded],
+      [row.nextEnemies, row.nextCrowded],
+    ] as const) {
+      let squadron = false;
+      for (const n of notes) {
+        const pose = enemyPose(n, f, g.y(n), g.x),
+          flagship = isCarrier(n);
+        if (!pose.visible) continue;
+        const alive = !pose.hit || (flagship && pose.remaining > 0);
+        c.fillStyle = col;
+        c.strokeStyle = col;
+        // Crowded formation slots remain a counted squadron; every attack and hit still exists.
+        if (crowded && alive && !pose.diving && !pose.hit) {
+          if (!squadron) {
+            squadron = true;
+            c.save();
+            c.translate(pose.entering ? pose.x : w / 2, pose.entering ? pose.y : row.y);
+            c.globalAlpha = row.instrument.muted ? 0.3 : 0.75;
+            c.strokeRect(-w * 0.2, -9, w * 0.4, 18);
+            c.textAlign = 'center';
             c.fillStyle = col;
-            const age = ((f.now - n.start) * 8) % 1;
-            for (let bit = 0; bit < 4; bit++) {
-              spark(seed(n) + bit * 53, age, particle);
-              c.globalAlpha = particle.alpha;
-              c.fillRect(start + particle.x * 20, row.y + particle.y * 22, 2, 2);
+            c.fillText(`SQUADRON ×${String(notes.length)}`, 0, 4);
+            c.restore();
+          }
+          c.globalAlpha = 0.3;
+          c.fillRect(g.x(n.start), row.y - 5, 2, 10);
+        } else if (alive) {
+          // A short curved wake makes the loop and curling dive readable in a still frame.
+          if (pose.diving || pose.entering) {
+            c.save();
+            c.globalAlpha = row.instrument.muted ? 0.12 : 0.35;
+            c.lineWidth = 1.5;
+            c.beginPath();
+            for (let step = 0; step <= 12; step++) {
+              const past = enemyPose(
+                n,
+                { ...f, now: f.now - (12 - step) * f.cps * 0.014 },
+                g.y(n),
+                g.x,
+              );
+              if (step === 0) c.moveTo(past.x, past.y);
+              else c.lineTo(past.x, past.y);
             }
+            c.stroke();
+            c.restore();
+          }
+          if (flagship && pose.hit && pose.remaining > 0) {
+            const origin = pose.y + spriteRadius(n, w, h) * 0.85;
+            const length = (g.shipY - origin - 15) * pose.remaining;
+            c.save();
+            const beam = c.createLinearGradient(0, pose.y, 0, pose.y + Math.max(1, length));
+            beam.addColorStop(0, col);
+            beam.addColorStop(1, t.ground);
+            c.fillStyle = beam;
+            c.globalAlpha = row.instrument.muted ? 0.08 : 0.3;
+            c.beginPath();
+            c.moveTo(pose.x - 5, origin);
+            c.lineTo(pose.x - 26, origin + length);
+            c.lineTo(pose.x + 26, origin + length);
+            c.lineTo(pose.x + 5, origin);
+            c.fill();
+            c.globalAlpha = row.instrument.muted ? 0.15 : 0.8;
+            c.strokeStyle = col;
+            line(c, pose.x - 26, origin + length, pose.x + 26, origin + length);
+            c.restore();
+          }
+          c.save();
+          c.translate(pose.x, pose.y);
+          c.rotate(pose.angle);
+          c.globalAlpha = row.instrument.muted ? 0.3 : 1;
+          c.shadowColor = col;
+          c.shadowBlur = t.glow && (pose.diving || pose.hit) ? 10 : 0;
+          beetle(
+            c,
+            spriteRadius(n, w, h),
+            flagship,
+            f.now,
+            col,
+            t.text,
+            t.ground,
+            row.instrument.index,
+          );
+          c.restore();
+        }
+        if (!row.instrument.muted) {
+          c.fillStyle = col;
+          effect(n, pose.hitX, pose.hitY);
+          const shotDuration = Math.max(0.001, f.cps) * 0.09;
+          const u = 1 + (f.now - n.start) / shotDuration;
+          if (n.hasOnset && !flagship && u >= 0 && u <= 1) {
+            // The projectile's head arrives at the enemy's hit point exactly on its onset.
+            c.save();
+            c.globalAlpha = 1;
+            c.strokeStyle = t.text;
+            c.lineWidth = 3;
+            const startY = g.shipY - playerWidth(w) * 0.5;
+            line(
+              c,
+              g.shipX + (pose.hitX - g.shipX) * Math.max(0, u - 0.18),
+              startY + (pose.hitY - startY) * Math.max(0, u - 0.18),
+              g.shipX + (pose.hitX - g.shipX) * u,
+              startY + (pose.hitY - startY) * u,
+            );
+            c.restore();
           }
         }
-      } else if (!pose.hit) {
-        if (pose.diving) {
-          c.globalAlpha *= 0.4;
-          c.setLineDash([3, 5]);
-          line(c, x, row.y, pose.x, pose.y);
-          c.setLineDash([]);
-          c.globalAlpha = row.instrument.muted ? 0.35 : 1;
-          c.shadowColor = col;
-          c.shadowBlur = t.glow ? 8 : 0;
-        }
-        hull(c, pose.x, pose.y, enemySize(n, w), row.instrument.index);
-        c.shadowBlur = 0;
-      }
-      if (carrier && pose.diving) {
-        // The carrier's nose dives; its scored hull remains in formation to show duration.
-        c.fillStyle = col;
-        c.globalAlpha = row.instrument.muted ? 0.35 : 1;
-        hull(c, pose.x, pose.y, enemySize(n, w), row.instrument.index);
-      }
-      if (!row.instrument.muted) {
-        c.fillStyle = col;
-        effect(n, x, carrier ? row.y : hitY, carrier);
-        if (pose.diving) {
-          c.strokeStyle = t.text;
-          c.globalAlpha = 0.7;
-          const u = clamp(1 - (n.start - f.now) * 8);
-          line(c, g.shipX, g.shipY - 13, g.shipX + (x - g.shipX) * u, g.shipY - 13 - 32 * u);
-        }
       }
     }
+    if (!row.instrument.muted)
+      for (const n of row.recent) {
+        const pose = enemyPose(n, f, g.y(n), g.x);
+        c.fillStyle = col;
+        effect(n, pose.hitX, pose.hitY);
+      }
   }
-  c.globalAlpha = 0.4;
-  c.strokeStyle = t.accent;
-  c.setLineDash([2, 6]);
-  line(c, g.shipX, 83, g.shipX, g.shipY - 18);
-  c.setLineDash([]);
   c.globalAlpha = 1;
   c.fillStyle = t.text;
-  // Asymmetric twin sails around an open central cockpit.
   c.save();
   c.translate(g.shipX, g.shipY);
   const playerScale = playerWidth(w) / 37;
   c.scale(playerScale, playerScale);
+  // Asymmetric twin sails around an open central cockpit.
   c.beginPath();
   c.moveTo(-4, -19);
   c.lineTo(-21, 15);
@@ -212,23 +280,21 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame) {
   c.restore();
   c.globalAlpha = 1;
   c.strokeStyle = t.line;
-  line(c, g.left, h - 31, g.right, h - 31);
-  c.strokeStyle = t.text;
-  line(c, g.left, h - 31, g.shipX, h - 31);
-  c.font = `10px "${t.fontMono}"`;
-  c.fillStyle = t.muted;
-  c.textAlign = 'left';
-  c.fillText('bar start', g.left, h - 12);
-  c.textAlign = 'right';
-  c.fillText('bar end', g.right, h - 12);
-  c.textAlign = 'center';
-  c.fillStyle = t.text;
-  c.fillText('ship = playhead', clamp(g.shipX, g.left + 100, g.right - 100), h - 12);
+  line(c, g.left, h - 27, g.right, h - 27);
+  c.strokeStyle = t.accent;
+  line(c, g.left, h - 27, g.left + (f.now - g.bar) * (g.right - g.left), h - 27);
 }
 export default {
   id: 'swarm',
   group: 'arcade',
   name: 'Swarm',
   tag: 'shooter',
-  mount: (el) => mount2d(el, () => null, draw),
+  mount: (el) =>
+    mount2d(
+      el,
+      (notes) => ({ drum: drumPart(notes) ?? null }),
+      (c, f, data) => {
+        draw(c, f, data.drum);
+      },
+    ),
 } satisfies ViewDefinition;
