@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Slalom</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+.nm{font-family:'JetBrains Mono',monospace;font-size:11px;fill:#A49EC4}
+.sm{font-family:'JetBrains Mono',monospace;font-size:10px;fill:#A49EC4}
+.hud{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;fill:#F4F1FF}
+.ink{fill:#F4F1FF}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="An original skier carves between the E-flat and D melody gates on a violet open mountain bowl. Twin tracks mark the G and E-flat notes already passed, the A-flat pad rolls the terrain, and a warm vertical veil marks the held vocal atmosphere." style="position: absolute; left: 0; top: 0; display: block">
+<defs><linearGradient id="snow" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#12101F"></stop><stop offset="1" stop-color="#2A2545"></stop></linearGradient></defs>
+<path d="M 0 233 L 130 112 L 246 206 L 390 81 L 551 200 L 685 105 L 960 245 L 960 600 L 0 600 Z" fill="#12101F" stroke="#2A2545" stroke-width="1" ></path>
+<path d="M 118 600 Q 218 384 325 228 Q 440 173 535 217 Q 705 376 851 600 Z" fill="url(#snow)" stroke="#A49EC4" stroke-width="1" ></path>
+<path d="M 121 556 Q 289 452 360 465 Q 553 509 818 445 M 219 379 Q 359 323 453 355 Q 596 398 710 351 M 312 248 Q 392 224 469 248" fill="none" stroke="#B388FF" stroke-width="2" ></path>
+<text x="27" y="279" class="nm" >darkPad · ab2</text>
+<text x="27" y="298" class="nm" >lowest pitch → terrain</text>
+<text x="27" y="326" class="nm" >eb3 + c4 → ridge lights</text>
+<path d="M 210 294 L 304 346" fill="none" stroke="#A49EC4" stroke-width="1" ></path>
+<path d="M 755 102 Q 805 250 734 403 Q 671 479 759 600" fill="none" stroke="#FF8A3D" stroke-width="38" opacity=".08"></path>
+<text x="734" y="86" class="nm" >vocalAtmos · ade:0</text>
+<text x="734" y="104" class="nm" >speed .8 · held 17–20</text>
+<path d="M 470 263 C 494 289 558 307 527 341 S 409 367 447 406" fill="none" stroke="#3DDCFF" stroke-width="2.5" opacity=".65"></path>
+<path d="M 478 263 C 502 289 566 307 535 341 S 417 367 455 406" fill="none" stroke="#3DDCFF" stroke-width="2.5" opacity=".65"></path>
+<path d="M 457 283 V 245 Q 482 230 507 245 V 283" fill="none" stroke="#3DDCFF" stroke-width="3" opacity=".35"></path>
+<path d="M 457 245 l 14 9 l -14 6 M 507 245 l -14 9 l 14 6" fill="#3DDCFF" stroke="#3DDCFF" stroke-width="1.5" opacity=".35"></path>
+<text x="482" y="226" class="nm" text-anchor="middle">g4 · .000</text>
+<path d="M 496 343 V 295 Q 533 280 570 295 V 343" fill="none" stroke="#3DDCFF" stroke-width="3" opacity=".35"></path>
+<path d="M 496 295 l 14 9 l -14 6 M 570 295 l -14 9 l 14 6" fill="#3DDCFF" stroke="#3DDCFF" stroke-width="1.5" opacity=".35"></path>
+<text x="533" y="276" class="nm" text-anchor="middle">eb4 · .250</text>
+<path d="M 339 478 V 387 Q 416 372 493 387 V 478" fill="none" stroke="#3DDCFF" stroke-width="3" ></path>
+<path d="M 339 387 l 14 9 l -14 6 M 493 387 l -14 9 l 14 6" fill="#3DDCFF" stroke="#3DDCFF" stroke-width="1.5" ></path>
+<text x="416" y="368" class="nm" text-anchor="middle">d4 · .500</text>
+<path d="M 210 591 V 484 Q 324 469 438 484 V 591" fill="none" stroke="#3DDCFF" stroke-width="3" ></path>
+<path d="M 210 484 l 14 9 l -14 6 M 438 484 l -14 9 l 14 6" fill="#3DDCFF" stroke="#3DDCFF" stroke-width="1.5" ></path>
+<text x="324" y="465" class="nm" text-anchor="middle">c4 · .750</text>
+<path d="M 452 408 C 480 435 433 443 416 478 Q 385 532 324 591" fill="none" stroke="#FFD23F" stroke-width="2" stroke-dasharray="3 6"></path>
+<text x="591" y="452" class="nm" >triangle · next d4</text>
+<text x="591" y="472" class="nm" >delay .375 · room .9</text>
+<text x="591" y="499" class="nm" >eb4 ended at .375</text>
+<text x="591" y="519" class="nm" >now carving between gates</text>
+<ellipse cx="451" cy="427" rx="29" ry="8" fill="#07060D" opacity=".5"></ellipse>
+<path d="M 433 405 L 426 445 M 452 407 L 460 446" fill="none" stroke="#F4F1FF" stroke-width="5" stroke-linecap="round"></path>
+<path d="M 442 387 L 433 414 M 448 389 L 455 416" fill="none" stroke="#FF8A3D" stroke-width="8" stroke-linecap="round"></path>
+<path d="M 422 385 L 412 411 M 465 384 L 481 408" fill="none" stroke="#A49EC4" stroke-width="2" ></path>
+<path d="M 440 370 L 423 385 M 449 370 L 465 384" fill="none" stroke="#3DDCFF" stroke-width="7" stroke-linecap="round"></path>
+<path d="M 431 357 Q 445 349 456 358 L 452 390 L 432 389 Z" fill="#3DDCFF" stroke="#07060D" stroke-width="2" ></path>
+<rect x="436" y="364" width="15" height="19" rx="5" fill="#12101F" ></rect>
+<circle cx="444" cy="348" r="12" fill="#F4F1FF" ></circle>
+<path d="M 435 348 Q 444 338 454 348" fill="none" stroke="#3DDCFF" stroke-width="8" ></path>
+<circle cx="304" cy="346" r="7" fill="#B388FF"></circle>
+<circle cx="453" cy="355" r="5" fill="#B388FF"></circle>
+<circle cx="596" cy="370" r="4" fill="#B388FF"></circle>
+<path d="{{scene.snow}}" fill="#F4F1FF" opacity=".3"></path>
+<text x="28" y="86" class="hud" >ROUND IV · BREAKDOWN</text>
+<text x="28" y="108" class="nm" >open bowl · 18 / 28</text>
+<text x="28" y="570" class="nm" >No drum gates in this section.</text>
+<text x="28" y="588" class="nm" >3 pad notes + 1 vocal span remain visible.</text>
+</svg>
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">03</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Slalom</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">downhill</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 18 · 40%</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div><p class="sp">Shows</p><p class="tx">A melody becomes a downhill run. The skier has passed g4 and eb4 and is carving toward d4 in the breakdown.</p></div>
+<div><p class="sp">Mapping</p><ul class="mp"><li>highest pitched part → gates; pitch → left or right</li><li>onset → pass gate; held note → corridor of its span</li><li>past melody → paired ski tracks; gaps → smooth carve</li><li>lowest pitch → terrain; other notes → flags or lights</li><li>section → mountain; collisions → counted gate bundles</li></ul></div>
+<div><p class="sp">Build</p><ul class="mp"><li>Canvas 2D · score/window · no changes</li><li>effort large · risk: overlapping gates</li><li>notes + now → route, tracks and spray</li><li>this pad chord → 3 ridge lights</li></ul></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+let seed = 17400;
+function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+let snow = '';
+for (let i = 0; i < 45; i++) {
+const x = 130 + rnd() * 700, y = 240 + rnd() * 330, r = .5 + rnd() * 1.3;
+snow += ' M' + x.toFixed(1) + ' ' + y.toFixed(1) + ' h' + r.toFixed(1) + ' v' + r.toFixed(1) + ' h-' + r.toFixed(1) + ' Z';
+}
+return { scene: { snow: snow } };
+}
+}
+</script>
+</body>
+</html>

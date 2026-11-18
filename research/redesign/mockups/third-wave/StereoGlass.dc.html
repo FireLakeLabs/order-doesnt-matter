@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Stereo glass</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+svg{font-size:10px;fill:#A49EC4}
+svg text{font-family:'JetBrains Mono',monospace}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="A round optical glass holds a cyan left-versus-right trace and a vertical mono reference. Separately labelled scored pan ticks all share the top centre angle because the piece has no explicit pan; the trace is marked illustrative." style="position: absolute; left: 0; top: 0; display: block">
+<defs><radialGradient id="glass"><stop offset="0" stop-color="#12101F"></stop><stop offset=".86" stop-color="#07060D"></stop><stop offset="1" stop-color="#2A2545"></stop></radialGradient><clipPath id="lens"><circle cx="456" cy="325" r="207"></circle></clipPath></defs><circle cx="456" cy="325" r="224" fill="#12101F" stroke="#2A2545" stroke-width="2"></circle><circle cx="456" cy="325" r="211" fill="url(#glass)" stroke="#A49EC4"></circle><circle cx="456" cy="325" r="65" fill="none" stroke="#2A2545"></circle><circle cx="456" cy="325" r="130" fill="none" stroke="#2A2545"></circle><circle cx="456" cy="325" r="195" fill="none" stroke="#2A2545"></circle><line x1="249" y1="325" x2="663" y2="325" stroke="#2A2545" ></line><line x1="456" y1="118" x2="456" y2="532" stroke="#2A2545" ></line><path d="M310 179 L602 471 M310 471 L602 179" fill="none" stroke="#2A2545" stroke-dasharray="3 6"></path><path d="{{glass.trace}}" fill="none" stroke="#3DDCFF" stroke-width="1.2" opacity=".7" clip-path="url(#lens)"></path><path d="M456 185 V465" fill="none" stroke="#F4F1FF" stroke-dasharray="2 6"></path><text x="456" y="165" text-anchor="middle" >MONO REFERENCE</text><text x="456" y="504" text-anchor="middle" >L + R</text><text x="651" y="347" text-anchor="end" >L − R</text><text x="24" y="91" fill="#3DDCFF" font-size="11" >MEASURED · MASTER L/R</text><text x="24" y="109" >Illustrative trace; requires a live stereo tap.</text><text x="729" y="162" fill="#FFD23F" font-size="11" >SCORED · PAN</text><text x="729" y="181" >No explicit pan in this piece.</text><text x="729" y="199" >All ticks: default centre .5</text><line x1="456" y1="101" x2="456" y2="98" stroke="#FF4D8D" stroke-width="2" ></line><line x1="461" y1="99" x2="706" y2="226" stroke="#2A2545" ></line><line x1="719" y1="222" x2="728" y2="222" stroke="#FF4D8D" stroke-width="3" ></line><text x="739" y="226" fill="#F4F1FF" font-size="11" >kick</text><text x="739" y="240" >onset 0 · passed</text><line x1="456" y1="97" x2="456" y2="94" stroke="#FFD23F" stroke-width="2" ></line><line x1="461" y1="95" x2="706" y2="261" stroke="#2A2545" ></line><line x1="719" y1="257" x2="728" y2="257" stroke="#FFD23F" stroke-width="3" ></line><text x="739" y="261" fill="#F4F1FF" font-size="11" >snare</text><text x="739" y="275" >onset .5 · ahead</text><line x1="456" y1="93" x2="456" y2="90" stroke="#3DDCFF" stroke-width="2" ></line><line x1="461" y1="91" x2="706" y2="296" stroke="#2A2545" ></line><line x1="719" y1="292" x2="728" y2="292" stroke="#3DDCFF" stroke-width="3" ></line><text x="739" y="296" fill="#F4F1FF" font-size="11" >hats</text><text x="739" y="310" >onset .375 · lit</text><line x1="456" y1="89" x2="456" y2="86" stroke="#5BFF8F" stroke-width="2" ></line><line x1="461" y1="87" x2="706" y2="331" stroke="#2A2545" ></line><line x1="719" y1="327" x2="728" y2="327" stroke="#5BFF8F" stroke-width="3" ></line><text x="739" y="331" fill="#F4F1FF" font-size="11" >open hat</text><text x="739" y="345" >onset .25 · passed</text><line x1="456" y1="85" x2="456" y2="82" stroke="#B388FF" stroke-width="2" ></line><line x1="461" y1="83" x2="706" y2="366" stroke="#2A2545" ></line><line x1="719" y1="362" x2="728" y2="362" stroke="#B388FF" stroke-width="3" ></line><text x="739" y="366" fill="#F4F1FF" font-size="11" >subBass</text><text x="739" y="380" >E♭1 · held</text><line x1="456" y1="81" x2="456" y2="78" stroke="#FF8A3D" stroke-width="2" ></line><line x1="461" y1="79" x2="706" y2="401" stroke="#2A2545" ></line><line x1="719" y1="397" x2="728" y2="397" stroke="#FF8A3D" stroke-width="3" ></line><text x="739" y="401" fill="#F4F1FF" font-size="11" >wobbleBass</text><text x="739" y="415" >E♭2 · held</text><circle cx="456" cy="93" r="5" fill="#3DDCFF" ></circle><text x="24" y="530" >Trace is the sum: no part attribution.</text><text x="24" y="547" >Pause/seek with no tap → show “no measured frame”.</text><text x="24" y="570" >6 RESTING PAN TICKS · DEFAULT CENTRE</text><text x="24" y="587" >darkPad · vocalAtmos · preDropVocal · snare roll · rising synth · melody (triangle)</text>
+<line x1="456" y1="77" x2="456" y2="74" stroke="#A49EC4" opacity=".45"></line><line x1="456" y1="73" x2="456" y2="70" stroke="#A49EC4" opacity=".45"></line><line x1="456" y1="69" x2="456" y2="66" stroke="#A49EC4" opacity=".45"></line><line x1="456" y1="65" x2="456" y2="62" stroke="#A49EC4" opacity=".45"></line><line x1="456" y1="61" x2="456" y2="58" stroke="#A49EC4" opacity=".45"></line><line x1="456" y1="57" x2="456" y2="54" stroke="#A49EC4" opacity=".45"></line></svg>
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">09</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Stereo glass</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">left and right</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 11 · 40%</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div><p class="sp">Shows</p><p class="tx">A glass figure from the measured stereo mix. The rim separately shows each part’s written pan and onsets.</p></div>
+<div><p class="sp">Mapping</p><ul class="mp"><li>measured L/R → sum up, difference across</li><li>mono → upright line; width → wider figure</li><li>scored pan → rim angle, default labelled</li><li>onset → lit tick; same pan → radial stack</li><li>dense audio → density; all parts → ticks</li></ul></div>
+<div><p class="sp">Build</p><ul class="mp"><li>Canvas 2D · audio/window · B</li><li>medium · risk: stereo tap alignment</li><li>No tap at seek → explicit missing frame.</li><li>Mock trace is illustrative, not measured.</li></ul></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+let seed = 10400;
+function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+let trace = '';
+for (let i = 0; i < 470; i++) {
+const t = i * .139;
+const mid = Math.sin(t) * .68 + Math.sin(t * 2.7) * .15;
+const side = Math.sin(t * 1.71) * .15 + (rnd() - .5) * .11;
+trace += (i ? ' L' : 'M') + (456 + side * 400).toFixed(1) + ' ' + (325 - mid * 210).toFixed(1);
+}
+return { glass: { trace: trace } };
+}
+}
+</script>
+</body>
+</html>

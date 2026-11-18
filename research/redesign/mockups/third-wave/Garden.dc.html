@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Garden</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;family=Space+Grotesk:wght@500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}
+a{color:#FFD23F}a:hover{color:#FFE680}
+.sp{margin:0 0 8px;font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:#A49EC4}
+.tx{margin:0;font-size:13px;line-height:1.5;color:#F4F1FF}
+.mp{margin:0;padding:0;list-style:none;font-size:12px;line-height:1.6;color:#D9D4F2}
+svg{font-size:10px;fill:#A49EC4}
+svg text{font-family:'JetBrains Mono',monospace}
+</style>
+</helmet>
+<div style="width: 960px; height: 760px; position: relative; overflow: hidden; background: #07060D; color: #F4F1FF; font-family: Inter, system-ui, sans-serif">
+<svg width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="Twelve curling musical vines cross spring, summer, storm, winter and storm again. Solid leaves grow up to the bar eleven tips; 225 future notes remain outlined, and each named plant carries its full-song note count." style="position: absolute; left: 0; top: 0; display: block"><defs><g id="vine" fill="none" stroke="currentColor"><path d="M187 0 q-11 -4 -12 5 M187 0 q-8 7 -5 12 M187 0 q-16 7 -18 2 M187 0 C245 -4 275 5 300 0 S375 -4 400 0 S475 -4 460 0" stroke-width="1.2"></path><path d="M460 0 Q490 -4 500 0 T600 0 T700 0 T800 0 T900 0" stroke-width=".8" opacity=".35" stroke-dasharray="2 5"></path></g></defs><text x="24" y="87" fill="#F4F1FF" font-size="11">339 NOTES · 114 OPEN LEAVES / 225 WAITING SEEDS</text><text x="936" y="87" text-anchor="end">whole arrangement · no notes omitted</text><path d="M200 165 Q250.0 149 300 165 V555 Q250.0 548 200 555 Z" fill="#12101F" opacity=".65"></path><text x="250.0" y="120" font-size="9" text-anchor="middle">INTRO / SPRING</text><text x="250.0" y="137" font-size="9" text-anchor="middle">bars 1–4</text><path d="M300 165 Q350.0 149 400 165 V555 Q350.0 548 300 555 Z" fill="#12101F" opacity=".65"></path><text x="350.0" y="120" font-size="9" text-anchor="middle">BUILD / SUMMER</text><text x="350.0" y="137" font-size="9" text-anchor="middle">bars 5–8</text><path d="M400 165 Q500.0 149 600 165 V555 Q500.0 548 400 555 Z" fill="#12101F" opacity=".65"></path><text x="500.0" y="120" font-size="9" text-anchor="middle">DROP / STORM</text><text x="500.0" y="137" font-size="9" text-anchor="middle">bars 9–16</text><path d="M600 165 Q650.0 149 700 165 V555 Q650.0 548 600 555 Z" fill="#12101F" opacity=".65"></path><text x="650.0" y="120" font-size="9" text-anchor="middle">BREAK / WINTER</text><text x="650.0" y="137" font-size="9" text-anchor="middle">bars 17–20</text><path d="M700 165 Q800.0 149 900 165 V555 Q800.0 548 700 555 Z" fill="#12101F" opacity=".65"></path><text x="800.0" y="120" font-size="9" text-anchor="middle">DROP / STORM</text><text x="800.0" y="137" font-size="9" text-anchor="middle">bars 21–28</text><path d="M241 156 q-13 -19 -21 -5 q0 12 21 5 q-3 -22 10 -21 q14 6 -10 21 q23 -7 25 6 q-6 15 -25 -6" fill="none" stroke="#B388FF" stroke-width="1.5" ></path><circle cx="351" cy="160" r="9" fill="none" stroke="#FFD23F" stroke-width="2"></circle><path d="M351 144 v-5 M351 176 v5 M335 160 h-5 M367 160 h5 M340 149 l-4 -4 M362 171 l4 4" fill="none" stroke="#FFD23F" stroke-width="1.3" ></path><path d="M481 162 q-7 -11 5 -16 q9 -12 20 -1 q15 0 16 16 Z" fill="none" stroke="#A49EC4" stroke-width="1.5" ></path><path d="M492 165 l-4 9 M503 165 l-4 9 M514 165 l-4 9" fill="none" stroke="#3DDCFF" ></path><path d="M781 162 q-7 -11 5 -16 q9 -12 20 -1 q15 0 16 16 Z" fill="none" stroke="#A49EC4" stroke-width="1.5" ></path><path d="M792 165 l-4 9 M803 165 l-4 9 M814 165 l-4 9" fill="none" stroke="#3DDCFF" ></path><path d="M650 177 v-31 M650 165 l-12 -9 M650 156 l12 -12 M650 171 l12 -6" fill="none" stroke="#A49EC4" stroke-width="1.5" ></path><text x="24" y="206" fill="#F4F1FF" font-size="11">kick</text><text x="162" y="206" text-anchor="end">16</text><use href="#vine" transform="translate(0 202)" style="color: #FF4D8D"></use><path d="{{plants.p0}}" fill="#FF4D8D"></path><path d="{{plants.f0}}" fill="none" stroke="#FF4D8D" stroke-width=".8" opacity=".38"></path><circle cx="460" cy="202" r="2.6" fill="#FFD23F"></circle><text x="24" y="235" fill="#F4F1FF" font-size="11">snare</text><text x="162" y="235" text-anchor="end">16</text><use href="#vine" transform="translate(0 231)" style="color: #FFD23F"></use><path d="{{plants.p1}}" stroke="#F4F1FF" stroke-width="0.49" fill="#FFD23F"></path><path d="{{plants.f1}}" fill="none" stroke="#FFD23F" stroke-width=".8" opacity=".38"></path><circle cx="460" cy="231" r="2.6" fill="#FFD23F"></circle><text x="24" y="264" fill="#F4F1FF" font-size="11">hats</text><text x="162" y="264" text-anchor="end">144</text><use href="#vine" transform="translate(0 260)" style="color: #3DDCFF"></use><path d="{{plants.p2}}" fill="#3DDCFF"></path><path d="{{plants.f2}}" fill="none" stroke="#3DDCFF" stroke-width=".8" opacity=".38"></path><circle cx="460" cy="260" r="2.6" fill="#FFD23F"></circle><text x="24" y="293" fill="#F4F1FF" font-size="11">open hat</text><text x="162" y="293" text-anchor="end">32</text><use href="#vine" transform="translate(0 289)" style="color: #5BFF8F"></use><path d="{{plants.p3}}" fill="#5BFF8F"></path><path d="{{plants.f3}}" fill="none" stroke="#5BFF8F" stroke-width=".8" opacity=".38"></path><circle cx="460" cy="289" r="2.6" fill="#FFD23F"></circle><text x="24" y="322" fill="#F4F1FF" font-size="11">subBass</text><text x="162" y="322" text-anchor="end">20</text><use href="#vine" transform="translate(0 318)" style="color: #B388FF"></use><path d="{{plants.p4}}" fill="#B388FF"></path><path d="{{plants.f4}}" fill="none" stroke="#B388FF" stroke-width=".8" opacity=".38"></path><circle cx="460" cy="318" r="2.6" fill="#FFD23F"></circle><text x="24" y="351" fill="#F4F1FF" font-size="11">wobbleBass</text><text x="162" y="351" text-anchor="end">20</text><use href="#vine" transform="translate(0 347)" style="color: #FF8A3D"></use><path d="{{plants.p5}}" stroke="#F4F1FF" stroke-width="0.36" fill="#FF8A3D"></path><path d="{{plants.f5}}" fill="none" stroke="#FF8A3D" stroke-width=".8" opacity=".38"></path><circle cx="460" cy="347" r="2.6" fill="#FFD23F"></circle><text x="24" y="380" fill="#F4F1FF" font-size="11">darkPad</text><text x="162" y="380" text-anchor="end">36</text><use href="#vine" transform="translate(0 376)" style="color: #B388FF"></use><path d="{{plants.p6}}" stroke="#F4F1FF" stroke-width="0.75" fill="#B388FF"></path><path d="{{plants.f6}}" fill="none" stroke="#B388FF" stroke-width=".8" opacity=".38"></path><circle cx="460" cy="376" r="2.6" fill="#FFD23F"></circle><text x="24" y="409" fill="#F4F1FF" font-size="11">vocalAtmos</text><text x="162" y="409" text-anchor="end">2</text><use href="#vine" transform="translate(0 405)" style="color: #5BFF8F"></use><path d="{{plants.p7}}" stroke="#F4F1FF" stroke-width="0.79" fill="#5BFF8F"></path><path d="{{plants.f7}}" fill="none" stroke="#5BFF8F" stroke-width=".8" opacity=".38"></path><circle cx="460" cy="405" r="2.6" fill="#FFD23F"></circle><text x="24" y="438" fill="#F4F1FF" font-size="11">snare roll</text><text x="162" y="438" text-anchor="end">32</text><use href="#vine" transform="translate(0 434)" style="color: #FFD23F"></use><path d="{{plants.p8}}" fill="#FFD23F"></path><path d="{{plants.f8}}" fill="none" stroke="#FFD23F" stroke-width=".8" opacity=".38"></path><circle cx="460" cy="434" r="2.6" fill="#FFD23F"></circle><text x="24" y="467" fill="#F4F1FF" font-size="11">rising synth</text><text x="162" y="467" text-anchor="end">4</text><use href="#vine" transform="translate(0 463)" style="color: #FF8A3D"></use><path d="{{plants.p9}}" fill="#FF8A3D"></path><path d="{{plants.f9}}" fill="none" stroke="#FF8A3D" stroke-width=".8" opacity=".38"></path><circle cx="460" cy="463" r="2.6" fill="#FFD23F"></circle><text x="24" y="496" fill="#F4F1FF" font-size="11">preDropVocal</text><text x="162" y="496" text-anchor="end">1</text><use href="#vine" transform="translate(0 492)" style="color: #FFD23F"></use><path d="{{plants.p10}}" stroke="#F4F1FF" stroke-width="0.59" fill="#FFD23F"></path><path d="{{plants.f10}}" fill="none" stroke="#FFD23F" stroke-width=".8" opacity=".38"></path><circle cx="460" cy="492" r="2.6" fill="#FFD23F"></circle><text x="24" y="525" fill="#F4F1FF" font-size="11">melody</text><text x="162" y="525" text-anchor="end">16</text><use href="#vine" transform="translate(0 521)" style="color: #3DDCFF"></use><path d="{{plants.p11}}" stroke="#F4F1FF" stroke-width="0.79" fill="#3DDCFF"></path><path d="{{plants.f11}}" fill="none" stroke="#3DDCFF" stroke-width=".8" opacity=".38"></path><circle cx="460" cy="521" r="2.6" fill="#FFD23F"></circle><path d="M460 176 V548" fill="none" stroke="#FFD23F" stroke-width="1.2" stroke-dasharray="2 6"></path><text x="468" y="563" fill="#FFD23F">NOW · growing tips</text><text x="24" y="584">Identical note bars share a sprig; Perlin gain changes leaf size. Future leaves stay outlined.</text></svg>
+<div style="position: absolute; left: 24px; top: 20px; display: flex; align-items: center; gap: 12px">
+<span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">13</span>
+<h1 style="margin: 0; font-family: 'Space Grotesk', sans-serif; font-weight: 600; font-size: 24px">Garden</h1>
+<span style="font-size: 12px; padding: 3px 10px; border: 1px solid #2A2545; border-radius: 999px; color: #A49EC4">whole song</span>
+</div>
+<div style="position: absolute; right: 24px; top: 26px; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: #A49EC4">bar 11 · 40%</div>
+<div style="position: absolute; left: 0; right: 0; bottom: 0; height: 160px; box-sizing: border-box; padding: 18px 24px; background: #12101F; border-top: 1px solid #2A2545; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr) minmax(0, 1fr); gap: 28px">
+<div><p class="sp">Shows</p><p class="tx">Twelve plants grow across five seasons. Each note is a leaf or bud; the unplayed song waits as seed outlines.</p></div>
+<div><p class="sp">Mapping</p><ul class="mp"><li>part → vine; bar → repeated sprig</li><li>pitch → leaf height; gain → leaf size</li><li>settings → petal shape + room-tinted edge</li><li>sections → seasons; now → growing tips</li><li>every note → leaf; dense leaves → counts</li></ul></div>
+<div><p class="sp">Build</p><ul class="mp"><li>Canvas 2D · score/whole song</li><li>large · risk: dense foliage hides pitch</li><li>Seeded time; no growth simulation.</li><li>Illustrative Perlin sizes; room = pale edge.</li></ul></div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":960,"height":760}}'>
+class Component extends DCLogic {
+renderVals() {
+const plants = {};
+const notes = [];
+function add(part, t, pitch, gain, shape) { notes.push([part,t,pitch,gain,shape]); }
+for (let b = 0; b < 28; b++) {
+const drop = (b >= 8 && b < 16) || b >= 20;
+if (drop) {
+add(0,b,0,1,0); add(1,b+.5,0,1,1);
+for (let k=0;k<8;k++) {
+let seed = (b*8+k+1)*10400;
+seed = (seed*9301+49297)%233280;
+add(2,b+k/8,0,.35+.3*seed/233280,0);
+}
+add(3,b+.25,0,.4,1); add(3,b+.75,0,.4,1);
+const phase = (b-8)%4;
+const pitches = phase===3 ? [29,31] : [24,24,27].slice(phase,phase+1);
+for(let k=0;k<pitches.length;k++) {
+add(4,b+k/pitches.length,pitches[k],.95,0);
+add(5,b+k/pitches.length,pitches[k]+12,.75,2);
+}
+}
+if (b<8 || (b>=16 && b<20)) {
+const chords = [[48,55,63],[44,51,60],[41,48,56],[43,50,59]];
+for(let k=0;k<3;k++) add(6,b,chords[b%4][k],.45,1);
+}
+if(b<4) for(let k=0;k<4;k++) add(2,b+k/4,0,.35,0);
+if(b>=4 && b<8) {
+for(let k=0;k<8;k++) add(8,b+k/8,0,.2+.75*((b-4+k/8)/4),0);
+add(9,b,48,.35,2);
+}
+if(b>=16 && b<20) for(let k=0;k<4;k++) add(11,b+k/4,[67,63,62,60][k],.4,1);
+}
+add(7,0,0,.75,1); add(7,16,0,.75,1); add(10,7.75,0,.95,2);
+for(let i=0;i<12;i++) { plants['p'+i]=''; plants['f'+i]=''; }
+function f(n) { return n.toFixed(1); }
+for(let i=0;i<notes.length;i++) {
+const n=notes[i], part=n[0], t=n[1], pitch=n[2], gain=n[3], shape=n[4];
+const x=200+t*25, y=202+part*29;
+const base=[0,0,0,0,24,36,41,0,0,48,0,60][part];
+const height=6+(pitch-base)*.42, size=2+gain*5;
+const dx=part===6 ? (pitch-base)*.38 : 0;
+const xx=x+dx, yy=y-height;
+let d=' M'+f(x)+' '+f(y)+' L'+f(xx)+' '+f(yy);
+if(shape===2) {
+d+=' l'+f(-size)+' '+f(-size)+' l'+f(size)+' '+f(-size)+' l'+f(size)+' '+f(size)+' Z';
+} else if(shape===1) {
+d+=' m0 -2 c'+f(-size*1.6)+' '+f(-size)+' '+f(size*1.6)+' '+f(-size*2)+' 0 '+f(-size*2)+' c'+f(size*1.6)+' 0 '+f(size*1.6)+' '+f(size*2)+' 0 '+f(size*2)+' Z';
+} else {
+d+=' q'+f(-size*1.6)+' '+f(-size*2)+' '+f(-size*2)+' 0 q'+f(size)+' '+f(size)+' '+f(size*2)+' 0 Z';
+}
+plants[(t<=10.4?'p':'f')+part]+=d;
+}
+return { plants: plants };
+}
+}
+</script>
+</body>
+</html>
