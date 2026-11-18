@@ -18,14 +18,14 @@ export function coilDetail(cycle: number, now: number, length: number) {
   return length <= 64 || Math.abs(cycle - Math.floor(now)) <= 3;
 }
 
-/** A long-lens pose keeps the loop spacing almost parallel across the song.
- * Matching the elevation in camera.up keeps the helix axis level. */
-export function coilPose(
-  frame: Pick<ViewFrame, 'width' | 'height' | 'now'>,
-  from: number,
-  length: number,
-) {
-  const distance = 5.35 / (Math.tan(Math.PI / 360) * (frame.width / frame.height));
-  const follow = ((frame.now - from) / length - 0.5) * 0.16;
-  return { distance, follow };
+/** Perspective fitting leaves room for section names and the controls. */
+export function coilPose(frame: Pick<ViewFrame, 'width' | 'height'>) {
+  return {
+    distance: Math.max(
+      4 / Math.tan(Math.PI / 8),
+      6.1 / ((Math.tan(Math.PI / 8) * frame.width) / frame.height),
+    ),
+  };
 }
+export const clampPitch = (pitch: number) =>
+  Math.max((-85 * Math.PI) / 180, Math.min((85 * Math.PI) / 180, pitch));
