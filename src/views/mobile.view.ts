@@ -209,9 +209,8 @@ function draw(
     20,
     49,
   );
-  ctx.textAlign = 'right';
   label(
-    `bar ${String(Math.floor(frame.now) + 1)} · ${String(Math.round((frame.now % 1) * 100))}%`,
+    `bar ${String(Math.floor(frame.now) + 1)} · ${String(Math.min(99, Math.round((frame.now % 1) * 100)))}%`,
     width - 94,
     28,
     Math.max(0, width - 180),
@@ -234,7 +233,7 @@ function draw(
         ]
       : [
           'Crystals: low pitch · beads: short unpitched · leaves: others · area = span × gain',
-          'Onset slots · dashed: ahead · ×: merged · drag arm: reorder · double-click: reset',
+          'Slots · dashed: ahead · ×: merged · L/R↓: dip · drag arm: reorder · double-click: reset',
           `Resting (${String(rest.length)}): ${rest.map((p) => p.name).join(' · ') || 'none'}`,
         ];
   lines.forEach((text, i) => {
