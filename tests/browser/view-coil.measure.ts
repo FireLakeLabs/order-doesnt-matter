@@ -5,6 +5,9 @@ import { prepare, viewEvidence } from './view-evidence';
 
 viewEvidence(test, 'coil');
 
+import { coilInteractions } from './view-coil.interactions';
+coilInteractions(test);
+
 declare global {
   interface Window {
     coilUploads: number;
@@ -102,22 +105,21 @@ test('coil: theme and resize update buffers in place, with level section bracket
   await probe.dispose();
 });
 
-test('coil: drag turns the spring, release settles, and disposal releases capture/listeners', async ({
+test('coil: drag orbits the coil, release holds, and disposal releases capture/listeners', async ({
   page,
 }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await prepare(page, 'coil');
   await page.evaluate(() => window.odmStudio.pause());
   const probe = await standalone(page);
-  const before = await probe.evaluate(({ el }) => el.querySelector('canvas')!.toDataURL());
+  const picture = () => page.screenshot({ clip: { x: 0, y: 0, width: 1300, height: 760 } });
+  const before = await picture();
   await page.mouse.move(650, 380);
   await page.mouse.down();
   await page.mouse.move(650, 480, { steps: 6 });
-  const turned = await probe.evaluate(({ el, handle, frame }) => {
-    handle.frame(frame);
-    return el.querySelector('canvas')!.toDataURL();
-  });
-  expect(turned).not.toBe(before);
+  await probe.evaluate(({ handle, frame }) => handle.frame(frame));
+  const turned = await picture();
+  expect(turned.equals(before)).toBe(false);
   await page.mouse.up();
   await probe.evaluate(async ({ handle, frame }) => {
     for (let i = 0; i < 70; i++) {
@@ -125,7 +127,7 @@ test('coil: drag turns the spring, release settles, and disposal releases captur
       await new Promise(requestAnimationFrame);
     }
   });
-  expect(await probe.evaluate(({ el }) => el.querySelector('canvas')!.toDataURL())).toBe(before);
+  expect((await picture()).equals(turned)).toBe(true);
   await page.mouse.down();
   const lifetime = await probe.evaluate(({ el, handle, before }) => {
     const canvas = el.querySelector('canvas')!;
