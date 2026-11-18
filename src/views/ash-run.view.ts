@@ -44,7 +44,14 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, data: Data) {
   c.fillText(`${s.district.name} · ${s.district.section ?? 'open city'}`, f.width - 18, 30);
   if (s.light) {
     c.fillStyle = '#b5a3b4';
-    c.fillText(`${s.light.key} ${s.light.value.toFixed(2)} → beam · per note`, f.width - 18, 49);
+    const name =
+      f.instruments.find((i) => i.id === s.light?.instrument)?.name ?? s.light.instrument;
+    c.fillText(
+      `${name} · ${s.light.key} ${s.light.value.toFixed(2)} → beam · per note`,
+      f.width - 18,
+      49,
+      f.width - 36,
+    );
   }
   const labels: [string, string | undefined][] = [
     ['footfalls', s.roles.footfalls],

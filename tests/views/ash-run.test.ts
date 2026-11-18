@@ -3,7 +3,7 @@ import { beforeAll, expect, it } from 'vitest';
 import { type AppState, initialState, loadPiece } from '../../src/app/state';
 import { importStrudel } from '../../src/import';
 import { generate } from '../../src/generate';
-import { buildFrame, neededRange, viewNotes } from '../../src/studio/frame';
+import { buildFrame, neededRange, sectionMembership, viewNotes } from '../../src/studio/frame';
 import {
   analyse,
   roles,
@@ -195,9 +195,11 @@ it('holds the walker lamp for the scored span and samples moving numeric beam se
   expect(s.lamp).toBe(true);
   const a = searchlight({ ...frame, now: 10.38 }, data)!,
     b = searchlight({ ...frame, now: 10.47 }, data)!;
-  expect(a.key).toBe('gain');
+  expect(a.key).toBe('cutoff');
+  expect(frame.instruments.find((i) => i.id === a.instrument)?.name).toBe('wobbleBass');
+  expect(a.value).toBeCloseTo(1370);
   expect(a.angle).toBe(b.angle);
-  expect(searchlight({ ...frame, now: 10.51 }, data)!.angle).not.toBe(a.angle);
+  expect(searchlight({ ...frame, now: 10.51 }, data)!.angle).toBe(a.angle);
   expect(scene({ ...frame, notes: [] }, analyse([])).lamp).toBe(false);
 });
 it('draws the same route and musical pose when revisiting time in either direction and across cache seams', async () => {
@@ -398,7 +400,7 @@ it('lands inside the next roof even in a very wide stage', () => {
   }
 });
 
-it('gives simultaneous voices distinct cells across eight parts, three widths and forty onsets', () => {
+it('keeps 3,360 simultaneous voices in disjoint windows or fixed subcells with and without siblings', () => {
   for (const width of [560, 960, 1920])
     for (let onset = 0; onset < 40; onset++) {
       const f = { ...scoreFrame(8), width, height: 600, now: onset / 4 };
@@ -416,23 +418,22 @@ it('gives simultaneous voices distinct cells across eight parts, three widths an
       expect(lights.reduce((sum, w) => sum + w.count, 0)).toBe(28); // Lowest part is the walker.
       for (const instrument of f.instruments.slice(1)) {
         const part = lights.filter((light) => light.id === instrument.id);
-        const cells = new Set(part.map((w) => `${w.layer}:${w.building}:${w.row}:${w.column}`));
-        expect(cells.size).toBe(part.length);
+        expect(part).toHaveLength(4);
         expect(part.reduce((sum, w) => sum + w.count, 0)).toBe(4);
-        if (part.some((w) => w.count > 1)) {
-          // A badge is valid only after this part's visible cells are exhausted.
-          const expanded = analyse([
-            ...f.notes,
-            ...f.notes.map((n) => ({ ...n, value: { note: Number(n.value.note) + 16 } })),
-          ]);
-          const full = windowLights(f, scene(f, expanded), expanded).filter(
-            (w) => w.id === instrument.id,
+        expectDisjoint(part);
+        for (const light of part) {
+          const alone = analyse(
+            f.notes.filter(
+              (n) =>
+                n.instrument !== instrument.id ||
+                analyse([n]).parts.get(instrument.id)?.[0].identity === light.identity,
+            ),
           );
-          expect(new Set(full.map((w) => `${w.layer}:${w.building}:${w.row}:${w.column}`))).toEqual(
-            cells,
-          );
-          expect(full.reduce((sum, w) => sum + w.count, 0)).toBe(8);
-        } else expect(cells.size).toBe(4);
+          const isolated = windowLights(f, scene(f, data), alone).find(
+            (w) => w.identity === light.identity,
+          )!;
+          expect(address(isolated)).toEqual(address(light));
+        }
       }
       const byPart = (a: (typeof lights)[number], b: (typeof lights)[number]) =>
         a.id.localeCompare(b.id) || a.x - b.x || a.y - b.y;
@@ -442,7 +443,7 @@ it('gives simultaneous voices distinct cells across eight parts, three widths an
     }
 });
 
-it('uses every available cell before counting excess chord voices on the final window', () => {
+it('splits colliding identities at fixed positions and badges only identical coincident notes', () => {
   const f = { ...scoreFrame(8), width: 560, height: 600, now: 10 };
   f.notes = f.instruments.flatMap((i) =>
     Array.from({ length: 200 }, (_, voice) => ({
@@ -459,14 +460,34 @@ it('uses every available cell before counting excess chord voices on the final w
   for (const instrument of f.instruments.slice(1)) {
     const part = lights.filter((light) => light.id === instrument.id);
     expect(part.length).toBeGreaterThan(4);
-    expect(part.length).toBeLessThan(200);
-    expect(new Set(part.map((w) => `${w.layer}:${w.building}:${w.row}:${w.column}`)).size).toBe(
-      part.length,
-    );
+    expect(part).toHaveLength(200);
+    expectDisjoint(part);
+    expect(
+      new Set(part.map((w) => `${w.layer}:${w.building}:${w.row}:${w.column}:${w.subcell}`)).size,
+    ).toBe(part.length);
     expect(new Set(part.map((w) => `${w.layer}:${w.building}`)).size).toBeGreaterThan(1);
     expect(part.reduce((sum, w) => sum + w.count, 0)).toBe(200);
-    expect(part.filter((w) => w.count > 1)).toEqual([part.at(-1)]);
+    expect(part.every((w) => w.count === 1)).toBe(true);
+    const collision = part.find((w) => w.split)!;
+    expect(collision).toBeDefined();
+    const withoutSiblings = analyse(
+      f.notes.filter(
+        (n) =>
+          n.instrument !== instrument.id ||
+          analyse([n]).parts.get(instrument.id)?.[0].identity === collision.identity,
+      ),
+    );
+    const alone = windowLights(f, s, withoutSiblings).find(
+      (w) => w.identity === collision.identity,
+    )!;
+    expect(address(alone)).toEqual(address(collision));
+    expect(alone.split).toBe(false);
   }
+  const doubled = analyse([...f.notes, ...f.notes]);
+  const duplicated = windowLights(f, s, doubled);
+  expect(duplicated).toHaveLength(lights.length);
+  expect(duplicated.every((w) => w.count === 2)).toBe(true);
+  expect(duplicated.map(address)).toEqual(lights.map(address));
   const labels: string[] = [];
   const noop = () => {};
   const c = {
@@ -476,6 +497,219 @@ it('uses every available cell before counting excess chord voices on the final w
     measureText: (text: string) => ({ width: text.length * 6 }),
     fillText: (text: string) => labels.push(text),
   } as unknown as CanvasRenderingContext2D;
-  windows(c, f, s, data);
-  expect(labels).toEqual(lights.filter((w) => w.count > 1).map((w) => `×${w.count}`));
+  windows(c, f, s, doubled);
+  expect(labels).toEqual(duplicated.map((w) => `×${w.count}`));
+});
+
+it('keeps the sweep fixture held windows when shorter chord siblings leave the query', () => {
+  const f = { ...scoreFrame(10), width: 1131, height: 468, now: 4.01 };
+  f.notes = Array.from({ length: 8 }, (_, i) =>
+    Array.from({ length: 4 }, (_, j) => ({
+      instrument: String(i),
+      start: 0,
+      end: j === 3 ? 8 : 0.5,
+      hasOnset: true,
+      value: { s: 'sawtooth', note: 60 + i * 2 + j },
+    })),
+  ).flat();
+  f.notes.push(
+    { instrument: '8', start: 0, end: 8, hasOnset: true, value: { note: 12, s: 'sine' } },
+    { instrument: '9', start: 0, end: 0.1, hasOnset: true, value: { note: 120, s: 'triangle' } },
+  );
+  const data = analyse(f.notes),
+    s = scene(f, data);
+  const full = windowLights(f, s, data);
+  const trimmed = windowLights(f, s, analyse(f.notes.filter((n) => n.end > 1)));
+  expect(full.some((w) => w.id === '4')).toBe(true);
+  expect(trimmed).toEqual(full);
+});
+
+type Light = ReturnType<typeof windowLights>[number];
+function address(w: Light) {
+  return [w.layer, w.building, w.row, w.column, w.offsetX, w.offsetY, w.subcell, w.x, w.y];
+}
+function expectDisjoint(lights: Light[]) {
+  const cells = new Map<string, Light[]>();
+  for (const light of lights) {
+    const key = `${light.layer}:${light.building}:${light.row}:${light.column}`;
+    const cell = cells.get(key) ?? [];
+    cell.push(light);
+    cells.set(key, cell);
+  }
+  for (const cell of cells.values()) {
+    const rectangles = cell
+      .flatMap((light) => {
+        const x = light.split ? light.x : light.windowX;
+        const parts = [{ x, width: light.width }];
+        if (light.wrapWidth > 0) parts.push({ x: light.windowX, width: light.wrapWidth });
+        for (const part of parts) {
+          expect(part.width).toBeGreaterThan(0);
+          expect(part.x).toBeGreaterThanOrEqual(light.windowX);
+          expect(part.x + part.width).toBeLessThanOrEqual(light.windowX + light.windowWidth + 1e-9);
+        }
+        return parts;
+      })
+      .sort((a, b) => a.x - b.x);
+    for (let index = 1; index < rectangles.length; index++)
+      expect(rectangles[index - 1].x + rectangles[index - 1].width).toBeLessThanOrEqual(
+        rectangles[index].x,
+      );
+  }
+}
+
+it('keeps each real dubstep note address when expired siblings leave the query across the whole arrangement', async () => {
+  const whole = await queried(0, { from: 0, to: 28 });
+  const data = analyse(whole.notes);
+  let compared = 0;
+  for (const width of [560, 960, 1920]) {
+    const times = new Set(whole.notes.map((n) => n.start + (n.end - n.start) / 2));
+    for (const now of times) {
+      const members = sectionMembership(state, now);
+      const f = {
+          ...whole,
+          width,
+          now,
+          instruments: whole.instruments.map((i) => ({
+            ...i,
+            inSection: members?.has(i.id) ?? i.inSection,
+          })),
+        },
+        s = scene(f, data);
+      const full = windowLights(f, s, data);
+      const trimmed = windowLights(
+        f,
+        s,
+        analyse(f.notes.filter((n) => now < Math.max(n.end, n.start + f.cps * 0.18))),
+      );
+      expect(trimmed.map(address), `${width}:${now}`).toEqual(full.map(address));
+      expectDisjoint(full);
+      compared += full.reduce((sum, w) => sum + w.count, 0);
+    }
+  }
+  console.log(`Ash Run real-arrangement address comparisons: ${compared}`);
+  expect(compared).toBeGreaterThan(0);
+});
+
+it('prioritises moving cutoff, then other filters, and uses a moving non-filter only without any filter', () => {
+  const f = { ...scoreFrame(3), now: 0.1 };
+  f.notes = f.instruments.flatMap((i) =>
+    [0, 1].map((start) => ({
+      instrument: i.id,
+      start,
+      end: start + 1,
+      hasOnset: true,
+      value:
+        i.index === 0
+          ? { note: 60, cutoff: 850 }
+          : i.index === 1
+            ? { note: 72, cutoff: 1370 }
+            : { s: 'hh', gain: start ? 1 : 0.2 },
+    })),
+  );
+  f.instruments[1].settings = [{ name: 'lpf', label: 'Cutoff', kind: 'signal' }];
+  const choose = () => searchlight(f, analyse(f.notes));
+  expect(choose()).toMatchObject({ instrument: '1', key: 'cutoff', value: 1370 });
+  f.instruments[1].settings = [];
+  expect(choose()).toMatchObject({ instrument: '0', key: 'cutoff', value: 850 });
+  f.notes = f.notes.map((n) => ({
+    ...n,
+    value: n.instrument === '1' ? { note: 72, hpf: 500 + n.start * 500 } : n.value,
+  }));
+  expect(choose()).toMatchObject({ instrument: '1', key: 'hpf', value: 500 });
+  f.notes = f.notes.filter((n) => n.instrument === '2');
+  expect(choose()).toMatchObject({ instrument: '2', key: 'gain', value: 0.2 });
+  expect(searchlight({ ...f, now: 0.9 }, analyse(f.notes))?.angle).toBe(choose()?.angle);
+  expect(searchlight({ ...f, now: 1.1 }, analyse(f.notes))?.angle).not.toBe(choose()?.angle);
+});
+
+it('keeps split positions fixed when colliding siblings disappear or reverse order', () => {
+  const f = { ...scoreFrame(2), width: 960, height: 600, now: 10 };
+  f.notes = [
+    { instrument: '0', start: 10, end: 18, hasOnset: true, value: { note: 12 } },
+    ...[60, 61, 72, 90].map((note) => ({
+      instrument: '1',
+      start: 10,
+      end: note === 72 ? 18 : 11,
+      hasOnset: true,
+      value: { note },
+    })),
+  ];
+  const data = analyse(f.notes),
+    s = scene(f, data);
+  // Force a facade collision; the independently hashed subcell must still separate every identity.
+  const collide = (notes: typeof f.notes) => {
+    const result = analyse(notes);
+    for (const e of result.parts.get('1') ?? []) e.seed = 7;
+    return result;
+  };
+  const full = windowLights(f, s, collide(f.notes));
+  expect(full).toHaveLength(4);
+  expect(full.every((w) => w.split)).toBe(true);
+  expect(full.reduce((sum, w) => sum + w.width + w.wrapWidth, 0)).toBeCloseTo(
+    full[0].windowWidth * 0.9,
+  );
+  expect(full.some((w) => w.wrapWidth > 0)).toBe(true);
+  expectDisjoint(full);
+  const fewer = windowLights(f, s, collide(f.notes.filter((n) => n.value.note !== 61)));
+  expect(fewer).toHaveLength(3);
+  for (const light of fewer) {
+    expect(light.split).toBe(true);
+    expect(address(light)).toEqual(address(full.find((w) => w.identity === light.identity)!));
+  }
+  const reverse = collide([...f.notes].reverse());
+  expect(windowLights(f, s, reverse)).toEqual(full);
+});
+
+it('recognises short filter aliases even when their moving signals sample a constant value', () => {
+  for (const [alias, key] of [
+    ['lp', 'cutoff'],
+    ['ctf', 'cutoff'],
+    ['lpf', 'cutoff'],
+    ['hp', 'hcutoff'],
+    ['hpf', 'hcutoff'],
+    ['bp', 'bandf'],
+    ['bpf', 'bandf'],
+  ]) {
+    const f = { ...scoreFrame(2), now: 0.1 };
+    f.notes = f.instruments.map((i) => ({
+      instrument: i.id,
+      start: 0,
+      end: 1,
+      hasOnset: true,
+      value: i.index === 0 ? { note: 60, cutoff: 850 } : { note: 72, [key]: 1370 },
+    }));
+    f.instruments[1].settings = [{ name: alias, label: 'Filter', kind: 'signal' }];
+    const light = searchlight(f, analyse(f.notes));
+    expect(light, alias).toMatchObject({ instrument: '1', key, value: 1370 });
+    expect(light?.angle, alias).toBeCloseTo(2.2 + (Math.log10(1370 / 20) / 3) * 0.7);
+  }
+});
+
+it('skips unsampled numeric filters without falling through to a moving non-filter', () => {
+  const f = { ...scoreFrame(3), now: 0.1 };
+  f.instruments[0].settings = [{ name: 'lpf', label: 'Cutoff', kind: 'signal' }];
+  f.notes = [
+    {
+      instrument: '0',
+      start: 0,
+      end: 1,
+      hasOnset: true,
+      value: { note: 60, cutoff: 'unknown', ftype: 'ladder' },
+    },
+    { instrument: '1', start: 0, end: 1, hasOnset: true, value: { note: 72, hcutoff: 500 } },
+    ...[0, 1].map((start) => ({
+      instrument: '2',
+      start,
+      end: start + 1,
+      hasOnset: true,
+      value: { s: 'hh', gain: start ? 1 : 0.2 },
+    })),
+  ];
+  expect(searchlight(f, analyse(f.notes))).toMatchObject({
+    instrument: '1',
+    key: 'hcutoff',
+    value: 500,
+  });
+  f.notes = f.notes.filter((n) => n.instrument !== '1');
+  expect(searchlight(f, analyse(f.notes))).toBeUndefined();
 });

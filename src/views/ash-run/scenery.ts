@@ -121,54 +121,88 @@ function visibleWindow(
     !s.buildings.some((n) => w.x < s.x(n.end) && w.x + w.width > s.x(n.start) && w.y + 7 >= s.y(n))
   );
 }
+/** Two independent identity hashes retain 53 bits for the fixed position inside a window. */
+function subcell(identity: string) {
+  let a = 2166136261,
+    b = 3339675911;
+  for (const char of identity) {
+    a = Math.imul(a ^ char.charCodeAt(0), 16777619);
+    b = Math.imul(b ^ char.charCodeAt(0), 2246822507);
+  }
+  return ((a >>> 0) * 2097152 + (b >>> 11)) / 9007199254740992;
+}
 export function windowLights(f: ViewFrame, s: Scene, data: Data) {
   const near = skyline(f, s, 2);
   const towers = [1, 2].flatMap((layer) => skyline(f, s, layer).map((b) => ({ ...b, layer })));
-  return [...data.parts].flatMap(([id, events]) => {
+  const lights = [...data.parts].flatMap(([id, events]) => {
     if ([s.roles.kick, s.roles.snare, s.roles.openHat, s.roles.walker].includes(id)) return [];
     const instrument = f.instruments.find((i) => i.id === id);
     const colour = instrument?.colour ?? f.theme.accent;
     const part = instrument?.index ?? 0;
-    const groups = new Map<number, typeof events>();
-    for (const e of events) {
-      const group = groups.get(e.note.start) ?? [];
-      group.push(e);
-      groups.set(e.note.start, group);
+    const pools = new Map<number, WindowCell[]>();
+    const identities = new Map<string, { event: (typeof events)[number]; count: number }>();
+    for (const event of events) {
+      const { start, end } = event.note;
+      if (f.now < start || f.now >= Math.max(end, start + f.cps * 0.18)) continue;
+      const prior = identities.get(event.identity);
+      if (prior) prior.count++;
+      else identities.set(event.identity, { event, count: 1 });
     }
-    return [...groups].flatMap(([start, group]) => {
-      if (f.now < start || !group.some((e) => f.now < Math.max(e.note.end, start + f.cps * 0.18)))
-        return [];
-      // Assign the whole onset group before checking held-note visibility.
-      const at = { ...f, now: start };
-      const city = { ...world(at), district: district(at) };
-      const horizon = skyline(at, city, 2);
-      const pool = partWindows(at, city, part).filter((w) => visibleWindow(at, city, w, horizon));
+    return [...identities].flatMap(([identity, { event, count }]) => {
+      const start = event.note.start;
+      let pool = pools.get(start);
+      if (!pool) {
+        const at = { ...f, now: start };
+        const city = { ...world(at), district: district(at) };
+        const horizon = skyline(at, city, 2);
+        pool = partWindows(at, city, part).filter((w) => visibleWindow(at, city, w, horizon));
+        pools.set(start, pool);
+      }
       if (!pool.length) return [];
-      const voices = group.toSorted((a, b) => a.seed - b.seed);
-      const first = Math.floor(random(voices[0].seed) * pool.length);
-      const counts = Array<number>(Math.min(voices.length, pool.length)).fill(0);
-      voices.forEach((e, rank) => {
-        if (f.now < Math.max(e.note.end, start + f.cps * 0.18))
-          counts[Math.min(rank, pool.length - 1)]++;
-      });
-      return counts.flatMap((count, rank) => {
-        if (!count) return [];
-        // Continue through the next tower; overflow is counted on the final cell.
-        const anchor = pool[(first + rank) % pool.length];
-        const b = towers.find((b) => b.layer === anchor.layer && b.index === anchor.building);
-        if (!b) return [];
-        const light = {
-          ...anchor,
+      // Both addresses belong to this note alone; queried siblings never take part.
+      const anchor = pool[Math.floor(random(event.seed) * pool.length)];
+      const b = towers.find((b) => b.layer === anchor.layer && b.index === anchor.building);
+      if (!b) return [];
+      const window = { ...anchor, x: b.x + anchor.offsetX, y: b.top + anchor.offsetY };
+      if (!visibleWindow(f, s, window, near)) return [];
+      const position = subcell(identity);
+      return [
+        {
+          ...window,
           id,
+          identity,
           colour,
           count,
-          x: b.x + anchor.offsetX,
-          y: b.top + anchor.offsetY,
-        };
-        return visibleWindow(f, s, light, near) ? [light] : [];
-      });
+          subcell: position,
+          windowX: window.x,
+          windowWidth: window.width,
+          x: window.x + position * window.width,
+          split: false,
+          wrapWidth: 0,
+        },
+      ];
     });
   });
+  const cells = new Map<string, typeof lights>();
+  for (const light of lights) {
+    const key = [light.id, light.layer, light.building, light.row, light.column].join(':');
+    const cell = cells.get(key) ?? [];
+    cell.push(light);
+    cells.set(key, cell);
+  }
+  for (const cell of cells.values()) {
+    if (cell.length < 2) continue;
+    cell.sort((a, b) => a.subcell - b.subcell);
+    cell.forEach((light, index) => {
+      light.split = true;
+      // Split positions stay fixed; the last strip wraps to use the window's left side.
+      const next = cell[index + 1]?.subcell ?? cell[0].subcell + 1;
+      const width = light.windowWidth * (next - light.subcell) * 0.9;
+      light.width = Math.min(width, light.windowWidth * (1 - light.subcell));
+      light.wrapWidth = width - light.width;
+    });
+  }
+  return lights.sort((a, b) => a.identity.localeCompare(b.identity));
 }
 export function windows(c: CanvasRenderingContext2D, f: ViewFrame, s: Scene, data: Data) {
   c.save();
@@ -176,15 +210,17 @@ export function windows(c: CanvasRenderingContext2D, f: ViewFrame, s: Scene, dat
   c.font = `10px "${f.theme.fontMono}"`;
   for (const light of windowLights(f, s, data)) {
     c.fillStyle = light.colour;
-    c.fillRect(light.x, light.y, light.width, 7);
+    const x = light.split ? light.x : light.windowX;
+    c.fillRect(x, light.y, light.width, 7);
+    if (light.wrapWidth > 0) c.fillRect(light.windowX, light.y, light.wrapWidth, 7);
     if (light.count > 1) {
       const label = `×${String(light.count)}`;
       const width = c.measureText(label).width + 6;
-      const x = Math.max(0, Math.min(f.width - width, light.x));
+      const badgeX = Math.max(0, Math.min(f.width - width, x));
       c.fillStyle = '#14111c';
-      c.fillRect(x, light.y - 11, width, 10);
+      c.fillRect(badgeX, light.y - 11, width, 10);
       c.fillStyle = light.colour;
-      c.fillText(label, x + 3, light.y - 3);
+      c.fillText(label, badgeX + 3, light.y - 3);
     }
   }
   c.restore();
