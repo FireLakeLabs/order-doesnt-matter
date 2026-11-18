@@ -5,6 +5,8 @@ import { revealView } from './shelf';
 import { scoreReady } from './helpers';
 import { indexTubes, racks } from '../../src/views/tubes/model';
 import { tubeLayout } from '../../src/views/tubes/geometry';
+import { tubeMotion } from '../../src/views/tubes/motion';
+import { vesselBody } from '../../src/views/tubes/vessels';
 
 test('Tubes: exact bar 11, five themes, Stage B, playback and frame cost', async ({ page }) => {
   const dir = `${process.env.ODM_VIEW_MEASURE_DIR}/tubes`;
@@ -62,13 +64,162 @@ test('Tubes: exact bar 11, five themes, Stage B, playback and frame cost', async
       glass: { width: tube.width, height: tube.bottom - tube.top },
       rows: layout.rows,
       tubes: layout.tubes.length,
-      folded: layout.chips.filter((c) => c.tube).length,
+
       mockupGlass: { width: 30, height: 282, stage: { width: 960, height: 600 } },
     };
   };
   const sizes: ReturnType<typeof sizeAt>[] = [];
   expect(wobbleCutoff.level).toBe(0.5);
   expect(wobbleCutoff.moving).toBe(false);
+  // Exact host-score frames, independent of screenshot/transport timing.
+  const evidenceFrame = { ...saved, width: 1300, height: 760, dpr: 1 };
+  const stand = await page.evaluateHandle(async () => {
+    await document.fonts.ready;
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;inset:0;width:1300px;height:760px;z-index:9999';
+    document.body.append(el);
+    return { el, handle: await window.viewProbe.definition.mount(el) };
+  });
+  const capture = async (now: number, file: string) => {
+    await stand.evaluate(({ handle }, frame) => handle.frame(frame), { ...evidenceFrame, now });
+    await page.screenshot({
+      path: `${dir}/${file}.png`,
+      clip: { x: 0, y: 0, width: 1300, height: 760 },
+    });
+  };
+  await capture(10.4, 'bar-11-40');
+  const hats = current.find((r) => r.instrument.name === 'hh · drop')!;
+  const hatPart = indexed.get(hats.instrument.id)!;
+  const onset = hatPart.onsets.find((n) => n.start === 10.375)!;
+  expect(onset).toBeDefined();
+  const boxes = tubeLayout(evidenceFrame, racks(evidenceFrame, indexed)).tubes;
+  const constant = vesselBody(
+    boxes.find(
+      (b) => b.rack.instrument.id === bass.instrument.id && b.tube.setting.name === 'lpf',
+    )!,
+  );
+  const gainBox = vesselBody(
+    boxes.find(
+      (b) => b.rack.instrument.id === hats.instrument.id && b.tube.setting.name === 'gain',
+    )!,
+  );
+  const pixels = (box: typeof constant) =>
+    stand.evaluate(({ el }, box) => {
+      const c = el.querySelector('canvas')!.getContext('2d')!;
+      return Array.from(
+        c.getImageData(
+          Math.floor(box.x - box.width / 2 - 2),
+          Math.floor(box.top - 2),
+          Math.ceil(box.width + 4),
+          Math.ceil(box.bottom - box.top + 4),
+        ).data,
+      ).join(',');
+    }, box);
+  const sequence = [];
+  const constantPixels: string[] = [],
+    movingPixels: string[] = [];
+  for (const ms of [-20, 20, 60, 120, 300]) {
+    const now = onset.start + (ms / 1000) * saved.cps;
+    await capture(
+      now,
+      `hats-${ms < 0 ? 'minus' : 'plus'}-${String(Math.abs(ms)).padStart(3, '0')}ms`,
+    );
+    const hatTube = racks({ ...saved, now }, indexed)
+      .find((r) => r.instrument.id === hats.instrument.id)!
+      .tubes.find((t) => t.setting.name === 'gain')!;
+    sequence.push({
+      ms,
+      now,
+      target: hatTube.level,
+      motion: tubeMotion(hatPart, hatTube, now, saved.cps),
+    });
+    constantPixels.push(await pixels(constant));
+    movingPixels.push(await pixels(gainBox));
+  }
+  expect(new Set(constantPixels).size).toBe(1);
+  expect(new Set(movingPixels).size).toBe(5);
+  // Exact redraw after a reverse seek, including the in-flight pour.
+  await capture(sequence[1].now, 'hats-reverse-plus-020ms');
+  expect(await pixels(gainBox)).toBe(movingPixels[1]);
+  // The melody is held here, so its delay/room vessels are lit beside the pad.
+  await capture(17.3, 'bar-18-breakdown');
+  // Equal adjacent values keep the body fixed while a later value makes the
+  // setting nonconstant. Compare the vessel alone, excluding history/labels.
+  const bubbleFrame = {
+    ...evidenceFrame,
+    instruments: [
+      { ...hats.instrument, settings: [{ name: 'gain', label: 'Level', kind: 'values' as const }] },
+    ],
+    notes: [
+      { instrument: hats.instrument.id, start: 0, end: 0.5, hasOnset: true, value: { gain: 0.5 } },
+      {
+        instrument: hats.instrument.id,
+        start: 1,
+        end: 1 + 0.01 * saved.cps,
+        hasOnset: true,
+        value: { gain: 0.5 },
+      },
+      { instrument: hats.instrument.id, start: 3, end: 4, hasOnset: true, value: { gain: 0.8 } },
+    ],
+  };
+  const bubbleBox = vesselBody(
+    tubeLayout(bubbleFrame, racks(bubbleFrame, indexTubes(bubbleFrame.notes))).tubes[0],
+  );
+  const bubbles = await stand.evaluate(
+    ({ el, handle }, { frame, box }) => {
+      const c = el.querySelector('canvas')!.getContext('2d')!;
+      const sameAsNoOnset = (muted: boolean, seconds: number) => {
+        const current = {
+          ...frame,
+          instruments: [{ ...frame.instruments[0], muted }],
+          now: 1 + seconds * frame.cps,
+        };
+        const picture = () =>
+          Array.from(
+            c.getImageData(
+              Math.ceil(box.x - box.width / 2),
+              Math.ceil(box.top),
+              Math.floor(box.width),
+              Math.floor(box.bottom - box.top),
+            ).data,
+          ).join(',');
+        handle.frame(current);
+        const before = picture();
+        handle.frame({
+          ...current,
+          notes: frame.notes.map((n) => (n.start === 1 ? { ...n, hasOnset: false } : n)),
+        });
+        return picture() === before;
+      };
+      return {
+        afterNoteEnds: !sameAsNoOnset(false, 0.03),
+        muted: !sameAsNoOnset(true, 0.03),
+        settled: !sameAsNoOnset(false, 0.5),
+      };
+    },
+    { frame: bubbleFrame, box: bubbleBox },
+  );
+  expect(bubbles).toEqual({ afterNoteEnds: true, muted: false, settled: false });
+  await writeFile(
+    `${dir}/pour.json`,
+    JSON.stringify(
+      {
+        onset: onset.start,
+        nextOnsetGapMs: 1000 * (0.125 / saved.cps),
+        constant: 'wobbleBass lpf',
+        constantPixelsIdentical: true,
+        bubbles,
+        sequence,
+      },
+      null,
+      2,
+    ),
+  );
+  await stand.evaluate(({ el, handle }) => {
+    handle.dispose();
+    el.remove();
+  });
+  await stand.dispose();
   for (const [width, height] of [
     [2560, 1440],
     [1920, 1080],

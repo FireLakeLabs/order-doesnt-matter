@@ -17,7 +17,6 @@ export interface PartIndex {
   onsets: ViewNote[];
   ends: number[];
   ranges: Map<string, SettingRange>;
-  textWidths: Map<string, number>;
 }
 export type TubeIndex = Map<string, PartIndex>;
 function rangeValue(value: unknown, name: string): unknown {
@@ -55,15 +54,10 @@ export function indexTubes(notes: ViewNote[]): TubeIndex {
   for (const [id, group] of groups) {
     group.sort((a, b) => a.start - b.start || a.end - b.end);
     let end = -Infinity;
-    const textWidths = new Map<string, number>();
-    for (const n of group)
-      for (const [key, value] of Object.entries(n.value))
-        textWidths.set(key, Math.max(textWidths.get(key) ?? 1, valueText(value).length));
     result.set(id, {
       notes: group,
       onsets: group.filter((n) => n.hasOnset),
       ends: group.map((n) => (end = Math.max(end, n.end))),
-      textWidths,
       ranges: settingRanges(
         group.map((n) => ({
           ...n,
@@ -78,15 +72,24 @@ export function indexTubes(notes: ViewNote[]): TubeIndex {
   }
   return result;
 }
-function upperBound<T>(items: readonly T[], value: number, read: (item: T) => number): number {
+function timeIndex<T>(
+  items: readonly T[],
+  value: number,
+  read: (item: T) => number,
+  before = false,
+): number {
   let lo = 0,
     hi = items.length;
   while (lo < hi) {
     const mid = (lo + hi) >>> 1;
-    if (read(items[mid]) <= value) lo = mid + 1;
+    if (before ? read(items[mid]) < value : read(items[mid]) <= value) lo = mid + 1;
     else hi = mid;
   }
   return lo;
+}
+/** First strictly later sample in a sorted local index, without scanning the song. */
+export function nextSample(notes: readonly ViewNote[], now: number): ViewNote | undefined {
+  return notes.at(timeIndex(notes, now, (n) => n.start));
 }
 export interface RackSample {
   active: ViewNote[];
@@ -94,14 +97,21 @@ export interface RackSample {
   last: ViewNote | undefined;
   history: ViewNote[];
 }
-/** Read only overlapping spans and the latest sixteen actual onsets. No visited-time state. */
-export function sampleRack(part: PartIndex | undefined, now: number): RackSample {
+/** Read overlapping spans and the latest sixteen onsets. `before` reads the
+ * exact left limit: exclude new starts, include notes ending at this boundary. */
+export function sampleRack(
+  part: PartIndex | undefined,
+  now: number,
+  side: 'at' | 'before' = 'at',
+): RackSample {
   if (!part) return { active: [], retained: [], last: undefined, history: [] };
-  const stop = upperBound(part.notes, now, (n) => n.start);
-  const from = upperBound(part.ends, now, (end) => end);
+  const before = side === 'before';
+  const stop = timeIndex(part.notes, now, (n) => n.start, before);
+  const from = timeIndex(part.ends, now, (end) => end, before);
   const active: ViewNote[] = [];
-  for (let i = from; i < stop; i++) if (part.notes[i].end > now) active.push(part.notes[i]);
-  const count = upperBound(part.onsets, now, (n) => n.start);
+  for (let i = from; i < stop; i++)
+    if (before ? part.notes[i].end >= now : part.notes[i].end > now) active.push(part.notes[i]);
+  const count = timeIndex(part.onsets, now, (n) => n.start, before);
   const last = active.at(-1) ?? (stop > 0 ? part.notes[stop - 1] : undefined);
   const retained: ViewNote[] = [];
   if (last && !active.length)
@@ -160,7 +170,6 @@ export interface Tube {
   level: number | undefined;
   low: number | undefined;
   text: string;
-  valueWidth: number;
   ticks: (number | undefined)[];
   sample: ViewNote | undefined;
   count: number;
@@ -192,7 +201,6 @@ export function tubeAt(part: PartIndex | undefined, setting: ViewSetting, rack: 
     level: levels.length ? Math.max(...levels) : undefined,
     low: levels.length ? Math.min(...levels) : undefined,
     text,
-    valueWidth: part?.textWidths.get(key) ?? 1,
     ticks: rack.history.map((n) => levelOf(n.value[key], range, key)),
     sample: rack.last,
     count: notes.length,
