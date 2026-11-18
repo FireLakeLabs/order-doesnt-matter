@@ -24,8 +24,8 @@ pictures are illustrative; the mapping rules on each card are the design.
 | harp          | Harp          | Pitch    | Canvas 2D  | whole song | One string per pitch the song uses; notes pluck and the string shimmers for the note's span           |
 | harmonograph  | Harmonograph  | Pitch    | Canvas 2D  | window     | Lowest and highest sounding pitch drive a two-pendulum figure; simple ratios close, clashes tangle    |
 | afterglow     | Afterglow     | Pitch    | Canvas 2D  | audio      | Measured spectrogram with scored notes outlined on top; tails past the outline are measured, labelled |
-| catwalk       | Catwalk       | Settings | Canvas 2D  | window     | Notes walk a runway wearing their settings as garments; the posing note's tag lists its whole bag     |
-| tubes         | Tubes         | Settings | Canvas 2D  | window     | One test tube per setting in use; moving values jump once per note and bubble, constants sit still    |
+| catwalk       | Catwalk       | Settings | Canvas 2D  | whole song | One model per part takes turns on a runway, posing on its notes; every note fires a camera flash      |
+| tubes         | Tubes         | Settings | Canvas 2D  | whole song | One vessel per setting in use, its family chosen by the setting; moving values pour to each new note  |
 | soundstage    | Soundstage    | Settings | Canvas 2D  | window     | Seen from above: pan left to right, room send near to far, gain as size                               |
 | aquarium      | Aquarium      | Settings | Canvas 2D  | window     | Each room is a tank; senders are fish; a note that changes the room stirs it and is named             |
 | metro         | Metro         | Song     | Canvas 2D  | whole song | Sections are stations, instruments are lines; a departure board names who joins and leaves next       |
@@ -36,8 +36,8 @@ pictures are illustrative; the mapping rules on each card are the design.
 | light-rig     | Light rig     | Show     | three.js   | window     | A lighting truss: strobe for the most regular drum, floor wash for the lowest part, heads for others  |
 | ribbons       | Ribbons       | Show     | three.js   | window     | Ribbons stream through a curtain of light at now; open where they play, turn when a setting moves     |
 | headline      | Headline      | Show     | Canvas 2D  | window     | Instrument names as a giant poster: solid while sounding, hollow at rest, weight from gain            |
-| ash-run       | Ash Run       | Arcade   | Canvas 2D  | window     | Dark rooftop runner: bass notes are rooftops, bass onsets are leaps, the snare is a barrier           |
-| swarm         | Swarm         | Arcade   | Canvas 2D  | window     | Formation shooter: rows are instruments, the ship rides the playhead, held notes are carriers         |
+| ash-run       | Ash Run       | Arcade   | Canvas 2D  | window     | Rooftop runner through a city built from distance; the music drives footfalls, crates, birds, windows |
+| swarm         | Swarm         | Arcade   | Canvas 2D  | window     | Formation shooter: notes swoop into rows and dive at their onsets; the ship meets each diver          |
 | saucers       | Saucers       | Arcade   | Canvas 2D  | window     | Saucers zap on short notes and tractor-beam cargo up for held notes; rooms are motherships            |
 | rimshot       | Rimshot       | Arcade   | Canvas 2D  | window     | A vector tube: notes climb their instrument's lanes and reach the rim on their onset                  |
 
@@ -94,7 +94,7 @@ carry within a lane. Every view is one pull request with the shared smoke test.
 Each brief names its mockup, its mapping rules and one end-to-end check on the
 dubstep arrangement; the pitch lane also checks bar 18.
 
-## Before the wave starts
+## Before the wave started
 
 - The browser suite must stop failing for timing reasons. The test-reliability
   fixes for the Studio transport, practice start-up, flood and Kiln rhythm tests
@@ -107,8 +107,8 @@ dubstep arrangement; the pitch lane also checks bar 18.
 ## Risks
 
 - Ribbons and Light rig may cost too much GPU time; build them last in their lane.
-- CI renders WebGL in software, which made Ring's motion check fail repeatedly
-  while it was built. New view tests go through the shared smoke test and its
+- CI rendered WebGL in software, which made Ring's motion check fail repeatedly
+  while it was built; browser tests now run locally only (D49). New view tests go through the shared smoke test and its
   readiness waits rather than writing their own.
 - Each view adds a browser smoke test, and Studio browser tests run one at a time,
   so the suite grows by roughly 24 tests.

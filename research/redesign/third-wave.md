@@ -1,4 +1,4 @@
-# Third wave: five fixes and seventeen views
+# Third wave: five fixes and twenty-two views
 
 Plan written by the lead with the owner on 2026-11-17. It changes none of the
 rules in [second-wave.md](second-wave.md): every view is one file behind the
@@ -14,7 +14,11 @@ rules on each card are the design. Pond and Whack were declined by the owner.
 
 Every wave below ends with a sweep (D50) before the next one starts.
 
-## Wave 3.0: fixes to existing views (first, five lanes in parallel)
+## Wave 3.0: fixes to existing views (merged, #122–#126)
+
+The sweep found four small fixes (Ash Run, Tubes, Swarm, Ribbons) and one
+limit that a view cannot fix alone, now in the backlog: a Catwalk flash tail
+ends early when its note leaves the notes the host supplies.
 
 | View    | Owner's complaint                                                                                       | Fix                                                                                                                                                                                                                                                                                                                                                                                   |
 | ------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
