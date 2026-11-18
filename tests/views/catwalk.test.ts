@@ -130,6 +130,52 @@ it('changes the end pose on every walking-part onset and flourishes backstage', 
   expect(figures({ ...f, now: 1.42 }).find((c) => !c.walking)!.flourish).toBeGreaterThan(0);
 });
 
+it('changes pose for successive triads while counting every note (R1)', () => {
+  const notes = [0.4, 0.5, 0.6].flatMap((start) =>
+    [48, 52, 55].map((pitch) => note(start, start + 0.05, { note: pitch })),
+  );
+  const f = frame(notes, 0.4);
+  const cast = [0.4, 0.5, 0.6].map((now) => figures({ ...f, now })[0]);
+  expect(cast.every((c) => c.posing)).toBe(true);
+  expect(cast.map((c) => c.pose)).toEqual([1, 2, 0]);
+  expect(cast.every((c) => c.members.length === 9)).toBe(true);
+  expect(
+    cameraFlashes({ ...f, now: 0.6 }, analyse(notes)).reduce((sum, flash) => sum + flash.count, 0),
+  ).toBe(3);
+});
+
+it('keeps entrance and exit handoffs continuous when the song window advances (R2)', () => {
+  for (const count of [2, 3]) {
+    for (const from of [0, 4]) {
+      const f = {
+        ...scoreFrame(count),
+        from,
+        to: from + 4,
+        sections: [{ name: 'show', from: 0, to: 4 }],
+        notes: Array.from({ length: count }, (_, id) => note(from, from + 4, {}, String(id))),
+      };
+      const before = figures({ ...f, now: from + 3.99999 });
+      const after = figures({
+        ...f,
+        from: from + 4,
+        to: from + 8,
+        now: from + 4.00001,
+        notes: f.notes.map((n) => ({ ...n, start: n.start + 4, end: n.end + 4 })),
+      });
+      expect(before.find((c) => c.next)?.instrument.id).toBe(
+        after.find((c) => c.walking)!.instrument.id,
+      );
+      expect(after.find((c) => c.walking)!.instrument.id).toBe(String((from + 4) % count));
+      for (const a of before) {
+        const b = after.find((c) => c.instrument.id === a.instrument.id)!;
+        expect(Math.abs(a.x - b.x)).toBeLessThan(0.1);
+        expect(Math.abs(a.y - b.y)).toBeLessThan(0.1);
+        expect(Math.abs(a.scale - b.scale)).toBeLessThan(0.001);
+      }
+    }
+  }
+});
+
 it('uses the latest sampled outfit, preserving zero gain and waiting through rests', () => {
   const first = note(0, 0.1, { gain: 0, lpf: 400 });
   const second = note(2, 2.1, { gain: 2, lpf: 900 });

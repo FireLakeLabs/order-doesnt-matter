@@ -194,9 +194,16 @@ export function stepAt(score: ShowScore, now: number): number {
 }
 
 export function turn(frame: ViewFrame, score: ShowScore, bar = Math.floor(frame.now)) {
+  // Adjacent curtain turns use the matching bar when the host advances its song window.
+  // Keep rotation on the absolute bar number so successive passes give different turns.
+  const span = frame.to - frame.from;
+  const lookup =
+    span > 0 && (bar + 1 <= frame.from || bar >= frame.to)
+      ? frame.from + mod(bar - frame.from, span)
+      : bar;
   const eligible = [...frame.instruments]
     .sort((a, b) => a.index - b.index)
-    .filter((i) => score.parts.get(i.id)?.some((n) => n.start < bar + 1 && n.end > bar));
+    .filter((i) => score.parts.get(i.id)?.some((n) => n.start < lookup + 1 && n.end > lookup));
   return eligible[mod(bar, eligible.length)]?.id;
 }
 
@@ -275,7 +282,7 @@ export function figures(frame: ViewFrame, score = analyse(frame.notes)): Figure[
         posing,
         returning,
         progress,
-        pose: onsets.length % 3,
+        pose: new Set(onsets.map((n) => n.start)).size % 3,
         flourish,
         x: active
           ? frame.width / 2 +

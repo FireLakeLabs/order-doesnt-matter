@@ -57,6 +57,35 @@ test('Catwalk: exact bar 11, five themes, Stage B, playback and frame cost', asy
     });
   }, moments);
   expect(reversibleFrames.every(Boolean)).toBe(true);
+  // Cross an actual host song-window refresh, rather than reusing the first pass's notes.
+  for (const [name, now] of [
+    ['loop-before', 27.99999],
+    ['loop-after', 28.00001],
+    ['loop-waiting', 28.08],
+  ] as [string, number][]) {
+    await page.evaluate((now) => window.odmStudio.seek(now), now);
+    await page.waitForFunction(
+      (now) =>
+        window.viewProbe.frame?.now === now &&
+        window.viewProbe.frame.from === Math.floor(now / 28) * 28,
+      now,
+    );
+    await scoreReady(page);
+    const sampled = await page.evaluate(() => window.viewProbe.frame!);
+    await show.evaluate(
+      ({ handle }, sampled) => handle.frame({ ...sampled, width: 1300, height: 760, dpr: 1 }),
+      sampled,
+    );
+    await page.screenshot({
+      path: `${dir}/${name}.png`,
+      clip: { x: 0, y: 0, width: 1300, height: 760 },
+    });
+  }
+  await page.evaluate(() => window.odmStudio.seek(10.4));
+  await page.waitForFunction(
+    () => window.viewProbe.frame?.now === 10.4 && window.viewProbe.frame.from === 0,
+  );
+  await scoreReady(page);
   await show.evaluate(({ handle, el }) => {
     handle.dispose();
     el.remove();
