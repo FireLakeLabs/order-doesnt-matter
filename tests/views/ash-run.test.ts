@@ -17,7 +17,7 @@ import {
 import { building, buildingAt, crossing, route, world } from '../../src/views/ash-run/city';
 import { crateState, walker } from '../../src/views/ash-run/effects';
 import { runPose } from '../../src/views/ash-run/runner';
-import { skyline, windowLights } from '../../src/views/ash-run/scenery';
+import { skyline, windowLights, windows } from '../../src/views/ash-run/scenery';
 import type { ViewFrame } from '../../src/views/types';
 import { queryEventsNode } from '../node-query';
 import { scoreFrame } from './score-fixture';
@@ -398,23 +398,84 @@ it('lands inside the next roof even in a very wide stage', () => {
   }
 });
 
-it('lights exactly one cell per active window note, regardless of stage width or chord size', () => {
+it('gives simultaneous voices distinct cells across eight parts, three widths and forty onsets', () => {
   for (const width of [560, 960, 1920])
-    for (const voices of [1, 4]) {
-      const f = { ...scoreFrame(8), width, height: 600, now: 10 };
+    for (let onset = 0; onset < 40; onset++) {
+      const f = { ...scoreFrame(8), width, height: 600, now: onset / 4 };
       f.notes = f.instruments.flatMap((i) =>
-        Array.from({ length: voices }, (_, voice) => ({
+        Array.from({ length: 4 }, (_, voice) => ({
           instrument: i.id,
-          start: 10,
-          end: 11,
+          start: f.now,
+          end: f.now + 1,
           hasOnset: true,
           value: { note: 48 + i.index * 4 + voice },
         })),
       );
       const data = analyse(f.notes),
         lights = windowLights(f, scene(f, data), data);
-      expect(lights).toHaveLength(7 * voices); // Lowest part lights the walker.
-      for (const instrument of f.instruments.slice(1))
-        expect(lights.filter((light) => light.id === instrument.id)).toHaveLength(voices);
+      expect(lights.reduce((sum, w) => sum + w.count, 0)).toBe(28); // Lowest part is the walker.
+      for (const instrument of f.instruments.slice(1)) {
+        const part = lights.filter((light) => light.id === instrument.id);
+        const cells = new Set(part.map((w) => `${w.layer}:${w.building}:${w.row}:${w.column}`));
+        expect(cells.size).toBe(part.length);
+        expect(part.reduce((sum, w) => sum + w.count, 0)).toBe(4);
+        if (part.some((w) => w.count > 1)) {
+          // A badge is valid only after this part's visible cells are exhausted.
+          const expanded = analyse([
+            ...f.notes,
+            ...f.notes.map((n) => ({ ...n, value: { note: Number(n.value.note) + 16 } })),
+          ]);
+          const full = windowLights(f, scene(f, expanded), expanded).filter(
+            (w) => w.id === instrument.id,
+          );
+          expect(new Set(full.map((w) => `${w.layer}:${w.building}:${w.row}:${w.column}`))).toEqual(
+            cells,
+          );
+          expect(full.reduce((sum, w) => sum + w.count, 0)).toBe(8);
+        } else expect(cells.size).toBe(4);
+      }
+      const byPart = (a: (typeof lights)[number], b: (typeof lights)[number]) =>
+        a.id.localeCompare(b.id) || a.x - b.x || a.y - b.y;
+      expect(
+        windowLights(f, scene(f, data), analyse([...f.notes].reverse())).toSorted(byPart),
+      ).toEqual(lights.toSorted(byPart));
     }
+});
+
+it('uses every available cell before counting excess chord voices on the final window', () => {
+  const f = { ...scoreFrame(8), width: 560, height: 600, now: 10 };
+  f.notes = f.instruments.flatMap((i) =>
+    Array.from({ length: 200 }, (_, voice) => ({
+      instrument: i.id,
+      start: f.now,
+      end: f.now + (voice % 2 ? 1 : 0.5),
+      hasOnset: true,
+      value: { note: 48 + i.index + voice / 1000 },
+    })),
+  );
+  const data = analyse(f.notes),
+    s = scene(f, data),
+    lights = windowLights(f, s, data);
+  for (const instrument of f.instruments.slice(1)) {
+    const part = lights.filter((light) => light.id === instrument.id);
+    expect(part.length).toBeGreaterThan(4);
+    expect(part.length).toBeLessThan(200);
+    expect(new Set(part.map((w) => `${w.layer}:${w.building}:${w.row}:${w.column}`)).size).toBe(
+      part.length,
+    );
+    expect(new Set(part.map((w) => `${w.layer}:${w.building}`)).size).toBeGreaterThan(1);
+    expect(part.reduce((sum, w) => sum + w.count, 0)).toBe(200);
+    expect(part.filter((w) => w.count > 1)).toEqual([part.at(-1)]);
+  }
+  const labels: string[] = [];
+  const noop = () => {};
+  const c = {
+    save: noop,
+    restore: noop,
+    fillRect: noop,
+    measureText: (text: string) => ({ width: text.length * 6 }),
+    fillText: (text: string) => labels.push(text),
+  } as unknown as CanvasRenderingContext2D;
+  windows(c, f, s, data);
+  expect(labels).toEqual(lights.filter((w) => w.count > 1).map((w) => `×${w.count}`));
 });

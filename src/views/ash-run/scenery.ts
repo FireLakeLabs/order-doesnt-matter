@@ -124,45 +124,70 @@ function visibleWindow(
 export function windowLights(f: ViewFrame, s: Scene, data: Data) {
   const near = skyline(f, s, 2);
   const towers = [1, 2].flatMap((layer) => skyline(f, s, layer).map((b) => ({ ...b, layer })));
-  const pools = new Map<string, WindowCell[]>();
   return [...data.parts].flatMap(([id, events]) => {
     if ([s.roles.kick, s.roles.snare, s.roles.openHat, s.roles.walker].includes(id)) return [];
     const instrument = f.instruments.find((i) => i.id === id);
     const colour = instrument?.colour ?? f.theme.accent;
     const part = instrument?.index ?? 0;
-    return events.flatMap((e) => {
-      const n = e.note;
-      if (f.now < n.start || f.now >= Math.max(n.end, n.start + f.cps * 0.18)) return [];
-      // Choose once from the city at onset, never from what is visible now.
-      const key = `${String(n.start)}:${String(part)}`;
-      let pool = pools.get(key);
-      if (!pool) {
-        const at = { ...f, now: n.start };
-        const city = { ...world(at), district: district(at) };
-        const horizon = skyline(at, city, 2);
-        pool = partWindows(at, city, part).filter((w) => visibleWindow(at, city, w, horizon));
-        pools.set(key, pool);
-      }
+    const groups = new Map<number, typeof events>();
+    for (const e of events) {
+      const group = groups.get(e.note.start) ?? [];
+      group.push(e);
+      groups.set(e.note.start, group);
+    }
+    return [...groups].flatMap(([start, group]) => {
+      if (f.now < start || !group.some((e) => f.now < Math.max(e.note.end, start + f.cps * 0.18)))
+        return [];
+      // Assign the whole onset group before checking held-note visibility.
+      const at = { ...f, now: start };
+      const city = { ...world(at), district: district(at) };
+      const horizon = skyline(at, city, 2);
+      const pool = partWindows(at, city, part).filter((w) => visibleWindow(at, city, w, horizon));
       if (!pool.length) return [];
-      const anchor = pool[Math.floor(random(e.seed) * pool.length)];
-      const b = towers.find((b) => b.layer === anchor.layer && b.index === anchor.building);
-      if (!b) return [];
-      const light = {
-        ...anchor,
-        id,
-        colour,
-        x: b.x + anchor.offsetX,
-        y: b.top + anchor.offsetY,
-      };
-      return visibleWindow(f, s, light, near) ? [light] : [];
+      const voices = group.toSorted((a, b) => a.seed - b.seed);
+      const first = Math.floor(random(voices[0].seed) * pool.length);
+      const counts = Array<number>(Math.min(voices.length, pool.length)).fill(0);
+      voices.forEach((e, rank) => {
+        if (f.now < Math.max(e.note.end, start + f.cps * 0.18))
+          counts[Math.min(rank, pool.length - 1)]++;
+      });
+      return counts.flatMap((count, rank) => {
+        if (!count) return [];
+        // Continue through the next tower; overflow is counted on the final cell.
+        const anchor = pool[(first + rank) % pool.length];
+        const b = towers.find((b) => b.layer === anchor.layer && b.index === anchor.building);
+        if (!b) return [];
+        const light = {
+          ...anchor,
+          id,
+          colour,
+          count,
+          x: b.x + anchor.offsetX,
+          y: b.top + anchor.offsetY,
+        };
+        return visibleWindow(f, s, light, near) ? [light] : [];
+      });
     });
   });
 }
 export function windows(c: CanvasRenderingContext2D, f: ViewFrame, s: Scene, data: Data) {
+  c.save();
+  c.textAlign = 'left';
+  c.font = `10px "${f.theme.fontMono}"`;
   for (const light of windowLights(f, s, data)) {
     c.fillStyle = light.colour;
     c.fillRect(light.x, light.y, light.width, 7);
+    if (light.count > 1) {
+      const label = `×${String(light.count)}`;
+      const width = c.measureText(label).width + 6;
+      const x = Math.max(0, Math.min(f.width - width, light.x));
+      c.fillStyle = '#14111c';
+      c.fillRect(x, light.y - 11, width, 10);
+      c.fillStyle = light.colour;
+      c.fillText(label, x + 3, light.y - 3);
+    }
   }
+  c.restore();
 }
 
 export function roofs(c: CanvasRenderingContext2D, f: ViewFrame, s: Scene) {
