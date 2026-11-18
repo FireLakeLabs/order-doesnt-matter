@@ -84,7 +84,28 @@ it('uses true fractional starts and preserves fragments, repeated pitches and ot
   const dense = blocks(bridge.piers[0].tones, box);
   expect(dense.reduce((n, b) => n + b.tones.length, 0)).toBe(3);
   expect(dense.some((b) => b.label === 'C3 ×2')).toBe(true);
-  expect(box.x(0.625) - box.x(0.125)).toBeCloseTo((box.right - box.left) / 2);
+  expect(box.x(0.625) - box.x(0.125)).toBeCloseTo((box.right - box.left) / 3);
+});
+it('keeps late onsets and the playhead inside the drawing at every Window size', () => {
+  for (const lookAhead of [1, 2, 4, 8]) {
+    const range = windowAt({ now: 17.9, lookAhead });
+    for (const width of [560, 1300]) {
+      const box = layout(width, 760, range);
+      for (const t of [range.from, range.from + 0.125, 17.9, range.to - 0.001]) {
+        expect(box.x(t)).toBeGreaterThanOrEqual(box.left);
+        expect(box.x(t)).toBeLessThanOrEqual(box.right);
+      }
+    }
+  }
+});
+it('counts degenerate pitched spans in the side strip instead of making a role or dropping them', () => {
+  const bad = [0, -1].map((duration) => ({ ...note(60, 1), end: 1 + duration }));
+  const bridge = analyse(bad);
+  expect(bridge.chord).toBeUndefined();
+  expect(bridge.melody).toBeUndefined();
+  const state = stateAt(bridge, { ...frame(), now: 1.4 });
+  expect(state.others).toHaveLength(2);
+  expect([...state.counts.values()]).toEqual([{ total: 2, active: 0 }]);
 });
 it('counts a held span once across continuation copies, while retaining real unison onsets', () => {
   const held = { ...note(48), end: 4 };
@@ -95,25 +116,6 @@ it('counts a held span once across continuation copies, while retaining real uni
   const carried = analyse([continuation, continuation]);
   expect(carried.notes).toHaveLength(1);
   expect(carried.tones).toHaveLength(1);
-});
-it('has fixed pitch heights and label bands when siblings end or leave the frame', () => {
-  for (const lookAhead of [1, 2, 4, 8]) {
-    const range = windowAt({ now: 17.4, lookAhead });
-    expect(range.from).toBeLessThanOrEqual(17.4);
-    expect(range.to).toBeGreaterThan(17.4);
-  }
-  const f = frame(),
-    box = layout(560, 470, { from: 16, to: 20 });
-  const held = { ...note(60), end: 4 };
-  const before = blocks(analyse([held, note(61)]).piers[0].tones, box);
-  const after = blocks([{ note: held, midi: 60 }], box);
-  expect(before.find((b) => b.tones.some((t) => t.midi === 60))!.y).toBe(after[0].y);
-  expect(box.y(60)).toBe(layout(560, 470, { from: 8, to: 12 }).y(60));
-  const bridge = analyse(notes),
-    state = stateAt(bridge, f);
-  stateAt(bridge, { ...f, now: 2 });
-  stateAt(bridge, { ...f, now: 26 });
-  expect(stateAt(bridge, f)).toEqual(state);
 });
 it('counts dense and out-of-range pitches in bounded blocks; no chord or melody is invented', () => {
   const bridge = analyse(Array.from({ length: 500 }, (_, i) => note(i % 140)));

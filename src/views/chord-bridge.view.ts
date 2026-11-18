@@ -13,6 +13,7 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, bridge: Bridge) {
   const part = (id?: string) => frame.instruments.find((i) => i.id === id);
   const chord = part(bridge.chord),
     melody = part(bridge.melody);
+  const melodyEdges = state.melody.filter((t) => t.midi < 36 || t.midi > 96).length;
   const labels: {
     text: string;
     x: number;
@@ -109,7 +110,7 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, bridge: Bridge) {
     right - left,
   );
   text(
-    `Melody: ${melody?.name ?? 'none'} · ${String(state.melody.filter((t) => t.note.start <= now && now < t.note.end).length)}/${String(state.melody.length)} now/window`,
+    `Melody: ${melody?.name ?? 'none'} · ${String(state.melody.filter((t) => t.note.start <= now && now < t.note.end).length)}/${String(state.melody.length)} now/window${melodyEdges ? ` · ${String(melodyEdges)} edge` : ''}`,
     left,
     100,
     right - left,

@@ -43,7 +43,9 @@ export function analyse(notes: ViewNote[]): Bridge {
   notes = [...spans.values()].flatMap((s) =>
     s.onsets.length ? s.onsets : [...s.carried.values()],
   );
-  const clean = notes.map((n) => ({ ...n, value: { ...n.value, n: undefined } }));
+  const clean = notes
+    .filter((n) => n.end > n.start)
+    .map((n) => ({ ...n, value: { ...n.value, n: undefined } }));
   const evidence = roleEvidence(clean);
   const groups = new Map<string, Map<number, Tone[]>>();
   const tones: Tone[] = [];
@@ -108,7 +110,8 @@ export function windowAt(frame: Pick<ViewFrame, 'now' | 'lookAhead'>) {
 }
 export function stateAt(bridge: Bridge, frame: ViewFrame) {
   const range = windowAt(frame);
-  const overlaps = (n: ViewNote) => n.start < range.to && n.end > range.from;
+  const overlaps = (n: ViewNote) =>
+    n.start < range.to && (n.end > n.start ? n.end > range.from : n.start >= range.from);
   const piers = bridge.piers.filter((p) => p.start < range.to && p.end > range.from);
   const melody = bridge.tones.filter(
     (t) => t.note.instrument === bridge.melody && overlaps(t.note),
@@ -116,7 +119,8 @@ export function stateAt(bridge: Bridge, frame: ViewFrame) {
   const others = bridge.notes.filter(
     (n) =>
       overlaps(n) &&
-      (readPitch(n.value) === undefined ||
+      (n.end <= n.start ||
+        readPitch(n.value) === undefined ||
         (n.instrument !== bridge.chord && n.instrument !== bridge.melody)),
   );
   const counts = new Map<string, { total: number; active: number }>();
@@ -146,7 +150,7 @@ export function layout(width: number, height: number, range: { from: number; to:
     bottom,
     scale,
     x: (time: number) =>
-      left + ((time - range.from + 0.25) / (range.to - range.from)) * (right - left),
+      left + ((time - range.from + 0.25) / (range.to - range.from + 0.5)) * (right - left),
     y,
     // Fixed 24px label bands leave exact-height ticks and span endpoints visible.
     band: (midi: number) => Math.floor((y(midi) - top) / 24),

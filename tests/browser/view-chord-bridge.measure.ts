@@ -132,6 +132,8 @@ for (const [file, now] of [
       expect(measured.freshEqual).toBe(true);
       expect(Math.min(...measured.contrast)).toBeGreaterThan(4.5);
       expect(measured.texts.every((t) => t.size >= 11)).toBe(true);
+      if (file === 'real-techno')
+        expect(measured.texts.some((t) => t.text.includes('4 edge'))).toBe(true);
       results.push(measured);
     }
     const frame = await page.evaluate(() => window.viewProbe.frame!);
@@ -197,8 +199,33 @@ test('Chord bridge: dense real corpus remains counted', async ({ page }) => {
     await readFile('corpus/programs/micro-dense-64.strudel', 'utf8'),
   );
   await page.waitForFunction(
-    () => window.viewProbe.frame?.now === 0.4 && window.viewProbe.frame.sections.length === 0,
+    () =>
+      window.viewProbe.frame?.now === 0.4 &&
+      window.viewProbe.frame.sections.length === 0 &&
+      window.viewProbe.frame.notes.length >= 1024,
   );
+  const frame = await page.evaluate(() => window.viewProbe.frame!);
+  expect(stateAt(analyse(frame.notes), frame).others).toHaveLength(1024);
+  const texts = await page.evaluate(async () => {
+    const texts: string[] = [];
+    const fill = CanvasRenderingContext2D.prototype.fillText;
+    const el = document.createElement('div');
+    const handle = await window.viewProbe.definition.mount(el);
+    CanvasRenderingContext2D.prototype.fillText = function (text, x, y, max) {
+      texts.push(text);
+      if (max === undefined) fill.call(this, text, x, y);
+      else fill.call(this, text, x, y, max);
+    };
+    try {
+      handle.frame(window.viewProbe.frame!);
+    } finally {
+      CanvasRenderingContext2D.prototype.fillText = fill;
+      handle.dispose();
+    }
+    return texts;
+  });
+  expect(texts).toContain('1024 in window');
+  expect(texts).toContain('1 / 1024');
   await mkdir(shots, { recursive: true });
   await page.screenshot({ path: `${shots}/dense-1920x1080.png` });
 });
