@@ -72,13 +72,13 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, drum: string | null) {
   const t = f.theme,
     w = f.width,
     h = f.height;
-  // Fractional CSS sizes leave a partially painted edge in the host's ground fill.
-  // Paint whole backing pixels so that edge cannot retain earlier frames while scrubbing.
-  c.save();
-  c.resetTransform();
+  // Deliberately replace mount2d's preparation with a reset of both context and
+  // pixels. Reused raster state can otherwise shade the same rotated wing
+  // differently after visiting another time.
+  c.reset();
   c.fillStyle = t.ground;
   c.fillRect(0, 0, c.canvas.width, c.canvas.height);
-  c.restore();
+  c.setTransform(f.dpr, 0, 0, f.dpr, 0, 0);
   const g = formation(f, drum),
     currentWave = wave(f);
   const particle: Particle = { x: 0, y: 0, alpha: 0 };
@@ -133,14 +133,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, drum: string | null) {
   for (const row of g.rows) {
     const col = row.instrument.muted ? t.muted : row.instrument.colour;
     c.globalAlpha = 1;
-    c.fillStyle = t.muted;
-    c.textAlign = 'right';
     c.font = `10px "${t.fontMono}"`;
-    const rowName =
-      row.crowded && row.enemies.length
-        ? `${row.instrument.name} ×${String(row.enemies.length)}`
-        : row.instrument.name;
-    c.fillText(rowName, w * 0.1, row.y + 4, w * 0.1 - 10);
     for (const [notes, crowded] of [
       [row.enemies, row.crowded],
       [row.nextEnemies, row.nextCrowded],
@@ -283,6 +276,32 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, drum: string | null) {
   line(c, g.left, h - 27, g.right, h - 27);
   c.strokeStyle = t.accent;
   line(c, g.left, h - 27, g.left + (f.now - g.bar) * (g.right - g.left), h - 27);
+
+  // Names sit above every squadron. The soft ground-coloured edge fades wakes
+  // beneath each small plate without changing any flight path.
+  c.save();
+  c.textAlign = 'right';
+  c.font = `10px "${t.fontMono}"`;
+  const labels = g.rows.map((row) => ({
+    y: row.y,
+    name:
+      row.crowded && row.enemies.length
+        ? `${row.instrument.name} ×${String(row.enemies.length)}`
+        : row.instrument.name,
+  }));
+  const right = w * 0.1;
+  for (const label of labels) {
+    const width = Math.min(c.measureText(label.name).width, right - 10);
+    c.fillStyle = t.ground;
+    c.shadowColor = t.ground;
+    c.shadowBlur = 8;
+    c.fillRect(right - width - 4, label.y - 10, width + 8, 20);
+  }
+  c.shadowBlur = 0;
+  c.shadowColor = 'transparent';
+  c.fillStyle = t.muted;
+  for (const label of labels) c.fillText(label.name, right, label.y + 4, right - 10);
+  c.restore();
 }
 export default {
   id: 'swarm',
