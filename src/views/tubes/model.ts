@@ -17,7 +17,6 @@ export interface PartIndex {
   onsets: ViewNote[];
   ends: number[];
   ranges: Map<string, SettingRange>;
-  textWidths: Map<string, number>;
 }
 export type TubeIndex = Map<string, PartIndex>;
 function rangeValue(value: unknown, name: string): unknown {
@@ -55,15 +54,10 @@ export function indexTubes(notes: ViewNote[]): TubeIndex {
   for (const [id, group] of groups) {
     group.sort((a, b) => a.start - b.start || a.end - b.end);
     let end = -Infinity;
-    const textWidths = new Map<string, number>();
-    for (const n of group)
-      for (const [key, value] of Object.entries(n.value))
-        textWidths.set(key, Math.max(textWidths.get(key) ?? 1, valueText(value).length));
     result.set(id, {
       notes: group,
       onsets: group.filter((n) => n.hasOnset),
       ends: group.map((n) => (end = Math.max(end, n.end))),
-      textWidths,
       ranges: settingRanges(
         group.map((n) => ({
           ...n,
@@ -160,7 +154,6 @@ export interface Tube {
   level: number | undefined;
   low: number | undefined;
   text: string;
-  valueWidth: number;
   ticks: (number | undefined)[];
   sample: ViewNote | undefined;
   count: number;
@@ -192,7 +185,6 @@ export function tubeAt(part: PartIndex | undefined, setting: ViewSetting, rack: 
     level: levels.length ? Math.max(...levels) : undefined,
     low: levels.length ? Math.min(...levels) : undefined,
     text,
-    valueWidth: part?.textWidths.get(key) ?? 1,
     ticks: rack.history.map((n) => levelOf(n.value[key], range, key)),
     sample: rack.last,
     count: notes.length,

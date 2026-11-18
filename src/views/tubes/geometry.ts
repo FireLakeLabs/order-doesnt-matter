@@ -18,101 +18,33 @@ export interface LabelBox {
   width: number;
   dense: boolean;
 }
-export interface ChipBox {
-  rack: Rack;
-  tube?: Tube;
-  text: string;
-  x: number;
-  y: number;
-  width: number;
-}
-export interface TubeLayout {
-  tubes: TubeBox[];
-  labels: LabelBox[];
-  chips: ChipBox[];
-  folded: boolean;
-  compact: boolean;
-  rows: number;
-  stageWidth: number;
-  trayLeft: number;
-  trayTop: number;
-  trayWidth: number;
-}
-/** All settings remain represented. Sampled constants may fold; a signal
- * with flat sampled values remains a tube, making that distinction visible. */
-export function tubeLayout(frame: Pick<ViewFrame, 'width' | 'height'>, racks: Rack[]): TubeLayout {
+/** Every setting has its own vessel, including constants and unavailable values. */
+export function tubeLayout(frame: Pick<ViewFrame, 'width' | 'height'>, racks: Rack[]) {
   const { width: w, height: h } = frame;
   const margin = 20;
   const gap = w < 700 ? 8 : 14;
-  const count = racks.reduce((n, r) => n + r.tubes.length, 0);
-  const folded = count * 60 + Math.max(0, racks.length - 1) * gap > w - margin * 2;
-  const entries: { rack: Rack; tube: Tube }[] = [];
-  const tokens: Omit<ChipBox, 'x' | 'y' | 'width'>[] = [];
-  for (const rack of racks) {
-    const constants = rack.tubes.filter(
-      (t) => folded && t.setting.kind !== 'signal' && !!t.range && !t.moving,
-    );
-    entries.push(
-      ...rack.tubes.filter((t) => !constants.includes(t)).map((tube) => ({ rack, tube })),
-    );
-    if (!constants.length) continue;
-    tokens.push({ rack, text: rack.instrument.name });
-    tokens.push(
-      ...constants.map((tube) => ({ rack, tube, text: `${tube.setting.name} ${tube.text}` })),
-    );
-  }
-  const aside = folded && tokens.length > 0 && w >= 1000;
-  const trayWidth = aside ? clamp(w * 0.27, 260, 360) : w;
-  const stageWidth = aside ? w - trayWidth - 12 : w;
-  const available = Math.max(1, stageWidth - margin * 2);
-  const trayLeft = aside ? w - trayWidth : 0;
-  const chipLeft = trayLeft + (aside ? 12 : margin);
-  const chipRight = trayLeft + trayWidth - (aside ? 12 : margin);
-  const packChips = (compact: boolean) => {
-    const chips: ChipBox[] = [];
-    let x = chipLeft,
-      row = 0;
-    for (const token of tokens) {
-      const text = compact && token.tube ? token.tube.setting.name : token.text;
-      const characters =
-        token.tube && !compact
-          ? token.tube.setting.name.length + 1 + token.tube.valueWidth
-          : text.length;
-      const width = Math.min(chipRight - chipLeft, Math.max(34, characters * 6 + 14));
-      if (x > chipLeft && x + width > chipRight) {
-        x = chipLeft;
-        row++;
-      }
-      chips.push({ ...token, text, x, y: row * 21, width });
-      x += width + (token.tube ? 5 : 3);
-    }
-    return { chips, height: tokens.length ? (row + 1) * 21 + 26 : 0 };
-  };
-  let packed = packChips(false);
-  const compact = packed.height > (aside ? h - 100 : h * 0.31);
-  if (compact) packed = packChips(true);
-  const trayTop = aside ? 88 : h - packed.height - 12;
-  const chips = packed.chips.map((c) => ({ ...c, y: trayTop + 24 + c.y }));
-  // Crowded groups continue on the next row without omitting a moving control.
-  const minimum = w < 700 ? 44 : 60;
+  const available = Math.max(1, w - margin * 2);
+  const minimum = w < 700 ? 44 : 52;
+  const entries = racks.flatMap((rack) => rack.tubes.map((tube) => ({ rack, tube })));
+  const groups = racks.filter((rack) => rack.tubes.length).length;
+  const rowCount = Math.max(
+    1,
+    Math.min(
+      entries.length,
+      Math.ceil((entries.length * minimum + Math.max(0, groups - 1) * gap) / available),
+    ),
+  );
+  // Balance rows rather than leaving one setting stranded on its own bench.
   const rows: (typeof entries)[] = [];
-  let row: typeof entries = [],
-    used = 0;
-  for (const entry of entries) {
-    const before = row.length && row.at(-1)?.rack !== entry.rack ? gap : 0;
-    if (row.length && used + before + minimum > available) {
-      rows.push(row);
-      row = [];
-      used = 0;
-    }
-    used += minimum + (row.length && row.at(-1)?.rack !== entry.rack ? gap : 0);
-    row.push(entry);
+  let offset = 0;
+  for (let r = 0; r < rowCount; r++) {
+    const count = Math.ceil((entries.length - offset) / (rowCount - r));
+    if (count) rows.push(entries.slice(offset, offset + count));
+    offset += count;
   }
-  if (row.length) rows.push(row);
   const labels: LabelBox[] = [],
     tubes: TubeBox[] = [];
-  const usableHeight = Math.max(1, (aside ? h - 12 : trayTop) - 88);
-  const rowHeight = usableHeight / Math.max(1, rows.length);
+  const rowHeight = Math.max(1, h - 100) / Math.max(1, rows.length);
   const dense = rows.length > 2;
   const header = dense ? 18 : 45,
     footer = dense ? 33 : 47;
@@ -131,7 +63,7 @@ export function tubeLayout(frame: Pick<ViewFrame, 'width' | 'height'>, racks: Ra
       tubes.push({
         ...entry,
         x: x + cell / 2,
-        width: clamp(cell * 0.57, 26, 60),
+        width: clamp(cell * 0.72, 26, 90),
         top: y + header,
         bottom: y + Math.max(header + 10, rowHeight - footer),
         dense,
@@ -139,16 +71,5 @@ export function tubeLayout(frame: Pick<ViewFrame, 'width' | 'height'>, racks: Ra
       x += cell;
     }
   }
-  return {
-    tubes,
-    labels,
-    chips,
-    folded,
-    compact,
-    rows: rows.length,
-    stageWidth,
-    trayLeft,
-    trayTop,
-    trayWidth,
-  };
+  return { tubes, labels, rows: rows.length, stageWidth: w };
 }

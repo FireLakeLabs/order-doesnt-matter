@@ -1,6 +1,8 @@
 import { beforeAll, expect, it } from 'vitest';
 import { indexTubes, racks, sampleRack, tubeAt } from '../../src/views/tubes/model';
 import { tubeLayout } from '../../src/views/tubes/geometry';
+import { tubeMotion } from '../../src/views/tubes/motion';
+import { vesselFor, octaveTicks } from '../../src/views/tubes/vessels';
 import type { ViewFrame, ViewNote, ViewSetting } from '../../src/views/types';
 import { tubesCorpusFrame } from './tubes.fixture';
 import { scoreFrame } from './score-fixture';
@@ -133,7 +135,7 @@ it('identical structured values remain flat, and distinct structured values rema
   expect(mixed.moving).toBe(true);
   expect(mixed.level).toBe(1);
 });
-it('keeps every real setting in metadata order as a tube or constant chip at both stages and desktops', () => {
+it('keeps every real setting as a vessel in metadata order at both stages and desktops', () => {
   const indexed = indexTubes(real.notes);
   const current = racks(real, indexed);
   for (const [width, height] of [
@@ -142,34 +144,26 @@ it('keeps every real setting in metadata order as a tube or constant chip at bot
     [559, 675],
   ]) {
     const layout = tubeLayout({ width, height }, current);
-    const visible = [...layout.tubes, ...layout.chips.filter((c) => c.tube)];
+    const visible = layout.tubes;
     expect(visible.length).toBe(current.reduce((n, r) => n + r.tubes.length, 0));
     for (const rack of current) {
       const tubeOrder = layout.tubes.filter((t) => t.rack === rack).map((t) => t.tube.setting.name);
-      expect(tubeOrder).toEqual(
-        rack.tubes
-          .filter((t) => !(layout.folded && t.setting.kind !== 'signal' && t.range && !t.moving))
-          .map((t) => t.setting.name),
-      );
+      expect(tubeOrder).toEqual(rack.tubes.map((t) => t.setting.name));
     }
     const cutoff = layout.tubes.find(
       (t) => t.rack.instrument.name === 'wobbleBass' && t.tube.setting.name === 'lpf',
     )!;
     expect(cutoff).toBeDefined();
-    expect(cutoff.bottom - cutoff.top).toBeGreaterThan(250);
+    expect(cutoff.bottom - cutoff.top).toBeGreaterThan(30);
     for (const tube of layout.tubes) {
       expect(tube.x - tube.width / 2).toBeGreaterThanOrEqual(0);
       expect(tube.x + tube.width / 2).toBeLessThanOrEqual(layout.stageWidth);
       expect(tube.top).toBeGreaterThan(80);
       expect(tube.bottom).toBeLessThan(height - 30);
     }
-    for (const chip of layout.chips) {
-      expect(chip.y).toBeGreaterThan(0);
-      expect(chip.y + 17).toBeLessThanOrEqual(height);
-    }
   }
 });
-it('fits one and twenty instruments and does not fold moving settings away', () => {
+it('fits one and twenty instruments without folding any settings away', () => {
   for (const count of [1, 20]) {
     const f = scoreFrame(count);
     f.instruments.forEach((i) => {
@@ -182,7 +176,7 @@ it('fits one and twenty instruments and does not fold moving settings away', () 
     const current = racks(f, indexTubes(f.notes));
     const layout = tubeLayout({ width: 559, height: 675 }, current);
     expect(layout.tubes.filter((t) => t.tube.setting.name === 'lpf')).toHaveLength(count);
-    expect(layout.tubes.length + layout.chips.filter((c) => c.tube).length).toBe(count * 2);
+    expect(layout.tubes.length).toBe(count * 2);
     expect(layout.tubes.every((t) => t.bottom > t.top && t.bottom < 675)).toBe(true);
   }
 });
@@ -201,7 +195,6 @@ it('keeps rack geometry fixed when another setting receives its first sample', (
       t.top,
       t.bottom,
     ]),
-    chips: layout.chips.map((c) => [c.x, c.y, c.width]),
   });
   expect(geometry(after)).toEqual(geometry(before));
   expect(geometry(atTime(0))).toEqual(geometry(before));
@@ -226,4 +219,82 @@ it('wraps twenty racks with several moving controls without overlapping rows or 
   const bottoms = [...new Set(layout.tubes.map((t) => t.bottom))];
   const tops = [...new Set(layout.tubes.map((t) => t.top))];
   for (let i = 1; i < tops.length; i++) expect(tops[i]).toBeGreaterThan(bottoms[i - 1] + 26);
+});
+
+const motion = (notes: ViewNote[], now: number, cps = 1, s = setting) => {
+  const part = indexTubes(notes).get('0');
+  return tubeMotion(part, tubeAt(part, s, sampleRack(part, now)), now, cps);
+};
+it('pours with cubic ease over 120 real ms or 40% of the next-onset gap', () => {
+  const notes = [
+    note(0, 1, { cutoff: 400 }),
+    note(1, 2, { cutoff: 1200 }),
+    note(2, 3, { cutoff: 400 }),
+  ];
+  expect(motion(notes, 1).level).toBe(0);
+  expect(motion(notes, 1.06).level).toBeCloseTo(0.875);
+  expect(motion(notes, 1.12).level).toBe(1);
+  expect(motion(notes, 1.03, 0.5).level).toBeCloseTo(0.875);
+  const fast = [notes[0], note(1, 1.1, { cutoff: 1200 }), note(1.1, 2, { cutoff: 400 })];
+  expect(motion(fast, 1.02).level).toBeCloseTo(0.875);
+  expect(motion(fast, 1.04).level).toBe(1);
+});
+it('settles after the pour within 4% of height and exactly stops after 400 ms', () => {
+  const notes = [note(0, 1, { cutoff: 400 }), note(1, 3, { cutoff: 1200 })];
+  expect(motion(notes, 1.06).tilt).toBe(0);
+  expect(Math.abs(motion(notes, 1.15).tilt)).toBeGreaterThan(0.005);
+  for (let i = 0; i < 100; i++) {
+    const m = motion(notes, 1 + i / 100);
+    expect(Math.abs(m.tilt) + Math.abs(m.ripple)).toBeLessThanOrEqual(0.04);
+  }
+  expect(Math.abs(motion(notes, 1.521).tilt)).toBe(0);
+  expect(Math.abs(motion(notes, 1.521).ripple)).toBe(0);
+  const times = [1.02, 1.06, 1.12, 1.3, 1.6];
+  const forward = times.map((t) => motion(notes, t));
+  expect(
+    times
+      .toReversed()
+      .map((t) => motion(notes, t))
+      .toReversed(),
+  ).toEqual(forward);
+});
+it('never animates constants, repeated equal values, or unavailable values', () => {
+  const fixed = [note(0, 1, { cutoff: 400 }), note(1, 2, { cutoff: 400 })];
+  expect(motion(fixed, 1.03)).toEqual(motion(fixed, 1.3));
+  const repeated = [...fixed, note(2, 3, { cutoff: 1200 })];
+  expect(motion(repeated, 1.03).level).toBe(0);
+  expect(Math.abs(motion(repeated, 1.03).tilt)).toBe(0);
+  expect(Math.abs(motion(repeated, 1.03).ripple)).toBe(0);
+  expect(motion([fixed[0], note(1, 2, {})], 1.03).level).toBeUndefined();
+});
+it('interpolates fragments continuously without easing, slosh or bubbles', () => {
+  const fragments = [note(0, 1, { cutoff: 400 }, false), note(1, 2, { cutoff: 1200 }, false)];
+  const halfway = motion(fragments, 0.5);
+  expect(halfway).toEqual({ level: 0.5, low: 0.5, tilt: 0, ripple: 0, age: undefined });
+  expect(motion(fragments, 0.9).level).toBeCloseTo(0.9);
+  expect(motion(fragments, 1.5).level).toBe(1);
+});
+it('eases both edges of a simultaneous value band and keeps all voices counted', () => {
+  const notes = [
+    note(0, 1, { cutoff: 0 }),
+    note(0, 1, { cutoff: 50 }),
+    note(1, 2, { cutoff: 50 }),
+    note(1, 2, { cutoff: 100 }),
+  ];
+  const m = motion(notes, 1.06);
+  expect(m.level).toBeCloseTo(0.9375);
+  expect(m.low).toBeCloseTo(0.4375);
+  expect(at(notes, 1.06).count).toBe(2);
+});
+it('chooses all vessel families through the existing canonical aliases', () => {
+  for (const name of ['lpf', 'cutoff', 'hpf', 'hcutoff', 'bandf', 'resonance', 'lpq', 'hpq'])
+    expect(vesselFor(name)).toBe('conical');
+  for (const name of ['room', 'size', 'roomsize', 'delay', 'delaytime', 'delayfeedback'])
+    expect(vesselFor(name)).toBe('round');
+  for (const name of ['gain', 'velocity', 'postgain']) expect(vesselFor(name)).toBe('speaker');
+  expect(vesselFor('pan')).toBe('balance');
+  for (const name of ['note', 'n', 'freq', 'speed']) expect(vesselFor(name)).toBe('cylinder');
+  expect(vesselFor('custom')).toBe('tube');
+  expect(octaveTicks('note', 48, 72)).toEqual([0, 0.5, 1]);
+  expect(octaveTicks('freq', 128, 512)).toEqual([0, 1 / 3, 1]);
 });
