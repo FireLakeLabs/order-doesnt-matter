@@ -13,7 +13,13 @@ import {
   runway,
   valueText,
   scoredNotes,
+  analyse,
+  cameraFlashes,
+  gaitAt,
+  stepAt,
+  flashAppearance,
 } from '../../src/views/catwalk/model';
+import { ellipsize, torsoAnchor } from '../../src/views/catwalk/figure';
 import type { ViewFrame, ViewNote } from '../../src/views/types';
 import { scoreFrame } from './score-fixture';
 
@@ -24,13 +30,13 @@ beforeAll(async () => {
   const events = Object.fromEntries(
     await Promise.all(
       state.rows.map(async (row) => {
-        const result = await queryEventsNode(generate(state.doc!, { only: row.id }), 8, 16);
+        const result = await queryEventsNode(generate(state.doc!, { only: row.id }), 0, 28);
         expect(result.error).toBeNull();
         return [row.id, result];
       }),
     ),
   );
-  const score = { from: 8, to: 16, events };
+  const score = { from: 0, to: 28, events };
   real = buildFrame({
     state,
     score,
@@ -60,22 +66,127 @@ const frame = (notes: ViewNote[], now = 1): ViewFrame => ({
   lookAhead: 1,
 });
 
-it('lands exactly on onset, poses for the scored hold, then leaves; arbitrary seeks reproduce the pose', () => {
-  const notes = [note(1, 2, { gain: 0.75, lpf: 1370 })];
-  const f = frame(notes);
-  const before = figures({ ...f, now: 0.5 })[0];
-  const start = figures(f)[0];
-  const held = figures({ ...f, now: 1.7 })[0];
-  expect(before.y).toBeLessThan(runway(f).front);
-  expect(before.posing).toBe(false);
-  expect(start.y).toBe(runway(f).front);
-  expect(start.posing).toBe(true);
-  expect(held.y).toBe(start.y);
-  expect(held.stride).toBe(0);
-  expect(held.outfit).toEqual(start.outfit);
-  expect(figures({ ...f, now: 2 })).toEqual([]);
-  expect(figures(f)[0]).toEqual(start);
+it('keeps one model per part through future entrances and rests, and rotates turns by bar', () => {
+  const notes = [note(0, 4, {}, '0'), note(0, 4, {}, '1'), note(3, 4, {}, '2')];
+  const f = { ...frame(notes, 0.1), instruments: scoreFrame(3).instruments };
+  for (const [now, id] of [
+    [0.1, '0'],
+    [1.1, '1'],
+    [2.1, '0'],
+    [3.1, '0'],
+  ] as const) {
+    const cast = figures({ ...f, now });
+    expect(cast).toHaveLength(3);
+    expect(cast.filter((c) => c.walking).map((c) => c.instrument.id)).toEqual([id]);
+    expect(cast.every((c) => c.scale > 0)).toBe(true);
+  }
+  const posed = figures({ ...f, now: 1.4 }).find((c) => c.walking)!;
+  expect(posed.posing).toBe(true);
+  expect(posed.y).toBe(runway(f).front);
+  expect(figures({ ...f, now: 1.6 }).find((c) => c.walking)!.y).toBe(posed.y);
+  const returned = figures({ ...f, now: 1.8 }).find((c) => c.walking)!;
+  expect(returned.returning).toBe(true);
+  expect(returned.facing).toBe(-1);
+  expect(returned.y).toBeLessThan(posed.y);
+  expect(figures({ ...f, now: 1.4 }).find((c) => c.walking)).toEqual(posed);
+  expect(figures({ ...f, now: 1.99 }).some((c) => c.next && c.instrument.id === '0')).toBe(true);
 });
+
+it('keeps the document cast even when a part has no notes in the available score', () => {
+  const f = { ...scoreFrame(2), now: 1.4, notes: [note(1, 2)] };
+  const waiting = figures(f).find((c) => c.instrument.id === '1')!;
+  expect(waiting.note).toBeUndefined();
+  expect(waiting.walking).toBe(false);
+  expect(waiting.outfit).toEqual([]);
+  expect(waiting.scale).toBeGreaterThan(0);
+});
+
+it('hands the runway to the next model without teleporting either model at a bar boundary', () => {
+  for (const count of [1, 3]) {
+    const f = {
+      ...scoreFrame(count),
+      notes: Array.from({ length: count }, (_, id) => note(0, 4, {}, String(id))),
+    };
+    for (const bar of [1, 2, 3]) {
+      const before = figures({ ...f, now: bar - 0.00001 });
+      const after = figures({ ...f, now: bar + 0.00001 });
+      for (const a of before) {
+        const b = after.find((c) => c.instrument.id === a.instrument.id)!;
+        expect(Math.abs(a.x - b.x)).toBeLessThan(0.1);
+        expect(Math.abs(a.y - b.y)).toBeLessThan(0.1);
+        expect(Math.abs(a.scale - b.scale)).toBeLessThan(0.001);
+      }
+    }
+  }
+});
+
+it('changes the end pose on every walking-part onset and flourishes backstage', () => {
+  const notes = [note(1, 1.1), note(1.4, 1.5), note(1.55, 1.6), note(1.4, 1.5, {}, '1')];
+  const f = { ...frame(notes, 1.39), instruments: scoreFrame(2).instruments };
+  // Bar 2 picks part 1; its note starts later, yet its model is already walking.
+  const before = figures(f).find((c) => c.walking)!;
+  const after = figures({ ...f, now: 1.4 }).find((c) => c.walking)!;
+  expect(after.instrument.id).toBe('1');
+  expect(after.pose).not.toBe(before.pose);
+  expect(figures({ ...f, now: 1.4 }).find((c) => !c.walking)!.flourish).toBe(1);
+  expect(figures({ ...f, now: 1.42 }).find((c) => !c.walking)!.flourish).toBeGreaterThan(0);
+});
+
+it('changes pose for successive triads while counting every note (R1)', () => {
+  const notes = [0.4, 0.5, 0.6].flatMap((start) =>
+    [48, 52, 55].map((pitch) => note(start, start + 0.05, { note: pitch })),
+  );
+  const f = frame(notes, 0.4);
+  const cast = [0.4, 0.5, 0.6].map((now) => figures({ ...f, now })[0]);
+  expect(cast.every((c) => c.posing)).toBe(true);
+  expect(cast.map((c) => c.pose)).toEqual([1, 2, 0]);
+  expect(cast.every((c) => c.members.length === 9)).toBe(true);
+  expect(
+    cameraFlashes({ ...f, now: 0.6 }, analyse(notes)).reduce((sum, flash) => sum + flash.count, 0),
+  ).toBe(3);
+});
+
+it('keeps entrance and exit handoffs continuous when the song window advances (R2)', () => {
+  for (const count of [2, 3]) {
+    for (const from of [0, 4]) {
+      const f = {
+        ...scoreFrame(count),
+        from,
+        to: from + 4,
+        sections: [{ name: 'show', from: 0, to: 4 }],
+        notes: Array.from({ length: count }, (_, id) => note(from, from + 4, {}, String(id))),
+      };
+      const before = figures({ ...f, now: from + 3.99999 });
+      const after = figures({
+        ...f,
+        from: from + 4,
+        to: from + 8,
+        now: from + 4.00001,
+        notes: f.notes.map((n) => ({ ...n, start: n.start + 4, end: n.end + 4 })),
+      });
+      expect(before.find((c) => c.next)?.instrument.id).toBe(
+        after.find((c) => c.walking)!.instrument.id,
+      );
+      expect(after.find((c) => c.walking)!.instrument.id).toBe(String((from + 4) % count));
+      for (const a of before) {
+        const b = after.find((c) => c.instrument.id === a.instrument.id)!;
+        expect(Math.abs(a.x - b.x)).toBeLessThan(0.1);
+        expect(Math.abs(a.y - b.y)).toBeLessThan(0.1);
+        expect(Math.abs(a.scale - b.scale)).toBeLessThan(0.001);
+      }
+    }
+  }
+});
+
+it('uses the latest sampled outfit, preserving zero gain and waiting through rests', () => {
+  const first = note(0, 0.1, { gain: 0, lpf: 400 });
+  const second = note(2, 2.1, { gain: 2, lpf: 900 });
+  const f = frame([first, second], 1.4);
+  expect(figures(f)[0].note).toBe(first);
+  expect(figures(f)[0].outfit.find((g) => g.name === 'gain')!.value).toBe(0);
+  expect(figures({ ...f, now: 2.4 })[0].note).toBe(second);
+});
+
 it('each sampled key gets one garment, including a badge for unfamiliar settings, independent of bag order', () => {
   const bag = {
     lpf: 940,
@@ -108,68 +219,45 @@ it('values size garments between notes; gain sizes figures and pan places them o
     expect(outfit(note(0, 1, { [name]: 0 }))[0].size).toBeLessThan(
       outfit(note(0, 1, { [name]: name === 'lpf' ? 12000 : 1 }))[0].size,
     );
-  const left = figures(frame([note(1, 2, { pan: 0, gain: 0.2 })]))[0];
-  const right = figures(frame([note(1, 2, { pan: 1, gain: 2 })]))[0];
+  const left = figures(frame([note(1, 2, { pan: 0, gain: 0.2 })], 1.4))[0];
+  const right = figures(frame([note(1, 2, { pan: 1, gain: 2 })], 1.4))[0];
   expect(left.x).toBeLessThan(650);
   expect(right.x).toBeGreaterThan(650);
   expect(left.scale).toBeLessThan(right.scale);
 });
-it('does not turn future fragments into arrivals, but preserves currently held fragments and zero gain', () => {
-  const notes = [note(0, 2, { gain: 0 }, '0', false), note(1.5, 2, {}, '0', false)];
-  const cast = figures(frame(notes));
-  expect(cast).toHaveLength(1);
-  expect(cast[0].note).toBe(notes[0]);
-  expect(cast[0].posing).toBe(true);
-  expect(cast[0].outfit[0].value).toBe(0);
-});
-it('one and twenty instruments and 500 notes per cycle retain all visible notes in explicit crowds', () => {
+it('counts every dense note per part without combining identities', () => {
   for (const count of [1, 20]) {
     const f = {
       ...scoreFrame(count),
       now: 0.4,
-      lookAhead: 1,
       notes: Array.from({ length: 500 }, (_, i) =>
-        note(i / 500, i / 500 + 0.5, { gain: 1 }, String(i % count)),
+        note(i / 500, i / 500 + 0.1, { gain: 1 }, String(i % count)),
       ),
     };
     const cast = figures(f);
+    expect(cast).toHaveLength(count);
     expect(cast.reduce((sum, c) => sum + c.members.length, 0)).toBe(500);
-    expect(cast.length).toBeLessThan(64);
-    expect(cast.some((c) => c.members.length > 1)).toBe(true);
+    expect(new Set(cast.map((c) => c.instrument.id)).size).toBe(count);
     expect(cast.every((c) => c.x > 0 && c.x < f.width && c.scale > 0)).toBe(true);
   }
 });
-it('real bar 11 bags use sampled values, including keys beyond the mockup; host refresh and names cannot change the outfit', () => {
+
+it('real bar 11 and 12 rotate the cast, use complete sampled bags, and ignore names and Window', () => {
   const cast = figures(real);
-  const featuredNotes = featured(cast, real.width);
-  expect(featuredNotes.length).toBeGreaterThan(0);
+  expect(featured(cast)).toHaveLength(1);
   for (const f of cast) {
-    expect(f.outfit.map((i) => i.name)).toEqual(Object.keys(f.note.value).sort());
-    expect(f.outfit).toEqual(outfit(f.note));
+    expect(f.outfit.map((i) => i.name)).toEqual(Object.keys(f.note!.value).sort());
+    expect(f.outfit).toEqual(outfit(f.note!));
   }
-  const bass = cast.find(
-    (c) => typeof c.note.value.cutoff === 'number' || typeof c.note.value.lpf === 'number',
-  )!;
-  expect(bass).toBeDefined();
-  expect(bass.members.filter((n) => n.instrument === bass.instrument.id)).toHaveLength(1);
-  const earlier = figures({ ...real, now: 10.2 }).find((c) => c.note === bass.note);
-  const later = figures({ ...real, now: 10.7 }).find((c) => c.note === bass.note);
-  expect(earlier?.outfit).toEqual(bass.outfit);
-  expect(later?.outfit).toEqual(bass.outfit);
+  expect(figures({ ...real, now: 11.4 }).find((c) => c.walking)!.instrument.id).not.toBe(
+    cast.find((c) => c.walking)!.instrument.id,
+  );
   const renamed = figures({
     ...real,
+    lookAhead: 10,
     instruments: real.instruments.map((i) => ({ ...i, name: 'renamed' })),
   });
   expect(renamed.map((c) => [c.x, c.y, c.outfit])).toEqual(cast.map((c) => [c.x, c.y, c.outfit]));
-  const refreshed = figures({
-    ...real,
-    notes: real.notes.filter((n) => n.end > 10 && n.start < 12),
-  });
-  expect(refreshed.find((c) => c.note === bass.note)?.outfit).toEqual(bass.outfit);
-  console.log(
-    'Catwalk bar 11 posing bags:',
-    JSON.stringify(featuredNotes.map((f) => ({ name: f.instrument.name, value: f.note.value }))),
-  );
 });
 
 it('collapses identical query continuations without dropping coincident note onsets', () => {
@@ -181,49 +269,122 @@ it('collapses identical query continuations without dropping coincident note ons
   expect(scoredNotes([fragment, { ...fragment, value: { gain: 0.5, note: 48 } }])).toHaveLength(2);
 });
 
-it('moderate pan values keep their side even at the extremes of the instrument fan', () => {
+it('lands steps on scored drum onsets, interpolates six cross-step poses, and falls back to quarters', () => {
+  const notes = [0, 0.2, 0.4, 0.6, 0.8].map((t) => note(t, t + 0.05, { s: 'bd' }));
+  const score = analyse(notes);
+  expect(stepAt(score, 0.2)).toBe(1);
+  expect(stepAt(score, 0.3)).toBeCloseTo(1.5);
+  expect(stepAt(analyse([note(0, 1, { note: 60 })]), 0.3)).toBe(1.2);
+  const poses = Array.from({ length: 6 }, (_, i) => gaitAt(i / 3));
+  expect(new Set(poses.map((p) => JSON.stringify(p))).size).toBe(6);
+  expect(poses[0].leftX).toBeGreaterThan(0);
+  expect(poses[3].rightX).toBeLessThan(0);
+  expect(poses[0].leftY).toBe(0);
+  expect(poses[3].rightY).toBe(0);
+  for (const pose of poses) {
+    expect(Math.abs(pose.hips)).toBeLessThanOrEqual(4);
+    expect(pose.shoulders).toBe(-pose.hips);
+  }
+  for (let step = 0; step < 2; step += 0.01) {
+    const a = gaitAt(step),
+      b = gaitAt(step + 0.001);
+    expect(Math.abs(a.leftX - b.leftX)).toBeLessThan(0.1);
+    expect(Math.abs(a.rightY - b.rightY)).toBeLessThan(0.1);
+  }
+  expect(gaitAt(0)).toEqual(gaitAt(2));
+  // A regular intro drum cannot keep driving imaginary contacts after its exit.
+  const sections = analyse([...notes, note(1.3, 1.31, { s: 'sd' }, '1')]);
+  expect(stepAt(sections, 1.3)).toBe(0);
+  expect(stepAt(sections, 2.3)).toBeCloseTo(2.3 * 4);
+  const drop = analyse([
+    ...[0, 1, 10, 11].map((t) => note(t, t + 0.01, { s: 'bd' })),
+    ...Array.from({ length: 16 }, (_, i) => note(10 + i / 8, 10 + (i + 1) / 8, { s: 'hh' }, '1')),
+  ]);
+  expect(stepAt(drop, 10.125)).toBe(1);
+});
+
+it('fires every genuine onset, including coincident and dense notes, and fades in 150 ms', () => {
+  const notes = [
+    note(1, 1.01, { gain: 1 }),
+    note(1, 1.01, { gain: 2 }, '1'),
+    note(1, 2, {}, '2', false),
+    note(1.1, 2),
+  ];
+  const score = analyse(notes);
+  const f = { ...frame(notes), cps: 0.5, instruments: scoreFrame(3).instruments };
+  const flashes = cameraFlashes(f, score);
+  expect(flashes.map((a) => a.instrument)).toEqual(['0', '1']);
+  expect(flashes[0].gain).toBeLessThan(flashes[1].gain);
+  expect(cameraFlashes({ ...f, now: 1.0375 }, score)[0].fade).toBeCloseTo(flashes[0].fade / 2);
+  expect(cameraFlashes({ ...f, now: 1.076 }, score)).toEqual([]);
+  expect(cameraFlashes(f, score)).toEqual(flashes);
+  const dense = analyse(Array.from({ length: 500 }, () => note(1, 1.01)));
+  const counted = cameraFlashes(f, dense);
+  expect(counted.reduce((n, flash) => n + flash.count, 0)).toBe(500);
+  expect(counted).toHaveLength(20);
+});
+
+it('keeps waiting models and labels in fixed slots with eight-pixel gutters', () => {
+  for (const width of [559, 960, 1300]) {
+    const f = { ...real, width };
+    const home = new Map(figures(f).map((c) => [c.instrument.id, c.slot]));
+    for (const now of [10.001, 10.1, 10.13, 10.16, 10.4, 11.1]) {
+      const cast = figures({ ...f, now });
+      const slots = cast.map((c) => c.slot).sort((a, b) => a.x - b.x);
+      for (let i = 1; i < slots.length; i++)
+        expect(
+          slots[i].x - slots[i].width / 2 - slots[i - 1].x - slots[i - 1].width / 2,
+        ).toBeGreaterThanOrEqual(8 - 1e-9);
+      for (const c of cast.filter((c) => !c.walking)) {
+        expect(c.slot).toEqual(home.get(c.instrument.id));
+        expect(c.x).toBe(c.slot.x);
+        expect(c.y - c.slot.y).toBeGreaterThanOrEqual(0);
+        expect(c.y - c.slot.y).toBeLessThanOrEqual(8);
+        if (!c.next) expect(c.y).toBe(c.slot.y);
+        expect(c.scale * 100).toBeLessThanOrEqual(c.slot.width + 1e-9);
+        const label = ellipsize(c.instrument.name, c.slot.width, (text) => text.length * 6);
+        expect(label.length * 6).toBeLessThanOrEqual(c.slot.width);
+        if (c.instrument.name.length * 6 > c.slot.width) expect(label.endsWith('…')).toBe(true);
+      }
+    }
+  }
+});
+
+it('anchors the leader inside the jacket through the walk, all poses and the turn', () => {
+  for (const now of [10.001, 10.1, 10.13, 10.4, 10.55, 10.68, 10.8]) {
+    const f = figures({ ...real, now }).find((f) => f.walking)!;
+    const anchor = torsoAnchor(f);
+    expect(anchor.y).toBeGreaterThan(f.y - 84 * f.scale);
+    expect(anchor.y).toBeLessThan(f.y - 45 * f.scale);
+    expect(Math.abs(anchor.x - f.x)).toBeLessThan(18 * f.scale);
+  }
+});
+
+it('sizes gain-one camera cores and halos in pixels, with a bounded floor pool and age fade', () => {
+  const first = flashAppearance({ gain: 1, fade: 1 }, 960);
+  expect(first.core).toBeGreaterThanOrEqual(10);
+  expect(first.halo).toBeGreaterThanOrEqual(40);
+  expect(first.halo).toBeLessThanOrEqual(60);
+  expect(first.pool).toBeGreaterThanOrEqual(0.1);
+  expect(first.pool).toBeLessThanOrEqual(0.15);
+  expect(flashAppearance({ gain: 0.5, fade: 1 }, 960).halo).toBeLessThan(first.halo);
+  expect(flashAppearance({ gain: 2, fade: 1 }, 960).halo).toBeGreaterThan(first.halo);
+  const aged = flashAppearance({ gain: 1, fade: 0.5 }, 960);
+  expect(aged.core).toBe(first.core);
+  expect(aged.halo).toBe(first.halo);
+  expect(aged.alpha).toBe(first.alpha / 2);
+  expect(aged.pool).toBe(first.pool / 2);
+});
+
+it('reserves the centre gutter for two long waiting names (R4)', () => {
   const f = {
     ...scoreFrame(2),
-    now: 1,
-    lookAhead: 1,
-    notes: [note(1, 2, { pan: 0.75 }, '0'), note(1, 2, { pan: 0.25 }, '1')],
+    now: 0.4,
+    instruments: scoreFrame(2).instruments.map((i) => ({ ...i, name: 'W'.repeat(80) })),
+    notes: [note(1, 2), note(1, 2, {}, '1')],
   };
-  const cast = figures(f);
-  expect(cast.find((c) => c.instrument.id === '0')!.x).toBeGreaterThan(f.width / 2);
-  expect(cast.find((c) => c.instrument.id === '1')!.x).toBeLessThan(f.width / 2);
-});
-
-it('held positions and crowd membership survive other instruments and dense notes entering the Window (R1)', () => {
-  const held = note(1, 3, { gain: 0.8, lpf: 900 }, '1');
-  const f = {
-    ...scoreFrame(3),
-    lookAhead: 1,
-    notes: [note(1, 3), held, ...Array.from({ length: 80 }, () => note(2.5, 3, {}, '2'))],
-  };
-  for (const width of [1300, 560]) {
-    const poseAt = (now: number) =>
-      figures({ ...f, now, width }).find((c) => c.members.includes(held))!;
-    const before = poseAt(1.4);
-    const after = poseAt(1.6);
-    expect(after.x).toBe(before.x);
-    expect(after.y).toBe(before.y);
-    expect(after.scale).toBe(before.scale);
-    expect(after.members).toEqual(before.members);
-    expect(poseAt(1.4)).toEqual(before);
-  }
-});
-
-it('a walking crowd is anchored by its earliest onset rather than a richer later outfit (R2)', () => {
-  const earlier = note(1.55, 2, { gain: 1 });
-  const later = note(1.6, 2, { lpf: 900, shape: 0.6 });
-  for (const notes of [
-    [later, earlier],
-    [earlier, later],
-  ]) {
-    const cast = figures(frame(notes));
-    expect(cast).toHaveLength(1);
-    expect(cast[0].note).toBe(earlier);
-    expect(cast[0].members).toHaveLength(2);
-    expect(cast[0].y).toBe(figures(frame([earlier]))[0].y);
-  }
+  const cast = figures(f).sort((a, b) => a.slot.x - b.slot.x);
+  const measure = (text: string) => text.length * 7;
+  const widths = cast.map((c) => measure(ellipsize(c.instrument.name, c.slot.width, measure)));
+  expect(cast[1].slot.x - widths[1] / 2 - cast[0].slot.x - widths[0] / 2).toBeGreaterThanOrEqual(8);
 });
