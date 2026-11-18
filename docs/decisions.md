@@ -167,3 +167,7 @@ Keep each entry to a few lines.
   suite as a build gate; CI and the deploy run `npm run check` and the infra
   checks only. Installing the test browser on GitHub runners took 5–9 minutes
   and timed out most jobs.
+- **D50 (2026-11-18) Waves end with a sweep.** After a wave's last merge, the
+  lead runs the sweep in the orchestrate skill: full browser suite on `main`,
+  accepted caveats gathered, everything touched seen together, docs matched.
+  Small fixes land before the next wave starts.

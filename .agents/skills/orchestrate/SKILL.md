@@ -35,6 +35,25 @@ does it do what the brief intended, and does it have the stated effect? Read
 code only where the ledger shows an open dispute or the behaviour is wrong.
 Send back with a specific, sized correction. The owner merges.
 
+## Closing a wave
+
+Every wave ends with a sweep for what single pull requests miss. After its last
+merge, give an implementer these, then judge the results:
+
+1. Run the full browser suite once on `main`; CI does not (D49).
+2. Gather every caveat and follow-up accepted in review ledgers, handbacks and
+   send-backs during the wave.
+3. Screenshot everything the wave touched on two real pieces in every theme,
+   in place in the Studio, together with its neighbours.
+4. Confirm the live site serves `main`, and the plan, backlog and decisions
+   match what shipped.
+
+Hold each result against the owner's original request, item by item. Small
+fixes go in sweep pull requests through the build skill, one per owned area;
+anything larger goes to the backlog or the next wave's plan. Tell the owner
+what was found and fixed, with screenshots of anything they should judge. The
+next wave starts once the sweep merges.
+
 ## Do not
 
 Add verification write-ups, recorded demos, metrics upkeep, word budgets or
