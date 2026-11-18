@@ -15,6 +15,53 @@ test('Catwalk: exact bar 11, five themes, Stage B, playback and frame cost', asy
     () => window.viewProbe.frame?.now === 10.4 && window.viewProbe.frame.lookAhead === 1,
   );
   await scoreReady(page);
+  // Exact real-song frames on a separate mount: the host still supplies the full score.
+  const show = await page.evaluateHandle(async () => {
+    await document.fonts.ready;
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;inset:0;width:1300px;height:760px;z-index:9999';
+    document.body.append(el);
+    return {
+      el,
+      handle: await window.viewProbe.definition.mount(el),
+      frame: { ...window.viewProbe.frame!, width: 1300, height: 760, dpr: 1 },
+    };
+  });
+  const moments: [string, number][] = [
+    ['bar-11-10', 10.1],
+    ['bar-11-40', 10.4],
+    ['bar-11-80', 10.8],
+    ['bar-12-10', 11.1],
+    ['bar-12-40', 11.4],
+    ['bar-12-80', 11.8],
+    ['bar-2-intro', 1.4],
+    ['gait-1', 10.1],
+    ['gait-2', 10.13],
+    ['gait-3', 10.16],
+    ['camera-onset', 10.001],
+  ];
+  for (const [name, now] of moments) {
+    await show.evaluate(({ handle, frame }, now) => handle.frame({ ...frame, now }), now);
+    await page.screenshot({
+      path: `${dir}/${name}.png`,
+      clip: { x: 0, y: 0, width: 1300, height: 760 },
+    });
+  }
+  const reversibleFrames = await show.evaluate(({ el, handle, frame }, moments) => {
+    return moments.map(([, now]) => {
+      handle.frame({ ...frame, now });
+      const pixels = el.querySelector('canvas')!.toDataURL();
+      handle.frame({ ...frame, now: 20 });
+      handle.frame({ ...frame, now });
+      return pixels === el.querySelector('canvas')!.toDataURL();
+    });
+  }, moments);
+  expect(reversibleFrames.every(Boolean)).toBe(true);
+  await show.evaluate(({ handle, el }) => {
+    handle.dispose();
+    el.remove();
+  });
+  await show.dispose();
   await writeFile(
     `${dir}/frame.json`,
     JSON.stringify(await page.evaluate(() => window.viewProbe.frame), null, 2),
