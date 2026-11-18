@@ -29,6 +29,18 @@ test('swarm: exact-time Studio evidence, themes, dense shields and frame cost', 
       for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
     });
   };
+  for (const [label, now] of [
+    ['bar-11-10', 10.1],
+    ['bar-11-40', 10.4],
+    ['bar-11-49', 10.49],
+    ['bar-11-90', 10.9],
+    ['bar-2-40', 1.4],
+  ] as const) {
+    await at(now);
+    await page
+      .locator('[data-region="stage-a"] canvas')
+      .screenshot({ path: `${shots}/${label}.png` });
+  }
   await at(10.4);
   await page.screenshot({ path: `${shots}/arcade-2560x1440.png` });
   const saved = await page.evaluate(() => ({
@@ -55,7 +67,13 @@ test('swarm: exact-time Studio evidence, themes, dense shields and frame cost', 
     await window.odmStudio.endScrub();
   });
   await page.waitForFunction(() => window.viewProbe.frame?.now === 10.4);
+  const presented = async () =>
+    page.evaluate(async () => {
+      for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
+    });
+  await presented();
   const a = page.locator('[data-region="stage-a"] canvas');
+  const forwardFrame = await page.evaluate(() => window.viewProbe.frame);
   const forward = await a.evaluate((canvas: HTMLCanvasElement) => [
     ...canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data,
   ]);
@@ -63,6 +81,7 @@ test('swarm: exact-time Studio evidence, themes, dense shields and frame cost', 
   await at(10.65);
   await page.evaluate(() => window.odmStudio.step(-1));
   await page.waitForFunction(() => window.viewProbe.frame?.now === 10.4);
+  await presented();
   const backward = await a.evaluate((canvas: HTMLCanvasElement) => [
     ...canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data,
   ]);
@@ -71,6 +90,23 @@ test('swarm: exact-time Studio evidence, themes, dense shields and frame cost', 
   for (let i = 0; i < forward.length; i += 4)
     if (forward.slice(i, i + 4).some((v, channel) => v !== backward[i + channel]))
       differentPixels++;
+  if (differentPixels) {
+    await writeFile(
+      `${shots}/pixel-difference.json`,
+      JSON.stringify(
+        {
+          differentPixels,
+          forwardFrame,
+          pixels: forward.flatMap((v, i) =>
+            v !== backward[i] ? [{ index: i, forward: v, backward: backward[i] }] : [],
+          ),
+          frame: await page.evaluate(() => window.viewProbe.frame),
+        },
+        null,
+        2,
+      ),
+    );
+  }
   expect(differentPixels).toBe(0);
   const second = page.locator('[data-region="stage-b"]');
   await second.getByRole('button', { name: 'Views', exact: true }).click();
