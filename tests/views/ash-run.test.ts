@@ -8,12 +8,16 @@ import {
   analyse,
   roles,
   scene,
-  roofY,
-  roofAt,
-  kind,
   searchlight,
+  district,
+  strideAt,
+  accented,
   parallaxRates,
 } from '../../src/views/ash-run/model';
+import { building, buildingAt, crossing, route, world } from '../../src/views/ash-run/city';
+import { crateState, walker } from '../../src/views/ash-run/effects';
+import { runPose } from '../../src/views/ash-run/runner';
+import { skyline, windowLights, windows } from '../../src/views/ash-run/scenery';
 import type { ViewFrame } from '../../src/views/types';
 import { queryEventsNode } from '../node-query';
 import { scoreFrame } from './score-fixture';
@@ -42,8 +46,8 @@ async function queried(now: number, range?: { from: number; to: number }, piece 
     theme: scoreFrame().theme,
     lookAhead: 1,
     trails: 1,
-    width: 1300,
-    height: 760,
+    width: 960,
+    height: 600,
     dpr: 1,
   });
 }
@@ -51,6 +55,165 @@ beforeAll(async () => {
   const source = readFileSync('corpus/programs/real-dubstep-arranged.strudel', 'utf8');
   state = loadPiece(initialState(), source, importStrudel(source));
   frame = await queried(10.4);
+});
+
+it('selects musical roles by scored timing and pitch, independent of names', () => {
+  const chosen = roles(frame, analyse(frame.notes));
+  const name = (id: string | undefined) => frame.instruments.find((i) => i.id === id)?.name;
+  expect(
+    [chosen.walker, chosen.footfalls, chosen.snare, chosen.kick, chosen.openHat].map(name),
+  ).toEqual(['subBass', 'hh · drop', 'sd · drop', 'bd', 'oh']);
+  const renamed = {
+    ...frame,
+    instruments: frame.instruments.map((i) => ({ ...i, name: 'x' })),
+    notes: frame.notes.map((n) => ({ ...n, value: { ...n.value, s: 'x' } })),
+  };
+  expect(roles(renamed, analyse(renamed.notes))).toEqual(chosen);
+});
+it('builds a city from distance alone with bounded roofs, gaps and floor changes', () => {
+  for (let index = -200; index < 200; index++) {
+    const b = building(index),
+      next = building(index + 1);
+    expect(b.end - b.start).toBeGreaterThanOrEqual(6 - 1e-9);
+    expect(b.end - b.start).toBeLessThanOrEqual(20 + 1e-9);
+    expect(b.gap).toBeGreaterThanOrEqual(1.2);
+    expect(b.gap).toBeLessThanOrEqual(2.2);
+    expect(next.start - b.end).toBeCloseTo(b.gap);
+    expect(next.floors - b.floors).toBeLessThanOrEqual(2);
+    expect(buildingAt((b.start + b.end) / 2)).toEqual(b);
+  }
+  const a = scene(frame, analyse(frame.notes)),
+    b = scene({ ...frame, notes: [] }, analyse([]));
+  expect(a.buildings).toEqual(b.buildings);
+  for (let layer = 0; layer < 3; layer++)
+    expect(skyline(frame, a, layer)).toEqual(skyline(frame, b, layer));
+  expect(a.distance).toBe(b.distance);
+  expect(a.size).toBe(54);
+  expect(a.speed).toBeGreaterThan(330);
+  expect(a.speed).toBeLessThan(380);
+  expect(scene({ ...frame, cps: frame.cps * 2 }, analyse(frame.notes)).speed).toBe(a.speed * 2);
+});
+it('takes off at an edge, follows a ballistic arc, absorbs landing and rolls after three-floor drops', () => {
+  const w = world(frame);
+  let rolls = 0;
+  for (let i = 0; i < 60; i++) {
+    const b = building(i),
+      jump = crossing(w, b),
+      mid = (jump.takeoff + jump.landing) / 2;
+    const seconds = (jump.landing - jump.takeoff) / frame.cps;
+    expect(seconds).toBeGreaterThanOrEqual(0.3);
+    expect(seconds).toBeLessThanOrEqual(0.45);
+    expect(route(w, jump.takeoff - 1e-7).feet).toBeCloseTo(w.y(b));
+    expect(route(w, jump.takeoff).feet).toBeCloseTo(w.y(b));
+    expect(route(w, mid).airborne).toBe(true);
+    expect(route(w, mid).feet).toBeLessThan((w.y(b) + w.y(jump.to)) / 2);
+    expect(route(w, jump.landing).feet).toBeCloseTo(w.y(jump.to));
+    expect(route(w, jump.landing).airborne).toBe(false);
+    expect(route(w, jump.landing + 0.05 * frame.cps).absorb).toBeCloseTo(1);
+    if (jump.drop) {
+      rolls++;
+      expect(route(w, jump.landing + 0.12 * frame.cps).roll).toBeDefined();
+    }
+    expect(route(w, jump.landing + 0.4 * frame.cps).roll).toBeUndefined();
+  }
+  expect(rolls).toBeGreaterThan(0);
+});
+it('continues running through the breakdown without a bass-created chasm', async () => {
+  const f = await queried(17.4),
+    s = scene(f, analyse(f.notes));
+  expect(s.district.name).toBe('docks');
+  expect(s.buildings.length).toBeGreaterThan(2);
+  expect(Number.isFinite(s.feet)).toBe(true);
+  const empty = scene({ ...f, notes: [] }, analyse([]));
+  expect(empty.feet).toBe(s.feet);
+  expect(empty.airborne).toBe(s.airborne);
+});
+it('changes district exactly at a section line and reuses a returning section name', () => {
+  const sections = [
+    { name: 'A', from: 0, to: 4 },
+    { name: 'B', from: 4, to: 8 },
+    { name: 'C', from: 8, to: 16 },
+    { name: 'D', from: 16, to: 20 },
+    { name: 'C', from: 20, to: 28 },
+  ];
+  expect([3.999, 4, 8, 16, 20, 28].map((now) => district({ now, sections }).name)).toEqual([
+    'old town',
+    'construction',
+    'downtown',
+    'docks',
+    'downtown',
+    'old town',
+  ]);
+});
+it('contacts on steady drum notes, uses six distinct poses and falls back to tempo in silence', () => {
+  const data = analyse(frame.notes),
+    r = roles(frame, data);
+  const hits = data.parts
+    .get(r.footfalls!)!
+    .filter((e) => e.note.hasOnset && e.note.start >= 10 && e.note.start < 11);
+  for (let i = 0; i < hits.length - 1; i++) {
+    const now = hits[i].note.start;
+    expect(strideAt({ ...frame, now }, data, r.footfalls).phase).toBe(0);
+    expect(
+      strideAt({ ...frame, now: (now + hits[i + 1].note.start) / 2 }, data, r.footfalls).phase,
+    ).toBeCloseTo(0.5);
+  }
+  expect(new Set([0, 0.2, 0.4, 0.6, 0.8, 1].map((p) => JSON.stringify(runPose(p)))).size).toBe(6);
+  expect(strideAt({ ...frame, now: 0.125 }, analyse([]), undefined).phase).toBe(0.5);
+});
+it('vaults on the snare, crashes on range-relative accents and keeps an airborne crate on the next roof', () => {
+  const data = analyse(frame.notes),
+    s = scene(frame, data);
+  const hit = data.parts.get(s.roles.snare!)!.find((e) => !route(s, e.note.start).airborne)!;
+  const onHit = scene({ ...frame, now: hit.note.start }, data);
+  expect(onHit.vault).toBeCloseTo(0.5);
+  expect(onHit.feet).toBeLessThan(route(s, hit.note.start).feet);
+  const b = building(8),
+    jump = crossing(s, b);
+  const airHit = { ...hit, note: { ...hit.note, start: (jump.takeoff + jump.landing) / 2 } };
+  const tumbling = crateState(s, airHit, airHit.note.start + 0.1);
+  expect(tumbling.tumble).toBe(true);
+  for (const phase of [0.5, 0.99]) {
+    const airborneHit = {
+      ...hit,
+      note: { ...hit.note, start: jump.takeoff + (jump.landing - jump.takeoff) * phase },
+    };
+    const landed = crateState(s, airborneHit, airborneHit.note.start + 0.3);
+    expect(landed.x).toBeGreaterThan(jump.to.start);
+    expect(landed.x).toBeLessThan(jump.to.end);
+    expect(landed.y).toBe(s.y(jump.to));
+  }
+  const low = { ...hit.note, value: { gain: 0.2 } },
+    high = { ...hit.note, start: hit.note.start + 0.1, value: { gain: 1 } };
+  const gains = analyse([low, high]);
+  expect(accented({ ...hit, note: low }, gains)).toBe(false);
+  expect(accented({ ...hit, note: high }, gains)).toBe(true);
+});
+it('holds the walker lamp for the scored span and samples moving numeric beam settings without inventing signal values', () => {
+  const data = analyse(frame.notes),
+    s = scene(frame, data);
+  expect(s.lamp).toBe(true);
+  const a = searchlight({ ...frame, now: 10.38 }, data)!,
+    b = searchlight({ ...frame, now: 10.47 }, data)!;
+  expect(a.key).toBe('gain');
+  expect(a.angle).toBe(b.angle);
+  expect(searchlight({ ...frame, now: 10.51 }, data)!.angle).not.toBe(a.angle);
+  expect(scene({ ...frame, notes: [] }, analyse([])).lamp).toBe(false);
+});
+it('draws the same route and musical pose when revisiting time in either direction and across cache seams', async () => {
+  const data = analyse(frame.notes),
+    expected = scene(frame, data);
+  for (const now of [14, 8, 12, 4, 10.4]) scene({ ...frame, now }, data);
+  expect(JSON.stringify(scene(frame, data))).toBe(JSON.stringify(expected));
+  for (const now of [8, 12, 20]) {
+    const old = neededRange(undefined, now - 0.05, 1, state.sections),
+      next = neededRange(undefined, now, 1, state.sections);
+    const pose = (f: ViewFrame) => {
+      const s = scene(f, analyse(f.notes));
+      return { buildings: s.buildings, feet: s.feet, stride: s.stride, roles: s.roles };
+    };
+    expect(pose(await queried(now, old))).toEqual(pose(await queried(now, next)));
+  }
 });
 
 it('recognises four-beat backbeats and strong-beat kicks in the other real drum grooves', async () => {
@@ -63,7 +226,6 @@ it('recognises four-beat backbeats and strong-beat kicks in the other real drum 
     expect(chosen.openHat, program).not.toBe(chosen.snare);
     if (program === 'real-synthwave') {
       expect(f.instruments.find((i) => i.id === chosen.kick)?.name).toBe('bd');
-      expect(chosen.openHat).toBeUndefined();
     }
   }
   const bd = frame.instruments.find((i) => i.name === 'bd')!;
@@ -101,170 +263,219 @@ it('keeps a half-time snare out of the kick role when the kick is syncopated', (
     const chosen = roles(f, analyse(notes));
     expect(chosen.snare, String(phases)).toBe(sd.id);
     expect(chosen.kick, String(phases)).toBeUndefined();
-    expect(kind(bd.id, chosen)).toBe('generic');
   }
 });
 
-it('starts a touching-roof leap at the old height and lands on the new roof', () => {
-  const data = analyse(frame.notes);
-  const before = scene({ ...frame, now: 11 - 1e-8 }, data);
-  const onset = scene({ ...frame, now: 11 }, data);
-  expect(onset.current?.note.value.note).toBe('f1');
-  expect(onset.feet).toBeCloseTo(before.feet, 5);
-  expect(onset.feet).toBeCloseTo(roofY(27, frame.height));
-  expect(scene({ ...frame, now: 11 + 1e-8 }, data).feet).toBeCloseTo(onset.feet, 4);
-  const landing = scene({ ...frame, now: 11.25 }, data);
-  expect(landing.feet).toBeCloseTo(roofY(29, frame.height));
-});
-it('chooses scored bass, downbeat footfalls, backbeat barriers, kick dust and offbeat cables without names', () => {
-  const data = analyse(frame.notes),
-    chosen = roles(frame, data);
-  const name = (id: string | undefined) => frame.instruments.find((i) => i.id === id)?.name;
-  expect(
-    [chosen.rooftops, chosen.footfalls, chosen.snare, chosen.kick, chosen.openHat].map(name),
-  ).toEqual(['subBass', 'bd', 'sd · drop', 'bd', 'oh']);
-  const renamed = {
-    ...frame,
-    instruments: frame.instruments.map((i) => ({ ...i, name: 'renamed' })),
-    notes: frame.notes.map((n) => ({ ...n, value: { ...n.value, s: 'renamed' } })),
-  };
-  expect(roles(renamed, analyse(renamed.notes))).toEqual(chosen);
-  const light = searchlight(frame, data)!;
-  expect(name(light.instrument)).toBe('hh · drop');
-  expect(light.key).toBe('gain');
-});
-
-it('builds exact bass note spans with monotonic pitch height and leaps triggered on bass onsets', () => {
-  const data = analyse(frame.notes),
-    s = scene(frame, data);
-  expect(s.roofs).toHaveLength(10);
-  expect(s.current?.note).toMatchObject({ start: 10, end: 11, value: { note: 'eb1' } });
-  expect(s.x(11) - s.x(10)).toBeCloseTo(s.scale);
-  expect(s.x(11.5) - s.x(11)).toBeCloseTo(s.scale / 2);
-  expect(roofY(24, 760)).toBeGreaterThan(roofY(27, 760));
-  expect(roofY(27, 760)).toBeGreaterThan(roofY(31, 760));
-  expect(s.feet).toBeCloseTo(roofY(27, 760));
-  expect(s.stride).toBeCloseTo(0.4);
-  expect(scene({ ...frame, now: 10 }, data).leap).toBe(0);
-  expect(scene({ ...frame, now: 10.125 }, data).leap).toBeGreaterThan(30);
-  expect(scene({ ...frame, now: 10.25 }, data).leap).toBeCloseTo(0);
-  expect(roofAt(s.roofs, 11.5)?.note.value.note).toBe('g1');
-});
-it('keeps the bass role when it sits out the breakdown, exposing a real four-cycle chasm', async () => {
-  const f = await queried(18.4),
-    data = analyse(f.notes),
-    s = scene(f, data);
-  expect(f.instruments.find((i) => i.id === s.roles.rooftops)?.name).toBe('subBass');
-  expect(f.instruments.find((i) => i.id === s.roles.rooftops)?.inSection).toBe(false);
-  expect(s.chasm).toBe(true);
-  expect(s.current).toBeUndefined();
-  expect(s.roofs.every((e) => e.note.end <= 16 || e.note.start >= 20)).toBe(true);
-  expect(s.feet).toBeGreaterThan(80);
-  expect(s.feet).toBeLessThan(f.height * 0.76);
-});
-it('uses generic debris when unpitched onset phases do not establish drum roles', () => {
-  const notes = frame.notes
-    .filter((n) => n.hasOnset && n.value.s === 'oh')
-    .map((n) => ({ ...n, start: n.start + 0.123, end: n.end + 0.123 }));
-  const id = notes[0].instrument;
-  const f = { ...frame, notes, instruments: frame.instruments.filter((i) => i.id === id) };
-  const chosen = roles(f, analyse(notes));
-  expect(chosen).toMatchObject({
-    rooftops: undefined,
-    kick: undefined,
-    snare: undefined,
-    openHat: undefined,
-  });
-  expect(kind(id, chosen)).toBe('generic');
-  expect(chosen.footfalls).toBe(id);
-});
-it('samples the searchlight once per actual note and ignores float noise in constant cutoff samples', () => {
-  const data = analyse(frame.notes);
-  const a = searchlight({ ...frame, now: 10.38 }, data)!,
-    b = searchlight({ ...frame, now: 10.47 }, data)!;
-  expect(a.note?.start).toBe(10.375);
-  expect(a.angle).toBe(b.angle);
-  expect(searchlight({ ...frame, now: 10.51 }, data)!.angle).not.toBe(a.angle);
-  expect(a.key).toBe('gain');
-  expect(searchlight({ ...frame, notes: [], instruments: [] }, analyse([]))).toBeUndefined();
-});
-it('folds setting continuations, preserves unison onsets and uses the upper surface of simultaneous roofs', () => {
-  const source = frame.notes.find(
-    (n) => n.hasOnset && n.start === 10 && n.end === 11 && n.value.note === 'eb1',
-  )!;
+it('preserves unison onsets, folds setting continuations and assigns highest short pitched notes to pigeons', () => {
+  const source = frame.notes.find((n) => n.hasOnset && n.start === 10 && n.value.note === 'eb1')!;
   const full = analyse(frame.notes).parts.get(source.instrument)!;
   expect(full.filter((e) => e.note.start === 10 && e.note.end === 11)).toHaveLength(1);
   expect(analyse([source, { ...source }]).parts.get(source.instrument)).toHaveLength(2);
   const fragment = { ...source, hasOnset: false };
   expect(analyse([fragment, { ...fragment }]).parts.get(source.instrument)).toHaveLength(1);
-  const chord = analyse([fragment, { ...fragment, value: { note: 'g1' } }]).parts.get(
-    source.instrument,
-  )!;
-  expect(chord).toHaveLength(2);
-  expect(roofAt(chord, 10.4)?.note.value.note).toBe('g1');
-  const f = { ...frame, notes: [fragment] };
-  expect(scene(f, analyse(f.notes)).current?.note.hasOnset).toBe(false);
+  const notes = ['c3', 'c6'].map((note, index) => ({
+    ...source,
+    instrument: String(index),
+    start: 10,
+    end: 10.125,
+    value: { note },
+  }));
+  const f = { ...frame, notes, instruments: scoreFrame(2).instruments };
+  expect(roles(f, analyse(notes))).toMatchObject({
+    walker: '0',
+    openHat: '1',
+    footfalls: undefined,
+  });
 });
-it('keeps real note geometry and role choices when the host cache window changes', async () => {
-  for (const now of [8, 12, 20]) {
-    const old = neededRange(undefined, now - 0.05, 1, state.sections),
-      next = neededRange(undefined, now, 1, state.sections);
-    expect(next.from).toBe(old.from + 4);
-    const a = await queried(now, old),
-      b = await queried(now, next);
-    const pose = (f: ViewFrame) => {
-      const s = scene(f, analyse(f.notes));
-      return {
-        roles: s.roles,
-        feet: s.feet,
-        stride: s.stride,
-        angle: s.light?.angle,
-        roofs: s.roofs
-          .filter((e) => s.x(e.note.end) > 0 && s.x(e.note.start) < f.width)
-          .map((e) => [e.note.start, e.note.end, e.midi]),
-      };
-    };
-    expect(pose(a)).toEqual(pose(b));
+
+it('vaults on every ground-level snare-roll onset even when hits are closer than a vault interval', async () => {
+  const f = await queried(5),
+    data = analyse(f.notes),
+    chosen = roles(f, data);
+  const snare = data.parts
+    .get(chosen.snare!)!
+    .filter((e) => e.note.hasOnset && e.note.start >= 4 && e.note.start < 8);
+  let vaults = 0;
+  for (const e of snare) {
+    if (route(world(f), e.note.start).airborne || accented(e, data)) continue;
+    vaults++;
+    expect(scene({ ...f, now: e.note.start }, data).vault, String(e.note.start)).toBeCloseTo(0.5);
+  }
+  expect(vaults).toBeGreaterThan(8);
+});
+
+it('gives twenty simultaneous parts disjoint lit windows, so no part can overpaint another', () => {
+  for (let trial = 0; trial < 16; trial++) {
+    const f = { ...scoreFrame(20), width: 960, height: 600, now: 10 };
+    f.notes = f.instruments.map((i) => ({
+      instrument: i.id,
+      start: 10,
+      end: 11,
+      hasOnset: true,
+      value: { note: 48 + i.index + trial },
+    }));
+    const data = analyse(f.notes),
+      s = scene(f, data),
+      lights = windowLights(f, s, data);
+    expect(new Set(lights.map((light) => light.id)).size).toBe(19); // Lowest part is the walker.
+    expect(new Set(lights.map((light) => `${light.x},${light.y}`)).size).toBe(lights.length);
   }
 });
-it('uses four parallax rates and scales actual world speed with cps after Speed without moving a paused score', () => {
-  const data = analyse(frame.notes),
-    s = scene(frame, data),
-    slow = scene({ ...frame, cps: frame.cps / 4 }, data);
-  expect(parallaxRates).toHaveLength(4);
-  expect(new Set(parallaxRates).size).toBe(4);
-  expect(parallaxRates[3]).toBe(1);
-  expect(slow.speed).toBeCloseTo(s.speed / 4);
-  expect(slow.feet).toBe(s.feet);
-  expect(slow.x(11)).toBe(s.x(11));
-  expect(scene({ ...frame, now: 18.4 }, data).district.name).toBe('breakdown');
-  expect(scene({ ...frame, now: 38.4 }, data).district.name).toBe('drop');
-  expect(scene({ ...frame, sections: [] }, data).district.name).toBe('Uncharted');
-  scene({ ...frame, now: 20 }, data);
-  scene({ ...frame, now: 0 }, data);
-  expect(scene(frame, data).feet).toBe(s.feet);
+
+it('keeps short ballistic jumps at the tall 560 × 760 Stage B size without oversized gaps', () => {
+  const f = { ...frame, width: 560, height: 760 },
+    w = world(f);
+  expect(w.size).toBeCloseTo(68.4);
+  expect(w.pace * f.cps).toBeCloseTo((355.8333333333 * 560) / 960);
+  for (let i = 0; i < 60; i++) {
+    const b = building(i, w.maxGap),
+      jump = crossing(w, b);
+    expect(b.gap).toBeGreaterThanOrEqual(1.2 - 1e-9);
+    expect(b.gap).toBeLessThanOrEqual(2.2);
+    expect((jump.landing - jump.takeoff) / f.cps).toBeGreaterThanOrEqual(0.3);
+    expect((jump.landing - jump.takeoff) / f.cps).toBeLessThanOrEqual(0.45 + 1e-9);
+    expect(route(w, jump.landing).feet).toBeCloseTo(w.y(jump.to));
+  }
 });
-it('retains all five hundred corpus-derived spans at one and twenty instruments on both stages', () => {
-  const source = frame.notes.find((n) => n.hasOnset && n.start === 10 && n.end === 11)!;
-  for (const count of [1, 20])
-    for (const width of [560, 1300]) {
-      const f = { ...scoreFrame(count), now: 0.4, width, lookAhead: 1 };
-      f.notes = Array.from({ length: 500 }, (_, i) => ({
-        ...source,
-        instrument: String(i % count),
-        start: i / 500,
-        end: (i + 1) / 500,
-        value: { ...source.value, note: i % 80 },
-      }));
+
+it('keeps a held window on the same cell while it moves at its layer parallax', () => {
+  const f = { ...scoreFrame(3), width: 960, height: 600, now: 10 };
+  f.notes = f.instruments.map((i) => ({
+    instrument: i.id,
+    start: 10,
+    end: 11,
+    hasOnset: true,
+    value: { note: 48 + i.index },
+  }));
+  const data = analyse(f.notes);
+  const initial = windowLights(f, scene(f, data), data);
+  const anchor = initial.find((w) => w.layer === 1 && w.x > 150 && w.x < f.width - 20 && w.y < 280);
+  expect(anchor).toBeDefined();
+  if (!anchor) throw Error('Expected an unobscured mid-ground window');
+  for (let tick = 1; tick < 100; tick++) {
+    const current = { ...f, now: 10 + tick * 0.01 },
+      s = scene(current, data);
+    const light = windowLights(current, s, data).find(
+      (w) =>
+        w.id === anchor.id &&
+        w.layer === anchor.layer &&
+        w.building === anchor.building &&
+        w.row === anchor.row &&
+        w.column === anchor.column,
+    );
+    expect(light, String(current.now)).toBeDefined();
+    expect(light!.x).toBeCloseTo(anchor.x - s.pace * parallaxRates[anchor.layer] * tick * 0.01);
+    expect(light!.y).toBe(anchor.y);
+  }
+});
+it('keeps the drawn walker on the horizon across its former on-screen wrap', () => {
+  const noop = () => {};
+  const lamps: number[] = [];
+  const c = {
+    beginPath: noop,
+    moveTo: noop,
+    lineTo: noop,
+    stroke: noop,
+    quadraticCurveTo: noop,
+    fill: noop,
+    arc: (x: number) => lamps.push(x),
+  } as unknown as CanvasRenderingContext2D;
+  const f = { ...frame, width: 960, height: 600 },
+    data = analyse(f.notes);
+  for (const now of [4.19, 4.24, 4.25, 4.26, 4.3, 8.49, 8.5]) {
+    const current = { ...f, now };
+    walker(c, current, { ...scene(current, data), lamp: false });
+  }
+  expect(new Set(lamps).size).toBe(1);
+});
+it('lands inside the next roof even in a very wide stage', () => {
+  const w = world({ ...frame, width: 3840, height: 600 });
+  for (let i = 0; i < 60; i++) {
+    const jump = crossing(w, building(i, w.maxGap));
+    expect((jump.landing * w.pace) / w.size).toBeLessThan(jump.to.end);
+    expect(route(w, jump.landing).airborne).toBe(false);
+    expect(route(w, jump.landing).feet).toBeCloseTo(w.y(jump.to));
+  }
+});
+
+it('gives simultaneous voices distinct cells across eight parts, three widths and forty onsets', () => {
+  for (const width of [560, 960, 1920])
+    for (let onset = 0; onset < 40; onset++) {
+      const f = { ...scoreFrame(8), width, height: 600, now: onset / 4 };
+      f.notes = f.instruments.flatMap((i) =>
+        Array.from({ length: 4 }, (_, voice) => ({
+          instrument: i.id,
+          start: f.now,
+          end: f.now + 1,
+          hasOnset: true,
+          value: { note: 48 + i.index * 4 + voice },
+        })),
+      );
       const data = analyse(f.notes),
-        s = scene(f, data);
-      expect([...data.parts.values()].reduce((sum, p) => sum + p.length, 0)).toBe(500);
-      expect(s.roofs.length).toBe(count === 1 ? 500 : 25);
-      expect(s.size).toBeGreaterThanOrEqual(58);
-      expect(s.feet).toBeGreaterThan(80);
-      expect(s.feet).toBeLessThan(f.height);
-      expect(s.gate).toBeGreaterThan(s.size / 2);
+        lights = windowLights(f, scene(f, data), data);
+      expect(lights.reduce((sum, w) => sum + w.count, 0)).toBe(28); // Lowest part is the walker.
+      for (const instrument of f.instruments.slice(1)) {
+        const part = lights.filter((light) => light.id === instrument.id);
+        const cells = new Set(part.map((w) => `${w.layer}:${w.building}:${w.row}:${w.column}`));
+        expect(cells.size).toBe(part.length);
+        expect(part.reduce((sum, w) => sum + w.count, 0)).toBe(4);
+        if (part.some((w) => w.count > 1)) {
+          // A badge is valid only after this part's visible cells are exhausted.
+          const expanded = analyse([
+            ...f.notes,
+            ...f.notes.map((n) => ({ ...n, value: { note: Number(n.value.note) + 16 } })),
+          ]);
+          const full = windowLights(f, scene(f, expanded), expanded).filter(
+            (w) => w.id === instrument.id,
+          );
+          expect(new Set(full.map((w) => `${w.layer}:${w.building}:${w.row}:${w.column}`))).toEqual(
+            cells,
+          );
+          expect(full.reduce((sum, w) => sum + w.count, 0)).toBe(8);
+        } else expect(cells.size).toBe(4);
+      }
+      const byPart = (a: (typeof lights)[number], b: (typeof lights)[number]) =>
+        a.id.localeCompare(b.id) || a.x - b.x || a.y - b.y;
+      expect(
+        windowLights(f, scene(f, data), analyse([...f.notes].reverse())).toSorted(byPart),
+      ).toEqual(lights.toSorted(byPart));
     }
-  const empty = { ...frame, notes: [], instruments: [] };
-  expect(scene(empty, analyse([])).chasm).toBe(true);
+});
+
+it('uses every available cell before counting excess chord voices on the final window', () => {
+  const f = { ...scoreFrame(8), width: 560, height: 600, now: 10 };
+  f.notes = f.instruments.flatMap((i) =>
+    Array.from({ length: 200 }, (_, voice) => ({
+      instrument: i.id,
+      start: f.now,
+      end: f.now + (voice % 2 ? 1 : 0.5),
+      hasOnset: true,
+      value: { note: 48 + i.index + voice / 1000 },
+    })),
+  );
+  const data = analyse(f.notes),
+    s = scene(f, data),
+    lights = windowLights(f, s, data);
+  for (const instrument of f.instruments.slice(1)) {
+    const part = lights.filter((light) => light.id === instrument.id);
+    expect(part.length).toBeGreaterThan(4);
+    expect(part.length).toBeLessThan(200);
+    expect(new Set(part.map((w) => `${w.layer}:${w.building}:${w.row}:${w.column}`)).size).toBe(
+      part.length,
+    );
+    expect(new Set(part.map((w) => `${w.layer}:${w.building}`)).size).toBeGreaterThan(1);
+    expect(part.reduce((sum, w) => sum + w.count, 0)).toBe(200);
+    expect(part.filter((w) => w.count > 1)).toEqual([part.at(-1)]);
+  }
+  const labels: string[] = [];
+  const noop = () => {};
+  const c = {
+    save: noop,
+    restore: noop,
+    fillRect: noop,
+    measureText: (text: string) => ({ width: text.length * 6 }),
+    fillText: (text: string) => labels.push(text),
+  } as unknown as CanvasRenderingContext2D;
+  windows(c, f, s, data);
+  expect(labels).toEqual(lights.filter((w) => w.count > 1).map((w) => `×${w.count}`));
 });
