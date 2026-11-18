@@ -246,7 +246,7 @@ export function figures(frame: ViewFrame, score = analyse(frame.notes)): Figure[
       const slot = {
         x: queueX,
         y: r.back,
-        width: Math.max(0, (frame.width * 0.31) / wingCount - 8),
+        width: Math.max(0, Math.min((frame.width * 0.31) / wingCount, frame.width * 0.23) - 8),
       };
       const forward = isNext ? 8 * ease(clamp(phase / 0.2)) : 0;
       // Walk between the slot and the opening along the curtain before entering the runway.

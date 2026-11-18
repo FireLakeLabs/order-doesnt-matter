@@ -375,3 +375,16 @@ it('sizes gain-one camera cores and halos in pixels, with a bounded floor pool a
   expect(aged.alpha).toBe(first.alpha / 2);
   expect(aged.pool).toBe(first.pool / 2);
 });
+
+it('reserves the centre gutter for two long waiting names (R4)', () => {
+  const f = {
+    ...scoreFrame(2),
+    now: 0.4,
+    instruments: scoreFrame(2).instruments.map((i) => ({ ...i, name: 'W'.repeat(80) })),
+    notes: [note(1, 2), note(1, 2, {}, '1')],
+  };
+  const cast = figures(f).sort((a, b) => a.slot.x - b.slot.x);
+  const measure = (text: string) => text.length * 7;
+  const widths = cast.map((c) => measure(ellipsize(c.instrument.name, c.slot.width, measure)));
+  expect(cast[1].slot.x - widths[1] / 2 - cast[0].slot.x - widths[0] / 2).toBeGreaterThanOrEqual(8);
+});
