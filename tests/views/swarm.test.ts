@@ -345,3 +345,24 @@ it('does not name the first section while the playhead is in a section gap', () 
     }),
   ).toEqual({ number: 0, name: 'Open space' });
 });
+
+it('keeps onset-free continuations aligned with their current row after another part leaves', () => {
+  const f = scoreFrame(3);
+  const fragment = { instrument: '1', start: 0, end: 3, hasOnset: false, value: { note: 60 } };
+  const notes = [
+    { ...fragment, instrument: '0', end: 1, hasOnset: true },
+    fragment,
+    { instrument: '2', start: 1.5, end: 1.6, hasOnset: true, value: { s: 'hh' } },
+  ];
+  const at = (now: number) => {
+    const current = { ...f, now, notes },
+      g = formation(current);
+    const row = g.rows.find((row) => row.instrument.id === fragment.instrument)!;
+    const pose = enemyPose(fragment, current, g.y(fragment), g.x);
+    expect(pose.hit).toBe(false);
+    expect(pose.diving).toBe(false);
+    expect(pose.y).toBe(row.y);
+    return pose.y;
+  };
+  expect(at(0.99)).not.toBe(at(1));
+});

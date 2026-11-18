@@ -145,7 +145,7 @@ export function formation(frame: ViewFrame, drum: string | null = drumPart(frame
   const layouts = new Map([[bar, visible]]);
   const spacing = visible.length > 1 ? visible[1].y - visible[0].y : frame.height * 0.3;
   const y = (note: ViewNote) => {
-    const waveBar = Math.floor(note.start);
+    const waveBar = note.hasOnset ? Math.floor(note.start) : bar;
     let layout = layouts.get(waveBar);
     if (!layout) {
       layout = waveRows(frame, waveBar);
