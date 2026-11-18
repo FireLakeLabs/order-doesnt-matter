@@ -97,6 +97,20 @@ test('note inspection preserves pitch, settings, exact timing and overlapping ba
   expect(noteDescription(note, frame)).toContain('wobbleBass · E♭2');
   expect(noteDescription(note, frame)).toContain('Position 11.2 · length 5 beats');
   expect(noteDescription(note, frame)).toContain('lpf: 1370');
+  for (const offset of [28, 28.5]) {
+    const looped = {
+      ...frame,
+      now: 10.4 + offset,
+      sections: [{ name: 'song', from: 0, to: offset }],
+    };
+    expect(
+      noteDescription(
+        { ...note, start: note.start + offset, end: note.end + offset },
+        looped,
+        coilRange(looped).from,
+      ),
+    ).toContain('Position 11.2 · length 5 beats');
+  }
   expect(barNotes(frame, 11)).toEqual([note]);
   expect(barNotes(frame, 12)).toEqual([]);
   frame.notes = [note, { ...note, value: { note: 'g2' } }, { ...note, value: { note: 'bb2' } }];

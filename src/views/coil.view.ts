@@ -50,14 +50,15 @@ const view: ViewDefinition = {
     let flat: number | undefined;
     let dirty = true;
     const showNote = (note: ViewNote | undefined, x: number, y: number) => {
-      if (!last) return;
-      if (hovered !== note) {
+      if (!last) return false;
+      const changed = hovered !== note;
+      if (changed) {
         hovered = note;
         dirty = true;
       }
       tooltip.style.display = note ? 'block' : 'none';
       if (note) {
-        tooltip.textContent = noteDescription(note, last);
+        tooltip.textContent = noteDescription(note, last, coilRange(last).from);
         tooltip.style.background = last.theme.panel;
         tooltip.style.color = last.theme.text;
         tooltip.style.borderColor = last.theme.accent;
@@ -65,12 +66,12 @@ const view: ViewDefinition = {
         tooltip.style.left = `${String(Math.max(4, Math.min(x + 14, last.width - 360)))}px`;
         tooltip.style.top = `${String(Math.max(4, Math.min(y + 14, last.height - tooltip.offsetHeight - 8)))}px`;
       }
+      return changed;
     };
     const panel = createBarPanel(
       root,
       (note, x, y) => {
-        showNote(note, x, y);
-        redraw();
+        if (showNote(note, x, y)) redraw();
       },
       () => {
         flat = undefined;
@@ -170,8 +171,8 @@ const view: ViewDefinition = {
         redraw();
       } else {
         const rect = root.getBoundingClientRect();
-        showNote(pick(event)?.note, event.clientX - rect.left, event.clientY - rect.top);
-        redraw();
+        if (showNote(pick(event)?.note, event.clientX - rect.left, event.clientY - rect.top))
+          redraw();
       }
     };
     const up = (event: PointerEvent) => {
@@ -415,7 +416,7 @@ const view: ViewDefinition = {
         hoverScore.material.uniforms.songLength.value = range.length;
         hoverScore.update(frame);
       }
-      panel.draw(frame, flat, hovered);
+      panel.draw(frame, flat, range, hovered);
       const at = helixPoint(frame.now, range.from, range.length, 1.18);
       bead.position.set(at.x, at.y, at.z);
       const inner = helixPoint(frame.now, range.from, range.length, 0.25);
@@ -450,7 +451,7 @@ const view: ViewDefinition = {
         bracket.element.style.borderColor = active ? frame.theme.accent : frame.theme.line;
         bracket.element.style.fontFamily = `"${frame.theme.fontMono}"`;
       }
-      help.textContent = `${range.open ? '16 cycles shown' : `cycle ${String(cycle - range.from + 1)} / ${String(range.length)}`} · drag orbit · wheel zoom · shift/right drag slide · double-click reset`;
+      help.textContent = `${range.open ? '16 cycles shown' : `cycle ${String(Math.floor(frame.now - range.from) + 1)} / ${String(range.length)}`} · drag orbit · wheel zoom · shift/right drag slide · double-click reset`;
       caption.style.color = frame.theme.muted;
       caption.style.font = `13px "${frame.theme.fontMono}"`;
       stage.render(frame, (enabled) => {

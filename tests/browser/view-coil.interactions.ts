@@ -46,14 +46,58 @@ export function coilInteractions(test: typeof Test) {
         },
       };
     });
-    const dir = `${process.env.ODM_VIEW_MEASURE_DIR ?? '/tmp/odm-coil-evidence'}/coil`;
-    await mkdir(dir, { recursive: true });
+    const dir = process.env.ODM_VIEW_MEASURE_DIR
+      ? `${process.env.ODM_VIEW_MEASURE_DIR}/coil`
+      : undefined;
+    if (dir) await mkdir(dir, { recursive: true });
     const shot = async (name: string) => {
+      if (!dir) return;
       await page.evaluate(async () => {
         for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
       });
       return page.screenshot({ path: `${dir}/${name}.png` });
     };
+    const unchangedHover = (selector: string, x: number, y: number) =>
+      probe.evaluate(
+        ({ el, handle, frame }, { selector, x, y }) => {
+          handle.frame({ ...frame, playing: true, now: frame.now + 0.000001 });
+          const canvas = el.querySelector<HTMLCanvasElement>(selector)!;
+          const rect = canvas.getBoundingClientRect();
+          const move = (offset: number) =>
+            canvas.dispatchEvent(
+              new PointerEvent('pointermove', {
+                clientX: rect.left + x + offset,
+                clientY: rect.top + y,
+                pointerId: 1,
+                bubbles: true,
+              }),
+            );
+          move(0);
+          const tooltip = el.querySelector<HTMLElement>('.coil-tooltip')!;
+          const text = tooltip.textContent,
+            left = tooltip.style.left;
+          let draws = 0;
+          const gl = WebGL2RenderingContext.prototype,
+            original = gl.drawElements;
+          gl.drawElements = function (...args: unknown[]) {
+            draws++;
+            return Reflect.apply(original, this, args);
+          };
+          try {
+            for (let i = 1; i <= 20; i++) move(i * 0.001);
+          } finally {
+            gl.drawElements = original;
+          }
+          const result = {
+            draws,
+            sameNote: tooltip.textContent === text,
+            moved: tooltip.style.left !== left,
+          };
+          handle.frame(frame);
+          return result;
+        },
+        { selector, x, y },
+      );
     const picture = () => page.screenshot();
     const initial = await picture();
     await shot('00-default-960x600');
@@ -108,6 +152,14 @@ export function coilInteractions(test: typeof Test) {
     const tooltip = page.locator('.coil-tooltip').last();
     await expect(tooltip).toContainText('wobbleBass · E♭2');
     await expect(tooltip).toContainText('cutoff: 1370');
+    expect(await unchangedHover('canvas[data-coil]', found!.x, found!.y)).toEqual({
+      draws: 0,
+      sameNote: true,
+      moved: true,
+    });
+    // Real movement away and back gives the compositor fresh pointer damage.
+    await page.mouse.move(20, 20);
+    await page.mouse.move(found!.x, found!.y);
     await shot('03-wobbleBass-tooltip');
     await page.mouse.click(found!.x, found!.y);
     await expect(page.locator('.coil-bar').last()).toBeVisible();
@@ -132,10 +184,32 @@ export function coilInteractions(test: typeof Test) {
     });
     expect(rows).toHaveLength(6);
     for (const row of rows) expect(row.ink, `${row.name} note ink`).toBeGreaterThan(1000);
+    expect(await unchangedHover('.coil-bar canvas', 170, 45)).toEqual({
+      draws: 0,
+      sameNote: true,
+      moved: true,
+    });
+    await page.mouse.move(20, 20);
     await shot('04-bar11-flat');
     await page.keyboard.press('Escape');
     await expect(page.locator('.coil-bar').last()).toBeHidden();
     expect(await probe.evaluate((p) => p.escaped())).toBe(0);
+    await probe.evaluate(({ handle, frame }) =>
+      handle.frame({
+        ...frame,
+        now: 38.4,
+        from: 28,
+        to: 56,
+        notes: frame.notes.map((n) => ({ ...n, start: n.start + 28, end: n.end + 28 })),
+      }),
+    );
+    await page.mouse.move(20, 20);
+    await page.mouse.move(found!.x, found!.y);
+    await expect(tooltip).toContainText('Position 11.1');
+    await page.mouse.click(found!.x, found!.y);
+    await expect(page.locator('.coil-bar button').last()).toContainText('Bar 11 · drop');
+    await page.keyboard.press('Escape');
+    await probe.evaluate(({ handle, frame }) => handle.frame(frame));
     // Camera and spacing changes must not allocate new GPU score buffers.
     await page.evaluate(() => {
       window.coilUploads = 0;
@@ -177,40 +251,42 @@ export function coilInteractions(test: typeof Test) {
     await page.mouse.dblclick(20, 20);
     expect((await picture()).equals(initial)).toBe(true);
     await shot('06-reset');
-    const measured = await probe.evaluate(async ({ handle, frame, el }) => {
-      const costs: number[] = [],
-        cadence: number[] = [];
-      let previous = performance.now();
-      for (let i = 0; i < 180; i++) {
-        await new Promise(requestAnimationFrame);
-        const start = performance.now();
-        handle.frame({ ...frame, playing: true, now: 10.4 + (i * frame.cps) / 60 });
-        if (i >= 60) {
-          cadence.push(start - previous);
-          costs.push(performance.now() - start);
+    if (dir) {
+      const measured = await probe.evaluate(async ({ handle, frame, el }) => {
+        const costs: number[] = [],
+          cadence: number[] = [];
+        let previous = performance.now();
+        for (let i = 0; i < 180; i++) {
+          await new Promise(requestAnimationFrame);
+          const start = performance.now();
+          handle.frame({ ...frame, playing: true, now: 10.4 + (i * frame.cps) / 60 });
+          if (i >= 60) {
+            cadence.push(start - previous);
+            costs.push(performance.now() - start);
+          }
+          previous = start;
         }
-        previous = start;
-      }
-      costs.sort((a, b) => a - b);
-      cadence.sort((a, b) => a - b);
-      const canvas = el.querySelector('canvas');
-      const gl = canvas instanceof HTMLCanvasElement ? canvas.getContext('webgl2') : null;
-      const info = gl?.getExtension('WEBGL_debug_renderer_info');
-      return {
-        renderer:
-          gl && info ? (gl.getParameter(info.UNMASKED_RENDERER_WEBGL) as string) : 'unavailable',
-        scale: canvas?.dataset.renderScale,
-        bloom: canvas?.dataset.bloom,
-        frames: costs.length,
-        cpuMedian: costs[60],
-        cpuP95: costs[114],
-        cadenceMedian: cadence[60],
-        cadenceP95: cadence[114],
-        userAgent: navigator.userAgent,
-      };
-    });
-    console.log('Coil interaction frame timing', JSON.stringify(measured));
-    await writeFile(`${dir}/interaction-timing.json`, JSON.stringify(measured, null, 2));
+        costs.sort((a, b) => a - b);
+        cadence.sort((a, b) => a - b);
+        const canvas = el.querySelector('canvas');
+        const gl = canvas instanceof HTMLCanvasElement ? canvas.getContext('webgl2') : null;
+        const info = gl?.getExtension('WEBGL_debug_renderer_info');
+        return {
+          renderer:
+            gl && info ? (gl.getParameter(info.UNMASKED_RENDERER_WEBGL) as string) : 'unavailable',
+          scale: canvas?.dataset.renderScale,
+          bloom: canvas?.dataset.bloom,
+          frames: costs.length,
+          cpuMedian: costs[60],
+          cpuP95: costs[114],
+          cadenceMedian: cadence[60],
+          cadenceP95: cadence[114],
+          userAgent: navigator.userAgent,
+        };
+      });
+      console.log('Coil interaction frame timing', JSON.stringify(measured));
+      await writeFile(`${dir}/interaction-timing.json`, JSON.stringify(measured, null, 2));
+    }
     await page.mouse.move(450, 280);
     await page.mouse.down();
     const lifetime = await probe.evaluate(({ el, handle, before, added, releaseKeyboard }) => {

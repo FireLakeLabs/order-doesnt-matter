@@ -1,5 +1,6 @@
 import type { ViewFrame, ViewNote } from '../types';
 import { pitch, pitchClass } from '../shared/pitch';
+import type { coilRange } from './model';
 
 function formatValue(value: unknown): string {
   if (value === undefined) return 'undefined';
@@ -13,9 +14,10 @@ export function noteLabel(note: ViewNote) {
     ? formatValue(note.value.s ?? note.value.sound ?? 'note')
     : `${['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B'][pitchClass(midi)]}${String(Math.floor(Math.round(midi) / 12) - 1)}`;
 }
-export function noteDescription(note: ViewNote, frame: ViewFrame) {
+export function noteDescription(note: ViewNote, frame: ViewFrame, from = 0) {
   const part = frame.instruments.find((i) => i.id === note.instrument)?.name ?? note.instrument;
-  const position = `${String(Math.floor(note.start) + 1)}.${String(Number((1 + (((note.start % 1) + 1) % 1) * 4).toFixed(4)))}`;
+  const start = note.start - from;
+  const position = `${String(Math.floor(start) + 1)}.${String(Number((1 + (((start % 1) + 1) % 1) * 4).toFixed(4)))}`;
   return `${part} · ${noteLabel(note)}\nPosition ${position} · length ${String(Number(((note.end - note.start) * 4).toFixed(4)))} beats\n${Object.entries(
     note.value,
   )
@@ -94,7 +96,12 @@ export function createBarPanel(
   score.addEventListener('pointerleave', leave);
   score.onclick = close;
   return {
-    draw(frame: ViewFrame, cycle: number | undefined, hovered?: ViewNote) {
+    draw(
+      frame: ViewFrame,
+      cycle: number | undefined,
+      range: ReturnType<typeof coilRange>,
+      hovered?: ViewNote,
+    ) {
       panel.style.display = cycle === undefined ? 'none' : 'block';
       if (cycle === undefined) {
         score.remove();
@@ -102,12 +109,11 @@ export function createBarPanel(
       }
       if (!score.isConnected) panel.append(score);
       const rows = barRows(frame, cycle);
-      const length = frame.sections.at(-1)?.to ?? 16;
       const section = frame.sections
-        .filter((s) => cycle % length >= s.from && cycle % length < s.to)
+        .filter((s) => cycle - range.from >= s.from && cycle - range.from < s.to)
         .map((s) => s.name)
         .join(' · ');
-      title.textContent = `Bar ${String(cycle + 1)} · ${section || 'score'} · click to fold / Esc`;
+      title.textContent = `Bar ${String(Math.floor(cycle - range.from) + 1)} · ${section || 'score'} · click to fold / Esc`;
       panel.style.background = frame.theme.panel;
       panel.style.color = frame.theme.text;
       panel.style.borderColor = frame.theme.accent;
