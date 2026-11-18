@@ -293,3 +293,11 @@ it('keeps ordinary six-part rows as sprites in the standard Studio stage', () =>
   expect(g.rows).toHaveLength(6);
   expect(g.rows.every((row) => !row.crowded)).toBe(true);
 });
+
+it('counts overlapping flagships after different slots converge on their shared hover point', () => {
+  const n = frame.notes.find((n) => n.start === 10 && n.end === 11 && n.value.note !== undefined)!;
+  const layered = { ...frame, notes: [n, { ...n, start: 10.25, end: 11.25 }] };
+  const row = formation(layered).rows.find((row) => row.instrument.id === n.instrument)!;
+  expect(row.enemies).toHaveLength(2);
+  expect(row.crowded).toBe(true);
+});

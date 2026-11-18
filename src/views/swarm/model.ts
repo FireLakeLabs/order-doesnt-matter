@@ -161,7 +161,12 @@ export function formation(frame: ViewFrame, drum: string | null = drumPart(frame
       next,
       enemies: currentEnemies,
       nextEnemies,
-      crowded: cramped || overlaps(currentEnemies),
+      crowded:
+        cramped ||
+        overlaps(currentEnemies) ||
+        currentEnemies.filter(
+          (n) => n.hasOnset && isCarrier(n) && n.start <= frame.now && frame.now < n.end,
+        ).length > 1,
       nextCrowded: cramped || overlaps(nextEnemies),
       recent: enemies(
         frame.notes.filter(
