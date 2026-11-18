@@ -1,9 +1,11 @@
 import type { ViewFrame, ViewNote } from '../types';
 import { mostRegularDrum, roleEvidence } from '../shared/roles';
-import { noteProgress } from '../shared/timing';
-import { clamp } from '../shared/math';
 import { pitch } from '../shared/pitch';
 import { sectionAt } from '../shared/ring-model';
+import { routeAt, routeBetween, captivePoint } from './table';
+import type { PinballLayout, Target } from './table';
+export { pinballLayout, routeBetween, pointOnRoute, captivePoint } from './table';
+export type { PinballLayout, Target } from './table';
 
 export interface Point {
   x: number;
@@ -79,111 +81,6 @@ export function flipperAt(frame: Pick<ViewFrame, 'now' | 'notes' | 'sections'>) 
   return mostRegularDrum(roleEvidence(notes));
 }
 
-export function pinballLayout(frame: Pick<ViewFrame, 'width' | 'height' | 'instruments'>) {
-  const { width, height } = frame;
-  const instruments = frame.instruments
-    .slice()
-    .sort((a, b) => a.index - b.index || a.id.localeCompare(b.id));
-  const top = 128,
-    bottom = Math.max(top + 60, height - 132);
-  const left = Math.max(24, width * (width < 700 ? 0.08 : 0.14)),
-    right = width - left;
-  const baseColumns = instruments.length > 12 ? 4 : instruments.length > 4 ? 3 : 2;
-  const maxColumns = Math.max(1, Math.floor((right - left) / 76));
-  const columns = Math.min(
-    maxColumns,
-    Math.max(
-      baseColumns,
-      Math.ceil(instruments.length / Math.max(1, Math.floor((bottom - top) / 80))),
-    ),
-  );
-  const rows = Math.max(1, Math.ceil(instruments.length / columns));
-  const cellWidth = (right - left) / columns,
-    cellHeight = (bottom - top) / rows;
-  const compact = cellWidth < 110 || cellHeight < 80;
-  const radius = Math.max(
-    6,
-    Math.min(25, cellWidth * 0.2, (cellHeight - (compact ? 30 : 48)) * 0.32),
-  );
-  const targets = instruments.map((instrument, slot) => {
-    const column = slot % columns,
-      row = Math.floor(slot / columns);
-    return {
-      instrument,
-      slot,
-      column,
-      row,
-      x: left + (column + 0.5) * cellWidth,
-      y:
-        top +
-        row * cellHeight +
-        Math.max(radius + (compact ? 6 : 12), (cellHeight - (compact ? 25 : 42)) / 2),
-      channel: top + row * cellHeight + 10,
-      compact,
-      labelY: top + (row + 1) * cellHeight - (compact ? 8 : 24),
-      labelWidth: Math.max(12, cellWidth - 36),
-      radius,
-    };
-  });
-  return { left, right, top, bottom, cellWidth, cellHeight, columns, targets };
-}
-export type PinballLayout = ReturnType<typeof pinballLayout>;
-export type Target = PinballLayout['targets'][number];
-/** Travel only above each label band; different destination columns use different channels. */
-export function routeBetween(a: Target, b: Target, layout: PinballLayout): Point[] {
-  const offset = (((a.slot * 7 + b.slot * 3) % 5) - 2) * 2;
-  if (a.slot === b.slot) {
-    const side = Math.min(layout.cellWidth * 0.33, a.radius + 17);
-    return [
-      a,
-      { x: a.x - side, y: a.y },
-      { x: a.x - side, y: a.channel + offset },
-      { x: a.x + side, y: a.channel + offset },
-      { x: a.x + side, y: a.y },
-      b,
-    ];
-  }
-  // The vertical leg is in a gutter between columns, never through a target or label.
-  const gutter =
-    layout.left +
-    (Math.min(a.column, b.column) + (a.column === b.column ? 0 : 1)) * layout.cellWidth +
-    offset;
-  return [
-    a,
-    { x: a.x, y: a.channel + offset },
-    { x: gutter, y: a.channel + offset },
-    { x: gutter, y: b.channel + offset },
-    { x: b.x, y: b.channel + offset },
-    b,
-  ];
-}
-function routeAt(points: Point[], progress: number) {
-  const lengths = points.slice(1).map((p, i) => Math.hypot(p.x - points[i].x, p.y - points[i].y));
-  let distance = lengths.reduce((a, b) => a + b, 0) * clamp(progress);
-  for (let i = 0; i < lengths.length; i++) {
-    if (distance <= lengths[i] && lengths[i] > 0) {
-      const t = distance / lengths[i];
-      const position = {
-        x: points[i].x + (points[i + 1].x - points[i].x) * t,
-        y: points[i].y + (points[i + 1].y - points[i].y) * t,
-      };
-      return { position, ahead: [position, ...points.slice(i + 1)] };
-    }
-    distance -= lengths[i];
-  }
-  const position = points[points.length - 1];
-  return { position, ahead: [position] };
-}
-export function pointOnRoute(points: Point[], progress: number): Point {
-  return routeAt(points, progress).position;
-}
-export function captivePoint(target: Target, note: ViewNote, now: number): Point {
-  const phase = noteProgress(note, now) * Math.PI * 2;
-  return {
-    x: target.x + Math.sin(phase) * target.radius * 0.65,
-    y: target.y - (1 - Math.cos(phase)) * target.radius * 0.4,
-  };
-}
 export function pinballState(score: PinballScore, layout: PinballLayout, now: number) {
   const targets = new Map(layout.targets.map((t) => [t.instrument.id, t]));
   const groups = score.groups;

@@ -50,7 +50,7 @@ beforeAll(async () => {
 it('maps the actual drop at bar 11, 40%: two held bass spans and the next counted split', () => {
   const f = corpus.get('real-dubstep-arranged')!;
   const score = indexPinball(f.notes),
-    box = pinballLayout(f),
+    box = pinballLayout(f, score.kinds),
     state = pinballState(score, box, 10.4);
   expect(state.held).toBe(2);
   expect(state.fragments).toBe(2);
@@ -97,8 +97,8 @@ it('holds the exact scored span and keeps a note fixed when its siblings or wind
     value: { note: 'c1' },
   };
   const sibling = { ...note, end: 2 };
-  const box = pinballLayout(f),
-    score = indexPinball([note, sibling]);
+  const score = indexPinball([note, sibling]),
+    box = pinballLayout(f, score.kinds);
   expect(pinballState(score, box, 0.999).held).toBe(0);
   expect(pinballState(score, box, 1).held).toBe(2);
   expect(pinballState(score, box, 2).held).toBe(1);
@@ -132,40 +132,66 @@ it('fixes target identity from the full part list, independent of roles, names o
   expect(indexPinball(renamed).kinds).toEqual(indexPinball(f.notes).kinds);
   expect(flipperAt({ ...f, notes: renamed })).toEqual(flipperAt(f));
 });
-it('routes around label rectangles at both stage widths, even with twenty targets', () => {
-  for (const count of [1, 12, 20])
+it('uses mechanical role zones and keeps curved routes clear of other bumpers and exterior name tags', () => {
+  const dense = scoreFrame(20);
+  dense.notes = dense.instruments.flatMap((instrument, i) =>
+    Array.from({ length: i % 4 === 1 ? 4 : 1 }, (_, j) => ({
+      instrument: instrument.id,
+      start: 1 + j / 8,
+      end: i % 4 >= 2 ? 2 : 1 + j / 8 + 0.125,
+      hasOnset: true,
+      value: i % 4 >= 2 ? { note: i % 4 === 2 ? 36 : 72 } : {},
+    })),
+  );
+  for (const piece of [corpus.get('real-dubstep-arranged')!, dense])
     for (const [width, height] of [
       [1300, 760],
       [560, 675],
       [487, 469],
       [1131, 469],
     ]) {
-      const f = { ...scoreFrame(count), width, height },
-        box = pinballLayout(f);
+      const f = { ...piece, width, height },
+        score = indexPinball(f.notes),
+        box = pinballLayout(f, score.kinds);
+      for (const t of box.targets) {
+        expect(t.tag.x < box.left || t.tag.x > box.right).toBe(true);
+        if (t.kind === 'rollover') expect(t.y).toBeLessThan(box.top + box.fieldHeight * 0.25);
+        if (t.kind === 'ramp') {
+          expect(t.track).toHaveLength(65);
+          expect(t.track[0].y - t.track.at(-1)!.y).toBeGreaterThan(box.fieldHeight * 0.6);
+        }
+      }
       for (const a of box.targets)
         for (const b of box.targets) {
           const points = routeBetween(a, b, box);
-          const collisions: string[] = [];
-          for (let i = 1; i < points.length; i++) {
-            const a = points[i - 1],
-              b = points[i];
-            for (const t of box.targets) {
-              const left = t.x - t.labelWidth / 2 - 10,
-                right = t.x + t.labelWidth / 2 + 10;
-              const top = t.labelY - 21,
-                bottom = t.labelY + (t.compact ? 12 : 28);
+          expect(
+            points.length,
+            JSON.stringify({
+              width,
+              height,
+              a: a.slot,
+              b: b.slot,
+              ak: a.kind,
+              bk: b.kind,
+              ax: (a.x - box.left) / box.fieldWidth,
+              ay: (a.y - box.top) / box.fieldHeight,
+              bx: (b.x - box.left) / box.fieldWidth,
+              by: (b.y - box.top) / box.fieldHeight,
+            }),
+          ).toBeGreaterThan(2);
+          expect(pointOnRoute(points, 0)).toMatchObject({ x: a.x, y: a.y });
+          expect(pointOnRoute(points, 1)).toMatchObject({ x: b.x, y: b.y });
+          const collisions: number[] = [];
+          for (const p of points)
+            for (const obstacle of box.targets) {
+              if (obstacle.kind !== 'bumper' || obstacle === a || obstacle === b) continue;
               if (
-                Math.max(a.x, b.x) > left &&
-                Math.min(a.x, b.x) < right &&
-                Math.max(a.y, b.y) > top &&
-                Math.min(a.y, b.y) < bottom
+                Math.hypot(p.x - obstacle.x, p.y - obstacle.y) <
+                box.bumperRadius + box.ballRadius - 0.1
               )
-                collisions.push(
-                  JSON.stringify({ count, width, height, from: a, to: b, label: t.slot }),
-                );
+                collisions.push(obstacle.slot);
             }
-          }
-          expect(collisions).toEqual([]);
+          expect(collisions, JSON.stringify({ width, height, a: a.slot, b: b.slot })).toEqual([]);
         }
     }
 });
@@ -228,4 +254,16 @@ it('counts short control continuations separately without inventing live notes o
   expect(score.groups[0].notes).toHaveLength(1);
   expect(score.holds).toHaveLength(0);
   expect(pinballState(score, pinballLayout(scoreFrame(1)), 1.1).fragments).toBe(2);
+});
+
+it('keeps whole-piece feature assignments when the visible notes and themes change', () => {
+  const f = corpus.get('real-dubstep-arranged')!,
+    score = indexPinball(f.notes);
+  const changed = { ...f, notes: [], now: 19.8, instruments: f.instruments.slice().reverse() };
+  const before = pinballLayout(f, score.kinds),
+    after = pinballLayout(changed, score.kinds);
+  expect(after.targets.map((t) => [t.instrument.id, t.kind, t.x, t.y, t.track])).toEqual(
+    before.targets.map((t) => [t.instrument.id, t.kind, t.x, t.y, t.track]),
+  );
+  expect(before.ballRadius).toBe(before.capRadius * 1.5);
 });

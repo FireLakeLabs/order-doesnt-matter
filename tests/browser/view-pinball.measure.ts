@@ -46,7 +46,7 @@ test('Pinball: Studio themes, exact reversibility, counts and frame cost', async
   const frame = await page.evaluate(() => window.viewProbe.frame!);
   await writeFile(`${shots}/frame.json`, JSON.stringify(frame, null, 2));
   const score = indexPinball(frame.notes),
-    box = pinballLayout(frame),
+    box = pinballLayout(frame, score.kinds),
     state = pinballState(score, box, 10.4);
   const mapping = {
     held: state.held,
