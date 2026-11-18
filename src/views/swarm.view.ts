@@ -72,6 +72,13 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, drum: string | null) {
   const t = f.theme,
     w = f.width,
     h = f.height;
+  // Fractional CSS sizes leave a partially painted edge in the host's ground fill.
+  // Paint whole backing pixels so that edge cannot retain earlier frames while scrubbing.
+  c.save();
+  c.resetTransform();
+  c.fillStyle = t.ground;
+  c.fillRect(0, 0, c.canvas.width, c.canvas.height);
+  c.restore();
   const g = formation(f, drum),
     currentWave = wave(f);
   const particle: Particle = { x: 0, y: 0, alpha: 0 };
