@@ -9,8 +9,52 @@ import {
 } from '../../src/views/coil/model';
 import { noteDescription, barNotes, barRows } from '../../src/views/coil/inspect';
 import { pickSurfaces, pickSurface } from '../../src/views/coil/picking';
+import { coilFrame, coilNotes } from '../../src/views/coil/score';
 import { cycleStrips } from '../../src/views/shared/score-strips';
 import { scoreFrame } from './score-fixture';
+
+test('one onset and its identical continuations feed one strip, hit target and flat lane', () => {
+  const frame = scoreFrame();
+  const onset = {
+    instrument: '0',
+    start: 10,
+    end: 11,
+    hasOnset: true,
+    value: { note: 'eb2', cutoff: 1370 },
+  };
+  const continuation = { ...onset, hasOnset: false, value: { cutoff: 1370, note: 'eb2' } };
+  frame.notes = [continuation, onset, continuation];
+  const scored = coilFrame(frame);
+  expect(scored.notes).toEqual([onset]);
+  expect(frame.notes).toHaveLength(3);
+  expect(coilFrame(frame).notes).toBe(scored.notes);
+  expect(coilFrame(scored)).toBe(scored);
+  expect(
+    cycleStrips(scored, 10)
+      .filter((s) => !s.track)
+      .flatMap((s) => s.arcs),
+  ).toHaveLength(1);
+  expect(pickSurfaces(frame, 0, 28).filter((s) => s.note)).toHaveLength(1);
+  expect(barRows(frame, 10)[0].lanes).toEqual([0]);
+});
+
+test('genuine chord/unison onsets and unmatched or changed continuations survive', () => {
+  const frame = scoreFrame();
+  const chord = ['c3', 'g3', 'eb4'].map((note) => ({
+    instrument: '0',
+    start: 10,
+    end: 11,
+    hasOnset: true,
+    value: { note },
+  }));
+  frame.notes = chord.flatMap((n) => [n, { ...n, hasOnset: false }]);
+  expect(barRows(frame, 10)[0].lanes).toEqual([0, 1, 2]);
+  expect(coilNotes([chord[0], chord[0]])).toHaveLength(2);
+  const held = { ...chord[0], hasOnset: false };
+  const changed = { ...held, value: { note: 'c3', gain: 0.5 } };
+  expect(coilNotes([held, changed])).toEqual([held, changed]);
+  expect(coilNotes([chord[0], changed])).toEqual([chord[0], changed]);
+});
 
 test('28 joined loops span the whole arrangement; unknown endings are explicitly open', () => {
   const f = scoreFrame();

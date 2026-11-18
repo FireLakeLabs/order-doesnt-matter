@@ -6,6 +6,7 @@ import { cycleStrips, scoreInventory } from './shared/score-strips';
 import { coilDetail, coilRange, helixPoint, coilPose, clampPitch } from './coil/model';
 import { createBarPanel, noteDescription } from './coil/inspect';
 import { pickSurfaces, pickSurface } from './coil/picking';
+import { coilFrame } from './coil/score';
 import type { ViewNote } from './types';
 import type { ScoreStrip } from './shared/score-mesh';
 
@@ -264,6 +265,7 @@ const view: ViewDefinition = {
     let last: ViewFrame | undefined;
     const point = new THREE.Vector3();
     function draw(frame: ViewFrame) {
+      frame = coilFrame(frame);
       if (frame.width <= 0 || frame.height <= 0) return;
       const key = scoreInventory(frame);
       if (

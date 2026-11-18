@@ -4,6 +4,8 @@ import * as THREE from 'three';
 import { cycleScore } from '../../src/views/shared/cycle-score';
 import { helixPoint, coilPose } from '../../src/views/coil/model';
 import { prepare } from './view-evidence';
+import { coilFrame } from '../../src/views/coil/score';
+import { barRows } from '../../src/views/coil/inspect';
 
 /** Real arrangement, controlled host time; interaction itself uses browser pointers. */
 export function coilInteractions(test: typeof Test) {
@@ -127,7 +129,7 @@ export function coilInteractions(test: typeof Test) {
         frame.instruments.find((i) => i.id === n.instrument)?.name === 'wobbleBass',
     )!;
     expect(bass).toBeTruthy();
-    const band = cycleScore(frame, 10).find((b) => b.id === bass.instrument)!;
+    const band = cycleScore(coilFrame(frame), 10).find((b) => b.id === bass.instrument)!;
     const { distance } = coilPose(frame);
     const camera = new THREE.PerspectiveCamera(45, 960 / 600, 0.02, distance * 8);
     camera.position
@@ -161,9 +163,78 @@ export function coilInteractions(test: typeof Test) {
     await page.mouse.move(20, 20);
     await page.mouse.move(found!.x, found!.y);
     await shot('03-wobbleBass-tooltip');
+    if (dir) {
+      const evidence = await probe.evaluate(({ el, handle, frame }) => {
+        const canvas = el.querySelector<HTMLCanvasElement>('canvas[data-coil]')!;
+        const rect = (element: Element) => {
+          const r = element.getBoundingClientRect();
+          return { x: r.x, y: r.y, width: r.width, height: r.height };
+        };
+        const chrome = Array.from(document.querySelectorAll('[data-region="stage-a"] button'))
+          .filter(
+            (b) =>
+              b.textContent === 'Views' || b.getAttribute('aria-label')?.startsWith('Fill window'),
+          )
+          .map((b) => ({
+            text: b.textContent,
+            label: b.getAttribute('aria-label'),
+            insideCoil: el.contains(b),
+            rect: rect(b),
+          }));
+        const layers = document.elementsFromPoint(500, 180).map((e) => ({
+          tag: e.tagName,
+          coilCanvas: e === canvas,
+          insideCoil: el.contains(e),
+          className: e.getAttribute('class'),
+        }));
+        const tooltip = el.querySelector<HTMLElement>('.coil-tooltip')!;
+        const diagnostics = {
+          chrome,
+          layers,
+          tooltip: rect(tooltip),
+          flatDisplay: getComputedStyle(el.querySelector('.coil-bar')!).display,
+        };
+        handle.frame({ ...frame, now: frame.now + 0.000002 });
+        const render = canvas.toDataURL();
+        handle.frame(frame);
+        return { diagnostics, render };
+      });
+      await writeFile(
+        `${dir}/03-layer-evidence.json`,
+        JSON.stringify(evidence.diagnostics, null, 2),
+      );
+      await writeFile(
+        `${dir}/03-coil-render.png`,
+        Buffer.from(evidence.render.split(',')[1], 'base64'),
+      );
+    }
     await page.mouse.click(found!.x, found!.y);
     await expect(page.locator('.coil-bar').last()).toBeVisible();
     await expect(page.locator('.coil-bar button').last()).toContainText('Bar 11');
+    const bassRow = barRows(frame, 10).find((r) => r.part.name === 'wobbleBass')!;
+    expect(bassRow.notes).toHaveLength(1);
+    expect(bassRow.lanes).toEqual([0]);
+    const padRow = barRows(frame, 17).find((r) => r.part.name === 'darkPad')!;
+    expect(padRow.notes).toHaveLength(3);
+    expect(padRow.lanes).toEqual([0, 1, 2]);
+    const runs = await probe.evaluate(({ el }, row) => {
+      const canvas = el.querySelector<HTMLCanvasElement>('.coil-bar canvas')!;
+      const ctx = canvas.getContext('2d')!,
+        sample = document.createElement('canvas').getContext('2d')!;
+      sample.fillStyle = row.part.colour;
+      sample.fillRect(0, 0, 1, 1);
+      const rgb = sample.getImageData(0, 0, 1, 1).data;
+      const column = ctx.getImageData(Math.floor(canvas.width * 0.75), row.y, 1, row.height).data;
+      let runs = 0,
+        inside = false;
+      for (let p = 0; p < column.length; p += 4) {
+        const ink = column[p] === rgb[0] && column[p + 1] === rgb[1] && column[p + 2] === rgb[2];
+        if (ink && !inside) runs++;
+        inside = ink;
+      }
+      return runs;
+    }, bassRow);
+    expect(runs).toBe(1);
     const rows = await probe.evaluate(({ el, frame }) => {
       const canvas = el.querySelector<HTMLCanvasElement>('.coil-bar canvas')!;
       const pixels = canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data;

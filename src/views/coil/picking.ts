@@ -2,6 +2,7 @@ import type * as Three from 'three';
 import type { ViewFrame, ViewNote } from '../types';
 import { cycleScore } from '../shared/cycle-score';
 import { helixPoint } from './model';
+import { coilFrame } from './score';
 
 interface Surface {
   cycle: number;
@@ -12,6 +13,7 @@ interface Surface {
 /** CPU ribbons mirror the shader's helix, including the playhead enlargement.
  * Kept separately because the GPU mesh stores time/radius rather than world positions. */
 export function pickSurfaces(frame: ViewFrame, from: number, to: number): Surface[] {
+  frame = coilFrame(frame);
   const result: Surface[] = [];
   const add = (
     cycle: number,

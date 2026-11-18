@@ -1,6 +1,7 @@
 import type { ViewFrame, ViewNote } from '../types';
 import { pitch, pitchClass } from '../shared/pitch';
 import { coilRange } from './model';
+import { coilNotes } from './score';
 
 function formatValue(value: unknown): string {
   if (value === undefined) return 'undefined';
@@ -26,7 +27,7 @@ export function noteDescription(note: ViewNote, frame: ViewFrame) {
     .join(' · ')}`;
 }
 export function barNotes(frame: ViewFrame, cycle: number) {
-  return frame.notes.filter((n) => n.start < cycle + 1 && n.end > cycle);
+  return coilNotes(frame.notes).filter((n) => n.start < cycle + 1 && n.end > cycle);
 }
 
 /** Keep simultaneous notes separate without shrinking their labels away. */
