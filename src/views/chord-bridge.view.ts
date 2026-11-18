@@ -72,6 +72,7 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, bridge: Bridge) {
     left,
     190,
     right - left,
+    true,
   );
   text('OTHER NOTES', sideX, 99, box.side - 18);
   text(`${String(state.others.length)} in window`, sideX, 119, box.side - 18);
