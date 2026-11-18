@@ -104,11 +104,7 @@ test('note inspection preserves pitch, settings, exact timing and overlapping ba
       sections: [{ name: 'song', from: 0, to: offset }],
     };
     expect(
-      noteDescription(
-        { ...note, start: note.start + offset, end: note.end + offset },
-        looped,
-        coilRange(looped).from,
-      ),
+      noteDescription({ ...note, start: note.start + offset, end: note.end + offset }, looped),
     ).toContain('Position 11.2 · length 5 beats');
   }
   expect(barNotes(frame, 11)).toEqual([note]);
@@ -118,6 +114,18 @@ test('note inspection preserves pitch, settings, exact timing and overlapping ba
   expect(rows).toHaveLength(1);
   expect(rows[0].lanes).toEqual([0, 1, 2]);
   expect(rows[0].laneHeight).toBeGreaterThanOrEqual(18);
+});
+test('unsectioned windows retain absolute bar positions', () => {
+  const frame = { ...scoreFrame(), now: 35.4 };
+  const note = {
+    instrument: '0',
+    start: 35.25,
+    end: 35.75,
+    hasOnset: true,
+    value: { note: 'eb2' },
+  };
+  expect(coilRange(frame)).toMatchObject({ from: 32, open: true });
+  expect(noteDescription(note, frame)).toContain('Position 36.2 · length 2 beats');
 });
 test('picking the deformed ribbon returns the original note and turn, including a reverse seek', () => {
   const frame = scoreFrame();

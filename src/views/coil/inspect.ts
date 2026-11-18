@@ -1,6 +1,6 @@
 import type { ViewFrame, ViewNote } from '../types';
 import { pitch, pitchClass } from '../shared/pitch';
-import type { coilRange } from './model';
+import { coilRange } from './model';
 
 function formatValue(value: unknown): string {
   if (value === undefined) return 'undefined';
@@ -14,9 +14,10 @@ export function noteLabel(note: ViewNote) {
     ? formatValue(note.value.s ?? note.value.sound ?? 'note')
     : `${['C', 'D♭', 'D', 'E♭', 'E', 'F', 'G♭', 'G', 'A♭', 'A', 'B♭', 'B'][pitchClass(midi)]}${String(Math.floor(Math.round(midi) / 12) - 1)}`;
 }
-export function noteDescription(note: ViewNote, frame: ViewFrame, from = 0) {
+export function noteDescription(note: ViewNote, frame: ViewFrame) {
   const part = frame.instruments.find((i) => i.id === note.instrument)?.name ?? note.instrument;
-  const start = note.start - from;
+  const range = coilRange(frame);
+  const start = note.start - (range.open ? 0 : range.from);
   const position = `${String(Math.floor(start) + 1)}.${String(Number((1 + (((start % 1) + 1) % 1) * 4).toFixed(4)))}`;
   return `${part} · ${noteLabel(note)}\nPosition ${position} · length ${String(Number(((note.end - note.start) * 4).toFixed(4)))} beats\n${Object.entries(
     note.value,
@@ -113,7 +114,7 @@ export function createBarPanel(
         .filter((s) => cycle - range.from >= s.from && cycle - range.from < s.to)
         .map((s) => s.name)
         .join(' · ');
-      title.textContent = `Bar ${String(Math.floor(cycle - range.from) + 1)} · ${section || 'score'} · click to fold / Esc`;
+      title.textContent = `Bar ${String(Math.floor(cycle - (range.open ? 0 : range.from)) + 1)} · ${section || 'score'} · click to fold / Esc`;
       panel.style.background = frame.theme.panel;
       panel.style.color = frame.theme.text;
       panel.style.borderColor = frame.theme.accent;

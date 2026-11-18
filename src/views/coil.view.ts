@@ -58,7 +58,7 @@ const view: ViewDefinition = {
       }
       tooltip.style.display = note ? 'block' : 'none';
       if (note) {
-        tooltip.textContent = noteDescription(note, last, coilRange(last).from);
+        tooltip.textContent = noteDescription(note, last);
         tooltip.style.background = last.theme.panel;
         tooltip.style.color = last.theme.text;
         tooltip.style.borderColor = last.theme.accent;
