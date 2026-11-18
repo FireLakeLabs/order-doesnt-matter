@@ -154,7 +154,7 @@ it('keeps every real setting as a vessel in metadata order at both stages and de
       (t) => t.rack.instrument.name === 'wobbleBass' && t.tube.setting.name === 'lpf',
     )!;
     expect(cutoff).toBeDefined();
-    expect(cutoff.bottom - cutoff.top).toBeGreaterThan(30);
+    expect(cutoff.bottom - cutoff.top).toBeGreaterThan(((height - 100) / layout.rows) * 0.45);
     for (const tube of layout.tubes) {
       expect(tube.x - tube.width / 2).toBeGreaterThanOrEqual(0);
       expect(tube.x + tube.width / 2).toBeLessThanOrEqual(layout.stageWidth);
@@ -297,4 +297,36 @@ it('chooses all vessel families through the existing canonical aliases', () => {
   expect(vesselFor('custom')).toBe('tube');
   expect(octaveTicks('note', 48, 72)).toEqual([0, 0.5, 1]);
   expect(octaveTicks('freq', 128, 512)).toEqual([0, 1 / 3, 1]);
+});
+
+it('starts a pour from the held voice visible before the onset, after a short overlapping voice has ended', () => {
+  const notes = [
+    note(0, 4, { cutoff: 0 }),
+    note(1, 1.5, { cutoff: 100 }),
+    note(2, 3, { cutoff: 50 }),
+  ];
+  expect(motion(notes, 1.99).level).toBe(0);
+  expect(motion(notes, 2).level).toBe(0);
+  expect(motion(notes, 2.06).level).toBeCloseTo(0.4375);
+  expect(motion(notes, 2.12).level).toBe(0.5);
+  expect(motion(notes, 2.06).low).toBe(0);
+  expect(motion(notes, 1.99).level).toBe(0);
+});
+it('includes old notes ending at the onset in the pre-onset band and retains values through rests', () => {
+  const notes = [
+    note(0, 4, { cutoff: 0 }),
+    note(1, 2, { cutoff: 100 }),
+    note(2, 3, { cutoff: 50 }),
+  ];
+  expect(motion(notes, 2).level).toBe(1);
+  expect(motion(notes, 2).low).toBe(0);
+  expect(motion(notes, 2.06).level).toBeCloseTo(0.5625);
+  const rest = [
+    note(0, 0.5, { cutoff: 0 }),
+    note(0, 0.5, { cutoff: 50 }),
+    note(2, 3, { cutoff: 100 }),
+  ];
+  expect(motion(rest, 2).level).toBe(0.5);
+  expect(motion(rest, 2).low).toBe(0);
+  expect(motion(rest, 2.06).level).toBeCloseTo(0.9375);
 });

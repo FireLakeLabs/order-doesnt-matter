@@ -1,5 +1,5 @@
 import { clamp } from '../shared/math';
-import { sampleRack, tubeAt, type PartIndex, type Tube } from './model';
+import { nextSample, sampleRack, tubeAt, type PartIndex, type Tube } from './model';
 
 export interface TubeMotion {
   level: number | undefined;
@@ -24,19 +24,10 @@ export function tubeMotion(
   };
   const sample = tube.sample;
   if (!part || !sample || !tube.moving || tube.level === undefined) return still;
-  // The last strictly earlier start and first strictly later onset. Equal-time
-  // voices are one transition, preserving the full polyphonic band.
-  let lo = 0,
-    hi = part.notes.length;
-  while (lo < hi) {
-    const mid = (lo + hi) >>> 1;
-    if (part.notes[mid].start < sample.start) lo = mid + 1;
-    else hi = mid;
-  }
   if (!sample.hasOnset) {
     // No invented impulses for fragments/signals: interpolate their available
     // samples directly, without an onset ease or a settling surface.
-    const next = part.notes.find((n) => n.start > sample.start);
+    const next = nextSample(part.notes, sample.start);
     if (!next || next.hasOnset) return still;
     const target = tubeAt(part, tube.setting, sampleRack(part, next.start));
     const progress = clamp((now - sample.start) / (next.start - sample.start));
@@ -46,11 +37,11 @@ export function tubeMotion(
   }
   const rate = Math.max(cps, Number.EPSILON);
   const age = Math.max(0, (now - sample.start) / rate);
-  if (lo === 0) return { ...still, age };
-  const previous = part.notes[lo - 1];
-  const before = tubeAt(part, tube.setting, sampleRack(part, previous.start));
+  // Start from the exact pre-onset rack, including older held voices and
+  // notes ending here, rather than revisiting the previous note's start.
+  const before = tubeAt(part, tube.setting, sampleRack(part, sample.start, 'before'));
   if (before.level === undefined) return { ...still, age };
-  const next = part.onsets.find((n) => n.start > sample.start);
+  const next = nextSample(part.onsets, sample.start);
   const duration = Math.min(0.12, next ? (0.4 * (next.start - sample.start)) / rate : 0.12);
   const ease = 1 - (1 - clamp(age / duration)) ** 3;
   const delta = tube.level - before.level;

@@ -143,6 +143,63 @@ test('Tubes: exact bar 11, five themes, Stage B, playback and frame cost', async
   expect(await pixels(gainBox)).toBe(movingPixels[1]);
   // The melody is held here, so its delay/room vessels are lit beside the pad.
   await capture(17.3, 'bar-18-breakdown');
+  // Equal adjacent values keep the body fixed while a later value makes the
+  // setting nonconstant. Compare the vessel alone, excluding history/labels.
+  const bubbleFrame = {
+    ...evidenceFrame,
+    instruments: [
+      { ...hats.instrument, settings: [{ name: 'gain', label: 'Level', kind: 'values' as const }] },
+    ],
+    notes: [
+      { instrument: hats.instrument.id, start: 0, end: 0.5, hasOnset: true, value: { gain: 0.5 } },
+      {
+        instrument: hats.instrument.id,
+        start: 1,
+        end: 1 + 0.01 * saved.cps,
+        hasOnset: true,
+        value: { gain: 0.5 },
+      },
+      { instrument: hats.instrument.id, start: 3, end: 4, hasOnset: true, value: { gain: 0.8 } },
+    ],
+  };
+  const bubbleBox = vesselBody(
+    tubeLayout(bubbleFrame, racks(bubbleFrame, indexTubes(bubbleFrame.notes))).tubes[0],
+  );
+  const bubbles = await stand.evaluate(
+    ({ el, handle }, { frame, box }) => {
+      const c = el.querySelector('canvas')!.getContext('2d')!;
+      const sameAsNoOnset = (muted: boolean, seconds: number) => {
+        const current = {
+          ...frame,
+          instruments: [{ ...frame.instruments[0], muted }],
+          now: 1 + seconds * frame.cps,
+        };
+        const picture = () =>
+          Array.from(
+            c.getImageData(
+              Math.ceil(box.x - box.width / 2),
+              Math.ceil(box.top),
+              Math.floor(box.width),
+              Math.floor(box.bottom - box.top),
+            ).data,
+          ).join(',');
+        handle.frame(current);
+        const before = picture();
+        handle.frame({
+          ...current,
+          notes: frame.notes.map((n) => (n.start === 1 ? { ...n, hasOnset: false } : n)),
+        });
+        return picture() === before;
+      };
+      return {
+        afterNoteEnds: !sameAsNoOnset(false, 0.03),
+        muted: !sameAsNoOnset(true, 0.03),
+        settled: !sameAsNoOnset(false, 0.5),
+      };
+    },
+    { frame: bubbleFrame, box: bubbleBox },
+  );
+  expect(bubbles).toEqual({ afterNoteEnds: true, muted: false, settled: false });
   await writeFile(
     `${dir}/pour.json`,
     JSON.stringify(
@@ -151,6 +208,7 @@ test('Tubes: exact bar 11, five themes, Stage B, playback and frame cost', async
         nextOnsetGapMs: 1000 * (0.125 / saved.cps),
         constant: 'wobbleBass lpf',
         constantPixelsIdentical: true,
+        bubbles,
         sequence,
       },
       null,

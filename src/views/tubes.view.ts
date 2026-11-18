@@ -87,7 +87,7 @@ function drawTube(c: CanvasRenderingContext2D, f: ViewFrame, box: TubeBox, index
   }
   // Onset bubbles use real seconds, independently of playback frame order.
   const sample = tube.sample;
-  if (sample && motion.age !== undefined && motion.level !== undefined) {
+  if (!rack.instrument.muted && sample && motion.age !== undefined && motion.level !== undefined) {
     const age = motion.age;
     const life = 0.4;
     if (age < life) {
