@@ -16,6 +16,13 @@ import {
 } from '../../src/views/chord-bridge/model';
 import type { ViewNote } from '../../src/views/types';
 import { scoreFrame } from './score-fixture';
+import {
+  accidentalStyle,
+  bridgeLayout,
+  presentation,
+  spell,
+  stoneBlocks,
+} from '../../src/views/chord-bridge/drawing';
 
 let notes: ViewNote[];
 beforeAll(async () => {
@@ -37,6 +44,47 @@ const note = (midi: number, start = 0, instrument = 'p'): ViewNote => ({
   end: start + 1,
   hasOnset: true,
   value: { note: midi },
+});
+it('spells the real C-minor material with flats and a sharp-key set with sharps', () => {
+  const bridge = analyse(notes);
+  expect(presentation(bridge).spelling).toBe('flats');
+  expect([44, 51, 60].map((n) => spell(n, presentation(bridge).spelling))).toEqual([
+    'A♭2',
+    'E♭3',
+    'C4',
+  ]);
+  expect(accidentalStyle([2, 4, 6, 7, 9, 11, 1])).toBe('sharps');
+  expect(spell(66, 'sharps')).toBe('F#4');
+});
+it('fits the whole chord register into the bridge field without rescaling on active siblings', () => {
+  const bridge = analyse(notes),
+    register = presentation(bridge);
+  for (const [width, height] of [
+    [1131, 469],
+    [560, 674],
+    [1300, 760],
+  ]) {
+    const box = bridgeLayout(width, height, { from: 16, to: 20 }, register);
+    const occupied = box.y(41) - box.y(63);
+    expect(occupied / (box.bottom - box.top)).toBeGreaterThan(0.8);
+    expect(box.y(63)).toBeGreaterThanOrEqual(box.top);
+    expect(box.y(41)).toBeLessThanOrEqual(box.bottom);
+    for (const lookAhead of [1, 2, 4, 8]) {
+      const range = windowAt({ now: 17.9, lookAhead });
+      const current = bridgeLayout(width, height, range, register);
+      for (const t of [range.from, 17.9, range.to - 0.001]) {
+        expect(current.x(t)).toBeGreaterThan(current.left);
+        expect(current.x(t)).toBeLessThan(current.right);
+      }
+    }
+    const blocks = bridge.piers.flatMap((p) => stoneBlocks(p, box));
+    expect(blocks.reduce((n, b) => n + b.tones.length, 0)).toBe(12);
+  }
+  const held = { ...note(60), end: 4 };
+  const before = presentation(analyse([held, note(61), note(48, 2), note(55, 2)]));
+  const after = presentation(analyse([held, note(48, 2), note(55, 2)]));
+  expect(before.low).toBe(after.low);
+  expect(before.high).toBe(after.high);
 });
 it('maps the actual breakdown into four piers with the second holding G#2, D#3, C4', () => {
   const bridge = analyse(notes);

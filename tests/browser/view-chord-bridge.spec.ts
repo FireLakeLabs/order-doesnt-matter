@@ -33,7 +33,7 @@ test('chord-bridge: a held pitch keeps its drawn height as a sibling ends or lea
     const draw = (now: number, score = notes) => {
       const ys: number[] = [];
       CanvasRenderingContext2D.prototype.fillRect = function (x, y, w, h) {
-        if (w === 42 && h === 6) ys.push(y);
+        if (w === 8 && h === 6) ys.push(y);
         fill.call(this, x, y, w, h);
       };
       try {

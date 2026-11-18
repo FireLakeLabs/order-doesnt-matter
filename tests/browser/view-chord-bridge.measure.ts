@@ -55,21 +55,51 @@ for (const [file, now] of [
         const el = document.createElement('div');
         document.body.append(el);
         const handle = await window.viewProbe.definition.mount(el);
-        const texts: { text: string; x: number; y: number; width: number; size: number }[] = [];
-        const fill = CanvasRenderingContext2D.prototype.fillText;
-        CanvasRenderingContext2D.prototype.fillText = function (text, x, y, max) {
-          texts.push({
-            text,
-            x,
-            y,
-            width: this.measureText(text).width,
-            size: parseFloat(this.font),
-          });
-          if (max === undefined) fill.call(this, text, x, y);
-          else fill.call(this, text, x, y, max);
+        const capture = (frame: typeof source) => {
+          const texts: {
+            text: string;
+            x: number;
+            y: number;
+            width: number;
+            size: number;
+            ink: { x: number; y: number; w: number; h: number };
+          }[] = [];
+          const blocks: { x: number; y: number; w: number; h: number }[] = [];
+          const fill = CanvasRenderingContext2D.prototype.fillText;
+          const rect = CanvasRenderingContext2D.prototype.fillRect;
+          CanvasRenderingContext2D.prototype.fillText = function (text, x, y, max) {
+            const m = this.measureText(text);
+            texts.push({
+              text,
+              x,
+              y,
+              width: m.width,
+              size: parseFloat(this.font),
+              ink: {
+                x: x - m.actualBoundingBoxLeft,
+                y: y - m.actualBoundingBoxAscent,
+                w: m.actualBoundingBoxLeft + m.actualBoundingBoxRight,
+                h: m.actualBoundingBoxAscent + m.actualBoundingBoxDescent,
+              },
+            });
+            if (max === undefined) fill.call(this, text, x, y);
+            else fill.call(this, text, x, y, max);
+          };
+          CanvasRenderingContext2D.prototype.fillRect = function (x, y, w, h) {
+            if (h === 28 && w >= 52 && w <= 78) blocks.push({ x, y, w, h });
+            rect.call(this, x, y, w, h);
+          };
+          try {
+            handle.frame(frame);
+          } finally {
+            CanvasRenderingContext2D.prototype.fillText = fill;
+            CanvasRenderingContext2D.prototype.fillRect = rect;
+          }
+          return { texts, blocks };
         };
+        const { texts, blocks } = capture(source);
+        const narrow = capture({ ...source, width: 560, height: 470 });
         handle.frame(source);
-        CanvasRenderingContext2D.prototype.fillText = fill;
         const picture = el.querySelector('canvas')!.toDataURL();
         handle.frame({ ...source, now: 25.7, width: 560, height: 470 });
         handle.frame({ ...source, now: 2.1 });
@@ -117,6 +147,8 @@ for (const [file, now] of [
           freshEqual,
           contrast,
           texts,
+          blocks,
+          narrow,
           cached: run(false),
           rebuilt: run(true),
           notes: source.notes.length,
@@ -134,6 +166,33 @@ for (const [file, now] of [
       expect(measured.texts.every((t) => t.size >= 11)).toBe(true);
       if (file === 'real-techno')
         expect(measured.texts.some((t) => t.text.includes('4 edge'))).toBe(true);
+      for (const drawing of [measured, measured.narrow]) {
+        const overlap = (
+          a: { x: number; y: number; w: number; h: number },
+          b: { x: number; y: number; w: number; h: number },
+        ) => a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+        for (const [i, text] of drawing.texts.entries()) {
+          expect(
+            drawing.texts.slice(i + 1).filter((other) => overlap(text.ink, other.ink)),
+            `${theme}: ${text.text} crosses text`,
+          ).toEqual([]);
+          for (const block of drawing.blocks) {
+            const inside =
+              text.ink.x >= block.x &&
+              text.ink.x + text.ink.w <= block.x + block.w &&
+              text.ink.y >= block.y &&
+              text.ink.y + text.ink.h <= block.y + block.h;
+            expect(
+              overlap(text.ink, block) && !inside,
+              `${theme}: ${text.text} crosses another block`,
+            ).toBe(false);
+          }
+        }
+      }
+      if (file === 'real-dubstep-arranged') {
+        for (const name of ['A♭2', 'E♭3', 'C4'])
+          expect(measured.texts.some((t) => t.text === name)).toBe(true);
+      }
       results.push(measured);
     }
     const frame = await page.evaluate(() => window.viewProbe.frame!);
