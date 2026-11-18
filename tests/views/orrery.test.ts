@@ -190,6 +190,10 @@ it('counts dense motif marks, retains twenty orbits, and reserves separate text 
     const b = orreryLayout(w, h, 20);
     expect(b.shown + b.hidden).toBe(20);
     expect(b.radius).toBeGreaterThan(50);
+    const worldWidth = b.narrow ? w : b.ledger.x - 12;
+    expect(b.rx * 2).toBeGreaterThan(worldWidth * 0.85);
+    expect(b.cx - b.rx).toBeGreaterThanOrEqual(24);
+    expect(b.cy - b.radius).toBeGreaterThan(90);
     expect(b.ledger.y + 23 + b.shown * 26).toBeLessThan(h - 83);
   }
   const techno = indexOrrery(corpus.get('real-techno')!);
@@ -226,4 +230,30 @@ it('never ignores notes outside section coverage or double-counts overlapping ob
   ];
   f.notes = [note(0, 1)];
   expect(indexOrrery(f).orbits[0].period).toBeNull();
+});
+
+it('finds the smallest grid period when section gates hide intervening repeats', () => {
+  for (const count of [2, 4]) {
+    const f = scoreFrame();
+    f.to = count * 8 - 4;
+    f.sections = Array.from({ length: count * 2 - 1 }, (_, i) => ({
+      name: String(i),
+      from: i * 4,
+      to: (i + 1) * 4,
+    }));
+    f.notes = Array.from({ length: count }, (_, i) => note(3 + i * 8, 3.5 + i * 8));
+    const q = indexOrrery(f);
+    expect(q.orbits[0].period).toEqual({ n: 4, d: 1 });
+    expect(q.orbits[0].marks).toEqual([{ phase: 0.75, count: 1 }]);
+    expect(q.common).toEqual({ n: 4, d: 1 });
+    // The same coverage/gap relation holds below a bar, without integer rounding.
+    const fraction = indexOrrery({
+      ...f,
+      to: f.to / 3,
+      sections: f.sections.map((s) => ({ ...s, from: s.from / 3, to: s.to / 3 })),
+      notes: f.notes.map((n) => ({ ...n, start: n.start / 3, end: n.end / 3 })),
+    });
+    expect(fraction.orbits[0].period).toEqual({ n: 4, d: 3 });
+    expect(fraction.common).toEqual({ n: 4, d: 3 });
+  }
 });

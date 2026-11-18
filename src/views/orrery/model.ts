@@ -115,9 +115,11 @@ function infer(notes: ViewNote[], frame: ViewFrame): Omit<Orbit, 'id'> {
   for (const f of fractions) {
     if (!f) return unknown('timing is not a recoverable rational');
     scale = (scale / gcd(scale, f.d)) * f.d;
-    if (!Number.isSafeInteger(scale) || !Number.isSafeInteger(scale * frame.to))
+    if (!Number.isSafeInteger(scale) || Math.abs(scale * frame.to) > Number.MAX_SAFE_INTEGER)
       return unknown('rational range too large');
   }
+  if (fractions.some((f) => f !== null && !Number.isSafeInteger(f.n * (scale / f.d))))
+    return unknown('rational range too large');
   const intervals = ranges.map((r) => ({
     from: Math.round(r.from * scale),
     to: Math.round(r.to * scale),
@@ -137,14 +139,26 @@ function infer(notes: ViewNote[], frame: ViewFrame): Omit<Orbit, 'id'> {
   events.sort((a, b) => a.start - b.start || a.key.localeCompare(b.key) || a.duration - b.duration);
   const candidates = new Set<number>();
   const first = new Map<string, number>();
+  const gaps = new Set<number>();
   for (const e of events) {
     if (e.duration > 0) candidates.add(e.duration);
     const key = `${String(e.duration)}:${e.key}`;
     const prior = first.get(key);
-    if (prior !== undefined && e.start > prior) candidates.add(e.start - prior);
+    if (prior !== undefined && e.start > prior) gaps.add(e.start - prior);
     else first.set(key, e.start);
   }
   const exposure = intervals.reduce((sum, r) => sum + r.to - r.from, 0);
+  // Gates may hide intermediate copies. Every valid period on the recovered
+  // timing grid divides a gap from the first occurrence of its motif key.
+  let work = 0;
+  for (const gap of gaps) {
+    for (let divisor = 1; divisor <= gap / divisor; divisor++) {
+      if (++work > 65536) return unknown('repeat search exceeds timing budget');
+      if (gap % divisor) continue;
+      candidates.add(divisor);
+      candidates.add(gap / divisor);
+    }
+  }
   const actual = new Map<string, number>();
   for (const e of events) {
     const key = `${String(e.start)}:${String(e.duration)}:${e.key}`;
@@ -245,10 +259,10 @@ export function orbitMarks(orbit: Orbit, radius: number) {
 }
 export function orreryLayout(width: number, height: number, count: number) {
   const narrow = width < 760;
-  const ledgerWidth = narrow ? width - 32 : Math.min(350, width * 0.38);
+  const ledgerWidth = narrow ? width - 32 : Math.min(268, width * 0.29);
   const skyWidth = narrow ? width : width - ledgerWidth - 28;
   const skyHeight = narrow ? Math.min(height * 0.4, width * 0.72) : height - 160;
-  const radius = Math.max(12, Math.min(skyWidth / 2 - 24, skyHeight / 2 - 12));
+  const radius = Math.max(12, Math.min(skyWidth / 2 - 24, skyHeight / 2 - 26));
   const cx = skyWidth / 2,
     cy = 76 + skyHeight / 2;
   const ledger = {
@@ -262,10 +276,11 @@ export function orreryLayout(width: number, height: number, count: number) {
     cx,
     cy,
     radius,
+    rx: Math.max(20, skyWidth / 2 - 32),
     ledger,
     shown,
     hidden: count - shown,
-    sun: Math.min(35, radius * 0.23),
+    sun: Math.max(narrow ? 24 : 32, Math.min(44, radius * 0.19)),
     narrow,
   };
 }
