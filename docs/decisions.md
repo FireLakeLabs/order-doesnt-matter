@@ -163,3 +163,7 @@ Keep each entry to a few lines.
   with the wave.
 - **D48 (2026-11-16) Studio is home.** The Studio replaces the old page at `/`,
   restoring its saved document; `/studio.html` redirects with query and hash intact.
+- **D49 (2026-11-18) Browser tests are local.** Implementers run the browser
+  suite as a build gate; CI and the deploy run `npm run check` and the infra
+  checks only. Installing the test browser on GitHub runners took 5–9 minutes
+  and timed out most jobs.
