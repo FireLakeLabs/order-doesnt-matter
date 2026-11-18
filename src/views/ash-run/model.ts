@@ -1,9 +1,10 @@
 import type { ViewFrame, ViewNote } from '../types';
 import { pitch } from '../shared/pitch';
 import { clamp } from '../shared/math';
-import { roleEvidence, lowestPitchedPart, mostRegularDrum, drumEvidence } from '../shared/roles';
+import { roleEvidence, lowestPitchedPart, drumEvidence } from '../shared/roles';
 import { settingRanges } from '../shared/settings';
 import { previousOnset, nextOnset, noteProgress } from '../shared/timing';
+import { building, buildingAt, crossing, route, world } from './city';
 
 export interface Event {
   note: ViewNote;
@@ -44,18 +45,30 @@ export type Data = ReturnType<typeof analyse>;
 export function district(frame: Pick<ViewFrame, 'now' | 'sections'>) {
   const length = frame.sections.at(-1)?.to ?? 0;
   const local = length > 0 ? ((frame.now % length) + length) % length : frame.now;
-  const index = frame.sections.findIndex((s) => s.from <= local && local < s.to);
-  return { index: Math.max(0, index), name: frame.sections[index]?.name ?? 'Uncharted' };
+  const section = frame.sections.find((s) => s.from <= local && local < s.to);
+  const names = [...new Set(frame.sections.map((s) => s.name))];
+  const index = Math.max(0, names.indexOf(section?.name ?? ''));
+  return {
+    index: index % 4,
+    name: ['old town', 'construction', 'downtown', 'docks'][index % 4],
+    section: section?.name,
+  };
 }
-/** Majority backbeats/downbeats/offbeats earn drum roles; unmatched notes become generic debris. */
+/** Majority backbeats/downbeats/offbeats earn drum roles; unmatched notes light windows. */
 export function roles(frame: ViewFrame, data: Data) {
   const eligible = frame.instruments
     .filter((i) => i.inSection)
     .sort((a, b) => a.index - b.index)
     .map((i) => i.id);
   // Explicit note/frequency evidence disambiguates melodic pitch from sample-index n.
-  const rooftops = lowestPitchedPart(data.evidence, data.explicit.size ? data.explicit : undefined);
-  const footfalls = mostRegularDrum(data.evidence, 'regular', eligible);
+  const walker = lowestPitchedPart(data.evidence, data.explicit.size ? data.explicit : undefined);
+  const steady = eligible
+    .flatMap((id) => {
+      const p = data.evidence.get(id);
+      return p && drumEvidence(p) ? [p] : [];
+    })
+    .sort((a, b) => a.regularity - b.regularity || b.density - a.density);
+  const footfalls = steady.at(0)?.id;
   const drums = eligible.flatMap((id) => {
     const p = data.evidence.get(id),
       d = p && drumEvidence(p);
@@ -93,44 +106,42 @@ export function roles(frame: ViewFrame, data: Data) {
         a.density - b.density,
     )
     .at(0)?.id;
-  const snare = drums
-    .filter((d) => d.id !== kick && d.back >= 0.6)
-    .sort((a, b) => b.back - a.back || a.density - b.density)
-    .at(0)?.id;
+  const snare =
+    drums
+      .filter((d) => d.id !== kick && d.back >= 0.6)
+      .sort((a, b) => b.back - a.back || a.density - b.density)
+      .at(0)?.id ??
+    drums
+      .filter((d) => d.id !== kick && d.density >= 4 && d.duration <= 0.25)
+      .sort((a, b) => b.duration - a.duration)
+      .at(0)?.id;
   const halfTime = (drums.find((d) => d.id === snare)?.halfBack ?? 0) >= 0.6;
   const offbeats = (d: (typeof drums)[number]) => Math.max(d.off, halfTime ? d.halfOff : 0);
-  const openHat = drums
-    .filter(
-      (d) =>
-        d.id !== kick &&
-        d.id !== snare &&
-        (offbeats(d) > 0.5 || (d.duration > 0.2 && d.strong < 0.5)),
-    )
-    .sort((a, b) => offbeats(b) - offbeats(a) || b.duration - a.duration || a.density - b.density)
-    .at(0)?.id;
-  return { rooftops, footfalls, kick, snare, openHat };
+  const openHat =
+    drums
+      .filter(
+        (d) =>
+          d.id !== kick &&
+          d.id !== snare &&
+          (offbeats(d) > 0.5 || (d.duration > 0.2 && d.strong < 0.5)),
+      )
+      .sort((a, b) => offbeats(b) - offbeats(a) || b.duration - a.duration || a.density - b.density)
+      .at(0)?.id ??
+    [...data.evidence.values()]
+      .filter(
+        (p) =>
+          eligible.includes(p.id) &&
+          p.id !== kick &&
+          p.id !== snare &&
+          p.duration <= 0.5 &&
+          data.explicit.has(p.id) &&
+          Number.isFinite(p.meanPitch),
+      )
+      .sort((a, b) => b.meanPitch - a.meanPitch)
+      .at(0)?.id;
+  return { walker, footfalls, kick, snare, openHat };
 }
 export type Roles = ReturnType<typeof roles>;
-export function kind(id: string, r: Roles) {
-  return id === r.rooftops
-    ? 'roof'
-    : id === r.snare
-      ? 'snare'
-      : id === r.kick
-        ? 'kick'
-        : id === r.openHat
-          ? 'cable'
-          : 'generic';
-}
-export function roofY(midi: number | undefined, height: number) {
-  return height * (0.64 - 0.22 * Math.tanh(((midi ?? 24) - 36) / 20));
-}
-export function roofAt(events: Event[], time: number): Event | undefined {
-  return events
-    .filter((e) => e.note.start <= time && time < e.note.end)
-    .sort((a, b) => (b.midi ?? -Infinity) - (a.midi ?? -Infinity) || b.note.start - a.note.start)
-    .at(0);
-}
 const identitySettings = new Set([
   'note',
   'n',
@@ -185,66 +196,85 @@ export function searchlight(frame: ViewFrame, data: Data) {
       : 0.5 + Math.atan(value) / Math.PI;
   return { instrument: driver.instrument, key: driver.key, note, value, angle: 2.2 + unit * 0.7 };
 }
+/** Contact phase spans consecutive actual onsets; silence falls back to a tempo cadence. */
+export function strideAt(frame: ViewFrame, data: Data, id: string | undefined) {
+  const notes = (data.parts.get(id ?? '') ?? []).map((e) => e.note);
+  const prev = previousOnset(notes, id ?? '', frame.now);
+  const next = nextOnset(notes, id ?? '', frame.now);
+  if (prev && next && next.start - prev.start <= 1) {
+    const index = Math.round(prev.start / (next.start - prev.start));
+    return {
+      phase: noteProgress({ start: prev.start, end: next.start }, frame.now),
+      side: index % 2,
+    };
+  }
+  const beat = frame.now * 4;
+  return { phase: ((beat % 1) + 1) % 1, side: ((Math.floor(beat) % 2) + 2) % 2 };
+}
+export function accented(event: Event, data: Data) {
+  const gain = event.note.value.gain;
+  const range = data.ranges.get(event.note.instrument)?.get('gain');
+  return (
+    typeof gain === 'number' &&
+    range?.min !== undefined &&
+    range.max !== undefined &&
+    range.max > range.min + 1e-6 &&
+    gain >= range.min + (range.max - range.min) * 0.75
+  );
+}
 export function scene(frame: ViewFrame, data: Data) {
   const r = roles(frame, data);
-  const gate = frame.width * 0.32;
-  const scale = (frame.width - gate - 24) / Math.max(0.001, frame.lookAhead);
-  const x = (time: number) => gate + (time - frame.now) * scale;
-  const roofs = data.parts.get(r.rooftops ?? '') ?? [];
-  const current = roofAt(roofs, frame.now);
-  const size = clamp(frame.height * 0.13, 58, 102);
-  let feet: number, leap: number;
-  if (current) {
-    const duration = Math.min(0.25, Math.max(0.001, (current.note.end - current.note.start) / 2));
-    const u = noteProgress(
-      { start: current.note.start, end: current.note.start + duration },
-      frame.now,
-    );
-    const before = roofAt(roofs, current.note.start - 1e-7);
-    leap = Math.sin(Math.PI * u) * size * 0.65;
-    feet =
-      roofY(before?.midi ?? current.midi, frame.height) * (1 - u) +
-      roofY(current.midi, frame.height) * u -
-      leap;
-  } else {
-    const before = roofs
-      .filter((e) => e.note.end <= frame.now)
-      .sort((a, b) => b.note.end - a.note.end)
-      .at(0);
-    const after = roofs
-      .filter((e) => e.note.start > frame.now)
-      .sort((a, b) => a.note.start - b.note.start)
-      .at(0);
-    const u = noteProgress(
-      {
-        start: before?.note.end ?? Math.floor(frame.now),
-        end: after?.note.start ?? Math.floor(frame.now) + 1,
-      },
-      frame.now,
-    );
-    leap = Math.sin(Math.PI * u) * frame.height * 0.16;
-    feet =
-      roofY(before?.midi, frame.height) * (1 - u) + roofY(after?.midi, frame.height) * u - leap;
-  }
-  const steps = (data.parts.get(r.footfalls ?? '') ?? []).map((e) => e.note);
-  const prev = previousOnset(steps, r.footfalls ?? '', frame.now),
-    next = nextOnset(steps, r.footfalls ?? '', frame.now);
-  const stride = prev && next ? noteProgress({ start: prev.start, end: next.start }, frame.now) : 0;
+  const w = world(frame);
+  const motion = route(w, frame.now);
+  const snare = [
+    ...new Map(
+      (data.parts.get(r.snare ?? '') ?? [])
+        .filter((e) => e.note.hasOnset)
+        .map((e) => [e.note.start, e]),
+    ).values(),
+  ];
+  const vault = snare
+    .flatMap((e, index) => {
+      if (route(w, e.note.start).airborne || accented(e, data)) return [];
+      const b = buildingAt((e.note.start * w.pace) / w.size, w.maxGap);
+      const start = Math.max(
+        e.note.start - 0.085,
+        crossing(w, building(b.index - 1, w.maxGap)).landing,
+        index ? (snare[index - 1].note.start + e.note.start) / 2 : -Infinity,
+      );
+      const end = Math.min(
+        e.note.start + 0.085,
+        crossing(w, b).takeoff,
+        index + 1 < snare.length ? (snare[index + 1].note.start + e.note.start) / 2 : Infinity,
+      );
+      if (frame.now <= start || frame.now >= end) return [];
+      const phase =
+        frame.now <= e.note.start
+          ? (0.5 * (frame.now - start)) / (e.note.start - start)
+          : 0.5 + (0.5 * (frame.now - e.note.start)) / (end - e.note.start);
+      return [phase];
+    })
+    .at(0);
+  const vaultLift = vault !== undefined ? Math.sin(vault * Math.PI) * w.size * 0.08 : 0;
+  const walkerNotes = (data.parts.get(r.walker ?? '') ?? []).map((e) => e.note);
+  const step = previousOnset(walkerNotes, r.walker ?? '', frame.now);
+  const next = nextOnset(walkerNotes, r.walker ?? '', frame.now);
   return {
+    ...w,
+    ...motion,
     roles: r,
-    gate,
-    scale,
-    x,
-    roofs,
-    current,
-    size,
-    feet,
-    leap,
-    chasm: !current,
-    stride,
-    speed: scale * Math.max(0, frame.cps),
     district: district(frame),
+    feet: motion.feet - vaultLift,
+    vault,
+    stride: strideAt(frame, data, r.footfalls),
     light: searchlight(frame, data),
+    lamp: walkerNotes.some((n) => n.start <= frame.now && frame.now < n.end),
+    walkerStep: step
+      ? clamp((frame.now - step.start) / Math.min(0.3, next ? next.start - step.start : 0.3))
+      : 1,
+    walkerSide: step ? Math.round(step.start * 8) % 2 : 0,
+    speed: w.pace * Math.max(0, frame.cps),
   };
 }
-export const parallaxRates = [0.06, 0.17, 0.38, 1] as const;
+export type Scene = ReturnType<typeof scene>;
+export const parallaxRates = [0.06, 0.17, 0.38] as const;
