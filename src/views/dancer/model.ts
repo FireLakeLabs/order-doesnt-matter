@@ -90,6 +90,11 @@ export interface DancerLayer {
 export function poseAt(score: DancerScore, now: number, muted: ReadonlySet<string> = new Set()) {
   const layers: DancerLayer[] = [];
   const pose = { feet: [0, 0], hands: [0, 0], head: 0, hips: 0, arms: 0, torso: 0 };
+  const weights = {
+    hips: { total: 0, peak: 0 },
+    arms: { total: 0, peak: 0 },
+    torso: { total: 0, peak: 0 },
+  };
   const counts = Object.fromEntries(roles.map((r) => [r, 0])) as Record<Role, number>;
   const tiles = new Map<number, DancerLayer[]>();
   for (const note of score.notes) {
@@ -109,6 +114,10 @@ export function poseAt(score: DancerScore, now: number, muted: ReadonlySet<strin
     const layer = { note, roles: assigned, side, cell: seed % 24, strength, progress, armTarget };
     for (const role of assigned) {
       counts[role]++;
+      if (role === 'hips' || role === 'arms' || role === 'torso') {
+        weights[role].total += strength;
+        weights[role].peak = Math.max(weights[role].peak, strength);
+      }
       if (role === 'feet' || role === 'hands') pose[role][side] += pulse;
       if (role === 'head') pose.head += pulse;
       if (role === 'hips') pose.hips += Math.sin(progress * Math.PI * 2) * strength;
@@ -120,8 +129,14 @@ export function poseAt(score: DancerScore, now: number, muted: ReadonlySet<strin
     tile.push(layer);
     tiles.set(layer.cell, tile);
   }
-  // Contributions add, then bound the anatomy. Coincident contributions remain
-  // present in layers, role counts and the counted floor cells even at saturation.
+  // Blend continuous targets so polyphony cannot turn a cutoff or pan value
+  // into a voice count. The strongest envelope preserves entry/exit easing.
+  for (const role of ['hips', 'arms', 'torso'] as const) {
+    const { total, peak } = weights[role];
+    pose[role] = total > 0 ? (pose[role] / total) * peak : 0;
+  }
+  // Percussive gestures add within anatomical bounds; every collision remains
+  // present in layers, role counts and counted floor cells.
   pose.feet = pose.feet.map((n) => clamp(n));
   pose.hands = pose.hands.map((n) => clamp(n));
   pose.head = clamp(pose.head);
@@ -140,18 +155,19 @@ export type DancerState = ReturnType<typeof poseAt>;
 
 export function dancerLayout(width: number, height: number) {
   const compact = width < 800;
-  const footer = compact ? 126 : 92;
-  const top = 76,
+  const footer = compact ? 104 : 76;
+  const top = 62,
     bottom = Math.max(top + 1, height - footer - 12);
-  const scale = Math.max(0.01, Math.min((bottom - top) / 430, (width - 32) / 620));
+  const scale = Math.max(0.01, Math.min((bottom - top) / 400, (width - 32) / 420));
   return {
     compact,
     footer,
     top,
     bottom,
     scale,
+    floorScale: (width - 32) / (620 * scale),
     x: width / 2,
-    y: top + (bottom - top - 430 * scale) / 2,
+    y: top + (bottom - top - 400 * scale) / 2,
   };
 }
 export function roleMembers(score: DancerScore, frame: ViewFrame, role: Role): string[] {

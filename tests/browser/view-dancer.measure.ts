@@ -225,6 +225,39 @@ test('Dancer: Studio themes, pure seeking, real-score mapping and CPU submission
     for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
   });
   await page.screenshot({ path: `${shots}/techno-studio-1920x1080.png` });
+  // Polyphonic cutoff regression: bass plus three pad voices must keep a mean target.
+  await page.evaluate(
+    async (source) => {
+      await window.odmStudio.load(source);
+      await window.odmStudio.seek(12.4);
+    },
+    await readFile('corpus/programs/piece-moss-radio.strudel', 'utf8'),
+  );
+  await page.waitForFunction(
+    () =>
+      window.viewProbe.frame?.now === 12.4 &&
+      window.viewProbe.frame.from === 8 &&
+      window.viewProbe.frame.to === 24 &&
+      window.viewProbe.frame.notes.length > 0,
+  );
+  await ready();
+  const mossFrame = await page.evaluate(() => window.viewProbe.frame!);
+  const mossState = poseAt(indexDancer(mossFrame.notes), 12.4);
+  expect(mossState.counts.arms).toBe(4);
+  expect(mossState.pose.arms).toBeLessThan(0.7);
+  expect(mossState.pose.arms).toBeGreaterThan(0.3);
+  const moss = {
+    counts: mossState.counts,
+    pose: mossState.pose,
+    notes: mossState.layers.length,
+    armTargets: mossState.layers.filter((l) => l.armTarget !== undefined).map((l) => l.armTarget),
+  };
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
+  });
+  await page.screenshot({ path: `${shots}/moss-radio-studio-1920x1080.png` });
+  await writeFile(`${shots}/moss-frame.json`, JSON.stringify(mossFrame, null, 2));
   await page.evaluate(
     async (source) => {
       await window.odmStudio.load(source);
@@ -276,6 +309,7 @@ test('Dancer: Studio themes, pure seeking, real-score mapping and CPU submission
         measured,
         mapping,
         techno: { counts: techno.counts, notes: techno.layers.length },
+        moss,
         narrow,
         themes: evidence,
       },
@@ -289,6 +323,7 @@ test('Dancer: Studio themes, pure seeking, real-score mapping and CPU submission
       measured,
       mapping,
       techno: { counts: techno.counts, notes: techno.layers.length },
+      moss,
       narrow,
       themes: evidence.map(({ theme, deterministic, identicalFresh, minContrast }) => ({
         theme,

@@ -1,6 +1,7 @@
 import type { ViewDefinition, ViewFrame } from './types';
 import { cutoff, dancerLayout, indexDancer, poseAt, roleMembers, roles } from './dancer/model';
 import type { DancerScore, DancerState } from './dancer/model';
+import { sectionAt } from './shared/ring-model';
 
 function fit(ctx: CanvasRenderingContext2D, text: string, width: number) {
   if (ctx.measureText(text).width <= width) return text;
@@ -32,17 +33,13 @@ function drawFigure(ctx: CanvasRenderingContext2D, frame: ViewFrame, state: Danc
         (l) => l.note.instrument === i.id && l.roles.includes(role as (typeof roles)[number]),
       ),
     )?.colour ?? fallback;
-  const hip = pose.hips * 24,
+  const hip = pose.hips * 34,
+    tilt = pose.hips * 8,
     lean = pose.torso * 28;
   const chest = hip + lean,
     shoulder = 159,
     pelvis = 266;
-  // Soft stage pool and shoe shadows anchor a solid, clothed figure.
-  const pool = ctx.createRadialGradient(0, 236, 12, 0, 236, 220);
-  pool.addColorStop(0, theme.panel);
-  pool.addColorStop(1, theme.ground);
-  ctx.fillStyle = pool;
-  ctx.fillRect(-300, 0, 600, 380);
+  // Shoe shadows anchor the articulated figure to the stage.
   ctx.fillStyle = theme.line;
   ctx.beginPath();
   ctx.ellipse(0, 360, 119, 15, 0, 0, Math.PI * 2);
@@ -52,9 +49,12 @@ function drawFigure(ctx: CanvasRenderingContext2D, frame: ViewFrame, state: Danc
   for (const side of [0, 1]) {
     const sign = side === 0 ? -1 : 1;
     const lift = pose.feet[side] * 28;
-    const knee = [sign * 49 + hip * 0.35, 310 - lift * 0.35];
+    const knee = [
+      sign * (49 + Math.abs(pose.hips) * 12) + hip * 0.5,
+      306 + sign * pose.hips * 16 - lift * 0.35,
+    ];
     const ankle = [sign * 77, 358 - lift];
-    const leg = [[hip + sign * 20, pelvis], knee, ankle];
+    const leg = [[hip + sign * 20, pelvis - sign * tilt], knee, ankle];
     path(ctx, leg, theme.text, 25);
     path(ctx, leg, colour('feet', theme.muted), 18);
     disc(ctx, knee[0], knee[1], 9, theme.panel);
@@ -77,8 +77,8 @@ function drawFigure(ctx: CanvasRenderingContext2D, frame: ViewFrame, state: Danc
   ctx.beginPath();
   ctx.moveTo(chest - 38, shoulder);
   ctx.quadraticCurveTo(chest, shoulder - 17, chest + 38, shoulder);
-  ctx.lineTo(hip + 29, 242);
-  ctx.quadraticCurveTo(hip, 254, hip - 29, 242);
+  ctx.lineTo(hip + 29, 242 - tilt);
+  ctx.quadraticCurveTo(hip, 254, hip - 29, 242 + tilt);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
@@ -93,18 +93,18 @@ function drawFigure(ctx: CanvasRenderingContext2D, frame: ViewFrame, state: Danc
   );
   ctx.fillStyle = colour('hips', theme.muted);
   ctx.beginPath();
-  ctx.moveTo(hip - 30, 237);
-  ctx.quadraticCurveTo(hip, 249, hip + 30, 237);
-  ctx.lineTo(hip + 32, 268);
-  ctx.quadraticCurveTo(hip, 283, hip - 32, 268);
+  ctx.moveTo(hip - 30, 237 + tilt);
+  ctx.quadraticCurveTo(hip, 249, hip + 30, 237 - tilt);
+  ctx.lineTo(hip + 32, 268 - tilt);
+  ctx.quadraticCurveTo(hip, 283, hip - 32, 268 + tilt);
   ctx.closePath();
   ctx.fill();
   ctx.stroke();
   path(
     ctx,
     [
-      [hip - 25, 246],
-      [hip + 25, 246],
+      [hip - 25, 246 + tilt],
+      [hip + 25, 246 - tilt],
     ],
     theme.text,
     4,
@@ -205,10 +205,36 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: DancerScor
     state = poseAt(score, now, new Set(frame.instruments.filter((i) => i.muted).map((i) => i.id)));
   ctx.fillStyle = theme.ground;
   ctx.fillRect(0, 0, width, height);
+  const pool = ctx.createRadialGradient(
+    box.x,
+    box.y + 201 * box.scale,
+    12,
+    box.x,
+    box.y + 201 * box.scale,
+    240 * box.scale,
+  );
+  pool.addColorStop(0, theme.panel);
+  pool.addColorStop(1, theme.ground);
+  ctx.fillStyle = pool;
+  ctx.fillRect(0, box.top, width, height - box.footer - box.top);
+  // Fixed downlights and a full-width floor make this a stage, with one dancer.
+  ctx.fillStyle = theme.panel;
+  for (const side of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(width / 2 + side * width * 0.36, box.top);
+    ctx.lineTo(width / 2 + side * width * 0.32, box.top);
+    ctx.lineTo(box.x + side * 65 * box.scale, box.y + 345 * box.scale);
+    ctx.lineTo(box.x + side * 145 * box.scale, box.y + 345 * box.scale);
+    ctx.closePath();
+    ctx.fill();
+  }
   ctx.save();
   ctx.translate(box.x, box.y);
   ctx.scale(box.scale, box.scale);
+  ctx.translate(0, -35);
   drawFigure(ctx, frame, state);
+  ctx.save();
+  ctx.scale(box.floorScale, 1);
   // Twenty-four fixed perspective cells. A cell keeps all coincident note marks.
   const tileText: { x: number; y: number; count: number }[] = [];
   for (let row = 0; row < 3; row++)
@@ -233,8 +259,13 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: DancerScor
       ctx.fill();
       ctx.stroke();
       if (tile.length)
-        tileText.push({ x: ((x + 35) * (a + b)) / 2, y: y + 10, count: tile.length });
+        tileText.push({
+          x: (((x + 35) * (a + b)) / 2) * box.floorScale,
+          y: y + 10,
+          count: tile.length,
+        });
     }
+  ctx.restore();
   ctx.restore();
   // All text is drawn last, outside the moving figure, using text on ground or
   // text on a ground plate. Instrument ink never serves as label ink.
@@ -243,9 +274,7 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: DancerScor
   ctx.font = `21px "${theme.fontDisplay}"`;
   ctx.fillText(`ONE BODY · ${String(state.sounding)} PARTS SOUNDING`, width / 2, 29);
   ctx.font = `11px "${theme.fontMono}"`;
-  const sectionLength = frame.sections.at(-1)?.to ?? 0;
-  const cycle = sectionLength ? now % sectionLength : now;
-  const section = frame.sections.find((s) => s.from <= cycle && cycle < s.to)?.name;
+  const section = sectionAt(frame)?.name;
   ctx.fillText(
     `${section ? section + ' · ' : ''}bar ${String(Math.floor(now) + 1)} · ${String(Math.round((now % 1) * 100))}% · ${String(state.layers.length)} scored notes`,
     width / 2,
@@ -253,7 +282,7 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: DancerScor
   );
   for (const tile of box.scale >= 0.95 ? tileText : []) {
     const x = box.x + tile.x * box.scale,
-      y = box.y + tile.y * box.scale;
+      y = box.y + (tile.y - 35) * box.scale;
     const text = String(tile.count),
       w = ctx.measureText(text).width + 6;
     ctx.fillStyle = theme.ground;
@@ -296,7 +325,7 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: DancerScor
       ),
       active = state.counts[role];
     const x = 16 + (i % cols) * cellWidth,
-      y = start + 18 + Math.floor(i / cols) * 28;
+      y = start + 16 + Math.floor(i / cols) * 18;
     ctx.fillStyle = theme.text;
     const summary = members.length
       ? `${names.get(members[0]) ?? members[0]}${members.length > 1 ? ` +${String(members.length - 1)}` : ''}`

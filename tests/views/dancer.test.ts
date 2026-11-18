@@ -19,7 +19,7 @@ import type { ViewFrame, ViewNote } from '../../src/views/types';
 
 const corpus = new Map<string, ViewFrame>();
 beforeAll(async () => {
-  for (const file of ['real-dubstep-arranged', 'real-techno']) {
+  for (const file of ['real-dubstep-arranged', 'real-techno', 'piece-moss-radio']) {
     const source = readFileSync(`corpus/programs/${file}.strudel`, 'utf8');
     const state = loadPiece(initialState(), source, importStrudel(source));
     const frame = scoreFrame(state.rows.length);
@@ -132,7 +132,7 @@ it('uses real spans with smooth boundaries, constant sampled cutoff targets, and
   // A non-onset fragment can still hold a limb; it does not invent an earlier snap.
   expect(poseAt(indexDancer([{ ...n, hasOnset: false }]), 3).counts.hips).toBe(1);
 });
-it('adds colliding roles and accounts for 500 coincident notes across twenty parts, with fixed cells and sides', () => {
+it('blends colliding targets and accounts for 500 coincident notes across twenty parts, with fixed cells and sides', () => {
   const notes = Array.from({ length: 500 }, (_, i) =>
     note(String(i % 20), 0, 1, { note: (i % 3) + 36, cutoff: 400 + i, pan: 0.7 }),
   );
@@ -143,8 +143,13 @@ it('adds colliding roles and accounts for 500 coincident notes across twenty par
   expect(state.counts.torso).toBe(500);
   expect([...state.tiles.values()].flat()).toHaveLength(500);
   expect(state.tiles.size).toBeLessThanOrEqual(24);
-  expect(state.pose.arms).toBe(1);
-  expect(state.pose.torso).toBe(1);
+  const meanTarget =
+    notes.reduce(
+      (sum, n) => sum + Math.log(Number(n.value.cutoff) / 60) / Math.log(16000 / 60),
+      0,
+    ) / notes.length;
+  expect(state.pose.arms).toBeCloseTo(meanTarget);
+  expect(state.pose.torso).toBeCloseTo(0.4);
   for (const layer of state.layers) {
     expect(layer.cell).toBe(noteSeed(layer.note) % 24);
     expect(layer.side).toBe(noteSeed(layer.note) % 2);
@@ -175,9 +180,10 @@ it('keeps figure and text in separate bands at Studio sizes, including narrow St
   ]) {
     const box = dancerLayout(width, height);
     expect(box.y).toBeGreaterThan(60);
-    expect(box.y + box.scale * 430).toBeLessThanOrEqual(height - box.footer);
-    expect(box.x - box.scale * 300).toBeGreaterThanOrEqual(16);
-    expect(box.x + box.scale * 300).toBeLessThanOrEqual(width - 16);
+    expect(box.y + box.scale * 400).toBeLessThanOrEqual(height - box.footer);
+    expect(box.x - box.scale * 210).toBeGreaterThanOrEqual(16);
+    expect(box.x + box.scale * 210).toBeLessThanOrEqual(width - 16);
+    expect(box.scale * box.floorScale * 620).toBeCloseTo(width - 32);
   }
 });
 
@@ -199,4 +205,38 @@ it('never mistakes sample indices for the lowest pitched part', () => {
   const state = poseAt(indexDancer(notes), 0.4);
   expect(state.layers.find((l) => l.roles.includes('hips'))?.note.instrument).toBe('sub');
   expect(state.layers.find((l) => l.note.instrument === 'vocal')?.roles).toEqual([]);
+});
+
+it('keeps cutoff, pan and hip sway unchanged when one part becomes a chord, including eased edges', () => {
+  const n = note('chord', 0, 1, { note: 'c1', cutoff: 700, pan: 0.7 });
+  const mono = indexDancer([n]);
+  const chord = indexDancer([
+    n,
+    { ...n, value: { ...n.value, note: 'eb1' } },
+    { ...n, value: { ...n.value, note: 'g1' } },
+  ]);
+  for (const now of [0.02, 0.4, 0.97]) {
+    const expected = poseAt(mono, now).pose,
+      actual = poseAt(chord, now);
+    for (const role of ['arms', 'torso', 'hips'] as const)
+      expect(actual.pose[role]).toBeCloseTo(expected[role]);
+    expect(actual.counts.arms).toBe(3);
+    expect(actual.counts.torso).toBe(3);
+    expect(actual.counts.hips).toBe(3);
+    expect([...actual.tiles.values()].flat()).toHaveLength(3);
+  }
+});
+it('blends the real moss-radio bass and three pad cutoff voices without saturating the arm height', () => {
+  const frame = windowFrame(corpus.get('piece-moss-radio')!, 12.4);
+  const state = poseAt(indexDancer(frame.notes), 12.4);
+  const arms = state.layers.filter((l) => l.armTarget !== undefined);
+  expect(arms).toHaveLength(4);
+  expect(state.counts.arms).toBe(4);
+  expect(state.pose.arms).toBeCloseTo(
+    (arms.reduce((sum, l) => sum + l.armTarget! * l.strength, 0) /
+      arms.reduce((sum, l) => sum + l.strength, 0)) *
+      Math.max(...arms.map((l) => l.strength)),
+  );
+  expect(state.pose.arms).toBeLessThan(0.7);
+  expect(state.pose.arms).toBeGreaterThan(0.3);
 });
