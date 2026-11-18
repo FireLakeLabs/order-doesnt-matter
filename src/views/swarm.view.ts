@@ -147,7 +147,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, drum: string | null) {
     ] as const) {
       let squadron = false;
       for (const n of notes) {
-        const pose = enemyPose(n, f, row.y, g.x),
+        const pose = enemyPose(n, f, g.y(n), g.x),
           flagship = isCarrier(n);
         if (!pose.visible) continue;
         const alive = !pose.hit || (flagship && pose.remaining > 0);
@@ -179,7 +179,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, drum: string | null) {
               const past = enemyPose(
                 n,
                 { ...f, now: f.now - (12 - step) * f.cps * 0.014 },
-                row.y,
+                g.y(n),
                 g.x,
               );
               if (step === 0) c.moveTo(past.x, past.y);
@@ -252,7 +252,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, drum: string | null) {
     }
     if (!row.instrument.muted)
       for (const n of row.recent) {
-        const pose = enemyPose(n, f, row.y, g.x);
+        const pose = enemyPose(n, f, g.y(n), g.x);
         c.fillStyle = col;
         effect(n, pose.hitX, pose.hitY);
       }
@@ -283,12 +283,6 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, drum: string | null) {
   line(c, g.left, h - 27, g.right, h - 27);
   c.strokeStyle = t.accent;
   line(c, g.left, h - 27, g.left + (f.now - g.bar) * (g.right - g.left), h - 27);
-  c.font = `10px "${t.fontMono}"`;
-  c.fillStyle = t.muted;
-  c.textAlign = 'left';
-  c.fillText(`BAR ${String(g.bar + 1)}`, g.left, h - 10);
-  c.textAlign = 'right';
-  c.fillText(`${String(Math.round((f.now - g.bar) * 100))}%`, g.right, h - 10);
 }
 export default {
   id: 'swarm',

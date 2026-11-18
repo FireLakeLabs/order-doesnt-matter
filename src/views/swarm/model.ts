@@ -27,7 +27,10 @@ export function wave(frame: Pick<ViewFrame, 'now' | 'sections'>) {
   const length = frame.sections.at(-1)?.to ?? 0;
   const local = length > 0 ? ((frame.now % length) + length) % length : frame.now;
   const index = frame.sections.findIndex((s) => s.from <= local && local < s.to);
-  return { number: index + 1 || 1, name: frame.sections[index]?.name ?? 'Open space' };
+  return {
+    number: index < 0 && frame.sections.length ? 0 : index + 1 || 1,
+    name: frame.sections[index]?.name ?? 'Open space',
+  };
 }
 /** Current-bar score count, never an accumulated counter or an invented unseen history. */
 export function hitCount(frame: Pick<ViewFrame, 'now' | 'notes' | 'instruments'>) {
@@ -110,15 +113,14 @@ export function shipX(frame: Pick<ViewFrame, 'notes' | 'now' | 'width' | 'cps' |
     (hitX(after, frame.width) - centre) * ease(clamp(1 - (after - frame.now) / (travel / 2)))
   );
 }
-export function formation(frame: ViewFrame, drum: string | null = drumPart(frame.notes) ?? null) {
-  const bar = Math.floor(frame.now);
-  const left = frame.width * 0.15,
-    right = frame.width * 0.85;
+/** A wave's slots depend on its scored participants, never the current section flag.
+ * Incoming notes retain these slots when the current bar/section changes. */
+function waveRows(frame: ViewFrame, bar: number) {
   const top = Math.max(90, frame.height * 0.15),
     bottom = Math.max(top, frame.height * 0.45);
   const visible = frame.instruments.filter(
     (i) =>
-      i.inSection ||
+      (!frame.notes.length && i.inSection) ||
       frame.notes.some((n) => n.instrument === i.id && n.end > bar && n.start < bar + 2),
   );
   const carriers = new Set(
@@ -130,9 +132,30 @@ export function formation(frame: ViewFrame, drum: string | null = drumPart(frame
     (a, b) => Number(carriers.has(b.id)) - Number(carriers.has(a.id)) || a.index - b.index,
   );
   const spacing = (bottom - top) / Math.max(1, visible.length - 1);
+  return visible.map((instrument, index) => ({
+    instrument,
+    y: visible.length === 1 ? (top + bottom) / 2 : top + index * spacing,
+  }));
+}
+export function formation(frame: ViewFrame, drum: string | null = drumPart(frame.notes) ?? null) {
+  const bar = Math.floor(frame.now);
+  const left = frame.width * 0.15,
+    right = frame.width * 0.85;
+  const visible = waveRows(frame, bar);
+  const layouts = new Map([[bar, visible]]);
+  const spacing = visible.length > 1 ? visible[1].y - visible[0].y : frame.height * 0.3;
+  const y = (note: ViewNote) => {
+    const waveBar = Math.floor(note.start);
+    let layout = layouts.get(waveBar);
+    if (!layout) {
+      layout = waveRows(frame, waveBar);
+      layouts.set(waveBar, layout);
+    }
+    return layout.find((row) => row.instrument.id === note.instrument)?.y ?? frame.height * 0.3;
+  };
   const x = (time: number, now = frame.now) =>
     frame.width / 2 + (phase(time) - 0.5) * (right - left) * breathing({ ...frame, now }, drum);
-  const rows = visible.map((instrument, index) => {
+  const rows = visible.map(({ instrument, y: rowY }) => {
     const notes = frame.notes.filter(
       (n) => n.instrument === instrument.id && n.end > bar && n.start < bar + 1,
     );
@@ -156,7 +179,7 @@ export function formation(frame: ViewFrame, drum: string | null = drumPart(frame
       spacing < Math.max(14, ((28 * frame.width) / 1300) * Math.min(1, frame.height / 760));
     return {
       instrument,
-      y: visible.length === 1 ? (top + bottom) / 2 : top + index * spacing,
+      y: rowY,
       notes,
       next,
       enemies: currentEnemies,
@@ -176,7 +199,7 @@ export function formation(frame: ViewFrame, drum: string | null = drumPart(frame
       ),
     };
   });
-  return { bar, left, right, x, shipX: shipX(frame), shipY: frame.height * 0.88, rows };
+  return { bar, left, right, x, y, shipX: shipX(frame), shipY: frame.height * 0.88, rows };
 }
 export const spriteRadius = (note: ViewNote, width: number, height = 760) =>
   enemySize(note, width) * clamp(height / 760, 0.65, 1) * (isCarrier(note) ? 1.5 : 1);
@@ -225,10 +248,14 @@ export function enemyPose(
     start = flagship ? note.start : note.start - duration;
   const arrival = flagship ? note.start + Math.min(duration, note.end - note.start) : note.start;
   const hit = {
-    x: isCarrier(note)
-      ? frame.width * (0.2 + 0.6 * clamp((rowY / frame.height - 0.15) / 0.3))
+    x: flagship
+      ? frame.width *
+        (0.2 +
+          0.6 *
+            ((frame.instruments.find((i) => i.id === note.instrument)?.index ?? 0) /
+              Math.max(1, frame.instruments.length - 1)))
       : hitX(note.start, frame.width),
-    y: frame.height * (isCarrier(note) ? 0.6 : 0.76),
+    y: frame.height * (flagship ? 0.6 : 0.76),
   };
   const slot = { x: x(note.start, start), y: rowY };
   const entryStart = Math.floor(note.start) - 0.5;

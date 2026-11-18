@@ -14,6 +14,10 @@ test('swarm: exact-time Studio evidence, themes, dense shields and frame cost', 
   await page.setViewportSize({ width: 1920, height: 1080 });
   await prepare(page, 'swarm');
   await page.setViewportSize({ width: 2560, height: 1440 });
+  const presented = async () =>
+    page.evaluate(async () => {
+      for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
+    });
   const at = async (now: number) => {
     await page.evaluate(async (now) => {
       await window.odmStudio.seek(now);
@@ -25,9 +29,7 @@ test('swarm: exact-time Studio evidence, themes, dense shields and frame cost', 
       now,
     );
     await page.evaluate(() => document.fonts.ready);
-    await page.evaluate(async () => {
-      for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
-    });
+    await presented();
   };
   for (const [label, now] of [
     ['bar-11-10', 10.1],
@@ -67,13 +69,8 @@ test('swarm: exact-time Studio evidence, themes, dense shields and frame cost', 
     await window.odmStudio.endScrub();
   });
   await page.waitForFunction(() => window.viewProbe.frame?.now === 10.4);
-  const presented = async () =>
-    page.evaluate(async () => {
-      for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
-    });
   await presented();
   const a = page.locator('[data-region="stage-a"] canvas');
-  const forwardFrame = await page.evaluate(() => window.viewProbe.frame);
   const forward = await a.evaluate((canvas: HTMLCanvasElement) => [
     ...canvas.getContext('2d')!.getImageData(0, 0, canvas.width, canvas.height).data,
   ]);
@@ -90,23 +87,6 @@ test('swarm: exact-time Studio evidence, themes, dense shields and frame cost', 
   for (let i = 0; i < forward.length; i += 4)
     if (forward.slice(i, i + 4).some((v, channel) => v !== backward[i + channel]))
       differentPixels++;
-  if (differentPixels) {
-    await writeFile(
-      `${shots}/pixel-difference.json`,
-      JSON.stringify(
-        {
-          differentPixels,
-          forwardFrame,
-          pixels: forward.flatMap((v, i) =>
-            v !== backward[i] ? [{ index: i, forward: v, backward: backward[i] }] : [],
-          ),
-          frame: await page.evaluate(() => window.viewProbe.frame),
-        },
-        null,
-        2,
-      ),
-    );
-  }
   expect(differentPixels).toBe(0);
   const second = page.locator('[data-region="stage-b"]');
   await second.getByRole('button', { name: 'Views', exact: true }).click();

@@ -133,13 +133,45 @@ it('the actual next wave enters only in the second half, loops and settles befor
   expect(pose(11).y).toBe(240);
   expect(entryPoint(1, { x: 600, y: 240 }, 1300, 760, 1)).toEqual({ x: 600, y: 240 });
   expect(entryPoint(0.5, { x: 600, y: 240 }, 1300, 760, 1).y).toBeGreaterThan(240);
-  // The first notes can start their dive before the bar line without jumping back to their slots.
-  const first = { ...n, start: 11, end: 11.1 };
-  const g = formation({ ...frame, now: 10.999999 });
-  const before = enemyPose(first, { ...frame, now: 10.999999 }, 240, g.x);
-  const after = enemyPose(first, { ...frame, now: 11 }, 240, formation({ ...frame, now: 11 }).x);
-  expect(before.x).toBeCloseTo(after.x, 3);
-  expect(before.y).toBeCloseTo(after.y, 3);
+});
+it('keeps dives and hovering flagships continuous when a part leaves at the bar line', () => {
+  const f = scoreFrame(4);
+  const [leaving, diver, other, held] = [
+    { instrument: '0', start: 0, end: 1, value: { note: 48 }, hasOnset: true },
+    { instrument: '1', start: 1.05, end: 1.1, value: { s: 'sd' }, hasOnset: true },
+    { instrument: '2', start: 1.75, end: 1.8, value: { s: 'hh' }, hasOnset: true },
+    { instrument: '3', start: 0, end: 3, value: { note: 60 }, hasOnset: true },
+  ];
+  const pose = (now: number) => {
+    const current = {
+      ...f,
+      now,
+      notes: [leaving, diver, other, held],
+      instruments: f.instruments.map((i) => ({ ...i, inSection: i.id !== '0' || now < 1 })),
+    };
+    const g = formation(current);
+    const row = (id: string) => g.rows.find((row) => row.instrument.id === id)!;
+    return {
+      rowY: row('1').y,
+      flagshipRowY: row('3').y,
+      slotY: g.y(diver),
+      diver: enemyPose(diver, current, g.y(diver), g.x),
+      flagship: enemyPose(held, current, row('3').y, g.x),
+    };
+  };
+  const before = pose(0.99999999),
+    after = pose(1);
+  expect(before.rowY).not.toBe(after.rowY);
+  expect(before.flagshipRowY).not.toBe(after.flagshipRowY);
+  expect(before.slotY).toBe(after.slotY);
+  expect(before.diver.diving).toBe(true);
+  expect(before.diver.x).toBeCloseTo(after.diver.x, 3);
+  expect(before.diver.y).toBeCloseTo(after.diver.y, 3);
+  expect(before.flagship.x).toBe(after.flagship.x);
+  expect(before.flagship.y).toBe(after.flagship.y);
+  pose(1.5);
+  pose(0.5);
+  expect(pose(1)).toEqual(after);
 });
 it('breathes by six percent on the scored steadiest drum and eases back', () => {
   const notes = [0, 0.25, 0.5, 0.75, 1].map((start) => ({
@@ -300,4 +332,16 @@ it('counts overlapping flagships after different slots converge on their shared 
   const row = formation(layered).rows.find((row) => row.instrument.id === n.instrument)!;
   expect(row.enemies).toHaveLength(2);
   expect(row.crowded).toBe(true);
+});
+
+it('does not name the first section while the playhead is in a section gap', () => {
+  expect(
+    wave({
+      now: 1.5,
+      sections: [
+        { name: 'first', from: 0, to: 1 },
+        { name: 'second', from: 2, to: 3 },
+      ],
+    }),
+  ).toEqual({ number: 0, name: 'Open space' });
 });
