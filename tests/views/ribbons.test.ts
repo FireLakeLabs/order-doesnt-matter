@@ -21,6 +21,8 @@ import {
 import { pitch } from '../../src/views/shared/pitch';
 import { queryEventsNode } from '../node-query';
 import { scoreFrame } from './score-fixture';
+import { themes, instrumentColour } from '../../src/studio/themes';
+import { labelColour } from '../../src/views/ribbons/labels';
 
 let frame: ViewFrame;
 let state: ReturnType<typeof loadPiece>;
@@ -267,4 +269,45 @@ it('reproduces camera, sampled turns and geometry after arbitrary times and quer
   expect(cameraPose(frame.now)).toEqual(pose);
   expect(ribbonGeometry(frame, ribbonParts(frame, data))).toEqual(original);
   expect(cameraPose(frame.now + 1)).not.toEqual(pose);
+});
+
+// Independent WCAG sRGB measurement, including rounded palette-wrap tints.
+function contrastRatio(a: string, b: string) {
+  const luminance = (hex: string) => {
+    const channels = hex
+      .slice(1)
+      .match(/../g)!
+      .map((value) => {
+        const v = Number.parseInt(value, 16) / 255;
+        return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+      });
+    return channels.reduce((sum, v, i) => sum + v * [0.2126, 0.7152, 0.0722][i], 0);
+  };
+  const values = [luminance(a), luminance(b)].sort((x, y) => x - y);
+  return (values[1] + 0.05) / (values[0] + 0.05);
+}
+it.each(Object.values(themes))(
+  '$name: every instrument label meets 4.5:1 on its opaque ground plate',
+  (theme) => {
+    // Covers every base colour, twenty instruments, repeated/tinted palette
+    // wraps and later tints.
+    for (let index = 0; index <= 100; index++) {
+      const colour = instrumentColour(theme.name, index);
+      const ink = labelColour(colour, theme);
+      expect(
+        contrastRatio(ink, theme.ground),
+        `${theme.name} instrument ${index}: ${colour}`,
+      ).toBeGreaterThanOrEqual(4.5);
+      if (contrastRatio(colour, theme.ground) >= 4.5) expect(ink).toBe(colour);
+      else expect(ink).toBe(theme.text);
+    }
+  },
+);
+it('makes the sweep’s Riso subBass label readable', () => {
+  const colour = instrumentColour('riso', 10);
+  expect(colour).toBe('#FFD033');
+  expect(contrastRatio(colour, themes.riso.ground)).toBeLessThan(1.5);
+  expect(
+    contrastRatio(labelColour(colour, themes.riso), themes.riso.ground),
+  ).toBeGreaterThanOrEqual(4.5);
 });
