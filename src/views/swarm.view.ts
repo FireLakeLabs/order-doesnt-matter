@@ -72,8 +72,9 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, drum: string | null) {
   const t = f.theme,
     w = f.width,
     h = f.height;
-  // Reset the backing context as well as its pixels: a reused raster cache can
-  // otherwise shade the same rotated wing differently after another time.
+  // Deliberately replace mount2d's preparation with a reset of both context and
+  // pixels. Reused raster state can otherwise shade the same rotated wing
+  // differently after visiting another time.
   c.reset();
   c.fillStyle = t.ground;
   c.fillRect(0, 0, c.canvas.width, c.canvas.height);
@@ -132,7 +133,6 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, drum: string | null) {
   for (const row of g.rows) {
     const col = row.instrument.muted ? t.muted : row.instrument.colour;
     c.globalAlpha = 1;
-    c.textAlign = 'right';
     c.font = `10px "${t.fontMono}"`;
     for (const [notes, crowded] of [
       [row.enemies, row.crowded],
