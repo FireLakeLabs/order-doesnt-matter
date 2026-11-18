@@ -49,17 +49,17 @@ Everything known to be outstanding, in one place. The [model](model.md) and
   remain without an established compatible remedy. The last recorded
   production-only audit reported none; dependency changes need fresh checks.
 - **Redesign wave:** in progress per the [Studio design](../research/redesign/design.md).
-  Left: Scope (with the Studio audio tap) and a polish pass.
-- **Timing-dependent browser tests:** the Studio transport comparisons, the
-  practice start-up wait, the flood delivery count and a Kiln rhythm wait that
-  hangs to the 60 s limit failed CI and deploys without a product defect. Being
-  fixed before the second wave.
+  Left: a polish pass.
 - **Second wave of views:** 19 of 24 merged, planned in
   [second-wave.md](../research/redesign/second-wave.md). Marble run, Graphic
   score, Aquarium, Light rig and Afterglow are folded into the third wave's 3.1.
-- **Third wave of views:** fixes to Coil, Ash Run, Swarm, Catwalk and Tubes,
-  then 17 views and the five second-wave views, planned in [third-wave.md](../research/redesign/third-wave.md).
-  Views needing a framework change wait for that change.
+- **Third wave of views:** fixes to Coil, Ash Run, Swarm, Catwalk and Tubes
+  are merged; 3.1 builds 17 views and the five second-wave views, planned in
+  [third-wave.md](../research/redesign/third-wave.md). Views needing a
+  framework change wait for that change.
+- **Flash tails past the supplied notes:** Catwalk's camera flash ends early
+  when its note leaves the notes the host supplies. Fixing it needs the host to
+  supply notes whose effects outlive the window, a contract change.
 
 ## Design questions
 
