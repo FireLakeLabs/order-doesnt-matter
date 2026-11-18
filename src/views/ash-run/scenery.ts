@@ -1,7 +1,8 @@
 import type { ViewFrame } from '../types';
 import { line } from '../shared/retro-2d';
 import { random } from '../shared/particles';
-import { parallaxRates, type Scene, type Data } from './model';
+import { district, parallaxRates, type Scene, type Data } from './model';
+import { world } from './city';
 
 export const palettes = [
   { wall: '#38262f', rim: '#78515a', dark: '#211820', detail: '#503640' },
@@ -10,7 +11,9 @@ export const palettes = [
   { wall: '#343033', rim: '#766666', dark: '#1c1b22', detail: '#51464b' },
 ];
 /** Geometry is indexed by distance alone, including towers that carry musical windows. */
-export function skyline(f: ViewFrame, s: Scene, layer: number) {
+type WindowCity = Pick<Scene, 'distance' | 'district' | 'buildings' | 'x' | 'y'>;
+
+export function skyline(f: ViewFrame, s: Pick<Scene, 'distance' | 'district'>, layer: number) {
   const tile = f.width * [0.14, 0.21, 0.28][layer];
   const travel = s.distance * parallaxRates[layer];
   const first = Math.floor(travel / tile) - 1;
@@ -71,63 +74,89 @@ export function background(c: CanvasRenderingContext2D, f: ViewFrame, s: Scene, 
     }
   }
 }
-export function windowLights(f: ViewFrame, s: Scene, data: Data) {
-  const near = skyline(f, s, 2);
-  const ids = [...data.parts.keys()].filter(
-    (id) => ![s.roles.kick, s.roles.snare, s.roles.openHat, s.roles.walker].includes(id),
-  );
-  const active = new Map(
-    ids.map((id) => [
-      id,
-      (data.parts.get(id) ?? []).filter(
-        ({ note }) => note.start <= f.now && f.now < Math.max(note.end, note.start + f.cps * 0.18),
-      ),
-    ]),
-  );
+function partWindows(f: ViewFrame, s: WindowCity, part: number) {
   const count = Math.max(1, f.instruments.length);
   return [1, 2].flatMap((layer) =>
     skyline(f, s, layer).flatMap((b) => {
-      // Allocate by a building's fixed row/column cells, before visibility. A
-      // held note keeps its cell as that building scrolls or becomes occluded.
       const cells = facadeWindows(b);
       const stripes = Math.ceil(count / cells.length);
-      return ids.flatMap((id) => {
-        const instrument = f.instruments.find((i) => i.id === id);
-        const colour = instrument?.colour ?? f.theme.accent;
-        const part = instrument?.index ?? 0;
-        const own = cells.filter((_, ordinal) => ordinal % count === part % count);
-        const pool = own.length ? own : [cells[part % cells.length]];
-        return (active.get(id) ?? []).flatMap((e) => {
-          const w = pool[Math.floor(random(e.seed + b.index * 773, layer) * pool.length)];
-          const x = w.x + (Math.floor(part / cells.length) * 10) / stripes;
-          const width = 10 / stripes;
-          if (x < 0 || x + width > f.width) return [];
-          if (
-            layer === 1 &&
-            near.some((n) => x < n.x + n.width && x + width > n.x && w.y + 7 >= n.top - 5)
-          )
-            return [];
-          if (
-            s.buildings.some((n) => x < s.x(n.end) && x + width > s.x(n.start) && w.y + 7 >= s.y(n))
-          )
-            return [];
-          return [
-            {
-              id,
-              colour,
-              layer,
-              building: b.index,
-              row: w.row,
-              column: w.column,
-              x,
-              y: w.y,
-              width,
-            },
-          ];
-        });
+      return cells.flatMap((w, ordinal) => {
+        if (
+          ordinal % count !== part % count &&
+          !(part >= cells.length && ordinal === part % cells.length)
+        )
+          return [];
+        const offsetX = w.x - b.x + (Math.floor(part / cells.length) * 10) / stripes;
+        return [
+          {
+            layer,
+            building: b.index,
+            row: w.row,
+            column: w.column,
+            offsetX,
+            offsetY: w.y - b.top,
+            x: b.x + offsetX,
+            y: w.y,
+            width: 10 / stripes,
+          },
+        ];
       });
     }),
   );
+}
+type WindowCell = ReturnType<typeof partWindows>[number];
+function visibleWindow(
+  f: ViewFrame,
+  s: WindowCity,
+  w: WindowCell,
+  near: ReturnType<typeof skyline>,
+) {
+  return (
+    w.x >= 0 &&
+    w.x + w.width <= f.width &&
+    !(
+      w.layer === 1 &&
+      near.some((n) => w.x < n.x + n.width && w.x + w.width > n.x && w.y + 7 >= n.top - 5)
+    ) &&
+    !s.buildings.some((n) => w.x < s.x(n.end) && w.x + w.width > s.x(n.start) && w.y + 7 >= s.y(n))
+  );
+}
+export function windowLights(f: ViewFrame, s: Scene, data: Data) {
+  const near = skyline(f, s, 2);
+  const towers = [1, 2].flatMap((layer) => skyline(f, s, layer).map((b) => ({ ...b, layer })));
+  const pools = new Map<string, WindowCell[]>();
+  return [...data.parts].flatMap(([id, events]) => {
+    if ([s.roles.kick, s.roles.snare, s.roles.openHat, s.roles.walker].includes(id)) return [];
+    const instrument = f.instruments.find((i) => i.id === id);
+    const colour = instrument?.colour ?? f.theme.accent;
+    const part = instrument?.index ?? 0;
+    return events.flatMap((e) => {
+      const n = e.note;
+      if (f.now < n.start || f.now >= Math.max(n.end, n.start + f.cps * 0.18)) return [];
+      // Choose once from the city at onset, never from what is visible now.
+      const key = `${String(n.start)}:${String(part)}`;
+      let pool = pools.get(key);
+      if (!pool) {
+        const at = { ...f, now: n.start };
+        const city = { ...world(at), district: district(at) };
+        const horizon = skyline(at, city, 2);
+        pool = partWindows(at, city, part).filter((w) => visibleWindow(at, city, w, horizon));
+        pools.set(key, pool);
+      }
+      if (!pool.length) return [];
+      const anchor = pool[Math.floor(random(e.seed) * pool.length)];
+      const b = towers.find((b) => b.layer === anchor.layer && b.index === anchor.building);
+      if (!b) return [];
+      const light = {
+        ...anchor,
+        id,
+        colour,
+        x: b.x + anchor.offsetX,
+        y: b.top + anchor.offsetY,
+      };
+      return visibleWindow(f, s, light, near) ? [light] : [];
+    });
+  });
 }
 export function windows(c: CanvasRenderingContext2D, f: ViewFrame, s: Scene, data: Data) {
   for (const light of windowLights(f, s, data)) {

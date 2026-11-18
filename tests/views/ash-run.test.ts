@@ -306,13 +306,13 @@ it('vaults on every ground-level snare-roll onset even when hits are closer than
 
 it('gives twenty simultaneous parts disjoint lit windows, so no part can overpaint another', () => {
   for (let trial = 0; trial < 16; trial++) {
-    const f = { ...scoreFrame(20), width: 960, height: 600 };
+    const f = { ...scoreFrame(20), width: 960, height: 600, now: 10 };
     f.notes = f.instruments.map((i) => ({
       instrument: i.id,
-      start: 10 - trial * 0.001,
-      end: 11 + trial * 0.001,
+      start: 10,
+      end: 11,
       hasOnset: true,
-      value: { note: 48 + i.index },
+      value: { note: 48 + i.index + trial },
     }));
     const data = analyse(f.notes),
       s = scene(f, data),
@@ -349,7 +349,7 @@ it('keeps a held window on the same cell while it moves at its layer parallax', 
   }));
   const data = analyse(f.notes);
   const initial = windowLights(f, scene(f, data), data);
-  const anchor = initial.find((w) => w.layer === 1 && w.x > 150 && w.x < 800 && w.y < 280);
+  const anchor = initial.find((w) => w.layer === 1 && w.x > 150 && w.x < f.width - 20 && w.y < 280);
   expect(anchor).toBeDefined();
   if (!anchor) throw Error('Expected an unobscured mid-ground window');
   for (let tick = 1; tick < 100; tick++) {
@@ -396,4 +396,25 @@ it('lands inside the next roof even in a very wide stage', () => {
     expect(route(w, jump.landing).airborne).toBe(false);
     expect(route(w, jump.landing).feet).toBeCloseTo(w.y(jump.to));
   }
+});
+
+it('lights exactly one cell per active window note, regardless of stage width or chord size', () => {
+  for (const width of [560, 960, 1920])
+    for (const voices of [1, 4]) {
+      const f = { ...scoreFrame(8), width, height: 600, now: 10 };
+      f.notes = f.instruments.flatMap((i) =>
+        Array.from({ length: voices }, (_, voice) => ({
+          instrument: i.id,
+          start: 10,
+          end: 11,
+          hasOnset: true,
+          value: { note: 48 + i.index * 4 + voice },
+        })),
+      );
+      const data = analyse(f.notes),
+        lights = windowLights(f, scene(f, data), data);
+      expect(lights).toHaveLength(7 * voices); // Lowest part lights the walker.
+      for (const instrument of f.instruments.slice(1))
+        expect(lights.filter((light) => light.id === instrument.id)).toHaveLength(voices);
+    }
 });
