@@ -123,12 +123,7 @@ export function pinballLayout(
       const inset = lanes > 1 ? (lane / (lanes - 1)) * 0.09 : 0;
       const p = (x: number, y: number) => point(side ? 1 - x : x, y);
       track = [
-        ...cubic(
-          p(0.23 + inset, 0.81),
-          p(0.05 + inset, 0.6),
-          p(0.32 + inset, 0.57),
-          p(0.22 + inset, 0.39),
-        ),
+        ...cubic(p(0.15, 0.81), p(0.05 + inset, 0.6), p(0.32 + inset, 0.57), p(0.22 + inset, 0.39)),
         ...cubic(
           p(0.22 + inset, 0.39),
           p(0.14 + inset, 0.23),

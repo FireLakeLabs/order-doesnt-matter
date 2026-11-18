@@ -1,17 +1,11 @@
 import type { ViewDefinition, ViewFrame } from './types';
-import {
-  flipperAt,
-  indexPinball,
-  pinballLayout,
-  pinballState,
-  captivePoint,
-} from './pinball/model';
-import type { PinballScore, PinballLayout, Point, Target } from './pinball/model';
+import { flipperAt, indexPinball, pinballState } from './pinball/model';
+import type { PinballScore, Point } from './pinball/model';
 import { previousOnset, noteProgress } from './shared/timing';
 import { sectionAt } from './shared/ring-model';
 import { clamp } from './shared/math';
-import { assignFeatures } from './pinball/table';
-import type { FeatureAssignments } from './pinball/table';
+import { assignFeatures, captivePoint, pinballLayout } from './pinball/table';
+import type { FeatureAssignments, PinballLayout, Target } from './pinball/table';
 
 function path(c: CanvasRenderingContext2D, points: Point[]) {
   c.beginPath();
@@ -296,7 +290,9 @@ function cabinet(
   c.lineWidth = 2;
   path(c, [p(0.39, 0.68), p(0.5, 0.76), p(0.61, 0.68)]);
   c.globalAlpha = 1;
-  for (const t of box.targets) feature(c, f, box, t, lit.has(t.instrument.id));
+  for (const active of [false, true])
+    for (const t of box.targets)
+      if (lit.has(t.instrument.id) === active) feature(c, f, box, t, active);
 }
 function ball(c: CanvasRenderingContext2D, f: ViewFrame, p: Point, radius: number, trail: Point[]) {
   c.save();

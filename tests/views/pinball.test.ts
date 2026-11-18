@@ -158,6 +158,8 @@ it('uses mechanical role zones and keeps curved routes clear of other bumpers an
         if (t.kind === 'rollover') expect(t.y).toBeLessThan(box.top + box.fieldHeight * 0.25);
         if (t.kind === 'ramp') {
           expect(t.track).toHaveLength(65);
+          const footX = (t.track[0].x - box.left) / box.fieldWidth;
+          expect(footX < 0.18 || footX > 0.82).toBe(true);
           expect(t.track[0].y - t.track.at(-1)!.y).toBeGreaterThan(box.fieldHeight * 0.6);
         }
       }
