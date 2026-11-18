@@ -10,6 +10,7 @@ export interface Event {
   note: ViewNote;
   midi: number | undefined;
   seed: number;
+  identity: string;
 }
 export function analyse(notes: ViewNote[]) {
   const evidence = roleEvidence(notes);
@@ -27,7 +28,7 @@ export function analyse(notes: ViewNote[]) {
       }
       let seed = Math.round(e.note.start * 1e6);
       for (const char of id + identity) seed = Math.imul(seed ^ char.charCodeAt(0), 16777619);
-      events.push({ note: e.note, midi: e.pitch, seed });
+      events.push({ note: e.note, midi: e.pitch, seed, identity: id + identity });
     }
     parts.set(id, events);
   }
@@ -156,30 +157,77 @@ const identitySettings = new Set([
   'end',
   'unit',
 ]);
-const preferred = ['cutoff', 'lpf', 'hcutoff', 'hpf', 'resonance', 'pan', 'gain'];
+const filters = [
+  'cutoff',
+  'lpf',
+  'hcutoff',
+  'hpf',
+  'bandf',
+  'bpf',
+  'resonance',
+  'lpq',
+  'hresonance',
+  'hpq',
+  'bandq',
+  'bpq',
+  'ftype',
+];
+const aliases: Record<string, string> = {
+  lpf: 'cutoff',
+  hpf: 'hcutoff',
+  bpf: 'bandf',
+  lpq: 'resonance',
+  hpq: 'hresonance',
+  bpq: 'bandq',
+};
+const preferred = [...filters, 'pan', 'gain'];
 export function searchlight(frame: ViewFrame, data: Data) {
   const candidates = frame.instruments
     .filter((i) => i.inSection)
     .flatMap((i) => {
       const events = data.parts.get(i.id) ?? [];
-      return [...(data.ranges.get(i.id) ?? [])].flatMap(([key, r]) =>
-        !identitySettings.has(key) &&
-        r.min !== undefined &&
-        r.max !== undefined &&
-        r.max - r.min > 1e-6 * Math.max(1, Math.abs(r.min), Math.abs(r.max))
-          ? [
-              {
-                instrument: i.id,
-                key,
-                events,
-                priority: preferred.includes(key) ? preferred.indexOf(key) : preferred.length,
-                index: i.index,
-              },
-            ]
-          : [],
-      );
+      const ranges = data.ranges.get(i.id);
+      const keys = new Set([
+        ...(ranges?.keys() ?? []),
+        ...i.settings.map((setting) =>
+          ranges?.has(setting.name) ? setting.name : (aliases[setting.name] ?? setting.name),
+        ),
+      ]);
+      return [...keys].flatMap((key) => {
+        if (identitySettings.has(key)) return [];
+        const r = ranges?.get(key);
+        const moving =
+          i.settings.some(
+            (setting) =>
+              (aliases[setting.name] ?? setting.name) === (aliases[key] ?? key) &&
+              (setting.kind === 'signal' || setting.kind === 'values'),
+          ) ||
+          (r?.min !== undefined &&
+            r.max !== undefined &&
+            r.max - r.min > 1e-6 * Math.max(1, Math.abs(r.min), Math.abs(r.max)));
+        const filter = filters.includes(key);
+        if (!filter && !moving) return [];
+        return [
+          {
+            instrument: i.id,
+            key,
+            events,
+            filter,
+            moving,
+            priority: preferred.includes(key) ? preferred.indexOf(key) : preferred.length,
+            index: i.index,
+          },
+        ];
+      });
     })
-    .sort((a, b) => a.priority - b.priority || a.index - b.index || a.key.localeCompare(b.key));
+    .sort(
+      (a, b) =>
+        Number(b.filter) - Number(a.filter) ||
+        Number(b.moving) - Number(a.moving) ||
+        a.priority - b.priority ||
+        a.index - b.index ||
+        a.key.localeCompare(b.key),
+    );
   const driver = candidates.at(0);
   if (!driver) return undefined;
   const notes = driver.events.map((e) => e.note);
