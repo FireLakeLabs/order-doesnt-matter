@@ -12,6 +12,8 @@ also on the owner's design canvas. Each shows the dubstep arrangement
 Slalom and Chord bridge use bar 18. The pictures are illustrative; the mapping
 rules on each card are the design. Pond and Whack were declined by the owner.
 
+Every wave below ends with a sweep (D50) before the next one starts.
+
 ## Wave 3.0: fixes to existing views (first, five lanes in parallel)
 
 | View    | Owner's complaint                                                                                       | Fix                                                                                                                                                                                                                                                                                                                                                                                   |
