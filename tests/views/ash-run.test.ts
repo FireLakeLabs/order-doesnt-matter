@@ -537,11 +537,23 @@ function expectDisjoint(lights: Light[]) {
     cells.set(key, cell);
   }
   for (const cell of cells.values()) {
-    cell.sort((a, b) => a.x - b.x);
-    for (const [index, light] of cell.entries()) {
-      expect(light.width).toBeGreaterThan(0);
-      if (index) expect(cell[index - 1].x + cell[index - 1].width).toBeLessThanOrEqual(light.x);
-    }
+    const rectangles = cell
+      .flatMap((light) => {
+        const x = light.split ? light.x : light.windowX;
+        const parts = [{ x, width: light.width }];
+        if (light.wrapWidth > 0) parts.push({ x: light.windowX, width: light.wrapWidth });
+        for (const part of parts) {
+          expect(part.width).toBeGreaterThan(0);
+          expect(part.x).toBeGreaterThanOrEqual(light.windowX);
+          expect(part.x + part.width).toBeLessThanOrEqual(light.windowX + light.windowWidth + 1e-9);
+        }
+        return parts;
+      })
+      .sort((a, b) => a.x - b.x);
+    for (let index = 1; index < rectangles.length; index++)
+      expect(rectangles[index - 1].x + rectangles[index - 1].width).toBeLessThanOrEqual(
+        rectangles[index].x,
+      );
   }
 }
 
@@ -614,7 +626,7 @@ it('keeps split positions fixed when colliding siblings disappear or reverse ord
   const f = { ...scoreFrame(2), width: 960, height: 600, now: 10 };
   f.notes = [
     { instrument: '0', start: 10, end: 18, hasOnset: true, value: { note: 12 } },
-    ...[60, 64, 67, 72].map((note) => ({
+    ...[60, 61, 72, 90].map((note) => ({
       instrument: '1',
       start: 10,
       end: note === 72 ? 18 : 11,
@@ -633,8 +645,12 @@ it('keeps split positions fixed when colliding siblings disappear or reverse ord
   const full = windowLights(f, s, collide(f.notes));
   expect(full).toHaveLength(4);
   expect(full.every((w) => w.split)).toBe(true);
+  expect(full.reduce((sum, w) => sum + w.width + w.wrapWidth, 0)).toBeCloseTo(
+    full[0].windowWidth * 0.9,
+  );
+  expect(full.some((w) => w.wrapWidth > 0)).toBe(true);
   expectDisjoint(full);
-  const fewer = windowLights(f, s, collide(f.notes.filter((n) => n.value.note !== 64)));
+  const fewer = windowLights(f, s, collide(f.notes.filter((n) => n.value.note !== 61)));
   expect(fewer).toHaveLength(3);
   for (const light of fewer) {
     expect(light.split).toBe(true);
@@ -642,4 +658,58 @@ it('keeps split positions fixed when colliding siblings disappear or reverse ord
   }
   const reverse = collide([...f.notes].reverse());
   expect(windowLights(f, s, reverse)).toEqual(full);
+});
+
+it('recognises short filter aliases even when their moving signals sample a constant value', () => {
+  for (const [alias, key] of [
+    ['lp', 'cutoff'],
+    ['ctf', 'cutoff'],
+    ['lpf', 'cutoff'],
+    ['hp', 'hcutoff'],
+    ['hpf', 'hcutoff'],
+    ['bp', 'bandf'],
+    ['bpf', 'bandf'],
+  ]) {
+    const f = { ...scoreFrame(2), now: 0.1 };
+    f.notes = f.instruments.map((i) => ({
+      instrument: i.id,
+      start: 0,
+      end: 1,
+      hasOnset: true,
+      value: i.index === 0 ? { note: 60, cutoff: 850 } : { note: 72, [key]: 1370 },
+    }));
+    f.instruments[1].settings = [{ name: alias, label: 'Filter', kind: 'signal' }];
+    const light = searchlight(f, analyse(f.notes));
+    expect(light, alias).toMatchObject({ instrument: '1', key, value: 1370 });
+    expect(light?.angle, alias).toBeCloseTo(2.2 + (Math.log10(1370 / 20) / 3) * 0.7);
+  }
+});
+
+it('skips unsampled numeric filters without falling through to a moving non-filter', () => {
+  const f = { ...scoreFrame(3), now: 0.1 };
+  f.instruments[0].settings = [{ name: 'lpf', label: 'Cutoff', kind: 'signal' }];
+  f.notes = [
+    {
+      instrument: '0',
+      start: 0,
+      end: 1,
+      hasOnset: true,
+      value: { note: 60, cutoff: 'unknown', ftype: 'ladder' },
+    },
+    { instrument: '1', start: 0, end: 1, hasOnset: true, value: { note: 72, hcutoff: 500 } },
+    ...[0, 1].map((start) => ({
+      instrument: '2',
+      start,
+      end: start + 1,
+      hasOnset: true,
+      value: { s: 'hh', gain: start ? 1 : 0.2 },
+    })),
+  ];
+  expect(searchlight(f, analyse(f.notes))).toMatchObject({
+    instrument: '1',
+    key: 'hcutoff',
+    value: 500,
+  });
+  f.notes = f.notes.filter((n) => n.instrument !== '1');
+  expect(searchlight(f, analyse(f.notes))).toBeUndefined();
 });

@@ -157,25 +157,15 @@ const identitySettings = new Set([
   'end',
   'unit',
 ]);
-const filters = [
-  'cutoff',
-  'lpf',
-  'hcutoff',
-  'hpf',
-  'bandf',
-  'bpf',
-  'resonance',
-  'lpq',
-  'hresonance',
-  'hpq',
-  'bandq',
-  'bpq',
-  'ftype',
-];
+const filters = ['cutoff', 'hcutoff', 'bandf', 'resonance', 'hresonance', 'bandq', 'ftype'];
 const aliases: Record<string, string> = {
   lpf: 'cutoff',
+  lp: 'cutoff',
+  ctf: 'cutoff',
   hpf: 'hcutoff',
+  hp: 'hcutoff',
   bpf: 'bandf',
+  bp: 'bandf',
   lpq: 'resonance',
   hpq: 'hresonance',
   bpq: 'bandq',
@@ -205,7 +195,8 @@ export function searchlight(frame: ViewFrame, data: Data) {
           (r?.min !== undefined &&
             r.max !== undefined &&
             r.max - r.min > 1e-6 * Math.max(1, Math.abs(r.min), Math.abs(r.max)));
-        const filter = filters.includes(key);
+        const canonical = aliases[key] ?? key;
+        const filter = filters.includes(canonical);
         if (!filter && !moving) return [];
         return [
           {
@@ -214,7 +205,9 @@ export function searchlight(frame: ViewFrame, data: Data) {
             events,
             filter,
             moving,
-            priority: preferred.includes(key) ? preferred.indexOf(key) : preferred.length,
+            priority: preferred.includes(canonical)
+              ? preferred.indexOf(canonical)
+              : preferred.length,
             index: i.index,
           },
         ];
@@ -228,22 +221,26 @@ export function searchlight(frame: ViewFrame, data: Data) {
         a.index - b.index ||
         a.key.localeCompare(b.key),
     );
-  const driver = candidates.at(0);
-  if (!driver) return undefined;
-  const notes = driver.events.map((e) => e.note);
-  const note =
-    notes
-      .filter((n) => n.start <= frame.now && frame.now < n.end)
-      .sort((a, b) => b.start - a.start)
-      .at(0) ?? previousOnset(notes, driver.instrument, frame.now);
-  const value = note?.value[driver.key];
-  if (typeof value !== 'number' || !Number.isFinite(value)) return undefined;
-  const unit = /cutoff|lpf|hpf/i.test(driver.key)
-    ? clamp(Math.log10(Math.max(20, value) / 20) / 3)
-    : driver.key === 'gain' || driver.key === 'pan'
-      ? clamp(value)
-      : 0.5 + Math.atan(value) / Math.PI;
-  return { instrument: driver.instrument, key: driver.key, note, value, angle: 2.2 + unit * 0.7 };
+  const hasFilter = candidates.some((candidate) => candidate.filter);
+  for (const driver of candidates) {
+    if (hasFilter && !driver.filter) continue;
+    const notes = driver.events.map((e) => e.note);
+    const note =
+      notes
+        .filter((n) => n.start <= frame.now && frame.now < n.end)
+        .sort((a, b) => b.start - a.start)
+        .at(0) ?? previousOnset(notes, driver.instrument, frame.now);
+    const value = note?.value[driver.key];
+    if (typeof value !== 'number' || !Number.isFinite(value)) continue;
+    const key = aliases[driver.key] ?? driver.key;
+    const unit = ['cutoff', 'hcutoff', 'bandf'].includes(key)
+      ? clamp(Math.log10(Math.max(20, value) / 20) / 3)
+      : key === 'gain' || key === 'pan'
+        ? clamp(value)
+        : 0.5 + Math.atan(value) / Math.PI;
+    return { instrument: driver.instrument, key: driver.key, note, value, angle: 2.2 + unit * 0.7 };
+  }
+  return undefined;
 }
 /** Contact phase spans consecutive actual onsets; silence falls back to a tempo cadence. */
 export function strideAt(frame: ViewFrame, data: Data, id: string | undefined) {

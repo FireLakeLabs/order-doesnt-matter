@@ -178,6 +178,7 @@ export function windowLights(f: ViewFrame, s: Scene, data: Data) {
           windowWidth: window.width,
           x: window.x + position * window.width,
           split: false,
+          wrapWidth: 0,
         },
       ];
     });
@@ -194,8 +195,11 @@ export function windowLights(f: ViewFrame, s: Scene, data: Data) {
     cell.sort((a, b) => a.subcell - b.subcell);
     cell.forEach((light, index) => {
       light.split = true;
-      // Only the available width changes with occupancy. The left edge never moves.
-      light.width = light.windowWidth * ((cell[index + 1]?.subcell ?? 1) - light.subcell) * 0.9;
+      // Split positions stay fixed; the last strip wraps to use the window's left side.
+      const next = cell[index + 1]?.subcell ?? cell[0].subcell + 1;
+      const width = light.windowWidth * (next - light.subcell) * 0.9;
+      light.width = Math.min(width, light.windowWidth * (1 - light.subcell));
+      light.wrapWidth = width - light.width;
     });
   }
   return lights.sort((a, b) => a.identity.localeCompare(b.identity));
@@ -208,14 +212,15 @@ export function windows(c: CanvasRenderingContext2D, f: ViewFrame, s: Scene, dat
     c.fillStyle = light.colour;
     const x = light.split ? light.x : light.windowX;
     c.fillRect(x, light.y, light.width, 7);
+    if (light.wrapWidth > 0) c.fillRect(light.windowX, light.y, light.wrapWidth, 7);
     if (light.count > 1) {
       const label = `×${String(light.count)}`;
       const width = c.measureText(label).width + 6;
-      const x = Math.max(0, Math.min(f.width - width, light.x));
+      const badgeX = Math.max(0, Math.min(f.width - width, x));
       c.fillStyle = '#14111c';
-      c.fillRect(x, light.y - 11, width, 10);
+      c.fillRect(badgeX, light.y - 11, width, 10);
       c.fillStyle = light.colour;
-      c.fillText(label, x + 3, light.y - 3);
+      c.fillText(label, badgeX + 3, light.y - 3);
     }
   }
   c.restore();
