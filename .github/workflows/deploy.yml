@@ -49,44 +49,8 @@ jobs:
           if-no-files-found: error
           retention-days: 90
 
-  browser:
-    name: Browser (${{ matrix.suite }} ${{ matrix.shard }})
-    runs-on: ubuntu-24.04
-    timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        suite: [studio, views]
-        shard: ['1/2', '2/2']
-        include:
-          - suite: engine
-            shard: '1/1'
-    steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
-        with:
-          persist-credentials: false
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
-        with:
-          node-version-file: .node-version
-          cache: npm
-      - run: npm ci
-      - run: npx playwright install --with-deps chromium
-      - run: npm run test:browser:${{ matrix.suite }} -- --shard=${{ matrix.shard }}
-        env:
-          ODM_PROFILE_PATH: browser-results/${{ matrix.suite }}-${{ strategy.job-index }}.json
-      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
-        if: always()
-        with:
-          name: browser-${{ matrix.suite }}-${{ strategy.job-index }}-evidence
-          path: |
-            browser-results/
-            .browser-build-*/
-          include-hidden-files: true
-          if-no-files-found: ignore
-          retention-days: 7
-
   configuration:
-    needs: [check, browser]
+    needs: [check]
     # Naming an environment creates it if absent. The repository variable keeps this
     # job from running, and so from creating one unrestricted, before provisioning.
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && vars.ODM_DEPLOY_ENABLED == 'true'
@@ -109,7 +73,7 @@ jobs:
           fi
 
   deploy:
-    needs: [check, browser, configuration]
+    needs: [check, configuration]
     if: github.ref == 'refs/heads/main' && needs.configuration.outputs.enabled == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 30

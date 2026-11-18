@@ -22,7 +22,8 @@ when the brief touches the page, `npm run test:browser`. Fix every failure at
 its cause. Never weaken a rule, skip a test or add a suppression comment to
 pass. If you believe a gate is wrong, leave it and say so in the handback. Do
 not send code to review while a gate fails. Suite durations are printed for
-information; they are not gates.
+information; they are not gates. CI does not run the browser suite, so your
+run is the only one; report its result.
 
 When agents share a machine, serialize heavy gates under `flock /tmp/odm-gates.lock`,
 in a detached session, recording the full log and exit code to files. A wrapper
