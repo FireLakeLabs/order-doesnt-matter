@@ -1,3 +1,5 @@
+import type { Arg, Core, Layer, Pattern, TopLevel } from '../document/types';
+import type { EventResult } from '../contract';
 import type { SampleLookup } from '../strudel/sample-buffers';
 
 export interface ViewNote {
@@ -38,6 +40,69 @@ export interface ViewTheme {
   radius: number;
   glow: boolean;
 }
+/** Snapshots preserve Strudel's whole/part spans, raw values and query errors.
+ * An available answer with result.error is broken, never silence. */
+export type ViewSnapshot =
+  | { status: 'available'; result: EventResult }
+  | { status: 'unavailable'; reason: string };
+export interface ViewDriver {
+  kind: 'constant' | 'values' | 'signal' | 'opaque';
+  time: 'definition';
+  /** Detached document structure, including its ordered transformations. */
+  pattern: Pattern;
+  opaque: string | null;
+  /** Driver queried independently at the frame's numeric from/to in definition
+   * time, without arrangement, use-site or global score transforms. These spans
+   * are not playback positions. Signals retain their continuous event spans. */
+  events(): Promise<ViewSnapshot>;
+  /** Authored fast/slow operations, inner to outer. Events query each argument
+   * independently at the frame's numeric from/to in its own local time, before
+   * applying it to the driver. They are not an effective playback rate. Outer
+   * driver rewrites that could change this timing make events unavailable. */
+  rates: {
+    id: string;
+    name: 'fast' | 'slow';
+    args: Arg[];
+    time: 'argument';
+    opaque: string | null;
+    events(): Promise<ViewSnapshot>;
+  }[];
+}
+export type ViewStructureStep = { id: string; opaque: string | null } & (
+  | { kind: 'phrase'; core: Core }
+  | { kind: 'setting'; layerId: string; name: string; args: Arg[]; driver: ViewDriver }
+  | { kind: 'rewrite'; name: string; args: Arg[] }
+  | { kind: 'opaque'; code: string }
+);
+export interface ViewProgramStructure {
+  instrument: string;
+  from: number;
+  to: number;
+  /** Step 0 is the core phrase (Pattern.id). Settings flatten their document
+   * layer in stored order and use Setting.id; rewrites use Layer.id.
+   * Names, arguments and mini structure are exactly as the document records.
+   * This is the definition's chain; step 0 is raw BEFORE the separately exposed
+   * context. Snapshots retain arrangement placement and apply that context. */
+  steps: ViewStructureStep[];
+  /** Construction outside this definition, still applied in EVERY snapshot,
+   * including step 0. Uses retain their separate inner-to-outer layer chains;
+   * path ids identify the arrangement/reference ancestry. Global all() calls
+   * retain their document order. These are detached document nodes. */
+  context: {
+    uses: { voiceId: string; pathIds: string[]; layers: Layer[] }[];
+    transforms: Extract<TopLevel, { kind: 'transform' }>[];
+  };
+  /** Ask Strudel with this chain truncated after index (inclusive). Opaque
+   * prefixes are unavailable with a reason. Lazy, off playback, deduplicated
+   * by document revision + step + range. 64 results retained, 32 outstanding;
+   * a full queue returns unavailable and may be retried on a later frame.
+   * Handles expire on document replacement or view disposal. */
+  snapshot(index: number): Promise<ViewSnapshot>;
+}
+export interface ViewStructureLookup {
+  get(instrument: string): ViewProgramStructure | undefined;
+}
+
 export interface ViewFrame {
   now: number; // absolute cycles, fractional, already latency-corrected
   playing: boolean;
@@ -89,6 +154,7 @@ export interface ViewFrame {
     endTime?: number;
     lagSeconds?: number;
   };
+  structure?: ViewStructureLookup; // only for structure: true; no queries until asked
   samples?: SampleLookup; // only for samples: true; shared source PCM, never loads
 }
 export interface ViewHandle {
@@ -102,6 +168,7 @@ export interface ViewDefinition {
   tag: string; // one or two words for the shelf, e.g. "whole song"
   needs?: 'score' | 'audio'; // default 'score'
   samples?: true; // independent of needs: can accompany score or audio
+  structure?: true; // independent of needs and samples; lazy program snapshots
   span?: 'window' | 'song'; // 'song' asks the host for the whole song
   mount(el: HTMLElement): ViewHandle | Promise<ViewHandle>;
 }

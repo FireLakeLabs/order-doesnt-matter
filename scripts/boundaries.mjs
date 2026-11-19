@@ -26,6 +26,12 @@ export function boundaryProblems(path, code) {
         !target.startsWith('src/views/') &&
         !/^three(?:\/|$)/.test(name) &&
         !staffEngraver &&
+        !(
+          path === 'src/views/types.ts' &&
+          ts.isImportDeclaration(node) &&
+          node.importClause?.isTypeOnly &&
+          /^src\/(?:document\/types|contract)(?:\.ts)?$/.test(target)
+        ) &&
         target !== 'src/strudel/audio-range' &&
         target !== 'src/strudel/audio-range.ts' &&
         !(
