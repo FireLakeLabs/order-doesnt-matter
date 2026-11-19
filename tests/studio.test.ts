@@ -125,6 +125,9 @@ test('frame builder preserves real spans, fragments, signals, values, room membe
     dpr: 2,
   });
   expect(frame.notes).toBe(notes);
+  expect('samples' in frame).toBe(false);
+  const samples = { get: () => ({ status: 'synth' as const }) };
+  expect(buildFrame({ ...frame, state: s, score, samples }).samples).toBe(samples);
   expect(frame.instruments.map((i) => i.name)).toEqual(['bd', 'bd 2', 'saw']);
   expect(frame.instruments[0]).toMatchObject({
     colour: '#FF4F7B',
