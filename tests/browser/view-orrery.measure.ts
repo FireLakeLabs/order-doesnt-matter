@@ -2,6 +2,8 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { prepare } from './view-evidence';
 import { revealView } from './shelf';
+import { createDriverOrbits, driverPhase } from '../../src/views/orrery/drivers';
+import type { ViewProgramStructure } from '../../src/views/types';
 import { indexOrrery, periodText } from '../../src/views/orrery/model';
 
 const shots = `${process.env.ODM_VIEW_MEASURE_DIR}/orrery`;
@@ -28,7 +30,51 @@ test('Orrery: real Studio mapping, five themes, exact reversibility and CPU cost
   });
   await page.waitForFunction(() => window.viewProbe.frame?.now === 10.4);
   await page.evaluate(() => document.fonts.ready);
+  const structureAnswers = await page.evaluate(async () => {
+    const frame = window.viewProbe.frame!;
+    return Promise.all(
+      frame.instruments.map(async (instrument) => {
+        const structure = frame.structure!.get(instrument.id)!;
+        const answers = await Promise.all(
+          structure.steps.map(async (step) =>
+            step.kind === 'setting'
+              ? Promise.all(step.driver.rates.map((rate) => rate.events()))
+              : [],
+          ),
+        );
+        return { structure, answers };
+      }),
+    );
+  });
+  await page.evaluate(async () => {
+    for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
+  });
   const frame = await page.evaluate(() => window.viewProbe.frame!);
+  const structures = new Map(
+    structureAnswers.map(({ structure, answers }) => {
+      structure.steps.forEach((step, index) => {
+        if (step.kind === 'setting')
+          step.driver.rates.forEach((rate, rateIndex) => {
+            rate.events = () => Promise.resolve(answers[index][rateIndex]);
+          });
+      });
+      return [structure.instrument, structure as ViewProgramStructure];
+    }),
+  );
+  const driverCache = createDriverOrbits();
+  const driverFrame = { ...frame, structure: { get: (id: string) => structures.get(id) } };
+  driverCache.get(driverFrame);
+  await Promise.resolve();
+  const drivers = driverCache.get(driverFrame);
+  const bass = drivers.find(
+    (moon) => frame.instruments.find((i) => i.id === moon.instrument)?.name === 'wobbleBass',
+  )!;
+  expect(bass.status).toBe('known');
+  const driverMoments = [8.4, 9.4, 10.4, 11.4].map((now) => ({ now, ...driverPhase(bass, now)! }));
+  expect(driverMoments.map((moment) => moment.rate)).toEqual([2, 4, 3, 8]);
+  expect(driverMoments[2].local).toBeCloseTo(2.4);
+  expect(driverMoments[2].phase).toBeCloseTo(7.2 / 17);
+  driverCache.dispose();
   const score = indexOrrery(frame);
   const mapping = score.orbits.map((o) => ({
     name: frame.instruments.find((i) => i.id === o.id)?.name,
@@ -72,6 +118,18 @@ test('Orrery: real Studio mapping, five themes, exact reversibility and CPU cost
         const el = document.createElement('div');
         document.body.append(el);
         const handle = await window.viewProbe.definition.mount(el);
+        handle.frame(source);
+        await Promise.all(
+          source.instruments.flatMap(
+            (i) =>
+              source.structure
+                ?.get(i.id)
+                ?.steps.flatMap((step) =>
+                  step.kind === 'setting' ? step.driver.rates.map((rate) => rate.events()) : [],
+                ) ?? [],
+          ),
+        );
+        await Promise.resolve();
         const texts: {
           text: string;
           x: number;
@@ -125,6 +183,8 @@ test('Orrery: real Studio mapping, five themes, exact reversibility and CPU cost
         const deterministic = picture === canvas.toDataURL();
         const freshEl = document.createElement('div');
         const fresh = await window.viewProbe.definition.mount(freshEl);
+        fresh.frame(source);
+        await Promise.resolve();
         fresh.frame(source);
         const matchesFresh = picture === freshEl.querySelector('canvas')!.toDataURL();
         fresh.dispose();
@@ -189,6 +249,11 @@ test('Orrery: real Studio mapping, five themes, exact reversibility and CPU cost
             t.bottom <= layout.height,
         ),
       ).toBe(true);
+      expect(
+        layout.texts
+          .filter((text) => /^\+\d+ parts/.test(text.text))
+          .every((text) => /\d+ marks · \d+ seen$/.test(text.text)),
+      ).toBe(true);
       const overlaps = layout.texts.flatMap((a, index) =>
         layout.texts
           .slice(index + 1)
@@ -201,6 +266,13 @@ test('Orrery: real Studio mapping, five themes, exact reversibility and CPU cost
     }
   }
   await page.getByRole('button', { name: 'Theme arcade', exact: true }).click();
+  for (const moment of driverMoments) {
+    await page.evaluate(async (now) => {
+      await window.odmStudio.seek(now);
+    }, moment.now);
+    await page.waitForFunction((now) => window.viewProbe.frame?.now === now, moment.now);
+    await page.screenshot({ path: `${shots}/driver-rate-${moment.rate}.png` });
+  }
   await page.evaluate(async () => {
     await window.odmStudio.seek(12);
   });
@@ -257,6 +329,8 @@ test('Orrery: real Studio mapping, five themes, exact reversibility and CPU cost
   }));
   const measurements = {
     mapping,
+    driverMoments,
+    drivers,
     common: periodText(score.common),
     complete: score.complete,
     technoMapping,

@@ -1,6 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { beforeAll, expect, it } from 'vitest';
 import { importStrudel } from '../../src/import';
+import { instruments } from '../../src/document';
+import { createStructureCache } from '../../src/studio/program-structure';
+import { createDriverOrbits, driverPhase, driverTicks } from '../../src/views/orrery/drivers';
 import { initialState, loadPiece } from '../../src/app/state';
 import { generate } from '../../src/generate';
 import { viewNotes } from '../../src/studio/frame';
@@ -305,4 +308,184 @@ it('retains exact recovered tick coordinates on fine coprime grids at later song
     );
     expect(indexOrrery(f).orbits[0].period).toEqual({ n: 1, d: 1 });
   }
+});
+
+// Driver snapshots use definition time, independently of the arranged note score.
+
+it('maps the real Dubstep driver loop and four speed segments without integrating frame history', async () => {
+  const doc = importStrudel(
+    readFileSync('corpus/programs/real-dubstep-arranged.strudel', 'utf8'),
+  ).doc;
+  const f = corpus.get('real-dubstep-arranged')!;
+  const cache = createStructureCache({ query: queryEventsNode, cancel() {} });
+  const drivers = createDriverOrbits();
+  const frame = { ...f, structure: cache.forFrame(doc, f) };
+  const bass = instruments(doc).find((row) => row.name === 'wobbleBass')!;
+  expect(drivers.get(frame).find((moon) => moon.instrument === bass.id)?.status).toBe('pending');
+  const structure = frame.structure.get(bass.id)!;
+  const filter = structure.steps.find((step) => step.kind === 'setting' && step.name === 'cutoff')!;
+  if (filter.kind !== 'setting') throw Error('Missing filter');
+  await filter.driver.rates[0].events();
+  const moon = drivers.get(frame).find((moon) => moon.instrument === bass.id)!;
+  expect(moon.status).toBe('known');
+  expect(moon.period).toEqual({ n: 4, d: 1 });
+  expect(moon.segments.map((segment) => segment.rate)).toEqual([2, 4, 3, 8]);
+  expect(driverTicks(moon)).toEqual([0, 2 / 17, 6 / 17, 9 / 17]);
+  for (const [now, rate, phase] of [
+    [8.4, 2, 0.8 / 17],
+    [9.4, 4, 3.6 / 17],
+    [10.4, 3, 7.2 / 17],
+    [11.4, 8, 12.2 / 17],
+  ]) {
+    expect(driverPhase(moon, now)?.rate).toBe(rate);
+    expect(driverPhase(moon, now)?.phase).toBeCloseTo(phase);
+  }
+  expect(driverPhase(moon, 10.4)?.phase).toBeCloseTo(driverPhase(moon, 22.4)!.phase);
+  expect(driverPhase(moon, 18.4)).toBeNull();
+  expect(driverPhase(moon, 11)?.rate).toBe(8);
+  drivers.dispose();
+  cache.dispose();
+});
+
+it('maps a 3-cycle arrangement offset and an affine use-site scale; does not guess opaque rates or rewrites', async () => {
+  for (const [expression, known] of [
+    ['sine.fast("<2 4 3 8>")', true],
+    ['sine.fast("<2 4 3 8>").slow(2)', false],
+    ['sine.fast("<2 4 3 8>").rev()', false],
+    ['sine.fast("<2 4 3 8>").range(200,900)', true],
+  ] as const) {
+    const doc = importStrudel(
+      `const pad = note("c e").lpf(${expression}); arrange([3, s("bd")], [16, pad.fast(2)]);`,
+    ).doc;
+    const rows = instruments(doc);
+    const row = rows.find((row) => row.name === 'pad')!;
+    const cache = createStructureCache({ query: queryEventsNode, cancel() {} });
+    const f = {
+      ...scoreFrame(rows.length),
+      from: 0,
+      to: 19,
+      structure: cache.forFrame(doc, { from: 0, to: 19 }),
+    };
+    f.instruments.forEach((instrument, index) => {
+      instrument.id = rows[index].id;
+    });
+    const drivers = createDriverOrbits();
+    drivers.get(f);
+    const filter = f.structure.get(row.id)!.steps.find((step) => step.kind === 'setting')!;
+    if (filter.kind !== 'setting') throw Error('Missing filter');
+    await Promise.all(filter.driver.rates.map((rate) => rate.events()));
+    const moons = drivers.get(f).filter((moon) => moon.instrument === row.id);
+    expect(moons.length).toBeGreaterThan(0);
+    expect(moons[0].status).toBe(known ? 'known' : 'unknown');
+    if (known) {
+      expect(driverPhase(moons[0], 4.2)?.local).toBeCloseTo(2.4);
+      expect(driverPhase(moons[0], 4.2)?.phase).toBeCloseTo(7.2 / 17);
+      expect(driverPhase(moons[0], 4.2)?.period).toEqual({ n: 2, d: 1 });
+    }
+    drivers.dispose();
+    cache.dispose();
+  }
+});
+
+it('keeps unavailable, broken, random, nonrational and incomplete driver answers explicitly unknown', async () => {
+  const doc = importStrudel('note("c").lpf(sine.fast("<2 4 3 8>"))').doc;
+  for (const query of [
+    async () => ({ events: [], cps: 1, error: null, opaqueValues: false }),
+    async () => ({
+      events: [],
+      cps: 1,
+      error: { phase: 'query' as const, message: 'broken' },
+      opaqueValues: false,
+    }),
+    async () => {
+      throw Error('unavailable');
+    },
+    async () => queryEventsNode('"<2 4 3 8>".degradeBy(.3)', 0, 16),
+    async () => queryEventsNode('"<2 4 3 8>".mul(Math.sqrt(2))', 0, 16),
+    async () => queryEventsNode('"<2 4 3 8>"', 0, 2),
+  ]) {
+    const cache = createStructureCache({ query, cancel() {} });
+    const f = scoreFrame();
+    f.to = 16;
+    f.instruments[0].id = instruments(doc)[0].id;
+    f.structure = cache.forFrame(doc, f);
+    const drivers = createDriverOrbits();
+    expect(drivers.get(f)[0].status).toBe('pending');
+    const step = f.structure
+      .get(f.instruments[0].id)!
+      .steps.find((step) => step.kind === 'setting')!;
+    if (step.kind !== 'setting') throw Error('Missing filter');
+    await step.driver.rates[0].events();
+    expect(drivers.get(f)[0].status).toBe('unknown');
+    drivers.dispose();
+    cache.dispose();
+  }
+});
+
+it('refuses a scaled rate loop outside the recoverable rational grid', async () => {
+  const doc = importStrudel(
+    'const pad = note("c").lpf(sine.fast("<2 4 3 8>".fast(4091))); pad.fast(4093)',
+  ).doc;
+  const row = instruments(doc)[0];
+  const cache = createStructureCache({ query: queryEventsNode, cancel() {} });
+  const f = scoreFrame();
+  f.to = 0.002;
+  f.instruments[0].id = row.id;
+  f.structure = cache.forFrame(doc, f);
+  const drivers = createDriverOrbits();
+  drivers.get(f);
+  const filter = f.structure.get(row.id)!.steps.find((step) => step.kind === 'setting')!;
+  if (filter.kind !== 'setting') throw Error('Missing filter');
+  await filter.driver.rates[0].events();
+  expect(drivers.get(f)[0]).toMatchObject({
+    status: 'unknown',
+    reason: 'Song-time rate period is not a recoverable rational',
+  });
+  drivers.dispose();
+  cache.dispose();
+});
+
+it('uses reciprocal speed for slow rate patterns and marks changes rather than repeated equal values', async () => {
+  const doc = importStrudel('note("c").lpf(sine.slow("<2 2 4>"))').doc;
+  const row = instruments(doc)[0];
+  const cache = createStructureCache({ query: queryEventsNode, cancel() {} });
+  const f = scoreFrame();
+  f.to = 12;
+  f.instruments[0].id = row.id;
+  f.structure = cache.forFrame(doc, f);
+  const drivers = createDriverOrbits();
+  drivers.get(f);
+  const filter = f.structure.get(row.id)!.steps.find((step) => step.kind === 'setting')!;
+  if (filter.kind !== 'setting') throw Error('Missing filter');
+  await filter.driver.rates[0].events();
+  const moon = drivers.get(f)[0];
+  expect(moon.status).toBe('known');
+  expect(moon.period).toEqual({ n: 3, d: 1 });
+  expect(driverTicks(moon)).toEqual([0, 0.8]);
+  expect(driverPhase(moon, 0.5)?.phase).toBeCloseTo(0.2);
+  expect(driverPhase(moon, 2.5)?.phase).toBeCloseTo(0.9);
+  drivers.dispose();
+  cache.dispose();
+});
+
+it('includes literal arrays that Strudel reifies as patterned signal rates', async () => {
+  const doc = importStrudel('note("c").lpf(sine.fast([2,4]))').doc;
+  const row = instruments(doc)[0];
+  const cache = createStructureCache({ query: queryEventsNode, cancel() {} });
+  const f = scoreFrame();
+  f.to = 4;
+  f.instruments[0].id = row.id;
+  f.structure = cache.forFrame(doc, f);
+  const drivers = createDriverOrbits();
+  expect(drivers.get(f)).toHaveLength(1);
+  const filter = f.structure.get(row.id)!.steps.find((step) => step.kind === 'setting')!;
+  if (filter.kind !== 'setting') throw Error('Missing filter');
+  await filter.driver.rates[0].events();
+  const moon = drivers.get(f)[0];
+  expect(moon.status).toBe('known');
+  expect(moon.period).toEqual({ n: 1, d: 1 });
+  expect(driverTicks(moon)).toEqual([0, 1 / 3]);
+  expect(driverPhase(moon, 0.75)?.phase).toBeCloseTo(2 / 3);
+  drivers.dispose();
+  cache.dispose();
 });

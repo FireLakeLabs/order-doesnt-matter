@@ -252,6 +252,7 @@ test('offset arrangements expose definition/argument time and every use-site/glo
       voiceId: use.voiceId,
       pathIds: use.path.map((node) => node.id),
       layers: use.layers,
+      timing: expect.any(Object),
     })),
   );
   expect(structure.context.uses[0].layers).toMatchObject([
@@ -304,4 +305,77 @@ test('rate queries refuse timing through an outer driver rewrite instead of repo
   expect(slow.opaque).toBeNull();
   expect(answer(await slow.events()).events.map((event) => event.value)).toEqual([2, 2, 2, 2]);
   cache.dispose();
+});
+
+test('use timing exposes exact arrangement offsets, scales and repeated-song local advancement', async () => {
+  for (const [source, name, expected] of [
+    [
+      'const pad = note("c*8").lpf(sine.fast("<2 4 3 8>")); arrange([3, s("bd")], [4, pad]);',
+      'pad',
+      [
+        { from: 3, to: 7, offset: 3, scale: 1 },
+        { from: 10, to: 14, offset: 6, scale: 1 },
+      ],
+    ],
+    [
+      'const pad = note("c*8").lpf(sine.fast("<2 4 3 8>")); arrange([3, s("bd")], [4, pad.fast(2)]);',
+      'pad',
+      [
+        { from: 3, to: 7, offset: 3, scale: 0.5 },
+        { from: 10, to: 14, offset: 6, scale: 0.5 },
+      ],
+    ],
+    [
+      readFileSync('corpus/programs/real-dubstep-arranged.strudel', 'utf8'),
+      'wobbleBass',
+      [
+        { from: 8, to: 16, offset: 8, scale: 1 },
+        { from: 20, to: 28, offset: 20, scale: 1 },
+        { from: 36, to: 44, offset: 28, scale: 1 },
+        { from: 48, to: 56, offset: 40, scale: 1 },
+      ],
+    ],
+  ] as const) {
+    const doc = importStrudel(source).doc;
+    const row = instruments(doc).find((row) => row.name === name)!;
+    const range = { from: 0, to: name === 'pad' ? 14 : 56 };
+    const cache = cacheFor(query);
+    const structure = cache.forFrame(doc, range).get(row.id)!;
+    const spans = structure.context.uses
+      .flatMap((use) => (use.timing?.status === 'available' ? use.timing.spans : []))
+      .sort((a, b) => a.from - b.from);
+    expect(spans).toEqual(expected);
+    // Real Strudel's final setting agrees with the mapped driver definition time.
+    const final = answer(await structure.snapshot(structure.steps.length - 1));
+    for (const event of final.events.filter((event) => event.hasOnset && event.whole)) {
+      const song = event.whole![0];
+      const span = spans.find((span) => span.from <= song && song < span.to)!;
+      expect(span).toBeDefined();
+      const local = (song - span.offset) / span.scale;
+      const signal = await query('sine.fast("<2 4 3 8>")', local, local + 0.0001);
+      expect((event.value as Record<string, unknown>).cutoff).toBeCloseTo(
+        name === 'pad'
+          ? (signal.events[0].value as number)
+          : 140 + 2460 * (signal.events[0].value as number),
+      );
+    }
+    cache.dispose();
+  }
+});
+
+test('non-affine context timing stays unavailable', () => {
+  for (const source of [
+    'const pad = note("c"); arrange([3,s("bd")],[4,pad.rev()]);',
+    'const pad = note("c"); arrange([3,s("bd")],[4,pad.fast("<1 2>")]);',
+    'const pad = note("c"); cat(s("bd"),pad);',
+    'const pad = note("c"); all(p=>p.rev()); pad;',
+  ]) {
+    const doc = importStrudel(source).doc;
+    const row = instruments(doc).find((row) => row.name === 'pad')!;
+    const cache = cacheFor(query);
+    expect(
+      cache.forFrame(doc, { from: 0, to: 16 }).get(row.id)!.context.uses[0].timing,
+    ).toMatchObject({ status: 'unavailable' });
+    cache.dispose();
+  }
 });

@@ -74,6 +74,13 @@ export type ViewStructureStep = { id: string; opaque: string | null } & (
   | { kind: 'rewrite'; name: string; args: Arg[] }
   | { kind: 'opaque'; code: string }
 );
+/** songTime = offset + scale * definitionTime within the half-open song span.
+ * Spans cover only this use's arrangement gates in the requested frame range.
+ * Arrangement repeats advance local time by that section's duration (Strudel
+ * arrange), not the whole song length. Unknown timing is never an identity map. */
+export type ViewUseTiming =
+  | { status: 'available'; spans: { from: number; to: number; offset: number; scale: number }[] }
+  | { status: 'unavailable'; reason: string };
 export interface ViewProgramStructure {
   instrument: string;
   from: number;
@@ -89,7 +96,14 @@ export interface ViewProgramStructure {
    * path ids identify the arrangement/reference ancestry. Global all() calls
    * retain their document order. These are detached document nodes. */
   context: {
-    uses: { voiceId: string; pathIds: string[]; layers: Layer[] }[];
+    uses: {
+      voiceId: string;
+      pathIds: string[];
+      layers: Layer[];
+      /** Additive: older structure producers may omit timing. Applies outside
+       * the definition only; later steps in its own chain remain the view's concern. */
+      timing?: ViewUseTiming;
+    }[];
     transforms: Extract<TopLevel, { kind: 'transform' }>[];
   };
   /** Ask Strudel with this chain truncated after index (inclusive). Opaque
