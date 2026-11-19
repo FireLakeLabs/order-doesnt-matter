@@ -113,6 +113,7 @@ test('Aquarium: Studio themes, actual rooms, reversible pixels and frame submiss
             value: { orbit: 0, room: 0.8, size: i ? 8 : 2 },
           })),
         },
+        { ...frame, now: 10.996, rooms: [], notes: frame.notes.map((n) => ({ ...n, value: {} })) },
       ];
       for (const [scenario, source] of scenarios.entries())
         for (const [width, height] of [
@@ -161,6 +162,7 @@ test('Aquarium: Studio themes, actual rooms, reversible pixels and frame submiss
             height,
             labels: labels.length,
             minFont: Math.min(...labels.map((l) => l.size)),
+            hundredPercent: labels.some((l) => l.text.includes('100%')),
             overlaps,
           });
         }
@@ -203,6 +205,7 @@ test('Aquarium: Studio themes, actual rooms, reversible pixels and frame submiss
     expect(theme.contrastPanel).toBeGreaterThanOrEqual(4.5);
     for (const size of theme.sizes) {
       expect(size.minFont).toBeGreaterThanOrEqual(11);
+      expect(size.hundredPercent).toBe(false);
       expect(size.overlaps).toEqual([]);
     }
   }
@@ -265,7 +268,7 @@ test('Aquarium: Studio themes, actual rooms, reversible pixels and frame submiss
   await page.getByRole('button', { name: 'Pause', exact: true }).click();
   // The probe is now Stage B; both stages show the same score and view.
   const corpus = [];
-  for (const file of ['real-techno', 'micro-orbit-conflict']) {
+  for (const file of ['real-techno', 'micro-orbit-conflict', 'micro-tree-stack']) {
     await page.evaluate(
       async (source) => {
         await window.odmStudio.load(source);
@@ -285,6 +288,8 @@ test('Aquarium: Studio themes, actual rooms, reversible pixels and frame submiss
     await page.screenshot({ path: `${shots}/${file}-1920x1080.png` });
   }
   expect(corpus[1].tanks[0].contested).toBe(true);
+  expect(corpus[2].tanks).toEqual([]);
+  expect(corpus[2].dry).toHaveLength(3);
   await writeFile(
     `${shots}/measurements.json`,
     JSON.stringify({ ...measured, real, corpus }, null, 2),

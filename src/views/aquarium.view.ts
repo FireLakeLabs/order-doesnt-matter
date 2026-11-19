@@ -2,7 +2,10 @@ import type { ViewDefinition, ViewFrame } from './types';
 import { indexStage, settingText, type StageIndex } from './soundstage/model';
 import { random } from './shared/particles';
 import { line } from './shared/retro-2d';
-import { aquarium, identity, swim, tankLayout, type Tank, type TankBox } from './aquarium/model';
+import { aquarium, identity, swim, tankLayout, type TankBox } from './aquarium/model';
+
+const percentage = (now: number) => Math.min(99, Math.floor((now % 1) * 100 + 1e-8));
+const counted = (n: number, noun: string) => `${String(n)} ${noun}${n === 1 ? '' : 's'}`;
 
 function fit(c: CanvasRenderingContext2D, text: string, width: number) {
   if (c.measureText(text).width <= width) return text;
@@ -58,15 +61,10 @@ function fish(
   c.fill();
   c.restore();
 }
-function drawTank(
-  c: CanvasRenderingContext2D,
-  f: ViewFrame,
-  box: TankBox,
-  rooms: Tank[] = [box.tank],
-) {
-  const { x, y, width: w, height: h, tank, shelf } = box,
+function drawTank(c: CanvasRenderingContext2D, f: ViewFrame, box: TankBox) {
+  const { x, y, width: w, height: h, rooms, shelf } = box,
     { theme } = f;
-  const dry = tank.orbit === null,
+  const dry = rooms.every((r) => r.orbit === null),
     merged = rooms.length > 1;
   const fishList = rooms.flatMap((r) => r.fish);
   const requests = rooms.flatMap((r) => r.requests);
@@ -208,7 +206,7 @@ function drawTank(
   c.font = `bold 16px "${theme.fontDisplay}"`;
   text(
     c,
-    dry ? 'Dry bowl' : merged ? `${String(rooms.length)} rooms` : `Room ${String(tank.orbit)}`,
+    dry ? 'Dry bowl' : merged ? `${String(rooms.length)} rooms` : `Room ${String(rooms[0].orbit)}`,
     x,
     y + 16,
     w,
@@ -233,7 +231,7 @@ function drawTank(
       text(c, `orbits ${rooms.map((r) => String(r.orbit)).join(', ')}`, x + 10, y + 64, w - 20);
       text(
         c,
-        `${String(requests.length)} requests · ${String(rooms.filter((r) => r.contested).length)} contested`,
+        `${counted(requests.length, 'request')} · ${String(rooms.filter((r) => r.contested).length)} contested`,
         x + 10,
         y + (compact ? 77 : 81),
         w - 20,
@@ -252,10 +250,12 @@ function drawTank(
         const at =
           r.start === null
             ? 'constant'
-            : `b${String(Math.floor(r.start) + 1)}:${String(Math.round((r.start % 1) * 100))}%`;
+            : `b${String(Math.floor(r.start) + 1)}:${String(percentage(r.start))}%`;
         text(
           c,
-          compact ? `${r.instrument.name} ${settingText(r.value)}` : `${r.instrument.name} @${at}`,
+          compact
+            ? `${r.instrument.name} ${r.setting === 'size' ? 'sz' : 'fb'} ${settingText(r.value)}`
+            : `${r.instrument.name} @${at}`,
           x + 10,
           y + 63 + i * (compact ? 15 : 30),
           w - 20,
@@ -263,7 +263,7 @@ function drawTank(
         if (!compact)
           text(
             c,
-            `${r.setting} ${settingText(r.value)}${i === 1 && ordered.length > 2 ? ` · +${String(ordered.length - 2)} requests` : ''}`,
+            `${r.setting} ${settingText(r.value)}${i === 1 && ordered.length > 2 ? ` · +${counted(ordered.length - 2, 'request')}` : ''}`,
             x + 10,
             y + 76 + i * 30,
             w - 20,
@@ -277,7 +277,16 @@ function drawTank(
   c.fillStyle = theme.text;
   text(
     c,
-    `${String(fishList.length)} fish${dry ? (fishList.some((p) => p.unknown) ? ' · ? unsampled' : ' · no send') : ` · ${String(bubbles.length)} onsets / ${String(bubbles.reduce((n, b) => n + b.count, 0))} bubbles`}`,
+    `${String(fishList.length)} fish${
+      dry
+        ? fishList.some((p) => p.unknown)
+          ? ' · ? unsampled'
+          : ' · no send'
+        : ` · ${counted(bubbles.length, 'onset')} / ${counted(
+            bubbles.reduce((n, b) => n + b.count, 0),
+            'bubble',
+          )}`
+    }`,
     x + 10,
     floor + 16,
     w - 20,
@@ -288,11 +297,15 @@ function drawTank(
     c.fillStyle = entry.instrument.colour;
     c.fillRect(x + 11, floor + 25 + i * 17, 7, 7);
     c.fillStyle = theme.text;
+    const label = `${entry.instrument.name}${entry.voices > 1 ? ` ×${String(entry.voices)} voices` : ''}${entry.unknown ? ' ?' : ''}`;
+    const withSend = `${label} · send ${entry.voices > 1 ? '≤' : ''}${settingText(entry.send)}`;
     text(
       c,
       last
         ? `+${String(fishList.length - i)} fish`
-        : `${entry.instrument.name}${entry.voices > 1 ? ` ×${String(entry.voices)} voices` : ''}${entry.unknown ? ' ?' : ''}`,
+        : c.measureText(withSend).width <= w - 34
+          ? withSend
+          : label,
       x + 24,
       floor + 32 + i * 17,
       w - 34,
@@ -312,21 +325,17 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, index: StageIndex) {
   c.fillText('Aquarium', 22, 32);
   c.font = `11px "${theme.fontMono}"`;
   c.textAlign = 'right';
-  c.fillText(
-    `bar ${String(Math.floor(f.now) + 1)} · ${String(Math.round((f.now % 1) * 100))}%`,
-    w - 22,
-    31,
-  );
+  c.fillText(`bar ${String(Math.floor(f.now) + 1)} · ${String(percentage(f.now))}%`, w - 22, 31);
   c.textAlign = 'left';
   text(
     c,
-    `${String(model.tanks.length)} tanks · ${String(model.tanks.reduce((n, t) => n + t.fish.length, 0))} sending fish · rooms are shared${model.tanks.length > 6 ? ' · shelf' : ''}`,
+    `${counted(model.tanks.length, 'tank')} · ${String(model.tanks.reduce((n, t) => n + t.fish.length, 0))} sending fish · rooms are shared${model.tanks.length > 6 ? ' · shelf' : ''}`,
     22,
     55,
     w - 44,
   );
   for (const box of layout.boxes) {
-    drawTank(c, f, box, box.rooms);
+    drawTank(c, f, box);
     c.strokeStyle = theme.line;
     c.lineWidth = 5;
     line(c, box.x - 3, box.y + box.height + 3, box.x + box.width + 3, box.y + box.height + 3);

@@ -128,3 +128,62 @@ it('keeps analytic swim identity when siblings end, and accounts for all rooms o
     }
   }
 });
+
+it('ignores settings for an effect with no send, for sampled notes and metadata constants', () => {
+  const f = scoreFrame(2);
+  f.rooms = [{ orbit: 1, members: ['0', '1'] }];
+  for (const values of [
+    [
+      { room: 0.5, size: 2, delayfeedback: 0.9 },
+      { room: 0, size: 8, delayfeedback: 0.3 },
+    ],
+    [
+      { room: 0.5, size: 2, delayfeedback: 0.9 },
+      { room: 0, delay: 0.4, size: 8, delayfeedback: 0.3 },
+    ],
+  ]) {
+    f.notes = values.map((value, i) => note(String(i), value));
+    const expected = values[1].delay
+      ? [
+          ['size', 2],
+          ['feedback', 0.3],
+        ]
+      : [['size', 2]];
+    for (const constants of [false, true]) {
+      f.instruments.forEach((instrument, i) => {
+        instrument.room = 1;
+        instrument.settings = Object.entries(values[i]).map(([name, value]) => ({
+          name,
+          label: name,
+          kind: 'constant',
+          value,
+        }));
+      });
+      const model = state({ ...f, notes: constants ? [] : f.notes });
+      expect(model.tanks[0].requests.map((r) => [r.setting, r.value])).toEqual(expected);
+      expect(model.tanks[0].contested).toBe(false);
+      expect(model.dry.fish).toHaveLength(values[1].delay ? 0 : 1);
+    }
+  }
+});
+it('centres a full-height bowl when one or twenty instruments have no sends', () => {
+  for (const count of [1, 20]) {
+    const f = scoreFrame(count);
+    f.notes = f.instruments.map((i) => note(i.id, {}));
+    const model = state(f);
+    expect(model.tanks).toEqual([]);
+    for (const [width, height] of [
+      [1300, 760],
+      [560, 675],
+      [1131, 469],
+    ]) {
+      const layout = tankLayout(model.tanks, model.dry, width, height);
+      expect(layout.boxes).toEqual([]);
+      expect(layout.bowl!.x + layout.bowl!.width / 2).toBe(width / 2);
+      expect(layout.bowl!.width).toBeGreaterThan(width * 0.7);
+      expect(layout.bowl!.y).toBe(82);
+      expect(layout.bowl!.height).toBe(height - 132);
+      expect(layout.bowl!.rooms[0].fish).toHaveLength(count);
+    }
+  }
+});

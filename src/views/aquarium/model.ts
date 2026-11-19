@@ -33,9 +33,12 @@ const finite = (n: unknown): n is number => typeof n === 'number' && Number.isFi
 export function send(instrument: ViewInstrument, note?: ViewNote) {
   const p = placement(instrument, note);
   const delay = note ? note.value.delay : constant(instrument, 'delay');
+  const delaySend = finite(delay) ? clamp(delay) : 0;
   return {
     orbit: p.orbit,
-    amount: p.room + (finite(delay) ? clamp(delay) : 0),
+    reverb: p.room,
+    delay: delaySend,
+    amount: p.room + delaySend,
     unknown: p.unknown || (delay !== undefined && !finite(delay)),
   };
 }
@@ -50,6 +53,10 @@ export function aquarium(frame: ViewFrame, index: StageIndex) {
     .sort((a, b) => a.orbit - b.orbit)
     .map((r) => ({ orbit: r.orbit, fish: [], requests: [], contested: false, bubbles: [] }));
   const dry: Tank = { orbit: null, fish: [], requests: [], contested: false, bubbles: [] };
+  const tankFor = (orbit: number | null, id: string) =>
+    tanks.find(
+      (t) => t.orbit === orbit && frame.rooms.find((r) => r.orbit === orbit)?.members.includes(id),
+    );
   const samples = new Map<string, (ViewNote | undefined)[]>();
   for (const mark of stageMarks(frame, index)) {
     const id = mark.instruments[0].id;
@@ -63,11 +70,7 @@ export function aquarium(frame: ViewFrame, index: StageIndex) {
     const groups = new Map<Tank, Fish>();
     for (const note of bags) {
       const s = send(instrument, note);
-      const tank = tanks.find(
-        (t) =>
-          t.orbit === s.orbit &&
-          frame.rooms.find((r) => r.orbit === t.orbit)?.members.includes(instrument.id),
-      );
+      const tank = tankFor(s.orbit, instrument.id);
       const destination = s.amount > 0 && tank ? tank : dry;
       let fish = groups.get(destination);
       if (!fish) {
@@ -78,15 +81,24 @@ export function aquarium(frame: ViewFrame, index: StageIndex) {
       fish.voices += Number(!!note);
       fish.send = Math.max(fish.send, s.amount);
       fish.unknown ||= s.unknown || (s.amount > 0 && !tank);
-      if (!tank) continue;
+      if (!tank || s.amount <= 0) continue;
       for (const [setting, value] of [
         [
           'size',
-          note
-            ? (note.value.size ?? note.value.roomsize)
-            : (constant(instrument, 'size') ?? constant(instrument, 'roomsize')),
+          s.reverb > 0
+            ? note
+              ? (note.value.size ?? note.value.roomsize)
+              : (constant(instrument, 'size') ?? constant(instrument, 'roomsize'))
+            : undefined,
         ],
-        ['feedback', note ? note.value.delayfeedback : constant(instrument, 'delayfeedback')],
+        [
+          'feedback',
+          s.delay > 0
+            ? note
+              ? note.value.delayfeedback
+              : constant(instrument, 'delayfeedback')
+            : undefined,
+        ],
       ] as const) {
         if (!finite(value)) continue;
         const request = { instrument, start: note?.start ?? null, setting, value };
@@ -109,11 +121,7 @@ export function aquarium(frame: ViewFrame, index: StageIndex) {
         age = frame.now - note.start,
         life = bubbleLife(s.amount);
       if (s.amount <= 0 || age < 0 || age >= life) continue;
-      const tank = tanks.find(
-        (t) =>
-          t.orbit === s.orbit &&
-          frame.rooms.find((r) => r.orbit === t.orbit)?.members.includes(instrument.id),
-      );
+      const tank = tankFor(s.orbit, instrument.id);
       tank?.bubbles.push({
         instrument,
         start: note.start,
@@ -149,7 +157,7 @@ export interface TankBox {
   y: number;
   width: number;
   height: number;
-  tank: Tank;
+  rooms: Tank[];
   shelf: boolean;
 }
 /** Above six rooms the whole inventory occupies counted miniature shelf tanks.
@@ -160,8 +168,13 @@ export function tankLayout(tanks: Tank[], dry: Tank, width: number, height: numb
     left = 22,
     top = 82,
     bottom = height - 50;
-  const bowlWidth = dry.fish.length ? Math.min(230, width * 0.25) : 0;
-  const available = width - left * 2 - (bowlWidth ? bowlWidth + gap : 0);
+  const onlyDry = tanks.length === 0;
+  const bowlWidth = dry.fish.length
+    ? onlyDry
+      ? Math.min(width - left * 2, 1000)
+      : Math.min(230, width * 0.25)
+    : 0;
+  const available = width - left * 2 - (!onlyDry && bowlWidth ? bowlWidth + gap : 0);
   const columns = Math.max(
     1,
     shelf
@@ -175,22 +188,21 @@ export function tankLayout(tanks: Tank[], dry: Tank, width: number, height: numb
     tanks.slice(i * groupSize, (i + 1) * groupSize),
   );
   const rows = Math.max(1, Math.ceil(groups.length / columns));
-  const boxes = groups.map((group, i) => ({
+  const boxes: TankBox[] = groups.map((group, i) => ({
     x: left + ((i % columns) * (available + gap)) / columns,
     y: top + (Math.floor(i / columns) * (bottom - top + gap)) / rows,
     width: (available - gap * (columns - 1)) / columns,
     height: (bottom - top - gap * (rows - 1)) / rows,
-    tank: group[0],
     shelf,
     rooms: group,
   }));
   const bowl: TankBox | null = bowlWidth
     ? {
-        x: width - left - bowlWidth,
-        y: top + (bottom - top) * 0.3,
+        x: onlyDry ? (width - bowlWidth) / 2 : width - left - bowlWidth,
+        y: onlyDry ? top : top + (bottom - top) * 0.3,
         width: bowlWidth,
-        height: (bottom - top) * 0.7,
-        tank: dry,
+        height: (bottom - top) * (onlyDry ? 1 : 0.7),
+        rooms: [dry],
         shelf: false,
       }
     : null;
