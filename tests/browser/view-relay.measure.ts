@@ -127,6 +127,18 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
         if (max === undefined) fill.call(this, text, x, y);
         else fill.call(this, text, x, y, max);
       };
+      const heads: { x: number; y: number; radius: number }[] = [];
+      const curves: { strong: boolean; dashed: boolean }[] = [];
+      const circle = CanvasRenderingContext2D.prototype.arc;
+      const curve = CanvasRenderingContext2D.prototype.bezierCurveTo;
+      CanvasRenderingContext2D.prototype.arc = function (x, y, radius, start, end, ccw) {
+        heads.push({ x, y, radius });
+        return circle.call(this, x, y, radius, start, end, ccw);
+      };
+      CanvasRenderingContext2D.prototype.bezierCurveTo = function (a, b, d, e, x, y) {
+        curves.push({ strong: this.globalAlpha === 1, dashed: this.getLineDash().length > 0 });
+        return curve.call(this, a, b, d, e, x, y);
+      };
       const sizes = [];
       for (const [width, height] of [
         [1300, 760],
@@ -134,6 +146,8 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
         [487, 468],
       ]) {
         labels.length = 0;
+        heads.length = 0;
+        curves.length = 0;
         handle.frame({ ...source, width, height });
         const captured = labels.slice();
         const collisions = captured.flatMap((a, i) =>
@@ -148,9 +162,18 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
             )
             .map((b) => [a.text, b.text]),
         );
-        sizes.push({ width, height, labels: captured, collisions });
+        sizes.push({
+          width,
+          height,
+          labels: captured,
+          collisions,
+          heads: heads.slice(),
+          curves: curves.slice(),
+        });
       }
+      CanvasRenderingContext2D.prototype.arc = circle;
       labels.length = 0;
+      curves.length = 0;
       const wobble = source.instruments.find((i) => i.name === 'wobbleBass')!.id;
       handle.frame({
         ...source,
@@ -161,6 +184,8 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
         ),
       });
       const nearLabels = labels.map((l) => l.text);
+      const nearDashed = curves.some((c) => c.dashed);
+      CanvasRenderingContext2D.prototype.bezierCurveTo = curve;
       labels.length = 0;
       handle.frame({
         ...source,
@@ -177,10 +202,18 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
         notes: source.notes.map((n) => ({ ...n, end: Math.min(n.end, n.start + 1 / 8) })),
       });
       const throughRest =
-        labels.some((l) => l.text.includes('13 current edges (2 shown)')) &&
+        labels.some((l) => l.text.includes('13 current returns · 4 bundles')) &&
         labels.some((l) => l.text.includes('exact +12 st · subBass → wobbleBass'));
       const sub = source.instruments.find((i) => i.name === 'subBass')!.id;
-      const rowY = labels.find((l) => l.x === 12 && l.text.endsWith('subBass'))!.y;
+      labels.length = 0;
+      handle.frame({
+        ...source,
+        instruments: source.instruments.filter((i) => i.id === sub),
+        notes: source.notes.filter((n) => n.instrument === sub),
+      });
+      const samePart =
+        labels.some((l) => l.text.includes('exact 0 st · subBass → subBass')) &&
+        !labels.some((l) => l.text.includes('compacted'));
       const boxes: {
         left: number;
         right: number;
@@ -188,6 +221,19 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
         bottom: number;
         height: number;
       }[] = [];
+      const ticks: { left: number; right: number; y: number }[] = [];
+      const move = CanvasRenderingContext2D.prototype.moveTo;
+      const line = CanvasRenderingContext2D.prototype.lineTo;
+      let pen = [0, 0];
+      CanvasRenderingContext2D.prototype.moveTo = function (x, y) {
+        pen = [x, y];
+        return move.call(this, x, y);
+      };
+      CanvasRenderingContext2D.prototype.lineTo = function (x, y) {
+        if (Math.abs(this.globalAlpha - 0.22) < 1e-6 && this.lineWidth === 2)
+          ticks.push({ left: Math.min(pen[0], x), right: Math.max(pen[0], x), y });
+        return line.call(this, x, y);
+      };
       const round = CanvasRenderingContext2D.prototype.roundRect;
       CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, radii) {
         boxes.push({
@@ -202,6 +248,7 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
       let mixedClear = true;
       for (const width of [1300, 487]) {
         boxes.length = 0;
+        ticks.length = 0;
         handle.frame({
           ...source,
           width,
@@ -210,14 +257,20 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
             { instrument: sub, start: 7.9, end: 8, hasOnset: true, value: { note: 'g1' } },
           ],
         });
-        const laneBoxes = boxes
-          .filter((b) => b.height < 32 && b.top < rowY && b.bottom > rowY)
-          .sort((a, b) => a.left - b.left);
+        const batonBoxes = boxes.filter((b) => b.height <= 22);
+        const subBoxes = batonBoxes.slice(0, 4);
+        const subY = (subBoxes[0].top + subBoxes[0].bottom) / 2;
+        const subTicks = ticks.filter((tick) => Math.abs(tick.y - subY) < 1e-6);
         mixedClear =
           mixedClear &&
-          laneBoxes.length === 5 &&
-          laneBoxes.every((b, i) => !i || laneBoxes[i - 1].right <= b.left);
+          batonBoxes.length === 8 &&
+          subTicks.length > 0 &&
+          subTicks.every((tick) =>
+            subBoxes.every((b) => tick.right <= b.left || tick.left >= b.right),
+          );
       }
+      CanvasRenderingContext2D.prototype.moveTo = move;
+      CanvasRenderingContext2D.prototype.lineTo = line;
       CanvasRenderingContext2D.prototype.roundRect = round;
       CanvasRenderingContext2D.prototype.fillText = fill;
       const rgb = (hex: string) =>
@@ -245,29 +298,43 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
         sizes,
         contrast,
         nearLabels,
+        nearDashed,
         compacted,
         throughRest,
+        samePart,
         mixedClear,
       };
     });
     expect(measured.nearLabels.some((text) => text.includes('near +12 st · d 0.2'))).toBe(true);
+    expect(measured.nearDashed).toBe(true);
     expect(measured.compacted).toBe(true);
     expect(measured.throughRest).toBe(true);
     expect(measured.mixedClear).toBe(true);
+    expect(measured.samePart).toBe(true);
     expect(measured.reversible).toBe(true);
     expect(measured.freshEqual).toBe(true);
     expect(measured.contrast).toBeGreaterThanOrEqual(4.5);
     for (const size of measured.sizes) {
       expect(size.collisions).toEqual([]);
       const nameBoundary = relayLayout(size.width, size.height, frame.instruments.length).left - 24;
-      const names = size.labels.filter(
-        (l) => /^\d+ /.test(l.text) && l.y > 112 && l.y < size.height - 128,
-      );
+      const names = size.labels.filter((l) => l.x === 12);
       expect(names.every((l) => l.x + l.width <= nameBoundary)).toBe(true);
+      expect(size.heads).toHaveLength(2);
+      expect(size.heads.every((head) => head.radius >= 4)).toBe(true);
+      expect(size.curves).toHaveLength(mapping.returns.length);
+      expect(size.curves.every((curve) => !curve.dashed)).toBe(true);
+      expect(size.curves.filter((curve) => curve.strong)).toHaveLength(13);
+      const left = relayLayout(size.width, size.height, frame.instruments.length).left;
+      // Numeric labels belong to the lane paint or distance markers, never to unmatched dashes.
+      expect(
+        size.labels.filter((l) => /^\d+$/.test(l.text)).every((l) => l.x < left || l.y < 104),
+      ).toBe(true);
+      expect(size.labels.some((l) => l.text === '+12 ×4')).toBe(true);
+      expect(size.labels.some((l) => l.text === '−12 ×3')).toBe(true);
       expect(
         size.labels.some(
           (l) =>
-            l.text.includes('(40 notes, 88 records)') && l.text.endsWith('305 capsule records'),
+            l.text.includes('(40 notes, 88 records)') && l.text.endsWith('305 unmatched records'),
         ),
       ).toBe(true);
       expect(

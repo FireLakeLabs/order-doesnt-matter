@@ -19,34 +19,147 @@ function fit(c: CanvasRenderingContext2D, value: string, width: number) {
   while (text && c.measureText(`${text}…`).width > width) text = text.slice(0, -1);
   return text ? `${text}…` : '';
 }
+/** Articulated legs, shoes, a vest and a hand-held baton; gait comes only from song time. */
+function runner(
+  c: CanvasRenderingContext2D,
+  f: ViewFrame,
+  x: number,
+  feet: number,
+  size: number,
+  colour: string,
+) {
+  const { theme: t, now } = f;
+  const stride = Math.sin(now * Math.PI * 4);
+  const limb = (points: number[][], width: number, ink: string) => {
+    c.beginPath();
+    points.forEach(([px, py], i) => {
+      if (i) c.lineTo(x + px * size, feet + py * size);
+      else c.moveTo(x + px * size, feet + py * size);
+    });
+    c.strokeStyle = t.panel;
+    c.lineWidth = width + 3;
+    c.stroke();
+    c.strokeStyle = ink;
+    c.lineWidth = width;
+    c.stroke();
+  };
+  c.lineCap = 'round';
+  c.lineJoin = 'round';
+  for (const side of [-1, 1]) {
+    const reach = side * stride;
+    const ankle = [reach * 0.28, -Math.max(0, -reach) * 0.18];
+    limb([[-0.06, -0.4], [reach * 0.18 - 0.1, -0.22], ankle], size * 0.09, t.text);
+    limb([ankle, [ankle[0] + 0.13, ankle[1]]], size * 0.11, colour);
+  }
+  limb(
+    [
+      [0.06, -0.73],
+      [-0.23, -0.58],
+      [-0.32, -0.73],
+    ],
+    size * 0.075,
+    t.text,
+  );
+  c.fillStyle = colour;
+  c.strokeStyle = t.text;
+  c.lineWidth = 1.5;
+  c.beginPath();
+  c.moveTo(x - size * 0.01, feet - size * 0.76);
+  c.lineTo(x + size * 0.19, feet - size * 0.71);
+  c.lineTo(x + size * 0.04, feet - size * 0.4);
+  c.lineTo(x - size * 0.15, feet - size * 0.43);
+  c.closePath();
+  c.fill();
+  c.stroke();
+  limb(
+    [
+      [0.12, -0.68],
+      [0.3, -0.52],
+      [0.43, -0.7],
+    ],
+    size * 0.075,
+    t.text,
+  );
+  limb(
+    [
+      [0.41, -0.79],
+      [0.47, -0.61],
+    ],
+    size * 0.12,
+    colour,
+  );
+  c.fillStyle = t.text;
+  c.strokeStyle = t.panel;
+  c.lineWidth = 2;
+  c.beginPath();
+  c.arc(x + size * 0.16, feet - size * 0.9, size * 0.11, 0, Math.PI * 2);
+  c.fill();
+  c.stroke();
+  c.strokeStyle = colour;
+  c.lineWidth = size * 0.06;
+  stroke(c, x + size * 0.07, feet - size * 0.95, x + size * 0.25, feet - size * 0.93);
+}
 function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Relay) {
   const { theme: t, width: w, height: h, now } = f;
   const parts = [...f.instruments].sort((a, b) => a.index - b.index || a.id.localeCompare(b.id));
   const box = relayLayout(w, h, parts.length);
-  const { left, right, top, bottom, lane } = box;
+  const { left, right } = box,
+    top = 104,
+    bottom = h - 100;
   const x = (time: number) =>
     left + ((time - score.from) / (score.to - score.from)) * (right - left);
-  const y = (id: string) => top + (parts.findIndex((p) => p.id === id) + 0.5) * lane;
   const focus = relayFocus(score, now);
   const matched = new Set(score.returns.flatMap((r) => [r.before, r.after]));
+  const carriers = new Set(score.phrases.filter((p) => matched.has(p.id)).map((p) => p.instrument));
+  // Reserve readable narrow lanes for the rest of the field; baton lanes take the remaining stage.
+  const available = bottom - top;
+  const quietHeight = carriers.size
+    ? Math.max(
+        Math.min(14, available / parts.length),
+        available / (parts.length + carriers.size * 5),
+      )
+    : available / Math.max(1, parts.length);
+  const heroHeight =
+    (available - quietHeight * (parts.length - carriers.size)) / Math.max(1, carriers.size);
+  let edge = top;
+  const lanes = new Map(
+    parts.map((p) => {
+      const height = carriers.has(p.id) ? heroHeight : quietHeight;
+      const lane = { top: edge, height, y: edge + height / 2 };
+      edge += height;
+      return [p.id, lane];
+    }),
+  );
+  const laneAt = (id: string) => {
+    const lane = lanes.get(id);
+    if (!lane) throw Error('Relay lane is missing');
+    return lane;
+  };
+  const y = (id: string) => laneAt(id).y + (carriers.has(id) ? laneAt(id).height * 0.25 : 0);
+  // Keep the established compact-baton policy independent of the new lane weighting.
   const baton = new Set(
     score.phrases
-      .filter((p) => matched.has(p.id) && x(p.to) - x(p.from) >= 24 && lane >= 14)
+      .filter((p) => matched.has(p.id) && x(p.to) - x(p.from) >= 24 && box.lane >= 14)
       .map((p) => p.id),
   );
   const colour = (shape: string) =>
     t.name === 'pocket'
       ? t.text
       : `hsl(${String(shapeHue(shape))} 78% ${t.name === 'riso' ? '40%' : '66%'})`;
+  const batonHeight = (id: string) => Math.min(22, Math.max(12, laneAt(id).height * 0.24));
   c.fillStyle = t.ground;
   c.fillRect(0, 0, w, h);
   c.fillStyle = t.panel;
-  c.beginPath();
-  c.roundRect(left - 20, top - 8, right - left + 40, bottom - top + 16, 20);
-  c.fill();
   c.strokeStyle = t.muted;
-  c.lineWidth = 1;
+  c.lineWidth = 2;
+  c.beginPath();
+  c.roundRect(left - 28, top - 6, right - left + 56, bottom - top + 12, 28);
+  c.fill();
   c.stroke();
+  c.save();
+  c.beginPath();
+  c.roundRect(left - 26, top - 4, right - left + 52, bottom - top + 8, 26);
+  c.clip();
   const unknown = [
     [score.from, Math.min(score.to, f.from)],
     [Math.max(score.from, f.to), score.to],
@@ -62,87 +175,122 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Relay) {
       stroke(c, dx, bottom, dx + bottom - top, top);
     c.restore();
   }
-  // Lane boundaries and starting blocks make the score a running track.
-  for (let i = 0; i <= parts.length; i++) {
-    c.globalAlpha = 0.42;
-    stroke(c, left - 10, top + i * lane, right + 10, top + i * lane);
-  }
+  // Painted lane lines curve into the two ends; starting blocks and a checked finish sit on the surface.
   parts.forEach((p, i) => {
-    c.globalAlpha = 0.5;
-    c.strokeStyle = t.muted;
-    stroke(c, left - 12, y(p.id) - lane * 0.2, left - 5, y(p.id) - lane * 0.2);
-    stroke(c, left - 12, y(p.id) + lane * 0.2, left - 5, y(p.id) + lane * 0.2);
+    const lane = laneAt(p.id);
+    c.globalAlpha = 0.55;
+    c.strokeStyle = t.text;
+    c.lineWidth = carriers.has(p.id) ? 2 : 1;
+    if (i) stroke(c, left - 24, lane.top, right + 24, lane.top);
+    c.globalAlpha = 0.65;
+    c.lineWidth = 3;
+    stroke(c, left + 10, lane.y - 3, left + 14, lane.y - 3);
+    stroke(c, left + 6, lane.y + 3, left + 10, lane.y + 3);
     for (let j = 0; j < 4; j++) {
       c.fillStyle = (i + j) % 2 ? t.text : t.ground;
       c.fillRect(
-        right + 3 + (j % 2) * 4,
-        top + i * lane + (Math.floor(j / 2) * lane) / 2,
-        4,
-        lane / 2,
+        right + 8 + (j % 2) * 6,
+        lane.top + (Math.floor(j / 2) * lane.height) / 2,
+        6,
+        lane.height / 2,
       );
     }
   });
-  c.globalAlpha = 1;
-  // Two representative handoffs stand for the current bundle. Every related
-  // baton lights; the ledger retains the full edge count instead of spaghetti.
-  const drawable = focus.links.filter((r) => baton.has(r.before) && baton.has(r.after));
-  const cross = drawable.find(
-    (r) => score.phrases[r.before].instrument !== score.phrases[r.after].instrument,
-  );
-  const other =
-    drawable.find((r) => r !== cross && r.kind === 'near') ??
-    drawable.find(
-      (r) =>
-        r !== cross && score.phrases[r.before].instrument === score.phrases[r.after].instrument,
-    ) ??
-    drawable.find((r) => r !== cross);
-  const arcs = [cross, other].filter((r): r is NonNullable<typeof r> => !!r);
-  const arcLabels: { text: string; x: number; y: number }[] = [];
-  for (const r of arcs) {
+  // Unmatched records are quiet marks, owned by the same phrase-local bins as before.
+  for (const part of parts) {
+    const loose = score.phrases.filter((p) => p.instrument === part.id && !baton.has(p.id));
+    c.globalAlpha = 0.22;
+    c.strokeStyle = part.colour;
+    c.lineWidth = 2;
+    for (const cap of capsules(loose, score.from, score.to, right - left))
+      for (const n of cap.notes) {
+        const a = x(Math.max(cap.from, n.start)),
+          b = Math.min(x(cap.to), a + (n.hasOnset ? 4 : 2));
+        stroke(c, a, y(part.id), b, y(part.id));
+      }
+  }
+  const drawable = score.returns.filter((r) => baton.has(r.before) && baton.has(r.after));
+  const current = new Set(focus.links);
+  const bundles = new Map<string, typeof drawable>();
+  for (const r of drawable.filter((r) => current.has(r))) {
     const a = score.phrases[r.before],
       b = score.phrases[r.after];
-    if (!a.shape) continue;
+    const key = JSON.stringify([a.instrument, b.instrument, r.kind, r.transpose, r.distance]);
+    const group = bundles.get(key) ?? [];
+    group.push(r);
+    bundles.set(key, group);
+  }
+  const groups = [...bundles.values()];
+  const sourceGroups = (id: string) =>
+    groups.filter((g) => score.phrases[g[0].before].instrument === id);
+  // All edges remain visible. Current parallel arcs share a rail and a single transposition tag.
+  const arc = (r: (typeof drawable)[number], strong: boolean) => {
+    const a = score.phrases[r.before],
+      b = score.phrases[r.after];
+    if (!a.shape) return;
     const ax = x((a.from + a.to) / 2),
       bx = x((b.from + b.to) / 2);
-    const ay = y(a.instrument),
-      by = y(b.instrument);
-    c.globalAlpha = 0.65;
-    c.strokeStyle = colour(a.shape);
-    c.lineWidth = 1.5;
-    c.setLineDash(r.kind === 'near' ? [4, 4] : []);
+    const ay = y(a.instrument) - batonHeight(a.instrument) / 2,
+      by = y(b.instrument) - batonHeight(b.instrument) / 2;
+    const own = sourceGroups(a.instrument),
+      group = own.find((g) => g.includes(r));
+    const slot = group ? own.indexOf(group) : 0;
+    const lane = laneAt(a.instrument);
+    const rail = lane.top + 8 + slot * Math.min(18, lane.height * 0.22);
+    c.globalAlpha = strong ? 1 : 0.11;
+    c.setLineDash(r.kind === 'near' ? [7, 5] : []);
     c.beginPath();
     c.moveTo(ax, ay);
-    const lift = Math.min(lane * 0.85, 12 + Math.abs(bx - ax) * 0.06);
-    if (ax === bx) c.bezierCurveTo(ax - 24, ay, bx - 24, by, bx, by);
-    else c.bezierCurveTo(ax, ay - lift, bx, by - lift, bx, by);
+    if (ax === bx) c.bezierCurveTo(ax - 34, rail, bx - 34, by, bx, by);
+    else c.bezierCurveTo(ax, rail, bx, rail, bx, by);
+    if (strong) {
+      c.strokeStyle = t.panel;
+      c.lineWidth = 7;
+      c.stroke();
+    }
+    c.strokeStyle = colour(a.shape);
+    c.lineWidth = strong ? 3 : 1;
     c.stroke();
-    arcLabels.push({
-      text: String(arcs.indexOf(r) + 1),
-      x: (ax + bx) / 2 - (ax === bx ? 20 : 0),
-      y: Math.max(top + 12, Math.min(ay, by) - lift * 0.65),
+    if (strong) {
+      c.setLineDash([]);
+      c.fillStyle = colour(a.shape);
+      c.beginPath();
+      c.moveTo(bx, by + 1);
+      c.lineTo(bx - 4, by - 6);
+      c.lineTo(bx + 4, by - 6);
+      c.closePath();
+      c.fill();
+    }
+  };
+  drawable
+    .filter((r) => !current.has(r))
+    .forEach((r) => {
+      arc(r, false);
     });
-  }
+  drawable
+    .filter((r) => current.has(r))
+    .forEach((r) => {
+      arc(r, true);
+    });
   c.setLineDash([]);
-  c.globalAlpha = 1;
-  const capsuleTexts: { text: string; x: number; y: number; width: number }[] = [];
   for (const p of score.phrases) {
     if (!baton.has(p.id) || !p.shape) continue;
     const px = x(p.from) + 3,
       py = y(p.instrument),
-      bw = x(p.to) - x(p.from) - 6;
+      bw = x(p.to) - x(p.from) - 6,
+      bh = batonHeight(p.instrument);
     const lit = focus.related.has(p.id);
-    c.globalAlpha = lit ? 1 : 0.42;
-    c.fillStyle = t.ground;
-    c.strokeStyle = lit ? t.text : t.muted;
-    c.lineWidth = lit ? 1.5 : 0.7;
+    c.globalAlpha = lit ? 1 : 0.4;
+    c.fillStyle = colour(p.shape);
+    c.strokeStyle = t.text;
+    c.lineWidth = lit ? 2 : 1;
     c.beginPath();
-    c.roundRect(px, py - lane * 0.26, bw, lane * 0.52, 6);
+    c.roundRect(px, py - bh / 2, bw, bh, bh / 2);
     c.fill();
     c.stroke();
-    c.strokeStyle = colour(p.shape);
-    c.lineWidth = Math.max(2, Math.min(4, lane * 0.09));
+    c.strokeStyle = t.ground;
+    c.lineWidth = 2;
     c.lineJoin = 'round';
-    c.lineCap = 'round';
     c.beginPath();
     const low = Math.min(...p.pitches),
       high = Math.max(...p.pitches);
@@ -150,92 +298,70 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Relay) {
       .filter((n) => n.hasOnset)
       .forEach((n, i) => {
         const nx = clamp((n.start - p.from) / (p.to - p.from));
-        const ny = py + (0.5 - (p.pitches[i] - low) / Math.max(1, high - low)) * lane * 0.3;
+        const ny = py + (0.5 - (p.pitches[i] - low) / Math.max(1, high - low)) * bh * 0.55;
         if (!i) c.moveTo(px + 5 + nx * (bw - 10), ny);
         else c.lineTo(px + 5 + nx * (bw - 10), ny);
         c.lineTo(px + 5 + clamp((n.end - p.from) / (p.to - p.from)) * (bw - 10), ny);
       });
     c.stroke();
-    c.globalAlpha = 1;
   }
-  for (const part of parts) {
-    const loose = score.phrases.filter((p) => p.instrument === part.id && !baton.has(p.id));
-    for (const cap of capsules(loose, score.from, score.to, right - left)) {
-      const width = x(cap.to) - x(cap.from),
-        inset = Math.min(2, width / 4),
-        px = x(cap.from) + inset,
-        bw = width - 2 * inset,
-        py = y(part.id);
-      c.fillStyle = t.ground;
-      c.strokeStyle = cap.notes.some((n) => n.start <= now && now < n.end) ? t.text : part.colour;
-      c.lineWidth = 1;
-      c.beginPath();
-      c.roundRect(px, py - Math.min(8, lane * 0.3), bw, Math.min(16, lane * 0.6), 6);
-      c.fill();
-      c.stroke();
-      capsuleTexts.push({ text: String(cap.count), x: px + bw / 2, y: py + 4, width: bw - 4 });
-    }
-  }
-  // Runner gait and distance are functions of score time, including backwards seeks.
+  c.globalAlpha = 1;
   const runnerX = x(Math.max(score.from, Math.min(score.to, now)));
-  c.globalAlpha = 0.5;
   c.strokeStyle = t.text;
   c.lineWidth = 1;
+  c.globalAlpha = 0.2;
   c.setLineDash([3, 5]);
-  stroke(c, runnerX, top - 8, runnerX, bottom + 8);
+  stroke(c, runnerX, top, runnerX, bottom);
   c.setLineDash([]);
-  parts.forEach((p) => {
-    const active = score.phrases.some((ph) => ph.instrument === p.id && focus.current.has(ph.id));
-    const py = y(p.id),
-      size = Math.min(13, lane * 0.58);
-    const stride = Math.sin(now * Math.PI * 8) * size * 0.4;
-    c.globalAlpha = p.muted ? 0.3 : active ? 1 : 0.4;
-    c.strokeStyle = t.text;
-    c.fillStyle = t.text;
-    c.lineWidth = Math.max(1, size * 0.14);
-    c.lineCap = 'round';
-    c.beginPath();
-    c.arc(runnerX, py - size * 0.6, size * 0.17, 0, Math.PI * 2);
-    c.fill();
-    stroke(c, runnerX, py - size * 0.35, runnerX - 2, py + size * 0.15);
-    stroke(c, runnerX - 2, py + size * 0.15, runnerX - stride - 3, py + size * 0.65);
-    stroke(c, runnerX - 2, py + size * 0.15, runnerX + stride + 3, py + size * 0.6);
-    stroke(c, runnerX, py - size * 0.2, runnerX + size * 0.45, py - size * 0.35);
-    const carrying = score.phrases.find(
-      (ph) => ph.instrument === p.id && focus.current.has(ph.id) && ph.shape,
-    );
-    c.strokeStyle = carrying?.shape ? colour(carrying.shape) : p.colour;
-    c.lineWidth = 3;
-    stroke(c, runnerX + size * 0.45, py - size * 0.35, runnerX + size * 0.6, py - size * 0.6);
-  });
   c.globalAlpha = 1;
-  // Text is last, on opaque plates: no runner or arc can cross a number.
-  c.font = `11px "${t.fontMono}"`;
-  c.textAlign = 'center';
-  for (const label of capsuleTexts) {
-    if (c.measureText(label.text).width > label.width || lane < 16) continue;
-    const tw = c.measureText(label.text).width;
-    c.fillStyle = t.ground;
-    c.fillRect(label.x - tw / 2 - 1, label.y - 10, tw + 2, 12);
-    c.fillStyle = t.text;
-    c.fillText(label.text, label.x, label.y);
+  for (const part of parts) {
+    const carrying = score.phrases.find(
+      (p) => p.instrument === part.id && focus.current.has(p.id) && matched.has(p.id),
+    );
+    if (carrying?.shape)
+      runner(
+        c,
+        f,
+        runnerX,
+        y(part.id) - 2,
+        Math.min(68, laneAt(part.id).height * 0.82),
+        colour(carrying.shape),
+      );
   }
-  const placed: typeof arcLabels = [];
-  for (const label of arcLabels) {
-    // Number tags live above lane centres; if a capsule occupies the tag's
-    // box, the matching numbered ledger entry alone labels the handoff.
-    if (
-      capsuleTexts.some(
-        (p) => Math.abs(p.y - label.y) < 14 && Math.abs(p.x - label.x) < p.width / 2 + 10,
-      )
-    )
-      continue;
-    if (placed.some((p) => Math.abs(p.x - label.x) < 16 && Math.abs(p.y - label.y) < 16)) continue;
-    placed.push(label);
-    c.fillStyle = t.ground;
-    c.fillRect(label.x - 7, label.y - 10, 14, 14);
+  c.restore();
+  // Every label is drawn last, outside motion or on an opaque plate.
+  c.font = `11px "${t.fontMono}"`;
+  parts.forEach((p, i) => {
+    const lane = laneAt(p.id);
+    if (lane.height < 14 && i % Math.ceil(14 / lane.height)) return;
     c.fillStyle = t.text;
-    c.fillText(label.text, label.x, label.y + 1);
+    c.textAlign = 'left';
+    c.fillText(fit(c, p.name, left - 56), 12, lane.y + 4);
+    c.textAlign = 'center';
+    c.fillStyle = t.panel;
+    c.fillRect(left - 24, lane.y - 8, 20, 16);
+    c.fillStyle = t.text;
+    c.fillText(String(i + 1), left - 14, lane.y + 4);
+  });
+  for (const group of groups) {
+    const r = group[0],
+      a = score.phrases[r.before];
+    const siblings = sourceGroups(a.instrument),
+      slot = siblings.indexOf(group);
+    const span = (right - left - 36) / siblings.length;
+    const text = fit(
+      c,
+      `${r.kind === 'near' ? 'near ' : ''}${transposeText(r.transpose)}${r.kind === 'near' ? ` d ${displayNumber(r.distance)}` : ''} ×${String(group.length)}`,
+      span - 8,
+    );
+    if (!text) continue;
+    const px = left + 24 + span * (slot + 0.5),
+      py = laneAt(a.instrument).top + 14;
+    const tw = c.measureText(text).width;
+    c.fillStyle = t.panel;
+    c.fillRect(px - tw / 2 - 4, py - 12, tw + 8, 16);
+    c.fillStyle = t.text;
+    c.fillText(text, px, py);
   }
   c.textAlign = 'left';
   c.fillStyle = t.text;
@@ -243,9 +369,8 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Relay) {
   c.fillText('Relay', 20, 30);
   c.font = `11px "${t.fontMono}"`;
   const records = f.notes.filter((n) => n.start < score.to && n.end > score.from);
-  const batonRecords = score.phrases
-    .filter((p) => baton.has(p.id))
-    .reduce((sum, p) => sum + p.notes.length, 0);
+  const batonPhrases = score.phrases.filter((p) => baton.has(p.id));
+  const batonRecords = batonPhrases.reduce((sum, p) => sum + p.notes.length, 0);
   c.fillText(
     fit(
       c,
@@ -261,14 +386,24 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Relay) {
   for (const section of score.sections) {
     const px = x(section.from),
       bw = x(section.to) - px;
+    const name = fit(c, section.name, bw - 12);
+    if (!name || px <= sectionEnd) continue;
+    const tw = c.measureText(name).width;
+    c.strokeStyle = t.muted;
+    c.lineWidth = 2;
+    stroke(c, px + 3, 64, px + 3, top - 8);
     c.fillStyle = t.panel;
-    c.fillRect(px, 66, bw - 2, 20);
+    c.beginPath();
+    c.moveTo(px + 3, 64);
+    c.lineTo(px + tw + 17, 64);
+    c.lineTo(px + tw + 12, 73);
+    c.lineTo(px + tw + 17, 82);
+    c.lineTo(px + 3, 82);
+    c.closePath();
+    c.fill();
     c.fillStyle = t.text;
-    const name = fit(c, section.name, bw - 8);
-    if (name && px > sectionEnd) {
-      c.fillText(name, px + 4, 80);
-      sectionEnd = px + c.measureText(name).width + 8;
-    }
+    c.fillText(name, px + 8, 77);
+    sectionEnd = px + tw + 20;
   }
   for (
     let bar = 0;
@@ -276,52 +411,61 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Relay) {
     bar += Math.max(1, Math.ceil(((score.to - score.from) * 34) / (right - left)))
   ) {
     c.fillStyle = t.text;
-    c.fillText(String((f.sections.length ? 0 : score.from) + bar + 1), x(score.from + bar), 102);
+    c.fillText(String((f.sections.length ? 0 : score.from) + bar + 1), x(score.from + bar), 97);
   }
-  parts.forEach((p, i) => {
-    if (lane < 15 && i % Math.ceil(15 / lane)) return;
-    c.fillStyle = t.text;
-    c.fillText(fit(c, `${String(i + 1)} ${p.name}`, left - 38), 12, y(p.id) + 4);
-  });
-  const foot = bottom + 28;
-  c.fillStyle = t.ground;
-  c.fillRect(0, foot - 8, w, h - foot + 8);
+  const foot = bottom + 22;
   c.fillStyle = t.text;
-  const batonAttacks = score.phrases
-    .filter((p) => baton.has(p.id))
-    .reduce((sum, p) => sum + p.notes.filter((n) => n.hasOnset).length, 0);
+  const batonAttacks = batonPhrases.reduce(
+    (sum, p) => sum + p.notes.filter((n) => n.hasOnset).length,
+    0,
+  );
   c.fillText(
     fit(
       c,
-      `${String(baton.size)} batons (${String(batonAttacks)} notes, ${String(batonRecords)} records) · ${String(records.length - batonRecords)} capsule records`,
+      `${String(baton.size)} batons (${String(batonAttacks)} notes, ${String(batonRecords)} records) · ${String(records.length - batonRecords)} unmatched records`,
       w - 40,
     ),
     20,
-    foot + 6,
+    foot,
   );
-  arcs.forEach((r, i) => {
-    const a = score.phrases[r.before],
+  const cross = groups.find(
+    (g) => score.phrases[g[0].before].instrument !== score.phrases[g[0].after].instrument,
+  );
+  const featured = cross ?? groups.at(0);
+  if (featured) {
+    const r = featured[0],
+      a = score.phrases[r.before],
       b = score.phrases[r.after];
     const name = (id: string) => parts.find((p) => p.id === id)?.name ?? id;
-    const detail = `${String(i + 1)} ${r.kind} ${transposeText(r.transpose)} st${r.kind === 'near' ? ` · d ${displayNumber(r.distance)}` : ''} · ${name(a.instrument)} → ${name(b.instrument)}`;
-    c.fillText(fit(c, detail, w - 40), 20, foot + 25 + i * 18);
-  });
-  if (!arcs.length)
+    c.fillText(
+      fit(
+        c,
+        `${r.kind} ${transposeText(r.transpose)} st${r.kind === 'near' ? ` · d ${displayNumber(r.distance)}` : ''} · ${name(a.instrument)} → ${name(b.instrument)}`,
+        w - 40,
+      ),
+      20,
+      foot + 19,
+    );
+  } else
     c.fillText(
       focus.links.length ? 'Current returns compacted to counts' : 'No current return established',
       20,
-      foot + 25,
+      foot + 19,
     );
   c.fillText(
     fit(
       c,
-      `Solid exact · dashed near · ${String(focus.links.length)} current edges (${String(arcs.length)} shown)`,
+      `Solid exact · dashed near · ${String(focus.links.length)} current returns · ${String(groups.length)} bundles`,
       w - 40,
     ),
     20,
-    foot + 63,
+    foot + 38,
   );
-  c.fillText(fit(c, 'Capsules count records, including control fragments', w - 40), 20, foot + 81);
+  c.fillText(
+    fit(c, 'Quiet dashes retain unmatched records, including control fragments', w - 40),
+    20,
+    foot + 57,
+  );
 }
 const definition: ViewDefinition = {
   id: 'relay',
