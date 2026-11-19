@@ -139,6 +139,23 @@ it('counts 500 colliding gate notes, keeps all roles and counts a simultaneous c
     notes: unisons.gates[0].notes.map((n) => ({ ...n, hasOnset: false })),
   });
   expect(carries.gates[0].notes).toHaveLength(3);
+  const manyFrame = {
+    ...f,
+    notes: f.notes.map((n, i) => ({
+      ...n,
+      instrument: String(i % 20),
+      value: { note: 40 + (i % 20) },
+    })),
+  };
+  const many = indexSlalom(manyFrame),
+    visible = slalomState(many, manyFrame);
+  expect(new Set(many.notes.map((n) => n.instrument)).size).toBe(20);
+  expect(many.melody).toBe('19');
+  expect(many.terrain).toBe('0');
+  expect(many.gates.flatMap((g) => g.notes)).toHaveLength(25);
+  expect(visible.gates.length + visible.sides.length).toBe(
+    many.notes.filter((n) => n.start < visible.box.to && n.end > visible.box.from).length,
+  );
 });
 it('keeps fixed pitch positions and deduplicates query continuations without losing genuine unisons', () => {
   const score = indexSlalom(real);

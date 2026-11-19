@@ -17,7 +17,7 @@ export interface Gate {
   label: string;
 }
 /** A fixed MIDI axis, never normalized to the notes currently in the window. */
-export const pitchX = (midi: number) => 0.5 + Math.tanh((midi - 60) / 12) * 0.42;
+export const pitchX = (midi: number) => 0.5 + Math.tanh((midi - 60) / 12) * 0.35;
 export function indexSlalom(frame: ViewFrame) {
   const section = sectionAt(frame);
   const from = section?.from ?? frame.from,

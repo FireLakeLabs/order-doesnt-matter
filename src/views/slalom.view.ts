@@ -13,6 +13,7 @@ import { clamp } from './shared/math';
 import { sectionAt } from './shared/ring-model';
 
 type Point = [number, number];
+const racerScale = (width: number) => (width < 700 ? 0.76 : 1.05);
 function line(c: CanvasRenderingContext2D, points: Point[], ink: string, width = 2) {
   c.strokeStyle = ink;
   c.lineWidth = width;
@@ -65,7 +66,7 @@ function skier(
   ink: string,
 ) {
   const t = f.theme,
-    scale = f.width < 700 ? 0.76 : 1.05;
+    scale = racerScale(f.width);
   const lean = clamp(turn * 15, -15, 15);
   c.save();
   c.translate(x, y);
@@ -428,7 +429,8 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
     );
   // Twin tracks are sampled from the very same exact-onset route as the skier.
   const trackFrom = Math.max(b.from, score.gates[0]?.start ?? f.now);
-  for (const offset of trackFrom <= f.now ? [-6, 6] : []) {
+  const skiOffset = 12 * racerScale(f.width);
+  for (const offset of trackFrom <= f.now ? [-skiOffset, skiOffset] : []) {
     const points: Point[] = [];
     for (let i = 0; i <= 180; i++) {
       const time = trackFrom + ((f.now - trackFrom) * i) / 180;
@@ -461,15 +463,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
     disc(c, xx, yy, 0.7 + random(i) * 1.8, t.text);
   }
   c.globalAlpha = 1;
-  skier(
-    c,
-    f,
-    sx,
-    sy,
-    clamp(-angle, -1.05, 1.05),
-    (angleAt(f.now + 0.008) - angleAt(f.now - 0.008)) * 4,
-    ink,
-  );
+  skier(c, f, sx, sy, -angle, (angleAt(f.now + 0.008) - angleAt(f.now - 0.008)) * 4, ink);
   c.restore();
   // All typography is drawn last, on opaque theme plates, outside the racer.
   const label = (
