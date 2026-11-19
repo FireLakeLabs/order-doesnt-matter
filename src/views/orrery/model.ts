@@ -107,34 +107,37 @@ function infer(notes: ViewNote[], frame: ViewFrame): Omit<Orbit, 'id'> {
     ranges.some((r, i) => ranges.some((s, j) => i < j && r.from < s.to && s.from < r.to))
   )
     return unknown('ambiguous section coverage');
-  const fractions = [
-    ...ranges.flatMap((s) => [rational(s.from), rational(s.to)]),
-    ...notes.flatMap((n) => [rational(n.start), rational(n.end)]),
-  ];
+  const fractions = new Map(
+    [...ranges.flatMap((s) => [s.from, s.to]), ...notes.flatMap((n) => [n.start, n.end])].map(
+      (time) => [time, rational(time)],
+    ),
+  );
   let scale = 1;
-  for (const f of fractions) {
+  for (const f of fractions.values()) {
     if (!f) return unknown('timing is not a recoverable rational');
     scale = (scale / gcd(scale, f.d)) * f.d;
     if (!Number.isSafeInteger(scale) || Math.abs(scale * frame.to) > Number.MAX_SAFE_INTEGER)
       return unknown('rational range too large');
   }
-  if (fractions.some((f) => f !== null && !Number.isSafeInteger(f.n * (scale / f.d))))
-    return unknown('rational range too large');
-  const intervals = ranges.map((r) => ({
-    from: Math.round(r.from * scale),
-    to: Math.round(r.to * scale),
-  }));
+  const coordinates = new Map<number, number>();
+  for (const [time, f] of fractions) {
+    if (!f) return unknown('timing is not a recoverable rational');
+    const tick = f.n * (scale / f.d);
+    if (!Number.isSafeInteger(tick)) return unknown('rational range too large');
+    coordinates.set(time, tick);
+  }
+  const ticks = (time: number) => coordinates.get(time) ?? NaN;
+  const intervals = ranges.map((r) => ({ from: ticks(r.from), to: ticks(r.to) }));
   const events: Event[] = [];
   for (const note of notes) {
     const key = identity(note);
     if (key === null) return unknown('opaque note identity');
     if (note.start < frame.from || note.start >= frame.to)
       return unknown('incomplete onset coverage');
-    events.push({
-      start: Math.round(note.start * scale),
-      duration: Math.round((note.end - note.start) * scale),
-      key,
-    });
+    const start = ticks(note.start);
+    const duration = ticks(note.end) - start;
+    if (!Number.isSafeInteger(duration)) return unknown('rational range too large');
+    events.push({ start, duration, key });
   }
   events.sort((a, b) => a.start - b.start || a.key.localeCompare(b.key) || a.duration - b.duration);
   const candidates = new Set<number>();
@@ -150,14 +153,39 @@ function infer(notes: ViewNote[], frame: ViewFrame): Omit<Orbit, 'id'> {
   const exposure = intervals.reduce((sum, r) => sum + r.to - r.from, 0);
   // Gates may hide intermediate copies. Every valid period on the recovered
   // timing grid divides a gap from the first occurrence of its motif key.
-  let work = 0;
+  const largest = [...gaps].reduce((max, gap) => Math.max(max, gap), 1);
+  // Sieve only possible prime factors, not every tick of a potentially huge
+  // timeline. The sieve uses at most about 1 MB; only extreme unresolved
+  // cofactors stay unknown. Ordinary song length has no shared work budget.
+  const limit = Math.min(1_000_000, Math.ceil(Math.sqrt(largest)));
+  const composite = new Uint8Array(limit + 1);
+  const primes: number[] = [];
+  for (let prime = 2; prime <= limit; prime++) {
+    if (composite[prime]) continue;
+    primes.push(prime);
+    if (prime <= limit / prime)
+      for (let multiple = prime * prime; multiple <= limit; multiple += prime)
+        composite[multiple] = 1;
+  }
   for (const gap of gaps) {
-    for (let divisor = 1; divisor <= gap / divisor; divisor++) {
-      if (++work > 65536) return unknown('repeat search exceeds timing budget');
-      if (gap % divisor) continue;
-      candidates.add(divisor);
-      candidates.add(gap / divisor);
+    let remaining = gap;
+    const divisors = [1];
+    for (const prime of primes) {
+      if (prime > remaining / prime) break;
+      const count = divisors.length;
+      let power = 1;
+      while (remaining % prime === 0) {
+        remaining /= prime;
+        power *= prime;
+        for (let i = 0; i < count; i++) divisors.push(divisors[i] * power);
+      }
     }
+    if (remaining > limit * limit) return unknown('inference grid too large');
+    if (remaining > 1) {
+      const count = divisors.length;
+      for (let i = 0; i < count; i++) divisors.push(divisors[i] * remaining);
+    }
+    for (const divisor of divisors) if (divisor * 2 <= exposure) candidates.add(divisor);
   }
   const actual = new Map<string, number>();
   for (const e of events) {

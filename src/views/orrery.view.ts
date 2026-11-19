@@ -212,7 +212,31 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: Orrery) {
     ctx.fill();
     ctx.stroke();
   }
+  const paintPlanet = (p: (typeof ordered)[number]) => {
+    ctx.save();
+    ctx.globalAlpha = p.rest ? 0.65 : 1;
+    sphere(
+      ctx,
+      p.x,
+      p.y,
+      p.r,
+      p.i.colour,
+      light,
+      p.rest || !p.o.period ? theme.ground : shade,
+      p.rest || !p.o.period,
+    );
+    ctx.strokeStyle = p.o.period ? p.i.colour : theme.text;
+    ctx.lineWidth = 1.5;
+    circle(ctx, p.x, p.y, p.r);
+    ctx.stroke();
+    ctx.strokeStyle = theme.text;
+    ctx.lineWidth = 0.65;
+    circle(ctx, p.x, p.y, p.r + 1);
+    ctx.stroke();
+    ctx.restore();
+  };
   ctx.globalAlpha = 1;
+  for (const p of ordered) if (p.y < sunY) paintPlanet(p);
   // The sun is a globe on the spindle, with one-bar rotating rays.
   ctx.strokeStyle = theme.accent;
   ctx.lineWidth = 1.5;
@@ -236,27 +260,7 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: Orrery) {
   ctx.lineWidth = 2;
   circle(ctx, cx, sunY, sun);
   ctx.stroke();
-  for (const p of ordered) {
-    ctx.globalAlpha = p.rest ? 0.65 : 1;
-    sphere(
-      ctx,
-      p.x,
-      p.y,
-      p.r,
-      p.i.colour,
-      light,
-      p.rest || !p.o.period ? theme.ground : shade,
-      p.rest || !p.o.period,
-    );
-    ctx.strokeStyle = p.o.period ? p.i.colour : theme.text;
-    ctx.lineWidth = 1.5;
-    circle(ctx, p.x, p.y, p.r);
-    ctx.stroke();
-    ctx.strokeStyle = theme.text;
-    ctx.lineWidth = 0.65;
-    circle(ctx, p.x, p.y, p.r + 1);
-    ctx.stroke();
-  }
+  for (const p of ordered) if (p.y >= sunY) paintPlanet(p);
   ctx.restore();
   // Text is opaque, uses the high-contrast text token, and is drawn after all motion.
   ctx.fillStyle = theme.text;

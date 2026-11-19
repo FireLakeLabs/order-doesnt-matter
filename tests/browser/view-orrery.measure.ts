@@ -215,8 +215,10 @@ test('Orrery: real Studio mapping, five themes, exact reversibility and CPU cost
   await choose('b', 'orrery');
   await page.waitForFunction(
     () =>
-      window.viewProbe.frame?.width ===
-      document.querySelector('[data-region="stage-b"] .view-host')?.clientWidth,
+      Math.abs(
+        (window.viewProbe.frame?.width ?? Infinity) -
+          (document.querySelector('[data-region="stage-b"] .view-host')?.clientWidth ?? 0),
+      ) < 1,
   );
   await page.locator('[data-region="stage-b"]').screenshot({ path: `${shots}/stage-b-narrow.png` });
   const narrow = await page.evaluate(() => ({

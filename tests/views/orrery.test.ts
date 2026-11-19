@@ -257,3 +257,52 @@ it('finds the smallest grid period when section gates hide intervening repeats',
     expect(fraction.common).toEqual({ n: 4, d: 3 });
   }
 });
+
+it('establishes long sixteenth/triplet-grid parts without spending a song-wide factoring budget', () => {
+  for (const [bars, triplet] of [
+    [64, true],
+    [128, true],
+    [128, false],
+  ] as const) {
+    const f = scoreFrame();
+    f.to = bars;
+    f.sections = [{ name: 'Whole song', from: 0, to: bars }];
+    f.notes = Array.from({ length: bars }, (_, bar) => [
+      ...Array.from({ length: 16 }, (_, step) =>
+        note(bar + step / 16, bar + (step + 1) / 16, { s: 'hh' }),
+      ),
+      ...(triplet ? [note(bar + 1 / 3, bar + 2 / 3, { s: 'oh' })] : []),
+    ]).flat();
+    const q = indexOrrery(f);
+    expect(q.orbits[0].period).toEqual(triplet ? { n: 1, d: 1 } : { n: 1, d: 16 });
+    expect(q.orbits[0].observed).toBe(bars * (triplet ? 17 : 16));
+    expect(q.orbits[0].marks.reduce((sum, mark) => sum + mark.count, 0)).toBe(triplet ? 17 : 1);
+    expect(q.complete).toBe(true);
+  }
+});
+
+it('keeps extreme unresolved grids bounded without claiming a period', () => {
+  const f = scoreFrame();
+  const gap = 1_000_003 ** 2;
+  f.to = gap * 2;
+  f.notes = [note(0, 1), note(gap, gap + 1)];
+  expect(indexOrrery(f).orbits[0]).toMatchObject({
+    period: null,
+    reason: 'inference grid too large',
+    observed: 2,
+  });
+});
+
+it('retains exact recovered tick coordinates on fine coprime grids at later song offsets', () => {
+  for (const from of [0, 8, 14, 16, 24, 30]) {
+    const f = scoreFrame();
+    f.from = from;
+    f.to = from + 2;
+    f.now = from + 0.4;
+    f.sections = [{ name: 'Tiny subdivisions', from: 0, to: 2 }];
+    f.notes = [from, from + 1].flatMap((bar) =>
+      [4093, 4091, 4079, 4073].map((d) => note(bar + 1 / d, bar + 2 / d)),
+    );
+    expect(indexOrrery(f).orbits[0].period).toEqual({ n: 1, d: 1 });
+  }
+});
