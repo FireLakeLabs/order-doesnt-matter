@@ -170,6 +170,9 @@ test('Sampler: decoded sources, all themes, reversibility, narrow stage and CPU 
     measured.map((m) => ({ theme: m.theme, reversible: m.reversible })),
   );
   expect(measured.every((m) => m.reversible)).toBe(true);
+  expect(measured.every((m) => m.texts.some((t) => t.text.startsWith('peak −14.4 dBFS')))).toBe(
+    true,
+  );
   expect(measured.every((m) => Math.min(...m.contrast) >= 4.5)).toBe(true);
   expect(measured[0].sources.every((s) => s.status === 'buffer')).toBe(true);
   await writeFile(`${shots}/measurements.json`, JSON.stringify(measured, null, 2));

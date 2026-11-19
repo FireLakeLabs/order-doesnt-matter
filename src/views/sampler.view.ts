@@ -2,6 +2,7 @@ import type { ViewDefinition, ViewFrame } from './types';
 import {
   padLayout,
   padState,
+  sampleLevel,
   sampleCursor,
   samplePads,
   waveformPeaks,
@@ -152,7 +153,7 @@ function drawPad(
         else status = state.latest ? 'ended' : 'waiting for onset';
       }
     } else settings = 'slice bounds not in this window';
-    file = `${result.duration.toFixed(3)}s · ${result.fileName}`;
+    file = `${sampleLevel(result).label} · ${result.duration.toFixed(3)}s · ${result.fileName}`;
   } else {
     status = result.status === 'loading' ? 'loading / not decoded yet' : 'unavailable';
     settings = state.muted

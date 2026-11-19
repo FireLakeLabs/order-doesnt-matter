@@ -10,6 +10,7 @@ import { scoreFrame } from './score-fixture';
 import {
   padLayout,
   padState,
+  sampleLevel,
   sampleCursor,
   samplePads,
   waveformPeaks,
@@ -43,6 +44,14 @@ const note = (value: ViewNote['value'] = {}, start = 10): ViewNote => ({
   hasOnset: true,
   value: { s: 'bd', ...value },
 });
+function peakSource(min: number[], max: number[]): SampleBuffer {
+  const source = Object.create(buffer) as SampleBuffer;
+  source.peaks = {
+    blockSize: 48000,
+    channels: [{ min: new Float32Array(min), max: new Float32Array(max) }],
+  };
+  return source;
+}
 it('places source cursors from onset seconds, sample rate, slice and signed speed, independently of score length', () => {
   const n = note({ begin: 0.25, end: 0.75, speed: 2 });
   const c = sampleCursor(n, buffer, 10.125, 0.5);
@@ -66,9 +75,41 @@ it('places source cursors from onset seconds, sample rate, slice and signed spee
 });
 it('uses only peak summaries, combines all channels, and shares a bounded screen summary', () => {
   const peaks = waveformPeaks(buffer, 2);
-  expect([...peaks.min]).toEqual([...new Float32Array([-0.8, -0.2])]);
-  expect([...peaks.max]).toEqual([...new Float32Array([0.4, 0.8])]);
+  expect([...peaks.min]).toEqual([-1, -0.25]);
+  expect([...peaks.max]).toEqual([0.5, 1]);
   expect(waveformPeaks(buffer, 2)).toBe(peaks);
+});
+it('normalises each source by its own peak once per buffer, preserving its real dBFS level across sizes', () => {
+  // Same asymmetric shape at different absolute levels, including an over-full-scale peak.
+  for (const peak of [0.1905951201915741, 0.5, 1.027376651763916]) {
+    const b = peakSource([-peak, -peak / 4], [peak / 2, peak / 8]);
+    const level = sampleLevel(b);
+    expect(level.peak).toBeCloseTo(peak);
+    expect(level.gain).toBeCloseTo(1 / peak);
+    if (peak < 0.2) expect(level.label).toBe('peak −14.4 dBFS');
+    expect([...waveformPeaks(b, 2).min]).toEqual([-1, -0.25]);
+    expect([...waveformPeaks(b, 2).max]).toEqual([0.5, 0.125]);
+    waveformPeaks(b, 1);
+    expect(sampleLevel(b)).toBe(level);
+    expect([...waveformPeaks(b, 2).min]).toEqual([-1, -0.25]);
+  }
+});
+it('labels silence and near-silence without amplifying it, including the −60 dBFS boundary', () => {
+  for (const peak of [0, 0.00001, 0.000999, 0.001001]) {
+    const b = peakSource([-peak, 0], [0, peak]);
+    const level = sampleLevel(b);
+    const drawn = waveformPeaks(b, 2);
+    expect([...drawn.min, ...drawn.max].every(Number.isFinite)).toBe(true);
+    if (!peak) expect(level.label).toBe('silent · peak −∞ dBFS');
+    else if (peak < 0.001) expect(level.label).toMatch(/^near silent · peak −/);
+    if (peak < 0.001) {
+      expect(level.gain).toBe(1);
+      expect(drawn.max[1]).toBe(b.peaks.channels[0].max[1]);
+    } else {
+      expect(level.gain).toBeGreaterThan(1);
+      expect(drawn.max[1]).toBe(1);
+    }
+  }
 });
 it('counts every overlapping retrigger, excludes fragments/future onsets, and suppresses resting/muted lights', () => {
   const frame = scoreFrame();
