@@ -1,4 +1,4 @@
-import type { Arg, Core, Pattern } from '../document/types';
+import type { Arg, Core, Layer, Pattern, TopLevel } from '../document/types';
 import type { EventResult } from '../contract';
 import type { SampleLookup } from '../strudel/sample-buffers';
 
@@ -47,15 +47,26 @@ export type ViewSnapshot =
   | { status: 'unavailable'; reason: string };
 export interface ViewDriver {
   kind: 'constant' | 'values' | 'signal' | 'opaque';
+  time: 'definition';
   /** Detached document structure, including its ordered transformations. */
   pattern: Pattern;
   opaque: string | null;
-  /** Driver queried independently over this frame's range, without arrangement
-   * or global score transforms. Signals retain their continuous event spans. */
+  /** Driver queried independently at the frame's numeric from/to in definition
+   * time, without arrangement, use-site or global score transforms. These spans
+   * are not playback positions. Signals retain their continuous event spans. */
   events(): Promise<ViewSnapshot>;
-  /** Authored rate operations, inner to outer. Events are the argument's own
-   * values in absolute cycles, before applying fast/slow to the driver. */
-  rates: { id: string; name: 'fast' | 'slow'; args: Arg[]; events(): Promise<ViewSnapshot> }[];
+  /** Authored fast/slow operations, inner to outer. Events query each argument
+   * independently at the frame's numeric from/to in its own local time, before
+   * applying it to the driver. They are not an effective playback rate. Outer
+   * driver rewrites that could change this timing make events unavailable. */
+  rates: {
+    id: string;
+    name: 'fast' | 'slow';
+    args: Arg[];
+    time: 'argument';
+    opaque: string | null;
+    events(): Promise<ViewSnapshot>;
+  }[];
 }
 export type ViewStructureStep = { id: string; opaque: string | null } & (
   | { kind: 'phrase'; core: Core }
@@ -70,8 +81,17 @@ export interface ViewProgramStructure {
   /** Step 0 is the core phrase (Pattern.id). Settings flatten their document
    * layer in stored order and use Setting.id; rewrites use Layer.id.
    * Names, arguments and mini structure are exactly as the document records.
-   * This is the definition's chain; snapshots retain arrangement/use context. */
+   * This is the definition's chain; step 0 is raw BEFORE the separately exposed
+   * context. Snapshots retain arrangement placement and apply that context. */
   steps: ViewStructureStep[];
+  /** Construction outside this definition, still applied in EVERY snapshot,
+   * including step 0. Uses retain their separate inner-to-outer layer chains;
+   * path ids identify the arrangement/reference ancestry. Global all() calls
+   * retain their document order. These are detached document nodes. */
+  context: {
+    uses: { voiceId: string; pathIds: string[]; layers: Layer[] }[];
+    transforms: Extract<TopLevel, { kind: 'transform' }>[];
+  };
   /** Ask Strudel with this chain truncated after index (inclusive). Opaque
    * prefixes are unavailable with a reason. Lazy, off playback, deduplicated
    * by document revision + step + range. 64 results retained, 32 outstanding;

@@ -8,6 +8,7 @@ import {
   type Layer,
   type Pattern,
 } from '../document';
+import type { Instrument } from '../document/instruments';
 import { generate, generatePattern } from '../generate';
 import { patternMethods } from '../import/registry';
 import type { QueryEvents } from '../contract';
@@ -122,15 +123,10 @@ export function createStructureCache(questions: Questions) {
           if (cached) return cached;
           const row = instruments(doc).find((instrument) => instrument.id === id);
           if (!row) return undefined;
-          const structure = describe(
-            doc,
-            row.pattern,
-            range,
-            (key, code) =>
-              version === revision
-                ? ask(doc, key, range, code)
-                : Promise.resolve(unavailable('This structure frame has expired')),
-            id,
+          const structure = describe(doc, row, range, (key, code) =>
+            version === revision
+              ? ask(doc, key, range, code)
+              : Promise.resolve(unavailable('This structure frame has expired')),
           );
           structures.set(key, structure);
           const oldest = structures.keys().next().value;
@@ -170,7 +166,7 @@ function opaquePattern(doc: Doc, pattern: Pattern, seen = new Set<string>()): st
 }
 function opaqueArgs(doc: Doc, args: Arg[], seen: Set<string>): string | null {
   for (const arg of args) {
-    if (arg.kind === 'callback') return 'Callback branch remains source-first for snapshots';
+    if (arg.kind === 'callback') return 'Callback snapshots are not yet supported';
     if (arg.kind === 'opaque') return 'Source-only argument';
     if (arg.kind === 'pattern') {
       const reason = opaquePattern(doc, arg.pattern, seen);
@@ -191,11 +187,11 @@ function opaqueLayer(doc: Doc, layer: Layer, seen = new Set<string>()): string |
 
 function describe(
   doc: Doc,
-  pattern: Pattern,
+  row: Instrument,
   range: { from: number; to: number },
   ask: Ask,
-  instrument: string,
 ): ViewProgramStructure {
+  const { pattern, id: instrument } = row;
   // Metadata belongs to the view; never hand out mutable references into the Doc.
   const exposed = structuredClone(pattern);
   const steps: ViewStructureStep[] = [
@@ -255,6 +251,14 @@ function describe(
     from: range.from,
     to: range.to,
     steps,
+    context: {
+      uses: row.uses.map((use) => ({
+        voiceId: use.voiceId,
+        pathIds: use.path.map((node) => node.id),
+        layers: structuredClone(use.layers),
+      })),
+      transforms: structuredClone(doc.body.filter((node) => node.kind === 'transform')),
+    },
     snapshot(index) {
       if (!Number.isInteger(index) || index < 0 || index >= addresses.length)
         return Promise.resolve(unavailable('No such chain step'));
@@ -307,33 +311,46 @@ function driver(doc: Doc, pattern: Pattern, ask: Ask): ViewDriver {
         return `${generate(context)}\nstack(${expression})`;
       });
   };
+  const layers = chains.flatMap((p) => p.layers);
   return {
     kind,
+    time: 'definition',
     pattern: structuredClone(pattern),
     opaque: reason,
     events: query(`driver:${pattern.id}`, pattern),
-    rates: chains.flatMap((p) =>
-      p.layers.flatMap((layer) => {
-        if (layer.kind !== 'rewrite' || !['fast', 'slow'].includes(layer.name)) return [];
-        const argument = layer.args.length ? layer.args[0] : undefined;
-        return [
-          {
-            id: layer.id,
-            name: layer.name as 'fast' | 'slow',
-            args: structuredClone(layer.args),
-            events:
-              argument?.kind === 'pattern'
-                ? query(`rate:${layer.id}`, argument.pattern)
-                : argument?.kind === 'literal'
-                  ? query(`rate:${layer.id}`, {
-                      ...p,
-                      core: { kind: 'data', value: argument.value },
-                      layers: [],
-                    })
-                  : () => Promise.resolve(unavailable('Source-only rate argument')),
-          },
-        ];
-      }),
-    ),
+    rates: layers.flatMap((layer, index) => {
+      if (layer.kind !== 'rewrite' || !['fast', 'slow'].includes(layer.name)) return [];
+      const argument = layer.args.length ? layer.args[0] : undefined;
+      const opaque = layers
+        .slice(index + 1)
+        .some(
+          (outer) =>
+            outer.kind === 'opaque' ||
+            (outer.kind === 'rewrite' && !['range', 'rangex'].includes(outer.name)),
+        )
+        ? 'Rate timing through later driver rewrites is not yet supported'
+        : opaqueArgs(doc, layer.args, new Set());
+      return [
+        {
+          id: layer.id,
+          name: layer.name as 'fast' | 'slow',
+          args: structuredClone(layer.args),
+          time: 'argument',
+          opaque,
+          events: opaque
+            ? () => Promise.resolve(unavailable(opaque))
+            : argument?.kind === 'pattern'
+              ? query(`rate:${layer.id}`, argument.pattern)
+              : argument?.kind === 'literal'
+                ? query(`rate:${layer.id}`, {
+                    id: layer.id,
+                    tier: layer.tier,
+                    core: { kind: 'data', value: argument.value },
+                    layers: [],
+                  })
+                : () => Promise.resolve(unavailable('Source-only rate argument')),
+        },
+      ];
+    }),
   };
 }

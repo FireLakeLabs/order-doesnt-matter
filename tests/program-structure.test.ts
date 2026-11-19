@@ -237,3 +237,71 @@ test('cache deduplicates queued work, bounds requests/results and expires old fr
   expect(await old.snapshot(0)).toMatchObject({ status: 'unavailable' });
   bounded.dispose();
 });
+
+test('offset arrangements expose definition/argument time and every use-site/global layer retained by snapshots', async () => {
+  const source = `const pad = note("c e").s("sawtooth").lpf(sine.range(200,900).fast("<2 4 3 8>"));
+    all(p => p.pan(0.3));
+    arrange([3, s("bd")], [4, pad.gain(0.2)]);`;
+  const doc = importStrudel(source).doc;
+  const row = instruments(doc).find((row) => row.name === 'pad')!;
+  const range = { from: 3, to: 7 };
+  const cache = cacheFor(query);
+  const structure = cache.forFrame(doc, range).get(row.id)!;
+  expect(structure.context.uses).toEqual(
+    row.uses.map((use) => ({
+      voiceId: use.voiceId,
+      pathIds: use.path.map((node) => node.id),
+      layers: use.layers,
+    })),
+  );
+  expect(structure.context.uses[0].layers).toMatchObject([
+    { kind: 'settings', settings: [{ name: 'gain', value: { core: { value: 0.2 } } }] },
+  ]);
+  expect(structure.context.transforms).toEqual(
+    doc.body.filter((node) => node.kind === 'transform'),
+  );
+  const raw = answer(await structure.snapshot(0));
+  expect(raw.events.filter((event) => event.hasOnset)).toHaveLength(8);
+  expect(
+    raw.events
+      .filter((event) => event.hasOnset)
+      .every((event) => {
+        const value = event.value as Record<string, unknown>;
+        return value.gain === 0.2 && value.pan === 0.3;
+      }),
+  ).toBe(true);
+  expect(answer(await structure.snapshot(structure.steps.length - 1))).toEqual(
+    await query(generate(doc, { only: row.id }), range.from, range.to),
+  );
+  const filter = structure.steps.find((step) => step.kind === 'setting' && step.name === 'cutoff')!;
+  if (filter.kind !== 'setting') throw Error('No filter');
+  expect(filter.driver.time).toBe('definition');
+  expect(filter.driver.rates[0].time).toBe('argument');
+  expect(answer(await filter.driver.rates[0].events()).events.map((event) => event.value)).toEqual([
+    8, 2, 4, 3,
+  ]);
+  const playingRates = await query('arrange([3, silence], [4, "<2 4 3 8>"])', 3, 7);
+  expect(playingRates.error).toBeNull();
+  expect(playingRates.events.map((event) => event.value)).toEqual([2, 4, 3, 8]);
+  // Context handed to views cannot change the document.
+  structure.context.uses[0].layers.length = 0;
+  expect(row.uses[0].layers.length).toBeGreaterThan(0);
+  cache.dispose();
+});
+
+test('rate queries refuse timing through an outer driver rewrite instead of reporting untransformed rate events', async () => {
+  const doc = importStrudel('note("c").lpf(sine.fast("<2 4>").slow(2).range(100,900))').doc;
+  const row = instruments(doc)[0];
+  const questions = vi.fn(query);
+  const cache = cacheFor(questions);
+  const structure = cache.forFrame(doc, { from: 0, to: 4 }).get(row.id)!;
+  const filter = structure.steps.find((step) => step.kind === 'setting')!;
+  if (filter.kind !== 'setting') throw Error('No filter');
+  const [fast, slow] = filter.driver.rates;
+  expect(fast.opaque).toContain('later driver rewrites');
+  expect(await fast.events()).toMatchObject({ status: 'unavailable', reason: fast.opaque });
+  expect(questions).not.toHaveBeenCalled();
+  expect(slow.opaque).toBeNull();
+  expect(answer(await slow.events()).events.map((event) => event.value)).toEqual([2, 2, 2, 2]);
+  cache.dispose();
+});
