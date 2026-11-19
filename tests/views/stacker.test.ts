@@ -155,3 +155,61 @@ it('keeps every dense note counted, every part row stable, and the well inside a
     expect(b.bottom - (b.capacity + 1) * b.pieceHeight).toBeGreaterThan(b.top);
   }
 });
+
+it('draws solid-height ragged forms with exact span edges and deterministic part lanes', async () => {
+  const { drawingLayout, pieceForm } = await import('../../src/views/stacker/drawing');
+  const frame = corpus.get('real-dubstep-arranged')!,
+    score = indexStacker(frame);
+  const piece = score.pieces[10],
+    form = pieceForm(piece, score.order, 600);
+  expect(form.rows).toBe(6);
+  expect(form.blocks.reduce((sum, b) => sum + b.count, 0)).toBe(16);
+  for (const block of form.blocks) {
+    expect(block.lane).toBe(score.order.indexOf(block.instrument) % 6);
+    expect(
+      piece.notes.some((n) => n.instrument === block.instrument && n.start === block.start),
+    ).toBe(true);
+    expect(piece.notes.some((n) => n.instrument === block.instrument && n.end === block.end)).toBe(
+      true,
+    );
+  }
+  // The kick's rest stays a real gap, not a full-width piece enclosure.
+  const short = form.blocks.find((b) => b.end - b.start < 0.2)!;
+  expect(short.end - short.start).toBeLessThan(0.2);
+  const withoutSiblings = pieceForm(
+    { ...piece, notes: piece.notes.filter((n) => n.instrument === short.instrument) },
+    score.order,
+    600,
+  );
+  expect(withoutSiblings.blocks[0].lane).toBe(short.lane);
+  for (const [w, h] of [
+    [1300, 760],
+    [1131, 469],
+    [559, 675],
+    [559, 469],
+  ]) {
+    const d = drawingLayout(score, 10.4, w, h);
+    expect(d.cell).toBeGreaterThanOrEqual(14);
+    expect(d.state.stack).toHaveLength(10);
+    expect(d.state.visible.length + d.state.buried).toBe(10);
+    expect(d.landing).toBeGreaterThan(d.top);
+    expect(d.stackTop).toBeGreaterThanOrEqual(d.top);
+    expect(
+      d.placed.every((p) => p.y >= d.top && p.y + p.form.rows * d.cell <= d.bottom + 1e-8),
+    ).toBe(true);
+  }
+});
+it('collapses only the transient incoming repeat while the unchanged prefix drops into place', async () => {
+  const { drawingLayout } = await import('../../src/views/stacker/drawing');
+  const score = indexStacker(corpus.get('real-dubstep-arranged')!);
+  const early = drawingLayout(score, 21.04, 1131, 469);
+  const middle = drawingLayout(score, 21.16, 1131, 469);
+  const done = drawingLayout(score, 21.3, 1131, 469);
+  expect(early.lift).toBeGreaterThan(middle.lift);
+  expect(middle.lift).toBeGreaterThan(0);
+  expect(done.lift).toBe(0);
+  expect(middle.state.clears.map((p) => [p.bar, p.match])).toEqual([[20, 8]]);
+  expect(middle.state.stack).toHaveLength(20);
+  expect(middle.state.stack).toEqual(done.state.stack);
+  expect(drawingLayout(score, 21.16, 1131, 469)).toEqual(middle);
+});

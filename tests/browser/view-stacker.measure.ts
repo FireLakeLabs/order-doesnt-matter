@@ -2,7 +2,8 @@ import { mkdir, writeFile, readFile } from 'node:fs/promises';
 import { expect, test } from '@playwright/test';
 import { prepare } from './view-evidence';
 import { resolveTheme, viewTheme, instrumentColour, themeNames } from '../../src/studio/themes';
-import { indexStacker, notePatches, stackAt, stackerLayout } from '../../src/views/stacker/model';
+import { indexStacker, notePatches, stackAt } from '../../src/views/stacker/model';
+import { drawingLayout } from '../../src/views/stacker/drawing';
 
 const shots = `${process.env.ODM_VIEW_MEASURE_DIR}/stacker`;
 
@@ -47,7 +48,7 @@ test('Stacker: real-page evidence and reported frame cost', async ({ page }) => 
     await page.getByRole('button', { name: `Theme ${theme}`, exact: true }).click();
     await page.waitForFunction((name) => window.viewProbe.frame?.theme.name === name, theme);
     await page.evaluate(() => document.fonts.ready);
-    await page.screenshot({ path: `${shots}/${theme}-studio.png` });
+    await page.screenshot({ animations: 'disabled', path: `${shots}/${theme}-studio.png` });
   }
   await page.getByRole('button', { name: 'Theme arcade', exact: true }).click();
   await page.waitForFunction(() => window.viewProbe.frame?.theme.name === 'arcade');
@@ -69,7 +70,12 @@ test('Stacker: real-page evidence and reported frame cost', async ({ page }) => 
     ].map(([width, height]) => ({
       width,
       height,
-      ...stackerLayout(width, height, score.order.length),
+      cell: drawingLayout(score, 10.4, width, height).cell,
+      visible: drawingLayout(score, 10.4, width, height).state.visible.length,
+      buried: drawingLayout(score, 10.4, width, height).state.buried,
+      stackPixels:
+        drawingLayout(score, 10.4, width, height).bottom -
+        drawingLayout(score, 10.4, width, height).stackTop,
     })),
   };
   // Profile a separate mount with the real whole-song frame, never a simulated score.
@@ -136,6 +142,7 @@ test('Stacker: real-page evidence and reported frame cost', async ({ page }) => 
       // Every theme reverses exactly after later time, a resize and a backwards seek.
       const deterministic: Record<string, boolean> = {};
       const contrasts: Record<string, number> = {};
+      const clearReversal: Record<string, boolean> = {};
       const luminance = (hex: string) => {
         const rgb = [1, 3, 5].map((offset) => {
           const v = parseInt(hex.slice(offset, offset + 2), 16) / 255;
@@ -160,10 +167,17 @@ test('Stacker: real-page evidence and reported frame cost', async ({ page }) => 
         handle.frame({ ...frame, now: 1.2 });
         handle.frame(frame);
         deterministic[name] = picture === el.querySelector('canvas')!.toDataURL();
+        const clear = { ...frame, now: 21.16 };
+        handle.frame(clear);
+        const clearPicture = el.querySelector('canvas')!.toDataURL();
+        handle.frame({ ...frame, now: 21.31, width: 560 });
+        handle.frame({ ...frame, now: 1.4 });
+        handle.frame(clear);
+        clearReversal[name] = clearPicture === el.querySelector('canvas')!.toDataURL();
       }
       handle.dispose();
       el.remove();
-      return { ...result, deterministic, contrasts };
+      return { ...result, deterministic, clearReversal, contrasts };
     },
     themeNames.map((name) => ({
       theme: viewTheme(resolveTheme(name)),
@@ -176,6 +190,7 @@ test('Stacker: real-page evidence and reported frame cost', async ({ page }) => 
   expect(measured.keys[1]).toEqual(measured.keys[0]);
   expect(measured.keys[2]).toEqual(measured.keys[0]);
   expect(Object.values(measured.deterministic).every(Boolean)).toBe(true);
+  expect(Object.values(measured.clearReversal).every(Boolean)).toBe(true);
   expect(Math.min(...Object.values(measured.contrasts))).toBeGreaterThanOrEqual(4.5);
   console.log('Stacker CPU frame cost and mapping:', JSON.stringify({ ...measured, ...mapping }));
   await writeFile(
@@ -201,18 +216,33 @@ test('Stacker: real-page evidence and reported frame cost', async ({ page }) => 
   await page.waitForFunction(
     () => !!window.viewProbe.frame?.playing && window.viewProbe.frame.now > 10.4,
   );
-  await page.screenshot({ path: `${shots}/playing-2560x1440.png` });
+  await page.screenshot({ animations: 'disabled', path: `${shots}/playing-2560x1440.png` });
   await page.getByRole('button', { name: 'Pause', exact: true }).click();
 
   await page.evaluate(async () => {
-    await window.odmStudio.seek(21.08);
+    await window.odmStudio.seek(21.16);
   });
-  await page.waitForFunction(() => window.viewProbe.frame?.now === 21.08);
+  await page.waitForFunction(() => window.viewProbe.frame?.now === 21.16);
   await expect(page.locator('[data-region="score"]')).toHaveAttribute('data-score-ready', 'true');
-  await page.screenshot({ path: `${shots}/exact-clear-2560x1440.png` });
+  await page.screenshot({ animations: 'disabled', path: `${shots}/exact-clear-2560x1440.png` });
   await expand('song');
   await other.click();
   await page.setViewportSize({ width: 1920, height: 1080 });
+  await expect(page.locator('[data-region="stage-b"] .view-host')).toHaveAttribute(
+    'data-score-ready',
+    'true',
+  );
+  await page.screenshot({ animations: 'disabled', path: `${shots}/mid-clear-1920x1080.png` });
+  for (const now of [21.04, 21.3]) {
+    await page.evaluate(async (now) => {
+      await window.odmStudio.seek(now);
+    }, now);
+    await page.waitForFunction((now) => window.viewProbe.frame?.now === now, now);
+    await page.screenshot({
+      animations: 'disabled',
+      path: `${shots}/clear-${String(now)}-1920x1080.png`,
+    });
+  }
   for (const file of ['real-techno', 'micro-dense-64']) {
     await page.evaluate(
       async (source) => {
@@ -236,6 +266,6 @@ test('Stacker: real-page evidence and reported frame cost', async ({ page }) => 
       'true',
     );
     await expect(page.locator('[data-region="score"]')).toHaveAttribute('data-score-ready', 'true');
-    await page.screenshot({ path: `${shots}/${file}-1920x1080.png` });
+    await page.screenshot({ animations: 'disabled', path: `${shots}/${file}-1920x1080.png` });
   }
 });

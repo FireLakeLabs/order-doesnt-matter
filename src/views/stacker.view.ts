@@ -1,6 +1,8 @@
 import type { ViewDefinition, ViewFrame } from './types';
-import { indexStacker, notePatches, stackAt, stackerLayout, stackerRange } from './stacker/model';
-import type { Piece, Stacker } from './stacker/model';
+import { indexStacker, stackerRange } from './stacker/model';
+import type { Stacker } from './stacker/model';
+import { drawingLayout, formIndex } from './stacker/drawing';
+import type { Form } from './stacker/drawing';
 
 interface Label {
   text: string;
@@ -9,11 +11,15 @@ interface Label {
   size: number;
   width?: number;
 }
-function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: Stacker) {
+function draw(
+  ctx: CanvasRenderingContext2D,
+  frame: ViewFrame,
+  score: Stacker,
+  forms: Map<number, Form>,
+) {
   const { width, height, theme, now } = frame;
-  const box = stackerLayout(width, height, score.order.length);
-  const state = stackAt(score, now, box.capacity);
-  const { x, top, bottom, wellWidth, pieceHeight: ph, side } = box;
+  const box = drawingLayout(score, now, width, height, forms);
+  const { state, x, top, bottom, wellWidth, side, cell, inkWidth } = box;
   const labels: Label[] = [];
   const label = (text: string, x: number, y: number, size = 11, width?: number) =>
     labels.push({ text, x, y, size, width });
@@ -29,85 +35,155 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: Stacker) {
   ctx.fillRect(x, top, wellWidth, bottom - top);
   ctx.strokeStyle = theme.line;
   ctx.lineWidth = 1;
+  ctx.globalAlpha = 0.35;
   ctx.beginPath();
   for (let col = 0; col <= 16; col++) {
-    ctx.moveTo(x + (col * wellWidth) / 16, top);
-    ctx.lineTo(x + (col * wellWidth) / 16, bottom);
+    ctx.moveTo(x + 4 + (col * inkWidth) / 16, top);
+    ctx.lineTo(x + 4 + (col * inkWidth) / 16, bottom);
   }
-  for (let y = bottom; y >= top; y -= ph) {
+  for (let y = bottom; y >= top; y -= cell) {
     ctx.moveTo(x, y);
     ctx.lineTo(x + wellWidth, y);
   }
   ctx.stroke();
-  const activeHeight = Math.max(64, score.order.length * 3 + 8);
-  const piece = (p: Piece, y: number, ghost = false, preview = false, falling = false) => {
-    const px = preview ? side : x + 5;
-    const pw = preview ? width - side - 18 : wellWidth - 10;
-    const h = preview ? 44 : falling ? activeHeight : ph - 3;
-    ctx.fillStyle = theme.panel;
-    if (!ghost) ctx.fillRect(px, y, pw, h);
-    ctx.strokeStyle = ghost ? theme.muted : theme.line;
-    ctx.setLineDash(ghost ? [4, 4] : []);
-    ctx.strokeRect(px + 0.5, y + 0.5, pw - 1, h - 1);
-    ctx.setLineDash([]);
-    if (!p.known) {
-      if (!ghost) label('UNASKED', px + 8, y + h / 2 + 4, 11, pw - 16);
+  ctx.globalAlpha = 1;
+  const brightness = (colour: string) =>
+    [1, 3, 5].reduce((n, i) => n + parseInt(colour.slice(i, i + 2), 16), 0);
+  const light = brightness(theme.text) > brightness(theme.ground) ? theme.text : theme.ground;
+  const dark = light === theme.text ? theme.ground : theme.text;
+  const block = (
+    bx: number,
+    by: number,
+    w: number,
+    h: number,
+    colour: string,
+    outline: boolean,
+    active: boolean,
+  ) => {
+    if (outline) {
+      ctx.strokeStyle = theme.muted;
+      ctx.lineWidth = 1.25;
+      ctx.strokeRect(bx + 0.625, by + 0.625, Math.max(0, w - 1.25), Math.max(0, h - 1.25));
       return;
     }
-    const inkWidth = Math.max(1, pw - (preview ? 8 : 68));
-    const rowHeight = (h - 6) / Math.max(1, score.order.length);
-    let crowded = 0;
-    score.order.forEach((id, row) => {
-      const patches = notePatches(p, id, inkWidth);
-      const py = y + 3 + row * rowHeight;
-      for (const patch of patches) {
-        const start = px + 4 + patch.start * inkWidth;
-        const w = Math.max(0.8, (patch.end - patch.start) * inkWidth - 0.7);
-        const rh = Math.max(0.6, rowHeight - 0.45);
-        if (ghost) {
-          ctx.strokeStyle = theme.muted;
-          ctx.strokeRect(start, py, w, rh);
-        } else {
-          ctx.fillStyle = colours.get(id) ?? theme.text;
-          ctx.fillRect(start, py, w, rh);
-          // Light top and dark foot give each fractional block its bevel.
-          ctx.globalAlpha = 0.45;
-          ctx.fillStyle = theme.text;
-          ctx.fillRect(start, py, w, Math.min(0.65, rh / 3));
-          ctx.fillStyle = theme.ground;
-          ctx.fillRect(start, py + rh * 0.7, w, rh * 0.3);
-          ctx.globalAlpha = 1;
-        }
-        if (patch.count > 1) crowded += patch.count;
-      }
-    });
-    if (!preview && !ghost) {
-      label(String(p.bar - score.from + 1).padStart(2, '0'), px + pw - 54, y + h / 2 + 4);
-      if (crowded) label(`×${String(crowded)}`, px + pw - 30, y + h / 2 + 4, 11, 29);
+    const bevel = Math.min(3.5, h / 4, w / 4);
+    ctx.fillStyle = colour;
+    ctx.fillRect(bx, by, w, h);
+    ctx.globalAlpha *= 0.6;
+    ctx.fillStyle = light;
+    ctx.beginPath();
+    ctx.moveTo(bx, by);
+    ctx.lineTo(bx + w, by);
+    ctx.lineTo(bx + w - bevel, by + bevel);
+    ctx.lineTo(bx + bevel, by + bevel);
+    ctx.lineTo(bx + bevel, by + h - bevel);
+    ctx.lineTo(bx, by + h);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha /= 0.6;
+    ctx.globalAlpha *= 0.7;
+    ctx.fillStyle = dark;
+    ctx.beginPath();
+    ctx.moveTo(bx + w, by);
+    ctx.lineTo(bx + w, by + h);
+    ctx.lineTo(bx, by + h);
+    ctx.lineTo(bx + bevel, by + h - bevel);
+    ctx.lineTo(bx + w - bevel, by + h - bevel);
+    ctx.lineTo(bx + w - bevel, by + bevel);
+    ctx.closePath();
+    ctx.fill();
+    ctx.globalAlpha /= 0.7;
+    if (active) {
+      ctx.strokeStyle = theme.text;
+      ctx.lineWidth = 1;
+      ctx.strokeRect(bx + 0.5, by + 0.5, Math.max(0, w - 1), Math.max(0, h - 1));
     }
   };
-  state.visible.forEach((p, i) => {
-    piece(p, bottom - (i + 1) * ph);
-  });
-  const landing = bottom - state.visible.length * ph - activeHeight;
-  if (state.current) {
-    piece(state.current, landing, true, false, true);
-    const y = top + (landing - top) * state.phase;
-    piece(state.current, y, false, false, true);
-    ctx.strokeStyle = theme.text;
-    ctx.lineWidth = 2;
-    ctx.strokeRect(x + 5, y, wellWidth - 10, activeHeight);
-  }
-  // Section labels sit outside the well, so falling material cannot cover them.
-  for (let i = 0; i < state.visible.length; i++) {
-    const p = state.visible[i];
-    if (i === state.visible.length - 1 || p.section !== state.visible[i + 1].section) {
-      const y = bottom - (i + 1) * ph;
-      ctx.fillStyle = theme.text;
-      ctx.fillRect(x - 15, y, 4, ph - 3);
-      if (!box.narrow) label(p.section, 18, y + ph / 2 + 4, 11, x - 44);
+  const piece = (
+    form: Form,
+    y: number,
+    ghost = false,
+    preview = false,
+    active = false,
+    scale = 1,
+    opacity = 1,
+    metadata = true,
+  ) => {
+    const px = preview ? side : x + 4;
+    const pw = preview ? width - side - 18 : inkWidth;
+    const row = preview ? Math.min(12, 44 / form.rows) : cell;
+    const h = form.rows * row * scale;
+    if (!form.piece.known || form.blocks.length === 0) {
+      if (!ghost && metadata && y >= top && y + 12 <= bottom)
+        label(form.piece.known ? 'REST' : 'UNASKED', px + 8, y + 12, 11, pw - 16);
+      return;
     }
+    ctx.globalAlpha = opacity;
+    for (const tile of form.blocks) {
+      const by = y + ((tile.lane - form.first) * row + (tile.band * row) / tile.bands) * scale;
+      block(
+        px + tile.start * pw,
+        by,
+        (tile.end - tile.start) * pw,
+        (row / tile.bands) * scale,
+        colours.get(tile.instrument) ?? theme.text,
+        ghost,
+        active,
+      );
+    }
+    ctx.globalAlpha = 1;
+    if (!preview && !ghost && metadata && y + h / 2 >= top + 11 && y + h / 2 <= bottom - 4) {
+      label(
+        String(form.piece.bar - score.from + 1).padStart(2, '0'),
+        x + wellWidth - 54,
+        y + h / 2 + 4,
+      );
+      if (form.crowded)
+        label(`×${String(form.crowded)}`, x + wellWidth - 30, y + h / 2 + 4, 11, 29);
+    }
+  };
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(x, top, wellWidth, bottom - top);
+  ctx.clip();
+  for (const placed of box.placed) {
+    const raised =
+      state.flash && placed.form.piece.bar > (state.flash.match ?? Infinity) ? box.lift : 0;
+    piece(placed.form, placed.y - raised);
   }
+  if (box.flash && box.lift > 0) {
+    const matched = box.placed.find((p) => p.form.piece.bar === state.flash?.match);
+    if (matched) {
+      ctx.fillStyle = light;
+      ctx.globalAlpha = 0.65 * (1 - box.collapse);
+      ctx.fillRect(x, matched.y, wellWidth, matched.form.rows * cell);
+      ctx.globalAlpha = 1;
+    }
+    const flashY = box.anchor - box.lift;
+    ctx.fillStyle = light;
+    ctx.globalAlpha = 0.72 * (1 - box.collapse);
+    ctx.fillRect(x, flashY, wellWidth, box.lift);
+    ctx.globalAlpha = 1;
+    piece(box.flash, flashY, false, false, false, 1 - box.collapse, 1 - box.collapse, false);
+    ctx.fillStyle = light;
+    ctx.globalAlpha = 0.6 * (1 - box.collapse);
+    ctx.fillRect(x, flashY, wellWidth, box.lift);
+    ctx.globalAlpha = 1;
+  }
+  if (box.current) {
+    piece(box.current, box.landing - box.lift, true);
+    piece(box.current, top + (box.landing - top) * state.phase - box.lift, false, false, true);
+  }
+  ctx.restore();
+  // Section tags remain on their stable landings, outside all block motion.
+  box.placed.forEach((placed, i) => {
+    const p = placed.form.piece;
+    if (i === box.placed.length - 1 || p.section !== box.placed[i + 1].form.piece.section) {
+      ctx.fillStyle = theme.text;
+      ctx.fillRect(x - 15, placed.y, 4, Math.min(cell, 18));
+      if (!box.narrow) label(p.section, 18, placed.y + 13, 11, x - 44);
+    }
+  });
   label('STACKER', 18, 31, 23);
   label(
     `BAR ${state.current ? String(state.current.bar - score.from + 1) : '—'} · ${String(Math.min(99, Math.floor(state.phase * 100 + 1e-8)))}% ↓`,
@@ -124,7 +200,8 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: Stacker) {
       103,
       16,
     );
-    piece(state.next, 114, false, true);
+    const nextForm = box.forms.get(state.next.bar);
+    if (nextForm) piece(nextForm, 114, false, true);
   } else
     label(
       state.current && !score.arranged ? 'NEXT PAGE' : 'NEXT UNASKED',
@@ -146,29 +223,34 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: Stacker) {
   label(state.current?.section ?? 'End', side, 359, 12, width - side - 14);
   if (!box.narrow && height >= 560) {
     label('PIECE ROWS', 18, 81);
-    const available = Math.floor((bottom - state.visible.length * ph - 108) / 17);
+    const available = Math.floor((box.stackTop - 108) / 17);
     const count = Math.max(0, Math.min(score.order.length, available));
     for (let i = 0; i < count; i++) {
       const id = score.order[i];
       ctx.fillStyle = colours.get(id) ?? theme.text;
       ctx.fillRect(18, 94 + i * 17, 6, 8);
-      label(frame.instruments.find((p) => p.id === id)?.name ?? id, 30, 102 + i * 17, 11, x - 56);
+      label(
+        `${String((i % 6) + 1)} ${frame.instruments.find((p) => p.id === id)?.name ?? id}`,
+        30,
+        102 + i * 17,
+        11,
+        x - 56,
+      );
     }
     if (count < score.order.length)
       label(`+${String(score.order.length - count)} rows`, 18, 104 + count * 17, 11, x - 40);
   }
   if (state.flash) {
-    ctx.fillStyle = theme.text;
-    ctx.globalAlpha = 1 - state.phase / 0.28;
-    ctx.fillRect(x + 6, landing + activeHeight / 2 - 2, wellWidth - 12, 4);
-    ctx.globalAlpha = 1;
-    const text = `CLEAR · MATCH BAR ${String((state.flash.match ?? score.from) - score.from + 1)}`;
-    ctx.fillStyle = theme.panel;
-    ctx.fillRect(x + 8, top + 12, wellWidth - 16, 35);
-    label(text, x + 18, top + 35, 16, wellWidth - 36);
+    label(
+      `MATCH BAR ${String((state.flash.match ?? score.from) - score.from + 1)}`,
+      x + 18,
+      top + 27,
+      18,
+      wellWidth - 36,
+    );
   }
   // Fixed footer strips reserve space for counters and density semantics.
-  ctx.fillStyle = theme.panel;
+  ctx.fillStyle = box.flash ? light : theme.panel;
   ctx.fillRect(x, bottom + 13, wellWidth, 18);
   ctx.strokeStyle = theme.line;
   ctx.strokeRect(x, bottom + 13, wellWidth, 18);
@@ -187,9 +269,9 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: Stacker) {
       11,
       width - side - 12,
     );
-    label(`${String(score.order.length)} part rows`, side, 404, 11, width - side - 12);
+    label(`${String(score.order.length)} parts · 6 lanes`, side, 404, 11, width - side - 12);
   }
-  label('EXACT VALUES CLEAR · × = MERGED NOTES', 18, height - 7, 11, width - 36);
+  label('EXACT CLEARS · × = MERGED NOTES / SHARED LANES', 18, height - 7, 11, width - 36);
   // All text uses the theme's text/ground pair, on opaque plates, after motion.
   ctx.textBaseline = 'alphabetic';
   ctx.textAlign = 'left';
@@ -221,6 +303,9 @@ const view: ViewDefinition = {
     let score: Stacker | undefined,
       notes: ViewFrame['notes'] | undefined,
       key = '';
+    let formCache:
+      | { score: Stacker; width: number; height: number; forms: Map<number, Form> }
+      | undefined;
     return {
       frame(frame) {
         if (frame.width <= 0 || frame.height <= 0) return;
@@ -246,13 +331,25 @@ const view: ViewDefinition = {
         canvas.style.height = `${String(frame.height)}px`;
         ctx.reset();
         ctx.setTransform(frame.dpr, 0, 0, frame.dpr, 0, 0);
-        draw(ctx, frame, score);
+        if (
+          formCache?.score !== score ||
+          formCache.width !== frame.width ||
+          formCache.height !== frame.height
+        )
+          formCache = {
+            score,
+            width: frame.width,
+            height: frame.height,
+            forms: formIndex(score, frame.width, frame.height),
+          };
+        draw(ctx, frame, score, formCache.forms);
       },
       dispose() {
         canvas.remove();
         canvas.width = canvas.height = 0;
         score = undefined;
         notes = undefined;
+        formCache = undefined;
       },
     };
   },
