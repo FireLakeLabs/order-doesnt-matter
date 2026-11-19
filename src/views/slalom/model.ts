@@ -4,6 +4,7 @@ import { pitch } from '../shared/pitch';
 import { scoredNotes } from '../shared/scored-notes';
 import { sectionAt } from '../shared/ring-model';
 import { clamp } from '../shared/math';
+import { random } from '../shared/particles';
 import { accidentalStyle, spell } from '../chord-bridge/drawing';
 
 export const readPitch = (n: ViewNote) => pitch({ ...n.value, n: undefined });
@@ -18,11 +19,7 @@ export interface Gate {
 }
 /** A fixed MIDI axis, never normalized to the notes currently in the window. */
 export const pitchX = (midi: number) => 0.5 + Math.tanh((midi - 60) / 12) * 0.35;
-export function indexSlalom(frame: ViewFrame) {
-  const section = sectionAt(frame);
-  const from = section?.from ?? frame.from,
-    to = section?.to ?? frame.to;
-  const notes = scoredNotes(frame.notes).filter((n) => n.start < to && n.end > from);
+function indexMountain(notes: ViewNote[]) {
   const evidence = roleEvidence(notes.map((n) => ({ ...n, value: { ...n.value, n: undefined } })));
   const melody = [...evidence.values()]
     .filter((p) => Number.isFinite(p.meanPitch))
@@ -66,7 +63,34 @@ export function indexSlalom(frame: ViewFrame) {
             : `${spell(pitches[0], style)}…${spell(pitches[pitches.length - 1], style)} ×${String(notes.length)}`,
       };
     });
-  return { section, melody, terrain, notes, gates, style };
+  return { melody, terrain, notes, gates, style };
+}
+export function indexSlalom(frame: ViewFrame) {
+  const section = sectionAt(frame);
+  const notes = scoredNotes(frame.notes);
+  // Index each supplied mountain, including the approach to the next section.
+  // A crossing span belongs to the mountain where it began, so it stays counted once.
+  const mountains = new Map<number | undefined, ViewNote[]>();
+  for (const note of notes) {
+    const key = sectionAt({ ...frame, now: note.start })?.from;
+    const group = mountains.get(key) ?? [];
+    group.push(note);
+    mountains.set(key, group);
+  }
+  const courses = [...mountains].map(([from, notes]) => ({ from, ...indexMountain(notes) }));
+  const current = courses.find((course) => course.from === section?.from) ?? indexMountain([]);
+  return {
+    ...current,
+    section,
+    gates: courses.flatMap((course) => course.gates).sort((a, b) => a.start - b.start),
+    gateNotes: courses.flatMap((course) => course.gates.flatMap((gate) => gate.notes)),
+    terrainNotes: courses.flatMap((course) =>
+      course.notes.filter((n) => n.instrument === course.terrain),
+    ),
+    sideNotes: courses.flatMap((course) =>
+      course.notes.filter((n) => n.instrument !== course.melody || readPitch(n) === undefined),
+    ),
+  };
 }
 export type SlalomScore = ReturnType<typeof indexSlalom>;
 /** Cubic easing has continuous velocity at both ends, hits every onset exactly,
@@ -124,7 +148,7 @@ export function sideSpan(note: ViewNote, box: SlalomLayout) {
   const end = box.y(Math.min(note.end, box.to));
   return { start: note.start < box.from ? Math.min(end, start + 20) : start, end };
 }
-/** Nearby gate drawings merge to one opening; the count retains all source notes.
+/** Nearby gate labels merge; each corridor retains its own geometry. The count retains all source notes.
  * Route knots remain unmerged, so bundling cannot change the exact timing. */
 export function gateBundles(score: SlalomScore, box: SlalomLayout) {
   const groups: { gates: Gate[]; y: number; low: number; high: number; count: number }[] = [];
@@ -144,15 +168,52 @@ export function gateBundles(score: SlalomScore, box: SlalomLayout) {
 }
 export function slalomState(score: SlalomScore, frame: ViewFrame) {
   const box = slalomLayout(frame);
-  const visible = score.notes.filter((n) => n.start < box.to && n.end > box.from);
+  const visible = (notes: ViewNote[]) => notes.filter((n) => n.start < box.to && n.end > box.from);
   return {
     box,
     bundles: gateBundles(score, box),
     passed: score.gates.filter((g) => g.start >= Math.floor(frame.now) && g.start <= frame.now),
     next: score.gates.find((g) => g.start > frame.now),
-    gates: visible.filter((n) => n.instrument === score.melody && readPitch(n) !== undefined),
-    terrain: visible.filter((n) => n.instrument === score.terrain),
-    sides: visible.filter((n) => n.instrument !== score.melody || readPitch(n) === undefined),
+    gates: visible(score.gateNotes),
+    terrain: visible(score.terrainNotes),
+    sides: visible(score.sideNotes),
     x: routeAt(score.gates, frame.now),
   };
+}
+
+/** Stable snow identities scroll with absolute score time, across window edges. */
+export function snowSpecks(from: number, to: number) {
+  const specks = [];
+  for (let cycle = Math.floor(from); cycle < Math.ceil(to); cycle++)
+    for (let i = 0; i < 36; i++) {
+      const seed = cycle * 36 + i;
+      specks.push({
+        time: cycle + random(seed, 4),
+        x: random(seed, 3),
+        radius: 0.7 + random(seed, 5),
+      });
+    }
+  return specks;
+}
+export function routeAngle(gates: readonly Gate[], box: SlalomLayout, time: number) {
+  return Math.atan2(
+    box.width * (routeAt(gates, time + 0.0001) - routeAt(gates, time - 0.0001)),
+    ((box.bottom - box.top) / (box.to - box.from)) * 0.0002,
+  );
+}
+/** Monotone downhill samples cannot fold into loops on tight carves. */
+export function trackPoint(
+  gates: readonly Gate[],
+  box: SlalomLayout,
+  time: number,
+  offset: number,
+): [number, number] {
+  return [
+    box.x(routeAt(gates, time)) + Math.cos(routeAngle(gates, box, time)) * offset,
+    box.y(time),
+  ];
+}
+export function gateRails(gates: readonly Gate[], gate: Gate, box: SlalomLayout, time: number) {
+  const shift = box.width * corridorOffset(gates, gate, time);
+  return [box.x(gate.low) - 23 + shift, box.x(gate.high) + 23 + shift];
 }

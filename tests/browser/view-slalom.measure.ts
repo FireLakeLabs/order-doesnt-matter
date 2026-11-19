@@ -157,6 +157,23 @@ test('Slalom: real Studio mapping, five themes, reversibility and frame cost', a
   expect(measured.contrast.every((r) => r.ratio >= 4.5)).toBe(true);
   await writeFile(`${shots}/measurements.json`, JSON.stringify({ ...measured, mapping }, null, 2));
   console.log('Slalom mapping and CPU submission:', JSON.stringify({ ...measured, mapping }));
+  // The next mountain's gates are visible before its boundary, with a continuous route.
+  await page.getByRole('button', { name: 'Theme arcade', exact: true }).click();
+  for (const now of [19.9, 20]) {
+    await page.evaluate(async (now) => window.odmStudio.seek(now), now);
+    await page.waitForFunction(
+      (now) =>
+        window.viewProbe.frame?.now === now &&
+        window.viewProbe.frame.notes.some((n) => n.start >= 20),
+      now,
+    );
+    await page.evaluate(async () => {
+      for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
+    });
+    await page.screenshot({ path: `${shots}/boundary-${now}-1920x1080.png` });
+  }
+  await page.evaluate(async () => window.odmStudio.seek(17.4));
+  await page.waitForFunction(() => window.viewProbe.frame?.now === 17.4);
   await page.getByRole('button', { name: 'Theme arcade', exact: true }).click();
   await b.getByRole('button', { name: 'Views', exact: true }).click();
   const tile = b.locator('.shelf-popover [data-view="slalom"] .view-to-b');

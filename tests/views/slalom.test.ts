@@ -8,6 +8,9 @@ import { queryEventsNode } from '../node-query';
 import { scoreFrame } from './score-fixture';
 import {
   corridorOffset,
+  gateRails,
+  snowSpecks,
+  trackPoint,
   gateBundles,
   indexSlalom,
   pitchX,
@@ -214,4 +217,90 @@ it('keeps short carried side marks inside their real spans at every Window size'
   const state = slalomState(indexSlalom({ ...real, lookAhead: 1 }), { ...real, lookAhead: 1 });
   const clipped = state.sides.find((n) => n.start === 16 && n.end === 17)!;
   expect(sideSpan(clipped, state.box).end).toBe(state.box.y(17));
+});
+
+it('keeps twin tracks monotone downhill through rapid alternating carves', () => {
+  const frame = scoreFrame();
+  frame.notes = Array.from({ length: 20 }, (_, i) => ({
+    instrument: '0',
+    start: i / 20,
+    end: (i + 0.2) / 20,
+    hasOnset: true,
+    value: { note: i % 2 ? 84 : 36 },
+  }));
+  frame.from = 0;
+  frame.to = 2;
+  frame.now = 0.5;
+  const score = indexSlalom(frame),
+    box = slalomLayout(frame);
+  for (const offset of [-12, 12]) {
+    let previous = -Infinity;
+    for (let i = 0; i <= 1000; i++) {
+      const time = i / 1000,
+        point = trackPoint(score.gates, box, time, offset);
+      expect(point[1]).toBe(box.y(time));
+      expect(point[1]).toBeGreaterThan(previous);
+      previous = point[1];
+    }
+  }
+});
+it('retains snow positions when the scrolling window crosses an integer edge', () => {
+  const before = snowSpecks(0.999, 2.999),
+    after = snowSpecks(1.001, 3.001);
+  const common = (specks: ReturnType<typeof snowSpecks>) =>
+    specks.filter((s) => s.time >= 1 && s.time < 3);
+  expect(common(before)).toHaveLength(72);
+  expect(common(after)).toEqual(common(before));
+});
+it('keeps a held gate rail width and positions when a bundled sibling scrolls out', () => {
+  const frame = scoreFrame();
+  frame.from = 0;
+  frame.to = 4;
+  frame.lookAhead = 1;
+  frame.notes = [
+    { instrument: '0', start: 0, end: 2, hasOnset: true, value: { note: 60 } },
+    { instrument: '0', start: 0.02, end: 0.1, hasOnset: true, value: { note: 84 } },
+    { instrument: '0', start: 2, end: 3, hasOnset: true, value: { note: 65 } },
+  ];
+  const score = indexSlalom(frame),
+    held = score.gates[0];
+  const before = slalomState(score, { ...frame, now: 0.5 });
+  const after = slalomState(score, { ...frame, now: 0.6 });
+  expect(before.bundles[0].count).toBe(2);
+  expect(after.bundles[0].count).toBe(1);
+  const first = gateRails(score.gates, held, before.box, 0.7);
+  expect(gateRails(score.gates, held, after.box, 0.7)).toEqual(first);
+  expect(first[1] - first[0]).toBeCloseTo(46);
+});
+it('previews each next mountain with its own melody and keeps the route across boundaries', () => {
+  const frame = scoreFrame(2);
+  frame.sections = [
+    { name: 'first', from: 0, to: 2 },
+    { name: 'second', from: 2, to: 4 },
+  ];
+  frame.from = 0;
+  frame.to = 4;
+  frame.lookAhead = 4;
+  frame.notes = [
+    { instrument: '0', start: 1, end: 1.25, hasOnset: true, value: { note: 72 } },
+    { instrument: '1', start: 1, end: 2, hasOnset: true, value: { note: 36 } },
+    { instrument: '0', start: 2, end: 3, hasOnset: true, value: { note: 40 } },
+    { instrument: '1', start: 2, end: 2.25, hasOnset: true, value: { note: 67 } },
+  ];
+  const beforeFrame = { ...frame, now: 1.999999 },
+    afterFrame = { ...frame, now: 2 };
+  const before = indexSlalom(beforeFrame),
+    after = indexSlalom(afterFrame);
+  expect(before.melody).toBe('0');
+  expect(after.melody).toBe('1');
+  expect(before.gates).toEqual(after.gates);
+  expect(slalomState(before, beforeFrame).next).toMatchObject({ start: 2, x: pitchX(67) });
+  expect(slalomState(before, beforeFrame).gates.map((n) => n.instrument)).toContain('1');
+  expect(Math.abs(routeAt(before.gates, beforeFrame.now) - routeAt(after.gates, 2))).toBeLessThan(
+    1e-5,
+  );
+  expect(routeAt(before.gates, 1)).toBe(pitchX(72));
+  expect(routeAt(after.gates, 2)).toBe(pitchX(67));
+  // Prior tracks still use the same route after the mountain changes.
+  expect(routeAt(after.gates, 1.5)).toBe(routeAt(before.gates, 1.5));
 });
