@@ -110,7 +110,7 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: Stacker) {
   }
   label('STACKER', 18, 31, 23);
   label(
-    `BAR ${state.current ? String(state.current.bar - score.from + 1) : '—'} · ${String(Math.floor(state.phase * 100))}% ↓`,
+    `BAR ${state.current ? String(state.current.bar - score.from + 1) : '—'} · ${String(Math.min(99, Math.floor(state.phase * 100 + 1e-8)))}% ↓`,
     x,
     55,
     12,
@@ -125,7 +125,14 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: Stacker) {
       16,
     );
     piece(state.next, 114, false, true);
-  } else label('NEXT UNASKED', side, 110, 11, width - side - 12);
+  } else
+    label(
+      state.current && !score.arranged ? 'NEXT PAGE' : 'NEXT UNASKED',
+      side,
+      110,
+      11,
+      width - side - 12,
+    );
   const counter = (name: string, value: number, y: number, detail: string) => {
     label(`${name} · ${detail.toUpperCase()}`, side, y, 11, width - side - 12);
     label(String(value).padStart(2, '0'), side, y + 29, 28);
@@ -139,7 +146,7 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: Stacker) {
   label(state.current?.section ?? 'End', side, 359, 12, width - side - 14);
   if (!box.narrow && height >= 560) {
     label('PIECE ROWS', 18, 81);
-    const available = Math.floor((top + (landing - top) * state.phase - 100) / 17);
+    const available = Math.floor((bottom - state.visible.length * ph - 108) / 17);
     const count = Math.max(0, Math.min(score.order.length, available));
     for (let i = 0; i < count; i++) {
       const id = score.order[i];

@@ -86,6 +86,19 @@ test('Stacker: real-page evidence and reported frame cost', async ({ page }) => 
         if (max === undefined) fill.call(this, text, x, y);
         else fill.call(this, text, x, y, max);
       };
+      const keys = [10, 10.4, 10.95].map((now) => {
+        texts.length = 0;
+        handle.frame({ ...source, now });
+        const start = texts.indexOf('PIECE ROWS') + 1;
+        const end = texts.findIndex((text) => text.includes('STACKED'));
+        return texts.slice(start, end);
+      });
+      const captions = [1.4, 21.08].map((now) => {
+        texts.length = 0;
+        handle.frame({ ...source, now });
+        return texts.find((text) => text.startsWith('BAR '));
+      });
+      texts.length = 0;
       handle.frame(source);
       CanvasRenderingContext2D.prototype.fillText = fill;
       const run = (kind: 'cached' | 'seam' | 'rebuilt') => {
@@ -115,7 +128,9 @@ test('Stacker: real-page evidence and reported frame cost', async ({ page }) => 
         notes: source.notes.length,
         width: source.width,
         height: source.height,
-        texts,
+        texts: texts.slice(),
+        keys,
+        captions,
         userAgent: navigator.userAgent,
       };
       // Every theme reverses exactly after later time, a resize and a backwards seek.
@@ -156,6 +171,10 @@ test('Stacker: real-page evidence and reported frame cost', async ({ page }) => 
     })),
   );
 
+  expect(measured.captions).toEqual(['BAR 2 · 40% ↓', 'BAR 22 · 8% ↓']);
+  expect(measured.keys[0].length).toBeGreaterThan(0);
+  expect(measured.keys[1]).toEqual(measured.keys[0]);
+  expect(measured.keys[2]).toEqual(measured.keys[0]);
   expect(Object.values(measured.deterministic).every(Boolean)).toBe(true);
   expect(Math.min(...Object.values(measured.contrasts))).toBeGreaterThanOrEqual(4.5);
   console.log('Stacker CPU frame cost and mapping:', JSON.stringify({ ...measured, ...mapping }));
