@@ -1,6 +1,14 @@
 import { beforeAll, expect, it } from 'vitest';
 import type { ViewFrame, ViewNote } from '../../src/views/types';
-import { aquarium, bubbleLife, send, swim, tankLayout } from '../../src/views/aquarium/model';
+import {
+  aquarium,
+  bubbleLife,
+  dryBowl,
+  drySwim,
+  send,
+  swim,
+  tankLayout,
+} from '../../src/views/aquarium/model';
 import { indexStage } from '../../src/views/soundstage/model';
 import { soundstageCorpusFrame } from './soundstage.fixture';
 import { scoreFrame } from './score-fixture';
@@ -166,7 +174,7 @@ it('ignores settings for an effect with no send, for sampled notes and metadata 
     }
   }
 });
-it('centres a full-height bowl when one or twenty instruments have no sends', () => {
+it('centres the dry-only layout and retains one or twenty instruments with no sends', () => {
   for (const count of [1, 20]) {
     const f = scoreFrame(count);
     f.notes = f.instruments.map((i) => note(i.id, {}));
@@ -186,4 +194,75 @@ it('centres a full-height bowl when one or twenty instruments have no sends', ()
       expect(layout.bowl!.rooms[0].fish).toHaveLength(count);
     }
   }
+});
+
+it('packs dry fish into disjoint analytic paths inside the bowl, with the legend below', () => {
+  for (const count of [1, 2, 4, 8, 20]) {
+    const f = scoreFrame(count);
+    f.notes = f.instruments.map((i) => note(i.id, {}));
+    const dry = state(f).dry;
+    for (const wet of [[], state(real).tanks])
+      for (const [width, height] of [
+        [1300, 760],
+        [560, 675],
+        [1131, 469],
+      ]) {
+        const slot = tankLayout(wet, dry, width, height).bowl!;
+        const bowl = dryBowl(slot, count);
+        expect(bowl.paths.length + bowl.overflow).toBe(count);
+        expect(bowl.paths).toHaveLength(Math.min(count, 8));
+        expect(bowl.legendY).toBeGreaterThan(bowl.y + bowl.height);
+        expect(bowl.legendY + 28 + (bowl.legendRows - 1) * 17).toBeLessThan(height - 40);
+        const bounds = bowl.paths.map((p) => ({
+          left: p.x - p.rx - 38 * p.size,
+          right: p.x + p.rx + 38 * p.size,
+          top: p.y - p.ry - 28 * p.size,
+          bottom: p.y + p.ry + 28 * p.size,
+        }));
+        // Check entire path envelopes, so the separation holds for every time.
+        for (const [i, a] of bounds.entries()) {
+          expect(a.left).toBeGreaterThan(bowl.x + bowl.width * 0.18);
+          expect(a.right).toBeLessThan(bowl.x + bowl.width * 0.82);
+          expect(a.top).toBeGreaterThan(bowl.y + bowl.height * 0.18);
+          expect(a.bottom).toBeLessThan(bowl.y + bowl.height * 0.78);
+          for (const x of [a.left, a.right])
+            for (const y of [a.top, a.bottom]) {
+              const right = x > bowl.x + bowl.width / 2;
+              const bottom = y > bowl.y + bowl.height / 2;
+              const radius = bowl.radius[bottom ? (right ? 2 : 3) : right ? 1 : 0];
+              const dx = Math.max(bowl.x + radius - x, 0, x - (bowl.x + bowl.width - radius));
+              const dy = Math.max(bowl.y + radius - y, 0, y - (bowl.y + bowl.height - radius));
+              expect(Math.hypot(dx, dy)).toBeLessThanOrEqual(radius);
+            }
+          for (const b of bounds.slice(i + 1))
+            expect(
+              a.right < b.left || b.right < a.left || a.bottom < b.top || b.bottom < a.top,
+            ).toBe(true);
+          const path = bowl.paths[i];
+          const original = drySwim(path, 'fish', 10.4);
+          for (const now of [0, -100, 10000, 2, 10.4]) {
+            const p = drySwim(path, 'fish', now);
+            expect(p.x).toBeGreaterThanOrEqual(path.x - path.rx);
+            expect(p.x).toBeLessThanOrEqual(path.x + path.rx);
+            expect(p.y).toBeGreaterThanOrEqual(path.y - path.ry);
+            expect(p.y).toBeLessThanOrEqual(path.y + path.ry);
+          }
+          expect(drySwim(path, 'fish', 10.4)).toEqual(original);
+          expect(drySwim(path, 'fish', 12)).not.toEqual(original);
+        }
+      }
+  }
+});
+it('grows the dry bowl to its cap without resizing or moving wet tanks', () => {
+  const { tanks, dry } = state(real);
+  const sizes = [1, 4, 8, 20].map((count) => {
+    const inventory = { ...dry, fish: Array.from({ length: count }, () => dry.fish[0]) };
+    const layout = tankLayout(tanks, inventory, 1131, 469);
+    expect(layout.boxes).toEqual(tankLayout(tanks, dry, 1131, 469).boxes);
+    const bowl = dryBowl(layout.bowl!, count);
+    return bowl.width * bowl.height;
+  });
+  expect(sizes[0]).toBeLessThan(sizes[1]);
+  expect(sizes[1]).toBeLessThan(sizes[2]);
+  expect(sizes[2]).toBe(sizes[3]);
 });

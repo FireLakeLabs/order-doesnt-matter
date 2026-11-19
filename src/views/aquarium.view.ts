@@ -2,7 +2,15 @@ import type { ViewDefinition, ViewFrame } from './types';
 import { indexStage, settingText, type StageIndex } from './soundstage/model';
 import { random } from './shared/particles';
 import { line } from './shared/retro-2d';
-import { aquarium, identity, swim, tankLayout, type TankBox } from './aquarium/model';
+import {
+  aquarium,
+  dryBowl,
+  drySwim,
+  identity,
+  swim,
+  tankLayout,
+  type TankBox,
+} from './aquarium/model';
 
 const percentage = (now: number) => Math.min(99, Math.floor((now % 1) * 100 + 1e-8));
 const counted = (n: number, noun: string) => `${String(n)} ${noun}${n === 1 ? '' : 's'}`;
@@ -60,6 +68,70 @@ function fish(
   c.arc(16, -4, 2.6, 0, Math.PI * 2);
   c.fill();
   c.restore();
+}
+function drawDryBowl(c: CanvasRenderingContext2D, f: ViewFrame, box: TankBox) {
+  const fishList = box.rooms[0].fish;
+  const bowl = dryBowl(box, fishList.length);
+  const { x, y, width: w, height: h } = bowl;
+  const { theme } = f;
+  const legendWidth = Math.min(box.width, Math.max(180, w));
+  const legendX = box.x + (box.width - legendWidth) / 2;
+  c.fillStyle = theme.panel;
+  c.strokeStyle = theme.muted;
+  c.lineWidth = 1.5;
+  c.beginPath();
+  c.roundRect(x, y, w, h, bowl.radius);
+  c.fill();
+  c.stroke();
+  c.save();
+  c.clip();
+  c.fillStyle = theme.line;
+  c.fillRect(x, y + h * 0.85, w, h * 0.15);
+  for (let i = 0; i < Math.ceil(w / 9); i++) {
+    c.fillStyle = i % 2 ? theme.muted : theme.ground;
+    c.beginPath();
+    c.ellipse(x + i * 9, y + h - 5 - random(i, 3) * 8, 3.5, 2, i, 0, Math.PI * 2);
+    c.fill();
+  }
+  bowl.paths.forEach((path, i) => {
+    const entry = fishList[i];
+    const p = drySwim(path, entry.instrument.id, f.now);
+    c.globalAlpha = entry.instrument.muted ? 0.3 : 1;
+    fish(c, p.x, p.y, path.size, p.facing, entry.instrument.colour, f);
+  });
+  c.restore();
+  c.fillStyle = theme.text;
+  c.font = `bold 16px "${theme.fontDisplay}"`;
+  text(c, 'Dry bowl', x, box.y + 16, w);
+  c.font = `11px "${theme.fontMono}"`;
+  text(
+    c,
+    `${String(fishList.length)} fish · ${fishList.some((p) => p.unknown) ? '? unsampled' : 'no send'}`,
+    legendX + 10,
+    bowl.legendY + 12,
+    legendWidth - 20,
+  );
+  for (let i = 0; i < bowl.legendRows; i++) {
+    const entry = fishList[i];
+    const label = `${entry.instrument.name}${entry.voices > 1 ? ` ×${String(entry.voices)} voices` : ''}${entry.unknown ? ' ?' : ''}`;
+    const withSend = `${label} · send ${entry.voices > 1 ? '≤' : ''}${settingText(entry.send)}`;
+    c.fillStyle = entry.instrument.colour;
+    c.fillRect(legendX + 11, bowl.legendY + 21 + i * 17, 7, 7);
+    c.fillStyle = theme.text;
+    text(
+      c,
+      i === bowl.legendRows - 1 && fishList.length > bowl.legendRows
+        ? bowl.overflow
+          ? `+${String(bowl.overflow)} offscreen`
+          : `+${String(fishList.length - i)} fish`
+        : c.measureText(withSend).width <= legendWidth - 34
+          ? withSend
+          : label,
+      legendX + 24,
+      bowl.legendY + 28 + i * 17,
+      legendWidth - 34,
+    );
+  }
 }
 function drawTank(c: CanvasRenderingContext2D, f: ViewFrame, box: TankBox) {
   const { x, y, width: w, height: h, rooms, shelf } = box,
@@ -340,7 +412,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, index: StageIndex) {
     c.lineWidth = 5;
     line(c, box.x - 3, box.y + box.height + 3, box.x + box.width + 3, box.y + box.height + 3);
   }
-  if (layout.bowl) drawTank(c, f, layout.bowl);
+  if (layout.bowl) drawDryBowl(c, f, layout.bowl);
   if (!model.tanks.length && !model.dry.fish.length)
     c.fillText('No instruments in this section', 22, h / 2);
   c.font = `11px "${theme.fontMono}"`;
