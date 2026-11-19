@@ -46,6 +46,20 @@ test('Mobile: Studio evidence, all-theme pixel reversibility, crowd counts and f
 }) => {
   const dir = `${process.env.ODM_VIEW_MEASURE_DIR}/mobile`;
   await mkdir(dir, { recursive: true });
+  const stagesReady = async () => {
+    await page.waitForFunction(
+      () =>
+        Array.from(document.querySelectorAll('.view-host')).every(
+          (host) => host.getAttribute('data-score-ready') === 'true',
+        ) &&
+        Array.from(document.querySelectorAll('.view-status')).every(
+          (status) => status.textContent === '',
+        ),
+    );
+    await page.evaluate(async () => {
+      for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
+    });
+  };
   await page.setViewportSize({ width: 1920, height: 1080 });
   await prepare(page, 'mobile');
   await page.getByRole('button', { name: '1', exact: true }).click();
@@ -206,9 +220,14 @@ test('Mobile: Studio evidence, all-theme pixel reversibility, crowd counts and f
     await readFile('corpus/programs/real-techno.strudel', 'utf8'),
   );
   await page.waitForFunction(
-    () => window.viewProbe.frame?.now === 1.4 && window.viewProbe.frame.sections.length === 0,
+    () =>
+      window.viewProbe.frame?.now === 1.4 &&
+      window.viewProbe.frame.sections.length === 0 &&
+      window.viewProbe.frame.instruments.length === 4 &&
+      window.viewProbe.frame.width < 600,
   );
   await scoreReady(page);
+  await stagesReady();
   await page.screenshot({ path: `${dir}/techno-2560x1440.png` });
   const techno = mapping(await page.evaluate(() => window.viewProbe.frame!));
   expect(techno.arms.map((a) => a.weights)).toEqual([4, 4, 2, 8]);
@@ -224,9 +243,11 @@ test('Mobile: Studio evidence, all-theme pixel reversibility, crowd counts and f
     () =>
       window.viewProbe.frame?.now === 1.4 &&
       window.viewProbe.frame.notes.length >= 256 &&
-      window.viewProbe.frame.instruments.length === 1,
+      window.viewProbe.frame.instruments.length === 1 &&
+      window.viewProbe.frame.width < 600,
   );
   await scoreReady(page);
+  await stagesReady();
   await page.screenshot({ path: `${dir}/dense-2560x1440.png` });
   const dense = mapping(await page.evaluate(() => window.viewProbe.frame!));
   expect(dense.arms.map((a) => a.weights)).toEqual([256]);
