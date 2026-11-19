@@ -126,3 +126,59 @@ test('document replacement and disposal invalidate both request purposes', async
   await setImmediate();
   expect(cache.score.events).toEqual({});
 });
+
+test('wider and disjoint requests withdraw old ranges and ignore superseded replies', async () => {
+  const replies: ((result: EventResult) => void)[] = [];
+  const cache = createScoreCache(() => new Promise((resolve) => replies.push(resolve)));
+  const state = piece('s("bd")');
+  const window = { from: 4, to: 20 },
+    song = { from: 0, to: 28 };
+  const answered: EventResult = {
+    ...result,
+    events: [
+      {
+        whole: [10, 11],
+        part: [10, 11],
+        hasOnset: true,
+        value: { s: 'bd' },
+      },
+    ],
+  };
+  cache.request(state, window);
+  replies[0](answered);
+  await setImmediate();
+  expect(cache.notes).toHaveLength(1);
+  cache.request(state, song);
+  expect(cache.score).toEqual({ ...song, events: {} });
+  expect(cache.notes).toEqual([]);
+  cache.request(state, window);
+  replies[1](answered);
+  await setImmediate();
+  expect(cache.score.events).toEqual({});
+  replies[2](answered);
+  await setImmediate();
+  expect(cache.score).toEqual({ ...window, events: { [state.rows[0].id]: answered } });
+  cache.request(state, { from: 32, to: 48 });
+  expect(cache.score).toEqual({ from: 32, to: 48, events: {} });
+  expect(cache.notes).toEqual([]);
+  cache.dispose();
+});
+
+test('a pending promotion withdraws a non-covering range; a covering answer survives refresh', async () => {
+  const replies: ((result: EventResult) => void)[] = [];
+  const cache = createScoreCache(() => new Promise((resolve) => replies.push(resolve)));
+  const state = piece('s("bd")');
+  const first = { from: 0, to: 4 },
+    next = { from: 4, to: 12 };
+  cache.request(state, first, next);
+  replies[0](result);
+  await setImmediate();
+  cache.request(state, next);
+  expect(cache.score).toEqual({ ...next, events: {} });
+  replies[1](result);
+  await setImmediate();
+  const covering = cache.score;
+  cache.request(state, { from: 6, to: 8 });
+  expect(cache.score).toBe(covering);
+  cache.dispose();
+});

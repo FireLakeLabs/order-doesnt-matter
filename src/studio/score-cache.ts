@@ -105,6 +105,13 @@ export function createScoreCache(
         publish();
       }
       ask(current, state, range);
+      // Keep a covering answer during refresh, but never publish a previous
+      // window as the answer to a wider or disjoint question.
+      if (score.from > range.from || score.to < range.to) {
+        score = { ...range, events: {} };
+        notes = [];
+        error = '';
+      }
       if (next && key(next) !== key(range)) ask(ahead, state, next);
       else if (ahead.key) clear(ahead);
     },
