@@ -127,58 +127,40 @@ test('document replacement and disposal invalidate both request purposes', async
   expect(cache.score.events).toEqual({});
 });
 
-test('wider and disjoint requests withdraw old ranges and ignore superseded replies', async () => {
+test('range refresh retains the rail answer, notes and errors until its replacement arrives', async () => {
   const replies: ((result: EventResult) => void)[] = [];
   const cache = createScoreCache(() => new Promise((resolve) => replies.push(resolve)));
-  const state = piece('s("bd")');
-  const window = { from: 4, to: 20 },
-    song = { from: 0, to: 28 };
-  const answered: EventResult = {
+  const state = piece('stack(s("bd"), s("sd"))');
+  cache.request(state, { from: 0, to: 12 });
+  replies[0]({
     ...result,
-    events: [
-      {
-        whole: [10, 11],
-        part: [10, 11],
-        hasOnset: true,
-        value: { s: 'bd' },
-      },
-    ],
-  };
-  cache.request(state, window);
-  replies[0](answered);
+    events: [{ whole: [3.75, 4.5], part: [3.75, 4.5], hasOnset: true, value: { s: 'bd' } }],
+  });
+  replies[1]({ ...result, error: { phase: 'query', message: 'visible row error' } });
   await setImmediate();
-  expect(cache.notes).toHaveLength(1);
-  cache.request(state, song);
-  expect(cache.score).toEqual({ ...song, events: {} });
-  expect(cache.notes).toEqual([]);
-  cache.request(state, window);
-  replies[1](answered);
-  await setImmediate();
-  expect(cache.score.events).toEqual({});
-  replies[2](answered);
-  await setImmediate();
-  expect(cache.score).toEqual({ ...window, events: { [state.rows[0].id]: answered } });
-  cache.request(state, { from: 32, to: 48 });
-  expect(cache.score).toEqual({ from: 32, to: 48, events: {} });
-  expect(cache.notes).toEqual([]);
+  const score = cache.score,
+    notes = cache.notes,
+    error = cache.error;
+  expect(notes).toHaveLength(1);
+  expect(error).toContain('visible row error');
+  cache.request(state, { from: 0, to: 16 });
+  expect(cache.score).toBe(score);
+  expect(cache.notes).toBe(notes);
+  expect(cache.error).toBe(error);
   cache.dispose();
 });
 
-test('a pending promotion withdraws a non-covering range; a covering answer survives refresh', async () => {
-  const replies: ((result: EventResult) => void)[] = [];
-  const cache = createScoreCache(() => new Promise((resolve) => replies.push(resolve)));
+test('a rejected ahead query keeps its error when promoted', async () => {
+  const replies: { resolve: (result: EventResult) => void; reject: (reason: Error) => void }[] = [];
+  const cache = createScoreCache(
+    () => new Promise((resolve, reject) => replies.push({ resolve, reject })),
+  );
   const state = piece('s("bd")');
-  const first = { from: 0, to: 4 },
-    next = { from: 4, to: 12 };
-  cache.request(state, first, next);
-  replies[0](result);
+  cache.request(state, { from: 0, to: 4 }, { from: 4, to: 8 });
+  replies[0].resolve(result);
+  replies[1].reject(Error('ahead failed'));
   await setImmediate();
-  cache.request(state, next);
-  expect(cache.score).toEqual({ ...next, events: {} });
-  replies[1](result);
-  await setImmediate();
-  const covering = cache.score;
-  cache.request(state, { from: 6, to: 8 });
-  expect(cache.score).toBe(covering);
+  cache.request(state, { from: 4, to: 8 });
+  expect(cache.error).toBe('ahead failed');
   cache.dispose();
 });

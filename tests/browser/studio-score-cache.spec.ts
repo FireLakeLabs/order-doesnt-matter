@@ -1,5 +1,5 @@
 import { revealView } from './shelf';
-import { expect, test } from '@playwright/test';
+import { expect, test, type Page } from '@playwright/test';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import type { ViewDefinition, ViewFrame } from '../../src/views/types';
 import { neededRange } from '../../src/studio/frame';
@@ -23,7 +23,7 @@ declare global {
   }
 }
 
-test('switching between whole-song drawings reuses the stage score', async ({ page }) => {
+async function trackQuestions(page: Page) {
   await page.addInitScript(() => {
     window.scoreCacheQuestions = { sent: 0, pending: 0 };
     const NativeWorker = window.Worker;
@@ -58,6 +58,10 @@ test('switching between whole-song drawings reuses the stage score', async ({ pa
       }
     };
   });
+}
+
+test('switching between whole-song drawings reuses the stage score', async ({ page }) => {
+  await trackQuestions(page);
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/?inspect&a=&b=');
   await page.waitForFunction(() => window.odmStudio.app.canPlay);
@@ -90,6 +94,7 @@ test('rapid window and song switches never present a non-covering score as ready
   page,
 }) => {
   const ids = ['piano-roll', 'graphic-score', 'staff', 'stacker'];
+  await trackQuestions(page);
   await page.addInitScript(() => {
     window.scoreRangeProbe = {
       frames: [],
@@ -273,5 +278,70 @@ test('rapid window and song switches never present a non-covering score as ready
   expect(measured.mounts - measured.disposals).toBe(1);
   await expect(stage.locator('.view-owned')).toHaveCount(1);
   await expect(stage.locator('canvas')).toHaveCount(1);
+  // At ordinary playback boundaries the ahead answer must already cover the
+  // next span. Hold new worker replies so a just-in-time request cannot hide a
+  // missing prefetch. The synth-only score needs no sample-bank network access.
+  await page.evaluate(() => window.odmStudio.load('note("60 64 67").s("sine")'));
+  const boundaries = [];
+  for (const [id, boundary] of [
+    ['piano-roll', 4],
+    ['graphic-score', 16],
+  ] as const) {
+    await page.evaluate((now) => window.odmStudio.seek(now), boundary - 0.05);
+    await choose(id);
+    await page.waitForFunction(
+      ({ id, now }) => {
+        const last = window.scoreRangeProbe.frames.at(-1);
+        return (
+          last?.id === id &&
+          last.ready &&
+          last.frame.now === now &&
+          window.scoreCacheQuestions.pending === 0
+        );
+      },
+      { id, now: boundary - 0.05 },
+    );
+    await page.evaluate(() => window.odmStudio.play());
+    const observed = await page.evaluate(async (boundary) => {
+      const probe = window.scoreRangeProbe;
+      const start = probe.frames.length;
+      const samples = [];
+      probe.hold = true;
+      for (let i = 0; i < 180; i++) {
+        await new Promise(requestAnimationFrame);
+        const now = window.odmStudio.getPlayhead();
+        const last = probe.frames.at(-1)!;
+        samples.push({
+          now,
+          ...last,
+          hostReady: document.querySelector<HTMLElement>('[data-region="stage-a"] .view-host')
+            ?.dataset.scoreReady,
+        });
+        if (now >= boundary + 0.1) break;
+      }
+      window.odmStudio.pause();
+      probe.hold = false;
+      for (const reply of probe.replies.splice(0)) reply();
+      return { samples, delivered: probe.frames.length - start };
+    }, boundary);
+    expect(observed.samples.at(-1)!.now).toBeGreaterThanOrEqual(boundary + 0.1);
+    expect(observed.delivered).toBeGreaterThan(1);
+    expect(observed.samples.every((sample) => sample.hostReady === 'true')).toBe(true);
+    expect(observed.samples.some((sample) => sample.frame.now >= boundary)).toBe(true);
+    for (const { span, frame } of observed.samples) {
+      const range = neededRange(span, frame.now, frame.lookAhead, []);
+      expect(frame.from).toBeLessThanOrEqual(range.from);
+      expect(frame.to).toBeGreaterThanOrEqual(range.to);
+    }
+    boundaries.push({
+      id,
+      boundary,
+      delivered: observed.delivered,
+      samples: observed.samples.length,
+      readyGaps: observed.samples.filter((sample) => sample.hostReady !== 'true').length,
+    });
+  }
+  console.log('Playback boundary probe:', JSON.stringify(boundaries));
+  if (evidence) await writeFile(`${evidence}/boundaries.json`, JSON.stringify(boundaries, null, 2));
   await page.unrouteAll({ behavior: 'wait' });
 });

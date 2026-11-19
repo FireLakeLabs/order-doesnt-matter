@@ -73,8 +73,15 @@ function Drawing({
       try {
         const { theme, lookAhead, trails } = options.current;
         const state = runtime.app.state;
-        const range = neededRange(mounted.definition.span, now, lookAhead, state.sections);
-        cache.request(state, range);
+        const span = mounted.definition.span;
+        const range = neededRange(span, now, lookAhead, state.sections);
+        const next = neededRange(
+          span,
+          span === 'song' ? range.to : now + 4,
+          lookAhead,
+          state.sections,
+        );
+        cache.request(state, range, next);
         const covers = cache.score.from <= range.from && cache.score.to >= range.to;
         const answered = state.rows.every((row) => Object.hasOwn(cache.score.events, row.id));
         const ready = covers && state.rows.length > 0 && answered;
@@ -166,16 +173,20 @@ export function ViewStage({
   choices: Pick<Layout, 'a' | 'b'>;
 }) {
   // Allocation is inert; workers start only when a drawing requests a score.
-  const [{ cache, queries }] = useState(() => {
+  const [cache] = useState(() => {
     const queries = createBrowserQueries();
-    return { cache: createScoreCache(queries.query), queries };
+    return createScoreCache(queries.query, {
+      cancel: () => {
+        queries.cancel();
+      },
+      ahead: createBrowserQueries(),
+    });
   });
   useEffect(
     () => () => {
       cache.dispose();
-      queries.cancel();
     },
-    [cache, queries],
+    [cache],
   );
   const [metadata, setMetadata] = useState({ id: '', name: '', tag: '' });
   const [shelfOpen, setShelfOpen] = useState(false);
