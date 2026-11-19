@@ -75,7 +75,7 @@ export function pinballLayout(
 ) {
   const { width, height } = frame;
   const top = 82,
-    bottom = Math.max(top + 100, height - 65);
+    bottom = Math.max(top + 100, height - 99);
   const fieldHeight = bottom - top,
     fieldWidth = Math.min(width * 0.78, fieldHeight * 1.55);
   const left = (width - fieldWidth) / 2,

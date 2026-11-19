@@ -197,3 +197,15 @@ it('retains 500 notes per cycle, all 20 rows, and moving gain values without a n
     }).marks,
   ).toEqual(s.marks);
 });
+
+it('reserves the measured width of the longest full row label at 11 px', () => {
+  const score = graphicScore(corpus.get('real-dubstep-arranged')!);
+  for (const advance of [6.6, 8.8]) {
+    const measure = (text: string) => text.length * advance;
+    const box = posterLayout(score, 1131, 469, measure);
+    expect(box.drumParts.some((p) => p.name === 'vocalAtmos')).toBe(true);
+    for (const part of box.drumParts)
+      expect(box.left - 8 - measure(part.name)).toBeGreaterThanOrEqual(box.margin);
+    expect(box.right - box.left).toBeGreaterThan(900);
+  }
+});

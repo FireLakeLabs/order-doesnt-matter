@@ -1,6 +1,6 @@
 import type { ViewDefinition, ViewFrame } from './types';
 import { mount2d, line } from './shared/retro-2d';
-import { analyse, scene, type Data } from './ash-run/model';
+import { analyse, scene, settingValue, type Data } from './ash-run/model';
 import { background, roofs, windows } from './ash-run/scenery';
 import { blasts, walker, crates, pigeons, dust } from './ash-run/effects';
 import { drawRunner } from './ash-run/runner';
@@ -47,7 +47,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, data: Data) {
     const name =
       f.instruments.find((i) => i.id === s.light?.instrument)?.name ?? s.light.instrument;
     c.fillText(
-      `${name} · ${s.light.key} ${s.light.value.toFixed(2)} → beam · per note`,
+      `${name} · ${s.light.key} ${settingValue(s.light.key, s.light.value)} → beam · per note`,
       f.width - 18,
       49,
       f.width - 36,

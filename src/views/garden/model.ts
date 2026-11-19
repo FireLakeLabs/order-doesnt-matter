@@ -141,6 +141,13 @@ export function gardenLayout(g: Garden, width: number, height: number) {
     y,
     vineY,
     sprigY,
+    // Separate simultaneous starts along the ground without moving scored foliage.
+    rootX: (p: Plant, first: number) =>
+      clamp(
+        x(first) - 22 + p.index * Math.min(28, (right - left) / Math.max(1, g.plants.length)),
+        left - 22,
+        right - 10,
+      ),
     plantBand,
   };
 }

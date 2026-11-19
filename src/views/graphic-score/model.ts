@@ -152,20 +152,26 @@ export function graphicScore(frame: ViewFrame) {
   };
 }
 export type GraphicScore = ReturnType<typeof graphicScore>;
-export function posterLayout(score: GraphicScore, width: number, height: number) {
+export function posterLayout(
+  score: GraphicScore,
+  width: number,
+  height: number,
+  measure: (text: string) => number = (text) => text.length * 11,
+) {
   const narrow = width < 700,
     margin = narrow ? 18 : 30;
   const columns = Math.max(1, Math.floor((width - 2 * margin) / (narrow ? 215 : 245)));
   const partRows = Math.min(Math.ceil(score.parts.length / columns), narrow ? 5 : 3);
   const footer = partRows * 18 + (narrow ? 68 : 52);
-  const left = margin + 42,
+  const drumParts = score.parts.filter((p) => p.unpitched);
+  const gutter = Math.max(42, ...drumParts.map((p) => measure(p.name) + 8));
+  const left = margin + gutter,
     right = width - margin,
     top = 110;
   const bottom = Math.max(top + 50, height - footer - 18);
-  const drumParts = score.parts.filter((p) => p.unpitched);
   const drumHeight = drumParts.length
     ? score.pitched
-      ? Math.min((bottom - top) * 0.42, drumParts.length * 19 + 16)
+      ? Math.min((bottom - top) * 0.7, Math.max((bottom - top) * 0.42, drumParts.length * 15 + 14))
       : bottom - top - 8
     : 0;
   const pitchBottom = score.pitched ? bottom - drumHeight - 12 : top - 4;

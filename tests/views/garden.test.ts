@@ -233,3 +233,24 @@ it('spaces number plates by actual weighted positions and reserves the pitch sca
     expect(b.left - 2.4 * leafRadius(2, b) - 3).toBeGreaterThanOrEqual(58);
   }
 });
+
+it('separates simultaneous plant roots along the ground without moving notes or losing leaves', () => {
+  const f = corpus.get('real-dubstep-arranged')!;
+  const g = indexGarden(f),
+    b = gardenLayout(g, 1131, 469);
+  const starts = g.plants.filter((p) => p.leaves[0]?.note.start === 0);
+  expect(starts.length).toBeGreaterThanOrEqual(3);
+  const roots = starts.map((p) => b.rootX(p, 0));
+  expect(new Set(roots).size).toBe(starts.length);
+  expect(Math.max(...roots) - Math.min(...roots)).toBeGreaterThanOrEqual(56);
+  const before = leafClusters(g, b);
+  for (const now of [20.5, 1, 10.4]) {
+    const again = indexGarden({ ...f, now });
+    const layout = gardenLayout(again, 1131, 469);
+    expect(
+      again.plants.map((p) => layout.rootX(p, Math.max(g.from, p.leaves[0].note.start))),
+    ).toEqual(g.plants.map((p) => b.rootX(p, Math.max(g.from, p.leaves[0].note.start))));
+    expect(leafClusters(again, layout)).toEqual(before);
+    expect(again.total).toBe(339);
+  }
+});

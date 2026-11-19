@@ -171,6 +171,27 @@ const aliases: Record<string, string> = {
   bpq: 'bandq',
 };
 const preferred = [...filters, 'pan', 'gain'];
+/** Scored setting units; ratios and pan positions are dimensionless. */
+export function settingValue(key: string, value: number): string {
+  const name = aliases[key] ?? key;
+  const units: Record<string, string> = {
+    cutoff: 'Hz',
+    hcutoff: 'Hz',
+    bandf: 'Hz',
+    resonance: 'Q',
+    hresonance: 'Q',
+    bandq: 'Q',
+    attack: 's',
+    decay: 's',
+    release: 's',
+    delaytime: 's',
+    crush: 'bits',
+    speed: '×',
+  };
+  const unit = units[name];
+  const digits = unit === 'Hz' || unit === 'bits' ? 0 : 2;
+  return `${String(Number(value.toFixed(digits)))}${unit ? ` ${unit}` : ''}`;
+}
 export function searchlight(frame: ViewFrame, data: Data) {
   const candidates = frame.instruments
     .filter((i) => i.inSection)

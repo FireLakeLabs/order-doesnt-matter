@@ -44,7 +44,14 @@ const view: ViewDefinition = {
       const print = poster.getContext('2d');
       if (!print) return;
       print.scale(scale, scale);
-      drawPoster(print, score, posterLayout(score, snapshot.width, snapshot.height), snapshot);
+      print.font = `11px "${snapshot.theme.fontMono}"`;
+      const layout = posterLayout(
+        score,
+        snapshot.width,
+        snapshot.height,
+        (text) => print.measureText(text).width,
+      );
+      drawPoster(print, score, layout, snapshot);
       poster.toBlob((blob) => {
         poster.width = poster.height = 0;
         if (!blob || disposed) return;
@@ -89,7 +96,13 @@ const view: ViewDefinition = {
           document.fonts.check(`11px "${frame.theme.fontMono}"`),
         ]);
         if (changed || paintKey !== nextPaint) {
-          box = posterLayout(score, frame.width, frame.height);
+          base.font = `11px "${frame.theme.fontMono}"`;
+          box = posterLayout(
+            score,
+            frame.width,
+            frame.height,
+            (text) => base.measureText(text).width,
+          );
           canvas.width = backing.width = Math.max(1, Math.round(frame.width * frame.dpr));
           canvas.height = backing.height = Math.max(1, Math.round(frame.height * frame.dpr));
           canvas.style.width = `${String(frame.width)}px`;
