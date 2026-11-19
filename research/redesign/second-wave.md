@@ -31,7 +31,7 @@ pictures are illustrative; the mapping rules on each card are the design.
 | metro         | Metro         | Song     | Canvas 2D  | whole song | Sections are stations, instruments are lines; a departure board names who joins and leaves next       |
 | skyline       | Skyline       | Song     | Canvas 2D  | whole song | One building per bar; floors are instruments playing, windows are notes at their real place           |
 | quilt         | Quilt         | Song     | Canvas 2D  | whole song | A row per section, a patch per bar, a ring per instrument; repeated bars sew identical patches        |
-| graphic-score | Graphic score | Song     | Canvas 2D  | whole song | Proportional graphic notation of the whole song: pitch lines, drum marks, cutoff zigzags, room halos  |
+| graphic-score | Graphic score | Pitch    | Canvas 2D  | whole song | Proportional graphic notation of the whole song: pitch lines, drum marks, cutoff zigzags, room halos  |
 | fireworks     | Fireworks     | Show     | Canvas 2D  | window     | Every note a shell bursting on its onset; held notes become drooping willows for their span           |
 | light-rig     | Light rig     | Show     | three.js   | window     | A lighting truss: strobe for the most regular drum, floor wash for the lowest part, heads for others  |
 | ribbons       | Ribbons       | Show     | three.js   | window     | Ribbons stream through a curtain of light at now; open where they play, turn when a setting moves     |
@@ -53,9 +53,11 @@ and art are our own.
   by time, so scrubbing and stepping draw the same picture every time.
 - **Déjà vu compares with the previous bar only.** Its "last time through"
   switch waits until views can own a setting; that is a contract change for later.
-- **Graphic score is on screen only.** A poster download is a host feature for later.
-- **Afterglow waits for Scope**, which brings the Studio's audio tap. It labels
-  measured and scored apart and never infers a tail from settings.
+- **Graphic score downloads a poster.** Its Download control exports a PNG at
+  poster size (#146).
+- **Afterglow uses Scope's audio tap** (#145). It labels measured and scored
+  apart and never infers a tail from settings. It is the one view that keeps
+  state: measured spectrum columns by score time, with unheard time hatched.
 
 ## Step 0, before any view
 

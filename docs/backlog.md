@@ -1,7 +1,7 @@
 # Backlog
 
 Everything known to be outstanding, in one place. The [model](model.md) and
-[decisions](decisions.md) record what is settled. Updated 2026-11-16.
+[decisions](decisions.md) record what is settled. Updated 2026-11-19.
 
 ## Studio cutover
 
@@ -50,13 +50,17 @@ Everything known to be outstanding, in one place. The [model](model.md) and
   production-only audit reported none; dependency changes need fresh checks.
 - **Redesign wave:** in progress per the [Studio design](../research/redesign/design.md).
   Left: a polish pass.
-- **Second wave of views:** 19 of 24 merged, planned in
-  [second-wave.md](../research/redesign/second-wave.md). Marble run, Graphic
-  score, Aquarium, Light rig and Afterglow are folded into the third wave's 3.1.
-- **Third wave of views:** fixes to Coil, Ash Run, Swarm, Catwalk and Tubes
-  are merged; 3.1 builds 17 views and the five second-wave views, planned in
-  [third-wave.md](../research/redesign/third-wave.md). Views needing a
-  framework change wait for that change.
+- **Second wave of views:** all 24 merged, planned in
+  [second-wave.md](../research/redesign/second-wave.md); the last five shipped
+  in the third wave's 3.1.
+- **Third wave of views:** 3.0 (five fixes) and 3.1 (sixteen views) are
+  merged, planned in [third-wave.md](../research/redesign/third-wave.md). Six
+  views remain, each waiting for its framework change in waves 3.2–3.5:
+  Sampler, Stereo glass, Origami, Tracing paper, Strobe and Mixing desk.
+- **View follow-ups accepted in review:** extract one shared scored-pitch reader
+  (Chord bridge, Light rig and Ribbons each guard locally); share log-band
+  extraction between Scope and Afterglow; a real-browser pause/resume probe for
+  Afterglow; Marble run stations can share a surface at extreme pitch ranges.
 - **Flash tails past the supplied notes:** Catwalk's camera flash ends early
   when its note leaves the notes the host supplies. Fixing it needs the host to
   supply notes whose effects outlive the window, a contract change.
