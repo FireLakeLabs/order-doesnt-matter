@@ -12,7 +12,13 @@ test('Slalom: real Studio mapping, five themes, reversibility and frame cost', a
   await page.evaluate(async () => {
     await window.odmStudio.seek(17.4);
   });
-  await page.waitForFunction(() => window.viewProbe.frame?.now === 17.4);
+  await page.waitForFunction(
+    () =>
+      window.viewProbe.frame?.now === 17.4 &&
+      window.viewProbe.frame.from <= 17 &&
+      window.viewProbe.frame.to >= 20 &&
+      window.viewProbe.frame.notes.some((n) => n.hasOnset && n.start === 17.25),
+  );
   // Put a second actual view on Stage B via its shelf.
   const b = page.locator('[data-region="stage-b"]');
   await b.getByRole('button', { name: 'Views', exact: true }).click();
@@ -208,6 +214,8 @@ test('Slalom: real Studio mapping, five themes, reversibility and frame cost', a
     () =>
       window.viewProbe.frame?.now === 1.4 &&
       window.viewProbe.frame.sections.length === 0 &&
+      window.viewProbe.frame.from <= 1.4 &&
+      window.viewProbe.frame.to >= 2 &&
       window.viewProbe.frame.notes.length > 0,
   );
   await expect(page.locator('[data-region="stage-a"] .view-host')).toHaveAttribute(
