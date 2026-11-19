@@ -1,6 +1,6 @@
 import type { ViewDefinition, ViewFrame } from './types';
 import { createThreeStage } from './shared/three-stage';
-import { indexRig, rigLook, rigSlots, slotAt } from './light-rig/model';
+import { headX, indexRig, rigLook, rigSlots, slotAt } from './light-rig/model';
 
 const vertex = `attribute vec3 ink; attribute float power;
 varying vec2 vUv; varying vec3 vInk; varying float vPower;
@@ -54,12 +54,14 @@ const view: ViewDefinition = {
     const railGeometry = new THREE.BufferGeometry();
     railGeometry.setAttribute('position', new THREE.Float32BufferAttribute(rails, 3));
     structure.add(new THREE.LineSegments(railGeometry, lineMaterial));
+    const haze = { phase: { value: 0 } };
     const beamMaterial = new THREE.ShaderMaterial({
+      uniforms: haze,
       vertexShader: vertex,
-      fragmentShader: `varying vec2 vUv;varying vec3 vInk;varying float vPower;
+      fragmentShader: `uniform float phase;varying vec2 vUv;varying vec3 vInk;varying float vPower;
       void main(){if(vPower<=0.)discard;float side=pow(max(0.,1.-abs(vUv.x*2.-1.)),1.7);
       float ends=smoothstep(0.,.035,vUv.y)*(1.-smoothstep(.92,1.,vUv.y));
-      float haze=.88+.12*sin(vUv.y*37.+vUv.x*9.);
+      float haze=.88+.12*sin(vUv.y*37.+vUv.x*9.+phase);
       gl_FragColor=vec4(vInk,side*ends*haze*vPower*.32);
       #include <colorspace_fragment>
       }`,
@@ -140,10 +142,17 @@ const view: ViewDefinition = {
     const object = new THREE.Object3D();
     const up = new THREE.Vector3(0, 1, 0),
       direction = new THREE.Vector3(),
-      side = new THREE.Vector3();
+      side = new THREE.Vector3(),
+      cameraRay = new THREE.Vector3(),
+      nearSide = new THREE.Vector3(),
+      farSide = new THREE.Vector3();
     const source = new THREE.Vector3(),
       target = new THREE.Vector3(),
-      colour = new THREE.Color();
+      colour = new THREE.Color(),
+      lensColour = new THREE.Color(),
+      accent = new THREE.Color(),
+      text = new THREE.Color(),
+      panel = new THREE.Color();
     let notes: ViewFrame['notes'] | undefined,
       inventory = '';
     let score = indexRig({ notes: [], instruments: [] });
@@ -186,23 +195,26 @@ const view: ViewDefinition = {
         paintKey = nextPaint;
         stage.resize(frame);
         const states = slots.map((slot) => slotAt(slot, score, frame));
+        haze.phase.value = (frame.now * 0.7) % (Math.PI * 2);
         const narrow = frame.width < 700;
         for (const material of [beamMaterial, spotMaterial])
           material.blending = frame.theme.glow ? THREE.AdditiveBlending : THREE.NormalBlending;
         // Keep the floor fixtures clear of the legend, including the narrow stage.
-        rig.scale.set(Math.min(1, camera.aspect / 1.8), 0.85, 1);
-        rig.position.y = 0.9;
+        rig.scale.set(Math.min(1, camera.aspect / 1.8), 0.78, 1);
+        rig.position.y = 1.35;
         camera.fov = 38;
         camera.position.set(0, 5.3, 13.5);
         camera.lookAt(0, 3.05, 0);
         camera.updateProjectionMatrix();
         camera.updateMatrixWorld();
-        metal.color.set(frame.theme.panel).lerp(new THREE.Color(frame.theme.text), 0.25);
-        floorMaterial.color.set(frame.theme.panel);
-        lineMaterial.color.set(frame.theme.text).lerp(new THREE.Color(frame.theme.panel), 0.45);
-        const headCount = slots.filter((s) => s.role === 'heads').length;
-        let fixture = 0,
-          pair = 0;
+        accent.set(frame.theme.accent);
+        text.set(frame.theme.text);
+        panel.set(frame.theme.panel);
+        metal.color.copy(panel).lerp(text, 0.25);
+        floorMaterial.color.copy(panel);
+        lineMaterial.color.copy(text).lerp(panel, 0.45);
+        let fixture = 0;
+        const heads: { ids: string[]; x: number; aim: number; depth: number }[] = [];
         function writeSurface(mesh: typeof beams, points: number[], power: number) {
           const g = mesh.geometry;
           const positions = g.getAttribute('position'),
@@ -226,11 +238,10 @@ const view: ViewDefinition = {
           source.set(x, y, z);
           target.set(tx, 0.025, tz);
           direction.subVectors(target, source).normalize();
-          side
-            .crossVectors(direction, new THREE.Vector3().subVectors(camera.position, source))
-            .normalize();
-          const a = side.clone().multiplyScalar(0.075),
-            b = side.clone().multiplyScalar(width);
+          cameraRay.subVectors(camera.position, source);
+          side.crossVectors(direction, cameraRay).normalize();
+          const a = nearSide.copy(side).multiplyScalar(0.075),
+            b = farSide.copy(side).multiplyScalar(width);
           writeSurface(
             beams,
             [
@@ -281,14 +292,12 @@ const view: ViewDefinition = {
           object.scale.set(1, 0.5, 1);
           object.updateMatrix();
           lenses.setMatrixAt(fixture, object.matrix);
-          lenses.setColorAt(fixture, colour.clone().multiplyScalar(0.08 + power * 0.8));
+          lenses.setColorAt(fixture, lensColour.copy(colour).multiplyScalar(0.08 + power * 0.8));
           fixture++;
         }
         slots.forEach((slot, i) => {
           const state = states[i];
-          colour
-            .set(state.leader.instrument.colour)
-            .lerp(new THREE.Color(frame.theme.accent), (look.index % 4) * 0.09);
+          colour.set(state.leader.instrument.colour).lerp(accent, (look.index % 4) * 0.09);
           const power = state.brightness;
           if (slot.role === 'strobe') light(0, 6.4, -0.15, 0, -1, 2.6, power);
           else if (slot.role === 'wash')
@@ -303,17 +312,17 @@ const view: ViewDefinition = {
                 power,
               );
           else {
-            const x = 1.3 + ((pair + 0.5) / Math.max(1, headCount)) * 5.9;
+            const x = headX(slot);
             const aim = state.aim;
             const cross = look.index % 2 ? -1 : 1;
             const depth = [-0.7, 1.4, -1.6, 0.5][look.index % 4];
             light(-x, 5.7, -0.1, -aim * cross, depth, 0.65 + aim * 0.12, power);
             light(x, 5.7, -0.1, aim * cross, depth, 0.65 + aim * 0.12, power);
-            pair++;
+            heads.push({ ids: slot.members.map((i) => i.id), x, aim, depth });
           }
           const names =
             slot.members.length > 1
-              ? `${String(slot.members.length)} parts · ${slot.members[0].name}`
+              ? `${String(slot.members.length)} parts · ${state.leader.instrument.name}`
               : slot.members[0].name;
           const status =
             [
@@ -324,7 +333,7 @@ const view: ViewDefinition = {
               .join(' + ') || 'off';
           const role =
             slot.role === 'heads'
-              ? `H${String(pair)} ×2`
+              ? `H${String(slot.bank + 1)} ×2`
               : slot.role === 'wash'
                 ? 'FLOOR ×5'
                 : state.merged > 1
@@ -332,7 +341,7 @@ const view: ViewDefinition = {
                   : 'STROBE';
           labels[i].hidden = false;
           labels[i].textContent =
-            `${role} · ${status}${slot.role === 'strobe' && state.active ? ` · ${String(state.active)} notes` : ''} · ${names}`;
+            `${role} · ${status}${slot.role === 'strobe' && state.active ? ` · ${String(state.active)} ${state.active === 1 ? 'note' : 'notes'}` : ''} · ${names}`;
           labels[i].title = slot.members.map((m) => m.name).join(', ');
         });
         labels.forEach((el, i) => {
@@ -349,7 +358,7 @@ const view: ViewDefinition = {
           for (const key of ['position', 'ink', 'power'])
             mesh.geometry.getAttribute(key).needsUpdate = true;
         }
-        title.textContent = `Light rig · ${look.name} · look ${String(look.index + 1)} · bar ${String(Math.floor(frame.now) + 1)} · ${String(Math.round((frame.now - Math.floor(frame.now)) * 100))}%`;
+        title.textContent = `Light rig · ${look.name} · look ${String(look.index + 1)} · bar ${String(Math.floor(frame.now) + 1)} · ${String(Math.min(99, Math.round((frame.now - Math.floor(frame.now)) * 100)))}%`;
         for (const el of [title, legend]) {
           el.style.background = frame.theme.ground;
           el.style.color = frame.theme.text;
@@ -360,6 +369,7 @@ const view: ViewDefinition = {
         stage.render(frame, (emission) => {
           structure.visible = !emission;
         });
+        stage.canvas.dataset.heads = JSON.stringify(heads);
         stage.canvas.dataset.fixtures = String(fixture);
         stage.canvas.dataset.assignments = String(slots.reduce((n, s) => n + s.members.length, 0));
         stage.canvas.dataset.active = String(states.reduce((n, s) => n + s.active, 0));

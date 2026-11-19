@@ -110,11 +110,29 @@ test('Light rig: Studio themes, exact reverse/resize, narrow stage, and playing 
   await page.screenshot({ path: `${shots}/onset-strobe.png` });
   await page.evaluate(() => window.odmStudio.seek(10.4));
   await page.waitForFunction(() => window.viewProbe.frame?.now === 10.4);
+  const beforeHeads = await page
+    .locator('[data-region="stage-a"] canvas')
+    .evaluate(
+      (c) => JSON.parse((c as HTMLCanvasElement).dataset.heads!) as { ids: string[]; x: number }[],
+    );
   await page.getByRole('button', { name: 'Play', exact: true }).click();
   await page.waitForFunction(
     () => window.odmStudio.app.state.playing && window.odmStudio.getPlayhead() > 10.4,
   );
   await frames(page);
+  const afterHeads = await page
+    .locator('[data-region="stage-a"] canvas')
+    .evaluate(
+      (c) => JSON.parse((c as HTMLCanvasElement).dataset.heads!) as { ids: string[]; x: number }[],
+    );
+  const headStability = beforeHeads.flatMap((before) =>
+    before.ids.map((id) => ({
+      id,
+      before: before.x,
+      after: afterHeads.find((h) => h.ids.includes(id))?.x,
+    })),
+  );
+  for (const head of headStability) expect(head.after).toBe(head.before);
   await page.screenshot({ path: `${shots}/playing-1920x1080.png` });
   await page.getByRole('button', { name: 'Pause', exact: true }).click();
   await page.setViewportSize({ width: 2560, height: 1440 });
@@ -130,7 +148,10 @@ test('Light rig: Studio themes, exact reverse/resize, narrow stage, and playing 
     await page.locator('[data-region="stage-b"] .view-host').evaluate((e) => e.clientWidth),
   ).toBeGreaterThan(500);
   expect(errors).toEqual([]);
-  await writeFile(`${shots}/mapping.json`, JSON.stringify({ counts, reversible, errors }, null, 2));
+  await writeFile(
+    `${shots}/mapping.json`,
+    JSON.stringify({ counts, reversible, headStability, errors }, null, 2),
+  );
 });
 
 test('Light rig: contrasting real ambient and twenty counted assignments', async ({ page }) => {

@@ -6,6 +6,7 @@ import { generate } from '../../src/generate';
 import { buildFrame, viewNotes } from '../../src/studio/frame';
 import type { ViewFrame, ViewNote } from '../../src/views/types';
 import {
+  headX,
   indexRig,
   partAt,
   rigLook,
@@ -45,10 +46,10 @@ const note = (
   end = 1,
   value: ViewNote['value'] = { note: 48, gain: 1 },
 ): ViewNote => ({ instrument, start, end, value, hasOnset: true });
-it('derives real roles from notes, preserves all six drop assignments and reports the exact check moment', () => {
+it('derives real roles from notes, reserves every document assignment and reports the exact check moment', () => {
   const score = indexRig(real),
     slots = rigSlots(real, score);
-  expect(slots.reduce((n, s) => n + s.members.length, 0)).toBe(6);
+  expect(slots.reduce((n, s) => n + s.members.length, 0)).toBe(real.instruments.length);
   expect(slots.find((s) => s.role === 'wash')!.members[0].name).toBe('subBass');
   expect(slots.find((s) => s.role === 'strobe')!.members[0].name).toBe('bd');
   const states = slots.map((s) => ({
@@ -105,6 +106,7 @@ it('bounds dense strobes locally and still counts every one of 500 genuine notes
     expect(state.brightness).toBeLessThanOrEqual(0.24);
     if (state.brightness) lit++;
   }
+  expect(lit).toBeGreaterThan(0);
   expect(lit).toBeLessThan(30);
   expect(partAt(p, 0.1, 1, 'strobe').active).toBe(1);
   expect(partAt(p, 0.5, 1, 'strobe').merged).toBe(91);
@@ -120,18 +122,61 @@ it('never invents sample-bank pitch and uses absolute higher pitches for wider a
   ).toBe(36);
   expect(spread(84)).toBeGreaterThan(spread(36));
 });
-it('eases from the preceding aim continuously, and a sibling ending cannot move a held beam', () => {
+it('eases the rendered slot continuously and reproduces it after arbitrary time visits', () => {
   const frame = {
-    ...scoreFrame(),
-    notes: [note('0', 0, 2, { note: 36 }), note('0', 1, 1.05, { note: 84 })],
+    ...scoreFrame(2),
+    notes: [
+      note('0', 0, 2, { note: 36 }),
+      note('0', 1, 1.05, { note: 84 }),
+      note('1', 0, 2, { note: 12 }),
+    ],
   };
-  const p = indexRig(frame).parts.get('0')!;
-  expect(partAt(p, 1 - 1e-8, 1, 'heads').aim).toBeCloseTo(partAt(p, 1, 1, 'heads').aim, 6);
-  expect(partAt(p, 1.12, 1, 'heads').aim).toBe(spread(84));
-  expect(partAt(p, 1.9, 1, 'heads').aim).toBe(spread(84));
-  const original = partAt(p, 1.04, 1, 'heads');
-  for (const now of [20, 0, -1, 1.8]) partAt(p, now, 1, 'heads');
-  expect(partAt(p, 1.04, 1, 'heads')).toEqual(original);
+  const score = indexRig(frame),
+    slot = rigSlots(frame, score).find((s) => s.role === 'heads')!;
+  const at = (now: number) => slotAt(slot, score, { ...frame, now, cps: 1 });
+  expect(at(1 - 1e-8).aim).toBeCloseTo(at(1).aim, 6);
+  expect(at(1.12).aim).toBe(spread(84));
+  expect(at(1.9).aim).toBe(spread(84));
+  const original = at(1.04);
+  for (const now of [20, 0, -1, 1.8]) at(now);
+  expect(at(1.04)).toEqual(original);
+});
+it('keeps a two-member shared slot aim fixed when one member ends and the other stays held', () => {
+  const frame = scoreFrame(10);
+  frame.notes = [
+    note('0', 0, 2, { note: 12 }),
+    note('1', 0, 2, { note: 36 }),
+    note('8', 0, 0.05, { note: 84 }),
+  ];
+  const score = indexRig(frame),
+    slot = rigSlots(frame, score).find(
+      (s) => s.members.length === 2 && s.members.some((i) => i.id === '1'),
+    )!;
+  const before = slotAt(slot, score, { ...frame, now: 0.04999 }),
+    after = slotAt(slot, score, { ...frame, now: 0.05001 });
+  expect(before).toMatchObject({ active: 2, held: 2 });
+  expect(after).toMatchObject({ active: 1, held: 1 });
+  expect(before.aim).toBe((spread(36) + spread(84)) / 2);
+  expect(after.aim).toBe(before.aim);
+});
+it.each([1, 0.5, 0.0001])('lights a strobe onset and ends its 35 ms pulse at cps %s', (cps) => {
+  const part = indexRig({ ...scoreFrame(), notes: [note('0', 0, 1, { gain: 1 })] }).parts.get('0')!;
+  const pulse = 0.035 * cps;
+  expect(partAt(part, 0, cps, 'strobe')).toMatchObject({ flashing: 1, active: 1 });
+  expect(partAt(part, 0, cps, 'strobe').brightness).toBeGreaterThan(0);
+  expect(partAt(part, pulse * 0.999, cps, 'strobe').flashing).toBe(1);
+  expect(partAt(part, pulse, cps, 'strobe')).toMatchObject({ flashing: 0, brightness: 0 });
+});
+it('retains zero-span onsets as counted flashes with no invented hold', () => {
+  const p = indexRig({ ...scoreFrame(), notes: [note('0', 0, 0)] }).parts.get('0')!;
+  expect(p.notes).toHaveLength(1);
+  for (const role of ['heads', 'wash', 'strobe'] as const) {
+    expect(partAt(p, -0.00001, 1, role).active).toBe(0);
+    expect(partAt(p, 0, 1, role)).toMatchObject({ active: 1, flashing: 1, held: 0 });
+    expect(partAt(p, 0, 1, role).brightness).toBeGreaterThan(0);
+    expect(partAt(p, 0.03499, 1, role).flashing).toBe(1);
+    expect(partAt(p, 0.035, 1, role)).toMatchObject({ active: 0, held: 0, brightness: 0 });
+  }
 });
 it('shares a maximum of eight assignments across twenty parts, counts every overlap and respects mute', () => {
   const frame = scoreFrame(20);
@@ -190,4 +235,27 @@ it('coalesces query carry-ins independently of input order while preserving genu
   const p = indexRig({ ...scoreFrame(), notes: [onset, onset] }).parts.get('0')!;
   expect(p.notes).toHaveLength(2);
   expect(partAt(p, 0.035, 1, 'strobe').brightness).toBe(0);
+});
+
+it('reserves physical banks before a later query admits resting parts', () => {
+  const frame = scoreFrame(10);
+  frame.now = 1.4;
+  frame.sections = [{ name: 'section', from: 0, to: 4 }];
+  frame.instruments = frame.instruments.map((i) => ({ ...i, inSection: Number(i.id) < 3 }));
+  frame.notes = [
+    note('0', 0, 0.1, {}),
+    note('0', 1, 1.1, {}),
+    note('0', 2, 2.1, {}),
+    note('1', 0, 4, { note: 24 }),
+    note('2', 0.5, 3, { note: 60 }),
+  ];
+  const score = indexRig(frame),
+    slot = rigSlots(frame, score).find((s) => s.members.some((i) => i.id === '2'))!;
+  const refreshed = { ...frame, notes: [...frame.notes, note('8', 0, 0.1, {})] };
+  const afterScore = indexRig(refreshed),
+    after = rigSlots(refreshed, afterScore).find((s) => s.members.some((i) => i.id === '2'))!;
+  expect(slot.members).toHaveLength(2);
+  expect(after.members.map((i) => i.id)).toEqual(slot.members.map((i) => i.id));
+  expect(headX(after)).toBe(headX(slot));
+  expect(slotAt(after, afterScore, refreshed).aim).toBe(slotAt(slot, score, frame).aim);
 });

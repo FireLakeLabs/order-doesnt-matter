@@ -13,7 +13,7 @@ interface Aim {
 export interface Part {
   id: string;
   notes: ViewNote[];
-  aims: Aim[];
+  targets: { start: number; to: number }[];
 }
 export interface RigScore {
   parts: Map<string, Part>;
@@ -47,7 +47,7 @@ export function indexRig(frame: Pick<ViewFrame, 'notes' | 'instruments'>): RigSc
     );
     const seen = new Set<string>();
     const notes = frame.notes
-      .filter((n) => n.instrument === instrument.id && n.end > n.start)
+      .filter((n) => n.instrument === instrument.id && n.end >= n.start)
       .filter((n) => {
         // Repeated carry-in fragments describe one span; genuine coincident onsets stay counted.
         const key = identity(n);
@@ -56,7 +56,6 @@ export function indexRig(frame: Pick<ViewFrame, 'notes' | 'instruments'>): RigSc
         return true;
       })
       .sort((a, b) => a.start - b.start || a.end - b.end);
-    const aims: Aim[] = [];
     const starts = new Map<number, number[]>();
     for (const note of notes) {
       const midi = scoredPitch(note, instrument);
@@ -69,11 +68,11 @@ export function indexRig(frame: Pick<ViewFrame, 'notes' | 'instruments'>): RigSc
       if (midi !== undefined) value.note = midi;
       normalised.push({ ...note, value });
     }
-    for (const [start, values] of starts) {
-      const to = values.reduce((a, b) => a + b, 0) / values.length;
-      aims.push({ start, from: aims.length ? aimAt(aims[aims.length - 1], start) : to, to });
-    }
-    parts.set(instrument.id, { id: instrument.id, notes, aims });
+    const targets = [...starts].map(([start, values]) => ({
+      start,
+      to: values.reduce((a, b) => a + b, 0) / values.length,
+    }));
+    parts.set(instrument.id, { id: instrument.id, notes, targets });
   }
   return { parts, evidence: roleEvidence(normalised) };
 }
@@ -103,17 +102,32 @@ export function rigSlots(frame: ViewFrame, score: RigScore) {
   const unpitched = ids.filter((id) => !Number.isFinite(score.evidence.get(id)?.meanPitch));
   const strobe = mostRegularDrum(score.evidence, 'regular', unpitched);
   const wash = lowestPitchedPart(score.evidence, new Set(ids));
-  const other = members.filter((i) => i.id !== strobe && i.id !== wash);
+  // Reserve banks from the document inventory, not the queried/visible subset.
+  // New carry-ins can join a shared pair without moving an existing fixture.
+  const other = frame.instruments
+    .slice()
+    .sort((a, b) => a.index - b.index)
+    .filter((i) => i.id !== strobe && i.id !== wash);
   const capacity = 8 - Number(!!strobe) - Number(!!wash);
-  const slots: { role: Role; members: ViewInstrument[] }[] = [];
-  if (strobe) slots.push({ role: 'strobe', members: members.filter((i) => i.id === strobe) });
-  if (wash) slots.push({ role: 'wash', members: members.filter((i) => i.id === wash) });
-  for (let i = 0; i < Math.min(capacity, other.length); i++)
-    slots.push({ role: 'heads', members: other.filter((_, j) => j % capacity === i) });
+  const banks = Math.min(capacity, other.length);
+  const slots: { role: Role; members: ViewInstrument[]; bank: number; banks: number }[] = [];
+  if (strobe)
+    slots.push({
+      role: 'strobe',
+      members: members.filter((i) => i.id === strobe),
+      bank: 0,
+      banks: 1,
+    });
+  if (wash)
+    slots.push({ role: 'wash', members: members.filter((i) => i.id === wash), bank: 0, banks: 1 });
+  for (let bank = 0; bank < banks; bank++) {
+    const members = other.filter((_, j) => j % banks === bank);
+    if (members.length) slots.push({ role: 'heads', members, bank, banks });
+  }
   return slots.map((slot) => {
     const targets = new Map<number, number[]>();
     for (const member of slot.members)
-      for (const aim of score.parts.get(member.id)?.aims ?? []) {
+      for (const aim of score.parts.get(member.id)?.targets ?? []) {
         const values = targets.get(aim.start) ?? [];
         values.push(aim.to);
         targets.set(aim.start, values);
@@ -127,11 +141,16 @@ export function rigSlots(frame: ViewFrame, score: RigScore) {
   });
 }
 export function partAt(part: Part, now: number, cps: number, role: Role) {
-  const active = part.notes.filter((n) => n.start <= now && now < n.end);
-  const seconds = Math.max(0.001, cps);
-  const pulse = 0.035 * seconds;
-  // One onset per fixed 320 ms bucket bounds dense strobe patterns without a clock.
-  const bucket = 0.32 * seconds;
+  const rate = Math.max(Number.EPSILON, cps);
+  const pulse = 0.035 * rate;
+  // Zero-span onsets are impulses: flash them, never invent a held interval.
+  const active = part.notes.filter(
+    (n) =>
+      n.start <= now && (now < n.end || (n.end === n.start && n.hasOnset && now - n.start < pulse)),
+  );
+  // Cap pulses per absolute 320 ms bucket, not by a minimum inter-flash gap.
+  // Neighbouring buckets can have closer onsets; each local flash is still ≤35 ms.
+  const bucket = 0.32 * rate;
   const chosen = new Map<number, ViewNote>();
   if (role === 'strobe')
     for (const n of part.notes)
@@ -151,11 +170,6 @@ export function partAt(part: Part, now: number, cps: number, role: Role) {
       : 1;
   const emitting = role === 'strobe' ? flashes : active;
   const brightness = emitting.reduce((sum, n) => sum + gain(n), 0);
-  let aim = 2.6;
-  for (const knot of part.aims) {
-    if (knot.start > now) break;
-    aim = aimAt(knot, now);
-  }
   return {
     active: active.length,
     // Dense strobe hits merge into bounded pulses, with every reached onset counted.
@@ -174,7 +188,6 @@ export function partAt(part: Part, now: number, cps: number, role: Role) {
       role === 'strobe'
         ? Math.min(0.24, brightness * 0.24)
         : Math.min(1.4, brightness * (flashes.length ? 0.95 : 0.65)),
-    aim,
   };
 }
 export function slotAt(
@@ -185,7 +198,7 @@ export function slotAt(
   const states = slot.members.map((i) => ({
     instrument: i,
     state: partAt(
-      score.parts.get(i.id) ?? { id: i.id, notes: [], aims: [] },
+      score.parts.get(i.id) ?? { id: i.id, notes: [], targets: [] },
       frame.now,
       frame.cps,
       slot.role,
@@ -225,3 +238,6 @@ export function slotAt(
     ),
   };
 }
+
+export const headX = (slot: ReturnType<typeof rigSlots>[number]) =>
+  1.3 + ((slot.bank + 0.5) / Math.max(1, slot.banks)) * 5.9;
