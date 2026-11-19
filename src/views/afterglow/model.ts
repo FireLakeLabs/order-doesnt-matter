@@ -43,8 +43,13 @@ export class HeardColumns {
   readonly columns = new Map<number, Column>();
   private settings: ViewFrame['instruments'][number]['settings'][] = [];
   private ids = '';
+  private transport?: Pick<ViewFrame, 'now' | 'playing' | 'cps'>;
+  private correctionUntil?: number;
   pass = 0;
   lastObservedNow = -Infinity;
+  get correcting() {
+    return this.correctionUntil !== undefined;
+  }
   observe(frame: ViewFrame) {
     const ids = frame.instruments.map((i) => i.id).join('\0');
     // The host caches settings arrays per immutable document. Their identity
@@ -55,7 +60,34 @@ export class HeardColumns {
       this.ids = ids;
       this.settings = frame.instruments.map((i) => i.settings);
     }
-    if (!frame.playing || !frame.audio || !Number.isFinite(frame.now)) return;
+    if (!Number.isFinite(frame.now)) return;
+    const previousTransport = this.transport;
+    if (!frame.playing) {
+      this.transport = { now: frame.now, playing: false, cps: frame.cps };
+      this.correctionUntil = undefined;
+      return;
+    }
+    if (!frame.audio) return;
+    this.transport = { now: frame.now, playing: true, cps: frame.cps };
+    // Resume and speed changes can briefly move the latency-corrected display
+    // backwards without revisiting audio. Ignore those snapshots until the
+    // last observed score time is reached. Ordinary seeks, even small ones,
+    // still start a pass; a paused backwards seek fails the resume condition.
+    const retreat = (this.lastObservedNow - frame.now) / frame.cps;
+    const transition =
+      previousTransport &&
+      ((!previousTransport.playing && previousTransport.now >= this.lastObservedNow) ||
+        previousTransport.cps !== frame.cps);
+    const correction = transition && retreat > 0 && retreat <= 0.5;
+    if (correction) this.correctionUntil = this.lastObservedNow;
+    if (this.correctionUntil !== undefined) {
+      if (
+        frame.now >= this.correctionUntil ||
+        (previousTransport?.playing && frame.now < previousTransport.now && !correction)
+      )
+        this.correctionUntil = undefined;
+      else return;
+    }
     // A pass is observation provenance, derived only from real audio arriving
     // at a lower score time (a loop wrap or seek). It never advances time.
     if (frame.now < this.lastObservedNow) this.pass++;
@@ -79,6 +111,8 @@ export class HeardColumns {
     this.columns.clear();
     this.pass = 0;
     this.lastObservedNow = -Infinity;
+    this.transport = undefined;
+    this.correctionUntil = undefined;
     this.settings = [];
     this.ids = '';
   }
@@ -106,7 +140,8 @@ export function visibleColumns(
   }
   return {
     columns,
-    earlierPass: columns.length > 0 && (earlierPass || now < heard.lastObservedNow),
+    earlierPass:
+      columns.length > 0 && (earlierPass || (!heard.correcting && now < heard.lastObservedNow)),
   };
 }
 
@@ -122,7 +157,7 @@ export function scoredNotes(frame: ViewFrame) {
     // Strudel sample n selects a sample; scaled n already arrives as note.
     const midi = pitch({ ...note.value, n: undefined });
     const tone = { note, hz: midi === undefined ? undefined : frequency(midi) };
-    const key = JSON.stringify([note.instrument, note.start, note.end, midi]);
+    const key = JSON.stringify([note.instrument, note.start, note.end, note.value]);
     let group = groups.get(key);
     if (!group) groups.set(key, (group = { onsets: [] }));
     if (note.hasOnset) group.onsets.push(tone);

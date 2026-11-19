@@ -6,6 +6,8 @@
  * never interpolated. Revisited cells show earlier observations, labelled “heard
  * then”, until new audio replaces them on the next pass. Passes are detected
  * from backwards jumps in observed audio time (loops or seeks), never a clock.
+ * Brief latency corrections after resume or speed changes skip snapshots until
+ * the last observed score time is reached; they do not create a new pass.
  * Future cells are hidden even if previously heard. No clock, inferred
  * tails, per-part audio attribution or simulated audio is kept here. Remounting
  * starts a new observation session. Audio comes through the same tap as Scope.

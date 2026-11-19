@@ -108,6 +108,48 @@ test('host per-document facts clear history for a replacement document even with
   expect(store.columns.size).toBe(0);
 });
 
+test('resume and speed latency corrections neither relabel nor replace heard measurements', () => {
+  for (const transition of ['resume', 'speed'] as const) {
+    const f = { ...scoreFrame(), audio: audio(), now: 4, cps: 0.5 };
+    const store = new HeardColumns();
+    store.observe({ ...f, now: 3.8 });
+    store.observe(f);
+    const originals = [...store.columns.values()];
+    if (transition === 'resume') store.observe({ ...f, playing: false });
+    const corrected = { ...f, cps: transition === 'speed' ? 1 : 0.5, now: 3.9 };
+    f.audio.spectrum.fill(255);
+    store.observe(corrected);
+    store.observe({ ...corrected, now: 3.95 });
+    expect(store.pass).toBe(0);
+    expect([...store.columns.values()]).toEqual(originals);
+    expect(visibleColumns(store, { from: 3, to: 5 }, 3.95).earlierPass).toBe(false);
+    store.observe({ ...corrected, now: 4 });
+    expect(store.correcting).toBe(false);
+    expect(store.columns.get(4 * COLUMNS_PER_CYCLE)).toBe(originals[1]);
+    store.observe({ ...corrected, now: 4.1 });
+    expect(store.columns.get(Math.floor(4.1 * COLUMNS_PER_CYCLE))?.bands[40]).toBe(255);
+  }
+});
+
+test('small real backwards seeks still retain and label earlier measurements, then remeasure', () => {
+  for (const paused of [false, true]) {
+    const f = { ...scoreFrame(), audio: audio(), now: 4, cps: 0.5 };
+    const store = new HeardColumns();
+    store.observe({ ...f, now: 3.8 });
+    store.observe(f);
+    if (paused) {
+      store.observe({ ...f, now: 3.9, playing: false });
+      expect(visibleColumns(store, { from: 3, to: 5 }, 3.9).earlierPass).toBe(true);
+    }
+    store.observe({ ...f, now: 3.9 });
+    expect(store.pass).toBe(1);
+    expect(store.correcting).toBe(false);
+    expect(visibleColumns(store, { from: 3, to: 5 }, 3.9).earlierPass).toBe(true);
+    store.observe({ ...f, now: 3.8 });
+    expect(store.columns.get(Math.floor(3.8 * COLUMNS_PER_CYCLE))?.pass).toBe(2);
+  }
+});
+
 test('real dubstep outlines keep actual spans and floor samples, and are pure across backwards seeks', async () => {
   const source = readFileSync('corpus/programs/real-dubstep-arranged.strudel', 'utf8');
   const state = loadPiece(initialState(), source, importStrudel(source));
@@ -203,4 +245,8 @@ test('whole-note fragments count once while genuine coincident onsets remain cou
   expect(scoredNotes({ ...f, notes: [held, carried, carried] })).toHaveLength(1);
   expect(scoredNotes({ ...f, notes: [carried, carried] })).toHaveLength(1);
   expect(scoredNotes({ ...f, notes: [held, held, carried] })).toHaveLength(2);
+  const kick = { ...carried, value: { s: 'bd', n: 0 } };
+  const snare = { ...carried, value: { s: 'sd', n: 0 } };
+  const otherKick = { ...carried, value: { s: 'bd', n: 1 } };
+  expect(scoredNotes({ ...f, notes: [kick, kick, snare, snare, otherKick] })).toHaveLength(3);
 });
