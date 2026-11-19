@@ -215,8 +215,15 @@ test('Tracing paper: real session edits, peel, themes, deterministic pixels and 
         const contrast = (b: number) =>
           (Math.max(foreground, b) + 0.05) / (Math.min(foreground, b) + 0.05);
         handle.dispose();
-        for (const deliver of deliveries.slice(4))
-          deliver({ status: 'available', score: scores[0] });
+        let disposedScoreReads = 0;
+        const lateAnswer = {
+          status: 'available' as const,
+          get score() {
+            disposedScoreReads++;
+            return scores[0];
+          },
+        };
+        for (const deliver of deliveries.slice(4)) deliver(lateAnswer);
         await Promise.resolve();
         await Promise.resolve();
         const released = el.childElementCount === 0;
@@ -230,6 +237,7 @@ test('Tracing paper: real session edits, peel, themes, deterministic pixels and 
           wrapTexts,
           peelState,
           released,
+          disposedScoreReads,
           asked,
           staleIgnored,
           deterministic,
@@ -252,6 +260,7 @@ test('Tracing paper: real session edits, peel, themes, deterministic pixels and 
     expect(measured.wrapTexts.some((t) => t.startsWith('BAR 11'))).toBe(true);
     expect(measured.peelState).toBe('pending');
     expect(measured.released).toBe(true);
+    expect(measured.disposedScoreReads).toBe(0);
     expect(measured.staleIgnored).toBe(true);
     expect(measured.deterministic).toBe(true);
     expect(measured.contrast).toBeGreaterThanOrEqual(4.5);
