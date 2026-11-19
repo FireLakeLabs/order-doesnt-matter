@@ -54,10 +54,13 @@ Everything known to be outstanding, in one place. The [model](model.md) and
   [second-wave.md](../research/redesign/second-wave.md); the last five shipped
   in the third wave's 3.1.
 - **Third wave of views:** 3.0 (five fixes) and 3.1 (sixteen views) are
-  merged, as is 3.2 (sample memory and stereo, with Sampler and Stereo glass),
-  planned in [third-wave.md](../research/redesign/third-wave.md). Four views
-  remain, each waiting for its framework change in waves 3.3–3.5: Origami,
-  Tracing paper, Strobe and Mixing desk.
+  merged, as are 3.2 (Sampler, Stereo glass) and 3.3 (Origami, Orrery's driver
+  orbit), planned in [third-wave.md](../research/redesign/third-wave.md). Three
+  views remain: Tracing paper (3.4), Strobe and Mixing desk (3.5).
+- **Structure queries:** a full queue (32 outstanding) leaves Orrery's driver
+  unknown for that window, and failed queries stay cached per key; both need a
+  retry policy. Origami raised p95 frame gap by 5 ms in one paired run; profile
+  before acting. Orrery's crowded key can say "1 drivers".
 - **View follow-ups accepted in review:** extract one shared scored-pitch reader
   (Chord bridge, Light rig and Ribbons each guard locally); share log-band
   extraction between Scope and Afterglow; a real-browser pause/resume probe for

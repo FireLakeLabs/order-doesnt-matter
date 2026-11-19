@@ -176,3 +176,10 @@ Keep each entry to a few lines.
   right, spectrum, calibrated −100…0 dBFS) or to decoded sample memory; others
   receive neither and pay nothing. Measured and scored are always labelled
   apart. Afterglow alone keeps state: measured columns by score time.
+- **D52 (2026-11-19) Views may see how a part is built.** A view may opt in to
+  program structure: each instrument's steps with document ids, its setting
+  drivers, and the score after any step. Strudel answers every step with the
+  chain cut there; nothing is re-implemented, and a step it cannot cut honestly
+  is unavailable with its reason. Queries are lazy, cached per document version,
+  bounded and off the playback path; edits invalidate them. Driver times are
+  local, with per-use offsets and scales to place them in the song.

@@ -65,6 +65,8 @@ because of its GPU cost.
 | 3.5  | F. setting values between notes (needs C)            | Strobe, Mixing desk motor trails |
 
 Wave 3.2 is merged: A (#158), B (#159), Sampler (#161), Stereo glass (#160).
+Wave 3.3 is merged: C (#164), per-use timing with Orrery's driver orbit
+(#165), Origami (#166).
 
 Each contract change lands alone before its views. Change E (views that take
 input or request edits) is not planned: its only remaining use is optional

@@ -97,7 +97,8 @@ and reported in the pull request, never gated.
 
 `src/views/<id>.ts` default-exports a `ViewDefinition`. A registry discovers the
 files, so adding a file adds a view to the shelf. Views never import Strudel,
-the engine, the document or React. The host owns the animation frame, resizing
+the engine, the document or React; the structure contract reuses document types
+through a type-only exception (D52). The host owns the animation frame, resizing
 and theme changes and calls `frame` with everything the view may draw from.
 
 ```ts
