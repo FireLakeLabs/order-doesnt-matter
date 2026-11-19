@@ -296,3 +296,156 @@ test('Aquarium: Studio themes, actual rooms, reversible pixels and frame submiss
   );
   console.log('Aquarium measured:', JSON.stringify({ ...measured, real, corpus }));
 });
+
+for (const [piece, now] of [
+  ['real-dubstep-arranged', 10.4],
+  ['real-techno', 1.4],
+] as const)
+  test(`Aquarium: dry bowl separation on ${piece}`, async ({ page }) => {
+    await mkdir(shots, { recursive: true });
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    await prepare(page, 'aquarium', piece);
+    await page.evaluate(async (now) => {
+      await window.odmStudio.seek(now);
+    }, now);
+    await page.waitForFunction((now) => window.viewProbe.frame?.now === now, now);
+    const frame = await page.evaluate(() => window.viewProbe.frame!);
+    const dryCount = mapping(frame).dry.length;
+    expect(dryCount).toBe(piece === 'real-dubstep-arranged' ? 4 : 3);
+    for (const theme of ['arcade', 'sunset', 'phosphor', 'riso', 'pocket']) {
+      await page.getByRole('button', { name: `Theme ${theme}`, exact: true }).click();
+      await page.waitForFunction((name) => window.viewProbe.frame?.theme.name === name, theme);
+      await page.evaluate(async () => {
+        await document.fonts.ready;
+        for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
+      });
+      // Capture in the Studio at the sweep's exact piece, time and viewport.
+      await page.screenshot({ path: `${shots}/${piece}-${theme}-sweep.png` });
+      await page.locator('[data-region="stage-a"] canvas').screenshot({
+        path: `${shots}/${piece}-${theme}-sweep-stage-a.png`,
+      });
+      const drawn = await page.evaluate((dryCount) => {
+        const frame = window.viewProbe.frame!;
+        const fish: { x: number; y: number; sx: number; sy: number }[] = [];
+        const outlines: { x: number; y: number; width: number; height: number }[] = [];
+        const labels: { text: string; y: number }[] = [];
+        const proto = CanvasRenderingContext2D.prototype;
+        const ellipse = proto.ellipse,
+          roundRect = proto.roundRect,
+          fillText = proto.fillText;
+        proto.ellipse = function (...args) {
+          if (args[2] === 26 && args[3] === 13) {
+            const m = this.getTransform();
+            fish.push({
+              x: m.e / frame.dpr,
+              y: m.f / frame.dpr,
+              sx: Math.abs(m.a) / frame.dpr,
+              sy: Math.abs(m.d) / frame.dpr,
+            });
+          }
+          return ellipse.apply(this, args);
+        };
+        proto.roundRect = function (x, y, width, height, radii) {
+          outlines.push({ x, y, width, height });
+          return roundRect.call(this, x, y, width, height, radii);
+        };
+        proto.fillText = function (text, x, y, maxWidth) {
+          labels.push({ text, y });
+          if (maxWidth === undefined) fillText.call(this, text, x, y);
+          else fillText.call(this, text, x, y, maxWidth);
+        };
+        try {
+          window.viewProbe.handle!.frame(frame);
+        } finally {
+          proto.ellipse = ellipse;
+          proto.roundRect = roundRect;
+          proto.fillText = fillText;
+        }
+        const bowl = outlines.at(-1)!;
+        const dry = fish.slice(-dryCount).map((p) => ({
+          left: p.x - 38 * p.sx,
+          right: p.x + 38 * p.sx,
+          top: p.y - 28 * p.sy,
+          bottom: p.y + 28 * p.sy,
+        }));
+        const overlaps = dry.flatMap((a, i) =>
+          dry
+            .slice(i + 1)
+            .filter(
+              (b) => a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom,
+            ),
+        );
+        const summary = labels.find((l) => l.text.startsWith(`${String(dryCount)} fish`))!;
+        const canvas = document.querySelector<HTMLCanvasElement>('[data-region="stage-a"] canvas')!;
+        const pixels = canvas.toDataURL();
+        window.viewProbe.handle!.frame({ ...frame, now: 2 });
+        window.viewProbe.handle!.frame({ ...frame, now: 17 });
+        window.viewProbe.handle!.frame(frame);
+        return { overlaps, dry, bowl, summary, reversible: pixels === canvas.toDataURL() };
+      }, dryCount);
+      expect(drawn.overlaps).toEqual([]);
+      expect(drawn.summary.y - 12).toBeGreaterThan(drawn.bowl.y + drawn.bowl.height);
+      expect(drawn.reversible).toBe(true);
+      for (const fish of drawn.dry) {
+        expect(fish.left).toBeGreaterThan(drawn.bowl.x);
+        expect(fish.right).toBeLessThan(drawn.bowl.x + drawn.bowl.width);
+        expect(fish.top).toBeGreaterThan(drawn.bowl.y);
+        expect(fish.bottom).toBeLessThan(drawn.bowl.y + drawn.bowl.height);
+      }
+    }
+  });
+
+test('Aquarium: dry overflow counts both unnamed and hidden fish', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await prepare(page, 'aquarium');
+  for (const theme of ['arcade', 'sunset', 'phosphor', 'riso', 'pocket']) {
+    await page.getByRole('button', { name: `Theme ${theme}`, exact: true }).click();
+    await page.waitForFunction((name) => window.viewProbe.frame?.theme.name === name, theme);
+    const labels = await page.evaluate(async () => {
+      await document.fonts.ready;
+      const source = window.viewProbe.frame!;
+      const instruments = Array.from({ length: 20 }, (_, index) => ({
+        ...source.instruments[0],
+        id: String(index),
+        index,
+        name: `fish ${String(index)}`,
+        inSection: true,
+        room: null,
+        settings: [],
+      }));
+      const frame = {
+        ...source,
+        now: 10.4,
+        width: 560,
+        height: 675,
+        instruments,
+        // Retain an empty wet tank to exercise the narrow, 140px dry area.
+        rooms: [{ orbit: 0, members: [] }],
+        notes: instruments.map((i) => ({
+          instrument: i.id,
+          start: 10,
+          end: 11,
+          hasOnset: true,
+          value: {},
+        })),
+      };
+      const labels: string[] = [];
+      const proto = CanvasRenderingContext2D.prototype;
+      const original = proto.fillText;
+      proto.fillText = function (text, x, y, maxWidth) {
+        labels.push(text);
+        if (maxWidth === undefined) original.call(this, text, x, y);
+        else original.call(this, text, x, y, maxWidth);
+      };
+      try {
+        window.viewProbe.handle!.frame(frame);
+      } finally {
+        proto.fillText = original;
+        window.viewProbe.handle!.frame(source);
+      }
+      return labels;
+    });
+    expect(labels.some((label) => label.startsWith('20 fish'))).toBe(true);
+    expect(labels, theme).toContain('+17 (12 hidden)');
+  }
+});

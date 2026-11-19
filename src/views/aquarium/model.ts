@@ -199,12 +199,63 @@ export function tankLayout(tanks: Tank[], dry: Tank, width: number, height: numb
   const bowl: TankBox | null = bowlWidth
     ? {
         x: onlyDry ? (width - bowlWidth) / 2 : width - left - bowlWidth,
-        y: onlyDry ? top : top + (bottom - top) * 0.3,
+        y: top,
         width: bowlWidth,
-        height: (bottom - top) * (onlyDry ? 1 : 0.7),
+        height: bottom - top,
         rooms: [dry],
         shelf: false,
       }
     : null;
   return { boxes, bowl };
+}
+
+/** Dry fish occupy disjoint cells in an inset rectangle inside the curved glass.
+ * Only the bowl uses this packing; wet fish retain their identity-based swim. */
+export function dryBowl(box: TankBox, count: number) {
+  const visible = Math.min(count, 8);
+  const columns = Math.max(1, Math.ceil(Math.sqrt(visible)));
+  const rows = Math.ceil(visible / columns);
+  const legendRows = Math.min(count, 4);
+  const footer = 27 + legendRows * 17;
+  const width = Math.min(box.width, 140 + (columns - 1) * 100);
+  const height = Math.min(box.height - 30 - 8 - footer, 120 + (rows - 1) * 60);
+  const x = box.x + (box.width - width) / 2;
+  const y = box.y + 30;
+  const cellWidth = (width * 0.64) / columns;
+  const cellHeight = (height * 0.6) / Math.max(1, rows);
+  return {
+    x,
+    y,
+    width,
+    height,
+    radius: [
+      Math.min(width * 0.22, height / 2),
+      Math.min(width * 0.22, height / 2),
+      Math.min(width * 0.4, height / 2),
+      Math.min(width * 0.4, height / 2),
+    ],
+    legendY: y + height + 8,
+    legendRows,
+    overflow: count - visible,
+    paths: Array.from({ length: visible }, (_, i) => ({
+      x: x + width * 0.18 + ((i % columns) + 0.5) * cellWidth,
+      y: y + height * 0.18 + (Math.floor(i / columns) + 0.5) * cellHeight,
+      rx: cellWidth * 0.12,
+      ry: cellHeight * 0.1,
+      // Fish including fins, tail, facing changes and stroke fit in ±38 × ±28.
+      size: Math.min(1.1, (cellWidth * 0.76 - 6) / 76, (cellHeight * 0.8 - 6) / 56),
+    })),
+  };
+}
+export function drySwim(
+  path: ReturnType<typeof dryBowl>['paths'][number],
+  id: string,
+  now: number,
+) {
+  const angle = now * 0.65 + random(identity(id)) * Math.PI * 2;
+  return {
+    x: path.x + Math.sin(angle) * path.rx,
+    y: path.y + Math.cos(angle) * path.ry,
+    facing: Math.cos(angle) >= 0 ? 1 : -1,
+  };
 }

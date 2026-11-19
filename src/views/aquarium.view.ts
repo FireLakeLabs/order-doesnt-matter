@@ -2,7 +2,15 @@ import type { ViewDefinition, ViewFrame } from './types';
 import { indexStage, settingText, type StageIndex } from './soundstage/model';
 import { random } from './shared/particles';
 import { line } from './shared/retro-2d';
-import { aquarium, identity, swim, tankLayout, type TankBox } from './aquarium/model';
+import {
+  aquarium,
+  dryBowl,
+  drySwim,
+  identity,
+  swim,
+  tankLayout,
+  type TankBox,
+} from './aquarium/model';
 
 const percentage = (now: number) => Math.min(99, Math.floor((now % 1) * 100 + 1e-8));
 const counted = (n: number, noun: string) => `${String(n)} ${noun}${n === 1 ? '' : 's'}`;
@@ -61,19 +69,83 @@ function fish(
   c.fill();
   c.restore();
 }
+function drawDryBowl(c: CanvasRenderingContext2D, f: ViewFrame, box: TankBox) {
+  const fishList = box.rooms[0].fish;
+  const bowl = dryBowl(box, fishList.length);
+  const { x, y, width: w, height: h } = bowl;
+  const { theme } = f;
+  const legendWidth = Math.min(box.width, Math.max(180, w));
+  const legendX = box.x + (box.width - legendWidth) / 2;
+  c.fillStyle = theme.panel;
+  c.strokeStyle = theme.muted;
+  c.lineWidth = 1.5;
+  c.beginPath();
+  c.roundRect(x, y, w, h, bowl.radius);
+  c.fill();
+  c.stroke();
+  c.save();
+  c.clip();
+  c.fillStyle = theme.line;
+  c.fillRect(x, y + h * 0.85, w, h * 0.15);
+  for (let i = 0; i < Math.ceil(w / 9); i++) {
+    c.fillStyle = i % 2 ? theme.muted : theme.ground;
+    c.beginPath();
+    c.ellipse(x + i * 9, y + h - 5 - random(i, 3) * 8, 3.5, 2, i, 0, Math.PI * 2);
+    c.fill();
+  }
+  bowl.paths.forEach((path, i) => {
+    const entry = fishList[i];
+    const p = drySwim(path, entry.instrument.id, f.now);
+    c.globalAlpha = entry.instrument.muted ? 0.3 : 1;
+    fish(c, p.x, p.y, path.size, p.facing, entry.instrument.colour, f);
+  });
+  c.restore();
+  c.fillStyle = theme.text;
+  c.font = `bold 16px "${theme.fontDisplay}"`;
+  text(c, 'Dry bowl', x, box.y + 16, w);
+  c.font = `11px "${theme.fontMono}"`;
+  text(
+    c,
+    `${String(fishList.length)} fish · ${fishList.some((p) => p.unknown) ? '? unsampled' : 'no send'}`,
+    legendX + 10,
+    bowl.legendY + 12,
+    legendWidth - 20,
+  );
+  for (let i = 0; i < bowl.legendRows; i++) {
+    const entry = fishList[i];
+    const last = i === bowl.legendRows - 1 && fishList.length > bowl.legendRows;
+    const label = `${entry.instrument.name}${entry.voices > 1 ? ` ×${String(entry.voices)} voices` : ''}${entry.unknown ? ' ?' : ''}`;
+    const withSend = `${label} · send ${entry.voices > 1 ? '≤' : ''}${settingText(entry.send)}`;
+    c.fillStyle = entry.instrument.colour;
+    if (!last) c.fillRect(legendX + 11, bowl.legendY + 21 + i * 17, 7, 7);
+    c.fillStyle = theme.text;
+    text(
+      c,
+      last
+        ? bowl.overflow
+          ? `+${String(fishList.length - i)} (${String(bowl.overflow)} hidden)`
+          : `+${String(fishList.length - i)} fish`
+        : c.measureText(withSend).width <= legendWidth - 34
+          ? withSend
+          : label,
+      legendX + (last ? 10 : 24),
+      bowl.legendY + 28 + i * 17,
+      legendWidth - (last ? 20 : 34),
+    );
+  }
+}
 function drawTank(c: CanvasRenderingContext2D, f: ViewFrame, box: TankBox) {
   const { x, y, width: w, height: h, rooms, shelf } = box,
     { theme } = f;
-  const dry = rooms.every((r) => r.orbit === null),
-    merged = rooms.length > 1;
+  const merged = rooms.length > 1;
   const fishList = rooms.flatMap((r) => r.fish);
   const requests = rooms.flatMap((r) => r.requests);
   const contested = rooms.some((r) => r.contested);
   const bubbles = rooms.flatMap((r) => r.bubbles);
   const compact = h < 270;
-  const legendRows = Math.min(fishList.length, dry ? 4 : compact ? 1 : shelf ? 2 : 4);
+  const legendRows = Math.min(fishList.length, compact ? 1 : shelf ? 2 : 4);
   const footer = 27 + legendRows * 17;
-  const waterTop = y + (dry ? 42 : compact ? 82 : 112),
+  const waterTop = y + (compact ? 82 : 112),
     floor = y + h - footer;
   const innerX = x + 8,
     innerW = w - 16,
@@ -82,8 +154,7 @@ function drawTank(c: CanvasRenderingContext2D, f: ViewFrame, box: TankBox) {
   c.strokeStyle = theme.muted;
   c.lineWidth = 1.5;
   c.beginPath();
-  if (dry) c.roundRect(x, y + 30, w, h - 30, [w * 0.22, w * 0.22, w * 0.4, w * 0.4]);
-  else c.roundRect(x, y + 25, w, h - 25, 7);
+  c.roundRect(x, y + 25, w, h - 25, 7);
   c.fill();
   c.stroke();
   c.save();
@@ -91,47 +162,45 @@ function drawTank(c: CanvasRenderingContext2D, f: ViewFrame, box: TankBox) {
   c.rect(innerX, waterTop, innerW, innerH);
   c.clip();
   // Token-coloured water and a moving surface, glass reflection on either side.
-  if (!dry) {
-    const water = c.createLinearGradient(0, waterTop, 0, floor);
-    water.addColorStop(0, theme.line);
-    water.addColorStop(1, theme.panel);
-    c.fillStyle = water;
-    c.fillRect(innerX, waterTop, innerW, innerH);
-    c.globalAlpha = 0.35;
-    c.fillStyle = theme.text;
-    c.fillRect(innerX + 7, waterTop + 5, 3, innerH - 15);
-    c.fillRect(innerX + innerW - 13, waterTop + 5, 1, innerH - 15);
+  const water = c.createLinearGradient(0, waterTop, 0, floor);
+  water.addColorStop(0, theme.line);
+  water.addColorStop(1, theme.panel);
+  c.fillStyle = water;
+  c.fillRect(innerX, waterTop, innerW, innerH);
+  c.globalAlpha = 0.35;
+  c.fillStyle = theme.text;
+  c.fillRect(innerX + 7, waterTop + 5, 3, innerH - 15);
+  c.fillRect(innerX + innerW - 13, waterTop + 5, 1, innerH - 15);
+  c.globalAlpha = 1;
+  const stir = Math.max(
+    0,
+    ...requests.map((r) => (r.start === null ? 0 : Math.max(0, 1 - (f.now - r.start) / 1.2))),
+  );
+  c.strokeStyle = theme.muted;
+  c.lineWidth = 1.2;
+  c.beginPath();
+  for (let dx = 0; dx <= innerW; dx += 3) {
+    const yy = waterTop + 5 + Math.sin(dx / 23 + f.now * 5) * (2 + stir * 4);
+    if (!dx) c.moveTo(innerX + dx, yy);
+    else c.lineTo(innerX + dx, yy);
+  }
+  c.stroke();
+  if (stir > 0) {
+    c.globalAlpha = 0.35 * stir;
+    for (let i = 0; i < 3; i++) {
+      c.beginPath();
+      c.ellipse(
+        x + w / 2,
+        waterTop + innerH * (0.28 + i * 0.2),
+        innerW * 0.37,
+        8 + Math.sin(f.now * 4 + i) * 4,
+        0,
+        0.2 + (f.now % (Math.PI * 2)),
+        Math.PI * 1.7 + (f.now % (Math.PI * 2)),
+      );
+      c.stroke();
+    }
     c.globalAlpha = 1;
-    const stir = Math.max(
-      0,
-      ...requests.map((r) => (r.start === null ? 0 : Math.max(0, 1 - (f.now - r.start) / 1.2))),
-    );
-    c.strokeStyle = theme.muted;
-    c.lineWidth = 1.2;
-    c.beginPath();
-    for (let dx = 0; dx <= innerW; dx += 3) {
-      const yy = waterTop + 5 + Math.sin(dx / 23 + f.now * 5) * (2 + stir * 4);
-      if (!dx) c.moveTo(innerX + dx, yy);
-      else c.lineTo(innerX + dx, yy);
-    }
-    c.stroke();
-    if (stir > 0) {
-      c.globalAlpha = 0.35 * stir;
-      for (let i = 0; i < 3; i++) {
-        c.beginPath();
-        c.ellipse(
-          x + w / 2,
-          waterTop + innerH * (0.28 + i * 0.2),
-          innerW * 0.37,
-          8 + Math.sin(f.now * 4 + i) * 4,
-          0,
-          0.2 + (f.now % (Math.PI * 2)),
-          Math.PI * 1.7 + (f.now % (Math.PI * 2)),
-        );
-        c.stroke();
-      }
-      c.globalAlpha = 1;
-    }
   }
   // Gravel and rooted, branching plants make the whole tank read as an aquarium.
   c.fillStyle = theme.line;
@@ -142,30 +211,28 @@ function drawTank(c: CanvasRenderingContext2D, f: ViewFrame, box: TankBox) {
     c.ellipse(innerX + i * 9, floor - 5 - random(i, 3) * 8, 3.5, 2, i, 0, Math.PI * 2);
     c.fill();
   }
-  if (!dry) {
-    c.strokeStyle = theme.muted;
-    c.lineWidth = shelf ? 2 : 3;
-    for (let i = 0; i < 5; i++) {
-      const px = innerX + innerW * (0.08 + i * 0.21),
-        ph = Math.min(innerH * 0.34, 50 + random(i) * 55);
-      const sway = Math.sin(f.now * 1.5 + i) * 7;
+  c.strokeStyle = theme.muted;
+  c.lineWidth = shelf ? 2 : 3;
+  for (let i = 0; i < 5; i++) {
+    const px = innerX + innerW * (0.08 + i * 0.21),
+      ph = Math.min(innerH * 0.34, 50 + random(i) * 55);
+    const sway = Math.sin(f.now * 1.5 + i) * 7;
+    c.beginPath();
+    c.moveTo(px, floor - 12);
+    c.bezierCurveTo(
+      px - 12,
+      floor - ph * 0.4,
+      px + sway + 12,
+      floor - ph * 0.8,
+      px + sway,
+      floor - ph,
+    );
+    c.stroke();
+    for (const side of [-1, 1]) {
       c.beginPath();
-      c.moveTo(px, floor - 12);
-      c.bezierCurveTo(
-        px - 12,
-        floor - ph * 0.4,
-        px + sway + 12,
-        floor - ph * 0.8,
-        px + sway,
-        floor - ph,
-      );
+      c.moveTo(px, floor - ph * 0.4);
+      c.quadraticCurveTo(px + side * 20, floor - ph * 0.7, px + side * 14, floor - ph * 0.8);
       c.stroke();
-      for (const side of [-1, 1]) {
-        c.beginPath();
-        c.moveTo(px, floor - ph * 0.4);
-        c.quadraticCurveTo(px + side * 20, floor - ph * 0.7, px + side * 14, floor - ph * 0.8);
-        c.stroke();
-      }
     }
   }
   const fishSize = Math.max(0.25, Math.min(shelf ? 0.65 : 1.35, innerW / 165, innerH / 100));
@@ -206,87 +273,79 @@ function drawTank(c: CanvasRenderingContext2D, f: ViewFrame, box: TankBox) {
   c.font = `bold 16px "${theme.fontDisplay}"`;
   text(
     c,
-    dry ? 'Dry bowl' : merged ? `${String(rooms.length)} rooms` : `Room ${String(rooms[0].orbit)}`,
+    merged ? `${String(rooms.length)} rooms` : `Room ${String(rooms[0].orbit)}`,
     x,
     y + 16,
     w,
   );
   c.font = `11px "${theme.fontMono}"`;
-  if (!dry) {
-    c.fillStyle = theme.panel;
-    c.fillRect(x + 2, y + 30, w - 4, compact ? 50 : 80);
-    c.fillStyle = theme.text;
+  c.fillStyle = theme.panel;
+  c.fillRect(x + 2, y + 30, w - 4, compact ? 50 : 80);
+  c.fillStyle = theme.text;
+  text(
+    c,
+    contested
+      ? 'CONTESTED'
+      : requests.length
+        ? 'STIRRED · shared requests'
+        : 'No size / feedback request',
+    x + 10,
+    y + 47,
+    w - 20,
+  );
+  if (merged) {
+    text(c, `orbits ${rooms.map((r) => String(r.orbit)).join(', ')}`, x + 10, y + 64, w - 20);
     text(
       c,
-      contested
-        ? 'CONTESTED'
-        : requests.length
-          ? 'STIRRED · shared requests'
-          : 'No size / feedback request',
+      `${counted(requests.length, 'request')} · ${String(rooms.filter((r) => r.contested).length)} contested`,
       x + 10,
-      y + 47,
+      y + (compact ? 77 : 81),
       w - 20,
     );
-    if (merged) {
-      text(c, `orbits ${rooms.map((r) => String(r.orbit)).join(', ')}`, x + 10, y + 64, w - 20);
+  } else if (requests.length) {
+    // Keep both disagreeing authors first, ahead of repeated identical requests.
+    const first =
+      requests.find((r) =>
+        requests.some((other) => other.setting === r.setting && other.value !== r.value),
+      ) ?? requests[0];
+    const other = requests.find((r) => r.setting === first.setting && r.value !== first.value);
+    const ordered = other
+      ? [first, other, ...requests.filter((r) => r !== first && r !== other)]
+      : requests;
+    ordered.slice(0, 2).forEach((r, i) => {
+      const at =
+        r.start === null
+          ? 'constant'
+          : `b${String(Math.floor(r.start) + 1)}:${String(percentage(r.start))}%`;
       text(
         c,
-        `${counted(requests.length, 'request')} · ${String(rooms.filter((r) => r.contested).length)} contested`,
+        compact
+          ? `${r.instrument.name} ${r.setting === 'size' ? 'sz' : 'fb'} ${settingText(r.value)}`
+          : `${r.instrument.name} @${at}`,
         x + 10,
-        y + (compact ? 77 : 81),
+        y + 63 + i * (compact ? 15 : 30),
         w - 20,
       );
-    } else if (requests.length) {
-      // Keep both disagreeing authors first, ahead of repeated identical requests.
-      const first =
-        requests.find((r) =>
-          requests.some((other) => other.setting === r.setting && other.value !== r.value),
-        ) ?? requests[0];
-      const other = requests.find((r) => r.setting === first.setting && r.value !== first.value);
-      const ordered = other
-        ? [first, other, ...requests.filter((r) => r !== first && r !== other)]
-        : requests;
-      ordered.slice(0, 2).forEach((r, i) => {
-        const at =
-          r.start === null
-            ? 'constant'
-            : `b${String(Math.floor(r.start) + 1)}:${String(percentage(r.start))}%`;
+      if (!compact)
         text(
           c,
-          compact
-            ? `${r.instrument.name} ${r.setting === 'size' ? 'sz' : 'fb'} ${settingText(r.value)}`
-            : `${r.instrument.name} @${at}`,
+          `${r.setting} ${settingText(r.value)}${i === 1 && ordered.length > 2 ? ` · +${counted(ordered.length - 2, 'request')}` : ''}`,
           x + 10,
-          y + 63 + i * (compact ? 15 : 30),
+          y + 76 + i * 30,
           w - 20,
         );
-        if (!compact)
-          text(
-            c,
-            `${r.setting} ${settingText(r.value)}${i === 1 && ordered.length > 2 ? ` · +${counted(ordered.length - 2, 'request')}` : ''}`,
-            x + 10,
-            y + 76 + i * 30,
-            w - 20,
-          );
-      });
-    }
-    // The second request's last line ends at y+106, just above the water.
+    });
   }
+  // The second request's last line ends at y+106, just above the water.
   c.fillStyle = theme.panel;
   c.fillRect(x + 4, floor + 1, w - 8, footer - 6);
   c.fillStyle = theme.text;
   text(
     c,
-    `${String(fishList.length)} fish${
-      dry
-        ? fishList.some((p) => p.unknown)
-          ? ' · ? unsampled'
-          : ' · no send'
-        : ` · ${counted(bubbles.length, 'onset')} / ${counted(
-            bubbles.reduce((n, b) => n + b.count, 0),
-            'bubble',
-          )}`
-    }`,
+    `${String(fishList.length)} fish · ${counted(bubbles.length, 'onset')} / ${counted(
+      bubbles.reduce((n, b) => n + b.count, 0),
+      'bubble',
+    )}`,
     x + 10,
     floor + 16,
     w - 20,
@@ -340,7 +399,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, index: StageIndex) {
     c.lineWidth = 5;
     line(c, box.x - 3, box.y + box.height + 3, box.x + box.width + 3, box.y + box.height + 3);
   }
-  if (layout.bowl) drawTank(c, f, layout.bowl);
+  if (layout.bowl) drawDryBowl(c, f, layout.bowl);
   if (!model.tanks.length && !model.dry.fish.length)
     c.fillText('No instruments in this section', 22, h / 2);
   c.font = `11px "${theme.fontMono}"`;
