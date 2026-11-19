@@ -8,6 +8,7 @@ import type { StudioClock } from './clock';
 import { buildFrame, createAudioFrames, neededRange } from './frame';
 import { runtime } from './runtime';
 import { createScoreCache } from './score-cache';
+import type { createStructureCache } from './program-structure';
 import { mountView } from './view-lifecycle';
 import { ViewShelf, viewDragType } from './ViewShelf';
 import type { Layout, Stage } from './session';
@@ -49,6 +50,7 @@ function Drawing({
     let active = true,
       broken = false;
     let samples: ViewFrame['samples'];
+    let structure: ReturnType<typeof createStructureCache> | undefined;
     let size = { width: container.clientWidth, height: container.clientHeight };
     const failed = (reason: unknown) => {
       broken = true;
@@ -58,6 +60,11 @@ function Drawing({
       async () => {
         if (!entry) throw Error(`Unknown view: ${viewId}`);
         const definition = await entry.load();
+        if (definition.structure) {
+          const { createStructureCache } = await import('./program-structure');
+          if (active)
+            structure = createStructureCache(createBrowserQueries(undefined, { size: 1 }));
+        }
         if (definition.samples)
           samples = (await import('../strudel/sample-cache')).sampleBuffers(
             () => !!runtime.app.engine,
@@ -100,6 +107,7 @@ function Drawing({
           buildFrame({
             state,
             samples,
+            structure: structure?.forFrame(state.doc, cache.score),
             audio:
               mounted.definition.needs === 'audio'
                 ? audioFrame(runtime.app.engine?.tap(), sample)
@@ -125,6 +133,7 @@ function Drawing({
     return () => {
       active = false;
       unsubscribe();
+      structure?.dispose();
       observer.disconnect();
       mounted.dispose();
       owned.remove();

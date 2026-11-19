@@ -27,6 +27,13 @@ test('boundary fixtures reject imports and fixed ports; allow the seam and OS po
       "import type { SampleLookup } from '../strudel/sample-buffers'",
     ),
   ).toEqual([]);
+  for (const path of ['../document/types', '../contract']) {
+    expect(boundaryProblems('src/views/types.ts', `import type { X } from '${path}'`)).toEqual([]);
+    expect(boundaryProblems('src/views/bad.ts', `import type { X } from '${path}'`)).not.toEqual(
+      [],
+    );
+    expect(boundaryProblems('src/views/types.ts', `import { X } from '${path}'`)).not.toEqual([]);
+  }
   for (const code of [
     "import { createSampleLookup } from '../strudel/sample-buffers'",
     "import type { SampleLookup } from '../strudel/sample-cache'",

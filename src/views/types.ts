@@ -1,3 +1,5 @@
+import type { Arg, Core, Pattern } from '../document/types';
+import type { EventResult } from '../contract';
 import type { SampleLookup } from '../strudel/sample-buffers';
 
 export interface ViewNote {
@@ -38,6 +40,49 @@ export interface ViewTheme {
   radius: number;
   glow: boolean;
 }
+/** Snapshots preserve Strudel's whole/part spans, raw values and query errors.
+ * An available answer with result.error is broken, never silence. */
+export type ViewSnapshot =
+  | { status: 'available'; result: EventResult }
+  | { status: 'unavailable'; reason: string };
+export interface ViewDriver {
+  kind: 'constant' | 'values' | 'signal' | 'opaque';
+  /** Detached document structure, including its ordered transformations. */
+  pattern: Pattern;
+  opaque: string | null;
+  /** Driver queried independently over this frame's range, without arrangement
+   * or global score transforms. Signals retain their continuous event spans. */
+  events(): Promise<ViewSnapshot>;
+  /** Authored rate operations, inner to outer. Events are the argument's own
+   * values in absolute cycles, before applying fast/slow to the driver. */
+  rates: { id: string; name: 'fast' | 'slow'; args: Arg[]; events(): Promise<ViewSnapshot> }[];
+}
+export type ViewStructureStep = { id: string; opaque: string | null } & (
+  | { kind: 'phrase'; core: Core }
+  | { kind: 'setting'; layerId: string; name: string; args: Arg[]; driver: ViewDriver }
+  | { kind: 'rewrite'; name: string; args: Arg[] }
+  | { kind: 'opaque'; code: string }
+);
+export interface ViewProgramStructure {
+  instrument: string;
+  from: number;
+  to: number;
+  /** Step 0 is the core phrase (Pattern.id). Settings flatten their document
+   * layer in stored order and use Setting.id; rewrites use Layer.id.
+   * Names, arguments and mini structure are exactly as the document records.
+   * This is the definition's chain; snapshots retain arrangement/use context. */
+  steps: ViewStructureStep[];
+  /** Ask Strudel with this chain truncated after index (inclusive). Opaque
+   * prefixes are unavailable with a reason. Lazy, off playback, deduplicated
+   * by document revision + step + range. 64 results retained, 32 outstanding;
+   * a full queue returns unavailable and may be retried on a later frame.
+   * Handles expire on document replacement or view disposal. */
+  snapshot(index: number): Promise<ViewSnapshot>;
+}
+export interface ViewStructureLookup {
+  get(instrument: string): ViewProgramStructure | undefined;
+}
+
 export interface ViewFrame {
   now: number; // absolute cycles, fractional, already latency-corrected
   playing: boolean;
@@ -89,6 +134,7 @@ export interface ViewFrame {
     endTime?: number;
     lagSeconds?: number;
   };
+  structure?: ViewStructureLookup; // only for structure: true; no queries until asked
   samples?: SampleLookup; // only for samples: true; shared source PCM, never loads
 }
 export interface ViewHandle {
@@ -102,6 +148,7 @@ export interface ViewDefinition {
   tag: string; // one or two words for the shelf, e.g. "whole song"
   needs?: 'score' | 'audio'; // default 'score'
   samples?: true; // independent of needs: can accompany score or audio
+  structure?: true; // independent of needs and samples; lazy program snapshots
   span?: 'window' | 'song'; // 'song' asks the host for the whole song
   mount(el: HTMLElement): ViewHandle | Promise<ViewHandle>;
 }
