@@ -1,6 +1,7 @@
 import type { ViewDefinition, ViewFrame } from './types';
 import {
   areaFactor,
+  weightDrop,
   areaUnit,
   indexMobile,
   mobileArms,
@@ -71,7 +72,7 @@ function draw(
   light.addColorStop(1, theme.ground);
   ctx.fillStyle = light;
   ctx.fillRect(0, 65, width, box.bottom - 65);
-  const tree = supportTree(box, arms.length);
+  const tree = supportTree(box, arms);
   ctx.strokeStyle = theme.muted;
   ctx.lineWidth = 1;
   ctx.lineCap = 'round';
@@ -84,15 +85,24 @@ function draw(
   line(ctx, tree.root.x, 67, tree.root.x, tree.root.y);
   for (const rod of tree.rods) {
     ctx.strokeStyle = theme.muted;
-    ctx.lineWidth = 1;
-    for (const child of rod.children) line(ctx, child.x, rod.y, child.x, child.y);
+    ctx.lineWidth = 1.3;
+    const slope = Math.tan(rod.tilt);
+    for (const child of rod.children)
+      line(ctx, child.x, rod.y + (child.x - rod.x) * slope, child.x, child.y);
     ctx.strokeStyle = theme.text;
-    ctx.lineWidth = 1.6;
-    line(ctx, rod.left - 7, rod.y, rod.right + 7, rod.y);
+    ctx.lineWidth = 2.4;
+    line(
+      ctx,
+      rod.left - 7,
+      rod.y + (rod.left - 7 - rod.x) * slope,
+      rod.right + 7,
+      rod.y + (rod.right + 7 - rod.x) * slope,
+    );
     ctx.fillStyle = theme.ground;
     circle(ctx, rod.x, rod.y, 3);
   }
   const unit = areaUnit(arms, box);
+  const drop = weightDrop(arms, box, unit);
   const counts: { x: number; y: number; text: string; width: number }[] = [];
   arms.forEach((arm, i) => {
     const part = frame.instruments.find((p) => p.id === arm.id);
@@ -102,7 +112,7 @@ function draw(
     const slope = Math.tan(arm.tilt);
     // The rods tilt, not the suspension wires. Each leaf owns a disjoint bay.
     ctx.strokeStyle = theme.text;
-    ctx.lineWidth = dragging === arm.id ? 4 : 3;
+    ctx.lineWidth = dragging === arm.id ? 5 : 3.8;
     line(ctx, x - box.half, y - box.half * slope, x + box.half, y + box.half * slope);
     ctx.strokeStyle = colour;
     ctx.lineWidth = 1.5;
@@ -117,7 +127,7 @@ function draw(
       const r = Math.sqrt((w.mass * unit) / areaFactor(arm.shape));
       // Bound the analytic swing by the bay and adjacent weights.
       const dx = w.swing * swingReach(arm, w, box, r);
-      const cy = attachY + box.hang + box.maxRadius * 2.2;
+      const cy = attachY + drop;
       ctx.globalAlpha = part?.muted ? 0.25 : w.passed ? 0.92 : 0.32;
       ctx.strokeStyle = theme.muted;
       ctx.lineWidth = 1;
