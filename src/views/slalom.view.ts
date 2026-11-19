@@ -3,18 +3,17 @@ import {
   gateRails,
   routeAngle,
   snowSpecks,
-  trackPoint,
   indexSlalom,
   pitchX,
   readPitch,
   routeAt,
   slalomState,
-  sideSpan,
 } from './slalom/model';
 import type { SlalomScore } from './slalom/model';
 import { random } from './shared/particles';
 import { clamp } from './shared/math';
 import { sectionAt } from './shared/ring-model';
+import { gatePosition, snowPaint } from './slalom/drawing';
 
 type Point = [number, number];
 const racerScale = (width: number) => (width < 700 ? 0.76 : 1.05);
@@ -219,7 +218,8 @@ function skier(
 function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
   const t = f.theme,
     s = slalomState(score, f),
-    b = s.box;
+    b = s.box,
+    paint = snowPaint(t);
   const part = (id?: string) => f.instruments.find((i) => i.id === id);
   const ink = part(score.melody)?.colour ?? t.accent;
   c.fillStyle = t.ground;
@@ -228,7 +228,12 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
   c.lineJoin = 'round';
   // Entire snow bowl is the course; asymmetric ridges change at section boundaries.
   const seed = (score.section?.from ?? 0) * 97;
-  c.fillStyle = t.panel;
+  const snow = c.createLinearGradient(b.left, b.top, f.width - b.left, b.bottom);
+  snow.addColorStop(0, paint.shade);
+  snow.addColorStop(0.36, paint.light);
+  snow.addColorStop(0.7, paint.snow);
+  snow.addColorStop(1, paint.shade);
+  c.fillStyle = snow;
   c.beginPath();
   c.moveTo(b.left, b.top);
   for (let i = 0; i <= 12; i++)
@@ -250,7 +255,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
         [x, b.top],
         [x + side * 18, b.bottom],
       ],
-      t.muted,
+      paint.groove,
       1,
     );
     for (let i = 0; i < 14; i++) {
@@ -259,9 +264,13 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
       shape(
         c,
         [
-          [xx, y - 13],
-          [xx - 8, y + 6],
-          [xx + 8, y + 6],
+          [xx, y - 17],
+          [xx - 6, y - 5],
+          [xx - 3, y - 6],
+          [xx - 10, y + 8],
+          [xx + 10, y + 8],
+          [xx + 3, y - 6],
+          [xx + 6, y - 5],
         ],
         t.line,
         t.line,
@@ -283,9 +292,21 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
   c.clip();
   // Wind-scoured snow and local moguls: bass pitch changes their height,
   // while their identity fixes their place on the slope.
-  c.globalAlpha = 0.18;
-  for (const speck of snowSpecks(b.from, b.to))
-    disc(c, b.x(speck.x), b.y(speck.time), speck.radius, t.muted);
+  c.globalAlpha = 0.22;
+  for (const speck of snowSpecks(b.from, b.to)) {
+    const x = b.x(speck.x),
+      y = b.y(speck.time);
+    line(
+      c,
+      [
+        [x - speck.radius * 2, y],
+        [x + speck.radius, y - 0.6],
+      ],
+      paint.groove,
+      0.6,
+    );
+    disc(c, x + 1, y + 1, speck.radius * 0.5, paint.light);
+  }
   c.globalAlpha = 1;
   for (const n of s.terrain) {
     const p = readPitch(n) ?? 36;
@@ -293,112 +314,188 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
     const x = b.x(0.15 + ((p % 24) / 24) * 0.7);
     const depth = 6 + clamp((p - 24) / 48) * 17;
     const wide = Math.min(90, b.width * 0.16);
-    c.globalAlpha = 0.42;
-    c.fillStyle = t.line;
+    c.save();
+    c.translate(x, y);
+    c.rotate(-0.12);
+    c.scale(wide, depth * 1.5);
+    const mound = c.createRadialGradient(-0.25, -0.55, 0.05, 0, 0, 1);
+    mound.addColorStop(0, paint.light);
+    mound.addColorStop(0.4, paint.snow);
+    mound.addColorStop(0.78, paint.shade);
+    mound.addColorStop(1, paint.snow);
+    c.fillStyle = mound;
     c.beginPath();
-    c.ellipse(x, y, wide, depth, -0.12, 0, Math.PI * 2);
+    c.arc(0, 0, 1, 0, Math.PI * 2);
     c.fill();
-    c.strokeStyle = part(n.instrument)?.colour ?? t.muted;
-    c.lineWidth = 1.5;
-    c.beginPath();
-    c.moveTo(x - wide, y);
-    c.bezierCurveTo(x - wide * 0.4, y - depth * 1.6, x + wide * 0.5, y - depth, x + wide, y);
-    c.stroke();
-    c.globalAlpha = 1;
+    c.restore();
   }
-  // Lights/flags have fixed identity-derived positions; crowded marks are counted below.
+  // Ridge floodlights and short pennants: no duration-length poles on the course.
   for (const n of s.sides) {
     const index = part(n.instrument)?.index ?? 0,
       p = readPitch(n),
-      side = index % 2 ? 1 : 0;
+      right = index % 2 === 1;
     const xx =
-      b.x(side ? 0.97 : 0.03) +
-      (p === undefined ? 0 : (side ? -1 : 1) * ((p % 24) / 24) * Math.min(80, b.width * 0.15));
-    const span = sideSpan(n, b),
-      yy = span.start;
-    const colour = part(n.instrument)?.colour ?? t.text;
-    line(
-      c,
-      [
-        [xx, yy],
-        [xx, span.end],
-      ],
-      colour,
-      p === undefined ? 4 : 2,
-    );
+      b.x(right ? 0.99 : 0.01) +
+      (p === undefined ? 0 : (right ? -1 : 1) * ((p % 24) / 24) * Math.min(50, b.width * 0.12));
+    const yy = b.y(Math.max(n.start, b.from)) + (n.start < b.from ? 18 : 0);
+    const colour = part(n.instrument)?.colour ?? t.accent;
+    const active = n.start <= f.now && n.end > f.now;
     if (p !== undefined) {
-      disc(c, xx, yy, 6, t.line);
-      disc(c, xx, yy, 3.5, colour);
+      const reach = right ? -1 : 1;
+      const glow = c.createRadialGradient(xx + reach * 22, yy + 7, 0, xx + reach * 22, yy + 7, 42);
+      glow.addColorStop(0, `${colour}50`);
+      glow.addColorStop(1, `${colour}00`);
+      c.fillStyle = glow;
+      c.globalAlpha = active ? 0.85 : 0.4;
+      c.beginPath();
+      c.ellipse(xx + reach * 24, yy + 8, 44, 22, 0, 0, Math.PI * 2);
+      c.fill();
+      c.globalAlpha = 1;
+      line(
+        c,
+        [
+          [xx - 4, yy + 7],
+          [xx + 4, yy + 7],
+        ],
+        paint.groove,
+        2,
+      );
+      line(
+        c,
+        [
+          [xx, yy + 7],
+          [xx, yy - 2],
+        ],
+        paint.groove,
+        2,
+      );
+      c.save();
+      c.translate(xx, yy - 3);
+      c.rotate(right ? -0.25 : 0.25);
+      c.fillStyle = paint.groove;
+      c.fillRect(-7, -4, 14, 8);
+      c.fillStyle = active ? paint.light : colour;
+      c.fillRect(-5, -2, 10, 4);
+      c.restore();
     } else {
       line(
         c,
         [
-          [xx, yy],
-          [xx, yy - 18],
+          [xx, yy + 4],
+          [xx, yy - 12],
         ],
-        t.text,
+        paint.groove,
         1.5,
       );
       shape(
         c,
         [
-          [xx, yy - 18],
-          [xx + (side ? -12 : 12), yy - 13],
-          [xx, yy - 8],
+          [xx, yy - 12],
+          [xx + (right ? -10 : 10), yy - 8],
+          [xx, yy - 4],
         ],
         colour,
-        t.panel,
+        paint.groove,
       );
     }
   }
-  for (const gate of score.gates) {
+  const sy = b.y(f.now),
+    sx = b.x(s.x);
+  const angleAt = (time: number) => routeAngle(score.gates, b, time);
+  // Twin tracks are sampled from the very same exact-onset route as the skier.
+  const trackFrom = Math.max(b.from, score.gates[0]?.start ?? f.now);
+  const skiOffset = 12 * racerScale(f.width);
+  for (const offset of trackFrom <= f.now ? [-skiOffset, skiOffset] : []) {
+    const points: Point[] = [];
+    for (let i = 0; i <= 180; i++) {
+      const time = trackFrom + ((f.now - trackFrom) * i) / 180;
+      points.push([b.x(routeAt(score.gates, time)) + offset, b.y(time)]);
+    }
+    line(
+      c,
+      points.map(([x, y]) => [x + 1.5, y + 1.5]),
+      paint.light,
+      4,
+    );
+    line(c, points, paint.shade, 4);
+    line(c, points, paint.groove, 1.5);
+  }
+  // A faint upcoming line guides the eye into the next opening.
+  c.setLineDash([3, 8]);
+  const preview: Point[] = [];
+  for (let i = 0; i <= 90; i++) {
+    const time = f.now + ((b.to - f.now) * i) / 90;
+    preview.push([b.x(routeAt(score.gates, time)), b.y(time)]);
+  }
+  line(c, preview, paint.groove, 1);
+  c.setLineDash([]);
+  for (const [gateIndex, gate] of score.gates.entries()) {
     if (gate.start >= b.to || gate.end <= b.from) continue;
     const start = Math.max(b.from, gate.start),
       end = Math.min(b.to, gate.end);
-    const y = b.y(start),
-      ey = b.y(end);
-    const colour = part(gate.notes[0].instrument)?.colour ?? ink;
-    c.globalAlpha = gate.start <= f.now ? 0.45 : 1;
-    for (const side of [0, 1]) {
-      const rail: Point[] = [];
-      const steps = Math.max(1, Math.ceil((ey - y) / 10));
-      for (let i = 0; i <= steps; i++) {
-        const time = start + ((end - start) * i) / steps;
-        rail.push([gateRails(score.gates, gate, b, time)[side], b.y(time)]);
-      }
-      line(c, rail, colour, 1);
-    }
-    // Pole spacing is anchored to this gate's onset, even when its head scrolls out.
-    const interval = (30 * (b.to - b.from)) / (b.bottom - b.top);
+    const colour = gateIndex % 2 ? paint.blue : paint.red;
+    // A corridor is a run of panel gates anchored to its own onset, with its scored end cap.
+    const interval = (40 * (b.to - b.from)) / (b.bottom - b.top);
     const times = [];
     for (let i = Math.ceil((start - gate.start) / interval); gate.start + i * interval < end; i++)
       times.push(gate.start + i * interval);
-    if (gate.end <= b.to) times.push(gate.end);
+    if (gate.end <= b.to && b.y(gate.end) - b.y(gate.start) >= 40) times.push(gate.end);
     for (const time of times) {
-      const gy = b.y(time);
-      for (const [side, xx] of gateRails(score.gates, gate, b, time).entries()) {
+      const gy = b.y(time),
+        rails = gateRails(score.gates, gate, b, time),
+        passed = time <= f.now,
+        knock = passed ? 5 : 0;
+      c.globalAlpha = passed ? 0.45 : 1;
+      // Soft footprints, flexible poles and a cloth panel between them.
+      for (const xx of rails) {
+        c.fillStyle = paint.shade;
+        c.beginPath();
+        c.ellipse(xx + 4, gy + 3, 8, 2.5, -0.2, 0, Math.PI * 2);
+        c.fill();
         line(
           c,
           [
-            [xx, gy + 6],
-            [xx, gy - 17],
+            [xx, gy + 3],
+            [xx + knock, gy - 21],
           ],
-          t.text,
-          2,
+          paint.groove,
+          3.8,
         );
-        shape(
+        line(
           c,
           [
-            [xx, gy - 17],
-            [xx + (side ? -13 : 13), gy - 13],
-            [xx, gy - 7],
+            [xx, gy + 3],
+            [xx + knock, gy - 21],
           ],
           colour,
-          t.panel,
+          2.3,
         );
+        disc(c, xx + knock, gy - 21, 1.7, paint.light);
       }
+      shape(
+        c,
+        [
+          [rails[0] + knock, gy - 18],
+          [rails[1] + knock, gy - 18],
+          [rails[1] + knock, gy - 7],
+          [(rails[0] + rails[1]) / 2 + knock, gy - 5],
+          [rails[0] + knock, gy - 7],
+        ],
+        colour,
+        colour,
+      );
+      line(
+        c,
+        [
+          [rails[0] + knock + 4, gy - 15],
+          [rails[1] + knock - 4, gy - 15],
+        ],
+        paint.light,
+        1,
+      );
+      c.globalAlpha = 1;
     }
-    // Each note keeps its own entrance and scored end mark, even in a label bundle.
+    // Tiny snow marks keep each note entrance and scored end visible without rail ladders.
     for (const n of gate.notes) {
       const midi = readPitch(n);
       if (midi === undefined) continue;
@@ -412,36 +509,12 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
             [xx - 3, b.y(time)],
             [xx + 3, b.y(time)],
           ],
-          t.text,
-          1.5,
+          paint.groove,
+          1,
         );
       }
     }
-    c.globalAlpha = 1;
   }
-  const sy = b.y(f.now),
-    sx = b.x(s.x);
-  const angleAt = (time: number) => routeAngle(score.gates, b, time);
-  // Twin tracks are sampled from the very same exact-onset route as the skier.
-  const trackFrom = Math.max(b.from, score.gates[0]?.start ?? f.now);
-  const skiOffset = 12 * racerScale(f.width);
-  for (const offset of trackFrom <= f.now ? [-skiOffset, skiOffset] : []) {
-    const points: Point[] = [];
-    for (let i = 0; i <= 180; i++) {
-      const time = trackFrom + ((f.now - trackFrom) * i) / 180;
-      points.push(trackPoint(score.gates, b, time, offset));
-    }
-    line(c, points, t.muted, 2.4);
-  }
-  // A faint upcoming line guides the eye into the next opening.
-  c.setLineDash([3, 8]);
-  const preview: Point[] = [];
-  for (let i = 0; i <= 90; i++) {
-    const time = f.now + ((b.to - f.now) * i) / 90;
-    preview.push([b.x(routeAt(score.gates, time)), b.y(time)]);
-  }
-  line(c, preview, t.muted, 1);
-  c.setLineDash([]);
   const angle = angleAt(f.now);
   for (let i = 0; i < 35; i++) {
     const age = ((((f.now * 3 + random(i, 2)) % 1) + 1) % 1) * 0.13,
@@ -451,7 +524,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
     const xx = b.x(routeAt(score.gates, time)) + drift - Math.sin(a) * age * 90;
     const yy = b.y(time) - age * 95;
     c.globalAlpha = (1 - age / 0.13) * Math.min(1, Math.abs(a) + 0.15);
-    disc(c, xx, yy, 0.7 + random(i) * 1.8, t.text);
+    disc(c, xx, yy, 0.7 + random(i) * 1.8, paint.light);
   }
   c.globalAlpha = 1;
   skier(c, f, sx, sy, -angle, (angleAt(f.now + 0.008) - angleAt(f.now - 0.008)) * 4, ink);
@@ -504,10 +577,10 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
     let x = b.x((bundle.low + bundle.high) / 2);
     const y = (next && s.next ? b.y(s.next.start) : bundle.y) - 24;
     const text = next
-      ? `${s.next?.label ?? ''} · next${bundle.count > 1 ? ` ×${String(bundle.count)}` : ''}`
+      ? `${s.next?.label ?? ''} @${gatePosition(s.next?.start ?? g.start)} · next${bundle.count > 1 ? ` ×${String(bundle.count)}` : ''}`
       : bundle.count > 1
         ? `×${String(bundle.count)} gates`
-        : `${g.label} · ${g.start <= f.now ? 'passed' : 'ahead'}`;
+        : `${g.label} @${gatePosition(g.start)} · ${g.start <= f.now ? 'passed' : 'ahead'}`;
     c.font = `11px "${t.fontMono}"`;
     if (next && s.next && Math.abs(y - sy) < 83) {
       const half = Math.min(180, c.measureText(text).width) / 2 + 10;
@@ -553,7 +626,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
     f.width - 40,
   );
   label(
-    `${String(hidden)} tags folded · ${part(score.terrain)?.name ?? 'No pitched part'} → terrain / ridge lights`,
+    `${String(hidden)} tags folded · ${part(score.terrain)?.name ?? 'No pitched part'} → moguls + floods; others → pennants`,
     20,
     footer + 49,
     f.width - 40,

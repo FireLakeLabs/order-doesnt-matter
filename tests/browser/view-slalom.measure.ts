@@ -70,11 +70,26 @@ test('Slalom: real Studio mapping, five themes, reversibility and frame cost', a
     const handle = await window.viewProbe.definition.mount(el);
     const canvas = () => el.querySelector('canvas')!;
     const deterministic = [];
+    const snowSurfaces = [];
     for (const f of frames)
       for (const lookAhead of [1, 4, 8]) {
         const source = { ...f, lookAhead, width: 1300, height: 760, dpr: 1 };
         handle.frame(source);
         const first = canvas().toDataURL();
+        if (lookAhead === 4) {
+          const ctx = canvas().getContext('2d')!;
+          const pixels = ctx.getImageData(0, 0, source.width, source.height).data;
+          let light = 0,
+            samples = 0;
+          for (let y = 110; y < source.height - 108; y += 5)
+            for (let x = Math.floor(source.width * 0.25); x < source.width * 0.75; x += 5) {
+              const i = (y * source.width + x) * 4;
+              // Read the actual rendered snow area, including moguls, gates and grooves.
+              if ((pixels[i] + pixels[i + 1] + pixels[i + 2]) / (3 * 255) > 0.7) light++;
+              samples++;
+            }
+          snowSurfaces.push({ theme: f.theme.name, lightFraction: light / samples });
+        }
         handle.frame({ ...source, now: 22.8, width: 559, height: 471 });
         handle.frame({ ...source, now: 16.9 });
         handle.frame(source);
@@ -145,6 +160,7 @@ test('Slalom: real Studio mapping, five themes, reversibility and frame cost', a
       cached,
       rebuilt,
       deterministic,
+      snowSurfaces,
       contrast,
       labels,
       notes: source.notes.length,
@@ -155,6 +171,11 @@ test('Slalom: real Studio mapping, five themes, reversibility and frame cost', a
   }, frames);
   expect(measured.deterministic.every((r) => r.backwardsResize && r.fresh)).toBe(true);
   expect(measured.contrast.every((r) => r.ratio >= 4.5)).toBe(true);
+  expect(measured.snowSurfaces.every((r) => r.lightFraction > 0.75)).toBe(true);
+  const tags = measured.labels.filter((label) => / · (ahead|passed|next)/.test(label.text));
+  expect(tags.length).toBeGreaterThan(0);
+  expect(tags.every((label) => /@\d+:/.test(label.text))).toBe(true);
+  expect(mapping.visible).toEqual({ gates: 9, terrain: 9, sides: 10, bundles: 8 });
   await writeFile(`${shots}/measurements.json`, JSON.stringify({ ...measured, mapping }, null, 2));
   console.log('Slalom mapping and CPU submission:', JSON.stringify({ ...measured, mapping }));
   // The next mountain's gates are visible before its boundary, with a continuous route.
