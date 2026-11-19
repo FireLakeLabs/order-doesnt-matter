@@ -151,6 +151,27 @@ export function padState(pad: Pad, frame: ViewFrame) {
   return { hits, latest, light, cursors, active, muted, resting: !eligible.size };
 }
 
+const levels = new WeakMap<SampleBuffer, { peak: number; gain: number; label: string }>();
+/** Source level is independent of screen size and time. Read the lookup's shared
+ * summaries once per immutable buffer, across every channel and both polarities. */
+export function sampleLevel(buffer: SampleBuffer) {
+  const cached = levels.get(buffer);
+  if (cached) return cached;
+  let peak = 0;
+  for (const channel of buffer.peaks.channels)
+    for (let i = 0; i < channel.min.length; i++)
+      peak = Math.max(peak, Math.abs(channel.min[i]), Math.abs(channel.max[i]));
+  const quiet = peak < 0.001; // −60 dBFS: never magnify near-silence into noise.
+  const db = peak ? (20 * Math.log10(peak)).toFixed(1).replace('-', '−') : '−∞';
+  const level = {
+    peak,
+    gain: quiet ? 1 : 1 / peak,
+    label: `${peak === 0 ? 'silent · ' : quiet ? 'near silent · ' : ''}peak ${db} dBFS`,
+  };
+  levels.set(buffer, level);
+  return level;
+}
+
 /** Collapse only shared peak summaries, never source channels/PCM. Memoized by
  * immutable buffer identity and screen resolution; frames only draw the bins. */
 const summaries = new WeakMap<
@@ -163,6 +184,7 @@ export function waveformPeaks(buffer: SampleBuffer, columns: number) {
   if (cached?.columns === columns) return cached;
   const min = new Float32Array(columns),
     max = new Float32Array(columns);
+  const { gain } = sampleLevel(buffer);
   for (let x = 0; x < columns; x++) {
     let lo = Infinity,
       hi = -Infinity;
@@ -173,8 +195,8 @@ export function waveformPeaks(buffer: SampleBuffer, columns: number) {
         lo = Math.min(lo, channel.min[i]);
         hi = Math.max(hi, channel.max[i]);
       }
-    min[x] = Number.isFinite(lo) ? lo : 0;
-    max[x] = Number.isFinite(hi) ? hi : 0;
+    min[x] = Number.isFinite(lo) ? lo * gain : 0;
+    max[x] = Number.isFinite(hi) ? hi * gain : 0;
   }
   const summary = { columns, min, max };
   summaries.set(buffer, summary);

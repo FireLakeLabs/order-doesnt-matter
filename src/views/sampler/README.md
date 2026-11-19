@@ -6,7 +6,10 @@ pad; a pitched address selecting different files has separate screens. Synth
 pitches share one symbolic shape card, explicitly labelled “synth, no sample”.
 Events without `s` use pinned Superdough's default triangle source.
 Waveforms collapse the lookup's shared min/max peaks across all channels. Drawing
-never reads `SampleBuffer.channels`. Screens keep natural source amplitude.
+never reads `SampleBuffer.channels`. Each screen scales by its source's own peak,
+computed once per buffer from those summaries. Its label retains the true peak in
+dBFS. Silent and near-silent sources (below −60 dBFS) are labelled and keep their
+natural amplitude rather than being amplified.
 
 For ordinary sample playback:
 
