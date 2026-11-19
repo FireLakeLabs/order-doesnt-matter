@@ -59,8 +59,17 @@ export function notesOf(row: TraceRow): TraceNote[] {
         a.start - b.start || a.end - b.end || canonical(a.value).localeCompare(canonical(b.value)),
     );
 }
-const voiceKey = (n: TraceNote) =>
-  canonical([pitch(n.value) ?? n.value.note ?? n.value.n ?? n.value.freq, n.hasOnset]);
+const voiceKey = (n: TraceNote) => {
+  const p = pitch(n.value);
+  // n alone can be a sample-bank index. Explicit note/frequency establishes a
+  // pitched voice, whose sound can legitimately change as a setting.
+  const pitched = p !== undefined && (n.value.note !== undefined || n.value.freq !== undefined);
+  return canonical([
+    p ?? n.value.note ?? n.value.n ?? n.value.freq,
+    pitched ? undefined : n.value.s,
+    n.hasOnset,
+  ]);
+};
 function indexNotes(notes: Iterable<TraceNote>, key: (n: TraceNote) => string) {
   const result = new Map<string, TraceNote[]>();
   for (const n of notes) {
@@ -107,7 +116,7 @@ function rangeText(range: SettingRange | undefined) {
         ];
   return [...numeric, ...[...range.values].map(canonical).sort()].join(', ');
 }
-/** Match document instrument/pattern ids first; a unique equal document path plus use ancestry is the fallback part identity. The contract has no per-note id, so event order never supplies identity. Within that part preserve exact score matches, then unique equal-onset/equal-pitch spans, then only mutual, unique nearest onsets within 1/16 cycle with equal pitch and onset/fragment kind. Tied or competing candidates remain removed plus added, never a guessed move. Settings are one counted margin mark per changed part/control on matched notes, showing sampled ranges (not authored signal bounds); duration/fragment changes are separate span changes, never mislabeled as settings. Counts and equality cover the supplied query range; the contract does not expose past arrangement lengths. */
+/** Match document instrument/pattern ids first; a unique equal document path plus use ancestry is the fallback part identity. The contract has no per-note id, so event order never supplies identity. Within that part preserve exact score matches, then unique equal-onset/equal-pitch spans, then only mutual, unique nearest onsets within 1/16 cycle with equal pitch and onset/fragment kind, with sound also equal when no explicit note/frequency establishes a pitched voice. Tied or competing candidates remain removed plus added, never a guessed move. Settings are one counted margin mark per changed part/control on matched notes, showing sampled ranges (not authored signal bounds); duration/fragment changes are separate span changes, never mislabeled as settings. Counts and equality cover the supplied query range; the contract does not expose past arrangement lengths. */
 export function compareScores(before: ViewHistoryScore, after: ViewHistoryScore): TraceDiff {
   const result: TraceDiff = {
     old: [],
@@ -145,14 +154,14 @@ export function compareScores(before: ViewHistoryScore, after: ViewHistoryScore)
         : identity.length === 0 && paths.length === 1
           ? paths[0]
           : undefined;
-    const old = notesOf(row);
+    const old = notesOf(row).map((n) => ({ ...n, instrument: next?.id ?? row.id }));
     result.old.push(...old);
     if (!next) {
       result.removed.push(...old);
       continue;
     }
     remaining.delete(next);
-    const fresh = notesOf(next).map((n) => ({ ...n, instrument: row.id }));
+    const fresh = notesOf(next);
     result.fresh.push(...fresh);
     const a = new Set(old),
       b = new Set(fresh),
@@ -192,7 +201,7 @@ export function compareScores(before: ViewHistoryScore, after: ViewHistoryScore)
     for (const name of [...keys].sort())
       if (pairs.some((p) => canonical(p.old.value[name]) !== canonical(p.fresh.value[name])))
         result.settings.push({
-          instrument: row.id,
+          instrument: next.id,
           name,
           before: rangeText(oldRanges.get(name)),
           after: rangeText(newRanges.get(name)),
@@ -251,4 +260,35 @@ export function countBins<T>(items: readonly T[], x: (item: T) => number, cell: 
     bins.set(key, bin);
   }
   return [...bins].sort(([a], [b]) => a - b).map(([slot, items]) => ({ slot, items }));
+}
+
+export interface TraceSheet {
+  diff: TraceDiff;
+  from: number;
+  to: number;
+  bars: Map<number, { counts: ReturnType<typeof barCounts>; settings: SettingMark[] }>;
+}
+/** Counts and margin membership are static for a queried pair/range, not frame work. */
+export function indexSheet(diff: TraceDiff, from: number, to: number): TraceSheet {
+  const bars: TraceSheet['bars'] = new Map();
+  const notes = [...diff.old, ...diff.fresh];
+  for (let bar = Math.floor(from); bar < Math.ceil(to); bar++) {
+    const active = new Set(
+      notes.filter((n) => n.start < bar + 1 && n.end > bar).map((n) => n.instrument),
+    );
+    bars.set(bar, {
+      counts: barCounts(diff, bar),
+      settings: diff.settings.filter((s) => active.has(s.instrument)),
+    });
+  }
+  return { diff, from, to, bars };
+}
+/** Caption plates fit between both neighbouring ink rings, including at 30 px rows. */
+export function markGeometry(rowHeight: number) {
+  return {
+    ringRadius: Math.min(9, (rowHeight - 17) / 2),
+    captionTop: -22,
+    captionHeight: 11,
+    captionBaseline: -12,
+  };
 }

@@ -13,6 +13,8 @@ import {
   countBins,
   defaultPair,
   pencilOpacity,
+  indexSheet,
+  markGeometry,
 } from '../../src/views/tracing-paper/model';
 
 function score(
@@ -122,6 +124,54 @@ test('defaults around present, not redo future; pencil age fades; dense bins acc
   expect(diff.added).toHaveLength(500);
   expect(barCounts(diff, 0).added).toBe(500);
 });
+test('does not mistake a removed snare and added clap for a moved drum note', () => {
+  for (const onset of [0.5, 0.5625]) {
+    const diff = compareScores(
+      score([0, 0.5], [{ s: 'bd' }, { s: 'sd' }]),
+      score([0, onset], [{ s: 'bd' }, { s: 'cp' }]),
+    );
+    expect(diff.added).toHaveLength(1);
+    expect(diff.removed).toHaveLength(1);
+    expect(diff.moved).toHaveLength(0);
+    expect(diff.settings).toHaveLength(0);
+  }
+});
+test('retains an explicitly pitched note when its timbre setting changes', () => {
+  const diff = compareScores(
+    score([0.5], [{ note: 60, s: 'sawtooth' }]),
+    score([0.5], [{ note: 60, s: 'sine' }]),
+  );
+  expect(diff.added).toHaveLength(0);
+  expect(diff.removed).toHaveLength(0);
+  expect(diff.settings.map((s) => s.name)).toEqual(['s']);
+  const samples = compareScores(
+    score([0.5], [{ n: 0, s: 'sd' }]),
+    score([0.5625], [{ n: 0, s: 'cp' }]),
+  );
+  expect(samples.moved).toHaveLength(0);
+  expect(samples.added).toHaveLength(1);
+  expect(samples.removed).toHaveLength(1);
+});
+test('uses the ink part identity for matched pencil/ink notes and cached bar summaries', () => {
+  const before = score([0], [{ s: 'hh', gain: 0.75 }], 'old'),
+    after = score([0], [{ s: 'hh', gain: 0.66 }], 'new');
+  const diff = compareScores(before, after);
+  expect(diff.old[0].instrument).toBe('new');
+  expect(diff.fresh[0].instrument).toBe('new');
+  expect(diff.settings[0].instrument).toBe('new');
+  const sheet = indexSheet(diff, 0, 16);
+  expect(sheet.bars.get(0)?.counts).toEqual(barCounts(diff, 0));
+  expect(sheet.bars.get(0)?.settings).toEqual(diff.settings);
+  expect(sheet.bars.get(1)?.settings).toEqual([]);
+});
+test('caption plates clear ink rings in both adjacent rows at all supported row heights', () => {
+  for (const height of [30, 31.3, 40, 80]) {
+    const box = markGeometry(height);
+    expect(-height + box.ringRadius + 0.75).toBeLessThan(box.captionTop);
+    expect(box.captionTop + box.captionHeight).toBeLessThan(-box.ringRadius - 0.75);
+    expect(box.captionBaseline).toBeGreaterThan(box.captionTop);
+  }
+});
 test('indexes all 8,000 notes when one control changes on 500 notes per cycle', () => {
   const onsets = Array.from({ length: 8000 }, (_, i) => i / 500);
   const before = score(
@@ -215,4 +265,14 @@ test('a different real piece compares identically even when instrument order cha
     }).identical,
   ).toBe(true);
   cache.dispose();
+});
+
+test('an unqueried future range cannot be inferred by shifting an old Strudel score', async () => {
+  const a = await queryEventsNode('s("hh*3").gain(perlin)', 0, 1);
+  const b = await queryEventsNode('s("hh*3").gain(perlin)', 16, 17);
+  expect(a.error).toBeNull();
+  expect(b.error).toBeNull();
+  expect(a.events.map((e) => (e.value as Record<string, unknown>).gain)).not.toEqual(
+    b.events.map((e) => (e.value as Record<string, unknown>).gain),
+  );
 });

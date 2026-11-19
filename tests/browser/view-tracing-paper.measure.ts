@@ -147,6 +147,15 @@ test('Tracing paper: real session edits, peel, themes, deterministic pixels and 
         const el = document.createElement('div');
         document.body.append(el);
         const handle = await window.viewProbe.definition.mount(el);
+        const freshHistory = {
+          versions: realVersions.filter((v) => v.position === 'present'),
+          score: () => {
+            throw Error('Fresh sessions must not query history');
+          },
+        };
+        handle.frame({ ...source, history: freshHistory });
+        handle.frame({ ...source, now: 38.4, from: 28, to: 56, history: freshHistory });
+        const freshWrapState = el.querySelector('canvas')!.dataset.state;
         handle.frame({ ...source, history: pending });
         const initialState = el.querySelector('canvas')!.dataset.state;
         const selects = el.querySelectorAll('select');
@@ -177,6 +186,21 @@ test('Tracing paper: real session edits, peel, themes, deterministic pixels and 
           if (i >= 30) times.push(performance.now() - start);
         }
         times.sort((a, b) => a - b);
+        // Unknown future ranges retain only the labelled, unshifted prior sheet.
+        const wrapTexts: string[] = [];
+        const fill = CanvasRenderingContext2D.prototype.fillText;
+        CanvasRenderingContext2D.prototype.fillText = function (text, x, y, max) {
+          wrapTexts.push(text);
+          if (max === undefined) fill.call(this, text, x, y);
+          else fill.call(this, text, x, y, max);
+        };
+        handle.frame({ ...stable, now: 38.4, from: 28, to: 56 });
+        CanvasRenderingContext2D.prototype.fillText = fill;
+        const wrapState = el.querySelector('canvas')!.dataset.state;
+        const previewFrom = el.querySelector('canvas')!.dataset.sheetFrom;
+        selects[0].value = realVersions[1].id;
+        selects[0].dispatchEvent(new Event('change'));
+        const peelState = el.querySelector('canvas')!.dataset.state;
         // Measure label contrast on the actual composited top sheet, plus the theme ground.
         const rgb = (hex: string) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
         const lum = (v: number[]) =>
@@ -191,10 +215,21 @@ test('Tracing paper: real session edits, peel, themes, deterministic pixels and 
         const contrast = (b: number) =>
           (Math.max(foreground, b) + 0.05) / (Math.min(foreground, b) + 0.05);
         handle.dispose();
+        for (const deliver of deliveries.slice(4))
+          deliver({ status: 'available', score: scores[0] });
+        await Promise.resolve();
+        await Promise.resolve();
+        const released = el.childElementCount === 0;
         el.remove();
         return {
           theme,
           initialState,
+          freshWrapState,
+          wrapState,
+          previewFrom,
+          wrapTexts,
+          peelState,
+          released,
           asked,
           staleIgnored,
           deterministic,
@@ -206,13 +241,35 @@ test('Tracing paper: real session edits, peel, themes, deterministic pixels and 
       },
       { scores, theme },
     );
+    expect(measured.freshWrapState).toBe('empty');
     expect(measured.initialState).toBe('pending');
-    expect(measured.asked).toHaveLength(4);
+    expect(measured.asked).toHaveLength(8);
+    expect(measured.wrapState).toBe('pending-preview');
+    expect(measured.previewFrom).toBe('0');
+    expect(
+      measured.wrapTexts.some((t) => t.startsWith('Loading bars 29–56 · previous bars 1–28')),
+    ).toBe(true);
+    expect(measured.wrapTexts.some((t) => t.startsWith('BAR 11'))).toBe(true);
+    expect(measured.peelState).toBe('pending');
+    expect(measured.released).toBe(true);
     expect(measured.staleIgnored).toBe(true);
     expect(measured.deterministic).toBe(true);
     expect(measured.contrast).toBeGreaterThanOrEqual(4.5);
     themeMeasures.push(measured);
   }
+  await page.evaluate(async () => {
+    await window.odmStudio.seek(38.4);
+  });
+  await expect(canvas).toHaveAttribute('data-state', 'pending-preview');
+  await expect(canvas).toHaveAttribute('data-sheet-from', '0');
+  await page.screenshot({ path: `${shots}/wrap-pending-previous-range.png` });
+  await expect(canvas).toHaveAttribute('data-state', 'ready');
+  await expect(canvas).toHaveAttribute('data-sheet-from', '28');
+  await page.evaluate(async () => {
+    await window.odmStudio.seek(10.4);
+  });
+  await expect(canvas).toHaveAttribute('data-state', 'ready');
+  await expect(canvas).toHaveAttribute('data-sheet-from', '0');
   await pencil.selectOption(versions[2].id);
   await expect(canvas).toHaveAttribute('data-state', 'ready');
   await page.screenshot({ path: `${shots}/peel-two-versions-back.png` });

@@ -1,12 +1,13 @@
 import type { ViewDefinition, ViewFrame, ViewHistorySnapshot } from './types';
 import {
-  barCounts,
+  indexSheet,
+  markGeometry,
   compareScores,
   countBins,
   defaultPair,
   pencilOpacity,
 } from './tracing-paper/model';
-import type { TraceDiff, TraceNote } from './tracing-paper/model';
+import type { TraceNote, TraceSheet } from './tracing-paper/model';
 
 function fit(ctx: CanvasRenderingContext2D, text: string, width: number) {
   if (ctx.measureText(text).width <= width) return text;
@@ -22,12 +23,13 @@ function line(ctx: CanvasRenderingContext2D, x: number, y: number, x2: number, y
 function draw(
   ctx: CanvasRenderingContext2D,
   f: ViewFrame,
-  diff: TraceDiff | undefined,
+  sheet: TraceSheet | undefined,
   status: string,
   age: number,
   label: string,
 ) {
   const { width: w, height: h, theme: t } = f;
+  const diff = sheet?.diff;
   ctx.reset();
   ctx.scale(f.dpr, f.dpr);
   ctx.fillStyle = t.ground;
@@ -138,7 +140,9 @@ function draw(
   ctx.strokeStyle = t.accent;
   ctx.lineWidth = 1.5;
   line(ctx, x(f.now), contentTop - 4, x(f.now), bottom - 9);
-  const counts = barCounts(diff, bar);
+  const summary = sheet.bars.get(bar);
+  const counts = summary?.counts ?? { added: 0, removed: 0, moved: 0, settings: 0 };
+  const marksBox = markGeometry(rowHeight);
   for (const [index, id] of visible.entries()) {
     const y = contentTop + (index + 0.5) * rowHeight;
     ctx.strokeStyle = t.line;
@@ -211,7 +215,7 @@ function draw(
       if (bin.items.length === 1) {
         if (first.kind === 'added') {
           ctx.beginPath();
-          ctx.ellipse(a, y, 8, 9, -0.2, 0, Math.PI * 2);
+          ctx.ellipse(a, y, 8, marksBox.ringRadius, -0.2, 0, Math.PI * 2);
           ctx.stroke();
         } else if (first.kind === 'removed') {
           ctx.save();
@@ -260,8 +264,13 @@ function draw(
               ? Math.max(binLeft, Math.min(a - 7, binLeft + cell - tw - 7))
               : binLeft;
         ctx.fillStyle = t.panel;
-        ctx.fillRect(tx - 2, y - 28, Math.min(cell - 3, tw + 4), 15);
-        text(caption, tx, y - 16, cell - 7);
+        ctx.fillRect(
+          tx - 2,
+          y + marksBox.captionTop,
+          Math.min(cell - 3, tw + 4),
+          marksBox.captionHeight,
+        );
+        text(caption, tx, y + marksBox.captionBaseline, cell - 7);
       }
     }
     // Text occupies its own margin and is painted after every note/mark.
@@ -280,9 +289,7 @@ function draw(
     24,
     bottom + 30,
   );
-  const margin = diff.settings.filter((s) =>
-    [...diff.old, ...diff.fresh].some((n) => n.instrument === s.instrument && active(n)),
-  );
+  const margin = summary?.settings ?? [];
   ctx.font = `italic 13px "${t.fontDisplay}"`;
   if (diff.identical) text('Same score in the queried song range.', 24, bottom + 51);
   else if (diff.opaque)
@@ -306,7 +313,7 @@ function draw(
     bars = Math.max(1, Math.ceil(f.to) - from),
     cell = (w - 48) / bars;
   for (let i = 0; i < bars; i++) {
-    const c = barCounts(diff, from + i),
+    const c = sheet.bars.get(from + i)?.counts ?? { added: 0, removed: 0, moved: 0, settings: 0 },
       sum = c.added + c.removed + c.moved + c.settings;
     ctx.fillStyle = from + i === bar ? t.accent : t.line;
     ctx.fillRect(24 + i * cell, h - 43, Math.max(1, cell - 2), 5);
@@ -354,9 +361,13 @@ const view: ViewDefinition = {
       selected: [string, string] | undefined,
       key = '',
       versionKey = '',
+      requestedPair = '',
+      requestedRange: [number, number] | undefined,
       generation = 0,
       disposed = false;
-    let diff: TraceDiff | undefined,
+    let sheet: TraceSheet | undefined,
+      preview: TraceSheet | undefined,
+      retained: { pair: string; sheet: TraceSheet } | undefined,
       answers: ViewHistorySnapshot[] | undefined,
       status = 'No edits yet';
     function repaint() {
@@ -413,7 +424,19 @@ const view: ViewDefinition = {
       if (requestKey !== key) {
         key = requestKey;
         const token = ++generation;
-        diff = undefined;
+        const pairKey = JSON.stringify(pair ?? null);
+        preview =
+          retained !== undefined &&
+          pairKey === requestedPair &&
+          retained.pair === pairKey &&
+          requestedRange &&
+          (requestedRange[0] !== f.from || requestedRange[1] !== f.to)
+            ? retained.sheet
+            : undefined;
+        if (requestedPair !== pairKey) retained = undefined;
+        requestedPair = pairKey;
+        requestedRange = [f.from, f.to];
+        sheet = undefined;
         answers = undefined;
         status = pair
           ? 'Lifting the sheets…'
@@ -426,9 +449,11 @@ const view: ViewDefinition = {
             .then((value) => {
               if (disposed || token !== generation) return;
               answers = value;
+              preview = undefined;
               if (value[0].status === 'available' && value[1].status === 'available') {
-                diff = compareScores(value[0].score, value[1].score);
-                status = diff.errors.length ? 'Could not compare scores' : '';
+                sheet = indexSheet(compareScores(value[0].score, value[1].score), f.from, f.to);
+                status = sheet.diff.errors.length ? 'Could not compare scores' : '';
+                if (!sheet.diff.errors.length) retained = { pair: JSON.stringify(pair), sheet };
               } else
                 status =
                   value.find((v) => v.status === 'unavailable')?.reason ?? 'History unavailable';
@@ -438,11 +463,12 @@ const view: ViewDefinition = {
               if (!disposed && token === generation) {
                 status = error instanceof Error ? error.message : String(error);
                 answers = [];
+                preview = undefined;
                 repaint();
               }
             });
       }
-      retry.hidden = !answers || (!!diff && !diff.errors.length);
+      retry.hidden = !answers || (!!sheet && !sheet.diff.errors.length);
       canvas.width = Math.max(1, Math.round(f.width * f.dpr));
       canvas.height = Math.max(1, Math.round(f.height * f.dpr));
       canvas.style.width = `${String(f.width)}px`;
@@ -456,21 +482,32 @@ const view: ViewDefinition = {
       canvas.dataset.state = !pair
         ? 'empty'
         : !answers
-          ? 'pending'
-          : diff?.errors.length || !diff
+          ? preview
+            ? 'pending-preview'
+            : 'pending'
+          : sheet?.diff.errors.length || !sheet
             ? 'error'
-            : diff.identical
+            : sheet.diff.identical
               ? 'identical'
               : 'ready';
+      const shown = sheet ?? preview;
+      canvas.dataset.sheetFrom = shown ? String(shown.from) : '';
+      // A pending range keeps the previous, explicitly labelled sheet at its own
+      // coordinates. Arbitrary Strudel programs need not repeat: never shift
+      // those old notes into the new, still unqueried score range.
       draw(
         context,
-        f,
-        diff,
+        preview
+          ? { ...f, from: preview.from, to: preview.to, now: preview.from + f.now - f.from }
+          : f,
+        shown,
         status,
         Math.abs(age),
-        pair
-          ? `${description} · pencil ${String(Math.abs(age))} edit${Math.abs(age) === 1 ? '' : 's'} ${age >= 0 ? 'back' : 'ahead'}`
-          : description,
+        preview
+          ? `Loading bars ${String(f.from + 1)}–${String(f.to)} · previous bars ${String(preview.from + 1)}–${String(preview.to)}`
+          : pair
+            ? `${description} · pencil ${String(Math.abs(age))} edit${Math.abs(age) === 1 ? '' : 's'} ${age >= 0 ? 'back' : 'ahead'}`
+            : description,
       );
     }
     return {
@@ -486,7 +523,10 @@ const view: ViewDefinition = {
         controls.remove();
         canvas.width = canvas.height = 0;
         latest = undefined;
-        diff = undefined;
+        preview = undefined;
+        retained = undefined;
+        requestedRange = undefined;
+        sheet = undefined;
         answers = undefined;
       },
     };
