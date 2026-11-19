@@ -75,10 +75,11 @@ function fighter(
   feet: number,
   scale: number,
   facing: number,
-  ink: string,
+  part: ViewFrame['instruments'][number],
   reach: number,
 ) {
   const t = f.theme,
+    ink = part.muted ? t.muted : part.colour,
     g = state.lead,
     e = state.extension;
   const guarding = !g || g.move === 'guard';
@@ -384,6 +385,8 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: BoutScore) {
     t.muted,
     4,
   );
+  // The native hold ring is 45 px including its stroke; reserve a 1 px gutter.
+  const lampScale = Math.min(1, (w - 70) / Math.max(1, f.instruments.length) / 46);
   for (let i = 0; i < Math.max(1, f.instruments.length); i++) {
     const x = 35 + ((i + 0.5) * (w - 70)) / Math.max(1, f.instruments.length);
     const a = state.arena.find((a) => a.part.index === i);
@@ -405,10 +408,10 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: BoutScore) {
     shape(
       c,
       [
-        [x - 10, box.top + 8],
-        [x + 10, box.top + 8],
-        [x + 15, box.top + 23],
-        [x - 15, box.top + 23],
+        [x - 10 * lampScale, box.top + 8],
+        [x + 10 * lampScale, box.top + 8],
+        [x + 15 * lampScale, box.top + 23],
+        [x - 15 * lampScale, box.top + 23],
       ],
       t.panel,
       t.muted,
@@ -416,20 +419,20 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: BoutScore) {
     line(
       c,
       [
-        [x - 9, box.top + 23],
-        [x + 9, box.top + 23],
+        [x - 9 * lampScale, box.top + 23],
+        [x + 9 * lampScale, box.top + 23],
       ],
       light ? (a?.part.colour ?? t.line) : t.line,
-      4,
+      4 * lampScale,
     );
     for (const note of a?.holds ?? []) {
       c.strokeStyle = a?.part.colour ?? t.line;
-      c.lineWidth = 3;
+      c.lineWidth = 3 * lampScale;
       c.beginPath();
       c.arc(
         x,
         box.top + 16,
-        21,
+        21 * lampScale,
         -Math.PI / 2,
         -Math.PI / 2 + noteProgress(note, f.now) * Math.PI * 2,
       );
@@ -497,7 +500,8 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: BoutScore) {
   c.ellipse(w / 2, box.feet + 2, w * 0.3, 19, 0, 0, Math.PI * 2);
   c.stroke();
   c.restore();
-  const xs = [box.left, box.right];
+  const xs = [box.left, box.right],
+    reach = Math.min(190, (box.right - box.left) / 2 / box.scale);
   state.departures.forEach((ftr) => {
     if (state.tag >= 1) return;
     const side = state.previous.findIndex((p) => p.part.id === ftr.part.id);
@@ -511,8 +515,8 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: BoutScore) {
       box.feet,
       box.scale,
       side ? -1 : 1,
-      ftr.part.colour,
-      160,
+      ftr.part,
+      reach,
     );
     c.restore();
   });
@@ -521,17 +525,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: BoutScore) {
     const start = old >= 0 ? xs[old] : side ? w + 70 : -70;
     const progress = state.tag * state.tag * (3 - 2 * state.tag);
     const x = start + (xs[side] - start) * progress;
-    fighter(
-      c,
-      f,
-      poses[side],
-      x,
-      box.feet,
-      box.scale,
-      side ? -1 : 1,
-      ftr.part.muted ? t.muted : ftr.part.colour,
-      Math.min(190, (box.right - box.left) / 2 / box.scale),
-    );
+    fighter(c, f, poses[side], x, box.feet, box.scale, side ? -1 : 1, ftr.part, reach);
   });
   const clash = state.clashes.at(-1);
   if (clash) {
@@ -597,7 +591,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: BoutScore) {
     const filled = (length * ftr.noteCount) / Math.max(1, state.total);
     c.fillRect(side ? x + length - filled : x, 62, filled, 8);
     const pose = poses[side];
-    const incoming = state.previous[side]?.part.id !== ftr.part.id && state.tag < 1;
+    const incoming = !state.previous.some((p) => p.part.id === ftr.part.id) && state.tag < 1;
     label(
       c,
       f,

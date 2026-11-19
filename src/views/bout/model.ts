@@ -7,8 +7,9 @@ import { sectionAt } from '../shared/ring-model';
 
 export type Move = 'jab' | 'guard' | 'heavy' | 'bass blow' | 'special';
 /** Rhythm/pitch evidence only: sample selectors (n) are not MIDI pitches.
- * Dense short rhythms jab; sparse offbeats step/guard; low pitches and
- * downbeat/backbeat rhythms hit hard. Timbral identity is not in the contract. */
+ * Dense short unpitched rhythms jab. Otherwise any downbeat or <=1.5 hits
+ * per occupied cycle hits hard; remaining offbeats step/guard. Low pitches
+ * throw heavier blows. Timbral identity is not in the contract. */
 export function indexBout(source: ViewNote[]) {
   const notes = scoredNotes(source);
   const evidence = roleEvidence(notes.map((n) => ({ ...n, value: { ...n.value, n: undefined } })));

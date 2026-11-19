@@ -232,3 +232,98 @@ test('Bout: Studio mapping, five themes, reversibility and CPU cost', async ({ p
     }),
   );
 });
+
+test('Bout: tag-outs preserve reach and muted ink, swaps are not tag-ins, dense lamps fit', async ({
+  page,
+}) => {
+  await prepare(page, 'bout');
+  const result = await page.evaluate(async () => {
+    const source = window.viewProbe.frame!;
+    const el = document.createElement('div');
+    const handle = await window.viewProbe.definition.mount(el);
+    const parts = Array.from({ length: 3 }, (_, index) => ({
+      ...source.instruments[0],
+      id: String(index),
+      name: `part ${String(index)}`,
+      index,
+      colour: '#ff4d8d',
+      muted: index === 0,
+    }));
+    const note = (instrument: string, start: number, end = start + 0.125) => ({
+      instrument,
+      start,
+      end,
+      hasOnset: true,
+      value: {},
+    });
+    const oldHits = [0.7, 0.8, 0.9, 0.99].map((t) => note('0', t));
+    const common = [...oldHits, note('1', 0.5), note('1', 1.5)];
+    const arcs: { x: number; y: number; r: number; ink: string; alpha: number }[] = [];
+    const labels: string[] = [],
+      lamps: number[] = [];
+    const arc = CanvasRenderingContext2D.prototype.arc;
+    const fill = CanvasRenderingContext2D.prototype.fillText;
+    CanvasRenderingContext2D.prototype.arc = function (x, y, r, start, end, anticlockwise) {
+      const transform = this.getTransform();
+      if (transform.a > 1.01 && transform.e > 0 && transform.e < 650)
+        arcs.push({ x, y, r, ink: String(this.fillStyle), alpha: this.globalAlpha });
+      if (transform.a === 1 && start === -Math.PI / 2) lamps.push(r * 2 + this.lineWidth);
+      arc.call(this, x, y, r, start, end, anticlockwise);
+    };
+    CanvasRenderingContext2D.prototype.fillText = function (text, x, y, max) {
+      labels.push(text);
+      if (max === undefined) fill.call(this, text, x, y);
+      else fill.call(this, text, x, y, max);
+    };
+    const draw = (notes: typeof source.notes, instruments = parts, width = 1300, now = 1) => {
+      arcs.length = labels.length = lamps.length = 0;
+      handle.frame({
+        ...source,
+        notes,
+        instruments,
+        width,
+        height: 760,
+        dpr: 1,
+        now,
+        from: 0,
+        to: 3,
+        lookAhead: 1,
+        sections: [],
+      });
+      return { arcs: arcs.slice(), labels: labels.slice(), lamps: lamps.slice() };
+    };
+    const active = draw([...common, note('0', 1.5), note('0', 1.5)]);
+    const departing = draw([...common, note('2', 1.5), note('2', 1.5)]);
+    const swapped = draw(
+      [
+        ...oldHits,
+        note('1', 0.5),
+        note('1', 0.6),
+        note('1', 0.7),
+        note('0', 1.5),
+        note('1', 1.5),
+        note('1', 1.6),
+      ],
+      parts,
+      1300,
+      1.1,
+    );
+    const dense = draw(
+      Array.from({ length: 20 }, (_, i) => note(String(i), 1, 2)),
+      Array.from({ length: 20 }, (_, index) => ({ ...parts[0], id: String(index), index })),
+      559,
+      1.4,
+    );
+    CanvasRenderingContext2D.prototype.arc = arc;
+    CanvasRenderingContext2D.prototype.fillText = fill;
+    handle.dispose();
+    return { active, departing, swapped, dense, muted: source.theme.muted };
+  });
+  expect(result.active.arcs.length).toBeGreaterThan(0);
+  expect(result.departing.arcs).toEqual(result.active.arcs);
+  expect(result.active.arcs.some((arc) => arc.ink === result.muted.toLowerCase())).toBe(true);
+  expect(result.departing.labels.some((label) => label.includes('TAG IN'))).toBe(true);
+  expect(result.swapped.labels.some((label) => label.includes('TAG IN'))).toBe(false);
+  expect(result.dense.lamps).toHaveLength(18);
+  for (const diameter of result.dense.lamps) expect(diameter).toBeLessThanOrEqual((559 - 70) / 20);
+});
