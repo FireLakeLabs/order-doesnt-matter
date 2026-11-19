@@ -1,3 +1,4 @@
+import { SPECTRUM_MIN_DB, SPECTRUM_MAX_DB } from '../strudel/audio-range';
 import type { ViewDefinition } from './types';
 import { bandLevel, logBands, risingTrigger } from './scope/model';
 
@@ -82,7 +83,11 @@ const view: ViewDefinition = {
         const spectrumTop = y + sh * 0.75;
         c.fillStyle = theme.muted;
         c.font = `${String(Math.max(10, font * 0.8))}px "${theme.fontMono}", monospace`;
-        c.fillText('SPECTRUM 20Hz – 20kHz', x + 16, spectrumTop - 12);
+        c.fillText(
+          `SPECTRUM 20Hz – 20kHz · ${String(SPECTRUM_MIN_DB)}…${String(SPECTRUM_MAX_DB)} dBFS`,
+          x + 16,
+          spectrumTop - 12,
+        );
         if (audio) {
           if (bins !== audio.spectrum.length || waveLength !== audio.wave.length) {
             bins = audio.spectrum.length;

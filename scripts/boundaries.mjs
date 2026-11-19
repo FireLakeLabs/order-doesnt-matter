@@ -25,7 +25,9 @@ export function boundaryProblems(path, code) {
         path.startsWith('src/views/') &&
         !target.startsWith('src/views/') &&
         !/^three(?:\/|$)/.test(name) &&
-        !staffEngraver
+        !staffEngraver &&
+        target !== 'src/strudel/audio-range' &&
+        target !== 'src/strudel/audio-range.ts'
       )
         problems.push('Views may import only views and three');
       if (

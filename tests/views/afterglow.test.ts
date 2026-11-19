@@ -1,3 +1,5 @@
+import { boundaryProblems } from '../../scripts/boundaries.mjs';
+import { SPECTRUM_MIN_DB, SPECTRUM_MAX_DB } from '../../src/strudel/audio-range';
 import { readFileSync } from 'node:fs';
 import { expect, test } from 'vitest';
 import { importStrudel } from '../../src/import';
@@ -34,8 +36,8 @@ test('log FFT bands and dB range use actual tap bins, not score settings', () =>
   expect(bands[band]).toBe(219);
   expect(bands[band - 2]).toBe(0);
   expect(bands[band + 2]).toBe(0);
-  expect(decibels(0)).toBe(-100);
-  expect(decibels(255)).toBe(-30);
+  expect(decibels(0)).toBe(SPECTRUM_MIN_DB);
+  expect(decibels(255)).toBe(SPECTRUM_MAX_DB);
   expect(level(0)).toBe(0);
   expect(level(255)).toBe(1);
   expect(frequencyPosition(20)).toBe(0);
@@ -249,4 +251,34 @@ test('whole-note fragments count once while genuine coincident onsets remain cou
   const snare = { ...carried, value: { s: 'sd', n: 0 } };
   const otherKick = { ...carried, value: { s: 'bd', n: 1 } };
   expect(scoredNotes({ ...f, notes: [kick, kick, snare, snare, otherKick] })).toHaveLength(3);
+});
+
+test('loud measurements above the former ceiling keep distinct heat levels', () => {
+  const byte = (db: number) =>
+    Math.round((255 * (db - SPECTRUM_MIN_DB)) / (SPECTRUM_MAX_DB - SPECTRUM_MIN_DB));
+  const levels = [-40, -30, -20, -10, 0].map((db) => level(byte(db)));
+  expect(levels[1]).toBeLessThan(0.8);
+  for (let i = 1; i < levels.length; i++) expect(levels[i]).toBeGreaterThan(levels[i - 1]);
+  for (const theme of Object.values(themes)) {
+    const ramp = heatRamp(theme);
+    expect(new Set(levels.map((l) => ramp[Math.round(l * 255)])).size).toBe(levels.length);
+  }
+});
+
+test('views may import only the import-free audio calibration module from the seam', () => {
+  for (const [path, prefix] of [
+    ['src/views/afterglow/model.ts', '../../strudel/'],
+    ['src/views/scope.view.ts', '../strudel/'],
+  ]) {
+    for (const suffix of ['', '.ts']) {
+      expect(boundaryProblems(path, `import '${prefix}audio-range${suffix}'`)).toEqual([]);
+      for (const file of ['audio-tap', 'audio', 'index', 'audio-range-extra'])
+        expect(boundaryProblems(path, `import '${prefix}${file}${suffix}'`)).toContain(
+          'Views may import only views and three',
+        );
+    }
+  }
+  expect(readFileSync('src/strudel/audio-range.ts', 'utf8')).not.toMatch(
+    /\b(import|export[^;]*from)\s/,
+  );
 });

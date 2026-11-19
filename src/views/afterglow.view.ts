@@ -16,6 +16,8 @@ import type { ViewDefinition } from './types';
 import type { Column } from './afterglow/model';
 import {
   BANDS,
+  HEAT_MIN_DB,
+  HEAT_MAX_DB,
   HeardColumns,
   heatRamp,
   layout,
@@ -146,13 +148,13 @@ const view: ViewDefinition = {
             ctx.setLineDash(future ? [4, 3] : []);
             // Contrasting theme keylines separate outlines from every heat level.
             ctx.strokeStyle = theme.text;
-            ctx.lineWidth = 4;
+            ctx.lineWidth = 6;
             ctx.strokeRect(left, rect.y, right - left, rect.height);
             ctx.strokeStyle = theme.ground;
-            ctx.lineWidth = 2.5;
+            ctx.lineWidth = 4;
             ctx.strokeRect(left, rect.y, right - left, rect.height);
             ctx.strokeStyle = colour;
-            ctx.lineWidth = 1.5;
+            ctx.lineWidth = 2;
             ctx.strokeRect(left, rect.y, right - left, rect.height);
           }
         }
@@ -222,7 +224,11 @@ const view: ViewDefinition = {
         ctx.fillStyle = gradient;
         ctx.fillRect(box.left, footer + 11, 110, 9);
         ctx.fillStyle = theme.text;
-        ctx.fillText('−90 → −30 dBFS · mixed output', box.left + 120, footer + 20);
+        ctx.fillText(
+          `${String(HEAT_MIN_DB)} → ${String(HEAT_MAX_DB)} dBFS · mixed output`,
+          box.left + 120,
+          footer + 20,
+        );
         ctx.textAlign = 'right';
         ctx.fillText(
           `bar ${String(Math.floor(now) + 1)} · ${String(Math.round((now - Math.floor(now)) * 100))}%`,
