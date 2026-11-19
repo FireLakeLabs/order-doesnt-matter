@@ -183,3 +183,9 @@ Keep each entry to a few lines.
   is unavailable with its reason. Queries are lazy, cached per document version,
   bounded and off the playback path; edits invalidate them. Driver times are
   local, with per-use offsets and scales to place them in the song.
+- **D53 (2026-11-19) Views may see this session's edits.** A view may opt in to
+  the undo history: stored versions with stable ids that survive undo and redo,
+  and the score of any version, answered by Strudel for that version's
+  document. Queries are lazy, bounded, retryable and off the playback path.
+  Exposure only: history stays 50 deep and is not persisted, so a reload shows
+  no edits. Matching notes across versions is the view's job.

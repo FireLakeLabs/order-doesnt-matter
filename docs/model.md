@@ -60,6 +60,7 @@ The Studio draws one piece through live views, a score and an editor tray.
 | The rendered output   | Measured left, right and spectrum, only in views that opt in (D51)    |
 | A sample file         | Its decoded waveform, only in views that opt in (D51)                 |
 | How a part is built   | Its steps and the score after each, only in views that opt in (D52)   |
+| Your recent edits     | Earlier versions' scores, only in views that opt in (D53)             |
 | Code we do not model  | Still visible, playable, and editable as text                         |
 
 Selecting a target opens **one editor** in the tray or wide rhythm area.

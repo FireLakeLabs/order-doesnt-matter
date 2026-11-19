@@ -155,6 +155,8 @@ export interface ViewFrame {
     channels?: 0 | 1 | 2;
   }; // needs: 'audio'; full fields in src/views/types.ts
   samples?: SampleLookup; // only for samples: true (D51)
+  structure?: StructureLookup; // only for structure: true (D52)
+  history?: HistoryLookup; // only for history: true (D53); this session only
 }
 export interface ViewHandle {
   frame(frame: ViewFrame): void;
@@ -167,6 +169,8 @@ export interface ViewDefinition {
   tag: string; // one or two words for the shelf, e.g. "whole song"
   needs?: 'score' | 'audio'; // default 'score'
   samples?: true; // decoded sample memory, independent of needs
+  structure?: true; // how each part is built, with step snapshots (D52)
+  history?: true; // this session's stored versions and their scores (D53)
   span?: 'window' | 'song'; // 'song' asks the host for the whole song
   mount(el: HTMLElement): ViewHandle | Promise<ViewHandle>;
 }

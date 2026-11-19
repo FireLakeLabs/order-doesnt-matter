@@ -66,7 +66,7 @@ because of its GPU cost.
 
 Wave 3.2 is merged: A (#158), B (#159), Sampler (#161), Stereo glass (#160).
 Wave 3.3 is merged: C (#164), per-use timing with Orrery's driver orbit
-(#165), Origami (#166).
+(#165), Origami (#166). Wave 3.4 is merged: D (#168), Tracing paper (#169).
 
 Each contract change lands alone before its views. Change E (views that take
 input or request edits) is not planned: its only remaining use is optional
