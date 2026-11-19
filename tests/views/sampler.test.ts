@@ -85,7 +85,9 @@ it('counts every overlapping retrigger, excludes fragments/future onsets, and su
   expect(padState(pad, frame)).toMatchObject({ light: 0, active: [], resting: true });
   frame.instruments[0].inSection = true;
   frame.instruments[0].muted = true;
-  expect(padState(pad, frame).active).toHaveLength(0);
+  expect(padState(pad, frame)).toMatchObject({ active: [], muted: true });
+  frame.instruments[0].inSection = false;
+  expect(padState(pad, frame).muted).toBe(true);
 });
 it('keeps addresses and ordering independent of now and note order, retains other-section constants and labels missing sounds', () => {
   const frame = scoreFrame(3);
@@ -96,9 +98,7 @@ it('keeps addresses and ordering independent of now and note order, retains othe
   frame.instruments[1].inSection = false;
   frame.notes = [note({ n: 2, bank: 'tr' }), note({ n: 0 })];
   const pads = samplePads(frame);
-  expect(samplePads({ ...frame, notes: [{ ...note(), value: {} }] })[0].result.status).toBe(
-    'unavailable',
-  );
+  expect(samplePads({ ...frame, notes: [{ ...note(), value: {} }] })[0].sound).toBe('triangle');
   expect(pads.map((p) => [p.sound, p.index, p.result.status])).toEqual([
     ['bd', 0, 'loading'],
     ['tr_bd', 2, 'loading'],
@@ -162,4 +162,29 @@ it('maps the real dubstep window and the real slice program, with synths classif
       ).toBe(true);
     }
   }
+});
+
+it('uses the pinned default triangle source and keeps n-pitched synth chords in one card', async () => {
+  const frame = scoreFrame();
+  frame.samples = {
+    get: (sound) =>
+      ['triangle', 'sine'].includes(sound)
+        ? { status: 'synth' }
+        : { status: 'unavailable', reason: 'Unknown sound' },
+  };
+  for (const [source, sound] of [
+    ['note("c3 e3 g3")', 'triangle'],
+    ['n("0 3 7").s("sine")', 'sine'],
+  ]) {
+    const result = await queryEventsNode(source, 0, 1);
+    expect(result.error).toBeNull();
+    frame.notes = viewNotes({ from: 0, to: 1, events: { '0': result } });
+    const pads = samplePads(frame);
+    expect(pads).toHaveLength(1);
+    expect(pads[0].sound).toBe(sound);
+    expect(pads[0].result.status).toBe('synth');
+    expect(pads[0].notes).toHaveLength(3);
+  }
+  frame.notes = [note({ s: 'missing' })];
+  expect(samplePads(frame)[0].result.status).toBe('unavailable');
 });

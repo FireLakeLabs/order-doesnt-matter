@@ -301,5 +301,15 @@ test('Sampler: decoded sources, all themes, reversibility, narrow stage and CPU 
       window.viewProbe.frame.notes.every((n) => n.value.s === 'sawtooth'),
   );
   await page.screenshot({ path: `${shots}/synth-only-fragments-2560x1440.png` });
+  await page.evaluate(async () => {
+    await window.odmStudio.load('note("c3 e3 g3")');
+    await window.odmStudio.seek(0.4);
+  });
+  await page.waitForFunction(
+    () =>
+      window.viewProbe.frame?.now === 0.4 &&
+      window.viewProbe.frame.notes.every((n) => n.value.s === undefined),
+  );
+  await page.screenshot({ path: `${shots}/default-triangle-2560x1440.png` });
   await frozen.dispose();
 });

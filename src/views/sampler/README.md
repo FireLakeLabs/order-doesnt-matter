@@ -4,6 +4,7 @@ A pad is a scored `s` + rounded `n` address. The lookup resolves banks, wrapped
 indices, and note-keyed files. Notes selecting the same address and file share a
 pad; a pitched address selecting different files has separate screens. Synth
 pitches share one symbolic shape card, explicitly labelled “synth, no sample”.
+Events without `s` use pinned Superdough's default triangle source.
 Waveforms collapse the lookup's shared min/max peaks across all channels. Drawing
 never reads `SampleBuffer.channels`. Screens keep natural source amplitude.
 
@@ -45,3 +46,8 @@ with neither queried notes nor a constant source address is counted as outside
 the window; the view cannot discover its samples. No inventory or voice state
 is remembered between frames. Overflow pads report merged addresses, notes and
 cursors when the stage cannot fit individual screens.
+
+The default MIDI 36 can also be transposed by a note-keyed bank whose closest
+key is not C2, even without an explicit `note` or `freq`. The lookup does not
+identify this case. Those unpitched cursors assume an untransposed bank and can
+have an unknown rate; exact support needs resolved root/rate metadata.

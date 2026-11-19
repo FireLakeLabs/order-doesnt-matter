@@ -17,7 +17,9 @@ export interface Pad {
 export function samplePads(frame: ViewFrame): Pad[] {
   const pads = new Map<string, Pad>();
   const add = (part: ViewInstrument, value: ViewNote['value'], note?: ViewNote) => {
-    const sound = typeof value.s === 'string' ? value.s : '';
+    // Superdough 1.3.0's default source is triangle when an event omits s.
+    const sound =
+      typeof value.s === 'string' ? value.s : note && value.s === undefined ? 'triangle' : '';
     const bank = typeof value.bank === 'string' ? `${value.bank}_` : '';
     const index = Math.round(number(value.n, 0));
     const pitch: { note?: string | number; freq?: number } = {};
@@ -57,7 +59,7 @@ export function samplePads(frame: ViewFrame): Pad[] {
   for (const pad of pads.values()) {
     const key = JSON.stringify([
       pad.sound,
-      pad.index,
+      pad.result.status === 'synth' ? null : pad.index,
       pad.result.status === 'buffer' ? pad.result.url : pad.result.status,
     ]);
     const previous = result.get(key);
@@ -91,7 +93,9 @@ export interface Cursor {
  * begin/end scale the NATURAL buffer, independently of speed. Negative speed
  * reverses the ENTIRE PCM first, so [b,e] maps to [1-e,1-b] in our source screen.
  * The lookup doesn't expose bank-root transposition or detune automation. Such
- * notes keep their real waveform/bounds but explicitly have no exact cursor.
+ * explicit-pitch notes keep real waveforms/bounds without an exact cursor. A
+ * note-keyed bank can also transpose the implicit MIDI 36; that case is not
+ * detectable from this lookup (see README limits).
  * This is source traversal, not measured output: envelopes, cut groups and FX
  * aren't inferred. Only onset-bearing notes in the supplied window trigger. */
 export function sampleCursor(
@@ -126,6 +130,8 @@ export function sampleCursor(
 }
 export function padState(pad: Pad, frame: ViewFrame) {
   const eligible = new Set(pad.parts.filter((p) => p.inSection && !p.muted).map((p) => p.id));
+  const muted =
+    (pad.parts.some((p) => p.inSection) && !eligible.size) || pad.parts.every((p) => p.muted);
   const hits = pad.notes.filter(
     (n) => n.hasOnset && n.start <= frame.now && eligible.has(n.instrument),
   );
@@ -142,7 +148,7 @@ export function padState(pad: Pad, frame: ViewFrame) {
       ? hits.map((n) => sampleCursor(n, result, frame.now, frame.cps))
       : [];
   const active = cursors.filter((c) => !c.ended && !c.limited);
-  return { hits, latest, light, cursors, active, resting: !eligible.size };
+  return { hits, latest, light, cursors, active, muted, resting: !eligible.size };
 }
 
 /** Collapse only shared peak summaries, never source channels/PCM. Memoized by

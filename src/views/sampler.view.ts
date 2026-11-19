@@ -90,11 +90,13 @@ function drawPad(
   const result = pad.result;
   ctx.fillStyle = frame.theme.ground;
   ctx.fillRect(sx, sy, sw, sh);
-  let status = state.resting
-    ? 'other sections · resting'
-    : state.latest
-      ? 'ended'
-      : 'waiting for onset';
+  let status = state.muted
+    ? 'muted'
+    : state.resting
+      ? 'other sections · resting'
+      : state.latest
+        ? 'ended'
+        : 'waiting for onset';
   let settings = '',
     file = '';
   if (result.status === 'buffer') {
@@ -144,7 +146,7 @@ function drawPad(
         if (state.active.length) {
           const newest = state.active.reduce((a, b) => (a.note.start > b.note.start ? a : b));
           status = `${String(state.active.length)} cursor${state.active.length === 1 ? '' : 's'} · ${String(Math.round(newest.fraction * 100))}% slice`;
-          if (unknown) status += ` · ${String(unknown)} unknown`;
+          if (unknown) status += ` · ${String(unknown)} untracked onsets`;
         } else if (unknown) status = `${String(unknown)} onsets · cursor unavailable`;
         else if (slice.speed === 0) status = 'speed 0 · no trigger';
         else status = state.latest ? 'ended' : 'waiting for onset';
@@ -153,7 +155,11 @@ function drawPad(
     file = `${result.duration.toFixed(3)}s · ${result.fileName}`;
   } else {
     status = result.status === 'loading' ? 'loading / not decoded yet' : 'unavailable';
-    settings = state.resting ? 'other sections · resting' : 'no decoded sample';
+    settings = state.muted
+      ? 'muted'
+      : state.resting
+        ? 'other sections · resting'
+        : 'no decoded sample';
     file = result.status === 'unavailable' ? result.reason : 'Sample has not been decoded';
     text(
       ctx,
@@ -229,7 +235,11 @@ function drawSynth(
   text(
     ctx,
     frame,
-    state.resting ? `${String(onsets)} onsets · resting` : `${String(onsets)} onsets in window`,
+    state.muted
+      ? `${String(onsets)} onsets · muted`
+      : state.resting
+        ? `${String(onsets)} onsets · resting`
+        : `${String(onsets)} onsets in window`,
     x + 24,
     y + h - 5,
     w - 40,
