@@ -126,3 +126,41 @@ test('document replacement and disposal invalidate both request purposes', async
   await setImmediate();
   expect(cache.score.events).toEqual({});
 });
+
+test('range refresh retains the rail answer, notes and errors until its replacement arrives', async () => {
+  const replies: ((result: EventResult) => void)[] = [];
+  const cache = createScoreCache(() => new Promise((resolve) => replies.push(resolve)));
+  const state = piece('stack(s("bd"), s("sd"))');
+  cache.request(state, { from: 0, to: 12 });
+  replies[0]({
+    ...result,
+    events: [{ whole: [3.75, 4.5], part: [3.75, 4.5], hasOnset: true, value: { s: 'bd' } }],
+  });
+  replies[1]({ ...result, error: { phase: 'query', message: 'visible row error' } });
+  await setImmediate();
+  const score = cache.score,
+    notes = cache.notes,
+    error = cache.error;
+  expect(notes).toHaveLength(1);
+  expect(error).toContain('visible row error');
+  cache.request(state, { from: 0, to: 16 });
+  expect(cache.score).toBe(score);
+  expect(cache.notes).toBe(notes);
+  expect(cache.error).toBe(error);
+  cache.dispose();
+});
+
+test('a rejected ahead query keeps its error when promoted', async () => {
+  const replies: { resolve: (result: EventResult) => void; reject: (reason: Error) => void }[] = [];
+  const cache = createScoreCache(
+    () => new Promise((resolve, reject) => replies.push({ resolve, reject })),
+  );
+  const state = piece('s("bd")');
+  cache.request(state, { from: 0, to: 4 }, { from: 4, to: 8 });
+  replies[0].resolve(result);
+  replies[1].reject(Error('ahead failed'));
+  await setImmediate();
+  cache.request(state, { from: 4, to: 8 });
+  expect(cache.error).toBe('ahead failed');
+  cache.dispose();
+});

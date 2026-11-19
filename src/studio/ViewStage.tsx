@@ -73,12 +73,24 @@ function Drawing({
       try {
         const { theme, lookAhead, trails } = options.current;
         const state = runtime.app.state;
-        cache.request(state, neededRange(mounted.definition.span, now, lookAhead, state.sections));
-        const ready = String(
-          state.rows.length > 0 &&
-            state.rows.every((row) => Object.hasOwn(cache.score.events, row.id)),
+        const span = mounted.definition.span;
+        const range = neededRange(span, now, lookAhead, state.sections);
+        const next = neededRange(
+          span,
+          span === 'song' ? range.to : now + 4,
+          lookAhead,
+          state.sections,
         );
-        if (container.dataset.scoreReady !== ready) container.dataset.scoreReady = ready;
+        cache.request(state, range, next);
+        const covers = cache.score.from <= range.from && cache.score.to >= range.to;
+        const answered = state.rows.every((row) => Object.hasOwn(cache.score.events, row.id));
+        const ready = covers && state.rows.length > 0 && answered;
+        if (container.dataset.scoreReady !== String(ready))
+          container.dataset.scoreReady = String(ready);
+        const message = cache.error || (!ready ? 'Asking the score…' : '');
+        if (status.current && status.current.textContent !== message)
+          status.current.textContent = message;
+        if (!covers || !answered) return;
         mounted.frame(
           buildFrame({
             state,
@@ -98,9 +110,6 @@ function Drawing({
             dpr: window.devicePixelRatio,
           }),
         );
-        const message = cache.error || (ready === 'false' ? 'Asking the score…' : '');
-        if (status.current && status.current.textContent !== message)
-          status.current.textContent = message;
       } catch (reason) {
         mounted.dispose();
         owned.replaceChildren();
@@ -117,7 +126,7 @@ function Drawing({
   }, [viewId, attempt, clock, metadata, cache]);
   return (
     <div className="view-stage">
-      <div ref={host} className="view-host" />
+      <div ref={host} className="view-host" data-score-ready="false" />
       {error ? (
         <div className="view-failure" role="alert">
           <strong>View failed</strong>
@@ -133,7 +142,9 @@ function Drawing({
           </Button>
         </div>
       ) : (
-        <p className="view-status" ref={status} role="status" />
+        <p className="view-status" ref={status} role="status">
+          Asking the score…
+        </p>
       )}
     </div>
   );
@@ -162,16 +173,20 @@ export function ViewStage({
   choices: Pick<Layout, 'a' | 'b'>;
 }) {
   // Allocation is inert; workers start only when a drawing requests a score.
-  const [{ cache, queries }] = useState(() => {
+  const [cache] = useState(() => {
     const queries = createBrowserQueries();
-    return { cache: createScoreCache(queries.query), queries };
+    return createScoreCache(queries.query, {
+      cancel: () => {
+        queries.cancel();
+      },
+      ahead: createBrowserQueries(),
+    });
   });
   useEffect(
     () => () => {
       cache.dispose();
-      queries.cancel();
     },
-    [cache, queries],
+    [cache],
   );
   const [metadata, setMetadata] = useState({ id: '', name: '', tag: '' });
   const [shelfOpen, setShelfOpen] = useState(false);
