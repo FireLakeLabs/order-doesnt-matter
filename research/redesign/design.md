@@ -146,7 +146,14 @@ export interface ViewFrame {
   width: number;
   height: number;
   dpr: number;
-  audio?: { wave: Float32Array; spectrum: Uint8Array }; // only for needs: 'audio'
+  audio?: {
+    wave: Float32Array;
+    spectrum: Uint8Array;
+    left?: Float32Array;
+    right?: Float32Array;
+    channels?: 0 | 1 | 2;
+  }; // needs: 'audio'; full fields in src/views/types.ts
+  samples?: SampleLookup; // only for samples: true (D51)
 }
 export interface ViewHandle {
   frame(frame: ViewFrame): void;
@@ -158,6 +165,7 @@ export interface ViewDefinition {
   name: string;
   tag: string; // one or two words for the shelf, e.g. "whole song"
   needs?: 'score' | 'audio'; // default 'score'
+  samples?: true; // decoded sample memory, independent of needs
   span?: 'window' | 'song'; // 'song' asks the host for the whole song
   mount(el: HTMLElement): ViewHandle | Promise<ViewHandle>;
 }

@@ -171,3 +171,8 @@ Keep each entry to a few lines.
   lead runs the sweep in the orchestrate skill: full browser suite on `main`,
   accepted caveats gathered, everything touched seen together, docs matched.
   Small fixes land before the next wave starts.
+- **D51 (2026-11-19) Measured inputs are opt-in.** Extends D35: views read the
+  score by default. A view may opt in to the measured output (mono, left and
+  right, spectrum, calibrated −100…0 dBFS) or to decoded sample memory; others
+  receive neither and pay nothing. Measured and scored are always labelled
+  apart. Afterglow alone keeps state: measured columns by score time.
