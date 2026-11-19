@@ -402,23 +402,38 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
   const sy = b.y(f.now),
     sx = b.x(s.x);
   const angleAt = (time: number) => routeAngle(score.gates, b, time);
-  // Twin tracks are sampled from the very same exact-onset route as the skier.
-  const trackFrom = Math.max(b.from, score.gates[0]?.start ?? f.now);
+  // Fair the past onset knots into two smooth snow grooves. This is pen geometry:
+  // the model's route, every gate position and the racer's current position stay exact.
+  const anchors: Point[] = score.gates
+    .filter((gate) => gate.start < f.now)
+    .map((gate) => [b.x(gate.x), b.y(gate.start)]);
+  anchors.push([sx, sy]);
   const skiOffset = 12 * racerScale(f.width);
-  for (const offset of trackFrom <= f.now ? [-skiOffset, skiOffset] : []) {
-    const points: Point[] = [];
-    for (let i = 0; i <= 180; i++) {
-      const time = trackFrom + ((f.now - trackFrom) * i) / 180;
-      points.push([b.x(routeAt(score.gates, time)) + offset, b.y(time)]);
+  for (const offset of anchors.length > 1 ? [-skiOffset, skiOffset] : []) {
+    for (const [shift, ink, width] of [
+      [1.5, paint.light, 4],
+      [0, paint.shade, 4],
+      [0, paint.groove, 1.5],
+    ] as const) {
+      c.beginPath();
+      c.moveTo(anchors[0][0] + offset + shift, anchors[0][1] + shift);
+      for (let i = 1; i < anchors.length; i++) {
+        const a = anchors[i - 1],
+          end = anchors[i],
+          dy = end[1] - a[1];
+        c.bezierCurveTo(
+          a[0] + offset + shift,
+          a[1] + dy * 0.42 + shift,
+          end[0] + offset + shift,
+          end[1] - dy * 0.42 + shift,
+          end[0] + offset + shift,
+          end[1] + shift,
+        );
+      }
+      c.strokeStyle = ink;
+      c.lineWidth = width;
+      c.stroke();
     }
-    line(
-      c,
-      points.map(([x, y]) => [x + 1.5, y + 1.5]),
-      paint.light,
-      4,
-    );
-    line(c, points, paint.shade, 4);
-    line(c, points, paint.groove, 1.5);
   }
   // A faint upcoming line guides the eye into the next opening.
   c.setLineDash([3, 8]);

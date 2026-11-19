@@ -172,7 +172,9 @@ test('Slalom: real Studio mapping, five themes, reversibility and frame cost', a
   expect(measured.deterministic.every((r) => r.backwardsResize && r.fresh)).toBe(true);
   expect(measured.contrast.every((r) => r.ratio >= 4.5)).toBe(true);
   expect(measured.snowSurfaces.every((r) => r.lightFraction > 0.75)).toBe(true);
-  const tags = measured.labels.filter((label) => / · (ahead|passed|next)/.test(label.text));
+  const tags = measured.labels.filter((label) =>
+    / · (ahead|passed|next)(?: ×\d+)?$/.test(label.text),
+  );
   expect(tags.length).toBeGreaterThan(0);
   expect(tags.every((label) => /@\d+:/.test(label.text))).toBe(true);
   expect(mapping.visible).toEqual({ gates: 9, terrain: 9, sides: 10, bundles: 8 });
