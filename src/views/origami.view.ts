@@ -9,7 +9,8 @@ import {
   noteIdentity,
   paperWindow,
   patternLabel,
-  printMarks,
+  printLayout,
+  paperLayout,
   scalar,
   sealedReason,
   snapshotNotes,
@@ -95,34 +96,20 @@ function score(
   ctx.strokeStyle = theme.text;
   ctx.lineWidth = 1;
   line(ctx, x + w * play, y, x + w * play, y + h);
-  const marks = printMarks(notes, from, to, w);
-  for (const mark of marks) {
-    const xx = x + mark.x * w,
-      yy = y + h - 8 - (mark.lane / 23) * (h - 25);
+  const print = printLayout(notes, from, to, w, h, (text) => ctx.measureText(text).width);
+  for (const mark of print.marks) {
     ctx.strokeStyle = colour;
     ctx.lineWidth = 3;
-    line(ctx, xx, yy, Math.max(xx + 2, x + mark.end * w - 2), yy);
+    line(ctx, x + mark.x, y + mark.y, x + mark.end, y + mark.y);
     ctx.fillStyle = colour;
-    ctx.fillRect(xx - 1, yy - 3, 3, 6);
+    ctx.fillRect(x + mark.x - 1, y + mark.y - 3, 3, 6);
   }
-  // Text always paints last on opaque paper, clear of the musical ink.
-  const occupied: { x: number; y: number; w: number }[] = [];
-  for (const mark of marks) {
-    const text = mark.count > 1 ? `×${String(mark.count)}` : mark.label;
-    const ww = ctx.measureText(text).width;
-    const xx = Math.min(x + w - ww, x + mark.x * w),
-      yy = y + h - 15 - (mark.lane / 23) * (h - 25);
-    if (
-      h < 35 ||
-      ww > w ||
-      occupied.some((r) => Math.abs(r.y - yy) < 13 && xx < r.x + r.w + 1 && xx + ww + 1 > r.x)
-    )
-      continue;
-    occupied.push({ x: xx, y: yy, w: ww });
+  // Label plates clear both neighbouring labels and every other note's ink.
+  for (const label of print.labels) {
     ctx.fillStyle = theme.panel;
-    ctx.fillRect(xx - 1, yy - 10, ww + 2, 12);
+    ctx.fillRect(x + label.x - 1, y + label.y - 10, label.width + 2, 12);
     ctx.fillStyle = theme.text;
-    ctx.fillText(text, xx, yy);
+    ctx.fillText(label.text, x + label.x, y + label.y);
   }
 }
 const view: ViewDefinition = {
@@ -186,9 +173,7 @@ const view: ViewDefinition = {
       for (const n of frame.notes)
         if (n.start < Math.floor(frame.now) + 1 && n.end > Math.floor(frame.now))
           counts.set(n.instrument, (counts.get(n.instrument) ?? 0) + 1);
-      const nextOptions = JSON.stringify(
-        frame.instruments.map((i) => [i.id, i.name, counts.get(i.id) ?? 0]),
-      );
+      const nextOptions = JSON.stringify(frame.instruments.map((i) => [i.id, i.name]));
       if (nextOptions !== optionsKey) {
         select.replaceChildren(
           ...frame.instruments.map((i) => {
@@ -200,12 +185,17 @@ const view: ViewDefinition = {
         );
         optionsKey = nextOptions;
       }
+      frame.instruments.forEach((instrument, index) => {
+        const option = select.options[index];
+        const text = `${instrument.name} · ${String(counts.get(instrument.id) ?? 0)} spans this bar`;
+        if (option.textContent !== text) option.textContent = text;
+      });
       if (id) select.value = id;
       c.fillStyle = theme.text;
       c.fillText(
         fit(
           c,
-          `${part?.name ?? 'No part'} · ${String(structure?.steps.length ?? 0)} stages · bar ${String(Math.floor(frame.now) + 1)} · ${String(Math.round((frame.now % 1) * 100))}%`,
+          `${part?.name ?? 'No part'} · ${String(structure?.steps.length ?? 0)} stages · bar ${String(Math.floor(frame.now) + 1)} · ${String(Math.floor((frame.now % 1) * 100))}%`,
           width - 36,
         ),
         18,
@@ -233,23 +223,17 @@ const view: ViewDefinition = {
           : [],
       );
       const branches = signalSteps.filter((s) => indices.includes(s.index));
-      const branchH = branches.length
-          ? 42 + Math.max(1, ...branches.map(({ step }) => step.driver.rates.length)) * 22
-          : 0,
-        top = 84 + branchH;
+      const requestedRates = branches.length
+        ? Math.max(1, ...branches.map(({ step }) => step.driver.rates.length))
+        : 0;
+      const { branchH, top, columns, panelH, rateRows } = paperLayout(
+        indices.length,
+        width,
+        height,
+        requestedRates,
+      );
       const left = 20,
         available = width - 40;
-      const maxRows = Math.max(1, Math.floor((height - 110 - top) / 132));
-      const preferredColumns = Math.max(
-        1,
-        Math.min(
-          indices.length,
-          Math.max(Math.floor(available / 120), Math.ceil(indices.length / maxRows)),
-        ),
-      );
-      const rows = Math.ceil(indices.length / preferredColumns);
-      const columns = Math.ceil(indices.length / rows);
-      const panelH = Math.max(85, (height - 110 - top) / rows - 22);
       const pw = available / columns;
       branches.forEach(({ step, index }, b) => {
         const cell = available / Math.max(1, branches.length);
@@ -270,6 +254,15 @@ const view: ViewDefinition = {
         );
         if (!step.driver.rates.length) c.fillText('Continuous driver · definition time', 10, 37);
         step.driver.rates.forEach((rate, rateIndex) => {
+          if (step.driver.rates.length > rateRows && rateIndex >= rateRows - 1) {
+            if (rateIndex === rateRows - 1)
+              c.fillText(
+                fit(c, `+${String(step.driver.rates.length - rateIndex)} rate folds`, bw - 24),
+                10,
+                37 + rateIndex * 22,
+              );
+            return;
+          }
           const answer = rate.opaque
             ? { status: 'unavailable' as const, reason: rate.opaque }
             : answers.read(structure, `rate:${rate.id}`, () => rate.events());
@@ -374,7 +367,7 @@ const view: ViewDefinition = {
           step.kind === 'setting' && sampled && step.name in sampled.value
             ? scalar(sampled.value[step.name])
             : stepDetail(step);
-        c.fillText(fit(c, detail, pw - 16), 8, 42);
+        if (panelH >= 85) c.fillText(fit(c, detail, pw - 16), 8, 42);
         const status = why
           ? 'sealed'
           : !answer
@@ -391,7 +384,7 @@ const view: ViewDefinition = {
         const compact = panelH < 145;
         if (!compact) c.fillText(fit(c, status, pw - 16), 8, 60);
         const chartY = compact ? 53 : 75,
-          chartH = Math.max(8, panelH - chartY - 28);
+          chartH = Math.max(0, panelH - chartY - 28);
         if (why) {
           c.strokeStyle = theme.muted;
           c.setLineDash([4, 3]);
@@ -415,7 +408,7 @@ const view: ViewDefinition = {
             } else row += `${row ? ' ' : ''}${word}`;
           }
           if (yy < panelH - 25) reasonLine(row, yy);
-        } else if (answer)
+        } else if (answer && chartH >= 8)
           score(
             c,
             frame,
@@ -466,7 +459,13 @@ const view: ViewDefinition = {
       );
       const sections = frame.sections.length
         ? frame.sections
-        : [{ name: 'four-bar pages', from: frame.from, to: frame.to }];
+        : [
+            {
+              name: `queried bars ${String(frame.from + 1)}–${String(frame.to)}`,
+              from: frame.from,
+              to: frame.to,
+            },
+          ];
       const origin = frame.sections.length ? 0 : frame.from;
       const duration = Math.max(1, (sections.at(-1)?.to ?? frame.to) - origin);
       for (const section of sections) {

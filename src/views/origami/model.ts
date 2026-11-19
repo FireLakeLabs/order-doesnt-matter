@@ -197,6 +197,76 @@ export function printMarks(notes: PaperNote[], from: number, to: number, width: 
   }
   return [...bins.values()];
 }
+export function printLayout(
+  notes: PaperNote[],
+  from: number,
+  to: number,
+  width: number,
+  height: number,
+  measure: (text: string) => number,
+) {
+  const marks = printMarks(notes, from, to, width).map((mark) => ({
+    ...mark,
+    x: mark.x * width,
+    y: height - 8 - (mark.lane / 23) * (height - 25),
+    end: Math.max(mark.x * width + 2, mark.end * width - 2),
+  }));
+  const labels: { text: string; x: number; y: number; width: number }[] = [];
+  for (const [index, mark] of marks.entries()) {
+    const text = mark.count > 1 ? `×${String(mark.count)}` : mark.label;
+    const w = measure(text),
+      x = Math.min(width - w, mark.x),
+      y = mark.y - 7;
+    if (
+      height < 35 ||
+      w > width ||
+      labels.some(
+        (other) =>
+          Math.abs(other.y - y) < 13 && x < other.x + other.width + 1 && x + w + 1 > other.x,
+      )
+    )
+      continue;
+    // The opaque plate must clear every other mark, including short chord notes.
+    if (
+      marks.some(
+        (other, i) =>
+          i !== index &&
+          x - 1 < other.end + 2 &&
+          x + w + 1 > other.x - 2 &&
+          y - 10 < other.y + 3 &&
+          y + 2 > other.y - 3,
+      )
+    )
+      continue;
+    labels.push({ text, x, y, width: w });
+  }
+  return { marks, labels };
+}
+
+/** Reserve a readable paper row before spending height on driver-rate flaps. */
+export function paperLayout(count: number, width: number, height: number, requestedRates: number) {
+  const rateRows = requestedRates
+    ? Math.min(requestedRates, Math.max(1, Math.floor((height - 343) / 22)))
+    : 0;
+  const branchH = rateRows ? 42 + rateRows * 22 : 0,
+    top = 84 + branchH;
+  const maxRows = Math.max(1, Math.floor((height - 110 - top) / 132));
+  const preferredColumns = Math.max(
+    1,
+    Math.min(count, Math.max(Math.floor((width - 40) / 120), Math.ceil(count / maxRows))),
+  );
+  const rows = Math.ceil(count / preferredColumns),
+    columns = Math.ceil(count / Math.max(1, rows));
+  return {
+    rateRows,
+    branchH,
+    top,
+    rows,
+    columns,
+    panelH: Math.max(0, (height - 110 - top) / Math.max(1, rows) - 22),
+  };
+}
+
 /** One outstanding question per mount, only requested by visible paper. Results are inert cached answers. */
 export function answerBook() {
   const books = new Map<ViewProgramStructure, Map<string, Answer>>();

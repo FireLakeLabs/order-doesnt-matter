@@ -14,6 +14,8 @@ import {
   noteIdentity,
   paperWindow,
   printMarks,
+  printLayout,
+  paperLayout,
   sealedReason,
   snapshotNotes,
   stepLabel,
@@ -222,4 +224,37 @@ test('pitch survives an added sound, while replacing a drum phrase changes its p
   expect(noteIdentity([{ ...note, value: { s: 'bd' } }])).not.toBe(
     noteIdentity([{ ...note, value: { s: 'hh' } }]),
   );
+});
+
+test('short chord notes remain visible under neighbouring label plates', () => {
+  const notes = ['c4', 'e4', 'g4'].map((note) => ({
+    start: 0,
+    end: 1 / 16,
+    onset: true,
+    value: { note },
+  }));
+  const print = printLayout(notes, 0, 4, 120, 60, (text) => text.length * 7);
+  expect(print.marks).toHaveLength(3);
+  expect(print.labels.map((label) => label.text)).toEqual(['G4']);
+  for (const label of print.labels)
+    for (const mark of print.marks) {
+      expect(
+        label.x - 1 < mark.end + 2 &&
+          label.x + label.width + 1 > mark.x - 2 &&
+          label.y - 10 < mark.y + 3 &&
+          label.y + 2 > mark.y - 3,
+      ).toBe(false);
+    }
+});
+test('driver flaps retain a counted overflow row and clear context at desktop stage heights', () => {
+  for (const height of [468, 675, 760])
+    for (const rates of [1, 6, 20])
+      for (const count of [3, 8, 20]) {
+        const layout = paperLayout(count, 560, height, rates);
+        expect(layout.top + layout.rows * (layout.panelH + 22)).toBeLessThanOrEqual(
+          height - 110 + 1e-9,
+        );
+        expect(layout.panelH).toBeGreaterThanOrEqual(85);
+        expect(layout.rateRows).toBeLessThanOrEqual(rates);
+      }
 });

@@ -95,6 +95,10 @@ test('Origami: real snapshots, themes, pull tab, exact reversibility and CPU sub
     handle.frame(source);
     const pendingOnFirstFrame = canvas.dataset.computing !== '0';
     await settle(source);
+    const option = el.querySelector('select')!.options[0];
+    handle.frame({ ...source, now: 11.4 });
+    const stableOptions = option === el.querySelector('select')!.options[0];
+    handle.frame(source);
     const texts: { text: string; size: string; ink: string }[] = [];
     const fill = CanvasRenderingContext2D.prototype.fillText;
     CanvasRenderingContext2D.prototype.fillText = function (text, x, y, max) {
@@ -185,6 +189,7 @@ test('Origami: real snapshots, themes, pull tab, exact reversibility and CPU sub
       contrast,
       texts,
       pendingOnFirstFrame,
+      stableOptions,
       listenerDelta: window.viewProbe.listeners - before,
       userAgent: navigator.userAgent,
     };
@@ -193,6 +198,7 @@ test('Origami: real snapshots, themes, pull tab, exact reversibility and CPU sub
   expect(Math.min(...Object.values(measured.contrast))).toBeGreaterThan(4.5);
   expect(measured.listenerDelta).toBe(0);
   expect(measured.pendingOnFirstFrame).toBe(true);
+  expect(measured.stableOptions).toBe(true);
   await writeFile(`${shots}/measurements.json`, JSON.stringify(measured, null, 2));
   console.log('Origami measured', JSON.stringify(measured));
   // Pointer capture moves the view-only pull tab; double-click restores full opening and automatic focus.
