@@ -64,6 +64,8 @@ because of its GPU cost.
 | 3.4  | D. edit history for views                            | Tracing paper                    |
 | 3.5  | F. setting values between notes (needs C)            | Strobe, Mixing desk motor trails |
 
+Wave 3.2 is merged: A (#158), B (#159), Sampler (#161), Stereo glass (#160).
+
 Each contract change lands alone before its views. Change E (views that take
 input or request edits) is not planned: its only remaining use is optional
 Mixing desk faders.

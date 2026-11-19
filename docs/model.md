@@ -57,6 +57,8 @@ The Studio draws one piece through live views, a score and an editor tray.
 | A continuous signal   | A curve only, never a note                                            |
 | A section of the song | A block in the scrub strip; resting instruments collapse in the score |
 | An orbit              | **Room**: shared sends shown by views that use room information       |
+| The rendered output   | Measured left, right and spectrum, only in views that opt in (D51)    |
+| A sample file         | Its decoded waveform, only in views that opt in (D51)                 |
 | Code we do not model  | Still visible, playable, and editable as text                         |
 
 Selecting a target opens **one editor** in the tray or wide rhythm area.

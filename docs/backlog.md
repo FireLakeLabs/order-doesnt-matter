@@ -54,13 +54,21 @@ Everything known to be outstanding, in one place. The [model](model.md) and
   [second-wave.md](../research/redesign/second-wave.md); the last five shipped
   in the third wave's 3.1.
 - **Third wave of views:** 3.0 (five fixes) and 3.1 (sixteen views) are
-  merged, planned in [third-wave.md](../research/redesign/third-wave.md). Six
-  views remain, each waiting for its framework change in waves 3.2–3.5:
-  Sampler, Stereo glass, Origami, Tracing paper, Strobe and Mixing desk.
+  merged, as is 3.2 (sample memory and stereo, with Sampler and Stereo glass),
+  planned in [third-wave.md](../research/redesign/third-wave.md). Four views
+  remain, each waiting for its framework change in waves 3.3–3.5: Origami,
+  Tracing paper, Strobe and Mixing desk.
 - **View follow-ups accepted in review:** extract one shared scored-pitch reader
   (Chord bridge, Light rig and Ribbons each guard locally); share log-band
   extraction between Scope and Afterglow; a real-browser pause/resume probe for
-  Afterglow; Marble run stations can share a surface at extreme pitch ranges.
+  Afterglow; Marble run stations can share a surface at extreme pitch ranges;
+  move the vendor typing for `getCachedBuffer` to the vendor typing home.
+- **Scope spectrum offset:** Scope's spectrum is read live while its waveform
+  is latency-corrected; measured 51 ms apart (#159). Deriving the spectrum from
+  the corrected PCM would align them.
+- **Sampler source facts:** exact cursors for pitched banks, explicit pitch,
+  looping and modulation need each bank's root and playback rate, and a
+  whole-song source list; until then Sampler labels those cursors unavailable.
 - **Flash tails past the supplied notes:** Catwalk's camera flash ends early
   when its note leaves the notes the host supplies. Fixing it needs the host to
   supply notes whose effects outlive the window, a contract change.
