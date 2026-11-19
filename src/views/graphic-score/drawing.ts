@@ -161,8 +161,7 @@ export function drawPoster(
     box.drumParts.length > 1 ? box.drumY(box.drumParts[1].id) - box.drumY(box.drumParts[0].id) : 20;
   const stride = Math.max(1, Math.ceil(14 / spacing));
   box.drumParts.forEach((p, i) => {
-    if (i % stride === 0)
-      ctx.fillText(fit(ctx, p.name, box.left - box.margin - 8), box.left - 8, box.drumY(p.id) + 4);
+    if (i % stride === 0) ctx.fillText(p.name, box.left - 8, box.drumY(p.id) + 4);
   });
   ctx.textAlign = 'left';
   const footerTop = height - box.footer;

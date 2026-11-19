@@ -9,6 +9,7 @@ import {
   roles,
   scene,
   searchlight,
+  settingValue,
   district,
   strideAt,
   accented,
@@ -712,4 +713,18 @@ it('skips unsampled numeric filters without falling through to a moving non-filt
   });
   f.notes = f.notes.filter((n) => n.instrument !== '1');
   expect(searchlight(f, analyse(f.notes))).toBeUndefined();
+});
+
+it('formats the beam driver with natural units and no spurious decimal zeroes', () => {
+  expect(settingValue('cutoff', 1369.9999999999)).toBe('1370 Hz');
+  expect(settingValue('lpf', 1370)).toBe('1370 Hz');
+  expect(settingValue('hp', 110.3)).toBe('110 Hz');
+  expect(settingValue('bandf', 800)).toBe('800 Hz');
+  expect(settingValue('lpq', 11)).toBe('11 Q');
+  expect(settingValue('attack', 0.375)).toBe('0.38 s');
+  expect(settingValue('release', 1.2)).toBe('1.2 s');
+  expect(settingValue('crush', 8)).toBe('8 bits');
+  expect(settingValue('speed', 0.9)).toBe('0.9 ×');
+  expect(settingValue('gain', 0.45321)).toBe('0.45');
+  expect(settingValue('pan', 0.5)).toBe('0.5');
 });

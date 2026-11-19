@@ -153,7 +153,7 @@ function drawRoot(
   first: number,
   grown: boolean,
 ) {
-  const root = b.x(first) - 22;
+  const root = b.rootX(p, first);
   c.globalAlpha = grown ? 0.8 : 0.18;
   c.strokeStyle = ink(f, p.id);
   c.lineWidth = grown ? 2 : 1;
@@ -161,7 +161,7 @@ function drawRoot(
   c.beginPath();
   c.moveTo(root, b.bottom + 12);
   c.bezierCurveTo(
-    root - 34,
+    root,
     b.bottom - 30,
     b.x(first) - 45,
     b.vineY(p, first) + 18,
@@ -460,7 +460,7 @@ const definition: ViewDefinition = {
       b: Layout | undefined,
       clusters: Cluster[] = [];
     let tagPlan: ClusterTags = { placed: [], hidden: 0 };
-    let roots: { first: number; x: number; canvas: HTMLCanvasElement }[] = [];
+    let roots: { first: number; x: number; width: number; canvas: HTMLCanvasElement }[] = [];
     const sprites = new Map<
       Cluster,
       { at: number; x: number; y: number; sx: number; sy: number; width: number; height: number }[]
@@ -550,15 +550,16 @@ const definition: ViewDefinition = {
             .filter((p) => p.leaves.length)
             .map((plant) => {
               const first = Math.max(rangeFrom, plant.leaves[0].note.start),
-                x = layout.x(first) - 60;
+                x = Math.min(layout.x(first) - 60, layout.rootX(plant, first) - 40),
+                width = Math.max(layout.x(first) + 4, layout.rootX(plant, first) + 4) - x;
               const root = document.createElement('canvas');
-              root.width = Math.ceil(64 * f.dpr);
+              root.width = Math.ceil(width * f.dpr);
               root.height = Math.round(f.height * f.dpr);
               const rc = root.getContext('2d');
               if (!rc) throw Error('Canvas 2D is unavailable');
               rc.setTransform(f.dpr, 0, 0, f.dpr, -x * f.dpr, 0);
               drawRoot(rc, f, layout, plant, first, true);
-              return { first, x, canvas: root };
+              return { first, x, width, canvas: root };
             });
           tc.reset();
           tc.setTransform(f.dpr, 0, 0, f.dpr, 0, 0);
@@ -580,7 +581,7 @@ const definition: ViewDefinition = {
         c.drawImage(grown, 0, 0, f.width, f.height);
         c.restore();
         for (const root of roots)
-          if (root.first <= f.now) c.drawImage(root.canvas, root.x, 0, 64, f.height);
+          if (root.first <= f.now) c.drawImage(root.canvas, root.x, 0, root.width, f.height);
         for (const [cluster, stages] of sprites) {
           const sprite = stages.findLast((s) => s.at <= f.now);
           if (!sprite) continue;

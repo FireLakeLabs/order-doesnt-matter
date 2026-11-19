@@ -467,7 +467,7 @@ function live(
   const next = state.next
     ? `NEXT ${state.next.time.toFixed(3)} · ×${String(state.multiball)}`
     : 'NO NEXT ONSET';
-  text(c, f, next, f.width / 2, f.height - 48, f.width - 30);
+  text(c, f, next, f.width / 2, f.height - 82, f.width - 30);
   const entries = box.targets
     .filter((t) => lit.has(t.instrument.id))
     .map((t) => {
@@ -477,26 +477,25 @@ function live(
         .reduce((n, g) => n + g.notes.filter((n) => n.instrument === t.instrument.id).length, 0);
       return { name: t.instrument.name, slot: t.slot, count: h?.count ?? ahead, held: !!h };
     });
-  const columns = Math.max(1, Math.floor((f.width - 24) / 150)),
+  const heading = (e: (typeof entries)[number]) =>
+    `${String(e.slot + 1)} ${e.held ? '×' : '+'}${String(e.count)}${e.count >= 8 ? ' JACKPOT' : e.held ? ' HOLD' : ''}`;
+  c.font = `11px "${f.theme.fontMono}"`;
+  const chipWidth = Math.max(150, ...entries.map((e) => c.measureText(e.name).width + 12));
+  const columns = Math.max(1, Math.floor((f.width - 30) / chipWidth)),
     max = columns * 2;
   const visible = entries.length > max ? entries.slice(0, max - 1) : entries;
-  const chips = visible.map(
-    (e) =>
-      `${String(e.slot + 1)} ${e.held ? '×' : '+'}${String(e.count)} ${e.count >= 8 ? 'JACKPOT ' : e.held ? 'HOLD ' : ''}${e.name}`,
-  );
+  const chips = visible.map((e) => ({ heading: heading(e), name: e.name }));
   if (entries.length > max)
-    chips.push(
-      `+${String(entries.length - visible.length)} parts · Σ${String(entries.slice(visible.length).reduce((n, e) => n + e.count, 0))}`,
-    );
-  chips.forEach((label, i) => {
-    text(
-      c,
-      f,
-      label,
-      15 + (((i % columns) + 0.5) * (f.width - 30)) / columns,
-      f.height - 27 + Math.floor(i / columns) * 17,
-      (f.width - 30) / columns - 12,
-    );
+    chips.push({
+      heading: `+${String(entries.length - visible.length)} parts`,
+      name: `Σ${String(entries.slice(visible.length).reduce((n, e) => n + e.count, 0))}`,
+    });
+  chips.forEach((chip, i) => {
+    const x = 15 + (((i % columns) + 0.5) * (f.width - 30)) / columns,
+      y = f.height - 61 + Math.floor(i / columns) * 34,
+      width = (f.width - 30) / columns - 12;
+    text(c, f, chip.heading, x, y, width);
+    text(c, f, chip.name, x, y + 17, width);
   });
 }
 const view: ViewDefinition = {
