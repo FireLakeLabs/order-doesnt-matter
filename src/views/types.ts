@@ -1,3 +1,5 @@
+import type { SampleLookup } from '../strudel/sample-buffers';
+
 export interface ViewNote {
   instrument: string; // ViewInstrument.id
   start: number; // absolute cycles
@@ -53,6 +55,7 @@ export interface ViewFrame {
   height: number;
   dpr: number;
   audio?: { wave: Float32Array; spectrum: Uint8Array }; // only for needs: 'audio'
+  samples?: SampleLookup; // only for samples: true; shared source PCM, never loads
 }
 export interface ViewHandle {
   frame(frame: ViewFrame): void;
@@ -64,6 +67,7 @@ export interface ViewDefinition {
   name: string;
   tag: string; // one or two words for the shelf, e.g. "whole song"
   needs?: 'score' | 'audio'; // default 'score'
+  samples?: true; // independent of needs: can accompany score or audio
   span?: 'window' | 'song'; // 'song' asks the host for the whole song
   mount(el: HTMLElement): ViewHandle | Promise<ViewHandle>;
 }

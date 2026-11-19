@@ -21,6 +21,18 @@ test('docs check keeps required files readable without word limits', () => {
 });
 
 test('boundary fixtures reject imports and fixed ports; allow the seam and OS ports', () => {
+  expect(
+    boundaryProblems(
+      'src/views/types.ts',
+      "import type { SampleLookup } from '../strudel/sample-buffers'",
+    ),
+  ).toEqual([]);
+  for (const code of [
+    "import { createSampleLookup } from '../strudel/sample-buffers'",
+    "import type { SampleLookup } from '../strudel/sample-cache'",
+    "const cache = import('../strudel/sample-cache')",
+  ])
+    expect(boundaryProblems('src/views/bad.ts', code)).not.toEqual([]);
   for (const code of [
     "import '@strudel/core'",
     "export { x } from 'superdough'",

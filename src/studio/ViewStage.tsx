@@ -3,7 +3,7 @@ import { Expand, Shrink, X } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { createBrowserQueries } from '../strudel/evaluate-browser';
 import { views } from '../views';
-import type { ViewTheme } from '../views/types';
+import type { ViewFrame, ViewTheme } from '../views/types';
 import type { StudioClock } from './clock';
 import { buildFrame, createAudioFrames, neededRange } from './frame';
 import { runtime } from './runtime';
@@ -48,6 +48,7 @@ function Drawing({
     container.append(owned);
     let active = true,
       broken = false;
+    let samples: ViewFrame['samples'];
     let size = { width: container.clientWidth, height: container.clientHeight };
     const failed = (reason: unknown) => {
       broken = true;
@@ -57,6 +58,10 @@ function Drawing({
       async () => {
         if (!entry) throw Error(`Unknown view: ${viewId}`);
         const definition = await entry.load();
+        if (definition.samples)
+          samples = (await import('../strudel/sample-cache')).sampleBuffers(
+            () => !!runtime.app.engine,
+          );
         if (active) metadata(definition.name, definition.tag);
         return definition;
       },
@@ -94,6 +99,7 @@ function Drawing({
         mounted.frame(
           buildFrame({
             state,
+            samples,
             audio:
               mounted.definition.needs === 'audio'
                 ? audioFrame(runtime.app.engine?.tap(), sample)
