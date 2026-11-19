@@ -1,6 +1,7 @@
 import type { ViewDefinition, ViewFrame, ViewNote } from './types';
 import {
   capsules,
+  displayNumber,
   indexRelay,
   relayFocus,
   relayLayout,
@@ -160,8 +161,10 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Relay) {
   for (const part of parts) {
     const loose = score.phrases.filter((p) => p.instrument === part.id && !baton.has(p.id));
     for (const cap of capsules(loose, score.from, score.to, right - left)) {
-      const px = x(cap.from) + 2,
-        bw = x(cap.to) - x(cap.from) - 4,
+      const width = x(cap.to) - x(cap.from),
+        inset = Math.min(2, width / 4),
+        px = x(cap.from) + inset,
+        bw = width - 2 * inset,
         py = y(part.id);
       c.fillStyle = t.ground;
       c.strokeStyle = cap.notes.some((n) => n.start <= now && now < n.end) ? t.text : part.colour;
@@ -300,7 +303,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Relay) {
     const a = score.phrases[r.before],
       b = score.phrases[r.after];
     const name = (id: string) => parts.find((p) => p.id === id)?.name ?? id;
-    const detail = `${String(i + 1)} ${r.kind} ${transposeText(r.transpose)} st${r.kind === 'near' ? ` · d ${String(r.distance)}` : ''} · ${name(a.instrument)} → ${name(b.instrument)}`;
+    const detail = `${String(i + 1)} ${r.kind} ${transposeText(r.transpose)} st${r.kind === 'near' ? ` · d ${displayNumber(r.distance)}` : ''} · ${name(a.instrument)} → ${name(b.instrument)}`;
     c.fillText(fit(c, detail, w - 40), 20, foot + 25 + i * 18);
   });
   if (!arcs.length)

@@ -21,7 +21,7 @@ export interface Return {
   transpose: number;
 }
 const gcd = (a: number, b: number): number => (b ? gcd(b, a % b) : a);
-/** Same recovery bound as Orrery: refuse score times outside a small rational grid. */
+/** Recover fractions with denominator ≤4096 within 1e−10 cycle; unsafe times stay unknown. */
 export function rational(value: number): [number, number] | null {
   if (!Number.isFinite(value)) return null;
   for (let d = 1; d <= 4096; d++) {
@@ -68,6 +68,7 @@ export function relayRange(frame: ViewFrame): [number, number] {
  * mean absolute shape deviation >0 and <=0.5 semitone, and no deviation >2;
  * the mean is the labelled distance. No rounded bar signatures, settings, names, source
  * period guess, octave folding or transitive near-match closure decides equality.
+ * The containing phrase block stays current through its rests.
  */
 export function indexRelay(frame: ViewFrame) {
   const [from, to] = relayRange(frame);
@@ -162,36 +163,38 @@ export function indexRelay(frame: ViewFrame) {
 export type Relay = ReturnType<typeof indexRelay>;
 export function relayFocus(score: Relay, now: number) {
   const current = new Set(
-    score.phrases
-      .filter((p) => p.notes.some((n) => n.hasOnset && n.start <= now && now < n.end))
-      .map((p) => p.id),
+    score.phrases.filter((p) => p.from <= now && now < p.to).map((p) => p.id),
   );
   const links = score.returns.filter((r) => current.has(r.before) || current.has(r.after));
   return { current, related: new Set(links.flatMap((r) => [r.before, r.after])), links };
 }
-/** Fixed score-time bins; merged marks retain their source records and attack counts. */
+/** Phrase-local bins retain every owned record without spilling into neighbouring batons. */
 export function capsules(phrases: Phrase[], from: number, to: number, width: number) {
-  const bins = Math.max(1, Math.floor(width / 38));
-  const buckets = new Map<number, ViewNote[]>();
-  for (const p of phrases)
+  return phrases.flatMap((p) => {
+    const a = Math.max(from, p.from),
+      b = Math.min(to, p.to);
+    if (b <= a) return [];
+    const bins = Math.max(1, Math.floor((width * (b - a)) / (to - from) / 38));
+    const buckets = new Map<number, ViewNote[]>();
     for (const n of p.notes) {
       // A crossing note belongs to its first visible block only.
-      if (p.from > Math.max(from, n.start)) continue;
+      if (p.from > Math.max(from, n.start) || n.end <= a || n.start >= b) continue;
       const slot = Math.min(
         bins - 1,
-        Math.max(0, Math.floor(((Math.max(n.start, from) - from) / (to - from)) * bins)),
+        Math.max(0, Math.floor(((Math.max(a, n.start) - a) / (b - a)) * bins)),
       );
       const bucket = buckets.get(slot) ?? [];
       bucket.push(n);
       buckets.set(slot, bucket);
     }
-  return [...buckets].map(([slot, notes]) => ({
-    from: from + (slot / bins) * (to - from),
-    to: from + ((slot + 1) / bins) * (to - from),
-    notes,
-    count: notes.length,
-    attacks: notes.filter((n) => n.hasOnset).length,
-  }));
+    return [...buckets].map(([slot, notes]) => ({
+      from: a + (slot / bins) * (b - a),
+      to: Math.min(b, a + ((slot + 1) / bins) * (b - a)),
+      notes,
+      count: notes.length,
+      attacks: notes.filter((n) => n.hasOnset).length,
+    }));
+  });
 }
 export function relayLayout(width: number, height: number, lanes: number) {
   const left = width < 700 ? 100 : 150;
@@ -205,5 +208,11 @@ export function shapeHue(shape: string): number {
   for (const c of shape) hash = Math.imul(hash ^ c.charCodeAt(0), 16777619);
   return (hash >>> 0) % 360;
 }
+/** Two decimal places for labels; tiny nonzero differences retain a compact nonzero value. */
+export function displayNumber(n: number): string {
+  return n !== 0 && Math.abs(n) < 0.01
+    ? n.toExponential(1).replace('.0e', 'e')
+    : String(Number(n.toFixed(2)));
+}
 export const transposeText = (n: number) =>
-  `${n > 0 ? '+' : n < 0 ? '−' : ''}${String(Math.abs(n))}`;
+  `${n > 0 ? '+' : n < 0 ? '−' : ''}${displayNumber(Math.abs(n))}`;

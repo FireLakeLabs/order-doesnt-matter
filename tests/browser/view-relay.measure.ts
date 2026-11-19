@@ -171,6 +171,54 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
         notes: source.notes.map((n) => ({ ...n, start: n.start / 4, end: n.end / 4 })),
       });
       const compacted = labels.some((l) => l.text === 'Current returns compacted to counts');
+      labels.length = 0;
+      handle.frame({
+        ...source,
+        notes: source.notes.map((n) => ({ ...n, end: Math.min(n.end, n.start + 1 / 8) })),
+      });
+      const throughRest =
+        labels.some((l) => l.text.includes('13 current edges (2 shown)')) &&
+        labels.some((l) => l.text.includes('exact +12 st · subBass → wobbleBass'));
+      const sub = source.instruments.find((i) => i.name === 'subBass')!.id;
+      const rowY = labels.find((l) => l.x === 12 && l.text.endsWith('subBass'))!.y;
+      const boxes: {
+        left: number;
+        right: number;
+        top: number;
+        bottom: number;
+        height: number;
+      }[] = [];
+      const round = CanvasRenderingContext2D.prototype.roundRect;
+      CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, radii) {
+        boxes.push({
+          left: Math.min(x, x + width),
+          right: Math.max(x, x + width),
+          top: Math.min(y, y + height),
+          bottom: Math.max(y, y + height),
+          height: Math.abs(height),
+        });
+        return round.call(this, x, y, width, height, radii);
+      };
+      let mixedClear = true;
+      for (const width of [1300, 487]) {
+        boxes.length = 0;
+        handle.frame({
+          ...source,
+          width,
+          notes: [
+            ...source.notes,
+            { instrument: sub, start: 7.9, end: 8, hasOnset: true, value: { note: 'g1' } },
+          ],
+        });
+        const laneBoxes = boxes
+          .filter((b) => b.height < 32 && b.top < rowY && b.bottom > rowY)
+          .sort((a, b) => a.left - b.left);
+        mixedClear =
+          mixedClear &&
+          laneBoxes.length === 5 &&
+          laneBoxes.every((b, i) => !i || laneBoxes[i - 1].right <= b.left);
+      }
+      CanvasRenderingContext2D.prototype.roundRect = round;
       CanvasRenderingContext2D.prototype.fillText = fill;
       const rgb = (hex: string) =>
         hex
@@ -198,10 +246,14 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
         contrast,
         nearLabels,
         compacted,
+        throughRest,
+        mixedClear,
       };
     });
     expect(measured.nearLabels.some((text) => text.includes('near +12 st · d 0.2'))).toBe(true);
     expect(measured.compacted).toBe(true);
+    expect(measured.throughRest).toBe(true);
+    expect(measured.mixedClear).toBe(true);
     expect(measured.reversible).toBe(true);
     expect(measured.freshEqual).toBe(true);
     expect(measured.contrast).toBeGreaterThanOrEqual(4.5);

@@ -12,6 +12,8 @@ import {
   capsules,
   rational,
   relayRange,
+  displayNumber,
+  transposeText,
 } from '../../src/views/relay/model';
 import type { ViewFrame } from '../../src/views/types';
 
@@ -185,4 +187,68 @@ it('keeps real score records accounted for and does not invent returns in a cont
   }
   const techno = indexRelay(corpus.get('real-techno')!);
   expect(techno.returns).toEqual([]); // 32 pitched notes per block are too dense to call phrases.
+});
+
+it('keeps a matched phrase current through internal and trailing rests, with half-open boundaries', () => {
+  const f = phraseFrame();
+  f.notes = f.notes.map((n) => ({ ...n, end: n.start + 1 / 8 }));
+  const score = indexRelay(f);
+  expect(score.returns).toHaveLength(1);
+  const first = score.phrases.find((p) => p.instrument === '0')!;
+  const second = score.phrases.find((p) => p.instrument === '1')!;
+  for (const now of [0.3, 1.3, 3.9]) {
+    expect(f.notes.some((n) => n.start <= now && now < n.end)).toBe(false);
+    const focus = relayFocus(score, now);
+    expect(focus.current).toEqual(new Set([first.id]));
+    expect(focus.related).toEqual(new Set([first.id, second.id]));
+    expect(focus.links).toEqual(score.returns);
+  }
+  expect(relayFocus(score, 4).current).toEqual(new Set([second.id]));
+  expect(relayFocus(score, 8).current.size).toBe(0);
+});
+it('keeps loose capsule spans inside their source blocks beside returning batons', () => {
+  const f = scoreFrame();
+  f.sections = [{ name: 'Song', from: 0, to: 28 }];
+  f.notes = [8, 12].flatMap((start) =>
+    [0, 0, 3, 5, 7].map((p, i) => ({
+      instrument: '0',
+      start: start + i / 2,
+      end: start + (i + 1) / 2,
+      hasOnset: true,
+      value: { note: 48 + p },
+    })),
+  );
+  const loose = [7.9, 16.1].map((start) => ({
+    instrument: '0',
+    start,
+    end: start + 0.1,
+    hasOnset: true,
+    value: { note: 90 },
+  }));
+  f.notes.push(...loose);
+  const score = indexRelay(f);
+  expect(score.returns).toHaveLength(1);
+  const matched = new Set(score.returns.flatMap((r) => [r.before, r.after]));
+  const batons = score.phrases.filter((p) => matched.has(p.id));
+  const unmatched = score.phrases.filter((p) => !matched.has(p.id));
+  for (const width of [960, 349]) {
+    const caps = capsules(unmatched, 0, 28, width);
+    expect(caps.reduce((sum, c) => sum + c.count, 0)).toBe(2);
+    for (const cap of caps) {
+      const owner = unmatched.find((p) => p.notes.includes(cap.notes[0]))!;
+      expect(cap.from).toBeGreaterThanOrEqual(owner.from);
+      expect(cap.to).toBeLessThanOrEqual(owner.to);
+      expect(batons.every((p) => cap.to <= p.from || cap.from >= p.to)).toBe(true);
+    }
+  }
+});
+it('formats fractional match labels compactly without displaying a nonzero near distance as zero', () => {
+  expect(displayNumber(1 / 3)).toBe('0.33');
+  expect(displayNumber(0.2)).toBe('0.2');
+  expect(displayNumber(0.000001)).not.toBe('0');
+  expect(displayNumber(0)).toBe('0');
+  expect(transposeText(1 / 3)).toBe('+0.33');
+  expect(transposeText(-1 / 3)).toBe('−0.33');
+  expect(transposeText(12)).toBe('+12');
+  expect(transposeText(0)).toBe('0');
 });
