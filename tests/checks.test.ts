@@ -203,3 +203,22 @@ test('views import only sibling contracts or three; logic directories stay frame
         'Logic directories must stay framework-free',
       );
 });
+
+test('only Staff may import the exact VexFlow package, including on-demand imports', () => {
+  for (const path of ['src/views/staff.view.ts', 'src/views/staff/engrave.ts']) {
+    expect(boundaryProblems(path, "const engraving = import('vexflow')")).toEqual([]);
+    expect(boundaryProblems(path, "import type { Stave } from 'vexflow'")).toEqual([]);
+    for (const name of ['vexflow/bravura', 'vexflow-extra', 'react'])
+      expect(boundaryProblems(path, `import '${name}'`)).toContain(
+        'Views may import only views and three',
+      );
+  }
+  for (const path of [
+    'src/views/other.view.ts',
+    'src/views/other/draw.ts',
+    'src/views/staff-extra/draw.ts',
+  ])
+    expect(boundaryProblems(path, "const engraving = import('vexflow')")).toContain(
+      'Views may import only views and three',
+    );
+});

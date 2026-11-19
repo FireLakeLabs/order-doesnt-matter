@@ -18,10 +18,14 @@ export function boundaryProblems(path, code) {
       const target = name.startsWith('.')
         ? posix.normalize(posix.join(posix.dirname(path), name))
         : name;
+      const staffEngraver =
+        name === 'vexflow' &&
+        (path === 'src/views/staff.view.ts' || path.startsWith('src/views/staff/'));
       if (
         path.startsWith('src/views/') &&
         !target.startsWith('src/views/') &&
-        !/^three(?:\/|$)/.test(name)
+        !/^three(?:\/|$)/.test(name) &&
+        !staffEngraver
       )
         problems.push('Views may import only views and three');
       if (
