@@ -1,3 +1,4 @@
+import { SPECTRUM_MIN_DB, SPECTRUM_MAX_DB } from './audio-range';
 import type { OutputTap } from '../contract';
 import { capturedRms } from '../engine/logic';
 import type { PCM } from '../engine/logic';
@@ -50,6 +51,8 @@ registerProcessor('odm-output-tap', ODMTap);
         const node = context.createAnalyser();
         node.fftSize = 2 ** Math.ceil(Math.log2(context.sampleRate * 0.1));
         node.smoothingTimeConstant = 0;
+        node.minDecibels = SPECTRUM_MIN_DB;
+        node.maxDecibels = SPECTRUM_MAX_DB;
         output.connect(node);
         analyser = node;
         timeDomain = new Float32Array(node.fftSize);

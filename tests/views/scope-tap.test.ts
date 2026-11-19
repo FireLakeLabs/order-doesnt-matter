@@ -1,4 +1,5 @@
 import { expect, test, vi } from 'vitest';
+import { SPECTRUM_MIN_DB, SPECTRUM_MAX_DB } from '../../src/strudel/audio-range';
 import { createTap } from '../../src/strudel/audio-tap';
 
 test('live analyser is lazy and reuses the result and both read buffers', async () => {
@@ -10,6 +11,8 @@ test('live analyser is lazy and reuses the result and both read buffers', async 
     fftSize: 0,
     frequencyBinCount: 4096,
     smoothingTimeConstant: 1,
+    minDecibels: -100,
+    maxDecibels: -30,
     getFloatTimeDomainData: waveRead,
     getByteFrequencyData: spectrumRead,
   };
@@ -45,6 +48,9 @@ test('live analyser is lazy and reuses the result and both read buffers', async 
     expect(first.spectrum[0]).toBe(64);
     expect(analyser.fftSize).toBe(8192);
     expect(analyser.smoothingTimeConstant).toBe(0);
+    expect(analyser.minDecibels).toBe(SPECTRUM_MIN_DB);
+    expect(analyser.maxDecibels).toBe(SPECTRUM_MAX_DB);
+    expect(analyser.maxDecibels).toBe(0);
     expect(context.createAnalyser).toHaveBeenCalledTimes(1);
     expect(output.connect).toHaveBeenCalledWith(analyser);
     expect(waveRead).toHaveBeenCalledTimes(2);

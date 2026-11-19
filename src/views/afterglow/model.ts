@@ -1,3 +1,4 @@
+import { SPECTRUM_MIN_DB, SPECTRUM_MAX_DB } from '../../strudel/audio-range';
 import type { ViewFrame, ViewNote, ViewTheme } from '../types';
 import { pitch } from '../shared/pitch';
 import { clamp } from '../shared/math';
@@ -10,9 +11,13 @@ export const MAX_COLUMNS = 4096;
 export const frequency = (midi: number) => 440 * 2 ** ((midi - 69) / 12);
 export const frequencyPosition = (hz: number) =>
   clamp(Math.log(hz / LOW_HZ) / Math.log(HIGH_HZ / LOW_HZ));
-/** Web Audio's default byte FFT range is -100…-30 dBFS. Display -90…-30. */
-export const decibels = (byte: number) => -100 + (byte / 255) * 70;
-export const level = (byte: number) => clamp((decibels(byte) + 90) / 60);
+/** Reserve the full loud end of the calibrated range; only the noise floor is hidden. */
+export const HEAT_MIN_DB = SPECTRUM_MIN_DB + 10;
+export const HEAT_MAX_DB = SPECTRUM_MAX_DB;
+export const decibels = (byte: number) =>
+  SPECTRUM_MIN_DB + (byte / 255) * (SPECTRUM_MAX_DB - SPECTRUM_MIN_DB);
+export const level = (byte: number) =>
+  clamp((decibels(byte) - HEAT_MIN_DB) / (HEAT_MAX_DB - HEAT_MIN_DB));
 
 /** Same sample-rate inference as Scope: the tap's wave is exactly 100 ms.
  * Peak bin per log band; no interpolation between bins or measured times. */
