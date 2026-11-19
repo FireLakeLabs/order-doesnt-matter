@@ -58,7 +58,10 @@ function Drawing({
       async () => {
         if (!entry) throw Error(`Unknown view: ${viewId}`);
         const definition = await entry.load();
-        if (definition.samples) samples = (await import('../strudel/sample-cache')).sampleBuffers;
+        if (definition.samples)
+          samples = (await import('../strudel/sample-cache')).sampleBuffers(
+            () => !!runtime.app.engine,
+          );
         if (active) metadata(definition.name, definition.tag);
         return definition;
       },

@@ -10,4 +10,8 @@ declare module '@strudel/web' {
 // AudioBuffers, populated after loadBuffer's decodeAudioData resolves. No loads,
 // audio context creation or playback changes here. Real-cache browser canary:
 // tests/browser/sample-buffers.spec.ts.
-export const sampleBuffers = createSampleLookup({ getSound, getSampleInfo, getCachedBuffer });
+export function sampleBuffers(ready: () => boolean) {
+  // The Studio publishes its engine only after createAudio has settled defaults().
+  // Until then, an absent name is not evidence that the sound is unavailable.
+  return createSampleLookup({ ready, getSound, getSampleInfo, getCachedBuffer });
+}

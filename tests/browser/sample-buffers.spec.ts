@@ -21,7 +21,9 @@ test('opted-in Studio view reads playback cache PCM and exact peaks on the dubst
   await context.route('https://raw.githubusercontent.com/**', (route) => {
     const bank: Record<string, unknown> = { _base: 'https://samples.invalid/' };
     for (const sound of ['ade', 'speech', 'bd', 'sd', 'hh', 'oh', 'cp'])
-      bank[sound] = ['burst.wav', 'burst.wav', 'burst.wav'];
+      bank[sound] = ['b.wav', 'b.wav', 'c.wav'];
+    bank.bd = ['a.wav', 'b.wav', 'c.wav'];
+    bank.pitched = { c2: ['a.wav'], e2: ['b.wav'] };
     bank.unplayed = ['unplayed.wav'];
     return route.fulfill({ json: bank });
   });
@@ -78,9 +80,11 @@ test('opted-in Studio view reads playback cache PCM and exact peaks on the dubst
       !!window.sampleFrames?.['stage-a']?.samples,
   );
   expect(await page.evaluate(() => 'samples' in window.sampleFrames['stage-b'])).toBe(false);
+  expect(await page.evaluate(() => window.odmStudio.app.engine == null)).toBe(true);
   expect(
-    await page.evaluate(() => window.sampleFrames['stage-a'].samples!.get('unknown_sound', 0)),
-  ).toMatchObject({ status: 'unavailable', reason: expect.stringContaining('Unknown sound') });
+    await page.evaluate(() => window.sampleFrames['stage-a'].samples!.get('bd', 0).status),
+  ).toBe('loading');
+  expect(fileRequests).toBe(0);
   await page.evaluate(
     (source) => window.odmStudio.load(source),
     await readFile('corpus/programs/real-dubstep-arranged.strudel', 'utf8'),
@@ -95,6 +99,9 @@ test('opted-in Studio view reads playback cache PCM and exact peaks on the dubst
   expect(await page.evaluate(() => window.sampleFrames['stage-a'].samples!.get('sine', 0))).toEqual(
     { status: 'synth' },
   );
+  expect(
+    await page.evaluate(() => window.sampleFrames['stage-a'].samples!.get('unknown_sound', 0)),
+  ).toMatchObject({ status: 'unavailable', reason: expect.stringContaining('Unknown sound') });
 
   const measured = await page.evaluate(() => {
     const samples = window.sampleFrames['stage-a'].samples!;
@@ -119,6 +126,8 @@ test('opted-in Studio view reads playback cache PCM and exact peaks on the dubst
         );
       }
     }
+    const wrapped = samples.get('bd', -1);
+    const pitched = samples.get('pitched', 0, { note: 'e2' });
     return {
       frameCount: handle.frameCount,
       decodedFrames: decoded.length,
@@ -129,7 +138,8 @@ test('opted-in Studio view reads playback cache PCM and exact peaks on the dubst
       fileName: handle.fileName,
       channels: handle.channels.length,
       shared: samples.get('bd', 0) === handle,
-      wrapped: samples.get('bd', -1) === handle,
+      wrappedFile: wrapped.status === 'buffer' ? wrapped.fileName : wrapped.status,
+      pitchedFile: pitched.status === 'buffer' ? pitched.fileName : pitched.status,
       peakError,
       blockSize: handle.peaks.blockSize,
       unplayed: samples.get('unplayed', 0).status,
@@ -139,13 +149,14 @@ test('opted-in Studio view reads playback cache PCM and exact peaks on the dubst
   expect(measured.frameCount).toBe(measured.decodedFrames);
   expect(measured.sampleRate).toBe(measured.decodedRate);
   expect(measured.duration).toBe(measured.decodedDuration);
-  expect(measured.fileName).toBe('burst.wav');
+  expect(measured.fileName).toBe('a.wav');
   expect(measured.shared).toBe(true);
-  expect(measured.wrapped).toBe(true);
+  expect(measured.wrappedFile).toBe('c.wav');
+  expect(measured.pitchedFile).toBe('b.wav');
   expect(measured.peakError).toBe(0);
   expect(measured.blockSize).toBe(512);
   expect(measured.unplayed).toBe('loading');
-  expect(fileRequests).toBe(1); // shared URL loaded once; lookup never loads unplayed.wav
+  expect(fileRequests).toBe(3); // three played URLs; lookup never loads unplayed.wav
   await info.attach('sample-buffer-measurements', {
     body: JSON.stringify(measured),
     contentType: 'application/json',

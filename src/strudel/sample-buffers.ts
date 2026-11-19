@@ -22,7 +22,8 @@ export interface SampleLookup {
   /** index is Strudel's n (rounded and wrapped by its resolver). Pitch selects
    * the file in note-keyed banks; omitted pitch uses Strudel's default MIDI 36.
    * Loading means no decoded entry yet, including a load that failed: the
-   * upstream cache exposes neither pending promises nor failures. Never loads. */
+   * upstream cache exposes neither pending promises nor failures. Also loading
+   * until playback has finished registering its sounds. Never loads. */
   get(
     sound: string,
     index: number,
@@ -30,19 +31,21 @@ export interface SampleLookup {
   ): SampleResult;
 }
 export interface SampleSource {
+  ready(): boolean;
   getSound(sound: string): { data: { type?: string; samples?: unknown } } | undefined;
   getSampleInfo(value: unknown, bank: unknown): { url: string };
   getCachedBuffer(url: string): AudioBuffer | undefined;
 }
 const loading = { status: 'loading' } as const;
 const synth = { status: 'synth' } as const;
+const handles = new WeakMap<AudioBuffer, SampleBuffer>();
 
-/** One lookup shared by opted-in stages. Peaks are computed on first request,
+/** Peaks are shared across opted-in stages and computed on first request,
  * once per decoded buffer; idle frames and views without samples do no work. */
 export function createSampleLookup(source: SampleSource): SampleLookup {
-  const handles = new WeakMap<AudioBuffer, SampleBuffer>();
   return {
     get(sound, index, pitch) {
+      if (!source.ready()) return loading;
       const entry = source.getSound(sound);
       if (!entry) return { status: 'unavailable', reason: `Unknown sound "${sound}"` };
       if (entry.data.type !== 'sample') return synth;

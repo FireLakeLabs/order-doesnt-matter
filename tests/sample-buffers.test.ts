@@ -4,6 +4,7 @@ import { createSampleLookup, type SampleSource } from '../src/strudel/sample-buf
 function fixture() {
   const bank = ['https://samples.invalid/kick#1.wav'];
   const source: SampleSource = {
+    ready: vi.fn(() => true),
     getSound: vi.fn((sound) =>
       sound === 'bd'
         ? { data: { type: 'sample', samples: bank } }
@@ -16,6 +17,19 @@ function fixture() {
   };
   return { source, bank, lookup: createSampleLookup(source) };
 }
+
+test('uninitialized and partially registering playback report loading without consulting the registry', () => {
+  const { source, lookup } = fixture();
+  vi.mocked(source.ready).mockReturnValue(false);
+  for (const sound of ['bd', 'sine', 'unknown'])
+    expect(lookup.get(sound, 0)).toEqual({ status: 'loading' });
+  expect(source.getSound).not.toHaveBeenCalled();
+  expect(source.getSampleInfo).not.toHaveBeenCalled();
+  expect(source.getCachedBuffer).not.toHaveBeenCalled();
+  vi.mocked(source.ready).mockReturnValue(true);
+  expect(lookup.get('sine', 0).status).toBe('synth');
+  expect(lookup.get('unknown', 0).status).toBe('unavailable');
+});
 
 test('unknown and synth states never read the decoded cache or resolve a sample', () => {
   const { source, lookup } = fixture();
@@ -80,6 +94,7 @@ test('decoded PCM is shared and stereo peaks are computed once, including a part
   expect(result.peaks.blockSize).toBe(512);
   expect(lookup.get('bd', 0)).toBe(result);
   expect(lookup.get('bd', 8)).toBe(result);
+  expect(createSampleLookup(source).get('bd', 0)).toBe(result);
   expect(getChannelData).toHaveBeenCalledTimes(2);
   // A new decoded entry is observed; a stale handle is not pinned to sound/index.
   vi.mocked(source.getCachedBuffer).mockReturnValue({ ...buffer } as AudioBuffer);
