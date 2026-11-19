@@ -142,12 +142,15 @@ export function gardenLayout(g: Garden, width: number, height: number) {
     vineY,
     sprigY,
     // Separate simultaneous starts along the ground without moving scored foliage.
-    rootX: (p: Plant, first: number) =>
-      clamp(
-        x(first) - 22 + p.index * Math.min(28, (right - left) / Math.max(1, g.plants.length)),
-        left - 22,
-        right - 10,
-      ),
+    rootX: (p: Plant, first: number) => {
+      const siblings = g.plants.filter(
+        (other) => other.leaves.length && Math.max(g.from, other.leaves[0].note.start) === first,
+      );
+      const rank = siblings.indexOf(p);
+      const origin = x(first) - (siblings.length > 1 ? 8 : 22);
+      const spacing = Math.min(28, Math.max(0, origin - 22) / Math.max(1, siblings.length - 1));
+      return origin - Math.max(0, rank) * spacing;
+    },
     plantBand,
   };
 }

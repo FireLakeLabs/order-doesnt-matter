@@ -161,7 +161,7 @@ function drawRoot(
   c.beginPath();
   c.moveTo(root, b.bottom + 12);
   c.bezierCurveTo(
-    root - 34,
+    root,
     b.bottom - 30,
     b.x(first) - 45,
     b.vineY(p, first) + 18,

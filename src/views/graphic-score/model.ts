@@ -156,7 +156,7 @@ export function posterLayout(
   score: GraphicScore,
   width: number,
   height: number,
-  measure: (text: string) => number = (text) => text.length * 11,
+  measure: (text: string) => number = (text) => text.length * 6.6,
 ) {
   const narrow = width < 700,
     margin = narrow ? 18 : 30;
@@ -171,7 +171,13 @@ export function posterLayout(
   const bottom = Math.max(top + 50, height - footer - 18);
   const drumHeight = drumParts.length
     ? score.pitched
-      ? Math.min((bottom - top) * 0.7, Math.max((bottom - top) * 0.42, drumParts.length * 15 + 14))
+      ? Math.min(
+          drumParts.length * 19 + 16,
+          Math.max(
+            (bottom - top) * 0.42,
+            Math.min((bottom - top) * 0.7, drumParts.length * 15 + 14),
+          ),
+        )
       : bottom - top - 8
     : 0;
   const pitchBottom = score.pitched ? bottom - drumHeight - 12 : top - 4;

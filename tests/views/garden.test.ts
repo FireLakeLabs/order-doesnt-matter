@@ -254,3 +254,18 @@ it('separates simultaneous plant roots along the ground without moving notes or 
     expect(again.total).toBe(339);
   }
 });
+
+it('keeps every root behind its first onset and leaves solitary starts in place', () => {
+  const g = indexGarden(corpus.get('real-dubstep-arranged')!);
+  for (const width of [559, 1131, 1300]) {
+    const box = gardenLayout(g, width, 675);
+    for (const p of g.plants) {
+      const first = Math.max(g.from, p.leaves[0].note.start);
+      expect(box.rootX(p, first)).toBeLessThanOrEqual(box.x(first));
+      const siblings = g.plants.filter(
+        (other) => Math.max(g.from, other.leaves[0].note.start) === first,
+      );
+      if (siblings.length === 1) expect(box.rootX(p, first)).toBe(box.x(first) - 22);
+    }
+  }
+});
