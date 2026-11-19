@@ -29,7 +29,7 @@ export function measureGlass(frame: ViewFrame) {
     maxSide = -Infinity,
     minMid = Infinity,
     maxMid = -Infinity;
-  let clipped = 0,
+  let offGlass = 0,
     peak = 0;
   const n = a.left.length;
   for (let i = 0; i < n; i++) {
@@ -47,7 +47,7 @@ export function measureGlass(frame: ViewFrame) {
     minMid = Math.min(minMid, mid);
     maxMid = Math.max(maxMid, mid);
     const radius = Math.hypot(mid, side);
-    if (radius > 1) clipped++;
+    if (radius > 1) offGlass++;
     const scale = Math.max(1, radius);
     const x = Math.round((((side / scale) * 0.9 + 1) / 2) * (DENSITY_SIZE - 1));
     const y = Math.round((((-mid / scale) * 0.9 + 1) / 2) * (DENSITY_SIZE - 1));
@@ -60,7 +60,7 @@ export function measureGlass(frame: ViewFrame) {
     peak,
     samples: n,
     mono: a.channels === 1,
-    clipped,
+    offGlass,
     correlation:
       a.channels === 2 && denominator > 0 ? clamp((lr - (ls * rs) / n) / denominator, -1, 1) : null,
     width: maxSide - minSide,
@@ -126,6 +126,7 @@ export function scoredRim(frame: ViewFrame) {
         if (note) {
           tick.count++;
           if (note.start <= frame.now && frame.now < note.end) tick.held++;
+          // A score-cycle flash: stepping/tempo changes preserve the same score picture.
           if (note.hasOnset && frame.now >= note.start && frame.now - note.start < 0.08)
             tick.onsets++;
         }
@@ -156,4 +157,40 @@ export function glassLayout(width: number, height: number, lanes = 24) {
     legendWidth,
     bottom,
   };
+}
+
+/** Merge only coincident part/pan lanes. Every source tick and span stays counted. */
+export function rimMarks(ticks: ReturnType<typeof scoredRim>, radius: number) {
+  const marks = new Map<
+    string,
+    {
+      angle: number;
+      radius: number;
+      colour: string;
+      ticks: number;
+      spans: number;
+      held: number;
+      onsets: number;
+    }
+  >();
+  for (const tick of ticks) {
+    const key = `${String(tick.pan)}:${String(tick.lane)}`;
+    const mark = marks.get(key);
+    if (mark) {
+      mark.ticks++;
+      mark.spans += tick.count;
+      mark.held += tick.held;
+      mark.onsets += tick.onsets;
+    } else
+      marks.set(key, {
+        angle: panAngle(tick.pan),
+        radius: radius + 17 + tick.lane * 3,
+        colour: tick.instrument.colour,
+        ticks: 1,
+        spans: tick.count,
+        held: tick.held,
+        onsets: tick.onsets,
+      });
+  }
+  return [...marks.values()];
 }

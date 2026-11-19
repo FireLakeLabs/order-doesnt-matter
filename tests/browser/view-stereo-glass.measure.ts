@@ -106,7 +106,11 @@ test('Stereo glass: measured span, all themes, reversible rim and CPU evidence',
   const measured = measureGlass(frame)!;
   expect(measured.samples).toBeGreaterThan(0);
   const ticks = scoredRim(frame),
-    box = glassLayout(frame.width, frame.height, frame.instruments.length);
+    box = glassLayout(
+      frame.width,
+      frame.height,
+      Math.max(1, ...frame.instruments.map((i) => i.index + 1)),
+    );
   const occupiedColumns = [...measured.bins.entries()]
     .filter(([, n]) => n > 0)
     .map(([i]) => i % DENSITY_SIZE);
@@ -128,7 +132,7 @@ test('Stereo glass: measured span, all themes, reversible rim and CPU evidence',
     densityCentreWidthPixels: (densityWidth * 2 * box.radius) / (DENSITY_SIZE - 1),
     softFootprintWidthPixels: ((densityWidth + 3.2) * 2 * box.radius) / (DENSITY_SIZE - 1),
     lagMs: measured.lagMs,
-    clipped: measured.clipped,
+    offGlass: measured.offGlass,
   };
   await page.screenshot({ path: `${shots}/playing-1920x1080.png` });
   const reversibility = [];
@@ -202,25 +206,30 @@ test('Stereo glass: measured span, all themes, reversible rim and CPU evidence',
       for (const [width, height] of [
         [1300, 760],
         [1131, 468],
+        [850, 468],
+        [870, 468],
+        [880, 468],
         [559, 675],
         [559, 468],
-      ]) {
-        labels.length = 0;
-        handle.frame({ ...f, width, height, playing: false, audio: undefined });
-        const collisions = labels.flatMap((a, i) =>
-          labels
-            .slice(i + 1)
-            .filter((b) => Math.abs(a.y - b.y) < 12 && a.x < b.x + b.width && b.x < a.x + a.width)
-            .map((b) => [a.text, b.text]),
-        );
-        audits.push({
-          width,
-          height,
-          collisions,
-          minFont: Math.min(...labels.map((l) => l.size)),
-          outOfBounds: labels.filter((l) => l.x < 0 || l.x + l.width > width).map((l) => l.text),
-        });
-      }
+      ])
+        for (const playing of [false, true]) {
+          labels.length = 0;
+          handle.frame({ ...f, width, height, playing, audio: playing ? f.audio : undefined });
+          const collisions = labels.flatMap((a, i) =>
+            labels
+              .slice(i + 1)
+              .filter((b) => Math.abs(a.y - b.y) < 12 && a.x < b.x + b.width && b.x < a.x + a.width)
+              .map((b) => [a.text, b.text]),
+          );
+          audits.push({
+            playing,
+            width,
+            height,
+            collisions,
+            minFont: Math.min(...labels.map((l) => l.size)),
+            outOfBounds: labels.filter((l) => l.x < 0 || l.x + l.width > width).map((l) => l.text),
+          });
+        }
       handle.dispose();
       el.remove();
       return { theme: f.theme.name, paused: results[0], rim: results[1], contrast, audits };
@@ -240,24 +249,45 @@ test('Stereo glass: measured span, all themes, reversible rim and CPU evidence',
     const source = { ...window.glassCapture!, width: 1300, height: 760, dpr: 1 };
     const el = document.createElement('div'),
       handle = await window.viewProbe.definition.mount(el);
-    const times = [];
-    for (let i = 0; i < 330; i++) {
-      const start = performance.now();
-      handle.frame({ ...source, now: source.now + i / 1000 });
-      if (i >= 30) times.push(performance.now() - start);
-    }
-    times.sort((a, b) => a - b);
-    handle.dispose();
-    el.remove();
-    return {
-      frames: times.length,
-      median: (times[149] + times[150]) / 2,
-      p95: times[285],
-      max: times[299],
+    const profile = (f: ViewFrame) => {
+      const times = [];
+      for (let i = 0; i < 330; i++) {
+        const start = performance.now();
+        handle.frame({ ...f, now: f.now + i / 1000 });
+        if (i >= 30) times.push(performance.now() - start);
+      }
+      times.sort((a, b) => a - b);
+      return {
+        frames: times.length,
+        median: (times[149] + times[150]) / 2,
+        p95: times[285],
+        max: times[299],
+      };
+    };
+    // Deterministic independent-channel noise fills the disc rather than a thin line.
+    let seed = 19;
+    const random = () => {
+      seed = (Math.imul(seed, 1664525) + 1013904223) | 0;
+      return ((seed >>> 0) / 2 ** 32) * 1.6 - 0.8;
+    };
+    const left = Float32Array.from({ length: 4800 }, random),
+      right = Float32Array.from({ length: 4800 }, random);
+    const wave = left.map((l, i) => (l + right[i]) / 2);
+    const wide: ViewFrame = {
+      ...source,
+      audio: { ...source.audio!, left, right, wave, channels: 2, complete: true },
+    };
+    const result = {
+      real: profile(source),
+      wideFixture: profile(wide),
       width: 1300,
       height: 760,
+      samples: 4800,
       userAgent: navigator.userAgent,
     };
+    handle.dispose();
+    el.remove();
+    return result;
   });
   await page.evaluate(() => {
     window.glassHold = false;
@@ -288,7 +318,10 @@ test('Stereo glass: measured span, all themes, reversible rim and CPU evidence',
     },
     await readFile('corpus/programs/real-techno.strudel', 'utf8'),
   );
-  await page.waitForFunction(() => !!window.viewProbe.frame?.audio?.complete);
+  await page.waitForFunction(() => {
+    const f = window.viewProbe.frame;
+    return !!f?.audio?.complete && f.now >= 1.6 && f.audio.left!.some((v) => Math.abs(v) > 0.01);
+  });
   await page.screenshot({ path: `${shots}/real-techno-playing.png` });
   await page.evaluate(() => window.odmStudio.stop());
   await writeFile(

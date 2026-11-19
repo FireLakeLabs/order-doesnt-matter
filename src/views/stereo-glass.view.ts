@@ -1,5 +1,5 @@
 import type { ViewDefinition, ViewFrame } from './types';
-import { DENSITY_SIZE, glassLayout, measureGlass, panAngle, scoredRim } from './stereo-glass/model';
+import { DENSITY_SIZE, glassLayout, measureGlass, rimMarks, scoredRim } from './stereo-glass/model';
 
 function fit(ctx: CanvasRenderingContext2D, text: string, width: number) {
   if (ctx.measureText(text).width <= width) return text;
@@ -88,47 +88,39 @@ const view: ViewDefinition = {
           }
           c.restore();
         }
-        const merged = new Map<
-          string,
-          { x: number; y: number; endX: number; endY: number; colour: string; lit: boolean }
-        >();
-        for (const tick of ticks) {
-          const angle = panAngle(tick.pan),
-            radius = r + 17 + tick.lane * 3;
-          const x = cx + Math.sin(angle) * radius,
-            y = cy - Math.cos(angle) * radius;
-          const key = `${String(angle)}:${String(tick.lane)}`;
-          const previous = merged.get(key);
-          merged.set(key, {
-            x,
-            y,
-            endX: cx + Math.sin(angle) * (radius + 2),
-            endY: cy - Math.cos(angle) * (radius + 2),
-            colour: previous ? theme.text : tick.instrument.colour,
-            lit: !!tick.onsets || !!previous?.lit,
-          });
-        }
+        const marks = rimMarks(ticks, r);
         c.lineWidth = 2;
-        for (const mark of merged.values()) {
-          c.strokeStyle = mark.colour;
+        for (const mark of marks) {
+          const sin = Math.sin(mark.angle),
+            cos = Math.cos(mark.angle);
+          const x = cx + sin * mark.radius,
+            y = cy - cos * mark.radius;
+          const colour = mark.ticks > 1 ? theme.text : mark.colour;
+          c.strokeStyle = colour;
           c.beginPath();
-          c.moveTo(mark.x, mark.y);
-          c.lineTo(mark.endX, mark.endY);
+          c.moveTo(x, y);
+          c.lineTo(x + sin * 2, y - cos * 2);
+          // Held spans have a crossbar, including continuations with no new onset.
+          if (mark.held) {
+            c.moveTo(x - cos * 3, y - sin * 3);
+            c.lineTo(x + cos * 3, y + sin * 3);
+          }
           c.stroke();
-          if (mark.lit) {
+          if (mark.onsets) {
             c.fillStyle = theme.text;
             c.beginPath();
-            c.arc(mark.x, mark.y, 4, 0, Math.PI * 2);
+            c.arc(x, y, 4, 0, Math.PI * 2);
             c.fill();
-            c.fillStyle = mark.colour;
+            c.fillStyle = colour;
             c.beginPath();
-            c.arc(mark.x, mark.y, 2.5, 0, Math.PI * 2);
+            c.arc(x, y, 2.5, 0, Math.PI * 2);
             c.fill();
           }
         }
         // Text is last, isolated from all moving ink on opaque token plates.
         c.font = `11px "${theme.fontMono}", monospace`;
         const label = (text: string, x: number, y: number, align: CanvasTextAlign = 'left') => {
+          if (align === 'left') text = fit(c, text, w - x - 18);
           c.textAlign = align;
           const size = c.measureText(text).width;
           const left = align === 'center' ? x - size / 2 : align === 'right' ? x - size : x;
@@ -143,7 +135,7 @@ const view: ViewDefinition = {
         label('GLASS = MEASURED · MASTER L/R', 18, 54);
         label('RIM = SCORED · PAN + ONSETS', box.wide ? box.legendX : 18, box.wide ? 54 : 73);
         label(
-          `bar ${String(Math.floor(frame.now) + 1)} · ${String(Math.round((frame.now % 1) * 100))}%`,
+          `bar ${String(Math.floor(frame.now) + 1)} · ${String(Math.floor((frame.now % 1) * 100))}%`,
           w - 18,
           30,
           'right',
@@ -181,9 +173,13 @@ const view: ViewDefinition = {
           count = ticks.reduce((n, t) => n + t.count, 0);
         const legendY = box.wide ? 138 : h - 126;
         const legendX = box.wide ? box.legendX : 18;
-        label(`SCORED · ${String(frame.instruments.length)} parts`, legendX, legendY);
         label(
-          `${String(ticks.length)} pan ticks · ${String(onsets)} lit onsets`,
+          `SCORED · ${String(frame.instruments.length)} parts · ${String(ticks.length)} ticks`,
+          legendX,
+          legendY,
+        );
+        label(
+          `${String(onsets)} lit onsets · ${String(ticks.reduce((n, t) => n + t.held, 0))} held spans`,
           legendX,
           legendY + 20,
         );
@@ -202,7 +198,7 @@ const view: ViewDefinition = {
             const name = fit(
               c,
               tick.instrument.name,
-              box.legendWidth - 38 - c.measureText(suffix).width,
+              box.legendWidth - 43 - c.measureText(suffix).width,
             );
             label(`${name}${suffix}`, legendX + 17, legendY + 66 + i * 24);
           });
@@ -214,13 +210,13 @@ const view: ViewDefinition = {
             );
         }
         label(
-          `${String(count)} score spans · ${String(ticks.length - merged.size)} merged ticks`,
+          `${String(count)} score spans · ${String(marks.reduce((n, m) => n + m.ticks - 1, 0))} merged ticks`,
           18,
           h - 48,
         );
         label(
           measured
-            ? `MEASURED · ${String(measured.clipped)} clipped · lag ${measured.lagMs.toFixed(1)} ms`
+            ? `MEASURED · ${String(measured.offGlass)} off glass · lag ${measured.lagMs.toFixed(1)} ms`
             : 'MEASURED · no PCM drawn',
           18,
           h - 29,

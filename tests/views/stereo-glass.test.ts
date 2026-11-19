@@ -1,6 +1,6 @@
 import { expect, it } from 'vitest';
 import { scoreFrame } from './score-fixture';
-import { measureGlass, scoredRim, panAngle } from '../../src/views/stereo-glass/model';
+import { measureGlass, scoredRim, panAngle, rimMarks } from '../../src/views/stereo-glass/model';
 function frame(left: number[], right: number[], channels: 1 | 2 = 2) {
   return {
     ...scoreFrame(),
@@ -107,4 +107,38 @@ it('shows simultaneous written pans, resting defaults, and explicit unknown sett
     [0.5, 'unknown'],
   ]);
   expect(scoredRim({ ...f, notes: [] })[0]).toMatchObject({ pan: 0.5, source: 'default' });
+});
+
+it('merges 32 coincident parts into 24 lanes without losing ticks, spans or held/onset states', () => {
+  const f = scoreFrame(32);
+  f.notes = Array.from({ length: 64 }, (_, i) => ({
+    instrument: String(i % 32),
+    start: 10.375,
+    end: 11,
+    hasOnset: i < 32,
+    value: {},
+  }));
+  const ticks = scoredRim(f),
+    marks = rimMarks(ticks, 100);
+  expect(ticks.filter((t) => t.lane === 23)).toHaveLength(9);
+  expect(marks).toHaveLength(24);
+  expect(marks.reduce((n, m) => n + m.ticks, 0)).toBe(32);
+  expect(marks.reduce((n, m) => n + m.spans, 0)).toBe(64);
+  expect(marks.reduce((n, m) => n + m.held, 0)).toBe(64);
+  expect(marks.reduce((n, m) => n + m.onsets, 0)).toBe(32);
+  expect(marks.filter((m) => m.ticks > 1)).toEqual([
+    expect.objectContaining({ ticks: 9, spans: 18, held: 18, onsets: 9, radius: 186 }),
+  ]);
+  expect(marks.length + marks.reduce((n, m) => n + m.ticks - 1, 0)).toBe(ticks.length);
+  // A continuation keeps its held crossbar after its onset flash expires.
+  const later = rimMarks(scoredRim({ ...f, now: 10.6 }), 100);
+  expect(later.reduce((n, m) => n + m.held, 0)).toBe(64);
+  expect(later.every((m) => m.onsets === 0)).toBe(true);
+});
+
+it('counts off-glass points rather than claiming channel overs are clipped', () => {
+  expect(measureGlass(frame([1.1], [0]))!.offGlass).toBe(0);
+  const measured = measureGlass(frame([2.2], [0]))!;
+  expect(measured.offGlass).toBe(1);
+  expect(measured.bins.reduce((n, v) => n + v, 0)).toBe(1);
 });
