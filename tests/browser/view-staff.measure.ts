@@ -131,8 +131,37 @@ test('Staff: engraving, five themes, reversibility and frame cost', async ({ pag
         if (max === undefined) fill.call(this, value, x, y);
         else fill.call(this, value, x, y, max);
       };
-      let twenty: string | undefined, flood: string | undefined;
+      let twenty: string | undefined,
+        flood: string | undefined,
+        held: string | undefined,
+        unison: string | undefined,
+        thirds: string | undefined;
       try {
+        for (const count of [1, 2, 3]) {
+          text.length = 0;
+          const notes = Array.from({ length: count }, (_, i) => ({
+            instrument: instrument.id,
+            start: i / count,
+            end: count === 1 ? 2 : (i + 1) / count,
+            hasOnset: true,
+            value: count === 2 ? { s: 'hit' } : { note: 60 },
+          }));
+          if (count === 2) notes[1] = notes[0];
+          handle.frame({
+            ...source,
+            now: 0.2,
+            from: 0,
+            to: 2,
+            lookAhead: 2,
+            instruments: [instrument],
+            notes,
+          });
+          const footer = text.find((s) => s.startsWith(`${String(count)} notes`));
+          if (count === 1) held = footer;
+          else if (count === 2) unison = footer;
+          else thirds = footer;
+        }
+        text.length = 0;
         const parts = Array.from({ length: 20 }, (_, i) => ({
           ...instrument,
           id: `stress-${String(i)}`,
@@ -199,6 +228,9 @@ test('Staff: engraving, five themes, reversibility and frame cost', async ({ pag
       const result = {
         twenty,
         flood,
+        held,
+        unison,
+        thirds,
         width: source.width,
         height: source.height,
         dpr: source.dpr,
@@ -227,6 +259,9 @@ test('Staff: engraving, five themes, reversibility and frame cost', async ({ pag
           : undefined,
       };
     });
+    expect(measured.held).toBe('1 notes · 0 ≈ · 0 counted');
+    expect(measured.unison).toBe('2 notes · 0 ≈ · 2 counted');
+    expect(measured.thirds).toBe('3 notes · 3 ≈ · 0 counted');
     expect(measured.twenty).toContain('20 notes');
     expect(measured.twenty).toContain('14 counted');
     expect(measured.flood).toContain('500 counted');
@@ -259,17 +294,27 @@ test('Staff: engraving, five themes, reversibility and frame cost', async ({ pag
   );
   await page.screenshot({ path: `${shots}/playing.png` });
   await page.getByRole('button', { name: 'Pause', exact: true }).click();
-  for (const file of ['real-techno', 'micro-dense-64']) {
-    await page.evaluate(
-      async (source) => {
-        await window.odmStudio.load(source);
-        await window.odmStudio.seek(1.4);
-      },
-      await readFile(`corpus/programs/${file}.strudel`, 'utf8'),
-    );
+  const fixtures = [
+    ['real-techno', await readFile('corpus/programs/real-techno.strudel', 'utf8')],
+    ['micro-dense-64', await readFile('corpus/programs/micro-dense-64.strudel', 'utf8')],
+    ['thirds', 'note("c4 eb4 g4").s("sine")'],
+    ['harmonic-minor', 'note("d2 d2 f2 a2 bb2 c#3").s("sine")'],
+    ['wide-register', 'note("[c1,g3,eb4]").s("sine")'],
+  ];
+  for (const [file, source] of fixtures) {
+    const previous = await page.evaluate(() => JSON.stringify(window.viewProbe.frame?.notes));
+    await page.evaluate(async (source) => {
+      await window.odmStudio.load(source);
+      await window.odmStudio.seek(1.4);
+    }, source);
     await page.waitForFunction(
-      () => window.viewProbe.frame?.now === 1.4 && window.viewProbe.frame.notes.length > 0,
+      (old) =>
+        window.viewProbe.frame?.now === 1.4 &&
+        window.viewProbe.frame.notes.length > 0 &&
+        JSON.stringify(window.viewProbe.frame.notes) !== old,
+      previous,
     );
+    await expect(stage.locator('.view-host')).toHaveAttribute('data-score-ready', 'true');
     await page.screenshot({ path: `${shots}/${file}.png` });
   }
   expect(errors).toEqual([]);

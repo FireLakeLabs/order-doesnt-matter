@@ -1,5 +1,5 @@
 import type { Stave, StaveNote, GhostNote, Voice } from 'vexflow';
-import type { ViewFrame } from '../types';
+import type { ViewFrame, ViewNote } from '../types';
 import license from './vexflow-license.txt?raw';
 import {
   readPitch,
@@ -10,6 +10,9 @@ import {
   writtenPitch,
   staffLayout,
   staffCapacity,
+  staffOrder,
+  notesInWindow,
+  noteApproximate,
 } from './model';
 import type { Mark, Part } from './model';
 
@@ -80,16 +83,22 @@ export function createEngraver(library: typeof import('vexflow')) {
   } = library;
   // Keep the moving line out of VexFlow's own approximation text as well as our labels.
   class NotationContext extends CanvasContext {
+    ground = '';
     avoid: { x: number; y: number; width: number; height: number }[] = [];
     override fillText(value: string, x: number, y: number) {
       if (value === '≈') {
         const m = this.context2D.measureText(value);
-        this.avoid.push({
+        const box = {
           x: x - 2,
           y: y - m.actualBoundingBoxAscent - 2,
           width: m.width + 4,
           height: m.actualBoundingBoxAscent + m.actualBoundingBoxDescent + 4,
-        });
+        };
+        this.avoid.push(box);
+        this.context2D.save();
+        this.context2D.fillStyle = this.ground;
+        this.context2D.fillRect(box.x, box.y, box.width, box.height);
+        this.context2D.restore();
       }
       super.fillText(value, x, y);
       return this;
@@ -149,7 +158,7 @@ export function createEngraver(library: typeof import('vexflow')) {
             mark.notes.map((n) =>
               part.clef === 'percussion'
                 ? drumKey
-                : writtenPitch(readPitch(n) ?? NaN, score.key.flats, part.octave),
+                : writtenPitch(readPitch(n) ?? NaN, score.key, part.octave),
             ),
           ),
         ];
@@ -175,17 +184,10 @@ export function createEngraver(library: typeof import('vexflow')) {
     const { width, height, theme } = frame;
     const range = scoreRange(frame);
     const inRange = (p: Part) =>
-      p.notes.some(
-        (n) =>
-          n.start < range.from + range.bars &&
-          (n.end > range.from || (n.end <= n.start && n.start >= range.from)),
-      );
+      notesInWindow(p.notes, range.from, range.from + range.bars).length > 0;
     const pitched = score.parts
       .filter((p) => p.clef !== 'percussion' && inRange(p))
-      .sort((a, b) => {
-        // Upper bass first, then lower bass. Remaining staves follow document order.
-        return Number(a.clef === 'treble') - Number(b.clef === 'treble') || a.octave - b.octave;
-      });
+      .sort(staffOrder);
     const drums = score.parts.filter((p) => p.clef === 'percussion' && inRange(p));
     const pitchedRows: Row[] = pitched.map((p) => ({ parts: [p], clef: p.clef, octave: p.octave }));
     const drumRow: Row | undefined = drums.length
@@ -204,6 +206,7 @@ export function createEngraver(library: typeof import('vexflow')) {
     ctx.fillStyle = theme.ground;
     ctx.fillRect(0, 0, width, height);
     const context = new NotationContext(ctx);
+    context.ground = theme.ground;
     context.setFillStyle(theme.text).setStrokeStyle(theme.text);
     const count = range.bars;
     const signature = (stave: Stave, row: Row) => {
@@ -218,9 +221,10 @@ export function createEngraver(library: typeof import('vexflow')) {
     const barWidth = (width - 48 - prefix) / columns;
     const bars: BarGeometry[] = [];
     const labels: { value: string; x: number; y: number; width: number; italic?: boolean }[] = [];
-    let roundings = 0,
-      total = 0,
-      grouped = 0;
+    const windowNotes = notesInWindow(score.notes, range.from, range.from + count);
+    const total = windowNotes.length,
+      roundings = windowNotes.filter(noteApproximate).length;
+    const groupedNotes = new Set<ViewNote>();
     const ties = new Map<string, { note: StaveNote; system: number }>();
     for (let b = 0; b < count; b++) {
       context.setFillStyle(theme.text).setStrokeStyle(theme.text);
@@ -298,15 +302,10 @@ export function createEngraver(library: typeof import('vexflow')) {
           const n = measures.reduce((sum, m) => sum + m.count, 0),
             approx = measures.reduce((sum, m) => sum + m.approximate, 0);
           groups.push({ r, count: n, approx, unasked: !range.asked[b] });
-          grouped += n;
-          roundings += approx;
-          total += n;
           return;
         }
         measures.forEach((m, v) => {
           const part = row.parts[v];
-          total += m.count;
-          roundings += m.approximate;
           const notes = m.marks.map((mark) =>
             noteFor(
               mark,
@@ -333,7 +332,6 @@ export function createEngraver(library: typeof import('vexflow')) {
           drawings.splice(drawings.length - rowVoices.length);
           const counts = rowCounts[r];
           groups.push({ r, ...counts, unasked: false });
-          grouped += counts.count;
         } else formatter.joinVoices(rowVoices);
       });
       // Real glyph widths (especially accidentals and ≈) decide the final crowd limit.
@@ -344,7 +342,6 @@ export function createEngraver(library: typeof import('vexflow')) {
         rowCounts.forEach((counts, r) => {
           if (groups.some((g) => g.r === r)) return;
           groups.push({ r, ...counts, unasked: false });
-          grouped += counts.count;
         });
         voices.length = 0;
       }
@@ -385,6 +382,8 @@ export function createEngraver(library: typeof import('vexflow')) {
         }
       }
       for (const group of groups) {
+        for (const part of rows[group.r].parts)
+          for (const n of notesInWindow(part.notes, bar, bar + 1)) groupedNotes.add(n);
         if (!group.unasked && !group.count) {
           context.setFillStyle(theme.text).setStrokeStyle(theme.text);
           const rest = new StaveNote({
@@ -421,8 +420,16 @@ export function createEngraver(library: typeof import('vexflow')) {
         width: barWidth - 15,
       });
       context.setFillStyle(theme.text).setStrokeStyle(theme.text);
-      if (column === 0 && rows.length >= 2 && rows[0].clef === 'bass' && rows[1].clef === 'bass')
-        new StaveConnector(staves[0], staves[1]).setType('brace').setContext(context).draw();
+      if (column === 0) {
+        const bass = rows.findIndex(
+          (row, index) => row.clef === 'bass' && rows[index + 1]?.clef === 'bass',
+        );
+        if (bass >= 0)
+          new StaveConnector(staves[bass], staves[bass + 1])
+            .setType('brace')
+            .setContext(context)
+            .draw();
+      }
     }
     // Continuations leaving the score get a real open-ended tie.
     for (const previous of ties.values()) drawTie(context, previous.note);
@@ -472,31 +479,23 @@ export function createEngraver(library: typeof import('vexflow')) {
     }
     ctx.font = `11px "${theme.fontMono}"`;
     const omitted = all.filter((r) => !rows.includes(r)).flatMap((r) => r.parts);
-    const omittedNotes = omitted.reduce(
-      (sum, p) =>
-        sum +
-        Array.from({ length: count }, (_, b) => measure(p.notes, range.from + b, 0).count).reduce(
-          (a, b) => a + b,
-          0,
-        ),
-      0,
-    );
-    total += omittedNotes;
-    grouped += omittedNotes;
+    for (const part of omitted)
+      for (const n of notesInWindow(part.notes, range.from, range.from + count))
+        groupedNotes.add(n);
     const resting = frame.instruments.filter(
       (i) => !score.parts.some((p) => p.source === i.id && inRange(p)),
     );
     const entries = [
       ...omitted.map(
         (p) =>
-          `${p.name}: ×${String(p.notes.filter((n) => n.start < range.from + count && n.end > range.from).length)} notes`,
+          `${p.name}: ×${String(notesInWindow(p.notes, range.from, range.from + count).length)} notes`,
       ),
       ...resting.map((p) => `${p.name}: ${range.asked.every(Boolean) ? 'rest' : 'not asked'}`),
     ];
     const footer = Math.max(bottom + 12, height - 67);
     text(
       ctx,
-      `${String(total)} notes · ${String(roundings)} ≈ · ${String(grouped)} counted${range.asked.every(Boolean) ? '' : ' · ? not asked yet'}${omitted.length ? ` · +${String(omitted.length)} voices below` : ''}`,
+      `${String(total)} notes · ${String(roundings)} ≈ · ${String(windowNotes.filter((n) => groupedNotes.has(n)).length)} counted${range.asked.every(Boolean) ? '' : ' · ? not asked yet'}${omitted.length ? ` · +${String(omitted.length)} voices below` : ''}`,
       24,
       footer,
       width - 48,

@@ -50,9 +50,26 @@ export function inferKey(notes: ViewNote[]) {
   }
   return result;
 }
-export function writtenPitch(midi: number, flats: boolean, octave = 0) {
+export function writtenPitch(midi: number, key: ReturnType<typeof inferKey>, octave = 0) {
   const n = Math.round(midi) + octave * 12;
-  return `${(flats ? flatNames : sharpNames)[pitchClass(n)]}/${String(Math.floor(n / 12) - 1)}`;
+  const pc = pitchClass(n);
+  const isMinor = key.name.endsWith('m');
+  const root = (isMinor ? minor : major).indexOf(key.name);
+  const scale = isMinor ? [0, 2, 3, 5, 7, 8, 10] : [0, 2, 4, 5, 7, 9, 11];
+  const degree =
+    isMinor && pc === (root + 11) % 12
+      ? 6
+      : scale.findIndex((offset) => (root + offset) % 12 === pc);
+  if (degree >= 0) {
+    const letters = ['c', 'd', 'e', 'f', 'g', 'a', 'b'];
+    const letter = (letters.indexOf(key.name[0].toLowerCase()) + degree) % 7;
+    const natural = [0, 2, 4, 5, 7, 9, 11][letter];
+    const accidental = ((pc - natural + 18) % 12) - 6;
+    const name =
+      letters[letter] + (accidental < 0 ? 'b'.repeat(-accidental) : '#'.repeat(accidental));
+    return `${name}/${String((n - natural - accidental) / 12 - 1)}`;
+  }
+  return `${(key.flats ? flatNames : sharpNames)[pc]}/${String(Math.floor(n / 12) - 1)}`;
 }
 /** VexFlow values in 64th-note ticks, including dotted values. */
 const values = [64, 48, 32, 24, 16, 12, 8, 6, 4, 3, 2, 1];
@@ -110,10 +127,21 @@ function split(
   }
   return result;
 }
-export function measure(notes: ViewNote[], bar: number, budget: number): Measure {
-  const active = notes.filter(
-    (n) => n.start < bar + 1 && (n.end > bar || (n.end <= n.start && n.start >= bar)),
+export function notesInWindow(notes: ViewNote[], from: number, to: number) {
+  return notes.filter(
+    (n) => n.start < to && (n.end > from || (n.end <= n.start && n.start >= from)),
   );
+}
+export function noteApproximate(n: ViewNote) {
+  const p = readPitch(n);
+  return (
+    nearestValue(n.end - n.start).approximate ||
+    Math.abs(n.start * 64 - Math.round(n.start * 64)) > 1e-6 ||
+    (p !== undefined && Math.abs(p - Math.round(p)) > 1e-6)
+  );
+}
+export function measure(notes: ViewNote[], bar: number, budget: number): Measure {
+  const active = notesInWindow(notes, bar, bar + 1);
   const events = new Map<string, ViewNote[]>();
   for (const n of active) {
     const key = `${String(n.start)}:${String(n.end)}`;
@@ -125,23 +153,33 @@ export function measure(notes: ViewNote[], bar: number, budget: number): Measure
   let cursor = 0,
     approximate = 0,
     grouped = active.length > budget || active.some((n) => n.end <= n.start);
-  for (const chord of [...events.values()].sort((a, b) => a[0].start - b[0].start)) {
+  const ordered = [...events.values()].sort((a, b) => a[0].start - b[0].start);
+  let previousEnd = -Infinity;
+  for (const [index, chord] of ordered.entries()) {
     const n = chord[0];
     const start = Math.max(0, Math.round((n.start - bar) * 64));
     const rounded = nearestValue(n.end - n.start);
-    const end = Math.min(64, Math.max(start + 1, Math.round((n.start - bar) * 64) + rounded.ticks));
-    const approx =
-      rounded.approximate ||
-      Math.abs((n.start - bar) * 64 - Math.round((n.start - bar) * 64)) > 1e-6 ||
-      chord.some((n) => {
-        const p = readPitch(n);
-        return p !== undefined && Math.abs(p - Math.round(p)) > 1e-6;
-      });
+    const next = ordered.at(index + 1)?.[0];
+    const nextStart = next ? Math.round((next.start - bar) * 64) : 64;
+    // Rounding a written value must not manufacture an overlap with the next onset.
+    const end = Math.min(
+      64,
+      nextStart,
+      Math.max(start + 1, Math.round((n.start - bar) * 64) + rounded.ticks),
+    );
+    const approx = chord.some(noteApproximate);
     if (approx) approximate += chord.length;
     if (
       start < cursor ||
+      end <= start ||
+      previousEnd > n.start + 1e-9 ||
       chord.length > 8 ||
-      (readPitch(chord[0]) !== undefined && new Set(chord.map(readPitch)).size !== chord.length) ||
+      new Set(
+        chord.map((n) => {
+          const p = readPitch(n);
+          return p === undefined ? 'percussion' : Math.round(p);
+        }),
+      ).size !== chord.length ||
       chord.some((n) => {
         const p = readPitch(n);
         return p !== undefined && (p < 12 || p > 96);
@@ -151,6 +189,7 @@ export function measure(notes: ViewNote[], bar: number, budget: number): Measure
     marks.push(...split(cursor, start, []));
     marks.push(...split(start, end, chord, approx, n.start < bar || !n.hasOnset, n.end > bar + 1));
     cursor = Math.max(cursor, end);
+    previousEnd = Math.max(previousEnd, n.end);
   }
   marks.push(...split(cursor, 64, []));
   return { bar, marks: grouped ? [] : marks, count: active.length, approximate, grouped };
@@ -215,7 +254,7 @@ export function staffScore(frame: ViewFrame) {
   const parts: Part[] = frame.instruments.flatMap((i) => {
     const own = notes.filter((n) => n.instrument === i.id);
     const mean = evidence.get(i.id)?.meanPitch ?? Infinity;
-    const visible = own.filter((n) => n.start < range.from + range.bars && n.end > range.from);
+    const visible = notesInWindow(own, range.from, range.from + range.bars);
     const gains = visible.map((n) => Number(n.value.gain ?? 1)).filter(Number.isFinite);
     const lo = gains.length ? dynamic(Math.min(...gains)) : '',
       hi = gains.length ? dynamic(Math.max(...gains)) : '';
@@ -230,8 +269,8 @@ export function staffScore(frame: ViewFrame) {
       source: i.id,
       name: i.name,
       notes: own,
-      clef: Number.isFinite(mean) ? (mean < 60 ? 'bass' : 'treble') : 'percussion',
-      octave: (evidence.get(i.id)?.low ?? Infinity) < 36 ? 1 : 0,
+      clef: 'percussion',
+      octave: 0,
       role: Number.isFinite(mean)
         ? undefined
         : i.id === kick
@@ -252,28 +291,47 @@ export function staffScore(frame: ViewFrame) {
     };
     const low = own.filter((n) => (readPitch(n) ?? -Infinity) < 60);
     const high = own.filter((n) => (readPitch(n) ?? -Infinity) >= 60);
-    if (Number.isFinite(mean) && low.length && high.length) {
-      return [
-        {
-          ...part,
-          id: `${i.id}:bass`,
-          name: `${i.name} · bass`,
-          notes: low,
-          clef: 'bass' as const,
-        },
-        {
-          ...part,
-          id: `${i.id}:treble`,
-          name: `${i.name} · treble`,
-          notes: high,
-          clef: 'treble' as const,
-          octave: 0,
-        },
-      ];
-    }
-    return [part];
+    if (!Number.isFinite(mean)) return [part];
+    const splitBass =
+      low.some((n) => (readPitch(n) ?? Infinity) < 36) &&
+      low.some((n) => (readPitch(n) ?? -Infinity) > 48);
+    const bass = (
+      splitBass
+        ? [
+            low.filter((n) => (readPitch(n) ?? 0) > 48),
+            low.filter((n) => (readPitch(n) ?? 0) <= 48),
+          ]
+        : [low]
+    )
+      .filter((notes) => notes.length)
+      .map((notes, index) => ({
+        ...part,
+        id: `${i.id}:bass:${String(index)}`,
+        name: `${i.name}${high.length || splitBass ? ' · bass' : ''}`,
+        notes,
+        clef: 'bass' as const,
+        octave: notes.some((n) => (readPitch(n) ?? Infinity) < 36) ? 1 : 0,
+      }));
+    return [
+      ...bass,
+      ...(high.length
+        ? [
+            {
+              ...part,
+              id: `${i.id}:treble`,
+              name: `${i.name}${low.length ? ' · treble' : ''}`,
+              notes: high,
+              clef: 'treble' as const,
+              octave: 0,
+            },
+          ]
+        : []),
+    ];
   });
   return { notes, parts, key: inferKey(notes) };
+}
+export function staffOrder(a: Part, b: Part) {
+  return Number(b.clef === 'treble') - Number(a.clef === 'treble') || a.octave - b.octave;
 }
 export function scoreRange(frame: ViewFrame) {
   const from = Math.floor(frame.now);

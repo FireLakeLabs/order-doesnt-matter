@@ -7,6 +7,8 @@ import {
   staffScore,
   staffLayout,
   staffCapacity,
+  staffOrder,
+  notesInWindow,
   scoreRange,
   writtenPitch,
 } from '../../src/views/staff/model';
@@ -42,8 +44,8 @@ describe('Staff notation', () => {
     );
     const key = inferKey(notes);
     expect(key.name).toBe('Cm');
-    expect(writtenPitch(39, key.flats)).toBe('eb/2');
-    expect(writtenPitch(27, key.flats, 1)).toBe('eb/2');
+    expect(writtenPitch(39, key)).toBe('eb/2');
+    expect(writtenPitch(27, key, 1)).toBe('eb/2');
   });
   it('fills exact eighth-note rhythms with genuine rests and 64 ticks', () => {
     const m = measure([note(0, 0.125), note(0.5, 0.625)], 0, 20);
@@ -76,6 +78,8 @@ describe('Staff notation', () => {
       Array.from({ length: 500 }, (_, i) => note(i / 500, (i + 1) / 500)),
       [note(0, 0.8), note(0.2, 0.5)],
       [note(0, 1, { note: 120 })],
+      [note(0, 0.5, { s: 'x' }), note(0, 0.5, { s: 'x' })],
+      [note(0, 1, { note: 60.1 }), note(0, 1, { note: 60.2 })],
     ]) {
       const m = measure(notes, 0, 12);
       expect(m.grouped).toBe(true);
@@ -221,4 +225,51 @@ it('fits two ledger-line bass staves and both kit stem directions in the real sh
   expect(box.tops[2] - box.tops[1]).toBeGreaterThanOrEqual(100);
   expect(box.heights[2]).toBeGreaterThanOrEqual(144);
   expect(box.bottom + 48).toBeLessThan(468.094);
+});
+
+it('engraves thirds, sixths and twelfths without rounding-created overlap', () => {
+  for (const count of [3, 6, 12]) {
+    const notes = Array.from({ length: count }, (_, i) => note(i / count, (i + 1) / count));
+    const m = measure(notes, 0, 30);
+    expect(m.grouped).toBe(false);
+    expect(m.approximate).toBe(count);
+    expect(m.marks.reduce((sum, mark) => sum + mark.ticks, 0)).toBe(64);
+    expect(new Set(m.marks.flatMap((mark) => mark.notes)).size).toBe(count);
+  }
+  expect(measure([note(0, 0.4), note(1 / 3, 2 / 3)], 0, 30).grouped).toBe(true);
+});
+it('spells minor leading tones and flat scale members by their own letters', () => {
+  for (const [root, line, midi, spelling] of [
+    ['Dm', ['d3', 'd3', 'f3', 'a3', 'bb3', 'c#4'], 61, 'c#/4'],
+    ['Gm', ['g2', 'g2', 'bb2', 'd3', 'eb3', 'f#3'], 54, 'f#/3'],
+    ['Gb', ['gb3', 'ab3', 'bb3', 'cb4', 'db4', 'eb4', 'f4'], 59, 'cb/4'],
+  ] as const) {
+    const key = inferKey(line.map((pitch, i) => note(i, i + 1, { note: pitch })));
+    expect(key.name).toBe(root);
+    expect(writtenPitch(midi, key)).toBe(spelling);
+  }
+});
+it('orders treble above upper and lower bass, retaining every wide-register note', () => {
+  const notes = [24, 55, 63].map((midi) => note(0, 1, { note: midi }));
+  const parts = staffScore(frame(notes)).parts.sort(staffOrder);
+  expect(parts.map((p) => [p.clef, p.octave])).toEqual([
+    ['treble', 0],
+    ['bass', 0],
+    ['bass', 1],
+  ]);
+  expect(parts.flatMap((p) => p.notes)).toHaveLength(3);
+  expect(
+    parts.every((p) =>
+      p.notes.every((n) => {
+        const midi = Number(n.value.note) + p.octave * 12;
+        return midi >= (p.clef === 'bass' ? 36 : 60) && midi <= (p.clef === 'bass' ? 60 : 84);
+      }),
+    ),
+  ).toBe(true);
+});
+it('counts tied and degenerate spans once across the complete window', () => {
+  const held = note(0, 2),
+    degenerate = note(1, 1);
+  expect(notesInWindow([held, degenerate], 0, 2)).toEqual([held, degenerate]);
+  expect(measure([held], 0, 20).count + measure([held], 1, 20).count).toBe(2);
 });
