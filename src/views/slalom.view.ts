@@ -13,7 +13,7 @@ import type { SlalomScore } from './slalom/model';
 import { random } from './shared/particles';
 import { clamp } from './shared/math';
 import { sectionAt } from './shared/ring-model';
-import { gatePosition, snowPaint } from './slalom/drawing';
+import { gateColourIndices, gatePosition, snowPaint } from './slalom/drawing';
 
 type Point = [number, number];
 const racerScale = (width: number) => (width < 700 ? 0.76 : 1.05);
@@ -402,6 +402,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
   const sy = b.y(f.now),
     sx = b.x(s.x);
   const angleAt = (time: number) => routeAngle(score.gates, b, time);
+  const angle = angleAt(f.now);
   // Fair the past onset knots into two smooth snow grooves. This is pen geometry:
   // the model's route, every gate position and the racer's current position stay exact.
   const anchors: Point[] = score.gates
@@ -420,12 +421,14 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
       for (let i = 1; i < anchors.length; i++) {
         const a = anchors[i - 1],
           end = anchors[i],
-          dy = end[1] - a[1];
+          dy = end[1] - a[1],
+          last = i === anchors.length - 1,
+          handle = Math.min(20, dy * 0.42);
         c.bezierCurveTo(
           a[0] + offset + shift,
           a[1] + dy * 0.42 + shift,
-          end[0] + offset + shift,
-          end[1] - dy * 0.42 + shift,
+          end[0] - (last ? Math.sin(angle) * handle : 0) + offset + shift,
+          end[1] - (last ? Math.cos(angle) * handle : dy * 0.42) + shift,
           end[0] + offset + shift,
           end[1] + shift,
         );
@@ -444,11 +447,12 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
   }
   line(c, preview, paint.groove, 1);
   c.setLineDash([]);
+  const colours = gateColourIndices(score.gates);
   for (const [gateIndex, gate] of score.gates.entries()) {
     if (gate.start >= b.to || gate.end <= b.from) continue;
     const start = Math.max(b.from, gate.start),
       end = Math.min(b.to, gate.end);
-    const colour = gateIndex % 2 ? paint.blue : paint.red;
+    const colour = colours[gateIndex] ? paint.blue : paint.red;
     // A corridor is a run of panel gates anchored to its own onset, with its scored end cap.
     const interval = (40 * (b.to - b.from)) / (b.bottom - b.top);
     const times = [];
@@ -530,7 +534,6 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
       }
     }
   }
-  const angle = angleAt(f.now);
   for (let i = 0; i < 35; i++) {
     const age = ((((f.now * 3 + random(i, 2)) % 1) + 1) % 1) * 0.13,
       time = f.now - age,

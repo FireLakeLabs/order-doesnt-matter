@@ -22,6 +22,7 @@ import {
 } from '../../src/views/slalom/model';
 import { accidentalStyle, spell } from '../../src/views/chord-bridge/drawing';
 import type { ViewFrame } from '../../src/views/types';
+import { gateColourIndices, gatePosition } from '../../src/views/slalom/drawing';
 let real: ViewFrame;
 beforeAll(async () => {
   const source = readFileSync('corpus/programs/real-dubstep-arranged.strudel', 'utf8');
@@ -303,4 +304,45 @@ it('previews each next mountain with its own melody and keeps the route across b
   expect(routeAt(after.gates, 2)).toBe(pitchX(67));
   // Prior tracks still use the same route after the mountain changes.
   expect(routeAt(after.gates, 1.5)).toBe(routeAt(before.gates, 1.5));
+});
+
+it('keeps gate colours when an odd number of earlier gates leave the fetched block', () => {
+  const frame = scoreFrame();
+  frame.from = 0;
+  frame.to = 8;
+  frame.notes = [1, 2, 3, 1, 3, 2, 4, 1].flatMap((count, cycle) =>
+    Array.from({ length: count }, (_, i) => ({
+      instrument: '0',
+      start: cycle + i / count,
+      end: cycle + i / count + 0.05,
+      hasOnset: true,
+      value: { note: 60 + i },
+    })),
+  );
+  const complete = indexSlalom(frame).gates;
+  const retained = indexSlalom({
+    ...frame,
+    from: 4,
+    notes: frame.notes.filter((n) => n.start >= 4),
+  }).gates;
+  expect(complete.filter((g) => g.start < 4)).toHaveLength(7);
+  expect(gateColourIndices(retained)).toEqual(gateColourIndices(complete).slice(7));
+  const colours = gateColourIndices(complete);
+  complete.forEach((gate, i) => {
+    if (i && Math.floor(gate.start) === Math.floor(complete[i - 1].start))
+      expect(colours[i]).not.toBe(colours[i - 1]);
+  });
+});
+it('formats rational gate positions without floating-point noise or a fifth beat', () => {
+  expect(gatePosition(0)).toBe('1:1');
+  for (const [fraction, expected] of [
+    [0, '18:1'],
+    [1 / 4, '18:2'],
+    [1 / 6, '18:1.66'],
+    [1 / 7, '18:1.57'],
+    [2 / 7, '18:2.14'],
+    [49 / 64, '18:4.06'],
+    [1 - 1e-12, '18:4.99'],
+  ] as const)
+    expect(gatePosition(17 + fraction)).toBe(expected);
 });

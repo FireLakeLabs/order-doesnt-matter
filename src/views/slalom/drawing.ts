@@ -1,6 +1,5 @@
 import type { ViewTheme } from '../types';
 
-/** Opaque snow paint, lightly tinted by the theme even on a night course. */
 export function mix(a: string, b: string, amount: number) {
   const channels = [1, 3, 5].map((i) =>
     Math.round(
@@ -9,6 +8,7 @@ export function mix(a: string, b: string, amount: number) {
   );
   return `#${channels.map((channel) => channel.toString(16).padStart(2, '0')).join('')}`;
 }
+/** Opaque snow paint, lightly tinted by the theme even on a night course. */
 export function snowPaint(theme: ViewTheme) {
   const snow = mix(theme.panel, '#ffffff', 0.9);
   return {
@@ -21,6 +21,22 @@ export function snowPaint(theme: ViewTheme) {
   };
 }
 export function gatePosition(start: number) {
-  const beat = Math.floor((start - Math.floor(start)) * 400 + 1e-8) / 100 + 1;
-  return `${String(Math.floor(start) + 1)}:${String(beat)}`;
+  const hundredths = Math.min(399, Math.floor((start - Math.floor(start)) * 400 + 1e-8));
+  const beat = (1 + hundredths / 100).toFixed(2).replace(/\.?0+$/, '');
+  return `${String(Math.floor(start) + 1)}:${beat}`;
+}
+
+/** Onset-sorted gates alternate within their own cycle. Dropping earlier fetched
+ * cycles cannot repaint a gate that remains in the score window. */
+export function gateColourIndices(gates: readonly { start: number }[]) {
+  let cycle = NaN,
+    order = 0;
+  return gates.map((gate) => {
+    const next = Math.floor(gate.start);
+    if (next !== cycle) {
+      cycle = next;
+      order = 0;
+    }
+    return order++ % 2;
+  });
 }
