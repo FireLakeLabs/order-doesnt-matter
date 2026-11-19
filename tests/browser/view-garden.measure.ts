@@ -149,10 +149,17 @@ test('Garden: real Studio, five themes, cached CPU and exact time reversal', asy
           b = luminance(bg);
         return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
       });
-      let matureSprites = 0;
+      let matureSprites = 0,
+        grownRoots = 0;
       const blit = CanvasRenderingContext2D.prototype.drawImage;
       CanvasRenderingContext2D.prototype.drawImage = function (image, ...coords: number[]) {
         if (coords.length === 8) matureSprites++;
+        if (
+          coords.length === 4 &&
+          image instanceof HTMLCanvasElement &&
+          image.width === Math.ceil(64 * source.dpr)
+        )
+          grownRoots++;
         Reflect.apply(blit, this, [image, ...coords]);
       };
       try {
@@ -188,6 +195,7 @@ test('Garden: real Studio, five themes, cached CPU and exact time reversal', asy
         labels,
         liveCurves: curves,
         matureSprites,
+        grownRoots,
         userAgent: navigator.userAgent,
       };
     });
@@ -197,6 +205,9 @@ test('Garden: real Studio, five themes, cached CPU and exact time reversal', asy
     expect(measured.labels.every((l) => l.size >= 11)).toBe(true);
     expect(measured.matureSprites).toBe(
       leafClusters(score, gardenLayout(score, 1300, 760)).filter((c) => c.start <= 10.4).length,
+    );
+    expect(measured.grownRoots).toBe(
+      score.plants.filter((p) => p.leaves.length && p.leaves[0].note.start <= 10.4).length,
     );
     expect(measured.liveCurves).toBeGreaterThan(0);
     expect(measured.liveCurves).toBeLessThanOrEqual(score.plants.length * 3);

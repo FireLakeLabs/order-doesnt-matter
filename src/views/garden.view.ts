@@ -4,6 +4,8 @@ import { noteName } from './shared/pitch';
 import { line } from './shared/retro-2d';
 import {
   clusterTags,
+  clusterGrowth,
+  plantNumbers,
   gardenLayout,
   gardenMoment,
   gardenRange,
@@ -16,6 +18,7 @@ import {
   type ClusterTags,
   type Garden,
   type Layout,
+  type Plant,
 } from './garden/model';
 
 function fit(c: CanvasRenderingContext2D, text: string, width: number) {
@@ -94,17 +97,18 @@ function foliage(
     if (!p.leaves.length) continue;
     const first = Math.max(g.from, p.leaves[0].note.start);
     const last = Math.min(g.to, (p.leaves.at(-1) ?? p.leaves[0]).note.start + 0.65);
-    const root = b.x(first) - 22;
+    if (!grown) drawRoot(c, f, b, p, first, false);
+    c.save();
+    if (grown) {
+      c.beginPath();
+      c.rect(b.x(first), 0, f.width - b.x(first), f.height);
+      c.clip();
+    }
+    c.globalAlpha = grown ? 0.8 : 0.18;
+    c.strokeStyle = ink(f, p.id);
+    c.lineWidth = grown ? 2 : 1;
     c.beginPath();
-    c.moveTo(root, b.bottom + 12);
-    c.bezierCurveTo(
-      root - 34,
-      b.bottom - 30,
-      b.x(first) - 45,
-      b.vineY(p, first) + 18,
-      b.x(first),
-      b.vineY(p, first),
-    );
+    c.moveTo(b.x(first), b.vineY(p, first));
     for (let time = first; time < last; time += 0.125) {
       const next = Math.min(time + 0.125, last);
       c.lineTo(b.x(next), b.vineY(p, next));
@@ -136,8 +140,35 @@ function foliage(
       c.bezierCurveTo(x + r * 2, y + r * 2, x - r, y + r * 2, x + r * 0.2, y + r * 0.6);
       c.stroke();
     }
+    c.restore();
   }
   for (const cluster of clusters) drawCluster(c, f, b, cluster, grown);
+  c.globalAlpha = 1;
+}
+function drawRoot(
+  c: CanvasRenderingContext2D,
+  f: ViewFrame,
+  b: Layout,
+  p: Plant,
+  first: number,
+  grown: boolean,
+) {
+  const root = b.x(first) - 22;
+  c.globalAlpha = grown ? 0.8 : 0.18;
+  c.strokeStyle = ink(f, p.id);
+  c.lineWidth = grown ? 2 : 1;
+  c.lineCap = 'round';
+  c.beginPath();
+  c.moveTo(root, b.bottom + 12);
+  c.bezierCurveTo(
+    root - 34,
+    b.bottom - 30,
+    b.x(first) - 45,
+    b.vineY(p, first) + 18,
+    b.x(first),
+    b.vineY(p, first),
+  );
+  c.stroke();
   c.globalAlpha = 1;
 }
 function drawCluster(
@@ -340,9 +371,8 @@ function labels(
     return;
   }
   const scale: { text: string; y: number }[] = [];
+  for (const p of plantNumbers(g, b)) plate(c, f, String(p.index + 1), 12, b.base(p) + 4);
   for (const p of g.plants) {
-    if (b.band >= 20 || p.index % Math.ceil(20 / b.band) === 0)
-      plate(c, f, String(p.index + 1), 12, b.base(p) + 4);
     if (!Number.isFinite(p.low) || b.plantBand(p) < 30) continue;
     for (const value of new Set([p.low, p.high]))
       scale.push({ text: noteName(value), y: b.y(p, value) + 4 });
@@ -430,15 +460,11 @@ const definition: ViewDefinition = {
       b: Layout | undefined,
       clusters: Cluster[] = [];
     let tagPlan: ClusterTags = { placed: [], hidden: 0 };
-    let sprites: {
-      cluster: Cluster;
-      x: number;
-      y: number;
-      sx: number;
-      sy: number;
-      width: number;
-      height: number;
-    }[] = [];
+    let roots: { first: number; x: number; canvas: HTMLCanvasElement }[] = [];
+    const sprites = new Map<
+      Cluster,
+      { at: number; x: number; y: number; sx: number; sy: number; width: number; height: number }[]
+    >();
     return {
       frame(f) {
         if (f.width <= 0 || f.height <= 0) return;
@@ -484,18 +510,22 @@ const definition: ViewDefinition = {
           const radius = leafRadius(2, b);
           const tileWidth = Math.ceil(radius * 6 + 8),
             tileHeight = Math.ceil(maxBand * 0.9 + radius * 4 + 12);
+          const stages = clusters.flatMap((cluster) =>
+            clusterGrowth(cluster).map((stage) => ({ cluster, ...stage })),
+          );
           const columns = Math.max(
             1,
-            Math.ceil(Math.sqrt((clusters.length * tileHeight) / tileWidth)),
+            Math.ceil(Math.sqrt((stages.length * tileHeight) / tileWidth)),
           );
           atlas.width = Math.ceil(columns * tileWidth * f.dpr);
           atlas.height = Math.max(
             1,
-            Math.ceil(Math.ceil(clusters.length / columns) * tileHeight * f.dpr),
+            Math.ceil(Math.ceil(stages.length / columns) * tileHeight * f.dpr),
           );
           ac.reset();
           ac.setTransform(f.dpr, 0, 0, f.dpr, 0, 0);
-          sprites = clusters.map((cluster, i) => {
+          sprites.clear();
+          stages.forEach(({ cluster, bloom, at }, i) => {
             const x = layout.x(cluster.start) - tileWidth / 2;
             const y = layout.y(cluster.plant, cluster.pitch, cluster.start) - radius * 2 - 4;
             const sx = (i % columns) * tileWidth,
@@ -505,10 +535,31 @@ const definition: ViewDefinition = {
             ac.rect(sx, sy, tileWidth, tileHeight);
             ac.clip();
             ac.translate(sx - x, sy - y);
-            drawCluster(ac, f, layout, cluster, true);
+            drawCluster(ac, f, layout, bloom, true);
             ac.restore();
-            return { cluster, x, y, sx, sy, width: tileWidth, height: tileHeight };
+            const group = sprites.get(cluster) ?? [];
+            group.push({ at, x, y, sx, sy, width: tileWidth, height: tileHeight });
+            sprites.set(cluster, group);
           });
+          for (const root of roots) {
+            root.canvas.width = 0;
+            root.canvas.height = 0;
+          }
+          const rangeFrom = g.from;
+          roots = g.plants
+            .filter((p) => p.leaves.length)
+            .map((plant) => {
+              const first = Math.max(rangeFrom, plant.leaves[0].note.start),
+                x = layout.x(first) - 60;
+              const root = document.createElement('canvas');
+              root.width = Math.ceil(64 * f.dpr);
+              root.height = Math.round(f.height * f.dpr);
+              const rc = root.getContext('2d');
+              if (!rc) throw Error('Canvas 2D is unavailable');
+              rc.setTransform(f.dpr, 0, 0, f.dpr, -x * f.dpr, 0);
+              drawRoot(rc, f, layout, plant, first, true);
+              return { first, x, canvas: root };
+            });
           tc.reset();
           tc.setTransform(f.dpr, 0, 0, f.dpr, 0, 0);
           tc.font = `11px "${f.theme.fontMono}"`;
@@ -528,8 +579,13 @@ const definition: ViewDefinition = {
         c.clip();
         c.drawImage(grown, 0, 0, f.width, f.height);
         c.restore();
-        for (const sprite of sprites) {
-          if (sprite.cluster.start > f.now) continue;
+        for (const root of roots)
+          if (root.first <= f.now) c.drawImage(root.canvas, root.x, 0, 64, f.height);
+        for (const [cluster, stages] of sprites) {
+          const sprite = stages.findLast((s) => s.at <= f.now);
+          if (!sprite) continue;
+          const grown = cluster.leaves.filter((l) => l.note.start <= f.now).length;
+          c.globalAlpha = 0.4 + (0.6 * grown) / cluster.leaves.length;
           c.drawImage(
             atlas,
             sprite.sx * f.dpr,
@@ -542,6 +598,7 @@ const definition: ViewDefinition = {
             sprite.height,
           );
         }
+        c.globalAlpha = 1;
         c.strokeStyle = f.theme.text;
         c.globalAlpha = 0.3;
         c.lineWidth = 1;
@@ -580,7 +637,12 @@ const definition: ViewDefinition = {
         g = undefined;
         b = undefined;
         clusters = [];
-        sprites = [];
+        sprites.clear();
+        for (const root of roots) {
+          root.canvas.width = 0;
+          root.canvas.height = 0;
+        }
+        roots = [];
         tagPlan = { placed: [], hidden: 0 };
       },
     };

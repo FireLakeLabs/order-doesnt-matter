@@ -8,6 +8,9 @@ import { queryEventsNode } from '../node-query';
 import { scoreFrame } from './score-fixture';
 import {
   clusterTags,
+  clusterGrowth,
+  grownCluster,
+  plantNumbers,
   gardenLayout,
   gardenMoment,
   gardenRange,
@@ -170,4 +173,63 @@ it('states partial query coverage and moves the whole-song range without assumin
   const partial = indexGarden({ ...f, from: 8, to: 12 });
   expect([partial.knownFrom, partial.knownTo]).toEqual([8, 12]);
   expect(gardenMoment(indexGarden(f), [], -1).grown).toBe(0);
+});
+
+it('grows only a cluster’s already-started members, including gain, room and petal changes', () => {
+  const f = scoreFrame();
+  f.notes = [0, 0.125, 0.25].map((start, i) => ({
+    instrument: '0',
+    start,
+    end: start + 0.1,
+    hasOnset: true,
+    value: { note: 48, gain: [0.2, 0.8, 1.5][i], room: i / 2, lpf: 200 + i * 100 },
+  }));
+  const g = indexGarden(f),
+    c = leafClusters(g, gardenLayout(g, 560, 675))[0];
+  expect(c.leaves).toHaveLength(3);
+  const stages = clusterGrowth(c);
+  expect(grownCluster(c, -0.1)).toBeUndefined();
+  for (const [now, count] of [
+    [0, 1],
+    [0.2, 2],
+    [0.3, 3],
+  ]) {
+    const expected = grownCluster(c, now)!,
+      stage = stages.findLast((s) => s.at <= now)!;
+    expect(expected.leaves).toHaveLength(count);
+    expect(stage.bloom.gain).toBe([0.2, 0.8, 1.5][count - 1]);
+    expect(stage.bloom.send).toBe((count - 1) / 2);
+    expect(stage.bloom.shapes).toEqual(c.leaves.slice(0, count).map((l) => l.shape));
+    expect(stage.bloom.leaves.every((l) => l.note.start <= now)).toBe(true);
+    expect([stage.bloom.gain, stage.bloom.send, stage.bloom.shapes]).toEqual([
+      expected.gain,
+      expected.send,
+      expected.shapes,
+    ]);
+  }
+  const dense = indexGarden(corpus.get('micro-dense-64')!);
+  for (const group of leafClusters(dense, gardenLayout(dense, 560, 675)))
+    expect(clusterGrowth(group)).toHaveLength(1);
+});
+it('spaces number plates by actual weighted positions and reserves the pitch scale margin', () => {
+  const f = scoreFrame(13);
+  f.notes = f.instruments.flatMap((p, i) =>
+    i < 10
+      ? [48, 60].map((note, k) => ({
+          instrument: p.id,
+          start: k / 4,
+          end: k / 4 + 0.1,
+          hasOnset: true,
+          value: { note },
+        }))
+      : [{ instrument: p.id, start: 0, end: 0.1, hasOnset: true, value: {} }],
+  );
+  const g = indexGarden(f);
+  for (const width of [560, 1300]) {
+    const b = gardenLayout(g, width, 547),
+      labels = plantNumbers(g, b);
+    for (let i = 1; i < labels.length; i++)
+      expect(b.base(labels[i]) - b.base(labels[i - 1])).toBeGreaterThanOrEqual(18);
+    expect(b.left - 2.4 * leafRadius(2, b) - 3).toBeGreaterThanOrEqual(58);
+  }
 });

@@ -97,13 +97,13 @@ export type Garden = ReturnType<typeof indexGarden>;
 export type Plant = Garden['plants'][number];
 export type Leaf = Plant['leaves'][number];
 export function gardenLayout(g: Garden, width: number, height: number) {
-  const left = width < 700 ? 62 : 82,
-    right = width - 28;
+  const right = width - 28;
   const columns = Math.max(1, Math.floor((width - 32) / 155));
   const legendRows = Math.ceil(g.plants.length / columns);
   const bottom = height - 66 - legendRows * 19;
   const top = 118;
   const band = Math.max(1, (bottom - top) / Math.max(1, g.plants.length));
+  const left = Math.ceil(Math.max(width < 700 ? 62 : 82, 61 + 2.4 * leafRadius(2, { band })));
   const x = (time: number) => left + ((time - g.from) / (g.to - g.from)) * (right - left);
   const weights = g.plants.map((p) => (Number.isFinite(p.low) && p.high > p.low ? 3 : 1));
   const unit =
@@ -146,8 +146,15 @@ export function gardenLayout(g: Garden, width: number, height: number) {
 }
 export type Layout = ReturnType<typeof gardenLayout>;
 /** One gain scale for the whole garden, independent of the space a plant needs for pitch. */
-export function leafRadius(gain: number, box: Layout) {
+export function leafRadius(gain: number, box: { band: number }): number {
   return Math.max(5, Math.min(13, box.band * 0.4)) * (0.35 + Math.sqrt(gain) * 0.7);
+}
+function appearance(leaves: Leaf[]) {
+  return {
+    gain: Math.max(...leaves.map((l) => l.gain)),
+    send: Math.max(...leaves.map((l) => l.send)),
+    shapes: [...new Set(leaves.map((l) => l.shape))],
+  };
 }
 /** Fixed time bins and exact pitch. Every member remains available for counts and inspection. */
 export function leafClusters(g: Garden, box: Layout) {
@@ -168,9 +175,7 @@ export function leafClusters(g: Garden, box: Layout) {
       start: Math.min(...leaves.map((l) => Math.max(g.from, l.note.start))),
       end: Math.max(...leaves.map((l) => l.note.start)),
       pitch: leaves[0].pitch,
-      gain: Math.max(...leaves.map((l) => l.gain)),
-      send: Math.max(...leaves.map((l) => l.send)),
-      shapes: [...new Set(leaves.map((l) => l.shape))],
+      ...appearance(leaves),
     }));
   });
 }
@@ -239,3 +244,37 @@ export function clusterTags(clusters: Cluster[], box: Layout, measure: (text: st
   return { placed, hidden };
 }
 export type ClusterTags = ReturnType<typeof clusterTags>;
+
+/** Only already-started members contribute to a mature cluster's appearance. */
+export function grownCluster(cluster: Cluster, now: number): Cluster | undefined {
+  const leaves = cluster.leaves.filter((l) => l.note.start <= now);
+  if (!leaves.length) return undefined;
+  return {
+    ...cluster,
+    leaves,
+    ...appearance(leaves),
+  };
+}
+/** Cache distinct visual prefixes, not every repeated member of a dense cluster. */
+export function clusterGrowth(cluster: Cluster) {
+  const stages: { at: number; bloom: Cluster }[] = [];
+  let key = '';
+  for (const at of new Set(cluster.leaves.map((l) => Math.max(cluster.start, l.note.start)))) {
+    const bloom = grownCluster(cluster, at);
+    if (!bloom) continue;
+    const next = JSON.stringify([bloom.gain, bloom.send, bloom.shapes]);
+    if (next === key) continue;
+    stages.push({ at, bloom });
+    key = next;
+  }
+  return stages;
+}
+export function plantNumbers(g: Garden, box: Layout) {
+  let previous = -Infinity;
+  return g.plants.filter((p) => {
+    const y = box.base(p);
+    if (y - previous < 18) return false;
+    previous = y;
+    return true;
+  });
+}
