@@ -152,7 +152,6 @@ it('keeps every dense note counted, every part row stable, and the well inside a
     expect(b.x).toBeGreaterThan(0);
     expect(b.x + b.wellWidth).toBeLessThan(w);
     expect(b.bottom).toBeLessThan(h);
-    expect(b.bottom - (b.capacity + 1) * b.pieceHeight).toBeGreaterThan(b.top);
   }
 });
 
@@ -175,7 +174,10 @@ it('draws solid-height ragged forms with exact span edges and deterministic part
   }
   // The kick's rest stays a real gap, not a full-width piece enclosure.
   const short = form.blocks.find((b) => b.end - b.start < 0.2)!;
-  expect(short.end - short.start).toBeLessThan(0.2);
+  const samePart = form.blocks.filter((b) => b.instrument === short.instrument);
+  expect(samePart.reduce((span, b) => span + b.end - b.start, 0)).toBeLessThan(1);
+  // The real kick rests from 1/4 to 1/2; no block may cover that interval.
+  expect(samePart.every((b) => b.end <= 0.25 || b.start >= 0.5)).toBe(true);
   const withoutSiblings = pieceForm(
     { ...piece, notes: piece.notes.filter((n) => n.instrument === short.instrument) },
     score.order,

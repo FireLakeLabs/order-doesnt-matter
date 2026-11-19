@@ -2,6 +2,9 @@ import type { Piece, Stacker } from './model';
 import { notePatches, stackAt, stackerLayout } from './model';
 import { clamp } from '../shared/math';
 
+// Bar number and density badges live beyond the note-span field.
+const GUTTER = 68;
+
 export interface Block {
   instrument: string;
   lane: number;
@@ -48,7 +51,7 @@ export function pieceForm(piece: Piece, order: string[], width: number): Form {
   };
 }
 export function formIndex(score: Stacker, width: number, height: number) {
-  const inkWidth = Math.max(1, stackerLayout(width, height, score.order.length).wellWidth - 68);
+  const inkWidth = Math.max(1, stackerLayout(width, height, score.order.length).wellWidth - GUTTER);
   return new Map(score.pieces.map((p) => [p.bar, pieceForm(p, score.order, inkWidth)]));
 }
 /** Drawing capacity only: the music model, its logical prefix and repeat identity
@@ -62,7 +65,7 @@ export function drawingLayout(
   forms = formIndex(score, width, height),
 ) {
   const box = stackerLayout(width, height, score.order.length);
-  const inkWidth = Math.max(1, box.wellWidth - 68);
+  const inkWidth = Math.max(1, box.wellWidth - GUTTER);
   const cell = Math.max(14, Math.min(22, (box.bottom - box.top) / 28));
   const all = stackAt(score, now, score.pieces.length);
   const current = all.current ? forms.get(all.current.bar) : undefined;

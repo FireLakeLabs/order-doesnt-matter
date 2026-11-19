@@ -133,13 +133,8 @@ function draw(
     }
     ctx.globalAlpha = 1;
     if (!preview && !ghost && metadata && y + h / 2 >= top + 11 && y + h / 2 <= bottom - 4) {
-      label(
-        String(form.piece.bar - score.from + 1).padStart(2, '0'),
-        x + wellWidth - 54,
-        y + h / 2 + 4,
-      );
-      if (form.crowded)
-        label(`×${String(form.crowded)}`, x + wellWidth - 30, y + h / 2 + 4, 11, 29);
+      label(String(form.piece.bar - score.from + 1).padStart(2, '0'), px + pw + 10, y + h / 2 + 4);
+      if (form.crowded) label(`×${String(form.crowded)}`, px + pw + 34, y + h / 2 + 4, 11, 29);
     }
   };
   ctx.save();
@@ -269,7 +264,15 @@ function draw(
       11,
       width - side - 12,
     );
-    label(`${String(score.order.length)} parts · 6 lanes`, side, 404, 11, width - side - 12);
+    const parts = score.order.length,
+      lanes = Math.min(6, parts);
+    label(
+      `${String(parts)} ${parts === 1 ? 'part' : 'parts'} · ${String(lanes)} ${lanes === 1 ? 'lane' : 'lanes'}`,
+      side,
+      404,
+      11,
+      width - side - 12,
+    );
   }
   label('EXACT CLEARS · × = MERGED NOTES / SHARED LANES', 18, height - 7, 11, width - 36);
   // All text uses the theme's text/ground pair, on opaque plates, after motion.
