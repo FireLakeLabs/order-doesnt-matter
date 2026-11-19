@@ -394,3 +394,58 @@ for (const [piece, now] of [
       }
     }
   });
+
+test('Aquarium: dry overflow counts both unnamed and hidden fish', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await prepare(page, 'aquarium');
+  for (const theme of ['arcade', 'sunset', 'phosphor', 'riso', 'pocket']) {
+    await page.getByRole('button', { name: `Theme ${theme}`, exact: true }).click();
+    await page.waitForFunction((name) => window.viewProbe.frame?.theme.name === name, theme);
+    const labels = await page.evaluate(async () => {
+      await document.fonts.ready;
+      const source = window.viewProbe.frame!;
+      const instruments = Array.from({ length: 20 }, (_, index) => ({
+        ...source.instruments[0],
+        id: String(index),
+        index,
+        name: `fish ${String(index)}`,
+        inSection: true,
+        room: null,
+        settings: [],
+      }));
+      const frame = {
+        ...source,
+        now: 10.4,
+        width: 560,
+        height: 675,
+        instruments,
+        // Retain an empty wet tank to exercise the narrow, 140px dry area.
+        rooms: [{ orbit: 0, members: [] }],
+        notes: instruments.map((i) => ({
+          instrument: i.id,
+          start: 10,
+          end: 11,
+          hasOnset: true,
+          value: {},
+        })),
+      };
+      const labels: string[] = [];
+      const proto = CanvasRenderingContext2D.prototype;
+      const original = proto.fillText;
+      proto.fillText = function (text, x, y, maxWidth) {
+        labels.push(text);
+        if (maxWidth === undefined) original.call(this, text, x, y);
+        else original.call(this, text, x, y, maxWidth);
+      };
+      try {
+        window.viewProbe.handle!.frame(frame);
+      } finally {
+        proto.fillText = original;
+        window.viewProbe.handle!.frame(source);
+      }
+      return labels;
+    });
+    expect(labels.some((label) => label.startsWith('20 fish'))).toBe(true);
+    expect(labels, theme).toContain('+17 (12 hidden)');
+  }
+});
