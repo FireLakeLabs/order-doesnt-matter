@@ -6,6 +6,7 @@ import {
   readPitch,
   routeAt,
   slalomState,
+  sideSpan,
 } from './slalom/model';
 import type { SlalomScore } from './slalom/model';
 import { random } from './shared/particles';
@@ -312,13 +313,14 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: SlalomScore) {
     const xx =
       b.x(side ? 0.97 : 0.03) +
       (p === undefined ? 0 : (side ? -1 : 1) * ((p % 24) / 24) * Math.min(80, b.width * 0.15));
-    const yy = b.y(Math.max(n.start, b.from)) + (n.start < b.from ? 20 : 0);
+    const span = sideSpan(n, b),
+      yy = span.start;
     const colour = part(n.instrument)?.colour ?? t.text;
     line(
       c,
       [
         [xx, yy],
-        [xx, b.y(Math.min(n.end, b.to))],
+        [xx, span.end],
       ],
       colour,
       p === undefined ? 4 : 2,

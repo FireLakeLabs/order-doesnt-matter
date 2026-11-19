@@ -15,6 +15,7 @@ import {
   routeAt,
   slalomLayout,
   slalomState,
+  sideSpan,
 } from '../../src/views/slalom/model';
 import { accidentalStyle, spell } from '../../src/views/chord-bridge/drawing';
 import type { ViewFrame } from '../../src/views/types';
@@ -197,4 +198,20 @@ it('keeps a touching held-note corridor around the skier throughout its span', (
     expect(skier).toBeGreaterThanOrEqual(held.low + offset - 1e-12);
     expect(skier).toBeLessThanOrEqual(held.high + offset + 1e-12);
   }
+});
+
+it('keeps short carried side marks inside their real spans at every Window size', () => {
+  for (const lookAhead of [1, 4, 8]) {
+    const frame = { ...real, lookAhead },
+      state = slalomState(indexSlalom(frame), frame);
+    for (const note of state.sides) {
+      const span = sideSpan(note, state.box);
+      expect(span.start).toBeGreaterThanOrEqual(state.box.top);
+      expect(span.start).toBeLessThanOrEqual(span.end);
+      expect(span.end).toBeLessThanOrEqual(state.box.bottom);
+    }
+  }
+  const state = slalomState(indexSlalom({ ...real, lookAhead: 1 }), { ...real, lookAhead: 1 });
+  const clipped = state.sides.find((n) => n.start === 16 && n.end === 17)!;
+  expect(sideSpan(clipped, state.box).end).toBe(state.box.y(17));
 });

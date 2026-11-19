@@ -64,25 +64,27 @@ test('Slalom: real Studio mapping, five themes, reversibility and frame cost', a
     const handle = await window.viewProbe.definition.mount(el);
     const canvas = () => el.querySelector('canvas')!;
     const deterministic = [];
-    for (const f of frames) {
-      const source = { ...f, width: 1300, height: 760, dpr: 1 };
-      handle.frame(source);
-      const first = canvas().toDataURL();
-      handle.frame({ ...source, now: 22.8, width: 559, height: 471 });
-      handle.frame({ ...source, now: 16.9 });
-      handle.frame(source);
-      const restored = canvas().toDataURL();
-      const other = document.createElement('div');
-      const fresh = await window.viewProbe.definition.mount(other);
-      fresh.frame(source);
-      deterministic.push({
-        theme: f.theme.name,
-        backwardsResize: first === restored,
-        fresh: first === other.querySelector('canvas')!.toDataURL(),
-      });
-      fresh.dispose();
-      other.remove();
-    }
+    for (const f of frames)
+      for (const lookAhead of [1, 4, 8]) {
+        const source = { ...f, lookAhead, width: 1300, height: 760, dpr: 1 };
+        handle.frame(source);
+        const first = canvas().toDataURL();
+        handle.frame({ ...source, now: 22.8, width: 559, height: 471 });
+        handle.frame({ ...source, now: 16.9 });
+        handle.frame(source);
+        const restored = canvas().toDataURL();
+        const other = document.createElement('div');
+        const fresh = await window.viewProbe.definition.mount(other);
+        fresh.frame(source);
+        deterministic.push({
+          theme: f.theme.name,
+          lookAhead,
+          backwardsResize: first === restored,
+          fresh: first === other.querySelector('canvas')!.toDataURL(),
+        });
+        fresh.dispose();
+        other.remove();
+      }
     const source = { ...frames[0], width: 1300, height: 760, dpr: 1 };
     const run = (rebuilt: boolean) => {
       const costs = [];

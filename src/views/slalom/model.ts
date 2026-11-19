@@ -118,6 +118,12 @@ export function slalomLayout(frame: ViewFrame) {
   };
 }
 export type SlalomLayout = ReturnType<typeof slalomLayout>;
+/** Keep a carried flag visible only as far as its remaining scored span permits. */
+export function sideSpan(note: ViewNote, box: SlalomLayout) {
+  const start = box.y(Math.max(note.start, box.from));
+  const end = box.y(Math.min(note.end, box.to));
+  return { start: note.start < box.from ? Math.min(end, start + 20) : start, end };
+}
 /** Nearby gate drawings merge to one opening; the count retains all source notes.
  * Route knots remain unmerged, so bundling cannot change the exact timing. */
 export function gateBundles(score: SlalomScore, box: SlalomLayout) {
