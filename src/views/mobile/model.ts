@@ -160,27 +160,23 @@ export function mobileLayout(width: number, height: number, arms: number) {
   const footer = width < 700 ? 98 : 78;
   const top = 75,
     bottom = Math.max(top + 20, height - footer - 12);
-  const depth = Math.ceil(Math.log2(count));
   const canopy = Math.min((bottom - top) * 0.22, 90);
   const armY = top + canopy + (bottom - top - canopy) * 0.18;
   const half = Math.max(1, bay * 0.36);
   const stagger = Math.max(0, (bottom - armY - 65) * 0.12);
   const armYs = Array.from({ length: count }, (_, i) => armY + ((i % 3) - 1) * stagger);
   const room = Math.max(5, bottom - 65 - armY - stagger - half * 0.2);
-  const hang = room * 0.3;
-  const maxRadius = room * 0.15;
+  const maxRadius = room * 0.25;
   return {
     bay,
     slots,
     footer,
     top,
     bottom,
-    depth,
     canopy,
     armY,
     armYs,
     half,
-    hang,
     maxRadius,
     centers: Array.from({ length: count }, (_, i) => 20 + (i + 0.5) * bay),
   };
@@ -189,7 +185,7 @@ export type MobileLayout = ReturnType<typeof mobileLayout>;
 /** One area unit across every arm and every shape. Crowding reduces the common
  * scale, never clips gain or substitutes a minimum filled weight. */
 export function areaUnit(arms: Arm[], box: MobileLayout) {
-  let unit = 2400;
+  let unit = 9600;
   for (const arm of arms) {
     for (const w of arm.weights) {
       if (!w.mass) continue;
@@ -198,29 +194,68 @@ export function areaUnit(arms: Arm[], box: MobileLayout) {
           .filter((other) => other !== w)
           .map((other) => Math.abs(other.position - w.position) * box.half),
       );
-      const radius = Math.min(box.maxRadius, Math.max(0.1, box.bay * 0.14 - 4), neighbour * 0.34);
+      const radius = Math.min(box.maxRadius, Math.max(0.1, box.bay * 0.14 - 4), neighbour * 0.42);
       unit = Math.min(unit, (areaFactor(arm.shape) * radius * radius) / w.mass);
     }
   }
   return unit;
 }
-/** Binary support rods occupy only the canopy; leaf suspensions enter separate bays. */
-export function supportTree(box: MobileLayout, arms: number) {
-  const rods: {
-    x: number;
-    y: number;
-    left: number;
-    right: number;
-    children: { x: number; y: number }[];
-  }[] = [];
-  const visit = (from: number, to: number, depth: number): { x: number; y: number } => {
-    if (to - from === 1) return { x: box.centers[from], y: box.armYs[from] };
+/** One shared drop puts the lowest weight just above the count/part labels. */
+export function weightDrop(arms: Arm[], box: MobileLayout, unit: number) {
+  const lowest = Math.max(
+    ...arms.flatMap((arm, i) =>
+      arm.weights.map((w) => {
+        const radius = Math.sqrt((w.mass * unit) / areaFactor(arm.shape));
+        const extent = arm.shape === 'crystal' ? 2 : arm.shape === 'leaf' ? 1.4 : 1;
+        return box.armYs[i] + w.position * box.half * Math.tan(arm.tilt) + extent * radius;
+      }),
+    ),
+  );
+  return arms.length ? Math.max(0, box.bottom - 60 - lowest) : 0;
+}
+interface SupportPoint {
+  x: number;
+  y: number;
+  mass: number;
+  top: number;
+}
+interface SupportRod extends SupportPoint {
+  left: number;
+  right: number;
+  children: SupportPoint[];
+  moment: number;
+  tilt: number;
+}
+/** Subtree mass hangs at each child's pivot. Fit the analytic rod envelope into
+ * the canopy with one vertical scale, preserving every torque's sign and ratio. */
+export function supportTree(box: MobileLayout, arms: readonly Arm[]) {
+  const rods: SupportRod[] = [];
+  const leafTops = arms.map((arm, i) => box.armYs[i] - box.half * Math.abs(Math.tan(arm.tilt)));
+  const visit = (from: number, to: number): SupportPoint => {
+    if (to - from === 1)
+      return {
+        x: box.centers[from],
+        y: box.armYs[from],
+        top: leafTops[from],
+        mass: arms[from].mass,
+      };
     const middle = Math.floor((from + to) / 2);
-    const a = visit(from, middle, depth + 1),
-      b = visit(middle, to, depth + 1);
+    const a = visit(from, middle),
+      b = visit(middle, to);
+    const x = (a.x + b.x) / 2;
+    const mass = a.mass + b.mass;
+    const half = (b.x - a.x) / 2;
+    const moment = a.mass * (a.x - x) + b.mass * (b.x - x);
+    const tilt = mass > 0 ? clamp(moment / (mass * half), -1, 1) * 0.19 : 0;
+    const rise = (half + 7) * Math.abs(Math.tan(tilt));
+    const y = Math.min(a.top, b.top) - 16 - rise;
     const node = {
-      x: (a.x + b.x) / 2,
-      y: box.top + (depth * box.canopy) / Math.max(1, box.depth),
+      x,
+      y,
+      top: y - rise,
+      mass,
+      moment,
+      tilt,
       left: a.x,
       right: b.x,
       children: [a, b],
@@ -228,8 +263,18 @@ export function supportTree(box: MobileLayout, arms: number) {
     rods.push(node);
     return node;
   };
-  const root = arms ? visit(0, arms, 0) : { x: box.centers[0], y: box.armYs[0] };
-  return { rods, root };
+  const root = arms.length
+    ? visit(0, arms.length)
+    : { x: box.centers[0], y: box.armYs[0], top: box.armYs[0], mass: 0 };
+  const floor = Math.min(...(leafTops.length ? leafTops : box.armYs)) - 16;
+  const top = Math.min(floor, ...rods.map((rod) => rod.top));
+  const scale = top < box.top ? clamp((floor - box.top) / (floor - top)) : 1;
+  for (const rod of rods) {
+    rod.y = floor - (floor - rod.y) * scale;
+    rod.top = floor - (floor - rod.top) * scale;
+    rod.tilt = Math.atan(Math.tan(rod.tilt) * scale);
+  }
+  return { rods, root, scale };
 }
 
 /** Swing grows in open space, but its whole envelope stays in the note's bay
@@ -245,7 +290,8 @@ export function swingReach(arm: Arm, weight: Weight, box: MobileLayout, radius: 
     Math.min(
       12,
       (box.bay / 2 - Math.abs(weight.position * box.half) - radius - 1) * 0.8,
-      neighbour * 0.15,
+      // The larger radii use 42% of a neighbour gap; reserve 7% for each swing.
+      neighbour * 0.07,
     ),
   );
 }

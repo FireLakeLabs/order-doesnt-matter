@@ -19,6 +19,7 @@ import {
   swing,
   swingReach,
   tiltName,
+  weightDrop,
 } from '../../src/views/mobile/model';
 import type { ViewFrame, ViewNote } from '../../src/views/types';
 
@@ -124,7 +125,7 @@ it('keeps rods in the canopy, weights in separate bays, and a common exact area 
       box = mobileLayout(width, height, base.length);
     const arms = mobileArms(frame, score, [], box.slots),
       unit = areaUnit(arms, box);
-    const tree = supportTree(box, arms.length);
+    const tree = supportTree(box, arms);
     expect(tree.rods).toHaveLength(arms.length - 1);
     for (const rod of tree.rods) {
       expect(rod.y).toBeLessThan(box.armY);
@@ -137,11 +138,10 @@ it('keeps rods in the canopy, weights in separate bays, and a common exact area 
         const right = Math.abs(w.position * box.half) + swingReach(arm, w, box, r) + r;
         expect(right).toBeLessThan(box.bay / 2);
         const low =
-          Math.max(...box.armYs) +
-          box.half * Math.tan(0.19) +
-          box.hang +
-          box.maxRadius * 2.2 +
-          2 * r;
+          box.armYs[arms.indexOf(arm)] +
+          w.position * box.half * Math.tan(arm.tilt) +
+          weightDrop(arms, box, unit) +
+          (arm.shape === 'crystal' ? 2 : arm.shape === 'leaf' ? 1.4 : 1) * r;
         expect(low).toBeLessThan(box.bottom - 59);
       }
   }
@@ -178,4 +178,90 @@ it('retains twenty parts and 500 simultaneous weights without crossing their bay
       const swingLimit = swingReach(arm, w, box, radius);
       expect(Math.abs(w.position * box.half) + radius + swingLimit).toBeLessThan(box.bay / 2);
     }
+});
+
+it('tilts every support toward its heavier subtree and recomputes all ancestors from note mass', () => {
+  const f = scoreFrame(4);
+  f.lookAhead = 1;
+  f.notes = [1, 3, 2, 10].map((gain, i) => ({
+    instrument: String(i),
+    start: 10,
+    end: 11,
+    hasOnset: true,
+    value: { gain },
+  }));
+  const arms = mobileArms(f, indexMobile(f.notes));
+  const box = mobileLayout(1300, 760, arms.length);
+  const tree = supportTree(box, arms);
+  expect(tree.rods.map((rod) => rod.mass)).toEqual([4, 12, 16]);
+  expect(tree.rods.every((rod) => rod.tilt > 0)).toBe(true);
+  const root = tree.rods.at(-1)!;
+  // 4 units on the left, 12 on the right: normalized moment is one half.
+  expect(root.moment).toBeCloseTo((8 * (box.centers[2] - box.centers[0])) / 2);
+  expect(Math.tan(root.tilt) / tree.scale).toBeCloseTo(Math.tan(0.19 / 2));
+  f.notes[3] = { ...f.notes[3], value: { gain: 2 } };
+  const balanced = mobileArms(f, indexMobile(f.notes));
+  const changed = supportTree(box, balanced);
+  expect(changed.rods.map((rod) => rod.mass)).toEqual([4, 4, 8]);
+  expect(changed.rods.at(-1)!.tilt).toBe(0);
+  expect(changed.rods[1].tilt).toBe(0);
+  expect(changed.rods[0].tilt).toBeGreaterThan(0);
+  const reversed = supportTree(box, [...arms].reverse());
+  expect(reversed.rods.every((rod) => rod.tilt < 0)).toBe(true);
+  mobileArms({ ...f, now: 17 }, indexMobile(f.notes));
+  expect(supportTree(box, arms)).toEqual(tree);
+  const zero = supportTree(
+    box,
+    arms.map((arm) => ({ ...arm, mass: 0 })),
+  );
+  expect(zero.rods.every((rod) => rod.tilt === 0 && rod.mass === 0)).toBe(true);
+});
+
+it('fills the real-piece stage down to the label margin without changing span × gain areas', () => {
+  const score = indexMobile(frame.notes);
+  for (const [width, height] of [
+    [1300, 760],
+    [1131, 469],
+    [559, 675],
+  ]) {
+    const box = mobileLayout(width, height, mobileArms(frame, score).length);
+    const arms = mobileArms(frame, score, [], box.slots);
+    const unit = areaUnit(arms, box);
+    const drop = weightDrop(arms, box, unit);
+    const bottoms = arms.flatMap((arm, i) =>
+      arm.weights.map((w) => {
+        const r = Math.sqrt((w.mass * unit) / areaFactor(arm.shape));
+        return (
+          box.armYs[i] +
+          w.position * box.half * Math.tan(arm.tilt) +
+          drop +
+          (arm.shape === 'crystal' ? 2 : arm.shape === 'leaf' ? 1.4 : 1) * r
+        );
+      }),
+    );
+    expect(Math.max(...bottoms)).toBeCloseTo(box.bottom - 60);
+    const tree = supportTree(box, arms);
+    for (const rod of tree.rods) {
+      expect(rod.top).toBeGreaterThanOrEqual(box.top - 0.00001);
+      for (const child of rod.children) {
+        const attachment = rod.y + (child.x - rod.x) * Math.tan(rod.tilt);
+        expect(attachment).toBeLessThan(child.y);
+      }
+    }
+  }
+  // An isolated quarter-cycle bead now has twice the old base radius.
+  const one = mobileArms(
+    frame,
+    indexMobile([
+      {
+        instrument: frame.instruments[0].id,
+        start: 10,
+        end: 10.25,
+        hasOnset: true,
+        value: {},
+      },
+    ]),
+  );
+  const box = mobileLayout(1300, 760, 1);
+  expect(areaUnit(one, box)).toBe(9600);
 });
