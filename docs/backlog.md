@@ -25,7 +25,8 @@ Everything known to be outstanding, in one place. The [model](model.md) and
   in Keep work, with its load error visible. A disposable example fallback would
   need to preserve the saved candidate through the replacement flow.
 - **Recovery:** one latest browser-managed document, latest writer wins across
-  tabs, browser clearing can remove it, and Undo/transport are not persisted.
+  tabs, browser clearing can remove it, and Undo/transport are not persisted;
+  views that read the undo history (D53) see this session only.
   Portable JSON and generated Strudel are available; broader persistence is future
   scope rather than a claim of the current recovery feature.
 
@@ -54,9 +55,14 @@ Everything known to be outstanding, in one place. The [model](model.md) and
   [second-wave.md](../research/redesign/second-wave.md); the last five shipped
   in the third wave's 3.1.
 - **Third wave of views:** 3.0 (five fixes) and 3.1 (sixteen views) are
-  merged, as are 3.2 (Sampler, Stereo glass) and 3.3 (Origami, Orrery's driver
-  orbit), planned in [third-wave.md](../research/redesign/third-wave.md). Three
-  views remain: Tracing paper (3.4), Strobe and Mixing desk (3.5).
+  merged, as are 3.2 (Sampler, Stereo glass), 3.3 (Origami, Orrery's driver
+  orbit) and 3.4 (Tracing paper), planned in
+  [third-wave.md](../research/redesign/third-wave.md). Strobe and Mixing desk
+  remain for 3.5.
+- **History contract:** no per-note document ids or paths, so Tracing paper
+  matches by part, onset and pitch; edit target and kind are not recorded;
+  version caches evict oldest first; the immutable-document assumption (one
+  document object per version) is relied on but undocumented in code.
 - **Structure queries:** a full queue (32 outstanding) leaves Orrery's driver
   unknown for that window, and failed queries stay cached per key; both need a
   retry policy. Origami raised p95 frame gap by 5 ms in one paired run; profile
