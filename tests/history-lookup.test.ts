@@ -10,6 +10,7 @@ import { createEditSession } from '../src/editor/session';
 import { importStrudel } from '../src/import';
 import { generate } from '../src/generate';
 import { createHistoryLookup } from '../src/studio/history-lookup';
+import { instrumentInventory } from '../src/studio/instrument-names';
 import type { EventResult, QueryEvents } from '../src/contract';
 import type { ViewHistorySnapshot } from '../src/views/types';
 import { queryEventsNode as query } from './node-query';
@@ -279,3 +280,36 @@ test('measure all 50 retained past dubstep versions plus present, then cache hit
   cache.dispose();
   editor.dispose();
 }, 60_000);
+
+test('stored score names belong to their own document version, including generated section suffixes', async () => {
+  const next = structuredClone(doc);
+  walk(next, (node) => {
+    if ('core' in node) {
+      const pattern = node as Pattern;
+      if (pattern.core.kind === 'sequence' && pattern.core.notation === 'hh*8')
+        pattern.core = {
+          kind: 'sequence',
+          notation: 'sd*8',
+          steps: [{ kind: 'value', value: 'sd', repeat: 8 }],
+        };
+    }
+  });
+  const cache = cacheFor(async () => empty);
+  const lookup = cache.forFrame(push(history(doc), next, 'document'), range);
+  const answers = await Promise.all(
+    lookup.versions.map(async (v) => score(await lookup.score(v.id))),
+  );
+  const oldRows = instruments(doc),
+    newRows = instruments(next);
+  expect(answers[0].instruments.map((r) => r.name)).toEqual(
+    instrumentInventory({ doc, rows: oldRows }).names,
+  );
+  expect(answers[1].instruments.map((r) => r.name)).toEqual(
+    instrumentInventory({ doc: next, rows: newRows }).names,
+  );
+  const oldHat = answers[0].instruments.find((r) => r.name === 'hh · drop')!;
+  expect(oldHat).toBeDefined();
+  expect(answers[1].instruments.find((r) => r.id === oldHat.id)?.name).toBe('sd · drop 2');
+  expect(answers[0].instruments.find((r) => r.id === oldHat.id)?.name).toBe('hh · drop');
+  cache.dispose();
+});

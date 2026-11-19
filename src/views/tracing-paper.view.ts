@@ -275,7 +275,11 @@ function draw(
     }
     // Text occupies its own margin and is painted after every note/mark.
     ctx.font = `12px "${t.fontDisplay}"`;
-    text(f.instruments.find((i) => i.id === id)?.name ?? 'Stored part', 20, y - 1, left - 48);
+    const name = diff.names.get(id) ?? 'Stored part';
+    if (name.includes(' → ')) {
+      ctx.fillStyle = t.text;
+      ctx.fillText(name, 20, y - 1, left - 48);
+    } else text(name, 20, y - 1, left - 48);
     ctx.font = `11px "${t.fontMono}"`;
     text(`${String(old.length)} → ${String(fresh.length)}`, 20, y + 15, left - 48);
   }
@@ -297,7 +301,7 @@ function draw(
   else if (margin.length) {
     const mark = margin[0];
     text(
-      `${f.instruments.find((i) => i.id === mark.instrument)?.name ?? 'Stored part'} ${mark.name}: ${mark.before} → ${mark.after}${margin.length > 1 ? ` · +${String(margin.length - 1)} margin notes` : ''}`,
+      `${diff.names.get(mark.instrument) ?? 'Stored part'} ${mark.name}: ${mark.summary ?? `${mark.before} → ${mark.after}`}${margin.length > 1 ? ` · +${String(margin.length - 1)} margin notes` : ''}`,
       24,
       bottom + 51,
     );

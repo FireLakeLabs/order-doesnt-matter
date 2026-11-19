@@ -2,6 +2,7 @@ import { instruments, walk, type Doc, type Path } from '../document';
 import type { History } from '../editor/history';
 import type { QueryEvents } from '../contract';
 import { generate } from '../generate';
+import { instrumentInventory } from './instrument-names';
 import type { ViewHistoryLookup, ViewHistorySnapshot, ViewHistoryVersion } from '../views/types';
 
 type StoredHistory = Readonly<Pick<History, 'present'>> & {
@@ -69,8 +70,10 @@ export function createHistoryLookup(questions: Questions) {
         });
         const paths = new Map<string, Path>();
         walk(doc, (node, path) => paths.set(node.id, path));
+        const parts = instruments(doc);
+        const { names } = instrumentInventory({ doc, rows: parts });
         const rows = [];
-        for (const row of instruments(doc)) {
+        for (const [index, row] of parts.entries()) {
           if (active !== job) return unavailable('This history version is no longer stored');
           const result = await questions.query(
             generate(visual, { only: row.id }),
@@ -79,6 +82,7 @@ export function createHistoryLookup(questions: Questions) {
           );
           rows.push({
             id: row.id,
+            name: names[index],
             patternId: row.pattern.id,
             path: paths.get(row.pattern.id) ?? [],
             uses: row.uses.map((use) => ({

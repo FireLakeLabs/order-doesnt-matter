@@ -15,8 +15,10 @@ export interface SettingMark {
   name: string;
   before: string;
   after: string;
+  summary?: string;
 }
 export interface TraceDiff {
+  names: Map<string, string>;
   old: TraceNote[];
   fresh: TraceNote[];
   added: TraceNote[];
@@ -119,6 +121,7 @@ function rangeText(range: SettingRange | undefined) {
 /** Match document instrument/pattern ids first; a unique equal document path plus use ancestry is the fallback part identity. The contract has no per-note id, so event order never supplies identity. Within that part preserve exact score matches, then unique equal-onset/equal-pitch spans, then only mutual, unique nearest onsets within 1/16 cycle with equal pitch and onset/fragment kind, with sound also equal when no explicit note/frequency establishes a pitched voice. Tied or competing candidates remain removed plus added, never a guessed move. Settings are one counted margin mark per changed part/control on matched notes, showing sampled ranges (not authored signal bounds); duration/fragment changes are separate span changes, never mislabeled as settings. Counts and equality cover the supplied query range; the contract does not expose past arrangement lengths. */
 export function compareScores(before: ViewHistoryScore, after: ViewHistoryScore): TraceDiff {
   const result: TraceDiff = {
+    names: new Map(),
     old: [],
     fresh: [],
     added: [],
@@ -155,6 +158,10 @@ export function compareScores(before: ViewHistoryScore, after: ViewHistoryScore)
           ? paths[0]
           : undefined;
     const old = notesOf(row).map((n) => ({ ...n, instrument: next?.id ?? row.id }));
+    result.names.set(
+      next?.id ?? row.id,
+      next && row.name !== next.name ? `${row.name} → ${next.name}` : row.name,
+    );
     result.old.push(...old);
     if (!next) {
       result.removed.push(...old);
@@ -198,14 +205,23 @@ export function compareScores(before: ViewHistoryScore, after: ViewHistoryScore)
     );
     const oldRanges = settingRanges(old),
       newRanges = settingRanges(fresh);
-    for (const name of [...keys].sort())
-      if (pairs.some((p) => canonical(p.old.value[name]) !== canonical(p.fresh.value[name])))
-        result.settings.push({
-          instrument: next.id,
-          name,
-          before: rangeText(oldRanges.get(name)),
-          after: rangeText(newRanges.get(name)),
-        });
+    for (const name of [...keys].sort()) {
+      const changed = pairs.filter(
+        (p) => canonical(p.old.value[name]) !== canonical(p.fresh.value[name]),
+      ).length;
+      if (!changed) continue;
+      const before = rangeText(oldRanges.get(name)),
+        after = rangeText(newRanges.get(name));
+      result.settings.push({
+        instrument: next.id,
+        name,
+        before,
+        after,
+        ...(before === after
+          ? { summary: `${String(changed)} of ${String(pairs.length)} matched values changed` }
+          : {}),
+      });
+    }
     result.resized.push(
       ...pairs.filter(
         (p) =>
@@ -217,6 +233,7 @@ export function compareScores(before: ViewHistoryScore, after: ViewHistoryScore)
     );
   }
   for (const row of remaining) {
+    result.names.set(row.id, row.name);
     const notes = notesOf(row);
     result.fresh.push(...notes);
     result.added.push(...notes);

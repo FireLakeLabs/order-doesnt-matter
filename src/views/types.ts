@@ -131,6 +131,8 @@ export interface ViewHistoryScore {
   to: number;
   instruments: {
     id: string;
+    /** Studio display name from this stored document version. */
+    name: string;
     patternId: string;
     path: readonly (string | number)[];
     uses: { voiceId: string; pathIds: string[] }[];

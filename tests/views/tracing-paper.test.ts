@@ -28,6 +28,7 @@ function score(
     instruments: [
       {
         id,
+        name: 'hh',
         patternId: 'pattern',
         path: ['body', 0, 'pattern'],
         uses: [],
@@ -275,4 +276,50 @@ test('an unqueried future range cannot be inferred by shifting an old Strudel sc
   expect(a.events.map((e) => (e.value as Record<string, unknown>).gain)).not.toEqual(
     b.events.map((e) => (e.value as Record<string, unknown>).gain),
   );
+});
+
+test('peel labels use each score version, including renamed, replaced and removed parts', () => {
+  const old = score([0], [{ s: 'hh' }], 'old');
+  old.instruments[0].name = 'hh · drop';
+  const fresh = score([0], [{ s: 'sd' }], 'new');
+  fresh.instruments[0].name = 'sd · drop';
+  expect(compareScores(old, old).names.get('old')).toBe('hh · drop');
+  expect(compareScores(old, fresh).names.get('new')).toBe('hh · drop → sd · drop');
+  expect(compareScores(old, { ...fresh, instruments: [] }).names.get('old')).toBe('hh · drop');
+  expect(compareScores({ ...old, instruments: [] }, fresh).names.get('new')).toBe('sd · drop');
+});
+
+test('equal sampled ranges and rounded ranges report changed matched values', () => {
+  for (const [a, b] of [
+    [
+      [0.35, 0.45, 0.55, 0.638],
+      [0.35, 0.55, 0.45, 0.638],
+    ],
+    [
+      [0.3501, 0.6381],
+      [0.3502, 0.6382],
+    ],
+  ]) {
+    const times = a.map((_, i) => i / 8);
+    const diff = compareScores(
+      score(
+        times,
+        a.map((gain) => ({ gain })),
+      ),
+      score(
+        times,
+        b.map((gain) => ({ gain })),
+      ),
+    );
+    expect(diff.settings).toEqual([
+      {
+        instrument: 'part',
+        name: 'gain',
+        before: '0.35–0.638',
+        after: '0.35–0.638',
+        summary: `2 of ${String(a.length)} matched values changed`,
+      },
+    ]);
+    expect(diff.identical).toBe(false);
+  }
 });
