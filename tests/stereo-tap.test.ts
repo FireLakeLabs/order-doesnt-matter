@@ -55,6 +55,8 @@ test('stereo PCM shares a corrected 100 ms span, reuses buffers and reports abse
     expect(first.lagSeconds).toBeCloseTo(0);
     expect(first.left[0]).toBe(0);
     expect(first.left[99]).toBeCloseTo(0.99);
+    expect(first.right[0]).toBe(-0.5);
+    expect(first.right[99]).toBe(-0.5);
     for (let i = 0; i < 100; i++)
       expect(first.wave[i]).toBeCloseTo((first.left[i] + first.right[i]) / 2);
     // A true mono bus is left only, with no invented right-channel correlation.

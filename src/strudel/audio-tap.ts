@@ -46,7 +46,7 @@ registerProcessor('odm-output-tap', ODMTap);
   } finally {
     URL.revokeObjectURL(url);
   }
-  // Preserve mono input instead of Web Audio's default upmix to two channels.
+  // Cap input at two channels while retaining genuine mono and absent buses.
   const tap = new AudioWorkletNode(context, 'odm-output-tap', {
     channelCount: 2,
     channelCountMode: 'clamped-max',

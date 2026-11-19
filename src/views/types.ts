@@ -70,6 +70,10 @@ export interface ViewFrame {
    * Local 48 kHz browser fixtures measured onset +0.021–0.030 ms after the
    * scored trigger in both channels; score-frame residual was -2.646 to
    * +0.030 ms. These are observations, not a device-independent latency bound.
+   * spectrum remains the live, uncorrected analyser FFT. Its window ends roughly
+   * baseLatency + outputLatency + lagSeconds ahead of the PCM; it is not a Fourier
+   * transform of this PCM span. Scope therefore draws a corrected waveform
+   * beside live spectrum bands; views combining them must account for the offset.
    * This measures rendered output, not speaker arrival or sample-internal delay.
    */
   audio?: {
