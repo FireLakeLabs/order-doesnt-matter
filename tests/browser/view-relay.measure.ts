@@ -127,16 +127,56 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
         if (max === undefined) fill.call(this, text, x, y);
         else fill.call(this, text, x, y, max);
       };
-      const heads: { x: number; y: number; radius: number }[] = [];
-      const curves: { strong: boolean; dashed: boolean }[] = [];
+      const heads: { x: number; y: number; radius: number; alpha: number }[] = [];
+      const curves: {
+        strong: boolean;
+        dashed: boolean;
+        from: number[];
+        control: number[];
+        to: number[];
+      }[] = [];
+      const arrows: number[][][] = [];
+      const batons: { x: number; y: number; width: number; height: number }[] = [];
+      let points: number[][] = [];
+      const begin = CanvasRenderingContext2D.prototype.beginPath;
+      const pathMove = CanvasRenderingContext2D.prototype.moveTo;
+      const pathLine = CanvasRenderingContext2D.prototype.lineTo;
+      const pathFill = CanvasRenderingContext2D.prototype.fill;
+      const pathRound = CanvasRenderingContext2D.prototype.roundRect;
+      CanvasRenderingContext2D.prototype.beginPath = function () {
+        points = [];
+        return begin.call(this);
+      };
+      CanvasRenderingContext2D.prototype.moveTo = function (x, y) {
+        points.push([x, y]);
+        return pathMove.call(this, x, y);
+      };
+      CanvasRenderingContext2D.prototype.lineTo = function (x, y) {
+        points.push([x, y]);
+        return pathLine.call(this, x, y);
+      };
+      CanvasRenderingContext2D.prototype.fill = function () {
+        if (points.length === 3 && this.globalAlpha === 1) arrows.push(points.slice());
+        Reflect.apply(pathFill, this, []);
+      };
+      CanvasRenderingContext2D.prototype.roundRect = function (x, y, width, height, radii) {
+        if (height <= 22) batons.push({ x, y, width, height });
+        return pathRound.call(this, x, y, width, height, radii);
+      };
       const circle = CanvasRenderingContext2D.prototype.arc;
       const curve = CanvasRenderingContext2D.prototype.bezierCurveTo;
       CanvasRenderingContext2D.prototype.arc = function (x, y, radius, start, end, ccw) {
-        heads.push({ x, y, radius });
+        heads.push({ x, y, radius, alpha: this.globalAlpha });
         return circle.call(this, x, y, radius, start, end, ccw);
       };
       CanvasRenderingContext2D.prototype.bezierCurveTo = function (a, b, d, e, x, y) {
-        curves.push({ strong: this.globalAlpha === 1, dashed: this.getLineDash().length > 0 });
+        curves.push({
+          strong: this.globalAlpha === 1,
+          dashed: this.getLineDash().length > 0,
+          from: points[0],
+          control: [d, e],
+          to: [x, y],
+        });
         return curve.call(this, a, b, d, e, x, y);
       };
       const sizes = [];
@@ -148,6 +188,8 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
         labels.length = 0;
         heads.length = 0;
         curves.length = 0;
+        arrows.length = 0;
+        batons.length = 0;
         handle.frame({ ...source, width, height });
         const captured = labels.slice();
         const collisions = captured.flatMap((a, i) =>
@@ -169,8 +211,22 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
           collisions,
           heads: heads.slice(),
           curves: curves.slice(),
+          arrows: arrows.slice(),
+          batons: batons.slice(),
         });
       }
+      CanvasRenderingContext2D.prototype.beginPath = begin;
+      CanvasRenderingContext2D.prototype.moveTo = pathMove;
+      CanvasRenderingContext2D.prototype.lineTo = pathLine;
+      CanvasRenderingContext2D.prototype.fill = pathFill;
+      CanvasRenderingContext2D.prototype.roundRect = pathRound;
+      heads.length = 0;
+      handle.frame({
+        ...source,
+        instruments: source.instruments.map((i) => ({ ...i, muted: i.name === 'wobbleBass' })),
+      });
+      const mutedRunner =
+        heads.length === 2 && heads[0].alpha === 1 && Math.abs(heads[1].alpha - 0.3) < 1e-6;
       CanvasRenderingContext2D.prototype.arc = circle;
       labels.length = 0;
       curves.length = 0;
@@ -214,6 +270,21 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
       const samePart =
         labels.some((l) => l.text.includes('exact 0 st · subBass → subBass')) &&
         !labels.some((l) => l.text.includes('compacted'));
+      labels.length = 0;
+      handle.frame({
+        ...source,
+        now: 1.4,
+        instruments: source.instruments.filter((i) => i.id === sub || i.id === wobble),
+        notes: source.notes
+          .filter(
+            (n) => (n.instrument === sub || n.instrument === wobble) && n.start >= 8 && n.end <= 12,
+          )
+          .map((n) => ({ ...n, start: n.start - 8, end: n.end - 8 })),
+      });
+      const localTag = labels.find((l) => l.text === '+12 ×1');
+      const localTagCentre = localTag ? localTag.x + localTag.width / 2 : Infinity;
+      const localBundleTag =
+        localTagCentre >= 150 && localTagCentre <= 150 + ((1300 - 38 - 150) * 4) / 28;
       const boxes: {
         left: number;
         right: number;
@@ -303,6 +374,8 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
         throughRest,
         samePart,
         mixedClear,
+        mutedRunner,
+        localBundleTag,
       };
     });
     expect(measured.nearLabels.some((text) => text.includes('near +12 st · d 0.2'))).toBe(true);
@@ -324,6 +397,29 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
       expect(size.curves).toHaveLength(mapping.returns.length);
       expect(size.curves.every((curve) => !curve.dashed)).toBe(true);
       expect(size.curves.filter((curve) => curve.strong)).toHaveLength(13);
+      expect(size.arrows).toHaveLength(13);
+      let upward = 0;
+      for (const curve of size.curves
+        .filter((c) => c.strong)
+        .sort((a, b) => a.to[1] - b.to[1] || b.from[1] - a.from[1])) {
+        const target = size.batons.find(
+          (b) =>
+            Math.abs(b.x + b.width / 2 - curve.to[0]) < 1e-6 &&
+            (Math.abs(b.y - curve.to[1]) < 1e-6 || Math.abs(b.y + b.height - curve.to[1]) < 1e-6),
+        )!;
+        expect(target).toBeDefined();
+        const up = target.y + target.height / 2 < curve.from[1];
+        if (up) upward++;
+        expect(curve.to[1]).toBeCloseTo(up ? target.y + target.height : target.y, 6);
+        const arrow = size.arrows.find(
+          (a) => Math.abs(a[0][0] - curve.to[0]) < 1e-6 && Math.abs(a[0][1] - curve.to[1]) <= 1.1,
+        )!;
+        expect(arrow).toBeDefined();
+        // The curve and arrow approach the receiving surface from the same side.
+        expect(up ? curve.control[1] > curve.to[1] : curve.control[1] < curve.to[1]).toBe(true);
+        expect(up ? arrow[1][1] > arrow[0][1] : arrow[1][1] < arrow[0][1]).toBe(true);
+      }
+      expect(upward).toBe(3);
       const left = relayLayout(size.width, size.height, frame.instruments.length).left;
       // Numeric labels belong to the lane paint or distance markers, never to unmatched dashes.
       expect(
@@ -343,6 +439,8 @@ test('Relay: real Studio mapping, five themes, narrow lanes and pure-time CPU ev
         ),
       ).toBe(true);
     }
+    expect(measured.mutedRunner).toBe(true);
+    expect(measured.localBundleTag).toBe(true);
     measurements.push(measured);
   }
   await page.getByRole('button', { name: 'Theme arcade', exact: true }).click();

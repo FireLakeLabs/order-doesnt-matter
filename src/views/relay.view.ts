@@ -230,18 +230,21 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Relay) {
     if (!a.shape) return;
     const ax = x((a.from + a.to) / 2),
       bx = x((b.from + b.to) / 2);
+    const up = y(b.instrument) < y(a.instrument);
+    const direction = up ? -1 : 1;
     const ay = y(a.instrument) - batonHeight(a.instrument) / 2,
-      by = y(b.instrument) - batonHeight(b.instrument) / 2;
+      by = y(b.instrument) - (direction * batonHeight(b.instrument)) / 2;
     const own = sourceGroups(a.instrument),
       group = own.find((g) => g.includes(r));
     const slot = group ? own.indexOf(group) : 0;
     const lane = laneAt(a.instrument);
-    const rail = lane.top + 8 + slot * Math.min(18, lane.height * 0.22);
+    const rawRail = lane.top + 8 + slot * Math.min(18, lane.height * 0.22);
+    const rail = up ? Math.max(rawRail, by + 10) : Math.min(rawRail, ay - 10, by - 10);
     c.globalAlpha = strong ? 1 : 0.11;
     c.setLineDash(r.kind === 'near' ? [7, 5] : []);
     c.beginPath();
     c.moveTo(ax, ay);
-    if (ax === bx) c.bezierCurveTo(ax - 34, rail, bx - 34, by, bx, by);
+    if (ax === bx) c.bezierCurveTo(ax - 34, rail, bx, rail, bx, by);
     else c.bezierCurveTo(ax, rail, bx, rail, bx, by);
     if (strong) {
       c.strokeStyle = t.panel;
@@ -255,9 +258,9 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Relay) {
       c.setLineDash([]);
       c.fillStyle = colour(a.shape);
       c.beginPath();
-      c.moveTo(bx, by + 1);
-      c.lineTo(bx - 4, by - 6);
-      c.lineTo(bx + 4, by - 6);
+      c.moveTo(bx, by + direction);
+      c.lineTo(bx - 4, by - direction * 6);
+      c.lineTo(bx + 4, by - direction * 6);
       c.closePath();
       c.fill();
     }
@@ -318,7 +321,8 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Relay) {
     const carrying = score.phrases.find(
       (p) => p.instrument === part.id && focus.current.has(p.id) && matched.has(p.id),
     );
-    if (carrying?.shape)
+    if (carrying?.shape) {
+      c.globalAlpha = part.muted ? 0.3 : 1;
       runner(
         c,
         f,
@@ -327,6 +331,7 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Relay) {
         Math.min(68, laneAt(part.id).height * 0.82),
         colour(carrying.shape),
       );
+    }
   }
   c.restore();
   // Every label is drawn last, outside motion or on an opaque plate.
@@ -343,21 +348,42 @@ function draw(c: CanvasRenderingContext2D, f: ViewFrame, score: Relay) {
     c.fillStyle = t.text;
     c.fillText(String(i + 1), left - 14, lane.y + 4);
   });
+  const tags: { left: number; right: number; y: number }[] = [];
   for (const group of groups) {
     const r = group[0],
       a = score.phrases[r.before];
-    const siblings = sourceGroups(a.instrument),
-      slot = siblings.indexOf(group);
-    const span = (right - left - 36) / siblings.length;
+    const anchors = group
+      .flatMap((edge) => [score.phrases[edge.before], score.phrases[edge.after]])
+      .map((p) => x((p.from + p.to) / 2));
+    const first = Math.min(...anchors),
+      last = Math.max(...anchors);
     const text = fit(
       c,
       `${r.kind === 'near' ? 'near ' : ''}${transposeText(r.transpose)}${r.kind === 'near' ? ` d ${displayNumber(r.distance)}` : ''} ×${String(group.length)}`,
-      span - 8,
+      Math.min(right - left - 24, Math.max(96, last - first)),
     );
     if (!text) continue;
-    const px = left + 24 + span * (slot + 0.5),
+    const tw = c.measureText(text).width,
       py = laneAt(a.instrument).top + 14;
-    const tw = c.measureText(text).width;
+    // Anchor on this bundle, moving only beside nearby tags when their plates collide.
+    const candidates = [
+      (first + last) / 2,
+      ...tags
+        .filter((p) => Math.abs(p.y - py) < 18)
+        .flatMap((p) => [p.left - tw / 2 - 8, p.right + tw / 2 + 8]),
+    ];
+    const px = candidates
+      .map((v) => Math.max(left + tw / 2 + 4, Math.min(right - tw / 2 - 4, v)))
+      .find(
+        (v) =>
+          v >= first - tw / 2 &&
+          v <= last + tw / 2 &&
+          !tags.some(
+            (p) => Math.abs(p.y - py) < 18 && v - tw / 2 - 4 < p.right && v + tw / 2 + 4 > p.left,
+          ),
+      );
+    if (px === undefined) continue;
+    tags.push({ left: px - tw / 2 - 4, right: px + tw / 2 + 4, y: py });
     c.fillStyle = t.panel;
     c.fillRect(px - tw / 2 - 4, py - 12, tw + 8, 16);
     c.fillStyle = t.text;
