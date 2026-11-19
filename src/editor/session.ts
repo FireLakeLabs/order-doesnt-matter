@@ -3,7 +3,7 @@ import { describeTarget } from '../document/edit';
 import { setConstant } from '../document/edits/set-constant';
 import { generate } from '../generate';
 import type { Constant } from '../document/edit';
-import { history, push, undo, redo } from './history';
+import { history, push, undo, redo, type History } from './history';
 import { pending, transition, type Pending, type PendingEvent } from './pending';
 import { createBrowserQueries } from '../strudel/evaluate-browser';
 export const SWAP_THROTTLE_MS = 100;
@@ -31,6 +31,29 @@ function values(doc: Doc) {
  * one latest candidate bound the queue; the trailing candidate always gets sent. */
 export function createEditSession(doc: Doc, ports: Ports) {
   const questions = createBrowserQueries();
+  // Opt-in inspection never exposes the mutable objects owned by the editor.
+  // Weak keys retain document identities across Undo/Redo without extending retention.
+  const copies = new WeakMap<Doc, Doc>();
+  const exposed = new WeakMap<
+    History,
+    Readonly<Pick<History, 'present' | 'depth'>> & {
+      readonly past: readonly Doc[];
+      readonly future: readonly Doc[];
+    }
+  >();
+  function frozenCopy(doc: Doc): Doc {
+    const cached = copies.get(doc);
+    if (cached) return cached;
+    function freeze(value: unknown) {
+      if (!value || typeof value !== 'object') return;
+      for (const child of Object.values(value)) freeze(child);
+      Object.freeze(value);
+    }
+    const copy = structuredClone(doc);
+    freeze(copy);
+    copies.set(doc, copy);
+    return copy;
+  }
   let h = history(doc),
     p = pending(doc),
     token = 0,
@@ -225,6 +248,20 @@ export function createEditSession(doc: Doc, ports: Ports) {
     },
     get state() {
       return p;
+    },
+    /** Session-only, detached and deeply frozen; reading never changes undo retention. */
+    get history() {
+      let value = exposed.get(h);
+      if (!value) {
+        value = Object.freeze({
+          present: frozenCopy(h.present),
+          past: Object.freeze(h.past.map(frozenCopy)),
+          future: Object.freeze(h.future.map(frozenCopy)),
+          depth: h.depth,
+        });
+        exposed.set(h, value);
+      }
+      return value;
     },
     get canUndo() {
       return !!h.past.length;

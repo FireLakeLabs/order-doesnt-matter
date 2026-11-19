@@ -65,6 +65,7 @@ export interface FrameInput {
   audio?: ViewFrame['audio'];
   samples?: ViewFrame['samples'];
   structure?: ViewFrame['structure'];
+  history?: ViewFrame['history'];
 }
 /** DOM-free host adapter. now has already been corrected at the runtime boundary. */
 export function buildFrame(input: FrameInput): ViewFrame {
@@ -87,6 +88,7 @@ export function buildFrame(input: FrameInput): ViewFrame {
     audio: input.audio,
     ...(input.samples ? { samples: input.samples } : {}),
     ...(input.structure ? { structure: input.structure } : {}),
+    ...(input.history ? { history: input.history } : {}),
     playing: input.playing,
     cps: input.cps,
     notes,

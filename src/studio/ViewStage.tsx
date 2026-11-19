@@ -8,6 +8,7 @@ import type { StudioClock } from './clock';
 import { buildFrame, createAudioFrames, neededRange } from './frame';
 import { runtime } from './runtime';
 import { createScoreCache } from './score-cache';
+import type { createHistoryLookup } from './history-lookup';
 import type { createStructureCache } from './program-structure';
 import { mountView } from './view-lifecycle';
 import { ViewShelf, viewDragType } from './ViewShelf';
@@ -50,6 +51,9 @@ function Drawing({
     let active = true,
       broken = false;
     let samples: ViewFrame['samples'];
+    let history: ReturnType<typeof createHistoryLookup> | undefined;
+    let storedHistory: Parameters<ReturnType<typeof createHistoryLookup>['forFrame']>[0] = null;
+    let unsubscribeHistory: (() => void) | undefined;
     let structure: ReturnType<typeof createStructureCache> | undefined;
     let size = { width: container.clientWidth, height: container.clientHeight };
     const failed = (reason: unknown) => {
@@ -60,6 +64,18 @@ function Drawing({
       async () => {
         if (!entry) throw Error(`Unknown view: ${viewId}`);
         const definition = await entry.load();
+        if (definition.history) {
+          const { createHistoryLookup } = await import('./history-lookup');
+          if (active) {
+            history = createHistoryLookup(createBrowserQueries(undefined, { size: 1 }));
+            const changed = () => {
+              storedHistory = runtime.app.editor?.history ?? null;
+              history?.update(storedHistory);
+            };
+            unsubscribeHistory = runtime.app.subscribe(changed);
+            changed();
+          }
+        }
         if (definition.structure) {
           const { createStructureCache } = await import('./program-structure');
           if (active)
@@ -108,6 +124,7 @@ function Drawing({
             state,
             samples,
             structure: structure?.forFrame(state.doc, cache.score),
+            history: history?.forFrame(storedHistory, cache.score),
             audio:
               mounted.definition.needs === 'audio'
                 ? audioFrame(runtime.app.engine?.tap(), sample)
@@ -134,6 +151,8 @@ function Drawing({
       active = false;
       unsubscribe();
       structure?.dispose();
+      unsubscribeHistory?.();
+      history?.dispose();
       observer.disconnect();
       mounted.dispose();
       owned.remove();
