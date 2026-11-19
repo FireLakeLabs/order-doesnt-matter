@@ -1,10 +1,12 @@
 /** Afterglow draws scored outlines purely from the current score and now.
  * Exception: measured FFT snapshots cannot be reconstructed at arbitrary now.
- * HeardColumns stores the first actual measurement in each 1/64-cycle cell
+ * HeardColumns stores the first actual measurement per pass in each 1/64-cycle cell
  * (4096 cells max, FIFO), keyed by score time, cleared on program changes via
  * the host's per-document settings-array identity. Missing cells are hatched,
- * never interpolated. Revisited cells retain the earlier pass, labelled “heard
- * then”. Future cells are hidden even if previously heard. No clock, inferred
+ * never interpolated. Revisited cells show earlier observations, labelled “heard
+ * then”, until new audio replaces them on the next pass. Passes are detected
+ * from backwards jumps in observed audio time (loops or seeks), never a clock.
+ * Future cells are hidden even if previously heard. No clock, inferred
  * tails, per-part audio attribution or simulated audio is kept here. Remounting
  * starts a new observation session. Audio comes through the same tap as Scope.
  */
@@ -12,7 +14,6 @@ import type { ViewDefinition } from './types';
 import type { Column } from './afterglow/model';
 import {
   BANDS,
-  COLUMNS_PER_CYCLE,
   HeardColumns,
   heatRamp,
   layout,
@@ -21,6 +22,7 @@ import {
   scoredNotes,
   timeRange,
   frequencyPosition,
+  visibleColumns,
 } from './afterglow/model';
 
 const view: ViewDefinition = {
@@ -88,14 +90,10 @@ const view: ViewDefinition = {
         }
         ctx.stroke();
         ctx.restore();
-        let visibleColumns = 0;
-        for (const [cell, column] of heard.columns) {
-          const start = cell / COLUMNS_PER_CYCLE,
-            end = (cell + 1) / COLUMNS_PER_CYCLE;
-          if (column.time > now || end <= range.from || start >= now) continue;
-          visibleColumns++;
-          const left = Math.max(box.left, x(start)),
-            right = Math.min(nx, x(end));
+        const visible = visibleColumns(heard, range, now);
+        for (const { column, from, to } of visible.columns) {
+          const left = x(from),
+            right = x(to);
           let tile = tiles.get(column);
           if (!tile) {
             tile = document.createElement('canvas');
@@ -144,9 +142,12 @@ const view: ViewDefinition = {
             const right = future ? rect.end : Math.min(nx, rect.end);
             if (right <= left) continue;
             ctx.setLineDash(future ? [4, 3] : []);
-            // A dark keyline keeps pale instrument colours readable in light themes.
-            ctx.strokeStyle = ramp[0];
+            // Contrasting theme keylines separate outlines from every heat level.
+            ctx.strokeStyle = theme.text;
             ctx.lineWidth = 4;
+            ctx.strokeRect(left, rect.y, right - left, rect.height);
+            ctx.strokeStyle = theme.ground;
+            ctx.lineWidth = 2.5;
             ctx.strokeRect(left, rect.y, right - left, rect.height);
             ctx.strokeStyle = colour;
             ctx.lineWidth = 1.5;
@@ -167,7 +168,6 @@ const view: ViewDefinition = {
         ctx.font = `22px "${theme.fontDisplay}"`;
         ctx.fillText('Afterglow', 18, 29);
         ctx.font = `11px "${theme.fontMono}"`;
-        const previous = visibleColumns > 0 && now < heard.latest;
         ctx.fillText(
           !frame.playing
             ? 'PAUSED · no audio flowing'
@@ -177,11 +177,7 @@ const view: ViewDefinition = {
           18,
           50,
         );
-        ctx.fillText(
-          previous ? 'EARLIER PASS · heard then' : 'Heat = measured · outlines = scored',
-          18,
-          69,
-        );
+        ctx.fillText('Heat = measured · outlines = scored', 18, 69);
         ctx.textAlign = 'right';
         for (const hz of [30, 100, 300, 1000, 3000, 10000]) {
           const y = box.bottom - frequencyPosition(hz) * plotHeight;
@@ -197,7 +193,9 @@ const view: ViewDefinition = {
           ctx.fillText(text, left, top);
         };
         plate('now', nx + 5, box.top + 15);
-        if (!visibleColumns) plate('NOT HEARD · hatch', box.left + 12, box.top + 35);
+        if (!visible.columns.length) plate('NOT HEARD · hatch', box.left + 12, box.top + 35);
+        else if (visible.earlierPass)
+          plate('EARLIER PASS · heard then', box.left + 12, box.top + 35);
         // Future area is deliberately empty, including on a backwards seek.
         if (plotWidth * 0.25 > 100) plate('score only', nx + 10, box.top + plotHeight / 2);
         ctx.fillStyle = theme.text;
@@ -212,7 +210,7 @@ const view: ViewDefinition = {
           footer,
         );
         ctx.fillText(
-          `MEASURED · ${String(visibleColumns)} snapshots · hatch = not heard`,
+          `MEASURED · ${String(visible.columns.length)} snapshots · hatch = not heard`,
           box.left,
           footer + 38,
         );

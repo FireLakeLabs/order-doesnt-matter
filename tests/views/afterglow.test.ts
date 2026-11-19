@@ -6,6 +6,7 @@ import { generate } from '../../src/generate';
 import { buildFrame, viewNotes } from '../../src/studio/frame';
 import { queryEventsNode } from '../node-query';
 import { scoreFrame } from './score-fixture';
+import { themes } from '../../src/studio/themes';
 import {
   BANDS,
   COLUMNS_PER_CYCLE,
@@ -18,6 +19,8 @@ import {
   noteGeometry,
   scoredNotes,
   spectrumBands,
+  visibleColumns,
+  heatRamp,
 } from '../../src/views/afterglow/model';
 
 const audio = () => ({ wave: new Float32Array(4800), spectrum: new Uint8Array(4096) });
@@ -55,8 +58,19 @@ test('observation history copies first measurements, keeps seeks missing, ignore
   store.observe({ ...f, now: 2, playing: false });
   store.observe({ ...f, now: 2, audio: undefined });
   expect(store.columns.size).toBe(2);
+  // A loop wrap or playing seek records the next pass, rather than freezing
+  // the first lap's spectrum. Paused seeks above have not changed the pass.
+  expect(store.pass).toBe(0);
+  expect(visibleColumns(store, { from: 0, to: 5 }, 1.005).earlierPass).toBe(true);
   store.observe(f);
-  expect(store.columns.get(COLUMNS_PER_CYCLE)).toBe(first);
+  expect(store.pass).toBe(1);
+  const next = store.columns.get(COLUMNS_PER_CYCLE)!;
+  expect(next).not.toBe(first);
+  expect(next.bands[40]).toBe(250);
+  expect(visibleColumns(store, { from: 0, to: 5 }, 1.005).earlierPass).toBe(false);
+  expect(visibleColumns(store, { from: 0, to: 5 }, 4.01).earlierPass).toBe(true);
+  store.observe({ ...f, now: 4 });
+  expect(visibleColumns(store, { from: 0, to: 5 }, 4.01).earlierPass).toBe(false);
   for (let i = 0; i < MAX_COLUMNS + 5; i++) store.observe({ ...f, now: 5 + i / COLUMNS_PER_CYCLE });
   expect(store.columns.size).toBe(MAX_COLUMNS);
   expect(store.columns.has(COLUMNS_PER_CYCLE)).toBe(false);
@@ -115,8 +129,8 @@ test('real dubstep outlines keep actual spans and floor samples, and are pure ac
     i.name = 'renamed';
   });
   const notes = scoredNotes(f);
-  expect(notes).toHaveLength(69);
-  expect(notes.filter((n) => n.hz !== undefined)).toHaveLength(21);
+  expect(notes).toHaveLength(60);
+  expect(notes.filter((n) => n.hz !== undefined)).toHaveLength(12);
   expect(notes.filter((n) => n.hz === undefined)).toHaveLength(48);
   const wobble = notes.find((n) => n.note.value.s === 'sawtooth' && n.note.start === 10)!;
   expect(wobble.hz).toBeCloseTo(frequency(39));
@@ -130,4 +144,63 @@ test('real dubstep outlines keep actual spans and floor samples, and are pure ac
   expect(noteGeometry(wobble.note, wobble.hz, lone)).toEqual(
     noteGeometry(wobble.note, wobble.hz, f),
   );
+});
+
+test('visible measurements hide future cells, clip the current cell and never fill missing cells', () => {
+  const f = { ...scoreFrame(), audio: audio(), now: 1 };
+  const store = new HeardColumns();
+  store.observe(f);
+  store.observe({ ...f, now: 3 });
+  const slice = visibleColumns(store, { from: 0.5, to: 4 }, 1.005);
+  expect(slice.columns).toHaveLength(1);
+  expect(slice.columns[0].from).toBe(1);
+  expect(slice.columns[0].to).toBe(1.005);
+  expect(slice.columns[0].column.time).toBe(1);
+  expect(slice.earlierPass).toBe(true);
+  expect(visibleColumns(store, { from: 2, to: 2.5 }, 2.5)).toEqual({
+    columns: [],
+    earlierPass: false,
+  });
+  expect(visibleColumns(store, { from: 0, to: 1 }, 0.999)).toEqual({
+    columns: [],
+    earlierPass: false,
+  });
+  // The actual sample time, rather than only its cell key, limits visibility.
+  const sampled = new HeardColumns();
+  sampled.observe({ ...f, now: 1.01 });
+  expect(visibleColumns(sampled, { from: 0, to: 2 }, 1.005).columns).toEqual([]);
+});
+
+test.each([
+  ['arcade', 'rgb(7,6,13)', 'rgb(244,241,255)'],
+  ['sunset', 'rgb(26,11,46)', 'rgb(255,233,243)'],
+  ['phosphor', 'rgb(2,10,4)', 'rgb(184,255,200)'],
+  ['riso', 'rgb(29,27,47)', 'rgb(255,79,123)'],
+  ['pocket', 'rgb(15,42,29)', 'rgb(47,93,58)'],
+])('%s heat grows brighter without ending in the unmeasured paper colour', (name, quiet, loud) => {
+  const ramp = heatRamp(themes[name]);
+  expect(ramp[0]).toBe(quiet);
+  expect(ramp[255]).toBe(loud);
+});
+
+test('log band boundaries match Scope: bins below a band do not inflate its peak', () => {
+  const input = audio();
+  input.spectrum[12] = 255; // 70.3125 Hz, below the 73.03–78.48 Hz band.
+  input.spectrum[13] = 80; // 76.171875 Hz, inside it.
+  expect(spectrumBands(input)[18]).toBe(80);
+});
+
+test('whole-note fragments count once while genuine coincident onsets remain counted', () => {
+  const f = scoreFrame();
+  const held = {
+    instrument: f.instruments[0].id,
+    start: 10,
+    end: 12,
+    hasOnset: true,
+    value: { note: 36 },
+  };
+  const carried = { ...held, hasOnset: false };
+  expect(scoredNotes({ ...f, notes: [held, carried, carried] })).toHaveLength(1);
+  expect(scoredNotes({ ...f, notes: [carried, carried] })).toHaveLength(1);
+  expect(scoredNotes({ ...f, notes: [held, held, carried] })).toHaveLength(2);
 });

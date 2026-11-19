@@ -279,6 +279,7 @@ test('Afterglow: observed history, score reversibility, real Studio captures and
     return texts;
   });
   expect(history).toContain('EARLIER PASS · heard then');
+  expect(history).toContain('Heat = measured · outlines = scored');
   expect(history.some((t) => /^MEASURED · [1-9]/.test(t))).toBe(true);
   const unheard = await page.evaluate(() => {
     const texts: string[] = [],
