@@ -160,7 +160,9 @@ export function noteLevel(notes: ViewNote[], instrument: string, now: number): n
   return Math.min(1, Math.sqrt(power));
 }
 
-/** Called only by mounted audio views. The clock sample identifies one shared
+/** Pass the tap's whole analysis through, including its stereo buffers and
+ * corrected PCM end time; do not shift or copy individual channels here.
+ * Called only by mounted audio views. The clock sample identifies one shared
  * RAF, even while stopped: transport time alone would keep returning stale PCM. */
 export function createAudioFrames() {
   let tick: object | undefined;
