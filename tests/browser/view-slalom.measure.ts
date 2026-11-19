@@ -222,6 +222,8 @@ test('Slalom: real Studio mapping, five themes, reversibility and frame cost', a
     'data-score-ready',
     'true',
   );
+  await expect(b.locator('.view-host')).toHaveAttribute('data-score-ready', 'true');
+  await expect(b.locator('.view-status')).toHaveText('');
   await page.evaluate(async () => {
     for (let i = 0; i < 3; i++) await new Promise(requestAnimationFrame);
   });
