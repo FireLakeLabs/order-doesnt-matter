@@ -1,3 +1,4 @@
+import { createDriverOrbits, driverPhase, driverTicks, type DriverOrbit } from './orrery/drivers';
 import type { ViewDefinition, ViewFrame } from './types';
 import {
   alignment,
@@ -40,9 +41,14 @@ function sphere(
   circle(ctx, x, y, r);
   ctx.fill();
 }
-function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: Orrery) {
+function draw(
+  ctx: CanvasRenderingContext2D,
+  frame: ViewFrame,
+  score: Orrery,
+  drivers: DriverOrbit[],
+) {
   const { width, height, theme, now } = frame;
-  const box = orreryLayout(width, height, score.orbits.length);
+  const box = orreryLayout(width, height, score.orbits.length + drivers.length * 2);
   const { cx, cy, radius, rx, sun, ledger } = box;
   const paper = theme.name === 'riso' || theme.name === 'pocket';
   const light = paper ? theme.ground : theme.text;
@@ -233,6 +239,40 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: Orrery) {
     ctx.lineWidth = 0.65;
     circle(ctx, p.x, p.y, p.r + 1);
     ctx.stroke();
+    const moons = drivers.filter((moon) => moon.instrument === p.i.id);
+    moons.forEach((moon, index) => {
+      const state = driverPhase(moon, now);
+      const known = moon.status === 'known';
+      const radius = p.r + 12 + index * 9;
+      ctx.strokeStyle = theme.text;
+      ctx.lineWidth = 1;
+      ctx.setLineDash(known ? [] : [3, 3]);
+      ellipse(ctx, p.x, p.y, radius, radius * 0.65);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      for (const tick of driverTicks(moon)) {
+        const angle = tick * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(
+          p.x + Math.sin(angle) * (radius - 3),
+          p.y - Math.cos(angle) * (radius * 0.65 - 3),
+        );
+        ctx.lineTo(
+          p.x + Math.sin(angle) * (radius + 3),
+          p.y - Math.cos(angle) * (radius * 0.65 + 3),
+        );
+        ctx.stroke();
+      }
+      const angle = (state?.phase ?? 0) * Math.PI * 2;
+      const x = p.x + Math.sin(angle) * radius;
+      const y = p.y - Math.cos(angle) * radius * 0.65;
+      ctx.fillStyle = known ? p.i.colour : theme.ground;
+      circle(ctx, x, y, 3.5);
+      ctx.fill();
+      ctx.setLineDash(known ? [] : [2, 2]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    });
     ctx.restore();
   };
   ctx.globalAlpha = 1;
@@ -289,11 +329,44 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: Orrery) {
       Number(instruments.get(b.id)?.inSection) - Number(instruments.get(a.id)?.inSection) ||
       Number(Boolean(a.period)) - Number(Boolean(b.period)),
   );
-  const visible = ledgerOrbits.slice(0, box.shown);
+  const driverRows = Math.min(
+    drivers.length,
+    Math.max(0, Math.floor((height - 119 - ledger.y) / 52)),
+  );
+  drivers.slice(0, driverRows).forEach((moon, index) => {
+    const y = ledger.y + 23 + index * 52;
+    const state = driverPhase(moon, now);
+    const i = instruments.get(moon.instrument);
+    const status =
+      moon.status === 'pending'
+        ? 'pending'
+        : moon.status === 'unknown'
+          ? 'unknown'
+          : state
+            ? `${periodText(state.period)}-cycle loop`
+            : `${periodText(moon.period)} local-cycle loop · rest`;
+    ctx.fillText(
+      fit(ctx, `${i?.name ?? 'part'} · ${moon.setting} rate ${moon.notation}`, ledger.width),
+      ledger.x,
+      y,
+    );
+    ctx.fillText(
+      fit(
+        ctx,
+        `${status}${state ? ` · ${String(state.rate)} now · ${String(driverTicks(moon).length)} ticks` : ''}`,
+        ledger.width,
+      ),
+      ledger.x,
+      y + 20,
+    );
+  });
+  const driverOffset = driverRows * 52;
+  const shown = Math.max(0, box.shown - driverRows * 2);
+  const visible = ledgerOrbits.slice(0, shown);
   visible.forEach((o, n) => {
     const i = instruments.get(o.id);
     if (!i) return;
-    const y = ledger.y + 23 + n * 26;
+    const y = ledger.y + 23 + driverOffset + n * 26;
     ctx.fillStyle = i.colour;
     circle(ctx, ledger.x + 4, y - 4, 3);
     ctx.fill();
@@ -308,18 +381,18 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: Orrery) {
     ctx.fillText(detail, ledger.x + ledger.width, y);
     ctx.textAlign = 'left';
   });
-  if (box.hidden) {
-    const hidden = ledgerOrbits.slice(box.shown);
+  if (score.orbits.length > shown || drivers.length > driverRows) {
+    const hidden = ledgerOrbits.slice(shown);
     const marks = hidden.reduce((sum, o) => sum + o.marks.reduce((n, m) => n + m.count, 0), 0);
     const seen = hidden.filter((o) => !o.period).reduce((sum, o) => sum + o.observed, 0);
     ctx.fillText(
       fit(
         ctx,
-        `+${String(box.hidden)} parts · ${String(marks)} marks · ${String(seen)} seen`,
+        `+${String(score.orbits.length - shown)} parts${drivers.length > driverRows ? ` · ${String(drivers.length - driverRows)} drivers` : ''} · ${String(marks)} marks · ${String(seen)} seen`,
         ledger.width,
       ),
       ledger.x,
-      ledger.y + 23 + box.shown * 26,
+      ledger.y + 23 + driverOffset + shown * 26,
     );
   }
   const y = height - 65;
@@ -342,7 +415,7 @@ function draw(ctx: CanvasRenderingContext2D, frame: ViewFrame, score: Orrery) {
     y,
   );
   ctx.fillText(
-    fit(ctx, 'Note pitch / sample / span; section gates & settings excluded.', width - 32),
+    fit(ctx, 'Note orbits: pitch/sample/span. Moons: driver rate, one lap/loop.', width - 32),
     16,
     y + 22,
   );
@@ -358,11 +431,13 @@ const view: ViewDefinition = {
   group: 'song',
   tag: 'note periods',
   span: 'song',
+  structure: true,
   mount(element) {
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) throw Error('Canvas 2D is unavailable');
     element.append(canvas);
+    const drivers = createDriverOrbits();
     let notes: ViewFrame['notes'] | undefined,
       key = '',
       score: Orrery;
@@ -390,9 +465,10 @@ const view: ViewDefinition = {
         canvas.style.height = `${String(frame.height)}px`;
         ctx.reset();
         ctx.scale(frame.dpr, frame.dpr);
-        draw(ctx, frame, score);
+        draw(ctx, frame, score, drivers.get(frame));
       },
       dispose() {
+        drivers.dispose();
         canvas.remove();
       },
     };

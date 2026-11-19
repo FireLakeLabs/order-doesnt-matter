@@ -8,7 +8,7 @@ import {
   type Layer,
   type Pattern,
 } from '../document';
-import type { Instrument } from '../document/instruments';
+import type { Instrument, InstrumentUse } from '../document/instruments';
 import { generate, generatePattern } from '../generate';
 import { patternMethods } from '../import/registry';
 import type { QueryEvents } from '../contract';
@@ -18,6 +18,7 @@ import type {
   ViewSnapshot,
   ViewStructureLookup,
   ViewStructureStep,
+  ViewUseTiming,
 } from '../views/types';
 
 interface Questions {
@@ -143,6 +144,92 @@ export function createStructureCache(questions: Questions) {
   };
 }
 
+/** Mirror only affine score-time operations. In particular arrange keeps a
+ * section's speed and advances it by its duration on the next song turn.
+ * Source-only ancestry and non-affine rewrites deliberately have no mapping. */
+function useTiming(
+  doc: Doc,
+  use: InstrumentUse,
+  range: { from: number; to: number },
+): ViewUseTiming {
+  const unknown = (reason: string): ViewUseTiming => ({ status: 'unavailable', reason });
+  if (doc.body.some((node) => node.kind === 'transform'))
+    return unknown('Global score transforms have no established driver timing');
+  let spans = [{ ...range, offset: 0, scale: 1 }];
+  for (let index = 1; index < use.path.length - 1; index++) {
+    const node = use.path[index];
+    if (!('core' in node)) continue;
+    if (node.origin) return unknown('Localized instrument timing is unavailable');
+    for (const layer of [...node.layers].reverse()) {
+      if (layer.kind === 'settings') continue;
+      if (layer.kind !== 'rewrite' || !['fast', 'slow', 'early', 'late'].includes(layer.name))
+        return unknown('Non-affine use-site rewrite');
+      const arg = layer.args.length ? layer.args[0] : undefined;
+      const value =
+        arg?.kind === 'literal'
+          ? arg.value
+          : arg?.kind === 'pattern' &&
+              arg.pattern.layers.length === 0 &&
+              arg.pattern.core.kind === 'constant'
+            ? arg.pattern.core.value
+            : null;
+      if (
+        typeof value !== 'number' ||
+        !Number.isFinite(value) ||
+        (['fast', 'slow'].includes(layer.name) && value <= 0)
+      )
+        return unknown('Patterned or invalid use-site time transform');
+      spans = spans.map((span) => ({
+        ...span,
+        offset:
+          span.offset +
+          span.scale * (layer.name === 'late' ? value : layer.name === 'early' ? -value : 0),
+        scale: span.scale * (layer.name === 'fast' ? 1 / value : layer.name === 'slow' ? value : 1),
+      }));
+    }
+    if (node.core.kind === 'group') {
+      if (node.core.how === 'stack') continue;
+      if (node.core.how !== 'arrange') return unknown('Unsupported group timing');
+      const parts = node.core.parts;
+      const partIndex = parts.findIndex((part) => part.id === use.path[index + 1]?.id);
+      const durations = parts.map((part) => part.cycles ?? 1);
+      const total = durations.reduce((sum, value) => sum + value, 0);
+      if (partIndex < 0 || durations.some((value) => !Number.isFinite(value) || value <= 0))
+        return unknown('Invalid arrangement timing');
+      const start = durations.slice(0, partIndex).reduce((sum, value) => sum + value, 0);
+      const duration = durations[partIndex];
+      const next: typeof spans = [];
+      for (const span of spans) {
+        const first = Math.floor((span.from - span.offset) / span.scale / total);
+        const last = Math.ceil((span.to - span.offset) / span.scale / total);
+        if (last - first > 512) return unknown('Arrangement timing range is too large');
+        for (let turn = first; turn < last; turn++) {
+          const from = Math.max(span.from, span.offset + span.scale * (turn * total + start));
+          const to = Math.min(
+            span.to,
+            span.offset + span.scale * (turn * total + start + duration),
+          );
+          if (from < to)
+            next.push({
+              from,
+              to,
+              offset: span.offset + span.scale * (turn * (total - duration) + start),
+              scale: span.scale,
+            });
+        }
+      }
+      spans = next;
+    } else if (node.core.kind !== 'ref') return unknown('Unsupported ancestry timing');
+    if (
+      spans.some(
+        (span) => !Number.isFinite(span.offset) || !Number.isFinite(span.scale) || span.scale <= 0,
+      )
+    )
+      return unknown('Invalid use-site time mapping');
+  }
+  return { status: 'available', spans };
+}
+
 type Ask = (key: string, code: () => string) => Promise<ViewSnapshot>;
 
 /** Conservative source boundary, not an implementation of any rewrite. */
@@ -256,6 +343,7 @@ function describe(
         voiceId: use.voiceId,
         pathIds: use.path.map((node) => node.id),
         layers: structuredClone(use.layers),
+        timing: useTiming(doc, use, range),
       })),
       transforms: structuredClone(doc.body.filter((node) => node.kind === 'transform')),
     },
