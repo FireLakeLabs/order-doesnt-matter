@@ -117,6 +117,46 @@ export interface ViewStructureLookup {
   get(instrument: string): ViewProgramStructure | undefined;
 }
 
+export interface ViewHistoryVersion {
+  /** Session identity, stable across frames, Undo/Redo and view remounts. */
+  id: string;
+  ordinal: number;
+  position: 'past' | 'present' | 'future';
+  /** Absent when the undo history did not record this metadata. */
+  target?: string;
+  kind?: string;
+}
+export interface ViewHistoryScore {
+  from: number;
+  to: number;
+  instruments: {
+    id: string;
+    patternId: string;
+    path: readonly (string | number)[];
+    uses: { voiceId: string; pathIds: string[] }[];
+    /** Unmodified Strudel whole/part spans, values, onsets and errors. The seam
+     * provides no per-note document id/path: do not infer one by event order.
+     * Instrument/pattern ids and use ancestry above are document identities.
+     * Matching moved notes across versions remains the view's responsibility. */
+    result: EventResult;
+  }[];
+}
+export type ViewHistorySnapshot =
+  | { status: 'available'; score: ViewHistoryScore }
+  | { status: 'unavailable'; reason: string };
+export interface ViewHistoryLookup {
+  /** Chronological stored past, present, future. Only this editing session:
+   * Undo is not persisted. No additional history is retained for views. */
+  versions: readonly ViewHistoryVersion[];
+  /** Ask Strudel for one stored version over this frame's from/to, with mutes
+   * removed exactly as the Studio score does. Lazy, separate from playback;
+   * one version runs at a time, at most 32 outstanding, 64 completed answers
+   * cached by version id + range. Pending requests deduplicate. Failures and a
+   * full queue can be retried by calling score again. Dropped versions and
+   * disposed view handles are unavailable. Results are shared: do not mutate. */
+  score(versionId: string): Promise<ViewHistorySnapshot>;
+}
+
 export interface ViewFrame {
   now: number; // absolute cycles, fractional, already latency-corrected
   playing: boolean;
@@ -168,6 +208,7 @@ export interface ViewFrame {
     endTime?: number;
     lagSeconds?: number;
   };
+  history?: ViewHistoryLookup; // only for history: true; no queries until asked
   structure?: ViewStructureLookup; // only for structure: true; no queries until asked
   samples?: SampleLookup; // only for samples: true; shared source PCM, never loads
 }
@@ -182,6 +223,7 @@ export interface ViewDefinition {
   tag: string; // one or two words for the shelf, e.g. "whole song"
   needs?: 'score' | 'audio'; // default 'score'
   samples?: true; // independent of needs: can accompany score or audio
+  history?: true; // independent of needs; lazy session edit-history scores
   structure?: true; // independent of needs and samples; lazy program snapshots
   span?: 'window' | 'song'; // 'song' asks the host for the whole song
   mount(el: HTMLElement): ViewHandle | Promise<ViewHandle>;
