@@ -28,10 +28,13 @@ ends early when its note leaves the notes the host supplies.
 | Catwalk | Jerky figures in a line that vanish                                                                     | One model per part, persistent. Runway seen from the audience with curtain, runway lights and photographers down both sides. Parts take turns, one walk per bar in rotation among those playing: walk out, pose on its notes, turn, walk back. Every note of every part fires a camera flash in that part's colour. A smooth walk cycle: hip sway, one foot in front of the other.    |
 | Tubes   | Fill level jumps; every vessel the same                                                                 | The level pours from the previous note's value to the new one over a short ease with a small slosh, still exact for any `now`. Vessel by setting family: filters → conical flask; room, size, delay → round-bottom flask; gain → a speaker whose cone pushes out with the level; pan → a left/right speaker pair with a balance; pitch → tall graduated cylinder; others → test tube. |
 
-## Wave 3.1: views with no framework change
+## Wave 3.1: views with no framework change (merged, #135–#150)
 
 Each is one pull request with the shared smoke test. Lanes run in parallel;
-views within a lane run in order so lessons carry.
+views within a lane run in order so lessons carry. Five were sent back once for
+not reading as their subject at a glance (Pinball, Chord bridge, Relay, Slalom,
+Stacker). The sweep found a Studio switching defect, the shared analyser's
+−30 dB ceiling and small polish items; their fixes land before wave 3.2.
 
 | Lane        | Order                                |
 | ----------- | ------------------------------------ |
@@ -42,13 +45,14 @@ views within a lane run in order so lessons carry.
 | Second wave | Marble run → Aquarium → Afterglow    |
 
 The owner folded in the five second-wave views that were never started
-(2026-11-18). Their mapping rules are in [second-wave.md](second-wave.md) and
+(2026-11-18); all five shipped (#138, #141, #145, #146, #147). Their mapping rules are in [second-wave.md](second-wave.md) and
 their mockups in `mockups/second-wave/`. Light rig stays last in its lane
 because of its GPU cost.
 
 - Orrery's orbit for a moving setting's rate (the wobble's `<2 4 3 8>`) needs
   change C; build the note-period orbits now and add that orbit in wave 3.3.
-- Staff may add an engraving library, pinned to an exact version.
+- Staff engraves with VexFlow 4.2.5 (MIT), pinned and loaded only when Staff
+  opens; only Staff may import it.
 
 ## Later waves: one framework change with the views it unlocks
 
