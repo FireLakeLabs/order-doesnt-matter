@@ -19,23 +19,45 @@ const view: ViewDefinition = {
     scene.add(rig);
     const structure = new THREE.Group();
     rig.add(structure);
-    const metal = new THREE.MeshBasicMaterial();
+    const metal = new THREE.MeshStandardMaterial({
+      color: 0x343b48,
+      roughness: 0.48,
+      metalness: 0.35,
+    });
+    const silver = new THREE.MeshStandardMaterial({
+      color: 0xaebbc9,
+      roughness: 0.28,
+      metalness: 0.65,
+    });
+    const key = new THREE.DirectionalLight(0xe5eeff, 3.2);
+    key.position.set(-5, 9, 6);
+    const fill = new THREE.HemisphereLight(0xd5e5ff, 0x263043, 1.8);
+    scene.add(key, fill);
     const floorMaterial = new THREE.MeshBasicMaterial();
     const lineMaterial = new THREE.LineBasicMaterial();
     const box = new THREE.BoxGeometry(1, 1, 1);
     const barrel = new THREE.CylinderGeometry(0.19, 0.23, 0.45, 12);
     const lens = new THREE.SphereGeometry(0.15, 10, 6);
     const lensMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const rim = new THREE.TorusGeometry(0.175, 0.035, 6, 16);
+    rim.rotateX(Math.PI / 2);
+    const yokes = new THREE.InstancedMesh(box, metal, 24 * 3);
+    const rims = new THREE.InstancedMesh(rim, silver, 24);
     const housings = new THREE.InstancedMesh(box, metal, 24);
     const barrels = new THREE.InstancedMesh(barrel, metal, 24);
     const lenses = new THREE.InstancedMesh(lens, lensMaterial, 24);
-    structure.add(housings, barrels);
+    structure.add(housings, barrels, yokes, rims);
     rig.add(lenses);
     // Shared geometry and instancing keep draw calls independent of note density.
     const platform = new THREE.Mesh(box, floorMaterial);
     platform.position.set(0, -0.22, 0.4);
     platform.scale.set(16.8, 0.4, 8);
     structure.add(platform);
+    const backdropMaterial = new THREE.MeshBasicMaterial();
+    const backdrop = new THREE.Mesh(box, backdropMaterial);
+    backdrop.position.set(0, 3.3, -3.8);
+    backdrop.scale.set(17, 7.2, 0.08);
+    structure.add(backdrop);
     const rails: number[] = [];
     const line = (...points: number[]) => rails.push(...points);
     for (const z of [-0.35, 0.05]) {
@@ -49,6 +71,23 @@ const view: ViewDefinition = {
       line(x, 0, -0.3, x, 6.45, -0.3, x - 0.3, 0, -0.3, x + 0.3, 0, -0.3);
       line(x, 6.45, -0.35, x, 6.45, 0.05);
     }
+    const tube = new THREE.CylinderGeometry(0.026, 0.026, 1, 8);
+    const truss = new THREE.InstancedMesh(tube, silver, rails.length / 6);
+    const segment = new THREE.Object3D();
+    const start = new THREE.Vector3(),
+      end = new THREE.Vector3(),
+      axis = new THREE.Vector3(0, 1, 0);
+    for (let i = 0; i < rails.length; i += 6) {
+      start.fromArray(rails, i);
+      end.fromArray(rails, i + 3).sub(start);
+      segment.position.copy(start).addScaledVector(end, 0.5);
+      segment.scale.set(1, end.length(), 1);
+      segment.quaternion.setFromUnitVectors(axis, end.normalize());
+      segment.updateMatrix();
+      truss.setMatrixAt(i / 6, segment.matrix);
+    }
+    structure.add(truss);
+    rails.length = 0;
     for (let x = -8; x <= 8; x += 2) line(x, 0.005, -3.6, x, 0.005, 4.4);
     for (let z = -3.6; z < 4.5; z += 2) line(-8, 0.005, z, 8, 0.005, z);
     const railGeometry = new THREE.BufferGeometry();
@@ -152,7 +191,9 @@ const view: ViewDefinition = {
       lensColour = new THREE.Color(),
       accent = new THREE.Color(),
       text = new THREE.Color(),
-      panel = new THREE.Color();
+      panel = new THREE.Color(),
+      ground = new THREE.Color(),
+      glass = new THREE.Color(0x101b28);
     let notes: ViewFrame['notes'] | undefined,
       inventory = '';
     let score = indexRig({ notes: [], instruments: [] });
@@ -210,8 +251,11 @@ const view: ViewDefinition = {
         accent.set(frame.theme.accent);
         text.set(frame.theme.text);
         panel.set(frame.theme.panel);
-        metal.color.copy(panel).lerp(text, 0.25);
-        floorMaterial.color.copy(panel);
+        const lightTheme = frame.theme.name === 'riso' || frame.theme.name === 'pocket';
+        ground.set(frame.theme.ground);
+        backdrop.visible = lightTheme;
+        backdropMaterial.color.copy(text).lerp(panel, 0.08);
+        floorMaterial.color.copy(lightTheme ? backdropMaterial.color : panel);
         lineMaterial.color.copy(text).lerp(panel, 0.45);
         let fixture = 0;
         const heads: { ids: string[]; x: number; aim: number; depth: number }[] = [];
@@ -278,26 +322,46 @@ const view: ViewDefinition = {
             ],
             power,
           );
-          object.position.copy(source).addScaledVector(up, 0.35);
+          const mountSide = y < 1 ? -1 : 1;
+          object.position.copy(source).addScaledVector(up, 0.35 * mountSide);
           object.quaternion.identity();
-          object.scale.set(0.52, 0.22, 0.45);
+          object.scale.set(0.7, 0.15, 0.48);
           object.updateMatrix();
           housings.setMatrixAt(fixture, object.matrix);
+          // Two arms and their bridge form a stationary U around the tilting head.
+          for (let j = 0; j < 3; j++) {
+            object.position.set(
+              x + (j === 2 ? 0 : j === 0 ? -0.29 : 0.29),
+              y + (j === 2 ? 0.28 : 0.1) * mountSide,
+              z,
+            );
+            object.scale.set(j === 2 ? 0.65 : 0.09, j === 2 ? 0.08 : 0.42, 0.13);
+            object.updateMatrix();
+            yokes.setMatrixAt(fixture * 3 + j, object.matrix);
+          }
           object.position.copy(source);
           object.quaternion.setFromUnitVectors(up, direction);
           object.scale.set(1, 1, 1);
           object.updateMatrix();
           barrels.setMatrixAt(fixture, object.matrix);
+          object.position.copy(source).addScaledVector(direction, 0.23);
+          object.updateMatrix();
+          rims.setMatrixAt(fixture, object.matrix);
           object.position.copy(source).addScaledVector(direction, 0.24);
           object.scale.set(1, 0.5, 1);
           object.updateMatrix();
           lenses.setMatrixAt(fixture, object.matrix);
-          lenses.setColorAt(fixture, lensColour.copy(colour).multiplyScalar(0.08 + power * 0.8));
+          lenses.setColorAt(
+            fixture,
+            power > 0 ? lensColour.copy(colour).multiplyScalar(0.08 + power * 0.8) : glass,
+          );
           fixture++;
         }
         slots.forEach((slot, i) => {
           const state = states[i];
           colour.set(state.leader.instrument.colour).lerp(accent, (look.index % 4) * 0.09);
+          // Pocket's inks are dark greens: tint them toward its paper on the dark stage.
+          if (frame.theme.name === 'pocket') colour.lerp(ground, 0.55);
           const power = state.brightness;
           if (slot.role === 'strobe') light(0, 6.4, -0.15, 0, -1, 2.6, power);
           else if (slot.role === 'wash')
@@ -347,8 +411,8 @@ const view: ViewDefinition = {
         labels.forEach((el, i) => {
           if (i >= slots.length) el.hidden = true;
         });
-        for (const mesh of [housings, barrels, lenses]) {
-          mesh.count = fixture;
+        for (const mesh of [housings, barrels, lenses, yokes, rims]) {
+          mesh.count = mesh === yokes ? fixture * 3 : fixture;
           mesh.instanceMatrix.needsUpdate = true;
           mesh.frustumCulled = false;
         }
@@ -380,10 +444,21 @@ const view: ViewDefinition = {
       dispose() {
         if (disposed) return;
         disposed = true;
-        for (const geometry of [box, barrel, lens, railGeometry, beams.geometry, spots.geometry])
+        for (const geometry of [
+          box,
+          barrel,
+          lens,
+          rim,
+          tube,
+          railGeometry,
+          beams.geometry,
+          spots.geometry,
+        ])
           geometry.dispose();
         for (const material of [
           metal,
+          silver,
+          backdropMaterial,
           floorMaterial,
           lineMaterial,
           lensMaterial,
@@ -391,9 +466,7 @@ const view: ViewDefinition = {
           spotMaterial,
         ])
           material.dispose();
-        housings.dispose();
-        barrels.dispose();
-        lenses.dispose();
+        for (const mesh of [housings, barrels, lenses, yokes, rims, truss]) mesh.dispose();
         stage.dispose();
       },
     };

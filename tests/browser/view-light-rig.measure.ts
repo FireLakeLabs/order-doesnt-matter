@@ -252,6 +252,28 @@ test('Light rig: contrasting real ambient and twenty counted assignments', async
   await result.dispose();
 });
 
+test('Light rig: real Techno fixture and beam evidence', async ({ page }) => {
+  await setup(page);
+  await choose(page, 'band', 'b');
+  await page.evaluate(
+    async (source) => {
+      await window.odmStudio.load(source);
+      await window.odmStudio.seek(1.4);
+    },
+    await readFile('corpus/programs/real-techno.strudel', 'utf8'),
+  );
+  await page.waitForFunction(
+    () => window.viewProbe.frame?.now === 1.4 && window.viewProbe.frame.notes.length > 0,
+  );
+  for (const theme of ['arcade', 'riso', 'pocket', 'sunset', 'phosphor']) {
+    await page.getByRole('button', { name: `Theme ${theme}`, exact: true }).click();
+    await page.waitForFunction((name) => window.viewProbe.frame?.theme.name === name, theme);
+    await page.evaluate(() => document.fonts.ready);
+    await frames(page);
+    await page.screenshot({ path: `${shots}/real-techno-${theme}-1920x1080.png` });
+  }
+});
+
 test('Light rig: CPU submission and available GPU timer comparison with Ribbons and Ring', async ({
   page,
 }) => {
